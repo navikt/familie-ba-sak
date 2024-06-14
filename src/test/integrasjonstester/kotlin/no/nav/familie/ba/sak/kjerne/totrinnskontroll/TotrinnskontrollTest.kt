@@ -57,14 +57,15 @@ class TotrinnskontrollTest(
                 SaksstatistikkMellomlagringType.BEHANDLING,
                 behandling.id,
             ),
-        )
-            .hasSize(2)
+        ).hasSize(2)
         assertThat(
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
-                SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id,
-            )
-                .last().jsonToBehandlingDVH().behandlingStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(
+                    SaksstatistikkMellomlagringType.BEHANDLING,
+                    behandling.id,
+                ).last()
+                .jsonToBehandlingDVH()
+                .behandlingStatus,
         ).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
@@ -78,14 +79,15 @@ class TotrinnskontrollTest(
                 SaksstatistikkMellomlagringType.BEHANDLING,
                 behandling.id,
             ),
-        )
-            .hasSize(3)
+        ).hasSize(3)
         assertThat(
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
-                SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id,
-            )
-                .last().jsonToBehandlingDVH().behandlingStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(
+                    SaksstatistikkMellomlagringType.BEHANDLING,
+                    behandling.id,
+                ).last()
+                .jsonToBehandlingDVH()
+                .behandlingStatus,
         ).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK.name)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -112,14 +114,15 @@ class TotrinnskontrollTest(
                 SaksstatistikkMellomlagringType.BEHANDLING,
                 behandling.id,
             ),
-        )
-            .hasSize(3)
+        ).hasSize(3)
         assertThat(
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
-                SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id,
-            )
-                .last().jsonToBehandlingDVH().behandlingStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(
+                    SaksstatistikkMellomlagringType.BEHANDLING,
+                    behandling.id,
+                ).last()
+                .jsonToBehandlingDVH()
+                .behandlingStatus,
         ).isEqualTo(BehandlingStatus.UTREDES.name)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!

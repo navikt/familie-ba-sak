@@ -62,14 +62,18 @@ object EndretUtbetalingAndelValidering {
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
         val minsteDatoForTilkjentYtelse =
-            andelTilkjentYtelser.filter {
-                it.aktør == endretUtbetalingAndel.person!!.aktør
-            }.minByOrNull { it.stønadFom }?.stønadFom
+            andelTilkjentYtelser
+                .filter {
+                    it.aktør == endretUtbetalingAndel.person!!.aktør
+                }.minByOrNull { it.stønadFom }
+                ?.stønadFom
 
         val størsteDatoForTilkjentYtelse =
-            andelTilkjentYtelser.filter {
-                it.aktør == endretUtbetalingAndel.person!!.aktør
-            }.maxByOrNull { it.stønadTom }?.stønadTom
+            andelTilkjentYtelser
+                .filter {
+                    it.aktør == endretUtbetalingAndel.person!!.aktør
+                }.maxByOrNull { it.stønadTom }
+                ?.stønadTom
 
         if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
             (
@@ -321,7 +325,8 @@ fun finnDeltBostedPerioder(
                 }
 
             val deltBostedPerioder =
-                deltBostedVilkårResultater.groupBy { it.personResultat?.aktør }
+                deltBostedVilkårResultater
+                    .groupBy { it.personResultat?.aktør }
                     .flatMap { (_, vilkårResultater) -> vilkårResultater.mapNotNull { it.tilPeriode(vilkår = vilkårResultater) } }
 
             slåSammenOverlappendePerioder(

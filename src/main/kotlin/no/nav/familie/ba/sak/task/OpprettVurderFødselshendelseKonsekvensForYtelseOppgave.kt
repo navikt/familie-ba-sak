@@ -38,8 +38,8 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
             aktør: Aktør,
             oppgavetype: Oppgavetype,
             beskrivelse: String,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload =
                     objectMapper.writeValueAsString(
@@ -50,6 +50,5 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
                         ),
                     ),
             )
-        }
     }
 }

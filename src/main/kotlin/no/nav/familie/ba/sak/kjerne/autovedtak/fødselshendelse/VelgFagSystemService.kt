@@ -54,17 +54,17 @@ class VelgFagSystemService(
         }
     }
 
-    internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean {
-        return if (fagsak == null) {
+    internal fun morHarLøpendeEllerTidligereUtbetalinger(fagsak: Fagsak?): Boolean =
+        if (fagsak == null) {
             false
-        } else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
+        } else if (behandlingHentOgPersisterService
+                .hentBehandlinger(fagsakId = fagsak.id)
                 .any { it.status == BehandlingStatus.UTREDES }
         ) {
             true
         } else {
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) != null
         }
-    }
 
     internal fun morHarSakerMenIkkeLøpendeIInfotrygd(morsIdent: String): Boolean {
         val stønader = infotrygdService.hentInfotrygdstønaderForSøker(morsIdent, historikk = false).bruker
@@ -76,12 +76,14 @@ class VelgFagSystemService(
         barnasIdenter: List<String>,
     ): Boolean {
         val morsIdenter =
-            personidentService.hentIdenter(personIdent = morsIdent, historikk = true)
+            personidentService
+                .hentIdenter(personIdent = morsIdent, historikk = true)
                 .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
         val alleBarnasIdenter =
             barnasIdenter.flatMap {
-                personidentService.hentIdenter(personIdent = it, historikk = true)
+                personidentService
+                    .hentIdenter(personIdent = it, historikk = true)
                     .filter { identinfo -> identinfo.gruppe == "FOLKEREGISTERIDENT" }
                     .map { identinfo -> identinfo.ident }
             }
@@ -164,7 +166,9 @@ enum class FagsystemRegelVurdering {
     SEND_TIL_INFOTRYGD,
 }
 
-enum class FagsystemUtfall(val beskrivelse: String) {
+enum class FagsystemUtfall(
+    val beskrivelse: String,
+) {
     IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak med tidligere eller løpende utbetalinger i ba-sak"),
     LØPENDE_SAK_I_INFOTRYGD("Mor har løpende sak i infotrygd"),
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),

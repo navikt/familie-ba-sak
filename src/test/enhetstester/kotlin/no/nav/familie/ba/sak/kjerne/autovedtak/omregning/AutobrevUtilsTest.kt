@@ -22,12 +22,14 @@ class AutobrevUtilsTest {
     @Test
     fun `Skal sjekke at gjeldende begrunnelse for autobrev er i listen over alle`() {
         assertTrue(
-            AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(6)
+            AutobrevUtils
+                .hentStandardbegrunnelserReduksjonForAlder(6)
                 .contains(AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(6)),
         )
 
         assertTrue(
-            AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(18)
+            AutobrevUtils
+                .hentStandardbegrunnelserReduksjonForAlder(18)
                 .contains(AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(18)),
         )
     }

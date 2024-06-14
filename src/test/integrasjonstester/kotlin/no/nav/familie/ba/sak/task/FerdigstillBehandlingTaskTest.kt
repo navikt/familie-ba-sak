@@ -179,11 +179,13 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         assertEquals(BehandlingStatus.AVSLUTTET, ferdigstiltBehandling.status)
         assertEquals(
             FagsakStatus.AVSLUTTET.name,
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
-                SaksstatistikkMellomlagringType.BEHANDLING,
-                ferdigstiltBehandling.id,
-            )
-                .last().jsonToBehandlingDVH().behandlingStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(
+                    SaksstatistikkMellomlagringType.BEHANDLING,
+                    ferdigstiltBehandling.id,
+                ).last()
+                .jsonToBehandlingDVH()
+                .behandlingStatus,
         )
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
@@ -191,11 +193,13 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
         assertEquals(
             FagsakStatus.LØPENDE.name,
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
-                SaksstatistikkMellomlagringType.SAK,
-                ferdigstiltFagsak.id,
-            )
-                .last().jsonToSakDVH().sakStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(
+                    SaksstatistikkMellomlagringType.SAK,
+                    ferdigstiltFagsak.id,
+                ).last()
+                .jsonToSakDVH()
+                .sakStatus,
         )
     }
 
@@ -210,11 +214,13 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
         assertEquals(FagsakStatus.AVSLUTTET, ferdigstiltFagsak.status)
         assertEquals(
             FagsakStatus.AVSLUTTET.name,
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
-                SaksstatistikkMellomlagringType.SAK,
-                ferdigstiltFagsak.id,
-            )
-                .last().jsonToSakDVH().sakStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(
+                    SaksstatistikkMellomlagringType.SAK,
+                    ferdigstiltFagsak.id,
+                ).last()
+                .jsonToSakDVH()
+                .sakStatus,
         )
     }
 

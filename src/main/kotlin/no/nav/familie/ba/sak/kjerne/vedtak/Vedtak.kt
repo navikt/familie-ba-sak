@@ -33,7 +33,5 @@ class Vedtak(
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
 ) : BaseEntitet() {
-    override fun toString(): String {
-        return "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv)"
-    }
+    override fun toString(): String = "Vedtak(id=$id, behandling=$behandling, vedtaksdato=$vedtaksdato, aktiv=$aktiv)"
 }

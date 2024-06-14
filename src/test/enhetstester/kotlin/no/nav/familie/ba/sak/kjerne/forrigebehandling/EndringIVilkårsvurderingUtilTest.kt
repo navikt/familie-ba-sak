@@ -71,13 +71,15 @@ class EndringIVilkårsvurderingUtilTest {
         val person = lagPerson(aktør = aktør, type = PersonType.BARN, fødselsdato = fødselsdato)
 
         val perioderMedEndring =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-                forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-                personIBehandling = person,
-                personIForrigeBehandling = person,
-                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-            ).perioder().filter { it.innhold == true }
+            EndringIVilkårsvurderingUtil
+                .lagEndringIVilkårsvurderingTidslinje(
+                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
+                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
+                    personIBehandling = person,
+                    personIForrigeBehandling = person,
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }
@@ -127,13 +129,15 @@ class EndringIVilkårsvurderingUtilTest {
         val person = lagPerson(aktør = aktør, type = PersonType.BARN, fødselsdato = fødselsdato)
 
         val perioderMedEndring =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personIBehandling = person,
-                personIForrigeBehandling = person,
-                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-            ).perioder().filter { it.innhold == true }
+            EndringIVilkårsvurderingUtil
+                .lagEndringIVilkårsvurderingTidslinje(
+                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    personIBehandling = person,
+                    personIForrigeBehandling = person,
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(feb22, perioderMedEndring.single().fraOgMed.tilYearMonth())
@@ -185,13 +189,15 @@ class EndringIVilkårsvurderingUtilTest {
         val person = lagPerson(aktør = aktør, type = PersonType.BARN, fødselsdato = fødselsdato)
 
         val perioderMedEndring =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personIBehandling = person,
-                personIForrigeBehandling = person,
-                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = jun22,
-            ).perioder().filter { it.innhold == true }
+            EndringIVilkårsvurderingUtil
+                .lagEndringIVilkårsvurderingTidslinje(
+                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    personIBehandling = person,
+                    personIForrigeBehandling = person,
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = jun22,
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertEquals(0, perioderMedEndring.size)
     }
@@ -244,13 +250,15 @@ class EndringIVilkårsvurderingUtilTest {
         val person = lagPerson(aktør = aktør, type = PersonType.BARN, fødselsdato = fødselsdato)
 
         val perioderMedEndring =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personIBehandling = person,
-                personIForrigeBehandling = person,
-                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-            ).perioder().filter { it.innhold == true }
+            EndringIVilkårsvurderingUtil
+                .lagEndringIVilkårsvurderingTidslinje(
+                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    personIBehandling = person,
+                    personIForrigeBehandling = person,
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jun22, perioderMedEndring.single().fraOgMed.tilYearMonth())
@@ -302,13 +310,15 @@ class EndringIVilkårsvurderingUtilTest {
         val person = lagPerson(aktør = aktør, type = PersonType.BARN, fødselsdato = fødselsdato)
 
         val perioderMedEndring =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personIBehandling = person,
-                personIForrigeBehandling = person,
-                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-            ).perioder().filter { it.innhold == true }
+            EndringIVilkårsvurderingUtil
+                .lagEndringIVilkårsvurderingTidslinje(
+                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    personIBehandling = person,
+                    personIForrigeBehandling = person,
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }
@@ -353,13 +363,15 @@ class EndringIVilkårsvurderingUtilTest {
         val person = lagPerson(aktør = aktør, type = PersonType.BARN, fødselsdato = fødselsdato)
 
         val perioderMedEndring =
-            EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-                nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-                forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-                personIBehandling = person,
-                personIForrigeBehandling = person,
-                tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-            ).perioder().filter { it.innhold == true }
+            EndringIVilkårsvurderingUtil
+                .lagEndringIVilkårsvurderingTidslinje(
+                    nåværendePersonResultaterForPerson = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+                    forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+                    personIBehandling = person,
+                    personIForrigeBehandling = person,
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }

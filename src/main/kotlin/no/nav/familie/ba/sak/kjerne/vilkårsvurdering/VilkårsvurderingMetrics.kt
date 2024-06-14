@@ -30,7 +30,9 @@ class VilkårsvurderingMetrics(
             PersonType.ANNENPART to "Medforelder",
         )
 
-    enum class VilkårTellerType(val navn: String) {
+    enum class VilkårTellerType(
+        val navn: String,
+    ) {
         UTFALL("familie.ba.behandling.vilkaarsvurdering"),
         FØRSTEUTFALL("familie.ba.behandling.vilkaarsvurdering.foerstutfall"),
     }
@@ -50,28 +52,27 @@ class VilkårsvurderingMetrics(
                 Pair(Resultat.IKKE_OPPFYLT, VilkårIkkeOppfyltÅrsak.values()),
                 Pair(Resultat.IKKE_VURDERT, VilkårKanskjeOppfyltÅrsak.values()),
                 Pair(Resultat.OPPFYLT, VilkårOppfyltÅrsak.values()),
-            )
-                .forEach { (resultat, årsaker) ->
-                    årsaker
-                        .forEach { årsak ->
-                            if (vilkårUtfallMap[årsak.toString()] != null) {
-                                error("Årsak $årsak deler navn med minst en annen årsak")
-                            }
-
-                            vilkårUtfallMap[årsak.toString()] =
-                                Metrics.counter(
-                                    vilkårTellerType.navn,
-                                    "vilkaar",
-                                    årsak.hentIdentifikator(),
-                                    "resultat",
-                                    resultat.name,
-                                    "personType",
-                                    personTypeToDisplayedType[personType],
-                                    "beskrivelse",
-                                    årsak.hentMetrikkBeskrivelse(),
-                                )
+            ).forEach { (resultat, årsaker) ->
+                årsaker
+                    .forEach { årsak ->
+                        if (vilkårUtfallMap[årsak.toString()] != null) {
+                            error("Årsak $årsak deler navn med minst en annen årsak")
                         }
-                }
+
+                        vilkårUtfallMap[årsak.toString()] =
+                            Metrics.counter(
+                                vilkårTellerType.navn,
+                                "vilkaar",
+                                årsak.hentIdentifikator(),
+                                "resultat",
+                                resultat.name,
+                                "personType",
+                                personTypeToDisplayedType[personType],
+                                "beskrivelse",
+                                årsak.hentMetrikkBeskrivelse(),
+                            )
+                    }
+            }
 
             utfallMap[personType] = vilkårUtfallMap
         }
@@ -108,12 +109,12 @@ class VilkårsvurderingMetrics(
     }
 
     private fun økTellereForStansetIAutomatiskVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering) {
-        Vilkår.hentFødselshendelseVilkårsreglerRekkefølge()
+        Vilkår
+            .hentFødselshendelseVilkårsreglerRekkefølge()
             .map { mapVilkårTilVilkårResultater(vilkårsvurdering, it) }
             .firstOrNull { vilkårResultatGruppertPåPerson ->
                 vilkårResultatGruppertPåPerson.any { it.second?.resultat == Resultat.IKKE_OPPFYLT }
-            }
-            ?.let { vilkårResultatGruppertPåPerson ->
+            }?.let { vilkårResultatGruppertPåPerson ->
                 val vilkårResultatSøker =
                     vilkårResultatGruppertPåPerson.firstOrNull { it.first.type == PersonType.SØKER && it.second != null }
                 val vilkårResultatBarn =
@@ -156,7 +157,11 @@ class VilkårsvurderingMetrics(
     }
 
     private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
-        val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.id!!
+        val behandlingId =
+            vilkårResultat.personResultat
+                ?.vilkårsvurdering
+                ?.behandling
+                ?.id!!
         val personer =
             persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
                 ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")

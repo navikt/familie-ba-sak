@@ -55,9 +55,7 @@ class RegistrerPersongrunnlag(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.REGISTRERE_PERSONGRUNNLAG
-    }
+    override fun stegType(): StegType = StegType.REGISTRERE_PERSONGRUNNLAG
 }
 
 data class RegistrerPersongrunnlagDTO(

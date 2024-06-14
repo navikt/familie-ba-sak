@@ -36,8 +36,8 @@ class FerdigstillBehandlingTask(
         fun opprettTask(
             søkerIdent: String,
             behandlingsId: Long,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload =
                     objectMapper.writeValueAsString(
@@ -52,6 +52,5 @@ class FerdigstillBehandlingTask(
                         this["behandlingsId"] = behandlingsId.toString()
                     },
             )
-        }
     }
 }

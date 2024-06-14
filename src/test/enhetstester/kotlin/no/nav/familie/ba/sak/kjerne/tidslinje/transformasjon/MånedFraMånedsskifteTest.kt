@@ -46,7 +46,8 @@ internal class MånedFraMånedsskifteTest {
     @Test
     fun `skal gi tom tidslinje hvis månedsskiftet mangler verdi på begge sider`() {
         val daglinje =
-            "abcdefghijklmnopqrstuvwxyzæøå0123456789".tilCharTidslinje(28.nov(2021))
+            "abcdefghijklmnopqrstuvwxyzæøå0123456789"
+                .tilCharTidslinje(28.nov(2021))
                 .mapIkkeNull {
                     when (it) {
                         'c', 'd', '4', '5' -> null // 30/11, 1/12, 31/12 og 1/1 mangler verdi
@@ -64,7 +65,8 @@ internal class MånedFraMånedsskifteTest {
     @Test
     fun `skal gi tom tidslinje hvis månedsskiftet mangler verdi på begge én av sidene`() {
         val daglinje =
-            "abcdefghijklmnopqrstuvwxyzæøå0123456789".tilCharTidslinje(28.nov(2021))
+            "abcdefghijklmnopqrstuvwxyzæøå0123456789"
+                .tilCharTidslinje(28.nov(2021))
                 .mapIkkeNull {
                     when (it) {
                         'c', '5' -> null // 30/11 og 1/1 mangler verdi

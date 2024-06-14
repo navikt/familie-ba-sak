@@ -18,11 +18,7 @@ class SøknadGrunnlagService(
         return søknadGrunnlagRepository.save(søknadGrunnlag)
     }
 
-    fun hentAlle(behandlingId: Long): List<SøknadGrunnlag> {
-        return søknadGrunnlagRepository.hentAlle(behandlingId)
-    }
+    fun hentAlle(behandlingId: Long): List<SøknadGrunnlag> = søknadGrunnlagRepository.hentAlle(behandlingId)
 
-    fun hentAktiv(behandlingId: Long): SøknadGrunnlag? {
-        return søknadGrunnlagRepository.hentAktiv(behandlingId)
-    }
+    fun hentAktiv(behandlingId: Long): SøknadGrunnlag? = søknadGrunnlagRepository.hentAktiv(behandlingId)
 }

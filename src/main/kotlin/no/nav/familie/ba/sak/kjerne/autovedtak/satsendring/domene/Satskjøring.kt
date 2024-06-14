@@ -47,7 +47,5 @@ data class Satskjøring(
     override fun hashCode(): Int = javaClass.hashCode()
 
     @Override
-    override fun toString(): String {
-        return this::class.simpleName + "(id = $id , fagsakId = $fagsakId )"
-    }
+    override fun toString(): String = this::class.simpleName + "(id = $id , fagsakId = $fagsakId )"
 }

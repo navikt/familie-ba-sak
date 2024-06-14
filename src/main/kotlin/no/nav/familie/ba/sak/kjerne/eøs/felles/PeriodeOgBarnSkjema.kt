@@ -39,12 +39,11 @@ fun <T : PeriodeOgBarnSkjema<T>> T.harBarnOgPeriode(): Boolean {
     return harGyldigPeriode && barnAktører.isNotEmpty()
 }
 
-fun <T : PeriodeOgBarnSkjema<T>> T.inneholder(skjema: T): Boolean {
-    return this.bareInnhold() == skjema.bareInnhold() &&
+fun <T : PeriodeOgBarnSkjema<T>> T.inneholder(skjema: T): Boolean =
+    this.bareInnhold() == skjema.bareInnhold() &&
         (this.fom == null || this.fom!! <= skjema.fom) &&
         (this.tom == null || this.tom!! >= skjema.tom) &&
         this.barnAktører.containsAll(skjema.barnAktører)
-}
 
 fun <T : PeriodeOgBarnSkjema<T>> T.bareInnhold(): T =
     this.kopier(fom = null, tom = null, barnAktører = emptySet())
@@ -56,10 +55,11 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T =
     this.kopier(fom = null, tom = null, barnAktører = this.barnAktører)
 
 fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdTilOgMed(tom: YearMonth?) =
-    this.kopier(
-        fom = this.tom?.plusMonths(1),
-        tom = tom,
-    ).utenInnhold()
+    this
+        .kopier(
+            fom = this.tom?.plusMonths(1),
+            tom = tom,
+        ).utenInnhold()
 
 fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =
     this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))

@@ -14,8 +14,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import java.time.YearMonth
 
-class CharTidslinje<T : Tidsenhet>(private val tegn: String, private val startTidspunkt: Tidspunkt<T>) :
-    Tidslinje<Char, T>() {
+class CharTidslinje<T : Tidsenhet>(
+    private val tegn: String,
+    private val startTidspunkt: Tidspunkt<T>,
+) : Tidslinje<Char, T>() {
     val fraOgMed =
         when (tegn.first()) {
             '<' -> startTidspunkt.somUendeligLengeSiden()

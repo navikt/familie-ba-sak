@@ -40,21 +40,23 @@ class BeregningService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+        tilkjentYtelseRepository
+            .findByBehandlingOptional(behandlingId)
             ?.let { tilkjentYtelseRepository.delete(it) }
 
     fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
         behandlingIder: List<Long>,
         avstemmingstidspunkt: LocalDateTime,
     ): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(
-            behandlingIder,
-            avstemmingstidspunkt.toLocalDate().toYearMonth(),
-        )
-            .filter { it.erAndelSomSkalSendesTilOppdrag() }
+        andelTilkjentYtelseRepository
+            .finnLøpendeAndelerTilkjentYtelseForBehandlinger(
+                behandlingIder,
+                avstemmingstidspunkt.toLocalDate().toYearMonth(),
+            ).filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
     fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
@@ -78,36 +80,40 @@ class BeregningService(
         fagsakId: Long,
     ): List<TilkjentYtelse> {
         val andreFagsaker =
-            fagsakService.hentFagsakerPåPerson(barnAktør)
+            fagsakService
+                .hentFagsakerPåPerson(barnAktør)
                 .filter { it.id != fagsakId }
 
-        return andreFagsaker.mapNotNull { fagsak ->
-            val behandlingSomLiggerTilGodkjenning =
-                behandlingRepository.finnBehandlingerSomLiggerTilGodkjenning(
-                    fagsakId = fagsak.id,
-                ).singleOrNull()
+        return andreFagsaker
+            .mapNotNull { fagsak ->
+                val behandlingSomLiggerTilGodkjenning =
+                    behandlingRepository
+                        .finnBehandlingerSomLiggerTilGodkjenning(
+                            fagsakId = fagsak.id,
+                        ).singleOrNull()
 
-            if (behandlingSomLiggerTilGodkjenning != null) {
-                behandlingSomLiggerTilGodkjenning
-            } else {
-                val godkjenteBehandlingerSomIkkeErIverksattEnda =
-                    behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
-                if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
-                    godkjenteBehandlingerSomIkkeErIverksattEnda
+                if (behandlingSomLiggerTilGodkjenning != null) {
+                    behandlingSomLiggerTilGodkjenning
                 } else {
-                    val sisteVedtatteBehandling =
-                        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
-                    sisteVedtatteBehandling
+                    val godkjenteBehandlingerSomIkkeErIverksattEnda =
+                        behandlingRepository.finnBehandlingerSomHolderPåÅIverksettes(fagsakId = fagsak.id).singleOrNull()
+                    if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
+                        godkjenteBehandlingerSomIkkeErIverksattEnda
+                    } else {
+                        val sisteVedtatteBehandling =
+                            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                        sisteVedtatteBehandling
+                    }
                 }
-            }
-        }.map {
-            hentTilkjentYtelseForBehandling(behandlingId = it.id)
-        }.filter {
-            personopplysningGrunnlagRepository
-                .finnSøkerOgBarnAktørerTilAktiv(behandlingId = it.behandling.id)
-                .barn().map { barn -> barn.aktør }
-                .contains(barnAktør)
-        }.map { it }
+            }.map {
+                hentTilkjentYtelseForBehandling(behandlingId = it.id)
+            }.filter {
+                personopplysningGrunnlagRepository
+                    .finnSøkerOgBarnAktørerTilAktiv(behandlingId = it.behandling.id)
+                    .barn()
+                    .map { barn -> barn.aktør }
+                    .contains(barnAktør)
+            }.map { it }
     }
 
     fun erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): Boolean =
@@ -154,7 +160,8 @@ class BeregningService(
     ): TilkjentYtelse {
         val endreteUtbetalingAndeler =
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id).filter {
+                .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
+                .filter {
                     // Ved automatiske behandlinger ønsker vi alltid å ta vare på de gamle endrede andelene
                     if (behandling.skalBehandlesAutomatisk) {
                         true
@@ -264,7 +271,10 @@ class BeregningService(
             andelTilkjentYtelseRepository
                 .finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
+        return personopplysningGrunnlagRepository
+            .findByBehandlingAndAktiv(behandlingId)
+            ?.barna
+            ?.map { it.aktør }
             ?.filter {
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()

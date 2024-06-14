@@ -68,9 +68,7 @@ class IverksettMotFamilieTilbake(
         taskRepository.save(task)
     }
 
-    override fun stegType(): StegType {
-        return StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
-    }
+    override fun stegType(): StegType = StegType.IVERKSETT_MOT_FAMILIE_TILBAKE
 
     companion object {
         private val logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)

@@ -22,32 +22,37 @@ class SwaggerConfig(
     val apiScope: String,
 ) {
     @Bean
-    fun openApi(): OpenAPI {
-        return OpenAPI()
+    fun openApi(): OpenAPI =
+        OpenAPI()
             .components(Components().addSecuritySchemes("oauth2", securitySchemes()))
             .addSecurityItem(SecurityRequirement().addList("oauth2", listOf("read", "write")))
-    }
 
     @Bean
-    fun eksternOpenApi(): GroupedOpenApi {
-        return GroupedOpenApi.builder().group("ekstern").packagesToScan("no.nav.familie.ba.sak.ekstern.bisys", "no.nav.familie.ba.sak.ekstern.pensjon")
+    fun eksternOpenApi(): GroupedOpenApi =
+        GroupedOpenApi
+            .builder()
+            .group("ekstern")
+            .packagesToScan("no.nav.familie.ba.sak.ekstern.bisys", "no.nav.familie.ba.sak.ekstern.pensjon")
             .build()
-    }
 
     @Bean
-    fun internOpenApi(): GroupedOpenApi {
-        return GroupedOpenApi.builder().group("intern").packagesToScan("no.nav.familie.ba.sak")
+    fun internOpenApi(): GroupedOpenApi =
+        GroupedOpenApi
+            .builder()
+            .group("intern")
+            .packagesToScan("no.nav.familie.ba.sak")
             .build()
-    }
 
     @Bean
-    fun forvalterOpenApi(): GroupedOpenApi {
-        return GroupedOpenApi.builder().group("forvalter").packagesToScan("no.nav.familie.ba.sak.internal", "no.nav.familie.prosessering.rest")
+    fun forvalterOpenApi(): GroupedOpenApi =
+        GroupedOpenApi
+            .builder()
+            .group("forvalter")
+            .packagesToScan("no.nav.familie.ba.sak.internal", "no.nav.familie.prosessering.rest")
             .build()
-    }
 
-    private fun securitySchemes(): SecurityScheme {
-        return SecurityScheme()
+    private fun securitySchemes(): SecurityScheme =
+        SecurityScheme()
             .name("oauth2")
             .type(SecurityScheme.Type.OAUTH2)
             .scheme("oauth2")
@@ -55,10 +60,10 @@ class SwaggerConfig(
             .flows(
                 OAuthFlows()
                     .authorizationCode(
-                        OAuthFlow().authorizationUrl(authorizationUrl)
+                        OAuthFlow()
+                            .authorizationUrl(authorizationUrl)
                             .tokenUrl(tokenUrl)
                             .scopes(Scopes().addString(apiScope, "read,write")),
                     ),
             )
-    }
 }

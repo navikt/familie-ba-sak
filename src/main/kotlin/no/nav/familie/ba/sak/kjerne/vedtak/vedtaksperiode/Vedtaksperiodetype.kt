@@ -2,7 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 
-enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnelseType>) {
+enum class Vedtaksperiodetype(
+    val tillatteBegrunnelsestyper: Set<VedtakBegrunnelseType>,
+) {
     UTBETALING(
         setOf(
             VedtakBegrunnelseType.INNVILGET,
@@ -72,8 +74,8 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
     ENDRET_UTBETALING(emptySet()),
     ;
 
-    fun sorteringsRekkefølge(): Int {
-        return when (this) {
+    fun sorteringsRekkefølge(): Int =
+        when (this) {
             UTBETALING -> 1
             UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> 2
             FORTSATT_INNVILGET -> 3
@@ -81,5 +83,4 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnel
             AVSLAG -> 5
             ENDRET_UTBETALING -> 6
         }
-    }
 }

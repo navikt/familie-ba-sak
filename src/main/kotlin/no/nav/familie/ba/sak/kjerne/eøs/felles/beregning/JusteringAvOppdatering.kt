@@ -30,27 +30,31 @@ fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjelden
     val oppdatering = this
 
     val skjemaetDerTilOgMedForkortes =
-        gjeldendeSkjemaer.filter { gjeldende ->
-            gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
-                gjeldende.erLikBortsettFraTilOgMed(oppdatering)
-        }.singleOrNull()
+        gjeldendeSkjemaer
+            .filter { gjeldende ->
+                gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
+                    gjeldende.erLikBortsettFraTilOgMed(oppdatering)
+            }.singleOrNull()
 
     val skjemaetDerBarnFjernes =
-        gjeldendeSkjemaer.filter { gjeldende ->
-            oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
-                gjeldende.erLikBortsettFraBarn(oppdatering)
-        }.singleOrNull()
+        gjeldendeSkjemaer
+            .filter { gjeldende ->
+                oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
+                    gjeldende.erLikBortsettFraBarn(oppdatering)
+            }.singleOrNull()
 
     val skjemaetDerTilOgMedForkortesOgBarnFjernes =
-        gjeldendeSkjemaer.filter { gjeldende ->
-            gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
-                oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
-                gjeldende.erLikBortsettFraBarnOgTilOgMed(oppdatering)
-        }.singleOrNull()
+        gjeldendeSkjemaer
+            .filter { gjeldende ->
+                gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
+                    oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
+                    gjeldende.erLikBortsettFraBarnOgTilOgMed(oppdatering)
+            }.singleOrNull()
 
     return when {
         skjemaetDerTilOgMedForkortesOgBarnFjernes != null ->
-            oppdatering.medBarnaSomForsvinnerFra(skjemaetDerTilOgMedForkortesOgBarnFjernes)
+            oppdatering
+                .medBarnaSomForsvinnerFra(skjemaetDerTilOgMedForkortesOgBarnFjernes)
                 .utenInnholdTilOgMed(skjemaetDerTilOgMedForkortesOgBarnFjernes.tom)
         skjemaetDerBarnFjernes != null ->
             oppdatering.medBarnaSomForsvinnerFra(skjemaetDerBarnFjernes).utenInnhold()

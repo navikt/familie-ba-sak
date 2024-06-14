@@ -35,9 +35,7 @@ class DistribuerVedtaksbrev(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.DISTRIBUER_VEDTAKSBREV
-    }
+    override fun stegType(): StegType = StegType.DISTRIBUER_VEDTAKSBREV
 
     companion object {
         private val logger = LoggerFactory.getLogger(DistribuerVedtaksbrev::class.java)

@@ -10,7 +10,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
-data class PdlHentPersonResponse(val person: PdlPersonData?)
+data class PdlHentPersonResponse(
+    val person: PdlPersonData?,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonData(
@@ -49,7 +51,9 @@ enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }
 enum class FolkeregisteridentifikatorType { FNR, DNR }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlFødselsDato(val foedselsdato: String?)
+data class PdlFødselsDato(
+    val foedselsdato: String?,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlNavn(
@@ -57,13 +61,14 @@ data class PdlNavn(
     val mellomnavn: String? = null,
     val etternavn: String,
 ) {
-    fun fulltNavn(): String {
-        return when (mellomnavn) {
+    fun fulltNavn(): String =
+        when (mellomnavn) {
             null -> "$fornavn $etternavn"
             else -> "$fornavn $mellomnavn $etternavn"
         }
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlKjoenn(val kjoenn: Kjønn)
+data class PdlKjoenn(
+    val kjoenn: Kjønn,
+)

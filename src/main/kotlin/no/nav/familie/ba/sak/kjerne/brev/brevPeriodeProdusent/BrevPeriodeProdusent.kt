@@ -120,7 +120,10 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPerio
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling(): Map<Person, IBegrunnelseGrunnlagForPeriode> {
     val utbetalesUtvidetIDennePerioden =
-        any { it.value.dennePerioden.andeler.any { andel -> andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 } }
+        any {
+            it.value.dennePerioden.andeler
+                .any { andel -> andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 }
+        }
 
     return filterKeys { it.type == PersonType.BARN }
         .filterValues { grunnlag ->
@@ -139,7 +142,8 @@ private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling():
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
     val barnasFødselsdatoerListe: List<String> =
-        this.filter { it.type == PersonType.BARN }
+        this
+            .filter { it.type == PersonType.BARN }
             .sortedBy { it.fødselsdato }
             .map { it.fødselsdato.tilKortString() }
 

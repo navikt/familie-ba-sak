@@ -127,11 +127,10 @@ class VilkårVurderingTest(
             navn = "navn",
             kjønn = kjønn,
             bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
-        )
-            .apply {
-                this.sivilstander =
-                    mutableListOf(GrSivilstand(type = sivilstand, person = this, fom = LocalDate.of(1991, 1, 1)))
-            }
+        ).apply {
+            this.sivilstander =
+                mutableListOf(GrSivilstand(type = sivilstand, person = this, fom = LocalDate.of(1991, 1, 1)))
+        }
     }
 
     @Test
@@ -189,10 +188,9 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
-            )
-                .apply {
-                    periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
-                }
+            ).apply {
+                periode = DatoIntervallEntitet(LocalDate.now().minusYears(10))
+            }
 
         val barnAddress =
             GrVegadresse(
@@ -204,10 +202,9 @@ class VilkårVurderingTest(
                 "1232",
                 "whatever",
                 "4322",
-            )
-                .apply {
-                    periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
-                }
+            ).apply {
+                periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
+            }
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
 
@@ -334,10 +331,9 @@ class VilkårVurderingTest(
                             "1232",
                             "whatever",
                             "4322",
-                        )
-                            .apply {
-                                periode = DatoIntervallEntitet(LocalDate.now().minusDays(10))
-                            },
+                        ).apply {
+                            periode = DatoIntervallEntitet(LocalDate.now().minusDays(10))
+                        },
                     )
             }
         personopplysningGrunnlag.personer.add(søker)
@@ -485,7 +481,9 @@ class VilkårVurderingTest(
         assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).resultat)
         assertEquals(
             "Mor er EØS-borger, men har et løpende arbeidsforhold i Norge.",
-            Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).evaluering.begrunnelse,
+            Vilkår.LOVLIG_OPPHOLD
+                .vurderVilkår(person, LocalDate.now())
+                .evaluering.begrunnelse,
         )
     }
 
@@ -499,27 +497,28 @@ class VilkårVurderingTest(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
                 sivilstand = SIVILSTAND.GIFT,
-            )
-                .also {
-                    it.statsborgerskap =
-                        mutableListOf(
-                            GrStatsborgerskap(
-                                gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                landkode = "BEL",
-                                medlemskap = Medlemskap.EØS,
-                                person = it,
-                            ),
-                        )
-                    it.bostedsadresser =
-                        mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
-                }
+            ).also {
+                it.statsborgerskap =
+                    mutableListOf(
+                        GrStatsborgerskap(
+                            gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                            landkode = "BEL",
+                            medlemskap = Medlemskap.EØS,
+                            person = it,
+                        ),
+                    )
+                it.bostedsadresser =
+                    mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
+            }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.NORDEN)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
         assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).resultat)
         assertEquals(
             "Annen forelder er norsk eller nordisk statsborger.",
-            Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).evaluering.begrunnelse,
+            Vilkår.LOVLIG_OPPHOLD
+                .vurderVilkår(person, LocalDate.now())
+                .evaluering.begrunnelse,
         )
     }
 
@@ -533,20 +532,19 @@ class VilkårVurderingTest(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
                 sivilstand = SIVILSTAND.GIFT,
-            )
-                .also {
-                    it.statsborgerskap =
-                        mutableListOf(
-                            GrStatsborgerskap(
-                                gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                landkode = "BEL",
-                                medlemskap = Medlemskap.EØS,
-                                person = it,
-                            ),
-                        )
-                    it.bostedsadresser =
-                        mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
-                }
+            ).also {
+                it.statsborgerskap =
+                    mutableListOf(
+                        GrStatsborgerskap(
+                            gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                            landkode = "BEL",
+                            medlemskap = Medlemskap.EØS,
+                            person = it,
+                        ),
+                    )
+                it.bostedsadresser =
+                    mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
+            }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.TREDJELANDSBORGER)
 
         person.personopplysningGrunnlag.personer.add(annenForelder)
@@ -557,7 +555,9 @@ class VilkårVurderingTest(
         )
         assertEquals(
             "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er tredjelandsborger.",
-            Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).evaluering.begrunnelse,
+            Vilkår.LOVLIG_OPPHOLD
+                .vurderVilkår(person, LocalDate.now())
+                .evaluering.begrunnelse,
         )
     }
 
@@ -571,20 +571,19 @@ class VilkårVurderingTest(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
                 sivilstand = SIVILSTAND.GIFT,
-            )
-                .also {
-                    it.statsborgerskap =
-                        mutableListOf(
-                            GrStatsborgerskap(
-                                gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                landkode = "BEL",
-                                medlemskap = Medlemskap.EØS,
-                                person = it,
-                            ),
-                        )
-                    it.bostedsadresser =
-                        mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
-                }
+            ).also {
+                it.statsborgerskap =
+                    mutableListOf(
+                        GrStatsborgerskap(
+                            gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                            landkode = "BEL",
+                            medlemskap = Medlemskap.EØS,
+                            person = it,
+                        ),
+                    )
+                it.bostedsadresser =
+                    mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
+            }
         val annenForelder = opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.UKJENT)
         person.personopplysningGrunnlag.personer.add(annenForelder)
 
@@ -594,7 +593,9 @@ class VilkårVurderingTest(
         )
         assertEquals(
             "Mor har ikke lovlig opphold - EØS borger. Mor er ikke registrert med arbeidsforhold. Medforelder er statsløs.",
-            Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).evaluering.begrunnelse,
+            Vilkår.LOVLIG_OPPHOLD
+                .vurderVilkår(person, LocalDate.now())
+                .evaluering.begrunnelse,
         )
     }
 
@@ -608,20 +609,19 @@ class VilkårVurderingTest(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
                 sivilstand = SIVILSTAND.GIFT,
-            )
-                .also {
-                    it.statsborgerskap =
-                        mutableListOf(
-                            GrStatsborgerskap(
-                                gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                                landkode = "BEL",
-                                medlemskap = Medlemskap.EØS,
-                                person = it,
-                            ),
-                        )
-                    it.bostedsadresser =
-                        mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
-                }
+            ).also {
+                it.statsborgerskap =
+                    mutableListOf(
+                        GrStatsborgerskap(
+                            gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                            landkode = "BEL",
+                            medlemskap = Medlemskap.EØS,
+                            person = it,
+                        ),
+                    )
+                it.bostedsadresser =
+                    mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
+            }
         val annenForelder =
             opprettAnnenForelder(personopplysningGrunnlag, bostedsadresse, Medlemskap.EØS)
                 .also { it.arbeidsforhold = løpendeArbeidsforhold(it) }
@@ -630,7 +630,9 @@ class VilkårVurderingTest(
         assertEquals(Resultat.OPPFYLT, Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).resultat)
         assertEquals(
             "Annen forelder er fra EØS, men har et løpende arbeidsforhold i Norge.",
-            Vilkår.LOVLIG_OPPHOLD.vurderVilkår(person, LocalDate.now()).evaluering.begrunnelse,
+            Vilkår.LOVLIG_OPPHOLD
+                .vurderVilkår(person, LocalDate.now())
+                .evaluering.begrunnelse,
         )
     }
 
@@ -638,33 +640,32 @@ class VilkårVurderingTest(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         bostedsadresse: Bostedsadresse,
         medlemskap: Medlemskap,
-    ): Person {
-        return genererPerson(
+    ): Person =
+        genererPerson(
             PersonType.ANNENPART,
             personopplysningGrunnlag,
             sivilstand = SIVILSTAND.GIFT,
-        )
-            .also {
-                it.statsborgerskap =
-                    mutableListOf(
-                        GrStatsborgerskap(
-                            gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
-                            landkode = "LOL",
-                            medlemskap = medlemskap,
-                            person = it,
-                        ),
-                    )
-                it.bostedsadresser =
-                    mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
-            }
-    }
+        ).also {
+            it.statsborgerskap =
+                mutableListOf(
+                    GrStatsborgerskap(
+                        gyldigPeriode = DatoIntervallEntitet(LocalDate.now().minusYears(1)),
+                        landkode = "LOL",
+                        medlemskap = medlemskap,
+                        person = it,
+                    ),
+                )
+            it.bostedsadresser =
+                mutableListOf(GrBostedsadresse.fraBostedsadresse(bostedsadresse, it))
+        }
 
     private fun løpendeArbeidsforhold(person: Person) =
         mutableListOf(
             GrArbeidsforhold(
                 periode =
                     DatoIntervallEntitet(
-                        LocalDate.now()
+                        LocalDate
+                            .now()
                             .minusYears(
                                 1,
                             ),

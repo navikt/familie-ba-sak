@@ -12,11 +12,17 @@ fun mockPersonidentService(
     val personidentService = mockk<PersonidentService>()
     every { personidentService.hentOgLagreAktør(any(), any()) } answers {
         val personIdent = firstArg<String>()
-        dataFraCucumber.persongrunnlag[nyBehandlingId]!!.personer.single { it.aktør.aktivFødselsnummer() == personIdent }.aktør
+        dataFraCucumber.persongrunnlag[nyBehandlingId]!!
+            .personer
+            .single { it.aktør.aktivFødselsnummer() == personIdent }
+            .aktør
     }
     every { personidentService.hentAktør(any()) } answers {
         val personIdent = firstArg<String>()
-        dataFraCucumber.persongrunnlag[nyBehandlingId]!!.personer.single { it.aktør.aktivFødselsnummer() == personIdent }.aktør
+        dataFraCucumber.persongrunnlag[nyBehandlingId]!!
+            .personer
+            .single { it.aktør.aktivFødselsnummer() == personIdent }
+            .aktør
     }
     return personidentService
 }

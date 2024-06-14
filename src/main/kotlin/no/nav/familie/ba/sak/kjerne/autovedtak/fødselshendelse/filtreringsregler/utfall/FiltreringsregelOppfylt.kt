@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregl
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
 
-enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreringsregel: Filtreringsregel) :
-    EvalueringÅrsak {
+enum class FiltreringsregelOppfylt(
+    val beskrivelse: String,
+    private val filtreringsregel: Filtreringsregel,
+) : EvalueringÅrsak {
     MOR_HAR_GYLDIG_FNR("Mor har gyldig fødselsnummer", Filtreringsregel.MOR_GYLDIG_FNR),
     BARN_HAR_GYLDIG_FNR("Barn har gyldig fødselsnummer", Filtreringsregel.BARN_GYLDIG_FNR),
     MOR_ER_OVER_18_ÅR("Mor er over 18 år.", Filtreringsregel.MOR_ER_OVER_18_ÅR),
@@ -41,15 +43,9 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
     ),
     ;
 
-    override fun hentBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentBeskrivelse(): String = beskrivelse
 
-    override fun hentMetrikkBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentMetrikkBeskrivelse(): String = beskrivelse
 
-    override fun hentIdentifikator(): String {
-        return filtreringsregel.name
-    }
+    override fun hentIdentifikator(): String = filtreringsregel.name
 }

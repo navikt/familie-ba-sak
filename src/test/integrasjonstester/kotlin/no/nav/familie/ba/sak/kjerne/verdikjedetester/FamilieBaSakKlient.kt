@@ -182,7 +182,10 @@ class FamilieBaSakKlient(
         val restUtvidetBehandling = postForEntity<Ressurs<RestUtvidetBehandling>>(uriPost, "", headers)
 
         val endretUtbetalingAndelId =
-            restUtvidetBehandling.data!!.endretUtbetalingAndeler.first { it.tom == null && it.fom == null }.id
+            restUtvidetBehandling.data!!
+                .endretUtbetalingAndeler
+                .first { it.tom == null && it.fom == null }
+                .id
         val uriPut = URI.create("$baSakUrl/api/endretutbetalingandel/$behandlingId/$endretUtbetalingAndelId")
 
         return putForEntity(uriPut, restEndretUtbetalingAndel, headers)
@@ -215,7 +218,5 @@ class FamilieBaSakKlient(
         return postForEntity(uri, manueltBrevRequest, headers)
     }
 
-    fun encodePath(path: String): String {
-        return encodePath(path, "UTF-8")
-    }
+    fun encodePath(path: String): String = encodePath(path, "UTF-8")
 }

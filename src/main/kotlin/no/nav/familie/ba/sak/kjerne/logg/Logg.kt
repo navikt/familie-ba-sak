@@ -52,7 +52,10 @@ data class Logg(
     )
 }
 
-enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn) {
+enum class LoggType(
+    val visningsnavn: String,
+    val tittel: String = visningsnavn,
+) {
     AUTOVEDTAK_TIL_MANUELL_BEHANDLING("Autovedtak til manuell behandling", "Automatisk behandling stoppet"),
     INSTITUSJON_REGISTRERT("Institusjon ble registrert"),
     FØDSELSHENDELSE("Fødselshendelse"), // Deprecated, bruk livshendelse

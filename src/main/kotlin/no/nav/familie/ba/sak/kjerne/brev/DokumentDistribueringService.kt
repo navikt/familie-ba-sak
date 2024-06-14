@@ -73,14 +73,13 @@ class DokumentDistribueringService(
         }
     }
 
-    fun hentDistribusjonskanal(personIdent: PersonIdent): Distribusjonskanal {
-        return integrasjonClient.hentDistribusjonskanal(
+    fun hentDistribusjonskanal(personIdent: PersonIdent): Distribusjonskanal =
+        integrasjonClient.hentDistribusjonskanal(
             DokdistkanalRequest(
                 bruker = personIdent,
                 mottaker = personIdent,
             ),
         )
-    }
 
     internal fun opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO: DistribuerDokumentDTO) {
         val task = DistribuerDokumentPåJournalpostIdTask.opprettTask(distribuerDokumentDTO.copy(behandlingId = null))

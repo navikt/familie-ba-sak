@@ -38,7 +38,8 @@ class EndretUtbetalingAndelService(
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
         val person =
-            persongrunnlagService.hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
+            persongrunnlagService
+                .hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
                 .first()
 
         val personopplysningGrunnlag =
@@ -50,7 +51,8 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
         val andreEndredeAndelerPåBehandling =
-            endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
+            endretUtbetalingAndelHentOgPersisterService
+                .hentForBehandling(behandling.id)
                 .filter { it.id != endretUtbetalingAndelId }
 
         val gyldigTomEtterDagensDato =

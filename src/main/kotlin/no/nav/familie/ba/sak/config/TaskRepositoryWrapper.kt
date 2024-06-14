@@ -12,7 +12,9 @@ TaskRepository in familie-prosessering is @Primary, which is not able to mock so
  */
 @Profile("!mock-task-repository")
 @Component
-class TaskRepositoryWrapper(private val taskService: TaskService) {
+class TaskRepositoryWrapper(
+    private val taskService: TaskService,
+) {
     fun save(task: Task) =
         taskService.save(task)
 

@@ -44,34 +44,32 @@ class TestVerktøyController(
 ) {
     @GetMapping(path = ["/autobrev"])
     @Unprotected
-    fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
+    fun kjørSchedulerForAutobrev(): ResponseEntity<Ressurs<String>> =
+        if (envService.erPreprod() || envService.erDev()) {
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-    }
 
     @GetMapping(path = ["/test-satsendring/{fagsakId}"])
     @Unprotected
     fun utførSatsendringPåFagsak(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
+    ): ResponseEntity<Ressurs<String>> =
+        if (envService.erPreprod() || envService.erDev()) {
             opprettTaskService.opprettSatsendringTask(fagsakId, StartSatsendring.hentAktivSatsendringstidspunkt())
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-    }
 
     @PostMapping(path = ["/vedtak-om-overgangsstønad"])
     @Unprotected
     fun mottaHendelseOmVedtakOmOvergangsstønad(
         @RequestBody personIdent: PersonIdent,
-    ): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
+    ): ResponseEntity<Ressurs<String>> =
+        if (envService.erPreprod() || envService.erDev()) {
             val aktør = personidentService.hentAktør(personIdent.ident)
             val melding =
                 autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -82,26 +80,24 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-    }
 
     @PostMapping(path = ["/foedselshendelse"])
     @Unprotected
     fun mottaFødselshendelse(
         @RequestBody nyBehandlingHendelse: NyBehandlingHendelse,
-    ): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
+    ): ResponseEntity<Ressurs<String>> =
+        if (envService.erPreprod() || envService.erDev()) {
             val task = BehandleFødselshendelseTask.opprettTask(BehandleFødselshendelseTaskDTO(nyBehandlingHendelse))
             taskRepository.save(task)
             ResponseEntity.ok(Ressurs.success("Task for behandling av fødselshendelse på ${nyBehandlingHendelse.morsIdent} er opprettet"))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-    }
 
     @GetMapping(path = ["/ta-behandlinger-etter-ventefrist-av-vent"])
     @Unprotected
-    fun taBehandlingerEtterVentefristAvVent(): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
+    fun taBehandlingerEtterVentefristAvVent(): ResponseEntity<Ressurs<String>> =
+        if (envService.erPreprod() || envService.erDev()) {
             val taBehandlingerEtterVentefristAvVentTask =
                 Task(type = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE, payload = "")
             taskRepository.save(taBehandlingerEtterVentefristAvVentTask)
@@ -109,7 +105,6 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
-    }
 
     @GetMapping(path = ["/hent-simulering-pa-behandling/{behandlingId}"])
     fun hentSimuleringPåBehandling(
@@ -139,8 +134,10 @@ class TestVerktøyController(
         return if (behandling == null) {
             ResponseEntity.status(200).body("Fant ikke behandling med id $behandlingId")
         } else {
-            ResponseEntity.status(302)
-                .location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/")).build()
+            ResponseEntity
+                .status(302)
+                .location(URI.create("$hostname/fagsak/${behandling.fagsak.id}/$behandlingId/"))
+                .build()
         }
     }
 

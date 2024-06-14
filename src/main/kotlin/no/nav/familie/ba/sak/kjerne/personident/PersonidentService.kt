@@ -24,9 +24,7 @@ class PersonidentService(
     fun hentIdenter(
         personIdent: String,
         historikk: Boolean,
-    ): List<IdentInformasjon> {
-        return pdlIdentRestClient.hentIdenter(personIdent, historikk)
-    }
+    ): List<IdentInformasjon> = pdlIdentRestClient.hentIdenter(personIdent, historikk)
 
     fun identSkalLeggesTil(nyIdent: PersonIdent): Boolean {
         val identerFraPdl = hentIdenter(nyIdent.ident, true)
@@ -131,13 +129,9 @@ class PersonidentService(
     fun hentOgLagreAktørIder(
         barnasFødselsnummer: List<String>,
         lagre: Boolean,
-    ): List<Aktør> {
-        return barnasFødselsnummer.map { hentOgLagreAktør(it, lagre) }
-    }
+    ): List<Aktør> = barnasFødselsnummer.map { hentOgLagreAktør(it, lagre) }
 
-    fun hentAktørIder(barnasFødselsnummer: List<String>): List<Aktør> {
-        return barnasFødselsnummer.map { hentAktør(it) }
-    }
+    fun hentAktørIder(barnasFødselsnummer: List<String>): List<Aktør> = barnasFødselsnummer.map { hentAktør(it) }
 
     /*
     Ved merge vil èn av de to gjeldende aktør-IDene videreføres som gjeldende. Vi trenger dermed å sjekke

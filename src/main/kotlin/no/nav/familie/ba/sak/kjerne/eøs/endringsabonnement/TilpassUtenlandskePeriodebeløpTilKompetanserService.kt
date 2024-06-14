@@ -78,7 +78,8 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
             .tilSeparateTidslinjerForBarna()
             .filtrerSekundærland()
 
-    return forrigeUtenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
+    return forrigeUtenlandskePeriodebeløp
+        .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
             val utbetalingsland = kompetanse?.utbetalingsland()
             when {
@@ -88,8 +89,7 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
                 else -> upb
             }
-        }
-        .tilSkjemaer()
+        }.tilSkjemaer()
 }
 
 fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.filtrerSekundærland() =

@@ -130,7 +130,12 @@ internal class PersonidentServiceTest {
 
             assertEquals(2, aktør?.personidenter?.size)
             assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivFødselsnummer())
-            assertTrue(aktør.personidenter.first { !it.aktiv }.gjelderTil!!.isBefore(LocalDateTime.now()))
+            assertTrue(
+                aktør.personidenter
+                    .first { !it.aktiv }
+                    .gjelderTil!!
+                    .isBefore(LocalDateTime.now()),
+            )
             verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         }

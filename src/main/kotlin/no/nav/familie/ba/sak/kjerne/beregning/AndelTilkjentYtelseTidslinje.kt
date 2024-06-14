@@ -10,27 +10,25 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 class AndelTilkjentYtelseTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) : Tidslinje<AndelTilkjentYtelse, Måned>() {
-    override fun lagPerioder(): List<Periode<AndelTilkjentYtelse, Måned>> {
-        return andelerTilkjentYtelse.map {
+    override fun lagPerioder(): List<Periode<AndelTilkjentYtelse, Måned>> =
+        andelerTilkjentYtelse.map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
         }
-    }
 }
 
 class AndelTilkjentYtelseForVedtaksperioderTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) : Tidslinje<AndelForVedtaksperiode, Måned>() {
-    override fun lagPerioder(): List<Periode<AndelForVedtaksperiode, Måned>> {
-        return andelerTilkjentYtelse.map {
+    override fun lagPerioder(): List<Periode<AndelForVedtaksperiode, Måned>> =
+        andelerTilkjentYtelse.map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
                 innhold = AndelForVedtaksperiode(it),
             )
         }
-    }
 }

@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
-class ArbeidsforholdService(private val integrasjonClient: IntegrasjonClient) {
+class ArbeidsforholdService(
+    private val integrasjonClient: IntegrasjonClient,
+) {
     fun hentArbeidsforhold(person: Person): List<GrArbeidsforhold> {
         val arbeidsforholdForSisteFemÅr =
             integrasjonClient.hentArbeidsforhold(person.aktør.aktivFødselsnummer(), LocalDate.now().minusYears(5))

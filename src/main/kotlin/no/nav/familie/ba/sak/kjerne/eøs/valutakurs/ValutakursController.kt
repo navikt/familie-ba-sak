@@ -105,12 +105,12 @@ class ValutakursController(
     /**
      * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
      */
-    private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
-        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" &&
+    private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean =
+        restValutakurs.valutakursdato != null &&
+            restValutakurs.valutakode == "ISK" &&
             restValutakurs.valutakursdato.isBefore(
                 LocalDate.of(2018, 2, 1),
             )
-    }
 
     /**
      * Sjekker om *restValutakurs* inneholder nødvendige verdier og sammenligner disse med *eksisterendeValutakurs*
@@ -118,9 +118,7 @@ class ValutakursController(
     private fun valutakursErEndret(
         restValutakurs: RestValutakurs,
         eksisterendeValutakurs: Valutakurs,
-    ): Boolean {
-        return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
-    }
+    ): Boolean = restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
 
     @PutMapping(path = ["behandlinger/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     private fun endreVurderingsstrategiForValutakurser(

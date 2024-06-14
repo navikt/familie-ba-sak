@@ -83,9 +83,7 @@ data class ManueltBrevRequest(
     val manuelleBrevmottakere: List<ManuellBrevmottaker> = emptyList(),
     val fritekstAvsnitt: String? = null,
 ) {
-    override fun toString(): String {
-        return "${ManueltBrevRequest::class}, $brevmal"
-    }
+    override fun toString(): String = "${ManueltBrevRequest::class}, $brevmal"
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 

@@ -87,7 +87,8 @@ class PeriodeOffsetIntegrasjonTest(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+        beregningService
+            .hentAndelerTilkjentYtelseForBehandling(behandling.id)
             .forEach {
                 Assertions.assertNull(it.periodeOffset)
                 Assertions.assertNull(it.forrigePeriodeOffset)
@@ -106,7 +107,8 @@ class PeriodeOffsetIntegrasjonTest(
             )
         }
 
-        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+        beregningService
+            .hentAndelerTilkjentYtelseForBehandling(behandling.id)
             .forEach {
                 Assertions.assertNotNull(it.periodeOffset)
                 Assertions.assertNotNull(it.kildeBehandlingId)
@@ -151,7 +153,8 @@ class PeriodeOffsetIntegrasjonTest(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+        beregningService
+            .hentAndelerTilkjentYtelseForBehandling(behandling.id)
             .forEach {
                 Assertions.assertNull(it.periodeOffset)
                 Assertions.assertNull(it.forrigePeriodeOffset)
@@ -162,7 +165,8 @@ class PeriodeOffsetIntegrasjonTest(
             simuleringService.oppdaterSimuleringPåBehandling(behandling)
         }
 
-        beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+        beregningService
+            .hentAndelerTilkjentYtelseForBehandling(behandling.id)
             .forEach {
                 Assertions.assertNull(it.periodeOffset)
                 Assertions.assertNull(it.forrigePeriodeOffset)

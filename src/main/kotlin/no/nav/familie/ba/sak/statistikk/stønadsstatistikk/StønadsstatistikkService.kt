@@ -130,12 +130,15 @@ class StønadsstatistikkService(
         if (andelerMedEndringer.isEmpty()) return emptyList()
 
         val utbetalingsPerioder =
-            andelerMedEndringer.map { it.andel }
-                .tilTidslinjerPerPersonOgType().values
+            andelerMedEndringer
+                .map { it.andel }
+                .tilTidslinjerPerPersonOgType()
+                .values
                 .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
         val søkerOgBarn = persongrunnlag.søkerOgBarn
 
-        return utbetalingsPerioder.perioder()
+        return utbetalingsPerioder
+            .perioder()
             .mapNotNull { periode ->
                 val andelerIPeriode = periode.innhold
 
@@ -170,8 +173,8 @@ class StønadsstatistikkService(
         andelerForSegment: Iterable<AndelTilkjentYtelse>,
         behandling: Behandling,
         søkerOgBarn: List<Person>,
-    ): UtbetalingsperiodeDVHV2 {
-        return UtbetalingsperiodeDVHV2(
+    ): UtbetalingsperiodeDVHV2 =
+        UtbetalingsperiodeDVHV2(
             hjemmel = "Ikke implementert",
             stønadFom = fom,
             stønadTom = tom,
@@ -199,28 +202,25 @@ class StønadsstatistikkService(
                     )
                 },
         )
-    }
 
     private fun lagPersonDVHV2(
         person: Person,
         delingsProsentYtelse: Int = 0,
-    ): PersonDVHV2 {
-        return PersonDVHV2(
+    ): PersonDVHV2 =
+        PersonDVHV2(
             rolle = person.type.name,
             statsborgerskap = hentStatsborgerskap(person),
             bostedsland = hentLandkode(person),
             delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
             personIdent = person.aktør.aktivFødselsnummer(),
         )
-    }
 
-    private fun hentStatsborgerskap(person: Person): List<String> {
-        return if (person.statsborgerskap.isNotEmpty()) {
+    private fun hentStatsborgerskap(person: Person): List<String> =
+        if (person.statsborgerskap.isNotEmpty()) {
             person.statsborgerskap.filtrerGjeldendeNå().map { it.landkode }
         } else {
             listOf(personopplysningerService.hentGjeldendeStatsborgerskap(person.aktør).land)
         }
-    }
 
     private fun hentLandkode(person: Person): String =
         if (person.bostedsadresser.isNotEmpty()) {

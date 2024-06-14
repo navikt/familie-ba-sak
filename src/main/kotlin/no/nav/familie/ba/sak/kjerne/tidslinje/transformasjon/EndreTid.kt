@@ -63,7 +63,8 @@ fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
             val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
 
             innholdSisteDagForrigeMåned
-                .mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }.tilVerdi()
+                .mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }
+                .tilVerdi()
         }
     }
 }

@@ -31,8 +31,8 @@ class JournalførVedtaksbrevTask(
             behandlingId: Long,
             vedtakId: Long,
             gammelTask: Task? = null,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 TASK_STEP_TYPE,
                 "$vedtakId",
                 gammelTask?.metadata ?: Properties().apply {
@@ -41,6 +41,5 @@ class JournalførVedtaksbrevTask(
                     this["vedtakId"] = vedtakId.toString()
                 },
             )
-        }
     }
 }

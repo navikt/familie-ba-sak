@@ -19,8 +19,8 @@ class MockPdlIdentRestClient(
     override fun hentIdenter(
         personIdent: String,
         historikk: Boolean,
-    ): List<IdentInformasjon> {
-        return when {
+    ): List<IdentInformasjon> =
+        when {
             historikk ->
                 listOf(
                     IdentInformasjon(personIdent, historisk = false, gruppe = "FOLKEREGISTERIDENT"),
@@ -41,5 +41,4 @@ class MockPdlIdentRestClient(
                     ),
                 )
         }
-    }
 }

@@ -16,7 +16,9 @@ import java.time.LocalDateTime
 
 @Component
 @Profile("!prod")
-class FjernGamleFeiledeTasksIPreprod(val taskService: TaskService) {
+class FjernGamleFeiledeTasksIPreprod(
+    val taskService: TaskService,
+) {
     @Scheduled(cron = "0 0 4 * * *")
     @Transactional
     fun fjernGamleFeiledeTasksIPreprod() {

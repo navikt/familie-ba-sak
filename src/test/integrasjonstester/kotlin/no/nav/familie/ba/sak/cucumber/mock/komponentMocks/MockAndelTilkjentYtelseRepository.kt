@@ -15,7 +15,12 @@ fun mockAndelTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStepDef
     }
     every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any()) } answers {
         val fagsakId = firstArg<Long>()
-        val behandlingId = dataFraCucumber.behandlinger.filter { it.value.fagsak.id == fagsakId }.filter { it.value.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.value.id }?.key
+        val behandlingId =
+            dataFraCucumber.behandlinger
+                .filter { it.value.fagsak.id == fagsakId }
+                .filter { it.value.status == BehandlingStatus.AVSLUTTET }
+                .maxByOrNull { it.value.id }
+                ?.key
         val andelerPåBehandling = dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse ?: emptyList()
         andelerPåBehandling.tilSisteAndelPerAktørOgType()
     }

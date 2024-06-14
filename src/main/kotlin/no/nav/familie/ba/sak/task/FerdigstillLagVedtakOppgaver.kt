@@ -31,8 +31,8 @@ class FerdigstillLagVedtakOppgaver(
 
         fun opprettTask(
             behandlingId: Long,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(FerdigstillLagVedtakOppgaverDTO(behandlingId = behandlingId)),
                 properties =
@@ -40,6 +40,5 @@ class FerdigstillLagVedtakOppgaver(
                         this["behandlingsId"] = behandlingId.toString()
                     },
             )
-        }
     }
 }

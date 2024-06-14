@@ -90,7 +90,8 @@ object SatsService {
 
 fun satstypeTidslinje(satsType: SatsType) =
     tidslinje {
-        SatsService.finnAlleSatserFor(satsType)
+        SatsService
+            .finnAlleSatserFor(satsType)
             .map {
                 val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
                 val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()

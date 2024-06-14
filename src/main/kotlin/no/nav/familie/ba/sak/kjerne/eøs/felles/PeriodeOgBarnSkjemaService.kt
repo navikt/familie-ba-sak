@@ -9,13 +9,9 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
     val periodeOgBarnSkjemaRepository: PeriodeOgBarnSkjemaRepository<S>,
     val endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<S>>,
 ) {
-    fun hentMedBehandlingId(behandlingId: BehandlingId): Collection<S> {
-        return periodeOgBarnSkjemaRepository.finnFraBehandlingId(behandlingId.id)
-    }
+    fun hentMedBehandlingId(behandlingId: BehandlingId): Collection<S> = periodeOgBarnSkjemaRepository.finnFraBehandlingId(behandlingId.id)
 
-    fun hentMedId(id: Long): S {
-        return periodeOgBarnSkjemaRepository.getReferenceById(id)
-    }
+    fun hentMedId(id: Long): S = periodeOgBarnSkjemaRepository.getReferenceById(id)
 
     fun endreSkjemaer(
         behandlingId: BehandlingId,
@@ -64,8 +60,11 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         val blanktSkjema = skjemaTilSletting.utenInnhold()
 
         val oppdaterteKompetanser =
-            gjeldendeSkjemaer.minus(skjemaTilSletting).plus(blanktSkjema)
-                .slåSammen().medBehandlingId(behandlingId)
+            gjeldendeSkjemaer
+                .minus(skjemaTilSletting)
+                .plus(blanktSkjema)
+                .slåSammen()
+                .medBehandlingId(behandlingId)
 
         lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser)
     }

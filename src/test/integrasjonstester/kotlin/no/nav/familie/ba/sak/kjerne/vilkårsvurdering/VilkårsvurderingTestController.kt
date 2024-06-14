@@ -64,7 +64,8 @@ class VilkårsvurderingTestController(
         @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val personer =
-            personresultater.tilPersoner()
+            personresultater
+                .tilPersoner()
                 .map { it.copy(aktør = aktørIdRepository.saveAndFlush(it.aktør)) }
 
         val søker = personer.first { it.type == PersonType.SØKER }
@@ -132,14 +133,15 @@ class VilkårsvurderingTestController(
 }
 
 private fun Map<LocalDate, Map<Vilkår, String>>.tilPersoner(): List<Person> {
-    return this.keys.mapIndexed { indeks, startTidspunkt ->
-        when (indeks) {
-            0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startTidspunkt)
-            else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startTidspunkt)
-        }
-    }.map {
-        it.copy(id = 0).also { it.sivilstander.clear() }
-    } // tilfeldigPerson inneholder litt for mye, så fjerner det
+    return this.keys
+        .mapIndexed { indeks, startTidspunkt ->
+            when (indeks) {
+                0 -> tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = startTidspunkt)
+                else -> tilfeldigPerson(personType = PersonType.BARN, fødselsdato = startTidspunkt)
+            }
+        }.map {
+            it.copy(id = 0).also { it.sivilstander.clear() }
+        } // tilfeldigPerson inneholder litt for mye, så fjerner det
 }
 
 fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(

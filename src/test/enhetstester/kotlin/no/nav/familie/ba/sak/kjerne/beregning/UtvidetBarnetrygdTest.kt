@@ -105,12 +105,13 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList()
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(4, andeler.size)
@@ -176,18 +177,17 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = oppfyltBarn.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = oppfyltBarn.fom,
-                            vilkårOppfyltTom = oppfyltBarn.tom,
-                            personType = PersonType.BARN,
-                            fødselsdato = fødselsdatoUnder6År,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = oppfyltBarn.fom,
+                        vilkårOppfyltTom = oppfyltBarn.tom,
+                        personType = PersonType.BARN,
+                        fødselsdato = fødselsdatoUnder6År,
+                    ),
+                )
+            }
 
         vilkårsvurdering.apply { personResultater = (listOf(søkerResultat) + barnResultater).toSet() }
 
@@ -198,12 +198,13 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList()
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
 
         assertEquals(2, andeler.size)
@@ -274,7 +275,8 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
-                        .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
+                        .tilSeparateTidslinjerForBarna()
+                        .mapValues { it.value.map { true } },
             )
 
         val utvidetAndelerNårKunBarnMed50ProsentBorMedSøker =
@@ -286,7 +288,8 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
-                        .tilSeparateTidslinjerForBarna().mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } },
+                        .tilSeparateTidslinjerForBarna()
+                        .mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } },
             )
 
         assertEquals(BigDecimal(100), utvidetAndelerNårBarnMed100ProsentBorMedSøker.minOf { it.prosent })
@@ -308,43 +311,41 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
-                        ),
-                    )
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = søkerUtvidet.fom,
-                            vilkårOppfyltTom = søkerUtvidet.tom,
-                            personType = PersonType.SØKER,
-                            erUtvidet = søkerUtvidet.erUtvidet,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerUtvidet.fom,
+                        vilkårOppfyltTom = søkerUtvidet.tom,
+                        personType = PersonType.SØKER,
+                        erUtvidet = søkerUtvidet.erUtvidet,
+                    ),
+                )
+            }
 
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
         val personopplysningGrunnlag =
@@ -354,12 +355,14 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -390,43 +393,41 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
-                        ),
-                    )
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = søkerUtvidet.fom,
-                            vilkårOppfyltTom = søkerUtvidet.tom,
-                            personType = PersonType.SØKER,
-                            erUtvidet = søkerUtvidet.erUtvidet,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerUtvidet.fom,
+                        vilkårOppfyltTom = søkerUtvidet.tom,
+                        personType = PersonType.SØKER,
+                        erUtvidet = søkerUtvidet.erUtvidet,
+                    ),
+                )
+            }
 
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
         val personopplysningGrunnlag =
@@ -436,12 +437,14 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -472,43 +475,41 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
-                        ),
-                    )
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = søkerUtvidet.fom,
-                            vilkårOppfyltTom = søkerUtvidet.tom,
-                            personType = PersonType.SØKER,
-                            erUtvidet = søkerUtvidet.erUtvidet,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerUtvidet.fom,
+                        vilkårOppfyltTom = søkerUtvidet.tom,
+                        personType = PersonType.SØKER,
+                        erUtvidet = søkerUtvidet.erUtvidet,
+                    ),
+                )
+            }
 
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
         val personopplysningGrunnlag =
@@ -518,12 +519,14 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -551,57 +554,55 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
                             personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = b2bTom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                    vilkårResultater.addAll(
-                        setOf(
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = søkerOrdinær.fom,
-                                periodeTom = b2bTom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = b2bFom,
-                                periodeTom = null,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = b2bFom,
+                            periodeTom = null,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                }
+                    ),
+                )
+            }
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
         val personopplysningGrunnlag =
             PersonopplysningGrunnlag(behandlingId = behandling.id)
@@ -609,11 +610,14 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            ).andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         val vedtaksperioderMedBegrunnelser =
             hentPerioderMedUtbetaling(
@@ -663,31 +667,30 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
                             personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = søkerOrdinær.tom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                    vilkårResultater.addAll(
-                        setOf(
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = søkerOrdinær.fom,
-                                periodeTom = søkerOrdinær.tom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
-                        ),
-                    )
-                }
+                    ),
+                )
+            }
 
         val b2bTom = LocalDate.of(2020, 2, 29)
         val b2bFom = LocalDate.of(2020, 3, 1)
@@ -696,44 +699,43 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
-                        ),
-                    )
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
 
-                    vilkårResultater.removeIf { it.vilkårType == Vilkår.BOR_MED_SØKER }
-                    vilkårResultater.addAll(
-                        setOf(
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.BOR_MED_SØKER,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = søkerOrdinær.fom,
-                                periodeTom = b2bTom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.BOR_MED_SØKER,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = b2bFom,
-                                periodeTom = søkerOrdinær.tom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
+                vilkårResultater.removeIf { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.BOR_MED_SØKER,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = b2bTom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                }
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.BOR_MED_SØKER,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = b2bFom,
+                            periodeTom = søkerOrdinær.tom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
+                        ),
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
         val personopplysningGrunnlag =
@@ -743,12 +745,14 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         assertEquals(2, andeler.size)
 
@@ -777,31 +781,30 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
                             personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = søkerOrdinær.tom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                    vilkårResultater.addAll(
-                        setOf(
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = søkerOrdinær.fom,
-                                periodeTom = søkerOrdinær.tom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
-                        ),
-                    )
-                }
+                    ),
+                )
+            }
 
         val b2bTom = LocalDate.of(2020, 2, 29)
         val b2bFom = LocalDate.of(2020, 3, 1)
@@ -810,43 +813,42 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
+                vilkårResultater.removeIf { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
                             personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
+                            vilkårType = Vilkår.BOR_MED_SØKER,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = b2bTom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
                         ),
-                    )
-                    vilkårResultater.removeIf { it.vilkårType == Vilkår.BOR_MED_SØKER }
-                    vilkårResultater.addAll(
-                        setOf(
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.BOR_MED_SØKER,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = søkerOrdinær.fom,
-                                periodeTom = b2bTom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                            ),
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.BOR_MED_SØKER,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = b2bFom,
-                                periodeTom = søkerOrdinær.tom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.BOR_MED_SØKER,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = b2bFom,
+                            periodeTom = søkerOrdinær.tom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                }
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
         val personopplysningGrunnlag =
@@ -856,12 +858,14 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         assertEquals(4, andeler.size)
 
@@ -907,58 +911,56 @@ internal class UtvidetBarnetrygdTest {
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = søkerOrdinær.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = søkerOrdinær.fom,
+                        vilkårOppfyltTom = søkerOrdinær.tom,
+                        personType = PersonType.SØKER,
+                    ),
+                )
+                vilkårResultater.addAll(
+                    setOf(
+                        VilkårResultat(
                             personResultat = this,
-                            vilkårOppfyltFom = søkerOrdinær.fom,
-                            vilkårOppfyltTom = søkerOrdinær.tom,
-                            personType = PersonType.SØKER,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = søkerOrdinær.fom,
+                            periodeTom = utvidetFørstePeriodeTom,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                    vilkårResultater.addAll(
-                        setOf(
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = søkerOrdinær.fom,
-                                periodeTom = utvidetFørstePeriodeTom,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
-                            VilkårResultat(
-                                personResultat = this,
-                                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = utvidetAndrePeriodeFom,
-                                periodeTom = null,
-                                begrunnelse = "",
-                                sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
-                                utdypendeVilkårsvurderinger = emptyList(),
-                            ),
+                        VilkårResultat(
+                            personResultat = this,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = utvidetAndrePeriodeFom,
+                            periodeTom = null,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = this.vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
                         ),
-                    )
-                }
+                    ),
+                )
+            }
 
         val barnResultater =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 aktør = barnOppfylt.aktør,
-            )
-                .apply {
-                    vilkårResultater.addAll(
-                        oppfylteVilkårFor(
-                            personResultat = this,
-                            vilkårOppfyltFom = barnOppfylt.fom,
-                            vilkårOppfyltTom = barnOppfylt.tom,
-                            personType = PersonType.BARN,
-                            erDeltBosted = barnOppfylt.erDeltBosted,
-                        ),
-                    )
-                }
+            ).apply {
+                vilkårResultater.addAll(
+                    oppfylteVilkårFor(
+                        personResultat = this,
+                        vilkårOppfyltFom = barnOppfylt.fom,
+                        vilkårOppfyltTom = barnOppfylt.tom,
+                        personType = PersonType.BARN,
+                        erDeltBosted = barnOppfylt.erDeltBosted,
+                    ),
+                )
+            }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
         val personopplysningGrunnlag =
@@ -968,12 +970,14 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList().sortedBy { it.type }
+            TilkjentYtelseUtils
+                .beregnTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
+                .toList()
+                .sortedBy { it.type }
 
         assertEquals(3, andeler.size)
 
@@ -1091,7 +1095,8 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
-                        .tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
+                        .tilSeparateTidslinjerForBarna()
+                        .mapValues { it.value.map { true } },
             ).sortedBy { it.stønadFom }
 
         assertEquals(2, utvidetAndeler.size)
@@ -1142,21 +1147,22 @@ internal class UtvidetBarnetrygdTest {
                 )
             }
 
-        return vilkårSomSkalVurderes.map {
-            VilkårResultat(
-                personResultat = personResultat,
-                vilkårType = it,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato else vilkårOppfyltFom,
-                periodeTom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato.plusYears(18) else vilkårOppfyltTom,
-                begrunnelse = "",
-                sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger =
-                    listOfNotNull(
-                        if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
-                    ),
-            )
-        }.toSet()
+        return vilkårSomSkalVurderes
+            .map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato else vilkårOppfyltFom,
+                    periodeTom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato.plusYears(18) else vilkårOppfyltTom,
+                    begrunnelse = "",
+                    sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    utdypendeVilkårsvurderinger =
+                        listOfNotNull(
+                            if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                        ),
+                )
+            }.toSet()
     }
 
     private fun List<OppfyltPeriode>.lagGrunnlagPersoner(
@@ -1171,9 +1177,8 @@ internal class UtvidetBarnetrygdTest {
                 fødselsdato = fødselsdato,
                 navn = "Test Testesen",
                 kjønn = Kjønn.KVINNE,
-            )
-                .apply {
-                    sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
-                }
+            ).apply {
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+            }
         }
 }

@@ -51,16 +51,20 @@ internal class SkatteetatenServiceTest {
         )
 
         assertThat(
-            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
-                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
-        )
-            .isEqualTo(nyesteVedtaksdato.atStartOfDay())
+            skatteetatenService
+                .finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString())
+                .brukere
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!
+                .sisteVedtakPaaIdent,
+        ).isEqualTo(nyesteVedtaksdato.atStartOfDay())
 
         assertThat(
-            skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
-                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
-        )
-            .isEqualTo(nyesteVedtaksdato.plusDays(2).atStartOfDay())
+            skatteetatenService
+                .finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString())
+                .brukere
+                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!
+                .sisteVedtakPaaIdent,
+        ).isEqualTo(nyesteVedtaksdato.plusDays(2).atStartOfDay())
     }
 
     @Test
@@ -93,15 +97,15 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
-        )
-            .isEqualTo(vedtaksdato.atStartOfDay())
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!
+                .sisteVedtakPaaIdent,
+        ).isEqualTo(vedtaksdato.atStartOfDay())
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
-        )
-            .isEqualTo(vedtaksdato.plusDays(2).atStartOfDay())
+                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!
+                .sisteVedtakPaaIdent,
+        ).isEqualTo(vedtaksdato.plusDays(2).atStartOfDay())
     }
 
     @Test
@@ -136,10 +140,13 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
-        )
-            .isEqualTo(vedtaksdato.atStartOfDay())
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!
+                .sisteVedtakPaaIdent,
+        ).isEqualTo(vedtaksdato.atStartOfDay())
     }
 
-    class TestUtvidetSkatt(override val fnr: String, override val sisteVedtaksdato: LocalDate) : UtvidetSkatt
+    class TestUtvidetSkatt(
+        override val fnr: String,
+        override val sisteVedtaksdato: LocalDate,
+    ) : UtvidetSkatt
 }

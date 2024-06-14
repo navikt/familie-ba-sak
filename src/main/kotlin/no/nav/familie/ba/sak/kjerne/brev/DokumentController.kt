@@ -99,16 +99,17 @@ class DokumentController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        return dokumentGenereringService.genererManueltBrev(
-            manueltBrevRequest =
-                manueltBrevRequest.byggMottakerdata(
-                    behandling,
-                    persongrunnlagService,
-                    arbeidsfordelingService,
-                ),
-            erForhåndsvisning = true,
-            fagsak = behandling.fagsak,
-        ).let { Ressurs.success(it) }
+        return dokumentGenereringService
+            .genererManueltBrev(
+                manueltBrevRequest =
+                    manueltBrevRequest.byggMottakerdata(
+                        behandling,
+                        persongrunnlagService,
+                        arbeidsfordelingService,
+                    ),
+                erForhåndsvisning = true,
+                fagsak = behandling.fagsak,
+            ).let { Ressurs.success(it) }
     }
 
     @PostMapping(path = ["send-brev/{behandlingId}"])
@@ -158,11 +159,12 @@ class DokumentController(
         )
 
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-        return dokumentGenereringService.genererManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
-            erForhåndsvisning = true,
-            fagsak = fagsak,
-        ).let { Ressurs.success(it) }
+        return dokumentGenereringService
+            .genererManueltBrev(
+                manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
+                erForhåndsvisning = true,
+                fagsak = fagsak,
+            ).let { Ressurs.success(it) }
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/send-brev"])
@@ -187,9 +189,7 @@ class DokumentController(
     @PostMapping(path = ["/distribusjonskanal"])
     fun hentDistribusjonskanal(
         @RequestBody personIdent: PersonIdent,
-    ): Ressurs<Distribusjonskanal> {
-        return Ressurs.success(dokumentDistribueringService.hentDistribusjonskanal(personIdent))
-    }
+    ): Ressurs<Distribusjonskanal> = Ressurs.success(dokumentDistribueringService.hentDistribusjonskanal(personIdent))
 
     companion object {
         private val logger = LoggerFactory.getLogger(DokumentController::class.java)

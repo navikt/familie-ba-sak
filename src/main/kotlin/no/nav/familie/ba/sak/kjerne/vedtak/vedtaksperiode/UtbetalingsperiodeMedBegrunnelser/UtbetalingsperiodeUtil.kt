@@ -25,17 +25,19 @@ fun hentPerioderMedUtbetaling(
 
     val alleAndelerKombinertTidslinje =
         andelerTilkjentYtelse
-            .tilTidslinjerPerPersonOgType().values
+            .tilTidslinjerPerPersonOgType()
+            .values
             .kombinerUtenNull { it }
             .filtrer { !it?.toList().isNullOrEmpty() }
 
     val andelerSplittetOppTidslinje =
-        alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
-            when (andelerIPeriode) {
-                null -> null
-                else -> Pair(andelerIPeriode, splittVilkårIPeriode)
-            }
-        }.filtrerIkkeNull()
+        alleAndelerKombinertTidslinje
+            .kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
+                when (andelerIPeriode) {
+                    null -> null
+                    else -> Pair(andelerIPeriode, splittVilkårIPeriode)
+                }
+            }.filtrerIkkeNull()
 
     return andelerSplittetOppTidslinje
         .perioder()

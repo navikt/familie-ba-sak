@@ -21,7 +21,9 @@ import java.net.URI
 
 typealias TilbakekrevingId = String
 
-data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
+data class FinnesBehandlingsresponsDto(
+    val finnesÅpenBehandling: Boolean,
+)
 
 @Component
 class TilbakekrevingKlient(

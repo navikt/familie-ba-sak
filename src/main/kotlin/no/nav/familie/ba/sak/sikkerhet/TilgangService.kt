@@ -62,19 +62,25 @@ class TilgangService(
     /**
      * sjekkTilgangTilPersoner er cachet i [familieIntegrasjonerTilgangskontrollService]
      */
-    private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
-        return familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(personIdenter)
+    private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean =
+        familieIntegrasjonerTilgangskontrollService
+            .sjekkTilgangTilPersoner(personIdenter)
             .all { it.value.harTilgang }
-    }
 
     fun validerTilgangTilBehandling(
         behandlingId: Long,
         event: AuditLoggerEvent,
     ) {
         val personIdenter =
-            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+            persongrunnlagService
+                .hentSøkerOgBarnPåBehandling(behandlingId)
                 ?.map { it.aktør.aktivFødselsnummer() }
-                ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
+                ?: listOf(
+                    behandlingHentOgPersisterService
+                        .hent(behandlingId)
+                        .fagsak.aktør
+                        .aktivFødselsnummer(),
+                )
 
         if (!SikkerhetContext.erSystemKontekst()) {
             personIdenter.forEach {
@@ -103,11 +109,11 @@ class TilgangService(
         val aktør = fagsakService.hentAktør(fagsakId)
         val personIdenterIFagsak =
             (
-                persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
+                persongrunnlagService
+                    .hentSøkerOgBarnPåFagsak(fagsakId)
                     ?.map { it.aktør.aktivFødselsnummer() }
                     ?: emptyList()
-            )
-                .ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+            ).ifEmpty { listOf(aktør.aktivFødselsnummer()) }
 
         personIdenterIFagsak.forEach { fnr ->
             auditLogger.log(

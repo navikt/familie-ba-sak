@@ -108,7 +108,8 @@ class StartSatsendring(
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør =
-            fagsakRepository.finnFagsakerForAktør(aktør)
+            fagsakRepository
+                .finnFagsakerForAktør(aktør)
                 .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
 
         var harOpprettetSatsendring = false
@@ -120,9 +121,7 @@ class StartSatsendring(
         return harOpprettetSatsendring
     }
 
-    fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
-        return opprettSatsendringTaskVedGammelSats(fagsakId)
-    }
+    fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean = opprettSatsendringTaskVedGammelSats(fagsakId)
 
     private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean =
         if (kanStarteSatsendringPåFagsak(fagsakId)) {
@@ -133,10 +132,9 @@ class StartSatsendring(
             false
         }
 
-    fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
-        return satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, hentAktivSatsendringstidspunkt()) == null &&
+    fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean =
+        satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, hentAktivSatsendringstidspunkt()) == null &&
             !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
-    }
 
     fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean =
         !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
@@ -176,9 +174,7 @@ class StartSatsendring(
     }
 
     companion object {
-        fun hentAktivSatsendringstidspunkt(): YearMonth {
-            return SATSENDRINGMÅNED_JANUAR_2024
-        }
+        fun hentAktivSatsendringstidspunkt(): YearMonth = SATSENDRINGMÅNED_JANUAR_2024
 
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
         val SATSENDRINGMÅNED_MARS_2023: YearMonth = YearMonth.of(2023, 3)

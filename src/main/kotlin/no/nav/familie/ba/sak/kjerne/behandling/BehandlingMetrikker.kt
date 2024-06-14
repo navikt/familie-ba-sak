@@ -149,8 +149,8 @@ class BehandlingMetrikker(
         }
     }
 
-    private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> {
-        return BehandlingType.values().associateWith {
+    private fun initBehandlingTypeMetrikker(type: String): Map<BehandlingType, Counter> =
+        BehandlingType.values().associateWith {
             Metrics.counter(
                 "behandling.opprettet",
                 "type",
@@ -161,10 +161,9 @@ class BehandlingMetrikker(
                 type,
             )
         }
-    }
 
-    private fun initBehandlingÅrsakMetrikker(): Map<BehandlingÅrsak, Counter> {
-        return BehandlingÅrsak.values().associateWith {
+    private fun initBehandlingÅrsakMetrikker(): Map<BehandlingÅrsak, Counter> =
+        BehandlingÅrsak.values().associateWith {
             Metrics.counter(
                 "behandling.aarsak",
                 "aarsak",
@@ -173,7 +172,6 @@ class BehandlingMetrikker(
                 it.visningsnavn,
             )
         }
-    }
 
     companion object {
         val logger = LoggerFactory.getLogger(BehandlingMetrikker::class.java)

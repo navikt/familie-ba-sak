@@ -130,25 +130,30 @@ fun genererAutomatiskTestperson(
     forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
     sivilstander: List<Sivilstand> = emptyList(),
     bostedsadresser: List<Bostedsadresse> = konstantAdresse,
-): PersonInfo {
-    return PersonInfo(
+): PersonInfo =
+    PersonInfo(
         fødselsdato = fødselsdato,
         navn = "Autogenerert Navn $fødselsdato",
         forelderBarnRelasjon =
-            forelderBarnRelasjon.map {
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(it.aktør.personidenter.first().fødselsnummer),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    navn = null,
-                    fødselsdato = null,
-                    adressebeskyttelseGradering =
-                    null,
-                )
-            }.toSet(),
+            forelderBarnRelasjon
+                .map {
+                    ForelderBarnRelasjon(
+                        aktør =
+                            tilAktør(
+                                it.aktør.personidenter
+                                    .first()
+                                    .fødselsnummer,
+                            ),
+                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                        navn = null,
+                        fødselsdato = null,
+                        adressebeskyttelseGradering =
+                        null,
+                    )
+                }.toSet(),
         sivilstander = sivilstander,
         bostedsadresser = bostedsadresser,
     )
-}
 
 val mockNåværendeBosted =
     GrMatrikkeladresse(

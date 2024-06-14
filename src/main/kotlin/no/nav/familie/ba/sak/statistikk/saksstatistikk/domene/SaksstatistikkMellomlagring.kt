@@ -50,13 +50,9 @@ data class SaksstatistikkMellomlagring(
     @Column(name = "type_id")
     var typeId: Long? = null,
 ) {
-    fun jsonToSakDVH(): SakDVH {
-        return sakstatistikkObjectMapper.readValue(json, SakDVH::class.java)
-    }
+    fun jsonToSakDVH(): SakDVH = sakstatistikkObjectMapper.readValue(json, SakDVH::class.java)
 
-    fun jsonToBehandlingDVH(): BehandlingDVH {
-        return sakstatistikkObjectMapper.readValue(json, BehandlingDVH::class.java)
-    }
+    fun jsonToBehandlingDVH(): BehandlingDVH = sakstatistikkObjectMapper.readValue(json, BehandlingDVH::class.java)
 }
 
 enum class SaksstatistikkMellomlagringType {

@@ -42,7 +42,8 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         val barnaAktør = finnBarnMedTilkjentYtelseIForrigeBehandling(behandling, forrigeBehandlingSomErVedtatt)
 
         val personopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
+            persongrunnlagService
+                .hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
                 .tilKopiForNyBehandling(behandling, listOf(søkerAktør).plus(barnaAktør))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
