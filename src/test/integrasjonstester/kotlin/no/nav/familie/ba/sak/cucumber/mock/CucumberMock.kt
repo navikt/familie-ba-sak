@@ -452,6 +452,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             simuleringService = simuleringService,
+            tilbakekrevingService = tilbakekrevingService,
         )
 
     val stegService =
