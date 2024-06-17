@@ -283,7 +283,6 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
-                mottakerIdent = fnr,
             ).byggMottakerdata(
                 behandling,
                 persongrunnlagService,
@@ -327,7 +326,6 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
-                mottakerIdent = orgNummer,
             ).byggMottakerdata(
                 behandling,
                 persongrunnlagService,
@@ -344,8 +342,11 @@ class DokumentServiceIntegrationTest(
             brevKlient.genererBrev(
                 "bokmaal",
                 match {
-                    it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON && it.data.flettefelter.gjelder!!.first() == "institusjonsbarnets navn" &&
-                        it.data.flettefelter.organisasjonsnummer!!.first() == orgNummer
+                    it.mal == Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON &&
+                        it.data.flettefelter.gjelder!!
+                            .first() == "institusjonsbarnets navn" &&
+                        it.data.flettefelter.organisasjonsnummer!!
+                            .first() == orgNummer
                 },
             )
         }
@@ -382,7 +383,6 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-                mottakerIdent = orgNummer,
             ).byggMottakerdata(
                 behandling,
                 persongrunnlagService,
@@ -428,7 +428,6 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.SVARTIDSBREV_INSTITUSJON,
-                mottakerIdent = orgNummer,
             ).byggMottakerdata(
                 behandling,
                 persongrunnlagService,
@@ -474,7 +473,6 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
-                mottakerIdent = orgNummer,
                 antallUkerSvarfrist = 3,
             ).byggMottakerdata(
                 behandling,

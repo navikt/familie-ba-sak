@@ -33,11 +33,19 @@ class OppdaterVilkårsvurderingTest {
         val resB = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
-        Assertions.assertEquals(3, oppdatert.personResultater.first().vilkårResultater.size)
+        Assertions.assertEquals(
+            3,
+            oppdatert.personResultater
+                .first()
+                .vilkårResultater.size,
+        )
         Assertions.assertEquals(
             Resultat.OPPFYLT,
-            oppdatert.personResultater.first()
-                .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat,
+            oppdatert.personResultater
+                .first()
+                .vilkårResultater
+                .find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?.resultat,
         )
         Assertions.assertTrue(gammelt.personResultater.isEmpty())
     }
@@ -51,14 +59,27 @@ class OppdaterVilkårsvurderingTest {
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
         val (oppdatert, gammelt) = flyttResultaterTilInitielt(resB, resA)
-        Assertions.assertEquals(2, oppdatert.personResultater.first().vilkårResultater.size)
+        Assertions.assertEquals(
+            2,
+            oppdatert.personResultater
+                .first()
+                .vilkårResultater.size,
+        )
         Assertions.assertEquals(
             Resultat.OPPFYLT,
-            oppdatert.personResultater.first()
-                .vilkårResultater.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }?.resultat,
+            oppdatert.personResultater
+                .first()
+                .vilkårResultater
+                .find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                ?.resultat,
         )
         Assertions.assertEquals(1, gammelt.personResultater.size)
-        Assertions.assertEquals(1, gammelt.personResultater.first().vilkårResultater.size)
+        Assertions.assertEquals(
+            1,
+            gammelt.personResultater
+                .first()
+                .vilkårResultater.size,
+        )
     }
 
     @Test
@@ -114,7 +135,11 @@ class OppdaterVilkårsvurderingTest {
         val resultat2 = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr2, aktørId2)))
 
         val resterende = flyttResultaterTilInitielt(resultat2, resultat1).second
-        val fjernedeVilkår = resultat1.personResultater.first().vilkårResultater.toList()
+        val fjernedeVilkår =
+            resultat1.personResultater
+                .first()
+                .vilkårResultater
+                .toList()
         val generertAdvarsel = lagFjernAdvarsel(resterende.personResultater)
 
         Assertions.assertEquals(
@@ -167,7 +192,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitBosattIRiketVilkår =
-            nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            nyInit.personResultater
+                .find { it.aktør == søkerAktørId }
+                ?.vilkårResultater
+                ?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
                 ?: emptyList()
 
         Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
@@ -223,7 +251,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitBosattIRiketVilkår =
-            nyInit.personResultater.find { it.aktør == søkerAktørId }?.vilkårResultater?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            nyInit.personResultater
+                .find { it.aktør == søkerAktørId }
+                ?.vilkårResultater
+                ?.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
                 ?: emptyList()
 
         Assertions.assertTrue(nyInitBosattIRiketVilkår.isNotEmpty())
@@ -254,7 +285,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitInnholderUtvidetVilkår =
-            nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyInit.personResultater
+                .first()
+                .vilkårResultater
+                .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInnholderUtvidetVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -282,7 +316,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitInnholderUtvidetVilkår =
-            nyInit.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyInit.personResultater
+                .first()
+                .vilkårResultater
+                .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInnholderUtvidetVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -311,9 +348,15 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitInnholderIkkeUtvidetVilkår =
-            nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyInit.personResultater
+                .first()
+                .vilkårResultater
+                .none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         val nyAktivInneholderUtvidetVilkår =
-            nyAktiv.personResultater.first().vilkårResultater.any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyAktiv.personResultater
+                .first()
+                .vilkårResultater
+                .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInnholderIkkeUtvidetVilkår)
         Assertions.assertTrue(nyAktivInneholderUtvidetVilkår)
@@ -363,7 +406,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitUtvidetVilkår =
-            nyInit.personResultater.first().vilkårResultater.single { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyInit.personResultater
+                .first()
+                .vilkårResultater
+                .single { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitUtvidetVilkår.resultat == Resultat.OPPFYLT)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -412,7 +458,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitUtvidetVilkår =
-            nyInit.personResultater.first().vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyInit.personResultater
+                .first()
+                .vilkårResultater
+                .filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitUtvidetVilkår.size == 2)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -462,7 +511,10 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitInneholderIkkeUtvidetVilkår =
-            nyInit.personResultater.first().vilkårResultater.none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            nyInit.personResultater
+                .first()
+                .vilkårResultater
+                .none { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertTrue(nyInitInneholderIkkeUtvidetVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -483,7 +535,8 @@ class OppdaterVilkårsvurderingTest {
                     ),
             )
         val aktivVilkårsvurdering = initiellVilkårsvurderingUtenAndreVurderinger.copy()
-        aktivVilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+        aktivVilkårsvurdering.personResultater
+            .find { it.erSøkersResultater() }!!
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
 
         val (nyInit, nyAktiv) =
@@ -493,7 +546,9 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val nyInitInnholderOpplysningspliktVilkår =
-            nyInit.personResultater.find { it.erSøkersResultater() }!!.andreVurderinger
+            nyInit.personResultater
+                .find { it.erSøkersResultater() }!!
+                .andreVurderinger
                 .any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
 
         Assertions.assertTrue(nyInitInnholderOpplysningspliktVilkår)
@@ -525,38 +580,39 @@ class OppdaterVilkårsvurderingTest {
             )
 
         vilkårsvurdering.personResultater =
-            fnrAktør.map {
-                val personResultat =
-                    PersonResultat(
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktør = it.second,
+            fnrAktør
+                .map {
+                    val personResultat =
+                        PersonResultat(
+                            vilkårsvurdering = vilkårsvurdering,
+                            aktør = it.second,
+                        )
+
+                    personResultat.setSortedVilkårResultater(
+                        setOf(
+                            VilkårResultat(
+                                personResultat = personResultat,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.now(),
+                                periodeTom = LocalDate.now(),
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = behandling.id,
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultat,
+                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.now(),
+                                periodeTom = LocalDate.now(),
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = behandling.id,
+                            ),
+                        ),
                     )
 
-                personResultat.setSortedVilkårResultater(
-                    setOf(
-                        VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                            resultat = Resultat.OPPFYLT,
-                            periodeFom = LocalDate.now(),
-                            periodeTom = LocalDate.now(),
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = behandling.id,
-                        ),
-                        VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                            resultat = Resultat.OPPFYLT,
-                            periodeFom = LocalDate.now(),
-                            periodeTom = LocalDate.now(),
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = behandling.id,
-                        ),
-                    ),
-                )
-
-                personResultat
-            }.toSet()
+                    personResultat
+                }.toSet()
 
         return vilkårsvurdering
     }
@@ -571,46 +627,47 @@ class OppdaterVilkårsvurderingTest {
             )
 
         vilkårsvurdering.personResultater =
-            fnrAktør.map {
-                val personResultat =
-                    PersonResultat(
-                        vilkårsvurdering = vilkårsvurdering,
-                        aktør = it.second,
-                    )
+            fnrAktør
+                .map {
+                    val personResultat =
+                        PersonResultat(
+                            vilkårsvurdering = vilkårsvurdering,
+                            aktør = it.second,
+                        )
 
-                personResultat.setSortedVilkårResultater(
-                    setOf(
-                        VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                            resultat = Resultat.OPPFYLT,
-                            periodeFom = LocalDate.now(),
-                            periodeTom = LocalDate.now(),
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = behandling.id,
+                    personResultat.setSortedVilkårResultater(
+                        setOf(
+                            VilkårResultat(
+                                personResultat = personResultat,
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.now(),
+                                periodeTom = LocalDate.now(),
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = behandling.id,
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultat,
+                                vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.now(),
+                                periodeTom = LocalDate.now(),
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = behandling.id,
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultat,
+                                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.now(),
+                                periodeTom = LocalDate.now(),
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = behandling.id,
+                            ),
                         ),
-                        VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
-                            resultat = Resultat.OPPFYLT,
-                            periodeFom = LocalDate.now(),
-                            periodeTom = LocalDate.now(),
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = behandling.id,
-                        ),
-                        VilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                            resultat = Resultat.OPPFYLT,
-                            periodeFom = LocalDate.now(),
-                            periodeTom = LocalDate.now(),
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = behandling.id,
-                        ),
-                    ),
-                )
-                personResultat
-            }.toSet()
+                    )
+                    personResultat
+                }.toSet()
 
         return vilkårsvurdering
     }
@@ -625,12 +682,13 @@ class OppdaterVilkårsvurderingTest {
             )
 
         val personResultater =
-            personer.map { person ->
-                genererPersonResultatForPerson(
-                    vilkårsvurdering = vilkårsvurdering,
-                    person = person,
-                )
-            }.toSet()
+            personer
+                .map { person ->
+                    genererPersonResultatForPerson(
+                        vilkårsvurdering = vilkårsvurdering,
+                        person = person,
+                    )
+                }.toSet()
 
         vilkårsvurdering.personResultater = personResultater
 

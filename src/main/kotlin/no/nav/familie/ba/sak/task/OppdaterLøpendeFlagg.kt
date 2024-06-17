@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = 60,
 )
-class OppdaterLøpendeFlagg(val fagsakService: FagsakService) : AsyncTaskStep {
+class OppdaterLøpendeFlagg(
+    val fagsakService: FagsakService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val antallOppdaterte = fagsakService.oppdaterLøpendeStatusPåFagsaker()
         logger.info("Oppdatert status på $antallOppdaterte fagsaker til ${FagsakStatus.AVSLUTTET.name}")

@@ -54,8 +54,8 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak,
-): VedtaksperiodeMedBegrunnelser {
-    return VedtaksperiodeMedBegrunnelser(
+): VedtaksperiodeMedBegrunnelser =
+    VedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
@@ -65,12 +65,12 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(
         vedtak = vedtak,
     ).also { vedtaksperiode ->
         vedtaksperiode.fritekster.addAll(
-            this.fritekster.map {
-                VedtaksbegrunnelseFritekst(
-                    fritekst = it,
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiode,
-                )
-            }.toMutableList(),
+            this.fritekster
+                .map {
+                    VedtaksbegrunnelseFritekst(
+                        fritekst = it,
+                        vedtaksperiodeMedBegrunnelser = vedtaksperiode,
+                    )
+                }.toMutableList(),
         )
     }
-}

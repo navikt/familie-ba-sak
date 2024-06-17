@@ -81,8 +81,8 @@ class VilkårResultat(
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
     var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
 ) : BaseEntitet() {
-    override fun toString(): String {
-        return "VilkårResultat(" +
+    override fun toString(): String =
+        "VilkårResultat(" +
             "id=$id, " +
             "vilkårType=$vilkårType, " +
             "periodeFom=$periodeFom, " +
@@ -90,7 +90,6 @@ class VilkårResultat(
             "resultat=$resultat, " +
             "evalueringÅrsaker=$evalueringÅrsaker" +
             ")"
-    }
 
     fun nullstill() {
         periodeFom = null
@@ -112,8 +111,8 @@ class VilkårResultat(
         utdypendeVilkårsvurderinger = restVilkårResultat.utdypendeVilkårsvurderinger
     }
 
-    fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat {
-        return VilkårResultat(
+    fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat =
+        VilkårResultat(
             personResultat = nyPersonResultat ?: personResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,
             vilkårType = vilkårType,
@@ -130,14 +129,13 @@ class VilkårResultat(
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
             standardbegrunnelser = standardbegrunnelser,
         )
-    }
 
     fun kopierMedNyPeriode(
         fom: LocalDate,
         tom: LocalDate,
         behandlingId: Long,
-    ): VilkårResultat {
-        return VilkårResultat(
+    ): VilkårResultat =
+        VilkårResultat(
             personResultat = personResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,
             vilkårType = vilkårType,
@@ -153,10 +151,9 @@ class VilkårResultat(
             vurderesEtter = vurderesEtter,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
         )
-    }
 
-    fun tilKopiForNyttPersonResultat(nyttPersonResultat: PersonResultat): VilkårResultat {
-        return VilkårResultat(
+    fun tilKopiForNyttPersonResultat(nyttPersonResultat: PersonResultat): VilkårResultat =
+        VilkårResultat(
             personResultat = nyttPersonResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,
             vilkårType = vilkårType,
@@ -173,7 +170,6 @@ class VilkårResultat(
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
             standardbegrunnelser = standardbegrunnelser,
         )
-    }
 
     fun oppdaterPekerTilBehandling() {
         sistEndretIBehandlingId = personResultat!!.vilkårsvurdering.behandling.id

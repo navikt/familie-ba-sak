@@ -42,7 +42,8 @@ class BehandlingsresultatService(
                 behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
                     // alle barna som er krysset av på søknad
                     val barnFraSøknad =
-                        søknadDTO?.barnaMedOpplysninger
+                        søknadDTO
+                            ?.barnaMedOpplysninger
                             ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
                             ?.map { personidentService.hentAktør(it.ident) }
                             ?: emptyList()

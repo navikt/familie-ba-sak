@@ -9,7 +9,5 @@ interface LeaderClientService {
 
 @Service
 class DefaultLeaderClientService : LeaderClientService {
-    override fun isLeader(): Boolean {
-        return LeaderClient.isLeader() == true
-    }
+    override fun isLeader(): Boolean = LeaderClient.isLeader() == true
 }

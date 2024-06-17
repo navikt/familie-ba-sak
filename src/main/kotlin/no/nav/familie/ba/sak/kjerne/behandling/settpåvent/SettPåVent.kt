@@ -38,6 +38,8 @@ data class SettPåVent(
     var aktiv: Boolean = true,
 ) : BaseEntitet()
 
-enum class SettPåVentÅrsak(val visningsnavn: String) {
+enum class SettPåVentÅrsak(
+    val visningsnavn: String,
+) {
     AVVENTER_DOKUMENTASJON("Avventer dokumentasjon"),
 }

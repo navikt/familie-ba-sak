@@ -22,9 +22,7 @@ class VilkårsvurderingService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val sanityService: SanityService,
 ) {
-    fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
-        return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-    }
+    fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
 
     fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering =
         hentAktivForBehandling(behandlingId)
@@ -68,7 +66,8 @@ class VilkårsvurderingService(
                 behandlingId = behandlingId,
             )
 
-        return vilkårsvurdering?.personResultater
+        return vilkårsvurdering
+            ?.personResultater
             ?.flatMap { it.vilkårResultater }
             ?.filter { it.periodeFom != null }
             ?.filter { it.vilkårType != Vilkår.UNDER_18_ÅR && it.vilkårType != Vilkår.GIFT_PARTNERSKAP }

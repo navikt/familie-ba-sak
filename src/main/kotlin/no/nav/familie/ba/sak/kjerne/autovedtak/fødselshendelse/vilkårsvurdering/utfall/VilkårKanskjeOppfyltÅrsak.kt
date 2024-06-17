@@ -3,7 +3,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-enum class VilkårKanskjeOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) : EvalueringÅrsak {
+enum class VilkårKanskjeOppfyltÅrsak(
+    val beskrivelse: String,
+    val vilkår: Vilkår,
+) : EvalueringÅrsak {
     // Lovlig opphold
     LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN(
         "Må vurdere lengden på oppholdstillatelsen.",
@@ -16,15 +19,9 @@ enum class VilkårKanskjeOppfyltÅrsak(val beskrivelse: String, val vilkår: Vil
     ),
     ;
 
-    override fun hentBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentBeskrivelse(): String = beskrivelse
 
-    override fun hentMetrikkBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentMetrikkBeskrivelse(): String = beskrivelse
 
-    override fun hentIdentifikator(): String {
-        return vilkår.name
-    }
+    override fun hentIdentifikator(): String = vilkår.name
 }

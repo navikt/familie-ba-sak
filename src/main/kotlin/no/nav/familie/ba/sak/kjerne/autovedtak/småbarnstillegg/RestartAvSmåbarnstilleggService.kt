@@ -68,16 +68,16 @@ class RestartAvSmåbarnstilleggService(
         logger.info("Avslutter jobb for å finne småbarnstillegg som skal restartes, men som ikke allerede begrunnet")
     }
 
-    fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
-        return behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
-            finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(iverksatteLøpendeBehandlinger = it, måned = måned)
-        }.filter { fagsakId ->
-            val migreringsdato = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
-            migreringsdato?.month != LocalDate.now().minusMonths(1).month
-        }.filter { fagsakId ->
-            !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId, måned = måned)
-        }
-    }
+    fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> =
+        behandlingHentOgPersisterService
+            .partitionByIverksatteBehandlinger {
+                finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(iverksatteLøpendeBehandlinger = it, måned = måned)
+            }.filter { fagsakId ->
+                val migreringsdato = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
+                migreringsdato?.month != LocalDate.now().minusMonths(1).month
+            }.filter { fagsakId ->
+                !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId, måned = måned)
+            }
 
     private fun finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
@@ -95,7 +95,8 @@ class RestartAvSmåbarnstilleggService(
 
                 if (sisteVedtatteBehandling != null) {
                     val atySmåbarnstillegg =
-                        andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
+                        andelerTilkjentYtelseRepository
+                            .finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
                             .filter { it.erSmåbarnstillegg() }
                     val harSmåbarnstilleggForrigeMåned = atySmåbarnstillegg.any { it.stønadTom == måned.minusMonths(1) }
                     if (harSmåbarnstilleggForrigeMåned) {
@@ -117,11 +118,11 @@ class RestartAvSmåbarnstilleggService(
         måned: YearMonth,
     ): Boolean {
         val vedtaksperioderForVedtatteBehandlinger =
-            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+            behandlingHentOgPersisterService
+                .hentBehandlinger(fagsakId = fagsakId)
                 .filter { behandling ->
                     behandling.erVedtatt()
-                }
-                .flatMap { behandling ->
+                }.flatMap { behandling ->
                     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
                 }

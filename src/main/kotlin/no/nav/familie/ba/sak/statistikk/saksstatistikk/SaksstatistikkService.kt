@@ -51,8 +51,10 @@ class SaksstatistikkService(
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandlingId =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-                .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
+            behandlingHentOgPersisterService
+                .hentForrigeBehandlingSomErVedtatt(behandling)
+                .takeIf { erRevurderingEllerTekniskBehandling(behandling) }
+                ?.id
 
         val datoMottatt =
             when (behandling.opprettetÅrsak) {
@@ -168,15 +170,14 @@ class SaksstatistikkService(
         )
     }
 
-    private fun hentLandkode(person: Person): String {
-        return if (person.bostedsadresser.isNotEmpty()) {
+    private fun hentLandkode(person: Person): String =
+        if (person.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
             personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
                 person.aktør,
             )
         }
-    }
 
     private fun hentLandkode(aktør: Aktør): String {
         val personInfo = personopplysningerService.hentPersoninfoEnkel(aktør)
@@ -193,18 +194,18 @@ class SaksstatistikkService(
     private fun erRevurderingEllerTekniskBehandling(behandling: Behandling) =
         behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_ENDRING
 
-    private fun Behandling.resultatBegrunnelser(vedtak: Vedtak?): List<ResultatBegrunnelseDVH> {
-        return when (resultat) {
+    private fun Behandling.resultatBegrunnelser(vedtak: Vedtak?): List<ResultatBegrunnelseDVH> =
+        when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
             else ->
                 vedtak
                     ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
                     ?: emptyList()
         }
-    }
 
-    private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> {
-        return vedtaksperiodeService.hentPersisterteVedtaksperioder(this)
+    private fun Vedtak.hentResultatBegrunnelserFraVedtaksbegrunnelser(): List<ResultatBegrunnelseDVH> =
+        vedtaksperiodeService
+            .hentPersisterteVedtaksperioder(this)
             .flatMap { vedtaksperiode ->
                 vedtaksperiode.begrunnelser
                     .map {
@@ -216,7 +217,6 @@ class SaksstatistikkService(
                         )
                     }
             }
-    }
 
     companion object {
         val TIMEZONE: ZoneId = ZoneId.systemDefault()

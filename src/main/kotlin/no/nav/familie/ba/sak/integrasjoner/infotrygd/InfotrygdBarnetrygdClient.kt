@@ -105,7 +105,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    data class HentUtvidetBarnetrygdRequest(val personIdent: String, val fraDato: YearMonth)
+    data class HentUtvidetBarnetrygdRequest(
+        val personIdent: String,
+        val fraDato: YearMonth,
+    )
 
     @Retryable(
         value = [Exception::class],
@@ -242,7 +245,9 @@ class InfotrygdBarnetrygdClient(
     }
 }
 
-enum class InfotrygdBrevkode(val kode: String) {
+enum class InfotrygdBrevkode(
+    val kode: String,
+) {
     BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG("BA04"),
     BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG("BA05"),
     BREV_BATCH_OMREGNING_BARN_18_ÅR("BA37"),

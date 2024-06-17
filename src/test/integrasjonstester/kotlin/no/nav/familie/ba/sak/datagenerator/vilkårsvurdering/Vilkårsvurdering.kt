@@ -91,8 +91,8 @@ fun lagSøkerVilkårResultat(
     periodeFom: LocalDate,
     periodeTom: LocalDate? = null,
     behandlingId: Long,
-): Set<VilkårResultat> {
-    return setOf(
+): Set<VilkårResultat> =
+    setOf(
         lagVilkårResultat(
             personResultat = søkerPersonResultat,
             vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -110,7 +110,6 @@ fun lagSøkerVilkårResultat(
             behandlingId = behandlingId,
         ),
     )
-}
 
 fun lagBarnVilkårResultat(
     barnPersonResultat: PersonResultat,
@@ -118,8 +117,8 @@ fun lagBarnVilkårResultat(
     behandlingId: Long,
     periodeFom: LocalDate,
     flytteSak: Boolean = false,
-): Set<VilkårResultat> {
-    return setOf(
+): Set<VilkårResultat> =
+    setOf(
         lagVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.UNDER_18_ÅR,
@@ -161,4 +160,3 @@ fun lagBarnVilkårResultat(
             behandlingId = behandlingId,
         ),
     )
-}

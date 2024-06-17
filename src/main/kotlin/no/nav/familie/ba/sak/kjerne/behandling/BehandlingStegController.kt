@@ -222,7 +222,9 @@ class RestHenleggBehandlingInfo(
     val begrunnelse: String,
 )
 
-enum class HenleggÅrsak(val beskrivelse: String) {
+enum class HenleggÅrsak(
+    val beskrivelse: String,
+) {
     SØKNAD_TRUKKET("Søknad trukket"),
     FEILAKTIG_OPPRETTET("Behandling feilaktig opprettet"),
     AUTOMATISK_HENLAGT("Behandlingen er automatisk henlagt"),

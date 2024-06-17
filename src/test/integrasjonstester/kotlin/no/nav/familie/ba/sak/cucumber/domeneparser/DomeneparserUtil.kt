@@ -6,7 +6,9 @@ interface Domenenøkkel {
     val nøkkel: String
 }
 
-enum class Domenebegrep(override val nøkkel: String) : Domenenøkkel {
+enum class Domenebegrep(
+    override val nøkkel: String,
+) : Domenenøkkel {
     ID("Id"),
     FAGSAK_ID("FagsakId"),
     FAGSAK_TYPE("Fagsaktype"),

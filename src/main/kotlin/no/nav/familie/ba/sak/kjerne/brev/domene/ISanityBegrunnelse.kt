@@ -36,7 +36,8 @@ sealed interface ISanityBegrunnelse {
     val gjelderEndretutbetaling
         get() =
             this is SanityBegrunnelse &&
-                this.endringsaarsaker.isNotEmpty() && !gjelderEtterEndretUtbetaling()
+                this.endringsaarsaker.isNotEmpty() &&
+                !gjelderEtterEndretUtbetaling()
 
     val gjelderSatsendring
         get() =

@@ -39,14 +39,14 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(filter: (I) -> Boolean): 
  * Det vil finnes perioder som tilsvarer periodene fra kilde-tidslinjen,
  * men innholdet blir null hvis den boolske tidslinjen er false
  */
-fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(boolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> {
-    return this.kombinerMed(boolskTidslinje) { innhold, erSann ->
-        when (erSann) {
-            true -> innhold
-            else -> null
-        }
-    }.beskjærEtter(this)
-}
+fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(boolskTidslinje: Tidslinje<Boolean, T>): Tidslinje<I, T> =
+    this
+        .kombinerMed(boolskTidslinje) { innhold, erSann ->
+            when (erSann) {
+                true -> innhold
+                else -> null
+            }
+        }.beskjærEtter(this)
 
 /**
  * Extension-metode for å filtrere innholdet i en map av tidslinjer

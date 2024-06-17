@@ -179,9 +179,7 @@ class BehandlingsresultatSteg(
         }
     }
 
-    override fun stegType(): StegType {
-        return StegType.BEHANDLINGSRESULTAT
-    }
+    override fun stegType(): StegType = StegType.BEHANDLINGSRESULTAT
 
     private fun validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat: Behandling) {
         if (behandlingMedOppdatertBehandlingsresultat.erManuellMigrering() &&

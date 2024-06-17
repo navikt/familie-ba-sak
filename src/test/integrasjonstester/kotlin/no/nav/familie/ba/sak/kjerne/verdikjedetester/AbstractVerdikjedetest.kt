@@ -15,8 +15,7 @@ import org.testcontainers.images.PullPolicy
 
 val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
 
-class VerdikjedetesterPropertyOverrideContextInitializer :
-    ApplicationContextInitializer<ConfigurableApplicationContext?> {
+class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
@@ -77,4 +76,6 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
  * Hack needed because testcontainers use of generics confuses Kotlin.
  * Må bruke fixed host port for at klientene våres kan konfigureres med fast port.
  */
-class KMockServerContainer(imageName: String) : FixedHostPortGenericContainer<KMockServerContainer>(imageName)
+class KMockServerContainer(
+    imageName: String,
+) : FixedHostPortGenericContainer<KMockServerContainer>(imageName)

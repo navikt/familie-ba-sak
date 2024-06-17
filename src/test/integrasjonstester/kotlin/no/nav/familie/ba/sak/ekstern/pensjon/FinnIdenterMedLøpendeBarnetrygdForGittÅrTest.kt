@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest() : AbstractSpringIntegrationTest() {
+class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var databaseCleanupService: DatabaseCleanupService
 

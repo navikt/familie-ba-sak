@@ -69,16 +69,15 @@ class TilbakekrevingService(
                 varsel = restTilbakekreving.varsel,
                 tilbakekrevingsbehandlingId =
                     tilbakekrevingRepository
-                        .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
+                        .findByBehandlingId(behandling.id)
+                        ?.tilbakekrevingsbehandlingId,
             )
 
         tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
         return tilbakekrevingRepository.save(tilbakekreving)
     }
 
-    fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg? {
-        return tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg
-    }
+    fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg? = tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg
 
     fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
         tilbakekrevingRepository.findByBehandlingId(behandlingId)?.let { tilbakekrevingRepository.delete(it) }
@@ -115,7 +114,9 @@ class TilbakekrevingService(
                                 ),
                         ),
                     fagsystem = Fagsystem.BA,
-                    eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
+                    eksternFagsakId =
+                        vedtak.behandling.fagsak.id
+                            .toString(),
                     ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
                     saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn(),
                     institusjon = institusjon,
@@ -154,30 +155,32 @@ class TilbakekrevingService(
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
 
         val manuelleBrevMottakere =
-            brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
-                val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
-                val vergetype =
-                    when {
-                        mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
-                        mottakerType == VERGE && behandling.fagsak.type == FagsakType.NORMAL -> Vergetype.VERGE_FOR_VOKSEN
-                        mottakerType == VERGE && behandling.fagsak.type != FagsakType.NORMAL -> Vergetype.VERGE_FOR_BARN
-                        else -> null
-                    }
+            brevmottakerRepository
+                .finnBrevMottakereForBehandling(behandling.id)
+                .map { baSakBrevMottaker ->
+                    val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
+                    val vergetype =
+                        when {
+                            mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
+                            mottakerType == VERGE && behandling.fagsak.type == FagsakType.NORMAL -> Vergetype.VERGE_FOR_VOKSEN
+                            mottakerType == VERGE && behandling.fagsak.type != FagsakType.NORMAL -> Vergetype.VERGE_FOR_BARN
+                            else -> null
+                        }
 
-                Brevmottaker(
-                    type = mottakerType,
-                    vergetype = vergetype,
-                    navn = baSakBrevMottaker.navn,
-                    manuellAdresseInfo =
-                        ManuellAdresseInfo(
-                            adresselinje1 = baSakBrevMottaker.adresselinje1,
-                            adresselinje2 = baSakBrevMottaker.adresselinje2,
-                            postnummer = baSakBrevMottaker.postnummer,
-                            poststed = baSakBrevMottaker.poststed,
-                            landkode = baSakBrevMottaker.landkode,
-                        ),
-                )
-            }.toSet()
+                    Brevmottaker(
+                        type = mottakerType,
+                        vergetype = vergetype,
+                        navn = baSakBrevMottaker.navn,
+                        manuellAdresseInfo =
+                            ManuellAdresseInfo(
+                                adresselinje1 = baSakBrevMottaker.adresselinje1,
+                                adresselinje2 = baSakBrevMottaker.adresselinje2,
+                                postnummer = baSakBrevMottaker.postnummer,
+                                poststed = baSakBrevMottaker.poststed,
+                                landkode = baSakBrevMottaker.landkode,
+                            ),
+                    )
+                }.toSet()
 
         return OpprettTilbakekrevingRequest(
             fagsystem = Fagsystem.BA,
@@ -218,7 +221,8 @@ class TilbakekrevingService(
         }
 
         val behandling =
-            kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
+            kanOpprettesRespons.kravgrunnlagsreferanse
+                ?.toLong()
                 ?.let { behandlingHentOgPersisterService.hent(it) }
                 ?.takeIf { it.status == BehandlingStatus.AVSLUTTET }
         return if (behandling != null) {

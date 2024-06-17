@@ -178,7 +178,8 @@ class LoggServiceTest(
         assertTrue {
             logger.any {
                 it.type == LoggType.VILKÅRSVURDERING &&
-                    it.tittel == "Vilkårsvurdering gjennomført" && it.tekst == "Resultat ble innvilget"
+                    it.tittel == "Vilkårsvurdering gjennomført" &&
+                    it.tekst == "Resultat ble innvilget"
             }
         }
         assertTrue {
@@ -230,7 +231,8 @@ class LoggServiceTest(
         assertTrue {
             logger.any {
                 it.type == LoggType.VILKÅRSVURDERING &&
-                    it.tittel == "Vilkårsvurdering gjennomført" && it.tekst == "Resultat ble innvilget"
+                    it.tittel == "Vilkårsvurdering gjennomført" &&
+                    it.tekst == "Resultat ble innvilget"
             }
         }
         assertTrue {

@@ -64,7 +64,11 @@ data class TilkjentYtelse(
     val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf(),
 )
 
-fun TilkjentYtelse.tilTidslinjeMedAndeler(): Tidslinje<Iterable<AndelTilkjentYtelse>, Måned> = this.andelerTilkjentYtelse.tilTidslinjerPerPersonOgType().values.kombiner()
+fun TilkjentYtelse.tilTidslinjeMedAndeler(): Tidslinje<Iterable<AndelTilkjentYtelse>, Måned> =
+    this.andelerTilkjentYtelse
+        .tilTidslinjerPerPersonOgType()
+        .values
+        .kombiner()
 
 fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? =
     objectMapper.readValue(this.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)

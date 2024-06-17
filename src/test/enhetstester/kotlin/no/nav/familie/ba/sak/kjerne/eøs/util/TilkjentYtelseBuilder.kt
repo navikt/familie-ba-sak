@@ -58,8 +58,7 @@ class TilkjentYtelseBuilder(
         nasjonalt = nasjonalt,
     ) {
         satstypeTidslinje(SatsType.SMA)
-    }
-        .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
+    }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medUtvidet(
         s: String,
@@ -74,8 +73,7 @@ class TilkjentYtelseBuilder(
         differanse = differanse,
     ) {
         satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
-    }
-        .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
+    }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medOrdinær(
         s: String,
@@ -111,7 +109,8 @@ class TilkjentYtelseBuilder(
             gjeldendePersoner
                 .map { person ->
                     val andelTilkjentYtelseTidslinje =
-                        s.tilCharTidslinje(startMåned)
+                        s
+                            .tilCharTidslinje(startMåned)
                             .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
                             .map {
                                 AndelTilkjentYtelse(

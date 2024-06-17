@@ -281,9 +281,7 @@ class RestartAvSmåbarnstilleggTest(
             ),
         )
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
-        return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
-    }
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
 
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
@@ -487,7 +485,8 @@ class RestartAvSmåbarnstilleggTest(
         if (skalBegrunneSmåbarnstillegg) {
             val småbarnstilleggVedtaksperioder =
                 vedtaksperioderMedBegrunnelser.filter {
-                    it.utbetalingsperiodeDetaljer.filter { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.ytelseType == YtelseType.SMÅBARNSTILLEGG }
+                    it.utbetalingsperiodeDetaljer
+                        .filter { utbetalingsperiodeDetalj -> utbetalingsperiodeDetalj.ytelseType == YtelseType.SMÅBARNSTILLEGG }
                         .isNotEmpty()
                 }
 

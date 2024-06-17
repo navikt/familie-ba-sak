@@ -47,13 +47,9 @@ data class Fagsak(
     @Column(name = "arkivert", nullable = false)
     var arkivert: Boolean = false,
 ) : BaseEntitet() {
-    override fun hashCode(): Int {
-        return Objects.hashCode(id)
-    }
+    override fun hashCode(): Int = Objects.hashCode(id)
 
-    override fun toString(): String {
-        return "Fagsak(id=$id)"
-    }
+    override fun toString(): String = "Fagsak(id=$id)"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

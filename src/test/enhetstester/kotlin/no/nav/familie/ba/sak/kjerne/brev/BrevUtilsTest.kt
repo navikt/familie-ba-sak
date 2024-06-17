@@ -1124,4 +1124,10 @@ private fun setAvMånedÅrMediumForPeriode(
     fraAntallMndSiden: Long,
     tilAndtalMndSiden: Long,
 ): Set<String> =
-    LocalDate.now().minusMonths(fraAntallMndSiden).toYearMonth().rangeTo(LocalDate.now().minusMonths(tilAndtalMndSiden).toYearMonth()).map { it.tilMånedÅrMedium() }.toSet()
+    LocalDate
+        .now()
+        .minusMonths(fraAntallMndSiden)
+        .toYearMonth()
+        .rangeTo(LocalDate.now().minusMonths(tilAndtalMndSiden).toYearMonth())
+        .map { it.tilMånedÅrMedium() }
+        .toSet()

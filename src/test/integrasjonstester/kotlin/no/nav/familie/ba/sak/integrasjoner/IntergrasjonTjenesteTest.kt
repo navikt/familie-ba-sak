@@ -173,7 +173,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         val journalPostId =
             utgåendeJournalføringService.journalførDokument(
                 fnr = MOCK_FNR,
-                fagsakId = vedtak.behandling.fagsak.id.toString(),
+                fagsakId =
+                    vedtak.behandling.fagsak.id
+                        .toString(),
                 brev =
                     listOf(
                         Dokument(
@@ -193,6 +195,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         ),
                     ),
                 behandlingId = vedtak.behandling.id,
+                eksternReferanseId = "1_${vedtak.behandling.id}_journalfør",
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
@@ -424,7 +427,13 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         assertThat(response).hasSize(1)
         assertThat(response.first().arbeidsgiver?.organisasjonsnummer).isEqualTo("998877665")
-        assertThat(response.first().ansettelsesperiode?.periode?.fom).isEqualTo(LocalDate.now().minusYears(1))
+        assertThat(
+            response
+                .first()
+                .ansettelsesperiode
+                ?.periode
+                ?.fom,
+        ).isEqualTo(LocalDate.now().minusYears(1))
     }
 
     @Test
@@ -476,9 +485,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         assertTrue(feil.message?.contains("skyggesak") == true)
     }
 
-    private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> {
-        return success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
-    }
+    private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> = success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
 
     private fun forventetRequestArkiverDokument(
         fagsakId: Long,
@@ -519,7 +526,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             journalpostId = "123456789",
             behandlingId = 1L,
             brevmal = Brevmal.VARSEL_OM_REVURDERING,
-            personEllerInstitusjonIdent = "test",
+            fagsakId = 1L,
             erManueltSendt = true,
         )
 

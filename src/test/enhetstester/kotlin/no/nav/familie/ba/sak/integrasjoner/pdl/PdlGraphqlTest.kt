@@ -23,16 +23,70 @@ class PdlGraphqlTest {
     fun testDeserialization() {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlOkResponse.json")))
-        assertThat(resp.data.person!!.foedsel.first().foedselsdato).isEqualTo("1955-09-13")
-        assertThat(resp.data.person!!.navn.first().fornavn).isEqualTo("ENGASJERT")
-        assertThat(resp.data.person!!.kjoenn.first().kjoenn.toString()).isEqualTo("MANN")
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("12345678910")
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle.toString()).isEqualTo("BARN")
-        assertThat(resp.data.person!!.sivilstand.first().type).isEqualTo(SIVILSTAND.UGIFT)
-        assertThat(resp.data.person!!.bostedsadresse.first().vegadresse?.husnummer).isEqualTo("3")
-        assertThat(resp.data.person!!.bostedsadresse.first().vegadresse?.matrikkelId).isEqualTo(1234)
-        assertNull(resp.data.person!!.bostedsadresse.first().matrikkeladresse)
-        assertNull(resp.data.person!!.bostedsadresse.first().ukjentBosted)
+        assertThat(
+            resp.data.person!!
+                .foedsel
+                .first()
+                .foedselsdato,
+        ).isEqualTo("1955-09-13")
+        assertThat(
+            resp.data.person!!
+                .navn
+                .first()
+                .fornavn,
+        ).isEqualTo("ENGASJERT")
+        assertThat(
+            resp.data.person!!
+                .kjoenn
+                .first()
+                .kjoenn
+                .toString(),
+        ).isEqualTo("MANN")
+        assertThat(
+            resp.data.person!!
+                .forelderBarnRelasjon
+                .first()
+                .relatertPersonsIdent,
+        ).isEqualTo("12345678910")
+        assertThat(
+            resp.data.person!!
+                .forelderBarnRelasjon
+                .first()
+                .relatertPersonsRolle
+                .toString(),
+        ).isEqualTo("BARN")
+        assertThat(
+            resp.data.person!!
+                .sivilstand
+                .first()
+                .type,
+        ).isEqualTo(SIVILSTAND.UGIFT)
+        assertThat(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .vegadresse
+                ?.husnummer,
+        ).isEqualTo("3")
+        assertThat(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .vegadresse
+                ?.matrikkelId,
+        ).isEqualTo(1234)
+        assertNull(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .matrikkeladresse,
+        )
+        assertNull(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .ukjentBosted,
+        )
         assertThat(resp.errorMessages()).isEqualTo("")
     }
 
@@ -40,7 +94,11 @@ class PdlGraphqlTest {
     fun testTomAdresse() {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlTomAdresseOkResponse.json")))
-        assertTrue(resp.data.person!!.bostedsadresse.isEmpty())
+        assertTrue(
+            resp.data.person!!
+                .bostedsadresse
+                .isEmpty(),
+        )
     }
 
     @Test
@@ -49,18 +107,40 @@ class PdlGraphqlTest {
             mapper.readValue<PdlBaseResponse<PdlHentPersonRelasjonerResponse>>(
                 File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")),
             )
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle).isEqualTo(
+        assertThat(
+            resp.data.person!!
+                .forelderBarnRelasjon
+                .first()
+                .relatertPersonsRolle,
+        ).isEqualTo(
             FORELDERBARNRELASJONROLLE.BARN,
         )
-        assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("32345678901")
+        assertThat(
+            resp.data.person!!
+                .forelderBarnRelasjon
+                .first()
+                .relatertPersonsIdent,
+        ).isEqualTo("32345678901")
     }
 
     @Test
     fun testMatrikkelAdresse() {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlMatrikkelAdresseOkResponse.json")))
-        assertThat(resp.data.person!!.bostedsadresse.first().matrikkeladresse?.postnummer).isEqualTo("0274")
-        assertThat(resp.data.person!!.bostedsadresse.first().matrikkeladresse?.matrikkelId).isEqualTo(2147483649)
+        assertThat(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .matrikkeladresse
+                ?.postnummer,
+        ).isEqualTo("0274")
+        assertThat(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .matrikkeladresse
+                ?.matrikkelId,
+        ).isEqualTo(2147483649)
     }
 
     @Test
@@ -69,7 +149,13 @@ class PdlGraphqlTest {
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
                 File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json")),
             )
-        assertThat(resp.data.person!!.bostedsadresse.first().ukjentBosted?.bostedskommune).isEqualTo("Oslo")
+        assertThat(
+            resp.data.person!!
+                .bostedsadresse
+                .first()
+                .ukjentBosted
+                ?.bostedskommune,
+        ).isEqualTo("Oslo")
     }
 
     @Test
@@ -78,7 +164,12 @@ class PdlGraphqlTest {
             mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
                 File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
             )
-        assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+        assertThat(
+            resp.data.person!!
+                .adressebeskyttelse
+                .first()
+                .gradering,
+        ).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
@@ -94,7 +185,12 @@ class PdlGraphqlTest {
     fun testDeserializationOfResponseWithoutFødselsdato() {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlManglerFoedselResponse.json")))
-        assertThat(resp.data.person!!.foedsel.first().foedselsdato).isNull()
+        assertThat(
+            resp.data.person!!
+                .foedsel
+                .first()
+                .foedselsdato,
+        ).isNull()
     }
 
     @Test
@@ -105,7 +201,5 @@ class PdlGraphqlTest {
             .isEqualTo("For Etter")
     }
 
-    private fun getFile(name: String): String {
-        return javaClass.classLoader?.getResource(name)?.file ?: error("Testkonfigurasjon feil")
-    }
+    private fun getFile(name: String): String = javaClass.classLoader?.getResource(name)?.file ?: error("Testkonfigurasjon feil")
 }

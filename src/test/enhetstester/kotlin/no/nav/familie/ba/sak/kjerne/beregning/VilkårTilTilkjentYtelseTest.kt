@@ -145,8 +145,7 @@ class VilkårTilTilkjentYtelseTest {
                         sisteSmåbarnstilleggSatsTilTester(),
                         småbarnstilleggPeriode,
                         YtelseType.SMÅBARNSTILLEGG.name,
-                    )
-                    .bygg()
+                    ).bygg()
             } else {
                 TestTilkjentYtelseBuilder(vilkårsvurdering.behandling)
                     .medAndelTilkjentYtelse(barn1, barn1Andel1Beløp, barn1Andel1Periode, barn1Andel1Type)
@@ -250,7 +249,9 @@ class VilkårTilTilkjentYtelseTest {
     }
 }
 
-class TestVilkårsvurderingBuilder(sakType: String) {
+class TestVilkårsvurderingBuilder(
+    sakType: String,
+) {
     private val identPersonResultatMap = mutableMapOf<String, PersonResultat>()
     private val vilkårsvurdering =
         Vilkårsvurdering(
@@ -278,24 +279,27 @@ class TestVilkårsvurderingBuilder(sakType: String) {
         val testperiode = TestPeriode.parse(periode)
 
         val vilkårsresultater =
-            TestVilkårParser.parse(vilkår).map {
-                VilkårResultat(
-                    personResultat = personResultat,
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    periodeFom = testperiode.fraOgMed,
-                    periodeTom = testperiode.tilOgMed,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger =
-                        listOfNotNull(
-                            if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
-                        ),
-                )
-            }.toSet()
+            TestVilkårParser
+                .parse(vilkår)
+                .map {
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = it,
+                        resultat = Resultat.OPPFYLT,
+                        periodeFom = testperiode.fraOgMed,
+                        periodeTom = testperiode.tilOgMed,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger =
+                            listOfNotNull(
+                                if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                            ),
+                    )
+                }.toSet()
 
         personResultat.setSortedVilkårResultater(
-            personResultat.vilkårResultater.plus(vilkårsresultater)
+            personResultat.vilkårResultater
+                .plus(vilkårsresultater)
                 .toSet(),
         )
 
@@ -309,7 +313,9 @@ class TestVilkårsvurderingBuilder(sakType: String) {
     }
 }
 
-class TestTilkjentYtelseBuilder(val behandling: Behandling) {
+class TestTilkjentYtelseBuilder(
+    val behandling: Behandling,
+) {
     private val tilkjentYtelse =
         TilkjentYtelse(
             behandling = behandling,
@@ -347,20 +353,20 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
         return this
     }
 
-    fun bygg(): TilkjentYtelse {
-        return tilkjentYtelse
-    }
+    fun bygg(): TilkjentYtelse = tilkjentYtelse
 }
 
-data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
+data class TestPeriode(
+    val fraOgMed: LocalDate,
+    val tilOgMed: LocalDate?,
+) {
     companion object {
         private val yearMonthRegex = """^(\d{4}-\d{2}).*?(\d{4}-\d{2})?$""".toRegex()
         private val localDateRegex = """^(\d{4}-\d{2}-\d{2}).*?(\d{4}-\d{2}-\d{2})?$""".toRegex()
 
-        fun parse(s: String): TestPeriode {
-            return prøvLocalDate(s) ?: prøvYearMonth(s)
+        fun parse(s: String): TestPeriode =
+            prøvLocalDate(s) ?: prøvYearMonth(s)
                 ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
-        }
 
         private fun prøvLocalDate(s: String): TestPeriode? {
             val localDateMatch = localDateRegex.find(s)
@@ -397,8 +403,9 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 }
 
 object TestVilkårParser {
-    fun parse(s: String): List<Vilkår> {
-        return s.split(',')
+    fun parse(s: String): List<Vilkår> =
+        s
+            .split(',')
             .map {
                 when (it.replace("""\s*""".toRegex(), "").lowercase()) {
                     "opphold" -> Vilkår.LOVLIG_OPPHOLD
@@ -414,5 +421,4 @@ object TestVilkårParser {
                     else -> throw IllegalArgumentException("Ukjent vilkår: $s")
                 }
             }.toList()
-    }
 }

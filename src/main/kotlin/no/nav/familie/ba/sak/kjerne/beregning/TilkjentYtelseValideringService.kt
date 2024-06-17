@@ -76,12 +76,12 @@ class TilkjentYtelseValideringService(
     fun barnetrygdLøperForAnnenForelder(
         behandling: Behandling,
         barna: List<Person>,
-    ): Boolean {
-        return barna.any {
-            beregningService.hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id)
+    ): Boolean =
+        barna.any {
+            beregningService
+                .hentRelevanteTilkjentYtelserForBarn(barnAktør = it.aktør, fagsakId = behandling.fagsak.id)
                 .isNotEmpty()
         }
-    }
 
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long,
@@ -95,7 +95,8 @@ class TilkjentYtelseValideringService(
                 behandling = behandling,
             )
         val forrigeAndelerTilkjentYtelse =
-            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
+            forrigeBehandling
+                ?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
                 ?.andelerTilkjentYtelse
 
         return finnAktørIderMedUgyldigEtterbetalingsperiode(

@@ -26,11 +26,11 @@ import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.LoggingProducerListener
 
 @Configuration
-class KafkaAivenConfig(val environment: Environment) {
+class KafkaAivenConfig(
+    val environment: Environment,
+) {
     @Bean
-    fun producerFactory(): ProducerFactory<String, String> {
-        return DefaultKafkaProducerFactory(producerConfigs())
-    }
+    fun producerFactory(): ProducerFactory<String, String> = DefaultKafkaProducerFactory(producerConfigs())
 
     @Bean
     fun kafkaAivenTemplate(): KafkaTemplate<String, String> {
@@ -42,9 +42,7 @@ class KafkaAivenConfig(val environment: Environment) {
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String, String> {
-        return DefaultKafkaConsumerFactory(consumerConfigs())
-    }
+    fun consumerFactory(): ConsumerFactory<String, String> = DefaultKafkaConsumerFactory(consumerConfigs())
 
     @Bean
     fun concurrentKafkaListenerContainerFactory(kafkaErrorHandler: KafkaAivenErrorHandler): ConcurrentKafkaListenerContainerFactory<String, String> {
@@ -65,14 +63,10 @@ class KafkaAivenConfig(val environment: Environment) {
         }
 
     @Bean(name = [KafkaListenerConfigUtils.KAFKA_LISTENER_ENDPOINT_REGISTRY_BEAN_NAME])
-    fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? {
-        return KafkaListenerEndpointRegistry()
-    }
+    fun kafkaListenerEndpointRegistry(): KafkaListenerEndpointRegistry? = KafkaListenerEndpointRegistry()
 
     @Bean("kafkaObjectMapper")
-    fun kafkaObjectMapper(): ObjectMapper {
-        return objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
-    }
+    fun kafkaObjectMapper(): ObjectMapper = objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
     private fun producerConfigs(): Map<String, Any> {
         val kafkaBrokers = System.getenv("KAFKA_BROKERS") ?: "http://localhost:9092"

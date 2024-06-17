@@ -20,11 +20,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -55,6 +57,8 @@ class BeslutteVedtakTest {
     private val loggService = mockk<LoggService>()
     private val automatiskOppdaterValutakursService = mockk<AutomatiskOppdaterValutakursService>()
     private val valutakursRepository = mockk<ValutakursRepository>()
+    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    private val simuleringService = mockk<SimuleringService>()
 
     val beslutteVedtak =
         BeslutteVedtak(
@@ -71,6 +75,8 @@ class BeslutteVedtakTest {
             automatiskBeslutningService = automatiskBeslutningService,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             valutakursRepository = valutakursRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            simuleringService = simuleringService,
         )
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())

@@ -30,71 +30,64 @@ class PersonopplysningerService(
         val relasjonsidenter = personinfo.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
         val forelderBarnRelasjon =
-            personinfo.forelderBarnRelasjon.mapNotNull {
-                if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
-                    try {
-                        val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
-                        ForelderBarnRelasjon(
-                            aktør = it.aktør,
-                            relasjonsrolle = it.relasjonsrolle,
-                            fødselsdato = relasjonsinfo.fødselsdato,
-                            navn = relasjonsinfo.navn,
-                            adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
-                        )
-                    } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
-                        logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
-                        secureLogger.warn("Ignorerer relasjon ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()}: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+            personinfo.forelderBarnRelasjon
+                .mapNotNull {
+                    if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
+                        try {
+                            val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
+                            ForelderBarnRelasjon(
+                                aktør = it.aktør,
+                                relasjonsrolle = it.relasjonsrolle,
+                                fødselsdato = relasjonsinfo.fødselsdato,
+                                navn = relasjonsinfo.navn,
+                                adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
+                            )
+                        } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
+                            logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                            secureLogger.warn("Ignorerer relasjon ${it.aktør.aktivFødselsnummer()} til ${aktør.aktivFødselsnummer()}: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                            null
+                        }
+                    } else {
+                        identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
                         null
                     }
-                } else {
-                    identerMedAdressebeskyttelse.add(Pair(it.aktør, it.relasjonsrolle))
-                    null
-                }
-            }.toSet()
+                }.toSet()
 
         val forelderBarnRelasjonMaskert =
-            identerMedAdressebeskyttelse.map {
-                ForelderBarnRelasjonMaskert(
-                    relasjonsrolle = it.second,
-                    adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
-                )
-            }.toSet()
+            identerMedAdressebeskyttelse
+                .map {
+                    ForelderBarnRelasjonMaskert(
+                        relasjonsrolle = it.second,
+                        adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
+                    )
+                }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
 
-    fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo {
-        return hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
-    }
+    fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.ENKEL)
 
-    fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo {
-        return hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
-    }
+    fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.NAVN_OG_ADRESSE)
 
     private fun hentPersoninfoMedQuery(
         aktør: Aktør,
         personInfoQuery: PersonInfoQuery,
-    ): PersonInfo {
-        return pdlRestClient.hentPerson(aktør, personInfoQuery)
-    }
+    ): PersonInfo = pdlRestClient.hentPerson(aktør, personInfoQuery)
 
-    fun hentVergeData(aktør: Aktør): VergeData {
-        return VergeData(harVerge = harVerge(aktør).harVerge)
-    }
+    fun hentVergeData(aktør: Aktør): VergeData = VergeData(harVerge = harVerge(aktør).harVerge)
 
     fun harVerge(aktør: Aktør): VergeResponse {
         val harVerge =
-            pdlRestClient.hentVergemaalEllerFremtidsfullmakt(aktør)
+            pdlRestClient
+                .hentVergemaalEllerFremtidsfullmakt(aktør)
                 .any { it.type != "stadfestetFremtidsfullmakt" }
 
         return VergeResponse(harVerge)
     }
 
-    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap {
-        return pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
-    }
+    fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap = pdlRestClient.hentStatsborgerskapUtenHistorikk(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
 
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold =
         pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
@@ -137,4 +130,6 @@ class PersonopplysningerService(
     }
 }
 
-data class VergeResponse(val harVerge: Boolean)
+data class VergeResponse(
+    val harVerge: Boolean,
+)

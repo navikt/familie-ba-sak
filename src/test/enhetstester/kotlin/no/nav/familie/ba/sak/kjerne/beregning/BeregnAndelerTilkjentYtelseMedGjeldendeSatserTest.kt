@@ -352,20 +352,22 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
 
 private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
-    return TilkjentYtelseUtils.beregnTilkjentYtelse(
-        vilkårsvurdering = this.byggVilkårsvurdering(),
-        personopplysningGrunnlag = personopplysningGrunnlag,
-        fagsakType = FagsakType.NORMAL,
-    ).andelerTilkjentYtelse.map {
-        BeregnetAndel(
-            person = personopplysningGrunnlag.personer.first { person -> person.aktør == it.aktør },
-            stønadFom = it.stønadFom,
-            stønadTom = it.stønadTom,
-            beløp = it.kalkulertUtbetalingsbeløp,
-            sats = it.sats,
-            prosent = it.prosent,
-        )
-    }
+    return TilkjentYtelseUtils
+        .beregnTilkjentYtelse(
+            vilkårsvurdering = this.byggVilkårsvurdering(),
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            fagsakType = FagsakType.NORMAL,
+        ).andelerTilkjentYtelse
+        .map {
+            BeregnetAndel(
+                person = personopplysningGrunnlag.personer.first { person -> person.aktør == it.aktør },
+                stønadFom = it.stønadFom,
+                stønadTom = it.stønadTom,
+                beløp = it.kalkulertUtbetalingsbeløp,
+                sats = it.sats,
+                prosent = it.prosent,
+            )
+        }
 }
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =

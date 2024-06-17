@@ -124,7 +124,8 @@ class SmåbarnstilleggService(
         val dagensDato = LocalDate.now()
 
         val nyePerioderMedFullOvergangsstønad =
-            hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
+            hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør)
+                .map { it.tilInternPeriodeOvergangsstønad() }
                 .slåSammenTidligerePerioder(dagensDato)
 
         val andelerMedEndringerFraSistIverksatteBehandling =
@@ -151,9 +152,9 @@ class SmåbarnstilleggService(
         )
     }
 
-    fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<EksternPeriode> {
-        return efSakRestClient.hentPerioderMedFullOvergangsstønad(
-            aktør.aktivFødselsnummer(),
-        ).perioder
-    }
+    fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<EksternPeriode> =
+        efSakRestClient
+            .hentPerioderMedFullOvergangsstønad(
+                aktør.aktivFødselsnummer(),
+            ).perioder
 }

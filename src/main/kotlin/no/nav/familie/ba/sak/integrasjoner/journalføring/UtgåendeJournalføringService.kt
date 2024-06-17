@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.http.client.RessursException
@@ -28,10 +27,10 @@ class UtgåendeJournalføringService(
         brev: ByteArray,
         dokumenttype: Dokumenttype,
         førsteside: Førsteside?,
+        eksternReferanseId: String,
         avsenderMottaker: AvsenderMottaker? = null,
-        tilManuellMottakerEllerVerge: Boolean = false,
-    ): String {
-        return journalførDokument(
+    ): String =
+        journalførDokument(
             fnr = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
@@ -45,9 +44,8 @@ class UtgåendeJournalføringService(
                 ),
             førsteside = førsteside,
             avsenderMottaker = avsenderMottaker,
-            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge,
+            eksternReferanseId = eksternReferanseId,
         )
-    }
 
     fun journalførDokument(
         fnr: String,
@@ -58,14 +56,11 @@ class UtgåendeJournalføringService(
         førsteside: Førsteside? = null,
         behandlingId: Long? = null,
         avsenderMottaker: AvsenderMottaker? = null,
-        tilManuellMottakerEllerVerge: Boolean = false,
+        eksternReferanseId: String,
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
-
-        val eksternReferanseId =
-            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, tilManuellMottakerEllerVerge)
 
         val journalpostId =
             try {
@@ -110,18 +105,14 @@ class UtgåendeJournalføringService(
         eksternReferanseId: String,
         fnr: String,
     ): String =
-        integrasjonClient.hentJournalposterForBruker(
-            JournalposterForBrukerRequest(
-                brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
-                antall = 50,
-            ),
-        ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
-
-    fun genererEksternReferanseIdForJournalpost(
-        fagsakId: String,
-        behandlingId: Long?,
-        tilVerge: Boolean,
-    ) = listOfNotNull(fagsakId, behandlingId, if (tilVerge) "verge" else null, MDCOperations.getCallId()).joinToString("_")
+        integrasjonClient
+            .hentJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
+                    antall = 50,
+                ),
+            ).single { it.eksternReferanseId == eksternReferanseId }
+            .journalpostId
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)

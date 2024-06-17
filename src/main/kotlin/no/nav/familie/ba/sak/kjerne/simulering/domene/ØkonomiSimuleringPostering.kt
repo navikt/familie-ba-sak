@@ -70,8 +70,8 @@ data class ØkonomiSimuleringPostering(
         return (id == other.id)
     }
 
-    override fun toString(): String {
-        return "BrSimuleringPostering(" +
+    override fun toString(): String =
+        "BrSimuleringPostering(" +
             "id=$id, " +
             "økonomiSimuleringMottaker=${økonomiSimuleringMottaker.id}, " +
             "fagOmrådeKode=$fagOmrådeKode, " +
@@ -83,7 +83,6 @@ data class ØkonomiSimuleringPostering(
             "forfallsdato=$forfallsdato, " +
             "utenInntrekk=$utenInntrekk" +
             ")"
-    }
 
     val erManuellPostering: Boolean
         get() {

@@ -44,6 +44,4 @@ fun finnBarnSomSkalBehandlesForMor(
 fun barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
     barnaPåHendelse: List<Aktør>,
     barnaPåÅpenBehandling: List<Aktør>,
-): Boolean {
-    return barnaPåHendelse.all { barnaPåÅpenBehandling.contains(it) }
-}
+): Boolean = barnaPåHendelse.all { barnaPåÅpenBehandling.contains(it) }

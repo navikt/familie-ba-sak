@@ -50,11 +50,12 @@ class KompetanseTestController(
 private fun Map<LocalDate, String>.tilKompetanser(
     behandlingId: BehandlingId,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-): Collection<Kompetanse> {
-    return this.map { (dato, tidslinje) ->
-        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
-        KompetanseBuilder(dato.tilMånedTidspunkt(), behandlingId)
-            .medKompetanse(tidslinje, person)
-            .byggKompetanser()
-    }.flatten().slåSammen()
-}
+): Collection<Kompetanse> =
+    this
+        .map { (dato, tidslinje) ->
+            val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
+            KompetanseBuilder(dato.tilMånedTidspunkt(), behandlingId)
+                .medKompetanse(tidslinje, person)
+                .byggKompetanser()
+        }.flatten()
+        .slåSammen()

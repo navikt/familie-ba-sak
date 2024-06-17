@@ -74,7 +74,12 @@ class SaksstatistikkTest(
     @Tag("integration")
     fun `Skal lagre saksstatistikk sak til repository og sende meldinger`() {
         val fnr = randomFnr()
-        val fagsakId = fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr)).body!!.data!!.id
+        val fagsakId =
+            fagsakController
+                .hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr))
+                .body!!
+                .data!!
+                .id
 
         val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsakId)
 

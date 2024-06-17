@@ -74,10 +74,11 @@ data class TidspunktClosedRange<T : Tidsenhet>(
 
             override fun hasNext() = tidspunkt.endeligMindreEllerLik(tilOgMed)
 
-            override fun next(): Tidspunkt<T> {
-                return when {
+            override fun next(): Tidspunkt<T> =
+                when {
                     // Håndter spesialtilfellet <--A..A-->
-                    tidspunkt.erUendeligLengeSiden() && tilOgMed.erUendeligLengeTil() &&
+                    tidspunkt.erUendeligLengeSiden() &&
+                        tilOgMed.erUendeligLengeTil() &&
                         tidspunkt.endeligLik(tilOgMed) ->
                         tidspunkt.also {
                             // Flytter gjeldnde tidspunkt til B-->, og må flytte tilOgMed tilsvarende for å få det med.
@@ -97,14 +98,14 @@ data class TidspunktClosedRange<T : Tidsenhet>(
 
                     // Hvis tidspunkt = fraOgMed = A--> og tilOgMed = C-->
                     // så returnes A, og tidspunkt settes til neste endelige tidspunkt, B
-                    tidspunkt.erUendeligLengeTil() && tilOgMed.erUendeligLengeTil() &&
+                    tidspunkt.erUendeligLengeTil() &&
+                        tilOgMed.erUendeligLengeTil() &&
                         tidspunkt.endeligMindre(tilOgMed) ->
                         tidspunkt.somEndelig().also { tidspunkt = it.neste() }
 
                     // Ellers returner vi tidspunkt, og forvisser om at tidspunkt endelig og flytter det én tidsenhet frem
                     else -> tidspunkt.also { tidspunkt = it.somEndelig().neste() }
                 }
-            }
         }
 }
 

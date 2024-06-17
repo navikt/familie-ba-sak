@@ -57,7 +57,9 @@ class GrunnlagController(
         )
     }
 
-    class LeggTilBarnDto(val barnIdent: String) {
+    class LeggTilBarnDto(
+        val barnIdent: String,
+    ) {
         // Bruker init til å validere personidenten
         init {
             Fødselsnummer(barnIdent)

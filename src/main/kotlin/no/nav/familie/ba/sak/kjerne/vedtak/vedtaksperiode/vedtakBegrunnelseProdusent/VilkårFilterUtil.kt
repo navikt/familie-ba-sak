@@ -38,8 +38,8 @@ fun ISanityBegrunnelse.erLikVilkårOgUtdypendeVilkårIPeriode(
     }
 }
 
-fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean {
-    return when (vilkårResultat.vilkårType) {
+fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResultatForVedtaksperiode): Boolean =
+    when (vilkårResultat.vilkårType) {
         Vilkår.UNDER_18_ÅR -> true
         Vilkår.BOR_MED_SØKER -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.borMedSokerTriggere)
         Vilkår.GIFT_PARTNERSKAP -> vilkårResultat.utdypendeVilkårsvurderinger.harMinstEnTriggerFra(this.giftPartnerskapTriggere)
@@ -48,14 +48,12 @@ fun ISanityBegrunnelse.matcherMedUtdypendeVilkår(vilkårResultat: VilkårResult
         // Håndteres i `erGjeldendeForSmåbarnstillegg`
         Vilkår.UTVIDET_BARNETRYGD -> UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG !in this.utvidetBarnetrygdTriggere
     }
-}
 
-private fun List<UtdypendeVilkårsvurdering>.harMinstEnTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean {
-    return utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() ||
+private fun List<UtdypendeVilkårsvurdering>.harMinstEnTriggerFra(utdypendeVilkårsvurderingFraSanityBegrunnelse: List<VilkårTrigger>): Boolean =
+    utdypendeVilkårsvurderingFraSanityBegrunnelse.isEmpty() ||
         utdypendeVilkårsvurderingFraSanityBegrunnelse.any {
             it.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat = this)
         }
-}
 
 private fun finnUtgjørendeVilkår(
     sanityBegrunnelse: ISanityBegrunnelse,
@@ -65,9 +63,11 @@ private fun finnUtgjørendeVilkår(
 ): Set<VilkårResultatForVedtaksperiode> {
     val vilkårResultater = (begrunnelseGrunnlag.dennePerioden.vilkårResultater + utvidetVilkårPåSøkerIPeriode).filterNotNull()
     val vilkårResultaterForrigePeriode =
-        begrunnelseGrunnlag.forrigePeriode?.vilkårResultater?.plus(
-            utvidetVilkårPåSøkerIForrigePeriode,
-        )?.filterNotNull()
+        begrunnelseGrunnlag.forrigePeriode
+            ?.vilkårResultater
+            ?.plus(
+                utvidetVilkårPåSøkerIForrigePeriode,
+            )?.filterNotNull()
 
     val oppfylteVilkårResultaterDennePerioden =
         vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }

@@ -9,4 +9,5 @@ interface FinnPeriodeOgBarnSkjemaRepository<S : PeriodeOgBarnSkjemaEntitet<S>> {
 
 @NoRepositoryBean
 interface PeriodeOgBarnSkjemaRepository<S : PeriodeOgBarnSkjemaEntitet<S>> :
-    JpaRepository<S, Long>, FinnPeriodeOgBarnSkjemaRepository<S>
+    JpaRepository<S, Long>,
+    FinnPeriodeOgBarnSkjemaRepository<S>

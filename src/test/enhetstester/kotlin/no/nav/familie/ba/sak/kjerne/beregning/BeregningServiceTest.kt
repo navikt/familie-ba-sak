@@ -127,8 +127,7 @@ class BeregningServiceTest {
                     løpendeUnderkategori = null,
                     gjeldendeUtbetalingsperioder = emptyList(),
                     fagsakType = fagsak.type,
-                )
-                    .tilRestFagsak(emptyList(), emptyList()),
+                ).tilRestFagsak(emptyList(), emptyList()),
             )
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
@@ -198,9 +197,24 @@ class BeregningServiceTest {
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
 
         Assertions.assertEquals(1, slot.captured.andelerTilkjentYtelse.size)
-        Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
-        Assertions.assertEquals(periodeFom.nesteMåned(), slot.captured.andelerTilkjentYtelse.first().stønadFom)
-        Assertions.assertEquals(periodeTom.forrigeMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
+        Assertions.assertEquals(
+            1054,
+            slot.captured.andelerTilkjentYtelse
+                .first()
+                .kalkulertUtbetalingsbeløp,
+        )
+        Assertions.assertEquals(
+            periodeFom.nesteMåned(),
+            slot.captured.andelerTilkjentYtelse
+                .first()
+                .stønadFom,
+        )
+        Assertions.assertEquals(
+            periodeTom.forrigeMåned(),
+            slot.captured.andelerTilkjentYtelse
+                .first()
+                .stønadTom,
+        )
     }
 
     @Test

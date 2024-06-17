@@ -8,9 +8,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import java.time.LocalDate
 
 fun tilleggOrdinærSatsTilTester(): Int =
-    SatsService.finnAlleSatserFor(SatsType.TILLEGG_ORBA).findLast {
-        it.gyldigFom <= LocalDate.now().plusDays(1)
-    }!!.beløp
+    SatsService
+        .finnAlleSatserFor(SatsType.TILLEGG_ORBA)
+        .findLast {
+            it.gyldigFom <= LocalDate.now().plusDays(1)
+        }!!
+        .beløp
 
 fun sisteUtvidetSatsTilTester(): Int = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp
 

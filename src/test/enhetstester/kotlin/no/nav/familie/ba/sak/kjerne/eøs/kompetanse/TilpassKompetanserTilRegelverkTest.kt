@@ -40,14 +40,12 @@ class TilpassKompetanserTilRegelverkTest {
                     barn1,
                     annenForeldersAktivitetsland = null,
                     erAnnenForelderOmfattetAvNorskLovgivning = true,
-                )
-                .medKompetanse(
+                ).medKompetanse(
                     "     ----",
                     barn1,
                     annenForeldersAktivitetsland = null,
                     erAnnenForelderOmfattetAvNorskLovgivning = false,
-                )
-                .byggKompetanser()
+                ).byggKompetanser()
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
@@ -126,7 +124,8 @@ class TilpassKompetanserTilRegelverkTest {
                 .medKompetanse("SS-   SS-", barn1, barn2)
                 .medKompetanse("     S", barn1)
                 .medKompetanse("   - ", barn2)
-                .byggKompetanser().sortedBy { it.fom }
+                .byggKompetanser()
+                .sortedBy { it.fom }
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
@@ -170,7 +169,8 @@ class TilpassKompetanserTilRegelverkTest {
                 .medKompetanse("S        ", barn1, barn2)
                 .medKompetanse("     SS--", barn1, barn3)
                 .medKompetanse("-  SS    ", barn3)
-                .byggKompetanser().sortedBy { it.fom }
+                .byggKompetanser()
+                .sortedBy { it.fom }
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
@@ -196,7 +196,8 @@ class TilpassKompetanserTilRegelverkTest {
             KompetanseBuilder(jan2020)
                 .medKompetanse("--", barn1)
                 .medKompetanse("  ->", barn1, barn2)
-                .byggKompetanser().sortedBy { it.fom }
+                .byggKompetanser()
+                .sortedBy { it.fom }
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
@@ -237,7 +238,8 @@ class TilpassKompetanserTilRegelverkTest {
             KompetanseBuilder(jan2020)
                 .medKompetanse("SSS      ", barn1, barn2)
                 .medKompetanse("     SS--", barn1)
-                .byggKompetanser().sortedBy { it.fom }
+                .byggKompetanser()
+                .sortedBy { it.fom }
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
@@ -272,7 +274,8 @@ class TilpassKompetanserTilRegelverkTest {
                 .medKompetanse("      SS-", barn1, barn2)
                 .medKompetanse("     S", barn1)
                 .medKompetanse("SS-- ", barn2)
-                .byggKompetanser().sortedBy { it.fom }
+                .byggKompetanser()
+                .sortedBy { it.fom }
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
@@ -313,7 +316,8 @@ class TilpassKompetanserTilRegelverkTest {
             KompetanseBuilder(jan2020)
                 .medKompetanse("-----", barn1, barn2)
                 .medKompetanse("     ----", barn2)
-                .byggKompetanser().sortedBy { it.fom }
+                .byggKompetanser()
+                .sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

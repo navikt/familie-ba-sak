@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
+enum class VedtakBegrunnelseType(
+    val sorteringsrekkefølge: Int,
+) {
     INNVILGET(2),
     EØS_INNVILGET(2),
     INSTITUSJON_INNVILGET(2),
@@ -20,15 +22,9 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     ETTER_ENDRET_UTBETALING(6),
     ;
 
-    fun erInnvilget(): Boolean {
-        return this == INNVILGET || this == INSTITUSJON_INNVILGET
-    }
+    fun erInnvilget(): Boolean = this == INNVILGET || this == INSTITUSJON_INNVILGET
 
-    fun erReduksjon(): Boolean {
-        return this == REDUKSJON || this == INSTITUSJON_REDUKSJON
-    }
+    fun erReduksjon(): Boolean = this == REDUKSJON || this == INSTITUSJON_REDUKSJON
 
-    fun erAvslag(): Boolean {
-        return this == AVSLAG || this == INSTITUSJON_AVSLAG || this == EØS_AVSLAG
-    }
+    fun erAvslag(): Boolean = this == AVSLAG || this == INSTITUSJON_AVSLAG || this == EØS_AVSLAG
 }

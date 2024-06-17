@@ -73,15 +73,15 @@ class ApplicationConfig {
      */
     @Bean
     @Primary
-    fun oAuth2HttpClient(): OAuth2HttpClient {
-        return RetryOAuth2HttpClient(
+    fun oAuth2HttpClient(): OAuth2HttpClient =
+        RetryOAuth2HttpClient(
             RestClient.create(
                 RestTemplateBuilder()
                     .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                    .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)).build(),
+                    .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS))
+                    .build(),
             ),
         )
-    }
 
     @Bean
     fun prosesseringInfoProvider(
@@ -97,14 +97,15 @@ class ApplicationConfig {
         override fun harTilgang(): Boolean = grupper().contains(prosesseringRolle)
 
         @Suppress("UNCHECKED_CAST")
-        private fun grupper(): List<String> {
-            return try {
-                SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")
+        private fun grupper(): List<String> =
+            try {
+                SpringTokenValidationContextHolder()
+                    .getTokenValidationContext()
+                    .getClaims("azuread")
                     ?.get("groups") as List<String>? ?: emptyList()
             } catch (e: Exception) {
                 emptyList()
             }
-        }
     }
 
     companion object {

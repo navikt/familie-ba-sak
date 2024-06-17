@@ -90,8 +90,22 @@ object BehandlingsresultatValideringUtils {
                 if (erEndring) {
                     secureLogger.info(
                         "Er endring i kalkulert utbetalt beløp i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.\n" +
-                            "Andeler denne behandlingen: $andelerDenneBehandlingen\n" +
-                            "Andeler forrige behandling: $andelerForrigeBehandling",
+                            "Andeler denne behandlingen: ${
+                                andelerDenneBehandlingen.sortedWith(
+                                    compareBy(
+                                        { it.aktør.aktørId },
+                                        { it.stønadFom },
+                                    ),
+                                )
+                            }\n" +
+                            "Andeler forrige behandling: ${
+                                andelerForrigeBehandling.sortedWith(
+                                    compareBy(
+                                        { it.aktør.aktørId },
+                                        { it.stønadFom },
+                                    ),
+                                )
+                            }",
                     )
                     throw Feil("Det er endringer i kalkulert utbetalt beløp som går tilbake i tid. Gjelder andelene fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}. Se secure log for mer detaljer.")
                 }

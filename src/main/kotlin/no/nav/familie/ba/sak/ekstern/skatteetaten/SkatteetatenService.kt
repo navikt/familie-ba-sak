@@ -67,8 +67,11 @@ class SkatteetatenService(
             val perioderFraBasak = resultatBaSakForPerson?.perioder ?: emptyList()
 
             val perioder =
-                (perioderFraBasak + perioderFraInfotrygdForPerson).groupBy { periode -> periode.delingsprosent }.values
-                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
+                (perioderFraBasak + perioderFraInfotrygdForPerson)
+                    .groupBy { periode -> periode.delingsprosent }
+                    .values
+                    .flatMap(::slåSammenSkatteetatenPeriode)
+                    .toMutableList()
             if (perioder.isNotEmpty()) {
                 samletPerioder.add(
                     SkatteetatenPerioder(
@@ -86,13 +89,12 @@ class SkatteetatenService(
         return SkatteetatenPerioderResponse(samletPerioder)
     }
 
-    private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
-        return fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(
-            fom = LocalDate.of(år.toInt(), 1, 1).atStartOfDay(),
-            tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay(),
-        )
-            .map { SkatteetatenPerson(it.fnr, it.sisteVedtaksdato.atStartOfDay()) }
-    }
+    private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> =
+        fagsakRepository
+            .finnFagsakerMedUtvidetBarnetrygdInnenfor(
+                fom = LocalDate.of(år.toInt(), 1, 1).atStartOfDay(),
+                tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay(),
+            ).map { SkatteetatenPerson(it.fnr, it.sisteVedtaksdato.atStartOfDay()) }
 
     private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(
         personer: List<String>,
@@ -140,8 +142,11 @@ class SkatteetatenService(
                 ident = it.second.ident,
                 sisteVedtakPaaIdent = it.second.sisteVedtakPaaIdent,
                 perioder =
-                    it.second.perioder.groupBy { periode -> periode.delingsprosent }.values
-                        .flatMap(::slåSammenSkatteetatenPeriode).toMutableList(),
+                    it.second.perioder
+                        .groupBy { periode -> periode.delingsprosent }
+                        .values
+                        .flatMap(::slåSammenSkatteetatenPeriode)
+                        .toMutableList(),
             )
         }
     }
@@ -159,8 +164,9 @@ class SkatteetatenService(
         )
     }
 
-    private fun slåSammenSkatteetatenPeriode(perioderAvEtGittDelingsprosent: List<SkatteetatenPeriode>): List<SkatteetatenPeriode> {
-        return perioderAvEtGittDelingsprosent.sortedBy { it.fraMaaned }
+    private fun slåSammenSkatteetatenPeriode(perioderAvEtGittDelingsprosent: List<SkatteetatenPeriode>): List<SkatteetatenPeriode> =
+        perioderAvEtGittDelingsprosent
+            .sortedBy { it.fraMaaned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
                 val nesteUtbetalingFraMåned = YearMonth.parse(nesteUtbetaling.fraMaaned)
                 val forrigeUtbetalingTomMåned =
@@ -174,7 +180,6 @@ class SkatteetatenService(
                     sammenslåttePerioder.apply { add(nesteUtbetaling) }
                 }
             }
-    }
 
     companion object {
         val LOG = LoggerFactory.getLogger(SkatteetatenService::class.java)

@@ -47,9 +47,10 @@ class MånedligValutajusteringScheduler(
     }
 
     private fun hentNesteVirkedag(): LocalDateTime =
-        VirkedagerProvider.nesteVirkedag(
-            LocalDate.now().minusDays(1),
-        ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
+        VirkedagerProvider
+            .nesteVirkedag(
+                LocalDate.now().minusDays(1),
+            ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
 
     companion object {
         const val KLOKKETIME_SCHEDULER_TRIGGES = 2

@@ -205,7 +205,8 @@ class VedtaksperiodeService(
         eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
     ) {
         val eksisterendeAvslagBegrunnelser =
-            vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }
+            vedtaksperiodeMedBegrunnelser.begrunnelser
+                .filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }
                 .map { it.standardbegrunnelse.sanityApiNavn }
 
         val nyeAvslagBegrunnelser =
@@ -291,7 +292,8 @@ class VedtaksperiodeService(
                     12,
                 )
             ) {
-                vedtaksperioderMedBegrunnelser.firstOrNull { it.fom?.toYearMonth() == YearMonth.of(2022, 1) }
+                vedtaksperioderMedBegrunnelser
+                    .firstOrNull { it.fom?.toYearMonth() == YearMonth.of(2022, 1) }
                     ?.also { satsendringsvedtaksperiode ->
                         satsendringsvedtaksperiode.settBegrunnelser(
                             listOf(
@@ -406,9 +408,7 @@ class VedtaksperiodeService(
         }
     }
 
-    fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        return vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
-    }
+    fun hentPersisterteVedtaksperioder(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> = vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
 
     fun hentRestUtvidetVedtaksperiodeMedBegrunnelser(behandlingId: Long): List<RestUtvidetVedtaksperiodeMedBegrunnelser> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -486,8 +486,10 @@ class VedtaksperiodeService(
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             utvidetVedtaksperiodeMedBegrunnelser.copy(
                 gyldigeBegrunnelser =
-                    utvidetVedtaksperiodeMedBegrunnelser.tilVedtaksperiodeMedBegrunnelser(vedtak)
-                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList(),
+                    utvidetVedtaksperiodeMedBegrunnelser
+                        .tilVedtaksperiodeMedBegrunnelser(vedtak)
+                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser)
+                        .toList(),
             )
         }
     }
@@ -555,17 +557,19 @@ class VedtaksperiodeService(
         return andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag = personopplysningGrunnlag)
     }
 
-    fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean {
-        return kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
+    fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean =
+        kompetanseRepository
+            .finnFraBehandlingId(vedtak.behandling.id)
             .any { it.tom == null || it.tom.isAfter(YearMonth.now()) }
-    }
 
     fun skalMeldeFraOmEndringerEøsSelvstendigRett(vedtak: Vedtak): Boolean {
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
 
         val annenForelderOmfattetAvNorskLovgivningErSattPåBosattIRiket = (
-            vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
+            vilkårsvurdering
+                ?.personResultater
+                ?.flatMap { it.vilkårResultater }
                 ?.any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) && it.vilkårType == Vilkår.BOSATT_I_RIKET }
                 ?: false
         )
@@ -586,16 +590,19 @@ class VedtaksperiodeService(
         val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
         val mye = mapOf(NB to "mye", NN to "mykje").getOrDefault(målform, "mye")
 
-        return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
-            if (it.erPerMåned) {
-                val måned = mapOf(NB to "måned", NN to "månad").getOrDefault(målform, "måned")
-                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
-                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye per $måned."
-            } else {
-                val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
-            }
-        }.toSet().takeIf { it.isNotEmpty() }
+        return feilutbetaltValutaRepository
+            .finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
+            .map {
+                if (it.erPerMåned) {
+                    val måned = mapOf(NB to "måned", NN to "månad").getOrDefault(målform, "måned")
+                    val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                    "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye per $måned."
+                } else {
+                    val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+                    "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+                }
+            }.toSet()
+            .takeIf { it.isNotEmpty() }
     }
 
     fun beskrivPerioderMedRefusjonEøs(
@@ -605,8 +612,10 @@ class VedtaksperiodeService(
         val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
-        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id)
-            .filter { it.refusjonAvklart == avklart }.map {
+        return refusjonEøsRepository
+            .finnRefusjonEøsForBehandling(behandling.id)
+            .filter { it.refusjonAvklart == avklart }
+            .map {
                 val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
                 val land =
                     landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
@@ -629,6 +638,7 @@ class VedtaksperiodeService(
                         }
                     }
                 }
-            }.toSet().takeIf { it.isNotEmpty() }
+            }.toSet()
+            .takeIf { it.isNotEmpty() }
     }
 }

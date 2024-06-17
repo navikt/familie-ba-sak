@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
-import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -19,7 +18,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderLivshendelse
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -31,10 +29,7 @@ class HenleggBehandling(
     private val oppgaveService: OppgaveService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val organisasjonService: OrganisasjonService,
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
-    private val logger = LoggerFactory.getLogger(HenleggBehandling::class.java)
-
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
         data: RestHenleggBehandlingInfo,
@@ -42,26 +37,25 @@ class HenleggBehandling(
         val fagsak = behandling.fagsak
 
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
-            val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
             val brevmal = fagsak.institusjon?.let { Brevmal.HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON } ?: Brevmal.HENLEGGE_TRUKKET_SØKNAD
-            val mottakerNavnVedInstitusjonsak = fagsak.institusjon?.let { organisasjonService.hentOrganisasjon(it.orgNummer).navn }
 
             dokumentService.sendManueltBrev(
                 behandling = behandling,
                 fagsakId = fagsak.id,
                 manueltBrevRequest =
                     ManueltBrevRequest(
-                        mottakerNavn = mottakerNavnVedInstitusjonsak ?: "",
-                        mottakerIdent = mottakerIdent,
                         brevmal = brevmal,
                     ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
             )
         }
 
-        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
+        oppgaveService
+            .hentOppgaverSomIkkeErFerdigstilt(behandling)
             .filter {
                 !(
-                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in
+                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD &&
+                        data.begrunnelse == SATSENDRING &&
+                        it.type in
                         listOf(
                             BehandleSak,
                             GodkjenneVedtak,
@@ -69,8 +63,7 @@ class HenleggBehandling(
                             VurderLivshendelse,
                         )
                 )
-            }
-            .forEach {
+            }.forEach {
                 oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
             }
 
@@ -87,7 +80,5 @@ class HenleggBehandling(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.HENLEGG_BEHANDLING
-    }
+    override fun stegType(): StegType = StegType.HENLEGG_BEHANDLING
 }

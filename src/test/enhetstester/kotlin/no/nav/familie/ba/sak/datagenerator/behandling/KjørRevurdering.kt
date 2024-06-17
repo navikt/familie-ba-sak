@@ -123,7 +123,7 @@ fun kjørStegprosessForBehandling(
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
     val behandlingEtterDistribuertVedtak =
-        håndterDistribuertVedtakSteg(stegService, behandlingEtterJournalførtVedtak, søkerFnr, brevmalService)
+        håndterDistribuertVedtakSteg(stegService, behandlingEtterJournalførtVedtak, brevmalService)
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -167,7 +167,6 @@ private fun håndterSendtTilBeslutterSteg(
 private fun håndterDistribuertVedtakSteg(
     stegService: StegService,
     behandling: Behandling,
-    søkerFnr: String,
     brevmalService: BrevmalService,
 ): Behandling {
     val behandlingEtterDistribuertVedtak =
@@ -176,7 +175,7 @@ private fun håndterDistribuertVedtakSteg(
             DistribuerDokumentDTO(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
-                personEllerInstitusjonIdent = søkerFnr,
+                fagsakId = behandling.fagsak.id,
                 brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false,
             ),
@@ -254,8 +253,8 @@ private fun håndterBeslutteVedtakSteg(
 private fun hånderSilmuleringssteg(
     stegService: StegService,
     behandlingEtterBehandlingsresultat: Behandling,
-): Behandling {
-    return stegService.håndterVurderTilbakekreving(
+): Behandling =
+    stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
         if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
             RestTilbakekreving(
@@ -266,7 +265,6 @@ private fun hånderSilmuleringssteg(
             null
         },
     )
-}
 
 private fun håndterVilkårsvurderingSteg(
     vilkårsvurderingService: VilkårsvurderingService,

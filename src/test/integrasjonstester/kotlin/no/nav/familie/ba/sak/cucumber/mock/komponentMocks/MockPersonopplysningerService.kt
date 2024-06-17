@@ -12,7 +12,10 @@ fun mockPersonopplysningerService(dataFraCucumber: BegrunnelseTeksterStepDefinit
     val personopplysningerService = mockk<PersonopplysningerService>()
     every { personopplysningerService.hentPersoninfoEnkel(any()) } answers {
         val aktør = firstArg<Aktør>()
-        dataFraCucumber.persongrunnlag.values.flatMap { it.personer }.first { it.aktør == aktør }.tilPersonInfo()
+        dataFraCucumber.persongrunnlag.values
+            .flatMap { it.personer }
+            .first { it.aktør == aktør }
+            .tilPersonInfo()
     }
     return personopplysningerService
 }

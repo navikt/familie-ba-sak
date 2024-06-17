@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.internal.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilKortMånedLangtÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -194,7 +194,8 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.standardbegrunnelser,
                     it.vurderesEtter,
                 )
-            }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
+            }.toList()
+            .joinToString("") { (vilkårResultatRad, vilkårResultater) ->
                 "\n | ${vilkårResultatRad.aktørId} " +
                     "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
                     "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +
@@ -233,8 +234,7 @@ private fun hentAndelRader(
                 { it.stønadFom },
                 { it.stønadTom },
             ),
-        )
-        ?.joinToString("") {
+        )?.joinToString("") {
             """
       | ${it.aktør.aktørId} |${it.behandlingId}|${
                 it.stønadFom.førsteDagIInneværendeMåned().tilddMMyyyy()
@@ -352,9 +352,9 @@ private fun hentUtenlandskPeriodebeløpRader(utenlandskePeriodebeløp: Collectio
       | ${
                 utenlandskPeriodebeløp.barnAktører.joinToString(", ") { it.aktørId }
             } |${
-                utenlandskPeriodebeløp.fom.tilKortString()
+                utenlandskPeriodebeløp.fom.tilKortMånedLangtÅr()
             }|${
-                utenlandskPeriodebeløp.tom?.tilKortString() ?: ""
+                utenlandskPeriodebeløp.tom?.tilKortMånedLangtÅr() ?: ""
             }|${
                 utenlandskPeriodebeløp.behandlingId
             }|${
@@ -382,7 +382,7 @@ fun hentTekstForValutakurser(
         """
 
     Og med valutakurs for begrunnelse
-      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs |""" +
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs | Vurderingsform |""" +
             rader
     }
 }
@@ -407,6 +407,8 @@ private fun hentValutakursRader(valutakurser: Collection<Valutakurs>?): String =
                 valutakurs.valutakode
             }|${
                 valutakurs.kurs
+            }|${
+                valutakurs.vurderingsform
             }|"""
         } ?: ""
 
@@ -470,8 +472,8 @@ fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
 fun hentBrevBegrunnelseTekster(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-): String {
-    return vedtaksperioder.filter { (it.begrunnelser).isNotEmpty() }.joinToString("") { vedtaksperiode ->
+): String =
+    vedtaksperioder.filter { (it.begrunnelser).isNotEmpty() }.joinToString("") { vedtaksperiode ->
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
@@ -481,13 +483,12 @@ fun hentBrevBegrunnelseTekster(
         | $it | STANDARD |               |                      |             |                                      |         |       |                  |                         |                               |"""
             }
     }
-}
 
 fun hentEØSBrevBegrunnelseTekster(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-): String {
-    return vedtaksperioder.filter { (it.eøsBegrunnelser).isNotEmpty() }.joinToString("") { vedtaksperiode ->
+): String =
+    vedtaksperioder.filter { (it.eøsBegrunnelser).isNotEmpty() }.joinToString("") { vedtaksperiode ->
         """
 
     Så forvent følgende brevbegrunnelser for behandling $behandlingId i periode ${vedtaksperiode.fom?.tilddMMyyyy() ?: "-"} til ${vedtaksperiode.tom?.tilddMMyyyy() ?: "-"}
@@ -497,4 +498,3 @@ fun hentEØSBrevBegrunnelseTekster(
         | $it | EØS | | | | | | | | |"""
             }
     }
-}

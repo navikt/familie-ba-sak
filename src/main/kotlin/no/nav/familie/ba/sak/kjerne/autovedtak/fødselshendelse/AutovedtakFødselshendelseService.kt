@@ -139,8 +139,10 @@ class AutovedtakFødselshendelseService(
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse =
-                    filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                        .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
+                    filtreringsreglerService
+                        .hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
+                        .first { it.resultat == Resultat.IKKE_OPPFYLT }
+                        .begrunnelse,
             )
         } else {
             vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
@@ -197,11 +199,10 @@ class AutovedtakFødselshendelseService(
         }
     }
 
-    private fun hentÅpenNormalBehandling(aktør: Aktør): Behandling? {
-        return fagsakService.hentNormalFagsak(aktør)?.let {
+    private fun hentÅpenNormalBehandling(aktør: Aktør): Behandling? =
+        fagsakService.hentNormalFagsak(aktør)?.let {
             behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
         }
-    }
 
     private fun finnBarnSomSkalBehandlesForMor(
         fagsak: Fagsak?,
@@ -209,13 +210,17 @@ class AutovedtakFødselshendelseService(
     ): Pair<List<String>, List<String>> {
         val morsAktør = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val barnaTilMor =
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-                aktør = morsAktør,
-            ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
+            personopplysningerService
+                .hentPersoninfoMedRelasjonerOgRegisterinformasjon(
+                    aktør = morsAktør,
+                ).forelderBarnRelasjon
+                .filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
             if (fagsak != null) {
-                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).filter { !it.erHenlagt() }
+                behandlingHentOgPersisterService
+                    .hentBehandlinger(fagsakId = fagsak.id)
+                    .filter { !it.erHenlagt() }
                     .flatMap {
                         persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
                     }.distinct()

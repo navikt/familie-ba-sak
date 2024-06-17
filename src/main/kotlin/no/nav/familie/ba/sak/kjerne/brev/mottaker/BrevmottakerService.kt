@@ -2,18 +2,11 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.zeroSingleOrThrow
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
-import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
-import no.nav.familie.ba.sak.kjerne.steg.domene.toList
-import no.nav.familie.kontrakter.felles.BrukerIdType
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional
 class BrevmottakerService(
     private val brevmottakerRepository: BrevmottakerRepository,
     private val loggService: LoggService,
-    private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
     @Transactional
@@ -78,47 +69,38 @@ class BrevmottakerService(
 
     fun lagMottakereFraBrevMottakere(
         manueltRegistrerteMottakere: List<ManuellBrevmottaker>,
-        søkersident: String,
-        søkersnavn: String = hentMottakerNavn(søkersident),
-    ): List<MottakerInfo> {
-        manueltRegistrerteMottakere.singleOrNull { it.type == MottakerType.DØDSBO }?.let {
-            // brev sendes kun til den manuelt registerte dødsboadressen
-            return lagMottakerInfoUtenBrukerId(navn = søkersnavn, manuellAdresseInfo = lagManuellAdresseInfo(it)).toList()
-        }
+    ): List<MottakerInfo> =
+        when {
+            manueltRegistrerteMottakere.isEmpty() -> listOf(Bruker)
+            manueltRegistrerteMottakere.any { it.type == MottakerType.DØDSBO } -> {
+                val dodsbo = manueltRegistrerteMottakere.single { it.type == MottakerType.DØDSBO }
+                listOf(Dødsbo(navn = dodsbo.navn, manuellAdresseInfo = lagManuellAdresseInfo(dodsbo)))
+            }
 
-        val manuellAdresseUtenlands =
-            manueltRegistrerteMottakere.filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
-                .zeroSingleOrThrow {
-                    FunksjonellFeil("Mottakerfeil: Det er registrert mer enn en utenlandsk adresse tilhørende bruker")
-                }?.let {
-                    lagMottakerInfoMedBrukerId(
-                        brukerId = søkersident,
-                        navn = søkersnavn,
-                        manuellAdresseInfo = lagManuellAdresseInfo(it),
+            else -> {
+                val brukerMedUtenlandskAdresseListe =
+                    manueltRegistrerteMottakere
+                        .filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
+                        .map { BrukerMedUtenlandskAdresse(lagManuellAdresseInfo(it)) }
+                if (brukerMedUtenlandskAdresseListe.size > 1) {
+                    throw FunksjonellFeil("Mottakerfeil: Det er registrert mer enn en utenlandsk adresse tilhørende bruker")
+                }
+                val bruker = brukerMedUtenlandskAdresseListe.firstOrNull() ?: Bruker
+
+                val tilleggsmottakerListe =
+                    manueltRegistrerteMottakere.filter { it.type != MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
+                if (tilleggsmottakerListe.size > 1) {
+                    throw FunksjonellFeil(
+                        "Mottakerfeil: ${tilleggsmottakerListe.first().type.visningsnavn} kan ikke kombineres med ${tilleggsmottakerListe.last().type.visningsnavn}",
                     )
                 }
-
-        // brev sendes til brukers (manuelt) registerte adresse (i utlandet)
-        val bruker = manuellAdresseUtenlands ?: lagMottakerInfoMedBrukerId(brukerId = søkersident, navn = søkersnavn)
-
-        // ...og evt. til en manuelt registrert verge eller fullmektig i tillegg
-        val manuellTilleggsmottaker =
-            manueltRegistrerteMottakere.filter { it.type != MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
-                .zeroSingleOrThrow {
-                    FunksjonellFeil("Mottakerfeil: ${first().type.visningsnavn} kan ikke kombineres med ${last().type.visningsnavn}")
-                }?.let {
-                    lagMottakerInfoUtenBrukerId(navn = it.navn, manuellAdresseInfo = lagManuellAdresseInfo(it))
-                }
-
-        return listOfNotNull(bruker, manuellTilleggsmottaker)
-    }
-
-    fun hentMottakerNavn(personIdent: String): String {
-        val aktør = personidentService.hentAktør(personIdent)
-        return personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-            it.navn!!
+                val tilleggsmottaker =
+                    tilleggsmottakerListe.firstOrNull()?.let {
+                        FullmektigEllerVerge(navn = it.navn, manuellAdresseInfo = lagManuellAdresseInfo(it))
+                    }
+                listOfNotNull(bruker, tilleggsmottaker)
+            }
         }
-    }
 
     private fun lagManuellAdresseInfo(brevmottaker: ManuellBrevmottaker) =
         ManuellAdresseInfo(
@@ -128,28 +110,4 @@ class BrevmottakerService(
             poststed = brevmottaker.poststed,
             landkode = brevmottaker.landkode,
         )
-
-    private fun lagMottakerInfoUtenBrukerId(
-        navn: String,
-        manuellAdresseInfo: ManuellAdresseInfo,
-    ): MottakerInfo =
-        MottakerInfo(
-            brukerId = "",
-            brukerIdType = null,
-            erInstitusjonVerge = false,
-            navn = navn,
-            manuellAdresseInfo = manuellAdresseInfo,
-        )
-
-    private fun lagMottakerInfoMedBrukerId(
-        brukerId: String,
-        navn: String,
-        manuellAdresseInfo: ManuellAdresseInfo? = null,
-    ) = MottakerInfo(
-        brukerId = brukerId,
-        brukerIdType = BrukerIdType.FNR,
-        erInstitusjonVerge = false,
-        navn = navn,
-        manuellAdresseInfo = manuellAdresseInfo,
-    )
 }

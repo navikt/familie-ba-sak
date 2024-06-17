@@ -19,7 +19,9 @@ data class BarnetrygdTilPensjonRequest(
  * Ett element pr. fagsak barnet er knyttet til.
  * Kan være andre personer enn mor og far.
  */
-data class BarnetrygdTilPensjonResponse(val fagsaker: List<BarnetrygdTilPensjon>)
+data class BarnetrygdTilPensjonResponse(
+    val fagsaker: List<BarnetrygdTilPensjon>,
+)
 
 data class BarnetrygdTilPensjon(
     val fagsakEiersIdent: String,

@@ -169,9 +169,12 @@ class VilkårsvurderingForNyBehandlingService(
             VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
                 behandling = behandling,
                 barnaAktørSomAlleredeErVurdert =
-                    aktivVilkårsvurdering?.personResultater?.mapNotNull {
-                        personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
-                    }?.filter { it.type == PersonType.BARN }?.map { it.aktør } ?: emptyList(),
+                    aktivVilkårsvurdering
+                        ?.personResultater
+                        ?.mapNotNull {
+                            personopplysningGrunnlag.barna.firstOrNull { barn -> barn.aktør == it.aktør }
+                        }?.filter { it.type == PersonType.BARN }
+                        ?.map { it.aktør } ?: emptyList(),
             )
 
         tellMetrikkerForFødselshendelse(

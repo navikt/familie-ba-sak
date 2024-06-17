@@ -11,11 +11,11 @@ import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask.TASK_STEP_TYPE,
+    taskStepType = DistribuerVedtaksbrevTilFullmektigEllerVergeTask.TASK_STEP_TYPE,
     beskrivelse = "Send vedtaksbrev til institusjon verge eller manuell brev mottaker til Dokdist",
     maxAntallFeil = 3,
 )
-class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
+class DistribuerVedtaksbrevTilFullmektigEllerVergeTask(
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
@@ -27,18 +27,17 @@ class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
     }
 
     companion object {
-        fun opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
+        fun opprettDistribuerVedtaksbrevTilFullmektigEllerVergeTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
             properties: Properties,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
                 triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(),
             )
-        }
 
         const val TASK_STEP_TYPE = "distribuerVedtaksbrevTilVergeEllerManuellBrevMottaker"
     }

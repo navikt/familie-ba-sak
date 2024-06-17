@@ -87,7 +87,6 @@ class HenleggelseTest(
                 behandlingId = førsteBehandling.behandlingId,
                 manueltBrevRequest =
                     ManueltBrevRequest(
-                        mottakerIdent = scenario.søker.ident!!,
                         brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
                     ),
             )
@@ -140,9 +139,10 @@ class HenleggelseTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        return familieBaSakKlient().registrererSøknad(
-            behandlingId = behandling.id,
-            restRegistrerSøknad = restRegistrerSøknad,
-        ).data!!
+        return familieBaSakKlient()
+            .registrererSøknad(
+                behandlingId = behandling.id,
+                restRegistrerSøknad = restRegistrerSøknad,
+            ).data!!
     }
 }
