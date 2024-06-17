@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/stonadsstatistikk")
@@ -49,7 +49,7 @@ class StønadsstatistikkController(
     @PostMapping(path = ["/send-til-dvh-vedtak-etter-dato"])
     @Transactional
     fun sendTilStønadsstatistikkAlleVedtakEtterDato(
-        @RequestBody(required = true) dato: LocalDate,
+        @RequestBody(required = true) dato: LocalDateTime,
     ) {
         val behandlingerEtterDato: List<Long> = vedtakRepository.finnBehandlingerMedVedtakEtterDato(dato = dato)
 
