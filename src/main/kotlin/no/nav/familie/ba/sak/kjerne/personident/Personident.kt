@@ -39,12 +39,11 @@ data class Personident(
         }
     }
 
-    override fun toString(): String {
-        return """Personident(aktørId=${aktør.aktørId},
+    override fun toString(): String =
+        """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
                         |gjelderTil=$gjelderTil)
-            """.trimMargin()
-    }
+        """.trimMargin()
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
@@ -54,13 +53,12 @@ data class Personident(
         return fødselsnummer == entitet.fødselsnummer && aktiv == entitet.aktiv
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(fødselsnummer, aktiv)
-    }
+    override fun hashCode(): Int = Objects.hash(fødselsnummer, aktiv)
 
     companion object {
         private const val VALID_FØDSELSNUMMER = "^\\d{11}$"
         private val VALID =
-            java.util.regex.Pattern.compile(VALID_FØDSELSNUMMER)
+            java.util.regex.Pattern
+                .compile(VALID_FØDSELSNUMMER)
     }
 }

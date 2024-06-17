@@ -118,16 +118,17 @@ class DokumentService(
 
         mottakere.forEach { mottakerInfo ->
             val journalpostId =
-                utgåendeJournalføringService.journalførManueltBrev(
-                    fnr = fagsak.aktør.aktivFødselsnummer(),
-                    fagsakId = fagsakId.toString(),
-                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
-                    dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-                    førsteside = førsteside,
-                    eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
-                    avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
-                ).also { journalposterTilDistribusjon[it] = mottakerInfo }
+                utgåendeJournalføringService
+                    .journalførManueltBrev(
+                        fnr = fagsak.aktør.aktivFødselsnummer(),
+                        fagsakId = fagsakId.toString(),
+                        journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
+                        brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
+                        dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                        førsteside = førsteside,
+                        eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
+                        avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
+                    ).also { journalposterTilDistribusjon[it] = mottakerInfo }
 
             behandling?.let {
                 journalføringRepository.save(
@@ -146,7 +147,8 @@ class DokumentService(
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandling.id,
                 frist =
-                    LocalDate.now()
+                    LocalDate
+                        .now()
                         .plusDays(
                             manueltBrevRequest.brevmal.ventefristDager(
                                 manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.let { it * 7 }?.toLong(),
@@ -161,8 +163,8 @@ class DokumentService(
     private fun lagMottakere(
         fagsak: Fagsak,
         brevmottakere: List<ManuellBrevmottaker>,
-    ): List<MottakerInfo> {
-        return when {
+    ): List<MottakerInfo> =
+        when {
             fagsak.type == FagsakType.INSTITUSJON -> {
                 val orgNummer = checkNotNull(fagsak.institusjon).orgNummer
                 listOf(
@@ -178,7 +180,6 @@ class DokumentService(
                 )
             else -> listOf(Bruker)
         }
-    }
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {
         val vilkårsvurdering =
@@ -190,7 +191,8 @@ class DokumentService(
                         behandlingHentOgPersisterService
                             .hentForrigeBehandlingSomErVedtatt(behandling),
                 )
-        vilkårsvurdering.personResultater.single { it.erSøkersResultater() }
+        vilkårsvurdering.personResultater
+            .single { it.erSøkersResultater() }
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
     }
 
@@ -200,26 +202,27 @@ class DokumentService(
         manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
     ) = journalposterTilDistribusjon.forEach { journalPostTilDistribusjon ->
-        DistribuerDokumentTask.opprettDistribuerDokumentTask(
-            distribuerDokumentDTO =
-                DistribuerDokumentDTO(
-                    fagsakId = fagsak.id,
-                    behandlingId = behandling?.id,
-                    journalpostId = journalPostTilDistribusjon.key,
-                    brevmal = manueltBrevRequest.brevmal,
-                    erManueltSendt = true,
-                    manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
-                ),
-            properties =
-                Properties().apply
-                    {
-                        this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
-                        this["mottakerType"] = journalPostTilDistribusjon.value::class.simpleName
-                        this["journalpostId"] = journalPostTilDistribusjon.key
-                        this["behandlingId"] = behandling?.id.toString()
-                        this["fagsakId"] = fagsak.id.toString()
-                    },
-        ).also { taskRepository.save(it) }
+        DistribuerDokumentTask
+            .opprettDistribuerDokumentTask(
+                distribuerDokumentDTO =
+                    DistribuerDokumentDTO(
+                        fagsakId = fagsak.id,
+                        behandlingId = behandling?.id,
+                        journalpostId = journalPostTilDistribusjon.key,
+                        brevmal = manueltBrevRequest.brevmal,
+                        erManueltSendt = true,
+                        manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
+                    ),
+                properties =
+                    Properties().apply
+                        {
+                            this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
+                            this["mottakerType"] = journalPostTilDistribusjon.value::class.simpleName
+                            this["journalpostId"] = journalPostTilDistribusjon.key
+                            this["behandlingId"] = behandling?.id.toString()
+                            this["fagsakId"] = fagsak.id.toString()
+                        },
+            ).also { taskRepository.save(it) }
     }
 
     companion object {

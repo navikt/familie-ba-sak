@@ -181,7 +181,9 @@ private sealed interface KanOppretteRevurderingResultat
 
 private object KanOppretteRevurdering : KanOppretteRevurderingResultat
 
-private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteRevurderingResultat
+private data class KanIkkeOppretteRevurdering(
+    val årsak: Årsak,
+) : KanOppretteRevurderingResultat
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,

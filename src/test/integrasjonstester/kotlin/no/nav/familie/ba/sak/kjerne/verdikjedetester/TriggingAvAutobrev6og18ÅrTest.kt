@@ -164,7 +164,8 @@ class TriggingAvAutobrev6og18ÅrTest(
             vedtaksperioderMedBegrunnelser.single {
                 it.fom!!.isEqual(
                     LocalDate.now().førsteDagIInneværendeMåned(),
-                ) && it.type == Vedtaksperiodetype.UTBETALING
+                ) &&
+                    it.type == Vedtaksperiodetype.UTBETALING
             }
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = reduksjonVedtaksperiodeId.id,

@@ -141,7 +141,8 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
                     it.standardbegrunnelser,
                     it.vurderesEtter,
                 )
-            }.toList().joinToString("") { (vilkårResultatRad, vilkårResultater) ->
+            }.toList()
+            .joinToString("") { (vilkårResultatRad, vilkårResultater) ->
                 "| ${vilkårResultatRad.aktørId} " +
                     "| ${vilkårResultater.map { it.vilkårType }.joinToString(",")} " +
                     "| ${vilkårResultatRad.utdypendeVilkårsvurderinger.joinToString(",")} " +

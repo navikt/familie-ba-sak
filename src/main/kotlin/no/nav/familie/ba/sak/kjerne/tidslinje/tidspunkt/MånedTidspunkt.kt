@@ -27,8 +27,8 @@ data class MånedTidspunkt internal constructor(
     override fun medUendelighet(uendelighet: Uendelighet): MånedTidspunkt =
         copy(uendelighet = uendelighet)
 
-    override fun toString(): String {
-        return when (uendelighet) {
+    override fun toString(): String =
+        when (uendelighet) {
             Uendelighet.FORTID -> "<--"
             else -> ""
         } + måned +
@@ -36,27 +36,22 @@ data class MånedTidspunkt internal constructor(
                 Uendelighet.FREMTID -> "-->"
                 else -> ""
             }
-    }
 
-    override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int {
-        return måned.compareTo((tidspunkt as MånedTidspunkt).måned)
-    }
+    override fun sammenliknMed(tidspunkt: Tidspunkt<Måned>): Int = måned.compareTo((tidspunkt as MånedTidspunkt).måned)
 
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
+    override fun equals(other: Any?): Boolean =
+        when (other) {
             is MånedTidspunkt -> compareTo(other) == 0
             is Tidspunkt<*> -> this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
             else -> false
         }
-    }
 
-    override fun hashCode(): Int {
-        return if (uendelighet == Uendelighet.INGEN) {
+    override fun hashCode(): Int =
+        if (uendelighet == Uendelighet.INGEN) {
             måned.hashCode()
         } else {
             uendelighet.hashCode()
         }
-    }
 
     companion object {
         fun nå() = MånedTidspunkt(YearMonth.now(), Uendelighet.INGEN)

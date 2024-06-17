@@ -43,15 +43,12 @@ data class GrVegadresse(
             postnummer,
         )
 
-    override fun toSecureString(): String {
-        return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
+    override fun toSecureString(): String =
+        """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer
-            """.trimMargin()
-    }
+        """.trimMargin()
 
-    override fun toString(): String {
-        return "Vegadresse(detaljer skjult)"
-    }
+    override fun toString(): String = "Vegadresse(detaljer skjult)"
 
     override fun tilFrontendString() =
         """${

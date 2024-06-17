@@ -12,39 +12,30 @@ class VedtakService(
     private val vedtakRepository: VedtakRepository,
     private val dokumentGenereringService: DokumentGenereringService,
 ) {
-    fun hent(vedtakId: Long): Vedtak {
-        return vedtakRepository.getReferenceById(vedtakId)
-    }
+    fun hent(vedtakId: Long): Vedtak = vedtakRepository.getReferenceById(vedtakId)
 
-    fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
-        return vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
-    }
+    fun hentAktivForBehandling(behandlingId: Long): Vedtak? = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
 
-    fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak {
-        return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-    }
+    fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
 
-    fun hentVedtaksdatoForBehandlingThrows(behandlingId: Long): LocalDateTime {
-        return vedtakRepository.finnVedtaksdatoForBehandling(behandlingId)
+    fun hentVedtaksdatoForBehandlingThrows(behandlingId: Long): LocalDateTime =
+        vedtakRepository.finnVedtaksdatoForBehandling(behandlingId)
             ?: error("Finner ikke vedtaksato for behandling=$behandlingId")
-    }
 
-    fun oppdater(vedtak: Vedtak): Vedtak {
-        return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
+    fun oppdater(vedtak: Vedtak): Vedtak =
+        if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
             vedtakRepository.saveAndFlush(vedtak)
         } else {
             error("Forsøker å oppdatere et vedtak som ikke er lagret")
         }
-    }
 
-    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
-        return if (vedtak.behandling.erBehandlingMedVedtaksbrevutsending()) {
+    fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak =
+        if (vedtak.behandling.erBehandlingMedVedtaksbrevutsending()) {
             val brev = dokumentGenereringService.genererBrevForVedtak(vedtak)
             vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
         } else {
             vedtak
         }
-    }
 
     /**
      * Oppdater vedtaksdato og brev.

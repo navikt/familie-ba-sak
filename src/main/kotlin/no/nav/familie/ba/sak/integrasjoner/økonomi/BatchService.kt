@@ -5,7 +5,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
-class BatchService(val batchRepository: BatchRepository) {
+class BatchService(
+    val batchRepository: BatchRepository,
+) {
     @Transactional
     fun plukkLedigeBatchKjøringerFor(dato: LocalDate): Batch? {
         val batch = batchRepository.findByKjøredatoAndLedig(dato)

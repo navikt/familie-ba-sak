@@ -238,7 +238,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val samletResultat =
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
-                testDataBaSak.filter { it.fnr != excludedFnr }
+                testDataBaSak
+                    .filter { it.fnr != excludedFnr }
                     .map { it.fnr } +
                     testDataInfotrygd.map { it.fnr },
                 "2020",
@@ -247,16 +248,24 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(samletResultat.brukere).hasSize(2)
         assertThat(samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder).hasSize(2)
         assertThat(
-            samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
-                it.fraMaaned == "2020-08"
-            }!!.delingsprosent,
+            samletResultat.brukere
+                .find { it.ident == duplicatedFnr }!!
+                .perioder
+                .find {
+                    it.fraMaaned == "2020-08"
+                }!!
+                .delingsprosent,
         ).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._50,
         )
         assertThat(
-            samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
-                it.tomMaaned == "2020-09"
-            }!!.delingsprosent,
+            samletResultat.brukere
+                .find { it.ident == duplicatedFnr }!!
+                .perioder
+                .find {
+                    it.tomMaaned == "2020-09"
+                }!!
+                .delingsprosent,
         ).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._0,
         )
@@ -336,9 +345,27 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         assertThat(resultat.brukere).hasSize(1)
         assertThat(resultat.brukere.first().perioder).hasSize(1)
-        assertThat(resultat.brukere.first().perioder.first().fraMaaned).isEqualTo("2019-09")
-        assertThat(resultat.brukere.first().perioder.first().tomMaaned).isEqualTo("2027-07")
-        assertThat(resultat.brukere.first().perioder.first().delingsprosent).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .fraMaaned,
+        ).isEqualTo("2019-09")
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .tomMaaned,
+        ).isEqualTo("2027-07")
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .delingsprosent,
+        ).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
         assertThat(resultat.brukere.first().ident).isEqualTo(fnr)
         assertThat(resultat.brukere.first().sisteVedtakPaaIdent).isEqualTo(LocalDate.of(2022, 2, 6).atStartOfDay())
     }
@@ -416,9 +443,27 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         assertThat(resultat.brukere).hasSize(1)
         assertThat(resultat.brukere.first().perioder).hasSize(1)
-        assertThat(resultat.brukere.first().perioder.first().fraMaaned).isEqualTo("2019-09")
-        assertThat(resultat.brukere.first().perioder.first().tomMaaned).isEqualTo("2027-07")
-        assertThat(resultat.brukere.first().perioder.first().delingsprosent).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .fraMaaned,
+        ).isEqualTo("2019-09")
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .tomMaaned,
+        ).isEqualTo("2027-07")
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .delingsprosent,
+        ).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
         assertThat(resultat.brukere.first().ident).isEqualTo(fnr)
         assertThat(resultat.brukere.first().sisteVedtakPaaIdent).isEqualTo(LocalDate.of(2022, 2, 6).atStartOfDay())
     }
@@ -496,9 +541,27 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         assertThat(resultat.brukere).hasSize(1)
         assertThat(resultat.brukere.first().perioder).hasSize(1)
-        assertThat(resultat.brukere.first().perioder.first().fraMaaned).isEqualTo("2019-09")
-        assertThat(resultat.brukere.first().perioder.first().tomMaaned).isEqualTo("2027-07")
-        assertThat(resultat.brukere.first().perioder.first().delingsprosent).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .fraMaaned,
+        ).isEqualTo("2019-09")
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .tomMaaned,
+        ).isEqualTo("2027-07")
+        assertThat(
+            resultat.brukere
+                .first()
+                .perioder
+                .first()
+                .delingsprosent,
+        ).isEqualTo(SkatteetatenPeriode.Delingsprosent._0)
         assertThat(resultat.brukere.first().ident).isEqualTo(fnr)
         assertThat(resultat.brukere.first().sisteVedtakPaaIdent).isEqualTo(LocalDate.of(2022, 2, 6).atStartOfDay())
     }
@@ -560,14 +623,19 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val samletResultat =
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
-                testDataBaSak.filter { it.fnr != excludedFnr }
+                testDataBaSak
+                    .filter { it.fnr != excludedFnr }
                     .map { it.fnr },
                 "2020",
             )
 
         assertThat(samletResultat.brukere).hasSize(1)
         assertThat(samletResultat.brukere.find { it.ident == fnr }!!.perioder).hasSize(3)
-        val sortertePerioder = samletResultat.brukere.find { it.ident == fnr }!!.perioder.sortedBy { it.fraMaaned }
+        val sortertePerioder =
+            samletResultat.brukere
+                .find { it.ident == fnr }!!
+                .perioder
+                .sortedBy { it.fraMaaned }
         assertThat(sortertePerioder[0].delingsprosent).isEqualTo(
             SkatteetatenPeriode.Delingsprosent._0,
         )
@@ -712,20 +780,21 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 utbetalingsoppdrag = "utbetalt",
             ).also {
                 it.andelerTilkjentYtelse.addAll(
-                    perioderTestData.perioder.map { p ->
-                        AndelTilkjentYtelse(
-                            behandlingId = it.behandling.id,
-                            tilkjentYtelse = it,
-                            aktør = perioderTestData.aktør,
-                            kalkulertUtbetalingsbeløp = 1000,
-                            nasjonaltPeriodebeløp = 1000,
-                            stønadFom = YearMonth.of(p.first.year, p.first.month),
-                            stønadTom = YearMonth.of(p.second!!.year, p.second!!.month),
-                            type = YtelseType.UTVIDET_BARNETRYGD,
-                            sats = 1,
-                            prosent = p.third.tilBigDecimal(),
-                        )
-                    }.toMutableSet(),
+                    perioderTestData.perioder
+                        .map { p ->
+                            AndelTilkjentYtelse(
+                                behandlingId = it.behandling.id,
+                                tilkjentYtelse = it,
+                                aktør = perioderTestData.aktør,
+                                kalkulertUtbetalingsbeløp = 1000,
+                                nasjonaltPeriodebeløp = 1000,
+                                stønadFom = YearMonth.of(p.first.year, p.first.month),
+                                stønadTom = YearMonth.of(p.second!!.year, p.second!!.month),
+                                type = YtelseType.UTVIDET_BARNETRYGD,
+                                sats = 1,
+                                prosent = p.third.tilBigDecimal(),
+                            )
+                        }.toMutableSet(),
                 )
             }
         tilkjentYtelseRepository.saveAndFlush(ty)
@@ -761,20 +830,21 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 utbetalingsoppdrag = "utbetalt",
             ).also {
                 it.andelerTilkjentYtelse.addAll(
-                    perioderTestData.perioder.map { p ->
-                        AndelTilkjentYtelse(
-                            behandlingId = it.behandling.id,
-                            tilkjentYtelse = it,
-                            aktør = perioderTestData.aktør,
-                            kalkulertUtbetalingsbeløp = 1000,
-                            nasjonaltPeriodebeløp = 1000,
-                            stønadFom = YearMonth.of(p.first.year, p.first.month),
-                            stønadTom = stønadTom,
-                            type = YtelseType.UTVIDET_BARNETRYGD,
-                            sats = 1,
-                            prosent = p.third.tilBigDecimal(),
-                        )
-                    }.toMutableSet(),
+                    perioderTestData.perioder
+                        .map { p ->
+                            AndelTilkjentYtelse(
+                                behandlingId = it.behandling.id,
+                                tilkjentYtelse = it,
+                                aktør = perioderTestData.aktør,
+                                kalkulertUtbetalingsbeløp = 1000,
+                                nasjonaltPeriodebeløp = 1000,
+                                stønadFom = YearMonth.of(p.first.year, p.first.month),
+                                stønadTom = stønadTom,
+                                type = YtelseType.UTVIDET_BARNETRYGD,
+                                sats = 1,
+                                prosent = p.third.tilBigDecimal(),
+                            )
+                        }.toMutableSet(),
                 )
             }
         tilkjentYtelseRepository.saveAndFlush(ty)

@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/overgangsstonad")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class VedtakOmOvergangsstønadController(private val taskRepository: TaskRepositoryWrapper) {
+class VedtakOmOvergangsstønadController(
+    private val taskRepository: TaskRepositoryWrapper,
+) {
     @PostMapping
     fun håndterVedtakOmOvergangsstønad(
         @Valid

@@ -14,7 +14,8 @@ fun mockEcbService(dataFraCucumber: BegrunnelseTeksterStepDefinition): ECBServic
         val dato = secondArg<LocalDate>()
 
         val valutakurs =
-            dataFraCucumber.valutakurs.values.flatten()
+            dataFraCucumber.valutakurs.values
+                .flatten()
                 .firstOrNull { valutakurs -> valutakurs.valutakursdato == dato && valutakurs.valutakode == valuta }
 
         valutakurs?.kurs ?: BigDecimal.valueOf(10)

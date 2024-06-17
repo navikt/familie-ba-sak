@@ -20,8 +20,10 @@ import java.util.UUID
     // Rekjører kun 1 gang siden avstemming kan ha kjørt OK selv om tasken har feilet, så en autoretry kan trigge flere like grensesnittavstemminger
     maxAntallFeil = 1,
 )
-class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val opprettTaskService: OpprettTaskService) :
-    AsyncTaskStep {
+class GrensesnittavstemMotOppdrag(
+    val avstemmingService: AvstemmingService,
+    val opprettTaskService: OpprettTaskService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
         logger.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")

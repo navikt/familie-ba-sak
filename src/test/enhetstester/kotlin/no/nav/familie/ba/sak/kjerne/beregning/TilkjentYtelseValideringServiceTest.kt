@@ -143,7 +143,8 @@ class TilkjentYtelseValideringServiceTest {
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
         Assertions.assertEquals(
             person2.aktør,
-            tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+            tilkjentYtelseValideringService
+                .finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
                 .single(),
         )
     }

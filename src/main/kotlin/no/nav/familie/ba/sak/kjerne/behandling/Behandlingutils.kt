@@ -10,48 +10,43 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.YearMonth
 
 object Behandlingutils {
-    fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
-        return iverksatteBehandlinger
+    fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? =
+        iverksatteBehandlinger
             .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
             .maxByOrNull { it.aktivertTidspunkt }
-    }
 
     fun hentForrigeBehandlingSomErVedtatt(
         behandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling,
-    ): Behandling? {
-        return behandlinger
+    ): Behandling? =
+        behandlinger
             .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
             .maxByOrNull { it.aktivertTidspunkt }
-    }
 
     fun hentForrigeIverksatteBehandling(
         iverksatteBehandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling,
-    ): Behandling? {
-        return hentIverksatteBehandlinger(
+    ): Behandling? =
+        hentIverksatteBehandlinger(
             iverksatteBehandlinger,
             behandlingFørFølgende,
         ).maxByOrNull { it.aktivertTidspunkt }
-    }
 
     fun hentIverksatteBehandlinger(
         iverksatteBehandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling,
-    ): List<Behandling> {
-        return iverksatteBehandlinger
+    ): List<Behandling> =
+        iverksatteBehandlinger
             .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
-    }
 
     fun harBehandlingsårsakAlleredeKjørt(
         behandlingÅrsak: BehandlingÅrsak,
         behandlinger: List<Behandling>,
         måned: YearMonth,
-    ): Boolean {
-        return behandlinger.any {
+    ): Boolean =
+        behandlinger.any {
             it.aktivertTidspunkt.toLocalDate().toYearMonth() == måned && it.opprettetÅrsak == behandlingÅrsak
         }
-    }
 
     fun validerhenleggelsestype(
         henleggÅrsak: HenleggÅrsak,

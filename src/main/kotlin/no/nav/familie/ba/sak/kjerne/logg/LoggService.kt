@@ -707,16 +707,12 @@ class LoggService(
         return loggRepository.save(logg)
     }
 
-    fun hentLoggForBehandling(behandlingId: Long): List<Logg> {
-        return loggRepository.hentLoggForBehandling(behandlingId)
-    }
+    fun hentLoggForBehandling(behandlingId: Long): List<Logg> = loggRepository.hentLoggForBehandling(behandlingId)
 
     companion object {
         private fun tilBehandlingstema(
             underkategori: BehandlingUnderkategori,
             kategori: BehandlingKategori,
-        ): String {
-            return "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
-        }
+        ): String = "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
     }
 }

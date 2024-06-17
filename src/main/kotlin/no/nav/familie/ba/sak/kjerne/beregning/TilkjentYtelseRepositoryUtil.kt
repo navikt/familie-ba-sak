@@ -47,9 +47,11 @@ fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
 private fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
     try {
         // Det skal ikke være overlapp i andeler for en gitt ytelsestype og aktør
-        this.groupBy { it.aktør.aktørId + it.type }
+        this
+            .groupBy { it.aktør.aktørId + it.type }
             .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
-            .values.forEach { it.perioder() }
+            .values
+            .forEach { it.perioder() }
     } catch (throwable: Throwable) {
         throw IllegalStateException(
             "Endring av andeler tilkjent ytelse i differanseberegning holder på å introdusere duplikater",

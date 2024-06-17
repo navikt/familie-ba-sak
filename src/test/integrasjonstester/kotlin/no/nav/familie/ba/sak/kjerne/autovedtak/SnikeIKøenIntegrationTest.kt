@@ -204,8 +204,8 @@ class SnikeIKøenIntegrationTest(
         }
     }
 
-    private fun kjørFørstegangsbehandling(): Behandling {
-        return kjørStegprosessForFGB(
+    private fun kjørFørstegangsbehandling(): Behandling =
+        kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr),
@@ -218,13 +218,12 @@ class SnikeIKøenIntegrationTest(
             brevmalService = brevmalService,
             vilkårInnvilgetFom = guttenBarnesenFødselsdato,
         )
-    }
 
     private fun kjørRevurderingTilSteg(
         steg: StegType,
         fagsakId: Long,
-    ): Behandling {
-        return kjørStegprosessForRevurderingÅrligKontroll(
+    ): Behandling =
+        kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = steg,
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr),
@@ -233,7 +232,6 @@ class SnikeIKøenIntegrationTest(
             fagsakId = fagsakId,
             brevmalService = brevmalService,
         )
-    }
 }
 
 @TestConfiguration

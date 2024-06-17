@@ -31,8 +31,8 @@ data class Institusjon(
     override val navn: String,
 ) : MottakerInfo
 
-fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? {
-    return when (this) {
+fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? =
+    when (this) {
         is FullmektigEllerVerge, is Dødsbo ->
             AvsenderMottaker(
                 navn = navn,
@@ -48,7 +48,6 @@ fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? {
         // Trenger ikke overstyres når mottaker er bruker
         is Bruker, is BrukerMedUtenlandskAdresse -> null
     }
-}
 
 data class ManuellAdresseInfo(
     val adresselinje1: String,

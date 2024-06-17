@@ -108,7 +108,5 @@ class VilkårsvurderingSteg(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.VILKÅRSVURDERING
-    }
+    override fun stegType(): StegType = StegType.VILKÅRSVURDERING
 }

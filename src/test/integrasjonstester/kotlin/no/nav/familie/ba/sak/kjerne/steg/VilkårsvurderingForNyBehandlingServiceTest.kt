@@ -552,17 +552,18 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             }
         }
         Assertions.assertTrue {
-            barnVilkårResultat.filter {
-                it.vilkårType !in
-                    listOf(
-                        Vilkår.GIFT_PARTNERSKAP,
-                        Vilkår.UNDER_18_ÅR,
-                        Vilkår.BOR_MED_SØKER,
-                    )
-            }.all {
-                it.periodeFom == nyMigreringsdato &&
-                    it.periodeTom == null
-            }
+            barnVilkårResultat
+                .filter {
+                    it.vilkårType !in
+                        listOf(
+                            Vilkår.GIFT_PARTNERSKAP,
+                            Vilkår.UNDER_18_ÅR,
+                            Vilkår.BOR_MED_SØKER,
+                        )
+                }.all {
+                    it.periodeFom == nyMigreringsdato &&
+                        it.periodeTom == null
+                }
         }
     }
 
@@ -799,12 +800,14 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }.vilkårResultater
         assertThat(søkerVilkårResultat).hasSize(3)
         val barnVilkårResultat =
-            vilkårsvurdering.personResultater.first {
-                it.aktør.aktivFødselsnummer() == barnAktør.first().aktivFødselsnummer()
-            }.vilkårResultater
+            vilkårsvurdering.personResultater
+                .first {
+                    it.aktør.aktivFødselsnummer() == barnAktør.first().aktivFødselsnummer()
+                }.vilkårResultater
         assertThat(barnVilkårResultat).hasSize(5)
         assertThat(
-            barnVilkårResultat.filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() }
+            barnVilkårResultat
+                .filter { it.vilkårType.gjelderAlltidFraBarnetsFødselsdato() }
                 .all { it.periodeFom == personopplysningGrunnlag.barna.first().fødselsdato },
         )
     }
@@ -1076,13 +1079,13 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
 
         assertThat(kopiertEndredeUtbetalingsandeler.size).isEqualTo(endredeUtbetalingsAndeler.size)
-        assertThat(kopiertEndredeUtbetalingsandeler).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
-            "id",
-            "behandlingId",
-            "person",
-            *baseEntitetFelter,
-        )
-            .isEqualTo(endredeUtbetalingsAndeler)
+        assertThat(kopiertEndredeUtbetalingsandeler)
+            .usingRecursiveFieldByFieldElementComparatorIgnoringFields(
+                "id",
+                "behandlingId",
+                "person",
+                *baseEntitetFelter,
+            ).isEqualTo(endredeUtbetalingsAndeler)
 
         assertThat(kopiertEndredeUtbetalingsandeler.all { kopiertEua -> endredeUtbetalingsAndeler.any { eua -> eua.person!!.aktør.aktørId == kopiertEua.person!!.aktør.aktørId } }).isTrue
 

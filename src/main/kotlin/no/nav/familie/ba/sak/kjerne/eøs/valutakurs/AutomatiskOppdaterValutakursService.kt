@@ -17,10 +17,15 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserT
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtfyltUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.filtrerErUtfylt
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import org.springframework.stereotype.Service
@@ -105,17 +110,47 @@ class AutomatiskOppdaterValutakursService(
             }
 
         val automatiskGenererteValutakurser =
-            utenlandskePeriodebeløp
-                .filtrerErUtfylt()
-                .flatMap { utenlandskPeriodebeløp ->
-                    utenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(månedForTidligsteTillatteAutomatiskeValutakurs)
-                }
+            utenlandskePeriodebeløp.tilAutomatiskeValutakurserEtter(månedForTidligsteTillatteAutomatiskeValutakurs)
 
         valutakursService.oppdaterValutakurser(BehandlingId(behandling.id), automatiskGenererteValutakurser)
     }
 
-    private fun UtfyltUtenlandskPeriodebeløp.tilAutomatiskOppdaterteValutakurserEtter(
+    private fun Collection<UtenlandskPeriodebeløp>.tilAutomatiskeValutakurserEtter(
         månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
+    ): List<Valutakurs> {
+        val valutakoder =
+            filtrerErUtfylt().map { it.valutakode }.toSet()
+
+        val automatiskGenererteValutakurser =
+            valutakoder
+                .map { valutakode ->
+                    val upbGruppertPerBarnForValutakode = filtrerErUtfylt().filter { it.valutakode == valutakode }.groupBy { it.barnAktører }
+                    val upbPerBarnTidslinjer = upbGruppertPerBarnForValutakode.values.map { upbForBarn -> upbForBarn.sortedBy { it.fom }.map { månedPeriodeAv(it.fom, it.tom, it) }.tilTidslinje() }
+
+                    val perioderAvBarnMedValutakode = upbPerBarnTidslinjer.kombiner { upberIPeriode -> upberIPeriode.flatMap { it.barnAktører }.toSet() }.perioder()
+
+                    perioderAvBarnMedValutakode
+                        .mapNotNull { periode ->
+                            periode.innhold?.let {
+                                lagAutomatiskeValutakurserIPeriode(
+                                    månedForTidligsteTillatteAutomatiskeValutakurs = månedForTidligsteTillatteAutomatiskeValutakurs,
+                                    fom = periode.fraOgMed.tilYearMonth(),
+                                    tom = periode.tilOgMed.tilYearMonthEllerNull(),
+                                    barn = it,
+                                    valutakode = valutakode,
+                                )
+                            }
+                        }.flatten()
+                }.flatten()
+        return automatiskGenererteValutakurser
+    }
+
+    private fun lagAutomatiskeValutakurserIPeriode(
+        månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
+        fom: YearMonth,
+        tom: YearMonth?,
+        barn: Set<Aktør>,
+        valutakode: String,
     ): List<Valutakurs> {
         val start = maxOf(månedForTidligsteTillatteAutomatiskeValutakurs, fom)
         val denneMåneden = localDateProvider.now().toYearMonth()
@@ -129,7 +164,7 @@ class AutomatiskOppdaterValutakursService(
             Valutakurs(
                 fom = måned,
                 tom = if (måned == denneMåneden && tom == null) null else måned,
-                barnAktører = barnAktører,
+                barnAktører = barn,
                 valutakursdato = sisteVirkedagForrigeMåned,
                 valutakode = valutakode,
                 kurs = ecbService.hentValutakurs(valutakode, sisteVirkedagForrigeMåned),

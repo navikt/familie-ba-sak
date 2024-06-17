@@ -106,7 +106,8 @@ class PdlRestClient(
 
     private fun hentDødsfallDataFraListeMedDødsfall(dødsfall: List<PdlDødsfallResponse>): DødsfallData? {
         val dødsdato =
-            dødsfall.filter { it.doedsdato != null }
+            dødsfall
+                .filter { it.doedsdato != null }
                 .map { it.doedsdato }
                 .firstOrNull()
 
@@ -207,14 +208,13 @@ class PdlRestClient(
         return bostedsadresser.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
     }
 
-    fun httpHeaders(): HttpHeaders {
-        return HttpHeaders().apply {
+    fun httpHeaders(): HttpHeaders =
+        HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
             add("behandlingsnummer", Tema.BAR.behandlingsnummer)
         }
-    }
 
     companion object {
         private const val PATH_GRAPHQL = "graphql"
@@ -222,16 +222,18 @@ class PdlRestClient(
     }
 }
 
-enum class PersonInfoQuery(val graphQL: String) {
+enum class PersonInfoQuery(
+    val graphQL: String,
+) {
     ENKEL(hentGraphqlQuery("hentperson-enkel")),
     MED_RELASJONER_OG_REGISTERINFORMASJON(hentGraphqlQuery("hentperson-med-relasjoner-og-registerinformasjon")),
     NAVN_OG_ADRESSE(hentGraphqlQuery("hentperson-navn-og-adresse")),
 }
 
-fun hentGraphqlQuery(pdlResource: String): String {
-    return PersonInfoQuery::class.java.getResource("/pdl/$pdlResource.graphql").readText().graphqlCompatible()
-}
+fun hentGraphqlQuery(pdlResource: String): String =
+    PersonInfoQuery::class.java
+        .getResource("/pdl/$pdlResource.graphql")
+        .readText()
+        .graphqlCompatible()
 
-private fun String.graphqlCompatible(): String {
-    return StringUtils.normalizeSpace(this.replace("\n", ""))
-}
+private fun String.graphqlCompatible(): String = StringUtils.normalizeSpace(this.replace("\n", ""))

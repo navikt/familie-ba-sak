@@ -164,12 +164,8 @@ internal class StegServiceTest {
             override fun utførStegOgAngiNeste(
                 behandling: Behandling,
                 data: RegistrerPersongrunnlagDTO,
-            ): StegType {
-                return StegType.VILKÅRSVURDERING
-            }
+            ): StegType = StegType.VILKÅRSVURDERING
 
-            override fun stegType(): StegType {
-                return StegType.REGISTRERE_PERSONGRUNNLAG
-            }
+            override fun stegType(): StegType = StegType.REGISTRERE_PERSONGRUNNLAG
         }
 }

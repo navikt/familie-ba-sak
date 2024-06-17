@@ -146,15 +146,20 @@ class ForvalterServiceTest {
         every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsvurdering
 
         val vilkårsvurderingEndret = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
-        vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }
-            ?.vilkårResultater?.forEach { vilkårResultat ->
+        vilkårsvurderingEndret.personResultater
+            .singleOrNull { !it.erSøkersResultater() }
+            ?.vilkårResultater
+            ?.forEach { vilkårResultat ->
                 assertTrue(vilkårResultat.periodeFom?.isSameOrAfter(barn.fødselsdato) ?: false)
             }
 
         val vilkårResultaterMedFomEtterBarnsFødselsDato =
-            vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }?.vilkårResultater
+            vilkårsvurderingEndret.personResultater
+                .singleOrNull { !it.erSøkersResultater() }
+                ?.vilkårResultater
                 ?.filter { it.periodeFom?.isAfter(barn.fødselsdato) ?: false }
-        assertThat(vilkårResultaterMedFomEtterBarnsFødselsDato?.size).isEqualTo(2)
+        assertThat(vilkårResultaterMedFomEtterBarnsFødselsDato?.size)
+            .isEqualTo(2)
             .`as`("Vilkårresultater med fom etter barns fødselsdato har også blitt endret: $vilkårResultaterMedFomEtterBarnsFødselsDato")
     }
 
@@ -317,7 +322,8 @@ class ForvalterServiceTest {
         every { vilkårsvurderingService.hentAktivForBehandling(behandling.id) } returns vilkårsvurdering
 
         val vilkårsvurderingEndret = forvalterService.settFomPåVilkårTilPersonsFødselsdato(behandling.id)
-        vilkårsvurderingEndret.personResultater.singleOrNull { !it.erSøkersResultater() }
+        vilkårsvurderingEndret.personResultater
+            .singleOrNull { !it.erSøkersResultater() }
             ?.vilkårResultater
             ?.forEach { vilkårResultat ->
                 if (vilkårResultat.vilkårType == Vilkår.UNDER_18_ÅR) {
@@ -347,8 +353,8 @@ class ForvalterServiceTest {
             } else {
                 null
             },
-    ): VilkårResultat {
-        return VilkårResultat(
+    ): VilkårResultat =
+        VilkårResultat(
             personResultat = barnResultat,
             vilkårType = vilkårType,
             resultat = Resultat.OPPFYLT,
@@ -357,5 +363,4 @@ class ForvalterServiceTest {
             begrunnelse = "",
             sistEndretIBehandlingId = Random.nextLong(),
         )
-    }
 }

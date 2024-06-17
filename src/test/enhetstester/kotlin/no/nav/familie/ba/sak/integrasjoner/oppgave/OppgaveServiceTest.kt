@@ -284,8 +284,8 @@ class OppgaveServiceTest {
         )
     }
 
-    private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling {
-        return Behandling(
+    private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling =
+        Behandling(
             fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)),
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             kategori = BehandlingKategori.NASJONAL,
@@ -294,11 +294,8 @@ class OppgaveServiceTest {
         ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }
-    }
 
-    private fun lagTestOppgave(): DbOppgave {
-        return DbOppgave(behandling = lagTestBehandling(), type = Oppgavetype.BehandleSak, gsakId = OPPGAVE_ID)
-    }
+    private fun lagTestOppgave(): DbOppgave = DbOppgave(behandling = lagTestBehandling(), type = Oppgavetype.BehandleSak, gsakId = OPPGAVE_ID)
 
     companion object {
         private const val FAGSAK_ID = 10000000L

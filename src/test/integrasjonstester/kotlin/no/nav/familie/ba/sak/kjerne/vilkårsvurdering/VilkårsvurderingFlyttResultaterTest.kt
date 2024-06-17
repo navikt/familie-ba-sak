@@ -161,7 +161,11 @@ class VilkårsvurderingFlyttResultaterTest(
 
         Assertions.assertEquals(
             5,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater?.size,
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering
+                ?.personResultater
+                ?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }
+                ?.vilkårResultater
+                ?.size,
         )
         Assertions.assertEquals(
             vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater,
@@ -170,7 +174,11 @@ class VilkårsvurderingFlyttResultaterTest(
 
         Assertions.assertEquals(
             5,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater?.size,
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering
+                ?.personResultater
+                ?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }
+                ?.vilkårResultater
+                ?.size,
         )
         Assertions.assertEquals(
             vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater,

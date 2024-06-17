@@ -839,9 +839,12 @@ class UtbetalingsoppdragGeneratorServiceTest {
             every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(forrigeTilkjentYtelse.behandling.id) } returns forrigeTilkjentYtelse
 
             every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(behandling.fagsak.id) } returns
-                forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+                forrigeTilkjentYtelse.andelerTilkjentYtelse
+                    .filter { it.erAndelSomSkalSendesTilOppdrag() }
                     .groupBy { it.aktør.aktivFødselsnummer() }
-                    .mapValues { it.value.maxBy { it.periodeOffset!! } }.values.toList()
+                    .mapValues { it.value.maxBy { it.periodeOffset!! } }
+                    .values
+                    .toList()
         }
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse

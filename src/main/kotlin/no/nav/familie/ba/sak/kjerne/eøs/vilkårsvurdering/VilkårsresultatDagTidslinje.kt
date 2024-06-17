@@ -18,7 +18,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
  */
 fun Iterable<VilkårResultat>.tilVilkårRegelverkResultatTidslinje() =
     tidslinje {
-        this.filter { it.erOppfylt() }
+        this
+            .filter { it.erOppfylt() }
             .map { it.tilPeriode() }
     }
 

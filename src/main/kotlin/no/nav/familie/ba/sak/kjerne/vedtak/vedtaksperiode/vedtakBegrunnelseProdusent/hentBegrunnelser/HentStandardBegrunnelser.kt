@@ -75,7 +75,8 @@ internal fun hentStandardBegrunnelser(
                         begrunnelseGrunnlag,
                         utvidetVilkårPåSøkerIPeriode,
                         utvidetVilkårPåSøkerIForrigePeriode,
-                    ) && filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
+                    ) &&
+                        filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
 
                 begrunnelseErGjeldendeForUtgjørendeVilkår ->
                     filtrerPåVilkår(
@@ -109,8 +110,7 @@ internal fun hentStandardBegrunnelser(
             .filterValues {
                 it.periodeResultat in hentResultaterForForrigePeriode(begrunnelseGrunnlag.forrigePeriode) ||
                     it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT
-            }
-            .filterValues { begrunnelse -> begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type) }
+            }.filterValues { begrunnelse -> begrunnelse.erGjeldendeForRolle(person, behandling.fagsak.type) }
             .filterValues {
                 it.erEtterEndretUtbetaling(
                     endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
@@ -163,9 +163,7 @@ private fun filtrerPåEndretUtbetaling(
 
 private fun SanityBegrunnelse.erEndretUtbetaling(
     endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
-): Boolean {
-    return this.gjelderEndretUtbetaling() && this.erLikEndretUtbetalingIPeriode(endretUtbetaling)
-}
+): Boolean = this.gjelderEndretUtbetaling() && this.erLikEndretUtbetalingIPeriode(endretUtbetaling)
 
 private fun SanityBegrunnelse.erGjeldendeForRegelverk(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
     begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } || this.tema == Tema.FELLES
@@ -176,11 +174,16 @@ fun ISanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGr
     }
 
     val oppfylteVilkårDenneBehandlingen =
-        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
-            .map { it.vilkårType }.toSet()
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater
+            .filter { it.resultat == Resultat.OPPFYLT }
+            .map { it.vilkårType }
+            .toSet()
     val oppfylteVilkårForrigeBehandling =
-        begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }
-            ?.map { it.vilkårType }?.toSet() ?: emptySet()
+        begrunnelseGrunnlag.sammePeriodeForrigeBehandling
+            ?.vilkårResultater
+            ?.filter { it.resultat == Resultat.OPPFYLT }
+            ?.map { it.vilkårType }
+            ?.toSet() ?: emptySet()
 
     val vilkårMistetSidenForrigeBehandling = oppfylteVilkårForrigeBehandling - oppfylteVilkårDenneBehandlingen
 
@@ -314,8 +317,10 @@ fun ISanityBegrunnelse.erGjeldendeForOpphørFraForrigeBehandling(begrunnelseGrun
     }
 
     val oppfylteVilkårDenneBehandlingen =
-        begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
-            .map { it.vilkårType }.toSet()
+        begrunnelseGrunnlag.dennePerioden.vilkårResultater
+            .filter { it.resultat == Resultat.OPPFYLT }
+            .map { it.vilkårType }
+            .toSet()
 
     val oppfylteVilkårsresultaterForrigeBehandling =
         begrunnelseGrunnlag.sammePeriodeForrigeBehandling?.vilkårResultater?.filter { it.resultat == Resultat.OPPFYLT }

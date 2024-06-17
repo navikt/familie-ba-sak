@@ -39,8 +39,10 @@ class VilkårsvurderingTidslinjeService(
     fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean, Måned> {
         val søker = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id).søker
         val søkerPersonresultater =
-            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId.id)
-                .personResultater.single { it.aktør == søker.aktør }
+            vilkårsvurderingService
+                .hentAktivForBehandlingThrows(behandlingId = behandlingId.id)
+                .personResultater
+                .single { it.aktør == søker.aktør }
 
         val erAnnenForelderOmfattetAvNorskLovgivingTidslinje =
             søkerPersonresultater.vilkårResultater

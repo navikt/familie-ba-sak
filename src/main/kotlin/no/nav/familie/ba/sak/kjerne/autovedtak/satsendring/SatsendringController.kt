@@ -67,9 +67,7 @@ class SatsendringController(
     @GetMapping(path = ["/{fagsakId}/kan-kjore-satsendring"])
     fun kanKjøreSatsendringPåFagsak(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<Boolean>> {
-        return ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
-    }
+    ): ResponseEntity<Ressurs<Boolean>> = ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
 
     @PostMapping(path = ["/kjorsatsendringForListeMedIdenter"])
     fun utførSatsendringPåListeIdenter(

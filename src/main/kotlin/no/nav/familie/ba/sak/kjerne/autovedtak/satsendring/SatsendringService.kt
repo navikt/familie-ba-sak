@@ -42,22 +42,28 @@ class SatsendringService(
         var slice: Slice<Long> = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 10000))
         val løpendeFagsaker: List<Long> = slice.getContent()
         fagsakerUtenSisteSats.addAll(
-            løpendeFagsaker.parallelStream().filter {
-                !erFagsakOppdatertMedSisteSatser(it)
-            }.collect(
-                Collectors.toList(),
-            ),
+            løpendeFagsaker
+                .parallelStream()
+                .filter {
+                    !erFagsakOppdatertMedSisteSatser(it)
+                }.collect(
+                    Collectors.toList(),
+                ),
         )
 
         while (slice.hasNext()) {
             logger.info("Next slice")
             slice = fagsakRepository.finnLøpendeFagsaker(slice.nextPageable())
             fagsakerUtenSisteSats.addAll(
-                slice.get().toList().parallelStream().filter {
-                    !erFagsakOppdatertMedSisteSatser(it)
-                }.collect(
-                    Collectors.toList(),
-                ),
+                slice
+                    .get()
+                    .toList()
+                    .parallelStream()
+                    .filter {
+                        !erFagsakOppdatertMedSisteSatser(it)
+                    }.collect(
+                        Collectors.toList(),
+                    ),
             )
         }
         logger.warn("Følgende saker mangler satsendring:")

@@ -48,19 +48,21 @@ class OrdinærBarnetrygdUtilTest {
         val månedFørFylte18År = barn.fødselsdato.plusYears(18).forrigeMåned()
 
         val vilkårResulater =
-            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
-                if (it == Vilkår.BOR_MED_SØKER) {
-                    null
-                } else {
-                    lagVilkårResultat(
-                        personResultat = personResultat,
-                        periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) barn.fødselsdato else generellVilkårFom,
-                        periodeTom = null,
-                        resultat = Resultat.OPPFYLT,
-                        vilkårType = it,
-                    )
-                }
-            }.toSet()
+            Vilkår
+                .hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR)
+                .mapNotNull {
+                    if (it == Vilkår.BOR_MED_SØKER) {
+                        null
+                    } else {
+                        lagVilkårResultat(
+                            personResultat = personResultat,
+                            periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) barn.fødselsdato else generellVilkårFom,
+                            periodeTom = null,
+                            resultat = Resultat.OPPFYLT,
+                            vilkårType = it,
+                        )
+                    }
+                }.toSet()
 
         val borMedSøkerVilkår =
             listOf(

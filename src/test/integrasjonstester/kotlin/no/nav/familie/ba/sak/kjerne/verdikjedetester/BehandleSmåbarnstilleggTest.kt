@@ -348,9 +348,10 @@ class BehandleSmåbarnstilleggTest(
         // Vedtaksperioder skal være slettet etter at den er blitt omgjort til manuell behandling
         assertEquals(
             0,
-            vedtaksperiodeService.hentPersisterteVedtaksperioder(
-                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id),
-            ).size,
+            vedtaksperiodeService
+                .hentPersisterteVedtaksperioder(
+                    vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id),
+                ).size,
         )
 
         verify(exactly = 1) {

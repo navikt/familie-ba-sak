@@ -10,16 +10,12 @@ import org.springframework.transaction.annotation.Transactional
 class SammensattKontrollsakService(
     private val sammensattKontrollsakRepository: SammensattKontrollsakRepository,
 ) {
-    fun finnSammensattKontrollsak(behandlingId: Long): SammensattKontrollsak? {
-        return sammensattKontrollsakRepository.finnSammensattKontrollsakForBehandling(behandlingId = behandlingId)
-    }
+    fun finnSammensattKontrollsak(behandlingId: Long): SammensattKontrollsak? = sammensattKontrollsakRepository.finnSammensattKontrollsakForBehandling(behandlingId = behandlingId)
 
     @Transactional
     fun opprettSammensattKontrollsak(
         restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
-    ): SammensattKontrollsak {
-        return sammensattKontrollsakRepository.save(restOpprettSammensattKontrollsak.tilSammensattKontrollsak())
-    }
+    ): SammensattKontrollsak = sammensattKontrollsakRepository.save(restOpprettSammensattKontrollsak.tilSammensattKontrollsak())
 
     @Transactional
     fun oppdaterSammensattKontrollsak(

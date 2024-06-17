@@ -82,8 +82,8 @@ internal class HenleggBehandlingTaskTest {
         assertThat(task.metadata["Resultat"]).isEqualTo("Henleggelse kjørt OK")
     }
 
-    private fun opprettTekniskHenleggelseGrunnetSatsendringTask(): Task {
-        return Task(
+    private fun opprettTekniskHenleggelseGrunnetSatsendringTask(): Task =
+        Task(
             type = HenleggBehandlingTask.TASK_STEP_TYPE,
             payload =
                 objectMapper.writeValueAsString(
@@ -95,5 +95,4 @@ internal class HenleggBehandlingTaskTest {
                     ),
                 ),
         )
-    }
 }

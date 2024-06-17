@@ -44,14 +44,18 @@ class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationT
             )
 
         val utvidetBehandlingFør =
-            vilkårsvurderingTestController.opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
-                .body?.data!!
+            vilkårsvurderingTestController
+                .opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
+                .body
+                ?.data!!
 
         assertTrue(utvidetBehandlingFør.valutakurser.isEmpty())
 
         val utvidetBehandlingEtter =
-            kompetanseTestController.endreKompetanser(utvidetBehandlingFør.behandlingId, kompetanseRequest)
-                .body?.data!!
+            kompetanseTestController
+                .endreKompetanser(utvidetBehandlingFør.behandlingId, kompetanseRequest)
+                .body
+                ?.data!!
 
         assertTrue(utvidetBehandlingEtter.valutakurser.isNotEmpty())
     }

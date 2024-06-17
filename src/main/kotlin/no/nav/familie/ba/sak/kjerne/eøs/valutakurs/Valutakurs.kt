@@ -131,8 +131,8 @@ data class UtfyltValutakurs(
     val vurderingsform: Vurderingsform,
 ) : IValutakurs
 
-fun Valutakurs.tilIValutakurs(): IValutakurs {
-    return if (this.erObligatoriskeFelterSatt()) {
+fun Valutakurs.tilIValutakurs(): IValutakurs =
+    if (this.erObligatoriskeFelterSatt()) {
         UtfyltValutakurs(
             id = this.id,
             behandlingId = this.behandlingId,
@@ -150,16 +150,16 @@ fun Valutakurs.tilIValutakurs(): IValutakurs {
             behandlingId = this.behandlingId,
         )
     }
-}
 
 fun List<UtfyltValutakurs>.tilTidslinje() =
-    this.map {
-        Periode(
-            fraOgMed = it.fom.tilTidspunkt(),
-            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
-            innhold = it,
-        )
-    }.tilTidslinje()
+    this
+        .map {
+            Periode(
+                fraOgMed = it.fom.tilTidspunkt(),
+                tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
+                innhold = it,
+            )
+        }.tilTidslinje()
 
 fun Collection<Valutakurs>.erAlleValutakurserOppdaterteIMåned(
     måned: YearMonth,

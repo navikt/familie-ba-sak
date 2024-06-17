@@ -45,7 +45,8 @@ class SkatteetatenController(
                 skatteetatenService.finnPersonerMedUtvidetBarnetrygd(aar)
             } else {
                 SkatteetatenPersonerResponse(
-                    listeMedTestdataPerioder().filter { it.sisteVedtakPaaIdent.year == aar.toInt() }
+                    listeMedTestdataPerioder()
+                        .filter { it.sisteVedtakPaaIdent.year == aar.toInt() }
                         .map { SkatteetatenPerson(it.ident, it.sisteVedtakPaaIdent) },
                 )
             }

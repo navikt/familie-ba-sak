@@ -32,9 +32,14 @@ class VilkårFeil(
     cause: Throwable? = throwable,
 ) : FunksjonellFeil(melding, frontendFeilmelding, httpStatus, throwable, cause)
 
-class SatsendringFeil(melding: String? = "", public val satsendringSvar: SatsendringSvar) : RuntimeException(melding)
+class SatsendringFeil(
+    melding: String? = "",
+    public val satsendringSvar: SatsendringSvar,
+) : RuntimeException(melding)
 
-class MånedligValutaJusteringFeil(val melding: String) : RuntimeException(melding)
+class MånedligValutaJusteringFeil(
+    val melding: String,
+) : RuntimeException(melding)
 
 class UtbetalingsikkerhetFeil(
     melding: String,
@@ -62,12 +67,15 @@ class RolleTilgangskontrollFeil(
         throwable,
     )
 
-class PdlRequestException(message: String) : Feil(message)
+class PdlRequestException(
+    message: String,
+) : Feil(message)
 
 class PdlNotFoundException : FunksjonellFeil("Fant ikke person")
 
-class PdlPersonKanIkkeBehandlesIFagsystem(val årsak: String) :
-    FunksjonellFeil("Person kan ikke behandles i fagsystem: $årsak")
+class PdlPersonKanIkkeBehandlesIFagsystem(
+    val årsak: String,
+) : FunksjonellFeil("Person kan ikke behandles i fagsystem: $årsak")
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace"])
@@ -91,14 +99,13 @@ open class EksternTjenesteFeilException(
         eksternTjenesteFeil.melding = melding
     }
 
-    override fun toString(): String {
-        return """EksternTjenesteFeil(
+    override fun toString(): String =
+        """EksternTjenesteFeil(
             |   melding='$melding' 
             |   eksternTjeneste=$eksternTjenesteFeil
             |   request=$request
             |   throwable=$throwable)
-            """.trimMargin()
-    }
+        """.trimMargin()
 }
 
 @OptIn(ExperimentalContracts::class)

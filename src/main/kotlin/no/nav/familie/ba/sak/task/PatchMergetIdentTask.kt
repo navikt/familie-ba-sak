@@ -43,7 +43,8 @@ class PatchMergetIdentTask(
 
         val aktørerForIdentSomSkalPatches =
             (
-                persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
+                persongrunnlagService
+                    .hentSøkerOgBarnPåFagsak(fagsakId = dto.fagsakId)
                     ?.filter { it.type in listOf(PersonType.BARN, PersonType.SØKER) && it.aktør.aktivFødselsnummer() == dto.gammelIdent.ident }
                     ?.map { it.aktør.aktørId } ?: emptyList()
             ).toSet()

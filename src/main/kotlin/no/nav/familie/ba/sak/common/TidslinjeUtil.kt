@@ -16,7 +16,11 @@ fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, M�
         listOf(
             Periode(
                 fødselsdato.toYearMonth().tilTidspunkt().neste(),
-                fødselsdato.plusYears(18).toYearMonth().tilTidspunkt().forrige(),
+                fødselsdato
+                    .plusYears(18)
+                    .toYearMonth()
+                    .tilTidspunkt()
+                    .forrige(),
                 true,
             ),
         )
@@ -27,7 +31,11 @@ fun erUnder6ÅrTidslinje(person: Person) =
         listOf(
             Periode(
                 person.fødselsdato.toYearMonth().tilTidspunkt(),
-                person.fødselsdato.toYearMonth().plusYears(6).tilTidspunkt().forrige(),
+                person.fødselsdato
+                    .toYearMonth()
+                    .plusYears(6)
+                    .tilTidspunkt()
+                    .forrige(),
                 true,
             ),
         )

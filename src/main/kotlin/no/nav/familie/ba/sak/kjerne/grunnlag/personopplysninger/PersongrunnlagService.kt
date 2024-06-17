@@ -52,7 +52,8 @@ class PersongrunnlagService(
 ) {
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
         val restPerson = person.tilRestPerson()
-        restPerson.registerhistorikk?.statsborgerskap
+        restPerson.registerhistorikk
+            ?.statsborgerskap
             ?.forEach { lagret ->
                 val landkode = lagret.verdi
                 val land = statsborgerskapService.hentLand(landkode)
@@ -61,29 +62,28 @@ class PersongrunnlagService(
         return restPerson
     }
 
-    fun hentSøker(behandlingId: Long): Person {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
-    }
+    fun hentSøker(behandlingId: Long): Person = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
 
-    fun hentBarna(behandling: Behandling): List<Person> {
-        return hentBarna(behandling.id)
-    }
+    fun hentBarna(behandling: Behandling): List<Person> = hentBarna(behandling.id)
 
     fun hentSøkerOgBarnPåBehandlingThrows(behandlingId: Long): List<PersonEnkel> =
         hentSøkerOgBarnPåBehandling(behandlingId)
             ?: error("Finner ikke søker/barn på behandling=$behandlingId")
 
     fun hentSøkerOgBarnPåBehandling(behandlingId: Long): List<PersonEnkel>? =
-        personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId)
+        personopplysningGrunnlagRepository
+            .finnSøkerOgBarnAktørerTilAktiv(behandlingId)
             .takeIf { it.isNotEmpty() }
 
     fun hentSøkerOgBarnPåFagsak(fagsakId: Long): Set<PersonEnkel>? =
-        personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilFagsak(fagsakId)
+        personopplysningGrunnlagRepository
+            .finnSøkerOgBarnAktørerTilFagsak(fagsakId)
             .takeIf { it.isNotEmpty() }
 
     fun hentBarna(behandlingId: Long): List<Person> =
         personopplysningGrunnlagRepository
-            .findByBehandlingAndAktiv(behandlingId)!!.barna
+            .findByBehandlingAndAktiv(behandlingId)!!
+            .barna
 
     fun hentPersonerPåBehandling(
         identer: List<String>,
@@ -97,14 +97,11 @@ class PersongrunnlagService(
         return grunnlag.søkerOgBarn.filter { person -> aktørIder.contains(person.aktør) }
     }
 
-    fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
-    }
+    fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
 
-    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
-        return hentAktiv(behandlingId = behandlingId)
+    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag =
+        hentAktiv(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
-    }
 
     @Transactional
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
@@ -154,7 +151,8 @@ class PersongrunnlagService(
                 målform = personopplysningGrunnlag.søker.målform,
             )
 
-        oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
+        oppdatertGrunnlag.barna
+            .singleOrNull { nyttbarnAktør == it.aktør }
             ?.also { loggService.opprettBarnLagtTilLogg(behandling, it) } ?: run {
             secureLogger.info("Klarte ikke legge til barn med aktør $nyttbarnAktør på personopplysningsgrunnlag ${personopplysningGrunnlag.id}")
             throw Feil("Nytt barn ikke lagt til i personopplysningsgrunnlag ${personopplysningGrunnlag.id}. Se securelog for mer informasjon.")
@@ -182,7 +180,8 @@ class PersongrunnlagService(
     ) {
         val søkerAktør = personidentService.hentOgLagreAktør(søknadDTO.søkerMedOpplysninger.ident, true)
         val valgteBarnsAktør =
-            søknadDTO.barnaMedOpplysninger.filter { it.inkludertISøknaden && it.erFolkeregistrert }
+            søknadDTO.barnaMedOpplysninger
+                .filter { it.inkludertISøknaden && it.erFolkeregistrert }
                 .map { barn -> personidentService.hentOgLagreAktør(barn.ident, true) }
 
         val barnMedTilkjentYtelseIForrigeBehandling =
@@ -299,17 +298,20 @@ class PersongrunnlagService(
             person.opphold =
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()
             person.bostedsadresser =
-                personinfo.bostedsadresser.filtrerUtKunNorskeBostedsadresser()
+                personinfo.bostedsadresser
+                    .filtrerUtKunNorskeBostedsadresser()
                     .map { GrBostedsadresse.fraBostedsadresse(it, person) }
                     .toMutableList()
             person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }.toMutableList()
             person.statsborgerskap =
-                personinfo.statsborgerskap?.flatMap {
-                    statsborgerskapService.hentStatsborgerskapMedMedlemskap(
-                        statsborgerskap = it,
-                        person = person,
-                    )
-                }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
+                personinfo.statsborgerskap
+                    ?.flatMap {
+                        statsborgerskapService.hentStatsborgerskapMedMedlemskap(
+                            statsborgerskap = it,
+                            person = person,
+                        )
+                    }?.sortedBy { it.gyldigPeriode?.fom }
+                    ?.toMutableList() ?: mutableListOf()
             person.dødsfall =
                 lagDødsfallFraPdl(
                     person = person,
@@ -318,19 +320,22 @@ class PersongrunnlagService(
                 )
             if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
                 person.arbeidsforhold =
-                    arbeidsforholdService.hentArbeidsforhold(
-                        person = person,
-                    ).toMutableList()
+                    arbeidsforholdService
+                        .hentArbeidsforhold(
+                            person = person,
+                        ).toMutableList()
             }
         }
     }
 
     private fun hentFarEllerMedmorAktør(barna: List<Aktør>): Aktør? {
         val barnasFarEllerMedmorAktører =
-            barna.map { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = it) }
+            barna
+                .map { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør = it) }
                 .flatMap { barn ->
                     barn.forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR || it.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR }
-                }.map { it.aktør }.toSet()
+                }.map { it.aktør }
+                .toSet()
 
         return barnasFarEllerMedmorAktører.singleOrNull()?.also {
             personidentService.hentOgLagreAktør(ident = it.aktørId, lagre = true)

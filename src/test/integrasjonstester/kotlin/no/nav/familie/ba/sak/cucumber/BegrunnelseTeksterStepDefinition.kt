@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -122,16 +123,18 @@ class BegrunnelseTeksterStepDefinition {
         persongrunnlag.putAll(personGrunnlagMap)
 
         fagsaker =
-            fagsaker.mapValues { (_, fagsak) ->
-                val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
-                val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
-                fagsak.copy(aktør = søkerAktør)
-            }.toMutableMap()
+            fagsaker
+                .mapValues { (_, fagsak) ->
+                    val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
+                    val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
+                    fagsak.copy(aktør = søkerAktør)
+                }.toMutableMap()
 
         behandlinger =
-            behandlinger.mapValues { (_, behandling) ->
-                behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
-            }.toMutableMap()
+            behandlinger
+                .mapValues { (_, behandling) ->
+                    behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
+                }.toMutableMap()
     }
 
     @Og("følgende dagens dato {}")
@@ -286,8 +289,10 @@ class BegrunnelseTeksterStepDefinition {
         return utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
                 gyldigeBegrunnelser =
-                    it.tilVedtaksperiodeMedBegrunnelser(vedtak)
-                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList(),
+                    it
+                        .tilVedtaksperiodeMedBegrunnelser(vedtak)
+                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser)
+                        .toList(),
             )
         }
     }
@@ -399,7 +404,8 @@ class BegrunnelseTeksterStepDefinition {
             )
 
         val faktiskeBegrunnelser: List<BegrunnelseMedData> =
-            vedtaksperiodeMedBegrunnelser.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
+            vedtaksperiodeMedBegrunnelser
+                .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                 .begrunnelser
                 .filterIsInstance<BegrunnelseMedData>()
 
@@ -447,7 +453,8 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val fagsak = fagsaker[fagsakId]!!
         val internePerioderOvergangsstønad =
-            dataTable.asMaps()
+            dataTable
+                .asMaps()
                 .map({ rad ->
                     InternPeriodeOvergangsstønad(
                         fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
@@ -476,15 +483,19 @@ class BegrunnelseTeksterStepDefinition {
         dataTable: DataTable,
     ) {
         val beregnetTilkjentYtelse =
-            tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList()!!
+            tilkjenteYtelser[behandlingId]
+                ?.andelerTilkjentYtelse
+                ?.toList()!!
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!.andelerTilkjentYtelse
+            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!
+                .andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         assertThat(beregnetTilkjentYtelse)
-            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id", ".*forrigePeriodeOffset", ".*periodeOffset")
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id", ".*forrigePeriodeOffset", ".*periodeOffset")
             .isEqualTo(forventedeAndeler)
     }
 
@@ -496,12 +507,14 @@ class BegrunnelseTeksterStepDefinition {
         dataTable: DataTable,
     ) {
         val aktørTilDødsfall: Map<String, LocalDate> =
-            dataTable.asMaps().map { rad ->
-                val aktørId = parseAktørId(rad)
-                val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
+            dataTable
+                .asMaps()
+                .map { rad ->
+                    val aktørId = parseAktørId(rad)
+                    val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
 
-                aktørId to dødsfallDato
-            }.toMap()
+                    aktørId to dødsfallDato
+                }.toMap()
 
         aktørTilDødsfall.forEach { (aktørId, dødsfallDato) ->
             persongrunnlag.values.flatMap { it.personer }.filter { it.aktør.aktørId == aktørId }.forEach {
@@ -611,6 +624,27 @@ class BegrunnelseTeksterStepDefinition {
             mock.stegService.håndterBeslutningForVedtak(behandling, restBeslutning)
         }
     }
+
+    /**
+     * Mulige felt:
+     * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+     */
+    @Når("vi legger til utenlandsk periodebeløp for behandling {}")
+    fun `når vi legger til upb på behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(dataTable.asMaps(), persongrunnlag)[behandlingId]!!
+
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehanldingId = behandlingId,
+                forrigeBehandling = null,
+            )
+
+        mock.utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp.single())
+    }
 }
 
 data class SammenlignbarBegrunnelse(
@@ -629,7 +663,8 @@ private object SanityBegrunnelseMock {
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
-            objectMapper.readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
+            objectMapper
+                .readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
                 .toList()
 
         val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
@@ -651,10 +686,11 @@ private object SanityBegrunnelseMock {
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
-            objectMapper.readValue(
-                restSanityEØSBegrunnelserJson,
-                Array<RestSanityEØSBegrunnelse>::class.java,
-            ).toList()
+            objectMapper
+                .readValue(
+                    restSanityEØSBegrunnelserJson,
+                    Array<RestSanityEØSBegrunnelse>::class.java,
+                ).toList()
 
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }

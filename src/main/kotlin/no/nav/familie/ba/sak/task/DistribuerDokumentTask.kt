@@ -54,15 +54,14 @@ class DistribuerDokumentTask(
         fun opprettDistribuerDokumentTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
             properties: Properties,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
                 triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(),
             )
-        }
 
         const val TASK_STEP_TYPE = "distribuerDokument"
     }

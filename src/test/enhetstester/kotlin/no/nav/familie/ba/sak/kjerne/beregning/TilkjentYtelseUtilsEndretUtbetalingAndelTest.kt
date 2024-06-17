@@ -64,38 +64,34 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 4)),
                 MånedPeriode(YearMonth.of(2018, 10), YearMonth.of(2021, 8)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(barn1, it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(barn1, it.fom, it.tom)
+            }
 
         val andelTilkjentytelseForBarn2 =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 2), YearMonth.of(2018, 8)),
                 MånedPeriode(YearMonth.of(2018, 11), YearMonth.of(2021, 9)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(barn2, it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(barn2, it.fom, it.tom)
+            }
 
         val endretUtbetalingerForBarn1 =
             listOf(
                 MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
                 MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4)),
-            )
-                .map {
-                    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn1, it.fom, it.tom, 50)
-                }
+            ).map {
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn1, it.fom, it.tom, 50)
+            }
 
         val endretUtbetalingerForBarn2 =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 5)),
                 MånedPeriode(YearMonth.of(2018, 7), YearMonth.of(2021, 9)),
                 MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12)),
-            )
-                .map {
-                    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn2, it.fom, it.tom, 50)
-                }
+            ).map {
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn2, it.fom, it.tom, 50)
+            }
 
         val andelerTilkjentYtelserEtterEUA =
             TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(

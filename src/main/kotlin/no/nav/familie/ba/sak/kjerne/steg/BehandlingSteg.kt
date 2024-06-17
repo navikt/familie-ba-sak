@@ -33,24 +33,22 @@ interface BehandlingSteg<T> {
 
     fun stegType(): StegType
 
-    fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
-        return hentNesteSteg(
+    fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType =
+        hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
             endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT,
         )
-    }
 
     fun hentNesteStegGittEndringerIUtbetaling(
         behandling: Behandling,
         endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg,
-    ): StegType {
-        return hentNesteSteg(
+    ): StegType =
+        hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
             endringerIUtbetaling = endringerIUtbetaling,
         )
-    }
 
     fun preValiderSteg(
         behandling: Behandling,
@@ -173,21 +171,17 @@ enum class StegType(
     ),
     ;
 
-    fun displayName(): String {
-        return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
-    }
+    fun displayName(): String =
+        this.name
+            .replace('_', ' ')
+            .lowercase()
+            .replaceFirstChar { it.uppercase() }
 
-    fun kommerEtter(steg: StegType): Boolean {
-        return this.rekkefølge > steg.rekkefølge
-    }
+    fun kommerEtter(steg: StegType): Boolean = this.rekkefølge > steg.rekkefølge
 
-    fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean {
-        return this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
-    }
+    fun erGyldigIKombinasjonMedStatus(behandlingStatus: BehandlingStatus): Boolean = this.gyldigIKombinasjonMedStatus.contains(behandlingStatus)
 
-    fun erSaksbehandlerSteg(): Boolean {
-        return this.tillattFor.any { it == BehandlerRolle.SAKSBEHANDLER || it == BehandlerRolle.BESLUTTER }
-    }
+    fun erSaksbehandlerSteg(): Boolean = this.tillattFor.any { it == BehandlerRolle.SAKSBEHANDLER || it == BehandlerRolle.BESLUTTER }
 }
 
 fun hentNesteSteg(
@@ -320,7 +314,8 @@ fun hentNesteSteg(
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT ->
                     if (behandling.skalBehandlesAutomatisk &&
-                        behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK
+                        behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+                        behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK
                     ) {
                         IVERKSETT_MOT_OPPDRAG
                     } else {
@@ -423,7 +418,9 @@ private fun hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling: E
         EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
 
-enum class BehandlerRolle(val nivå: Int) {
+enum class BehandlerRolle(
+    val nivå: Int,
+) {
     SYSTEM(4),
     BESLUTTER(3),
     SAKSBEHANDLER(2),
@@ -431,7 +428,10 @@ enum class BehandlerRolle(val nivå: Int) {
     UKJENT(0),
 }
 
-enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
+enum class BehandlingStegStatus(
+    val navn: String,
+    val beskrivelse: String,
+) {
     IKKE_UTFØRT("IKKE_UTFØRT", "Steget er ikke utført"),
     UTFØRT("UTFØRT", "Utført"),
 }

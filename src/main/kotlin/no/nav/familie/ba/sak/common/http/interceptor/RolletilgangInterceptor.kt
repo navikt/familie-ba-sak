@@ -12,13 +12,16 @@ import org.springframework.web.servlet.HandlerInterceptor
 
 @Component
 @Import(RolleConfig::class)
-class RolletilgangInterceptor(private val rolleConfig: RolleConfig) : HandlerInterceptor {
+class RolletilgangInterceptor(
+    private val rolleConfig: RolleConfig,
+) : HandlerInterceptor {
     override fun preHandle(
         request: HttpServletRequest,
         response: HttpServletResponse,
         handler: Any,
     ): Boolean =
-        SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)
+        SikkerhetContext
+            .hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)
             .takeIf { it != BehandlerRolle.UKJENT }
             ?.let { super.preHandle(request, response, handler) }
             ?: run {

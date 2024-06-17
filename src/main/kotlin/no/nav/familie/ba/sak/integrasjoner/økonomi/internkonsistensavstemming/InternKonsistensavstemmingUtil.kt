@@ -21,7 +21,8 @@ fun erForskjellMellomAndelerOgOppdrag(
     fagsakId: Long,
 ): Boolean {
     val utbetalingsperioder =
-        utbetalingsoppdrag?.utbetalingsperiode
+        utbetalingsoppdrag
+            ?.utbetalingsperiode
             ?.filter { it.opphør == null }
             ?: emptyList()
 
@@ -78,7 +79,8 @@ private fun Utbetalingsperiode.harTilsvarendeAndelerForPersonOgYtelsetype(
     andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>,
 ): Boolean {
     val erAndelLikUtbetalingTidslinje =
-        this.tilBeløpstidslinje()
+        this
+            .tilBeløpstidslinje()
             .kombinerMed(andelerTidslinjeForEnPersonOgYtelsetype) { utbetalingsperiode, andel ->
                 utbetalingsperiode?.let { utbetalingsperiode == andel }
             }
@@ -113,7 +115,8 @@ private fun List<Utbetalingsperiode>.tilTidStrenger() =
 
 private sealed interface AndelOgOppdragForskjell
 
-private data class UtbetalingsperioderUtenTilsvarendeAndel(val utbetalingsperioder: List<Utbetalingsperiode>) :
-    AndelOgOppdragForskjell
+private data class UtbetalingsperioderUtenTilsvarendeAndel(
+    val utbetalingsperioder: List<Utbetalingsperiode>,
+) : AndelOgOppdragForskjell
 
 private object IngenForskjell : AndelOgOppdragForskjell

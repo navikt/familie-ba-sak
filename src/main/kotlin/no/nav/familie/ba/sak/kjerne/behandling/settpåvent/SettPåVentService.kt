@@ -22,16 +22,13 @@ class SettPåVentService(
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
 ) {
-    fun finnAktivSettPåVentPåBehandling(behandlingId: Long): SettPåVent? {
-        return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
-    }
+    fun finnAktivSettPåVentPåBehandling(behandlingId: Long): SettPåVent? = settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
 
     fun finnAktiveSettPåVent(): List<SettPåVent> = settPåVentRepository.findByAktivTrue()
 
-    private fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
-        return finnAktivSettPåVentPåBehandling(behandlingId)
+    private fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent =
+        finnAktivSettPåVentPåBehandling(behandlingId)
             ?: throw Feil("Behandling $behandlingId er ikke satt på vent.")
-    }
 
     private fun lagreEllerOppdater(settPåVent: SettPåVent): SettPåVent {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId = settPåVent.behandling.id)

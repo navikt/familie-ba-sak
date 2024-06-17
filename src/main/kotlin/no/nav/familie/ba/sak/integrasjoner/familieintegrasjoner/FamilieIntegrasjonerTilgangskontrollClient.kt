@@ -19,7 +19,11 @@ class FamilieIntegrasjonerTilgangskontrollClient(
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon-tilgangskontroll") {
     val tilgangPersonUri: URI =
-        UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
+        UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment(PATH_TILGANG_PERSON)
+            .build()
+            .toUri()
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
         if (SikkerhetContext.erSystemKontekst()) {

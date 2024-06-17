@@ -47,17 +47,35 @@ internal class StatsborgerskapServiceTest {
             )
 
         assertEquals(2, grStatsborgerskap.size)
-        assertEquals(FOM_1990, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().gyldigPeriode?.fom)
+        assertEquals(
+            FOM_1990,
+            grStatsborgerskap
+                .sortedBy { it.gyldigPeriode?.fom }
+                .first()
+                .gyldigPeriode
+                ?.fom,
+        )
         val dagenFørPolenBleMedlemAvEØS = FOM_2004.minusDays(1)
         assertEquals(
             dagenFørPolenBleMedlemAvEØS,
-            grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().gyldigPeriode?.tom,
+            grStatsborgerskap
+                .sortedBy { it.gyldigPeriode?.fom }
+                .first()
+                .gyldigPeriode
+                ?.tom,
         )
         assertEquals(
             Medlemskap.TREDJELANDSBORGER,
             grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.first().medlemskap,
         )
-        assertEquals(FOM_2004, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.last().gyldigPeriode?.fom)
+        assertEquals(
+            FOM_2004,
+            grStatsborgerskap
+                .sortedBy { it.gyldigPeriode?.fom }
+                .last()
+                .gyldigPeriode
+                ?.fom,
+        )
         assertEquals(Medlemskap.EØS, grStatsborgerskap.sortedBy { it.gyldigPeriode?.fom }.last().medlemskap)
     }
 

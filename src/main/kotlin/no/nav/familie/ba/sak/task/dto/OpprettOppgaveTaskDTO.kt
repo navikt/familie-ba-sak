@@ -12,7 +12,9 @@ data class OpprettOppgaveTaskDTO(
     val manuellOppgaveType: ManuellOppgaveType? = null,
 )
 
-enum class ManuellOppgaveType(val settBehandlesAvApplikasjon: Boolean) {
+enum class ManuellOppgaveType(
+    val settBehandlesAvApplikasjon: Boolean,
+) {
     SMÅBARNSTILLEGG(true),
     FØDSELSHENDELSE(false),
     ÅPEN_BEHANDLING(true),
