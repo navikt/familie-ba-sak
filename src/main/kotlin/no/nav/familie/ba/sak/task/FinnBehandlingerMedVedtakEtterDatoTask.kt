@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -15,14 +14,13 @@ import kotlin.system.measureTimeMillis
 @Service
 @TaskStepBeskrivelse(taskStepType = FinnBehandlingerMedVedtakEtterDatoTask.TASK_STEP_TYPE, beskrivelse = "Finner behandlinger med vedtak etter dato", maxAntallFeil = 1)
 class FinnBehandlingerMedVedtakEtterDatoTask(
-    val stønadsstatistikkService: StønadsstatistikkService,
-    val taskRepository: TaskRepositoryWrapper,
+    private val stønadsstatistikkService: StønadsstatistikkService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val dato = objectMapper.readValue<LocalDateTime>(task.payload)
         val tidBrukt =
             measureTimeMillis {
-                stønadsstatistikkService.finnVedtakEtterVedtaksdatoOgOpprettTasker(dato)
+                stønadsstatistikkService.opprettTaskerForVedtakEtterVedtaksdato(dato)
             }
         logger.info(
             "Fullført kjøring av FinnBehandlingerMedVedtakEtterDatoTask for dato $dato. " +

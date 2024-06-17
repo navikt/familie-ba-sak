@@ -241,10 +241,7 @@ class StønadsstatistikkService(
             landKode
         }
 
-    fun finnVedtakEtterVedtaksdatoOgOpprettTasker(
-        dato: LocalDateTime,
-        sidetall: Int = 0,
-    ) {
+    fun opprettTaskerForVedtakEtterVedtaksdato(dato: LocalDateTime) {
         val vedtatteBehandlingerEtterDato = vedtakRepository.finnBehandlingerMedVedtakEtterDato(dato)
 
         vedtatteBehandlingerEtterDato.chunked(1000).forEach {

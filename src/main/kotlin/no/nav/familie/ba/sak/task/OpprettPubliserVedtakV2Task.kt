@@ -14,8 +14,8 @@ import kotlin.system.measureTimeMillis
 @Service
 @TaskStepBeskrivelse(taskStepType = OpprettPubliserVedtakV2Task.TASK_STEP_TYPE, beskrivelse = "Oppretter Publiser vedtak V2 tasker", maxAntallFeil = 1)
 class OpprettPubliserVedtakV2Task(
-    val stønadsstatistikkService: StønadsstatistikkService,
-    val taskRepository: TaskRepositoryWrapper,
+    private val stønadsstatistikkService: StønadsstatistikkService,
+    private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val behandlinger = objectMapper.readValue<Set<Long>>(task.payload)
