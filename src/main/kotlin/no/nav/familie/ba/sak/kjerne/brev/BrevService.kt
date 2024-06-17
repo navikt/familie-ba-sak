@@ -253,13 +253,16 @@ class BrevService(
     private fun hentLandOgStartdatoForUtbetalingstabell(
         vedtak: Vedtak,
         utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
-    ): UtbetalingstabellAutomatiskValutajustering? =
-        utbetalingerPerMndEøs?.let {
-            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first { it.fom != null }.fom!!.tilMånedTidspunkt()
+    ): UtbetalingstabellAutomatiskValutajustering? {
+        val behandlingId = vedtak.behandling.id
+
+        return utbetalingerPerMndEøs?.let {
+            val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandlingId)
             val landkoder = integrasjonClient.hentLandkoderISO2()
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id)
-            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, kompetanser)
+            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
+            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.tilMånedTidspunkt(), landkoder, kompetanser)
         }
+    }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
         if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) return false
