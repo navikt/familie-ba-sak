@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.task.FinnBehandlingerMedVedtakEtterDatoTask
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -51,12 +52,8 @@ class StønadsstatistikkController(
     fun sendTilStønadsstatistikkAlleVedtakEtterDato(
         @RequestBody(required = true) dato: LocalDateTime,
     ) {
-        val behandlingerEtterDato: List<Long> = vedtakRepository.finnBehandlingerMedVedtakEtterDato(dato = dato)
-
-        behandlingerEtterDato.forEach {
-            val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
-            val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
-            taskRepository.save(vedtakV2Task)
-        }
+        logger.info("Starter opprettelse av FinnBehandlingerMedVedtakEtterDatoTask")
+        FinnBehandlingerMedVedtakEtterDatoTask.opprettTask(dato)
+        logger.info("Fullført opprettelse av FinnBehandlingerMedVedtakEtterDatoTask")
     }
 }
