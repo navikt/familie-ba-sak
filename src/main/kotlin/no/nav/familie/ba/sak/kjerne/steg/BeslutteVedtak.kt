@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -115,7 +116,16 @@ class BeslutteVedtak(
                 oppdaterValutakurserOgSimulering(behandling = behandling, erGodkjent = data.beslutning.erGodkjent())
 
                 val nyFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
-                nyFeilutbetaling != gammelFeilutbetaling
+
+                val erEndringIFeilutbetaling = nyFeilutbetaling != gammelFeilutbetaling
+                if (erEndringIFeilutbetaling) {
+                    secureLogger.info(
+                        "Det er endring i feilutbetaling etter valutajustering for behandling ${behandling.id}. " +
+                            "gammelFeilutbetaling=$gammelFeilutbetaling, nyFeilutbetaling=$nyFeilutbetaling. " +
+                            "Total simulering etter oppdatering er: \n${simuleringService.hentSimuleringPåBehandling(behandling.id)}",
+                    )
+                }
+                erEndringIFeilutbetaling
             } else {
                 false
             }
