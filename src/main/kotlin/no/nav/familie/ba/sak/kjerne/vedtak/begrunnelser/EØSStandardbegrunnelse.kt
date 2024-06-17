@@ -447,6 +447,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagSelvstendigRettForeldreneBorSammen"
     },
+    AVSLAG_SEKUNDÆRLAND_INGEN_AV_FORELDRENE_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSekundaerlandIngenAvForeldreneJobber"
+    },
     AVSLAG_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVVALG {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagDeltBostedBeggeForeldreIkkeOmfattetNorskLovvalg"
