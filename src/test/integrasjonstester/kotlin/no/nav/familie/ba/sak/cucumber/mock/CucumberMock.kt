@@ -448,10 +448,9 @@ class CucumberMock(
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
-            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             valutakursRepository = valutakursRepository,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             simuleringService = simuleringService,
+            tilbakekrevingService = tilbakekrevingService,
         )
 
     val stegService =
