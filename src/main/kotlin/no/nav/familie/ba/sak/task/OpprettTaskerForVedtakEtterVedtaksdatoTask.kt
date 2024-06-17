@@ -12,8 +12,8 @@ import java.time.LocalDateTime
 import kotlin.system.measureTimeMillis
 
 @Service
-@TaskStepBeskrivelse(taskStepType = FinnBehandlingerMedVedtakEtterDatoTask.TASK_STEP_TYPE, beskrivelse = "Finner behandlinger med vedtak etter dato", maxAntallFeil = 1)
-class FinnBehandlingerMedVedtakEtterDatoTask(
+@TaskStepBeskrivelse(taskStepType = OpprettTaskerForVedtakEtterVedtaksdatoTask.TASK_STEP_TYPE, beskrivelse = "Finner behandlinger med vedtak etter dato og oppretter tasker for resending av vedtak til dvh", maxAntallFeil = 1)
+class OpprettTaskerForVedtakEtterVedtaksdatoTask(
     private val stønadsstatistikkService: StønadsstatistikkService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
@@ -23,14 +23,14 @@ class FinnBehandlingerMedVedtakEtterDatoTask(
                 stønadsstatistikkService.opprettTaskerForVedtakEtterVedtaksdato(dato)
             }
         logger.info(
-            "Fullført kjøring av FinnBehandlingerMedVedtakEtterDatoTask for dato $dato. " +
+            "Fullført kjøring av OpprettTaskerForVedtakEtterVedtaksdatoTask for dato $dato. " +
                 "Tid brukt = $tidBrukt millisekunder",
         )
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "finnBehandlingerMedVedtakEtterDatoTask"
-        val logger = LoggerFactory.getLogger(FinnBehandlingerMedVedtakEtterDatoTask::class.java)
+        const val TASK_STEP_TYPE = "opprettTaskerForVedtakEtterVedtaksdatoTask"
+        private val logger = LoggerFactory.getLogger(OpprettTaskerForVedtakEtterVedtaksdatoTask::class.java)
 
         fun opprettTask(
             dato: LocalDateTime,

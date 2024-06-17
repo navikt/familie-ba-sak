@@ -37,7 +37,7 @@ class OpprettPubliserVedtakV2Task(
 
     companion object {
         const val TASK_STEP_TYPE = "opprettPubliserVedtakV2Task"
-        val logger = LoggerFactory.getLogger(OpprettPubliserVedtakV2Task::class.java)
+        private val logger = LoggerFactory.getLogger(OpprettPubliserVedtakV2Task::class.java)
 
         fun opprettTask(
             behandlinger: Set<Long>,

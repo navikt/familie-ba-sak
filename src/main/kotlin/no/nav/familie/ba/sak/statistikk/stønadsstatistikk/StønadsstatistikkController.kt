@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.task.FinnBehandlingerMedVedtakEtterDatoTask
+import no.nav.familie.ba.sak.task.OpprettTaskerForVedtakEtterVedtaksdatoTask
 import no.nav.familie.ba.sak.task.PubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -53,7 +53,7 @@ class StønadsstatistikkController(
         @RequestBody(required = true) dato: LocalDateTime,
     ) {
         logger.info("Starter opprettelse av FinnBehandlingerMedVedtakEtterDatoTask")
-        FinnBehandlingerMedVedtakEtterDatoTask.opprettTask(dato)
+        OpprettTaskerForVedtakEtterVedtaksdatoTask.opprettTask(dato)
         logger.info("Fullført opprettelse av FinnBehandlingerMedVedtakEtterDatoTask")
     }
 }
