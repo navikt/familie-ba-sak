@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -104,7 +105,7 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-        every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any()) } just runs
+        every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any<BehandlingId>()) } just runs
         every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns true
     }
 
