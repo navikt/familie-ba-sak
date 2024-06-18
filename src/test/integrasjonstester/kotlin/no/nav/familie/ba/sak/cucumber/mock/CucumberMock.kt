@@ -72,7 +72,7 @@ val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 class CucumberMock(
     dataFraCucumber: BegrunnelseTeksterStepDefinition,
     nyBehanldingId: Long,
-    forrigeBehandling: Behandling?,
+    forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehanldingId]?.let { dataFraCucumber.behandlinger[it] },
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
     ecbService: ECBService = mockEcbService(dataFraCucumber),
     scope: CoroutineScope? = null,
