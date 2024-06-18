@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -23,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.task.OpprettPubliserVedtakV2Task
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
 import no.nav.familie.eksterne.kontrakter.FagsakType
@@ -42,7 +40,6 @@ import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -53,7 +50,6 @@ class StønadsstatistikkService(
     private val vedtakService: VedtakService,
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
-    private val taskRepository: TaskRepositoryWrapper,
     private val kompetanseService: KompetanseService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
@@ -240,15 +236,6 @@ class StønadsstatistikkService(
             }
             landKode
         }
-
-    fun opprettTaskerForVedtakEtterVedtaksdato(dato: LocalDateTime) {
-        val vedtatteBehandlingerEtterDato = vedtakRepository.finnBehandlingerMedVedtakEtterDato(dato)
-
-        vedtatteBehandlingerEtterDato.chunked(1000).forEach {
-            val opprettPubliserVedtakV2Task = OpprettPubliserVedtakV2Task.opprettTask(it.toSet())
-            taskRepository.save(opprettPubliserVedtakV2Task)
-        }
-    }
 
     companion object {
         private val logger = LoggerFactory.getLogger(StønadsstatistikkService::class.java)
