@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -37,6 +38,7 @@ import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -57,6 +59,7 @@ class BeslutteVedtak(
     private val valutakursRepository: ValutakursRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val simuleringService: SimuleringService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -109,6 +112,16 @@ class BeslutteVedtak(
 
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
         val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
+
+        if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
+            val feilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
+            val tilbakekreving by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
+
+            if (feilutbetaling != BigDecimal.ZERO && tilbakekreving == null) {
+                throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
+            }
+        }
+
         val erEndringIFeilutbetalingOgErValutajustering =
             if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
                 val gammelFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id)
