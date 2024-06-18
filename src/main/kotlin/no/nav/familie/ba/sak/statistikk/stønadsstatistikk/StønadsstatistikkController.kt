@@ -53,7 +53,7 @@ class StønadsstatistikkController(
         @RequestBody(required = true) dato: LocalDateTime,
     ) {
         logger.info("Starter opprettelse av OpprettTaskerForVedtakEtterVedtaksdatoTask")
-        OpprettTaskerForVedtakEtterVedtaksdatoTask.opprettTask(dato)
+        taskRepository.save(OpprettTaskerForVedtakEtterVedtaksdatoTask.opprettTask(dato))
         logger.info("Fullført opprettelse av OpprettTaskerForVedtakEtterVedtaksdatoTask")
     }
 }
