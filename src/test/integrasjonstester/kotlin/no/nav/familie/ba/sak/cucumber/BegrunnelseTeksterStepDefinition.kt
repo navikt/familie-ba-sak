@@ -5,7 +5,6 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
-import kotlinx.coroutines.runBlocking
 import lagSvarFraEcbMock
 import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
@@ -36,9 +35,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
@@ -594,35 +591,17 @@ class BegrunnelseTeksterStepDefinition {
         assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
     }
 
-    @Når("vi kjører beslutte vedtakssteg for behandling {} med beslutning {}")
-    fun `når vi kjører beslutte vedtakssteg for behandling med beslutning`(
+    @Når("vi oppdaterer valutakursene for beslutter på behandling {}")
+    fun `vi oppdaterer valutakursene for beslutter på behandling`(
         behandlingId: Long,
-        beslutning: Beslutning,
     ) {
-        val behandling = behandlinger[behandlingId]!!
-        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehanldingId = behandlingId,
+            )
 
-        if (totrinnskontroller[behandlingId] == null) {
-            totrinnskontroller[behandlingId] = Totrinnskontroll(behandling = behandling, saksbehandler = "Test", saksbehandlerId = "Test")
-        }
-
-        val dataFraCucumber = this
-        runBlocking {
-            val mock =
-                CucumberMock(
-                    dataFraCucumber = dataFraCucumber,
-                    nyBehanldingId = behandlingId,
-                    forrigeBehandling = forrigeBehandlingId?.let { behandlinger[forrigeBehandlingId] },
-                    scope = this,
-                )
-
-            val restBeslutning =
-                RestBeslutningPåVedtak(
-                    beslutning = beslutning,
-                )
-
-            mock.stegService.håndterBeslutningForVedtak(behandling, restBeslutning)
-        }
+        mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
     }
 
     /**
