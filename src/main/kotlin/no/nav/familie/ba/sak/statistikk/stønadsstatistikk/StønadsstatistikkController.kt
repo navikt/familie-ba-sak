@@ -52,8 +52,8 @@ class StønadsstatistikkController(
     fun sendTilStønadsstatistikkAlleVedtakEtterDato(
         @RequestBody(required = true) dato: LocalDateTime,
     ) {
-        logger.info("Starter opprettelse av FinnBehandlingerMedVedtakEtterDatoTask")
+        logger.info("Starter opprettelse av OpprettTaskerForVedtakEtterVedtaksdatoTask")
         OpprettTaskerForVedtakEtterVedtaksdatoTask.opprettTask(dato)
-        logger.info("Fullført opprettelse av FinnBehandlingerMedVedtakEtterDatoTask")
+        logger.info("Fullført opprettelse av OpprettTaskerForVedtakEtterVedtaksdatoTask")
     }
 }
