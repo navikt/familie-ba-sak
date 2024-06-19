@@ -13,6 +13,82 @@ import java.time.YearMonth
 
 class InternKonsistensavstemmingUtilTest {
     @Test
+    fun `test av konsistensavstemming`() {
+        val andelerSisteVedtatteBehandling =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-01"),
+                    tom = YearMonth.parse("2023-02"),
+                    beløp = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-03"),
+                    tom = YearMonth.parse("2023-06"),
+                    beløp = 1083,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-07"),
+                    tom = YearMonth.parse("2023-12"),
+                    beløp = 1310,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2024-01"),
+                    tom = YearMonth.parse("2024-01"),
+                    beløp = 1510,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-01"),
+                    tom = YearMonth.parse("2023-02"),
+                    beløp = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-03"),
+                    tom = YearMonth.parse("2023-06"),
+                    beløp = 1083,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-07"),
+                    tom = YearMonth.parse("2023-12"),
+                    beløp = 1310,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2024-01"),
+                    tom = YearMonth.parse("2028-08"),
+                    beløp = 1510,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-01"),
+                    tom = YearMonth.parse("2023-02"),
+                    beløp = 1054,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-03"),
+                    tom = YearMonth.parse("2023-06"),
+                    beløp = 2489,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.parse("2023-07"),
+                    tom = YearMonth.parse("2028-08"),
+                    beløp = 2516,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                ),
+            )
+        val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdragTilTest)
+
+        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
+    }
+
+    @Test
     fun `Skal ignorere forskjeller før første utbetalingsoppdragsperiode`() {
         val andelerSisteVedtatteBehandling =
             listOf(
@@ -294,6 +370,186 @@ private val mockUtbetalingsoppdrag =
           "satsType": "MND",
           "utbetalesTil": "1",
           "behandlingId": 1,
+          "utbetalingsgrad": null
+        }
+      ],
+      "gOmregning": false
+    }
+    """.trimIndent()
+
+private val mockUtbetalingsoppdragTilTest =
+    """
+    {
+      "kodeEndring": "NY",
+      "fagSystem": "BA",
+      "saksnummer": "123456",
+      "aktoer": "123",
+      "saksbehandlerId": "H123456",
+      "avstemmingTidspunkt": "2024-01-08T08:47:30.391223196",
+      "utbetalingsperiode": [
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 0,
+          "forrigePeriodeId": null,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-01-01",
+          "vedtakdatoTom": "2023-02-28",
+          "sats": 1054,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 1,
+          "forrigePeriodeId": 0,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-03-01",
+          "vedtakdatoTom": "2023-06-30",
+          "sats": 1083,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 2,
+          "forrigePeriodeId": 1,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-07-01",
+          "vedtakdatoTom": "2023-12-31",
+          "sats": 1310,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 3,
+          "forrigePeriodeId": 2,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2024-01-01",
+          "vedtakdatoTom": "2024-04-30",
+          "sats": 1510,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 4,
+          "forrigePeriodeId": null,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-01-01",
+          "vedtakdatoTom": "2023-02-28",
+          "sats": 1054,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 5,
+          "forrigePeriodeId": 4,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-03-01",
+          "vedtakdatoTom": "2023-06-30",
+          "sats": 2489,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 6,
+          "forrigePeriodeId": 5,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-07-01",
+          "vedtakdatoTom": "2028-08-31",
+          "sats": 2516,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 7,
+          "forrigePeriodeId": null,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-01-01",
+          "vedtakdatoTom": "2023-02-28",
+          "sats": 1054,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 8,
+          "forrigePeriodeId": 7,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-03-01",
+          "vedtakdatoTom": "2023-06-30",
+          "sats": 1083,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 9,
+          "forrigePeriodeId": 8,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2023-07-01",
+          "vedtakdatoTom": "2023-12-31",
+          "sats": 1310,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 10,
+          "forrigePeriodeId": 9,
+          "datoForVedtak": "2024-01-08",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2024-01-01",
+          "vedtakdatoTom": "2028-08-31",
+          "sats": 1510,
+          "satsType": "MND",
+          "utbetalesTil": "123",
+          "behandlingId": 456789,
           "utbetalingsgrad": null
         }
       ],
