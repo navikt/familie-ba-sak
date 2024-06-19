@@ -1,7 +1,7 @@
 ﻿# language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - IWf0j6DPKL
+Egenskap: Automatisk valutajustering
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
@@ -50,8 +50,8 @@ Egenskap: Plassholdertekst for egenskap - IWf0j6DPKL
       | 3, 4    | 01.04.2024 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | LT                             | LT                  |
 
     Og med utenlandsk periodebeløp for begrunnelse
-      | AktørId | Fra måned | Til måned | BehandlingId | Beløp  | Valuta kode | Intervall | Utbetalingsland |
-      | 3, 4    | 04.2024   |           | 1            | 152.90 | EUR         | MÅNEDLIG  | LT              |
+      | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+      | 3, 4    | 04.2024   |           | 1            | 150   | EUR         | MÅNEDLIG  | LT              |
 
     Og med valutakurs for begrunnelse
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs    | Vurderingsform |
@@ -75,22 +75,22 @@ Egenskap: Plassholdertekst for egenskap - IWf0j6DPKL
       | 01.04.2024 | 30.04.2024 |                      | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |            |
 
 
-  Scenario: Plassholdertekst for scenario - SaKVERRUGe
-    Når vi kjører beslutte vedtakssteg for behandling 1 med beslutning UNDERKJENT
-
-    Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus | Behandlingstype       | Behandlingssteg    | Underkategori |
-      | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | EØS                 | UTREDES           | FØRSTEGANGSBEHANDLING | SEND_TIL_BESLUTTER | ORDINÆR       |
-
-  Scenario: Plassholdertekst for scenario - fjdakslfjlka
-    Når vi kjører beslutte vedtakssteg for behandling 1 med beslutning GODKJENT
-
-    Så forvent disse behandlingene
-      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus  | Behandlingstype       | Behandlingssteg        | Underkategori |
-      | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | EØS                 | IVERKSETTER_VEDTAK | FØRSTEGANGSBEHANDLING | JOURNALFØR_VEDTAKSBREV | ORDINÆR       |
+  Scenario: Skal oppdatere valutakursene og andel tilkjente ytelser når vi oppdaterer valutakursene for beslutter
+    Når vi oppdaterer valutakursene for beslutter på behandling 1
 
     Så forvent følgende valutakurser for behandling 1
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs    | Vurderingsform |
       | 3, 4    | 01.04.2024 | 30.04.2024 | 1            | 2024-03-27     | EUR         | 11.6825 | AUTOMATISK     |
       | 3, 4    | 01.05.2024 | 31.05.2024 | 1            | 2024-04-30     | EUR         | 11.815  | AUTOMATISK     |
       | 3, 4    | 01.06.2024 |            | 1            | 2024-05-31     | EUR         | 10      | AUTOMATISK     |
+
+    Så forvent følgende andeler tilkjent ytelse for behandling 1
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats | Differanseberegnet beløp |
+      | 3       | 1            | 01.04.2024 | 30.04.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 | -242                     |
+      | 3       | 1            | 01.05.2024 | 31.05.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 | -262                     |
+      | 3       | 1            | 01.06.2024 | 28.02.2033 | 10    | ORDINÆR_BARNETRYGD | 100     | 1510 | 10                       |
+
+      | 4       | 1            | 01.04.2024 | 30.04.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 | -242                     |
+      | 4       | 1            | 01.05.2024 | 31.05.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 | -262                     |
+      | 4       | 1            | 01.06.2024 | 30.09.2035 | 10    | ORDINÆR_BARNETRYGD | 100     | 1510 | 10                       |
+

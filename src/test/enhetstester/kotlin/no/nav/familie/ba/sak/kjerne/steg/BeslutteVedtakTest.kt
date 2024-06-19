@@ -20,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
@@ -59,7 +58,6 @@ class BeslutteVedtakTest {
     private val loggService = mockk<LoggService>()
     private val automatiskOppdaterValutakursService = mockk<AutomatiskOppdaterValutakursService>()
     private val valutakursRepository = mockk<ValutakursRepository>()
-    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
 
@@ -76,9 +74,7 @@ class BeslutteVedtakTest {
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
-            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             valutakursRepository = valutakursRepository,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
         )
