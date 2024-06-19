@@ -81,7 +81,8 @@ class BeslutteVedtak(
         }
 
         val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandling.id) }
-        val tilbakekreving by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
+        val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
+        val tilbakekrevingsvalg by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
         val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
 
         val behandlingSkalAutomatiskBesluttes =
@@ -109,8 +110,8 @@ class BeslutteVedtak(
 
         return if (data.beslutning.erGodkjent()) {
             val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
-            if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
-                validerErTilbakekrevingHvisFeilutbetaling(feilutbetaling, tilbakekreving)
+            if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling && !erÅpenTilbakekrevingPåFagsak) {
+                validerErTilbakekrevingHvisFeilutbetaling(feilutbetaling, tilbakekrevingsvalg)
             }
 
             val vedtak =
@@ -172,9 +173,9 @@ class BeslutteVedtak(
 
     private fun validerErTilbakekrevingHvisFeilutbetaling(
         feilutbetaling: BigDecimal,
-        tilbakekreving: Tilbakekrevingsvalg?,
+        tilbakekrevingsvalg: Tilbakekrevingsvalg?,
     ) {
-        if (feilutbetaling != BigDecimal.ZERO && tilbakekreving == null) {
+        if (feilutbetaling != BigDecimal.ZERO && tilbakekrevingsvalg == null) {
             throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
         }
     }
