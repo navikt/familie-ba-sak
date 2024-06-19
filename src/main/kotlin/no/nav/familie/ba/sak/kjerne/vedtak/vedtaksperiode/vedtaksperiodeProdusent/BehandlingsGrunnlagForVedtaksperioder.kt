@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
@@ -499,7 +499,7 @@ private fun lagGrunnlagMedOvergangsstønad(
 
 fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<Iterable<AndelForVedtaksperiode>, Måned> =
     this
-        .tilTidslinjerPerAktørOgType()
+        .tilAndelForVedtaksperiodeTidslinjerPerAktørOgType()
         .values
         .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
         .kombiner()

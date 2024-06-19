@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -480,7 +480,7 @@ fun lagPeriodeForOmregningsbehandling(
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val andelerTidslinje: Tidslinje<List<AndelForVedtaksperiode>, Måned> =
-        andelTilkjentYtelser.tilTidslinjerPerAktørOgType().values.kombiner { it.toList() }
+        andelTilkjentYtelser.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType().values.kombiner { it.toList() }
 
     val nesteEndringITilkjentYtelse =
         andelerTidslinje
