@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Delt bosted og endret utbetaling
+Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
 
   Bakgrunn:
     Gitt følgende fagsaker for begrunnelse
