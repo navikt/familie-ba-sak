@@ -84,6 +84,16 @@ class AutomatiskOppdaterValutakursService(
         endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
     )
 
+    @Transactional
+    fun oppdaterValutakurserEtterEndringstidspunkt(
+        behandling: Behandling,
+        utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>? = null,
+    ) = oppdaterValutakurserEtterEndringstidspunkt(
+        behandling = behandling,
+        utenlandskePeriodebeløp = utenlandskePeriodebeløp ?: utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id),
+        endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id).toYearMonth(),
+    )
+
     private fun oppdaterValutakurserEtterEndringstidspunkt(
         behandling: Behandling,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
@@ -200,6 +210,13 @@ class AutomatiskOppdaterValutakursService(
                 vurderingsstrategiForValutakurser = nyStrategi,
             ),
         )
+    }
+
+    @Transactional
+    fun oppdaterValutakurserOgSimulering(behandlingId: BehandlingId) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
+        oppdaterValutakurserEtterEndringstidspunkt(behandling)
+        simuleringService.oppdaterSimuleringPåBehandling(behandling)
     }
 }
 
