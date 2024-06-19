@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
@@ -317,7 +318,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             }
         }
 
-        erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkning(this) -> {
+        erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(this) -> {
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
         }
 
@@ -336,13 +337,14 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
             person.type == PersonType.BARN
     }
 
-private fun erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkning(
+private fun erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(
     sanityBegrunnelse: ISanityBegrunnelse,
 ): Boolean =
     sanityBegrunnelse.gjelderEndretutbetaling &&
         sanityBegrunnelse is SanityBegrunnelse &&
         sanityBegrunnelse.endringsaarsaker.contains(Årsak.DELT_BOSTED) &&
-        sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
+        sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING &&
+        sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger == EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES
 
 private fun ISanityBegrunnelse.erEksplisittAvslagPåSøker(
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
