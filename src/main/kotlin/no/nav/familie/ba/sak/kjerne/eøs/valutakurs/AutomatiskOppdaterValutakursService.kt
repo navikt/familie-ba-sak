@@ -84,6 +84,16 @@ class AutomatiskOppdaterValutakursService(
         endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id).toYearMonth(),
     )
 
+    @Transactional
+    fun oppdaterValutakurserEtterEndringstidspunkt(
+        behandling: Behandling,
+        utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>? = null,
+    ) = oppdaterValutakurserEtterEndringstidspunkt(
+        behandling = behandling,
+        utenlandskePeriodebeløp = utenlandskePeriodebeløp ?: utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandling.id),
+        endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id).toYearMonth(),
+    )
+
     private fun oppdaterValutakurserEtterEndringstidspunkt(
         behandling: Behandling,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
@@ -122,24 +132,26 @@ class AutomatiskOppdaterValutakursService(
             filtrerErUtfylt().map { it.valutakode }.toSet()
 
         val automatiskGenererteValutakurser =
-            valutakoder.map { valutakode ->
-                val upbGruppertPerBarnForValutakode = filtrerErUtfylt().filter { it.valutakode == valutakode }.groupBy { it.barnAktører }
-                val upbPerBarnTidslinjer = upbGruppertPerBarnForValutakode.values.map { upbForBarn -> upbForBarn.sortedBy { it.fom }.map { månedPeriodeAv(it.fom, it.tom, it) }.tilTidslinje() }
+            valutakoder
+                .map { valutakode ->
+                    val upbGruppertPerBarnForValutakode = filtrerErUtfylt().filter { it.valutakode == valutakode }.groupBy { it.barnAktører }
+                    val upbPerBarnTidslinjer = upbGruppertPerBarnForValutakode.values.map { upbForBarn -> upbForBarn.sortedBy { it.fom }.map { månedPeriodeAv(it.fom, it.tom, it) }.tilTidslinje() }
 
-                val perioderAvBarnMedValutakode = upbPerBarnTidslinjer.kombiner { upberIPeriode -> upberIPeriode.flatMap { it.barnAktører }.toSet() }.perioder()
+                    val perioderAvBarnMedValutakode = upbPerBarnTidslinjer.kombiner { upberIPeriode -> upberIPeriode.flatMap { it.barnAktører }.toSet() }.perioder()
 
-                perioderAvBarnMedValutakode.mapNotNull { periode ->
-                    periode.innhold?.let {
-                        lagAutomatiskeValutakurserIPeriode(
-                            månedForTidligsteTillatteAutomatiskeValutakurs = månedForTidligsteTillatteAutomatiskeValutakurs,
-                            fom = periode.fraOgMed.tilYearMonth(),
-                            tom = periode.tilOgMed.tilYearMonthEllerNull(),
-                            barn = it,
-                            valutakode = valutakode,
-                        )
-                    }
+                    perioderAvBarnMedValutakode
+                        .mapNotNull { periode ->
+                            periode.innhold?.let {
+                                lagAutomatiskeValutakurserIPeriode(
+                                    månedForTidligsteTillatteAutomatiskeValutakurs = månedForTidligsteTillatteAutomatiskeValutakurs,
+                                    fom = periode.fraOgMed.tilYearMonth(),
+                                    tom = periode.tilOgMed.tilYearMonthEllerNull(),
+                                    barn = it,
+                                    valutakode = valutakode,
+                                )
+                            }
+                        }.flatten()
                 }.flatten()
-            }.flatten()
         return automatiskGenererteValutakurser
     }
 
@@ -198,6 +210,13 @@ class AutomatiskOppdaterValutakursService(
                 vurderingsstrategiForValutakurser = nyStrategi,
             ),
         )
+    }
+
+    @Transactional
+    fun oppdaterValutakurserOgSimulering(behandlingId: BehandlingId) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
+        oppdaterValutakurserEtterEndringstidspunkt(behandling)
+        simuleringService.oppdaterSimuleringPåBehandling(behandling)
     }
 }
 

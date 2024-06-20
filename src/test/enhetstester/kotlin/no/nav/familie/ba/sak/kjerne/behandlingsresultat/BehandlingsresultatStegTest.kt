@@ -520,7 +520,8 @@ class BehandlingsresultatStegTest {
             barn = listOf(barn),
         )
 
-        assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }.isInstanceOf(SatsendringFeil::class.java)
+        assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+            .isInstanceOf(SatsendringFeil::class.java)
             .hasMessageContaining("Satsendring kan ikke endre på prosenten til en andel")
     }
 
@@ -564,8 +565,8 @@ class BehandlingsresultatStegTest {
         } returns emptyList()
     }
 
-    fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> {
-        return tidslinje {
+    fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> =
+        tidslinje {
             this.mapIndexed { index, it ->
                 Periode(
                     startdato.plusMonths(index.toLong()).tilTidspunkt(),
@@ -578,7 +579,6 @@ class BehandlingsresultatStegTest {
                 )
             }
         }
-    }
 
     private fun endretBehandlingsresultat() =
         listOf(

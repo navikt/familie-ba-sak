@@ -64,9 +64,11 @@ class PensjonService(
 
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
         val barnetrygdMedRelaterteSaker =
-            barnetrygdTilPensjon?.barnetrygdPerioder
+            barnetrygdTilPensjon
+                ?.barnetrygdPerioder
                 ?.filter { it.personIdent != aktør.aktivFødselsnummer() }
-                ?.map { it.personIdent }?.distinct()
+                ?.map { it.personIdent }
+                ?.distinct()
                 ?.map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
                 ?.flatten()
                 ?: emptyList()
@@ -91,7 +93,8 @@ class PensjonService(
     ): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
         val fagsaker =
-            fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
+            fagsakRepository
+                .finnFagsakerSomHarAndelerForAktør(aktør)
                 .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
                 .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
                 .distinct()
@@ -127,9 +130,7 @@ class PensjonService(
     private fun hentBarnetrygdTilPensjonFraInfotrygdQ(
         personIdent: String,
         fraDato: LocalDate,
-    ): List<BarnetrygdTilPensjon> {
-        return infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(personIdent, fraDato).fagsaker
-    }
+    ): List<BarnetrygdTilPensjon> = infotrygdBarnetrygdClient.hentBarnetrygdTilPensjon(personIdent, fraDato).fagsaker
 
     private fun hentBarnetrygdTilPensjon(
         fagsak: Fagsak,
@@ -205,9 +206,10 @@ class PensjonService(
             envService.erPreprod() -> {
                 val barnetrygdperioerPerPerson = this.groupBy { it.personIdent }.values
                 if (barnFnr != null) {
-                    barnetrygdperioerPerPerson.zip(barnFnr) { barnetrydperioder, barn ->
-                        barnetrydperioder.map { it.copy(personIdent = barn) }
-                    }.flatten()
+                    barnetrygdperioerPerPerson
+                        .zip(barnFnr) { barnetrydperioder, barn ->
+                            barnetrydperioder.map { it.copy(personIdent = barn) }
+                        }.flatten()
                 } else {
                     emptyList()
                 }
@@ -216,28 +218,28 @@ class PensjonService(
             else -> this
         }
 
-    fun YtelseType.tilPensjonYtelsesType(): YtelseTypeEkstern {
-        return when (this) {
+    fun YtelseType.tilPensjonYtelsesType(): YtelseTypeEkstern =
+        when (this) {
             YtelseType.ORDINÆR_BARNETRYGD -> YtelseTypeEkstern.ORDINÆR_BARNETRYGD
             YtelseType.SMÅBARNSTILLEGG -> YtelseTypeEkstern.SMÅBARNSTILLEGG
             YtelseType.UTVIDET_BARNETRYGD -> YtelseTypeEkstern.UTVIDET_BARNETRYGD
         }
-    }
 
-    fun BehandlingKategori.tilPensjonSakstype(): SakstypeEkstern {
-        return when (this) {
+    fun BehandlingKategori.tilPensjonSakstype(): SakstypeEkstern =
+        when (this) {
             BehandlingKategori.NASJONAL -> SakstypeEkstern.NASJONAL
             BehandlingKategori.EØS -> SakstypeEkstern.EØS
         }
-    }
 
     private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(
         personIdent: String,
         fraDato: LocalDate,
-    ): List<BarnetrygdTilPensjon> {
-        return distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
+    ): List<BarnetrygdTilPensjon> =
+        distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
             val perioderUtenOverlappMellomFagsystemene =
-                barnetrygdTilPensjon.flatMap { it.barnetrygdPerioder }.groupBy { it.personIdent }
+                barnetrygdTilPensjon
+                    .flatMap { it.barnetrygdPerioder }
+                    .groupBy { it.personIdent }
                     .values
                     .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
@@ -260,18 +262,17 @@ class PensjonService(
                 barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
             )
         }
-    }
 
     private fun List<BarnetrygdPeriode>.fjernOverlappendeInfotrygdperioder(): List<BarnetrygdPeriode> {
         val (baSakPerioder, opprinneligeInfotrygdPerioder) =
             partition { it.kildesystem == "BA" }
 
         val infotrygdperioderSomIkkeOverlapperBaPerioder =
-            baSakPerioder.tilTidslinje()
+            baSakPerioder
+                .tilTidslinje()
                 .kombinerMed(opprinneligeInfotrygdPerioder.tilTidslinje()) { periodeIBa, periodeIInfotrygd ->
                     periodeIInfotrygd.takeIf { periodeIBa == null }
-                }
-                .perioder()
+                }.perioder()
                 .mapNotNull {
                     it.innhold?.copy(
                         stønadFom = it.fraOgMed.tilYearMonth(),
@@ -303,18 +304,19 @@ class PensjonService(
 }
 
 private fun List<BarnetrygdPeriode>.tilTidslinje() =
-    this.map {
-        Periode(
-            fraOgMed = it.stønadFom.tilTidspunkt(),
-            tilOgMed = it.stønadTom.tilTidspunkt(),
-            innhold = it,
-        )
-    }.tilTidslinje()
+    this
+        .map {
+            Periode(
+                fraOgMed = it.stønadFom.tilTidspunkt(),
+                tilOgMed = it.stønadTom.tilTidspunkt(),
+                innhold = it,
+            )
+        }.tilTidslinje()
 
 private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
 
-private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> {
-    return when {
+private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
+    when {
         barnetrygdPerioder.isEmpty() -> {
             listOfNotNull(other)
         }
@@ -327,7 +329,6 @@ private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): Li
             listOfNotNull(this, other)
         }
     }
-}
 
 private val BarnetrygdTilPensjon.barna: List<String>
     get() = barnetrygdPerioder.map { it.personIdent }.filter { it != fagsakEiersIdent }

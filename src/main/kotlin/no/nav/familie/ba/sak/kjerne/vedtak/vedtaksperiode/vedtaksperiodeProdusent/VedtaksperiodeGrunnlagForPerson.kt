@@ -35,8 +35,10 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
 
     fun hentInnvilgedeYtelsestyper() =
         if (this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget) {
-            this.andeler.filter { it.prosent > BigDecimal.ZERO }
-                .map { it.type }.toSet()
+            this.andeler
+                .filter { it.prosent > BigDecimal.ZERO }
+                .map { it.type }
+                .toSet()
         } else {
             emptySet()
         }
@@ -44,8 +46,8 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
     fun kopier(
         person: Person = this.person,
         vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
-    ): VedtaksperiodeGrunnlagForPerson {
-        return when (this) {
+    ): VedtaksperiodeGrunnlagForPerson =
+        when (this) {
             is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
                 this.copy(
                     person,
@@ -56,7 +58,6 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
 
             is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
-    }
 }
 
 sealed class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
@@ -154,12 +155,11 @@ data class VilkårResultatForVedtaksperiode(
     )
 }
 
-fun List<VilkårResultatForVedtaksperiode>.erLikUtenomTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
-    return this.map { it.copy(tom = null) }.toSet() == other.map { it.copy(tom = null) }.toSet()
-}
+fun List<VilkårResultatForVedtaksperiode>.erLikUtenomTom(other: List<VilkårResultatForVedtaksperiode>): Boolean = this.map { it.copy(tom = null) }.toSet() == other.map { it.copy(tom = null) }.toSet()
 
 fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
-    Vilkår.hentOrdinæreVilkårFor(PersonType.BARN)
+    Vilkår
+        .hentOrdinæreVilkårFor(PersonType.BARN)
         .all { vilkår ->
             val vilkårsresutlatet = this.find { it.vilkårType == vilkår }
 
@@ -248,16 +248,15 @@ data class AndelForBrevperiode(
             satsErlik(annen.sats)
     }
 
-    private fun satsErlik(annen: Int): Boolean {
-        return if (kalkulertUtbetalingsbeløp == 0) {
+    private fun satsErlik(annen: Int): Boolean =
+        if (kalkulertUtbetalingsbeløp == 0) {
             true
         } else {
             Objects.equals(sats, annen)
         }
-    }
 
-    override fun hashCode(): Int {
-        return if (kalkulertUtbetalingsbeløp == 0) {
+    override fun hashCode(): Int =
+        if (kalkulertUtbetalingsbeløp == 0) {
             Objects.hash(
                 kalkulertUtbetalingsbeløp,
                 type,
@@ -271,7 +270,6 @@ data class AndelForBrevperiode(
                 sats,
             )
         }
-    }
 }
 
 data class KompetanseForVedtaksperiode(

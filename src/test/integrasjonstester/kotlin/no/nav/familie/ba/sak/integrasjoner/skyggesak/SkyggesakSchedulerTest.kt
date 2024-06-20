@@ -82,7 +82,11 @@ class SkyggesakSchedulerTest {
         )
         Assertions.assertEquals(
             now.minusDays(13).toLocalDate(),
-            skyggesakRepository.finnSkyggesakerSomErSendt().single().sendtTidspunkt?.toLocalDate(),
+            skyggesakRepository
+                .finnSkyggesakerSomErSendt()
+                .single()
+                .sendtTidspunkt
+                ?.toLocalDate(),
         )
     }
 }

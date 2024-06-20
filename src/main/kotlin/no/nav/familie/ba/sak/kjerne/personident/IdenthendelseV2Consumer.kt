@@ -49,17 +49,22 @@ class IdenthendelseV2Consumer(
             }
 
             val aktivAktørid =
-                aktør?.identifikatorer?.singleOrNull { ident ->
-                    ident.type == Type.AKTORID && ident.gjeldende
-                }?.idnummer.toString()
+                aktør
+                    ?.identifikatorer
+                    ?.singleOrNull { ident ->
+                        ident.type == Type.AKTORID && ident.gjeldende
+                    }?.idnummer
+                    .toString()
 
             // I tilfeller som ved merge av hendelser vil man få både identhendelse på gammel og ny aktørid, så for å unngå duplikater så sender man bare på aktiv ident
             if (aktørIdPåHendelse.contains(aktivAktørid)) {
-                aktør?.identifikatorer?.singleOrNull { ident ->
-                    ident.type == Type.FOLKEREGISTERIDENT && ident.gjeldende
-                }?.also { folkeregisterident ->
-                    personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer.toString()))
-                }
+                aktør
+                    ?.identifikatorer
+                    ?.singleOrNull { ident ->
+                        ident.type == Type.FOLKEREGISTERIDENT && ident.gjeldende
+                    }?.also { folkeregisterident ->
+                        personidentService.opprettTaskForIdentHendelse(PersonIdent(folkeregisterident.idnummer.toString()))
+                    }
             } else {
                 SECURE_LOGGER.info("Ignorerer å lage task på ident-hendelse fordi aktør $aktørIdPåHendelse ikke lenger er en gyldig aktør")
             }

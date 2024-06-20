@@ -69,7 +69,5 @@ class RegistrereSøknad(
         return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
     }
 
-    override fun stegType(): StegType {
-        return StegType.REGISTRERE_SØKNAD
-    }
+    override fun stegType(): StegType = StegType.REGISTRERE_SØKNAD
 }

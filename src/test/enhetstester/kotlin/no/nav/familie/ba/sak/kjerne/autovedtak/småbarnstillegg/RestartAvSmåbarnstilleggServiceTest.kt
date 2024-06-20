@@ -36,10 +36,12 @@ class RestartAvSmåbarnstilleggServiceTest {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(0L) } returns LocalDate.now()
 
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(1L) } returns
-            LocalDate.now()
+            LocalDate
+                .now()
                 .minusMonths(1)
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(2L) } returns
-            LocalDate.now()
+            LocalDate
+                .now()
                 .minusMonths(2)
 
         every {

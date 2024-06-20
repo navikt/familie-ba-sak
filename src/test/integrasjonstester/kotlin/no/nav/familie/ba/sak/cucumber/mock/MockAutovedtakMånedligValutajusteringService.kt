@@ -16,7 +16,10 @@ fun mockAutovedtakMånedligValutajusteringService(
     nyBehanldingId: Long,
     svarFraEcbMock: Map<Pair<String, LocalDate>, BigDecimal>,
 ): AutovedtakMånedligValutajusteringService {
-    val forrigeBehandling = dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id }
+    val forrigeBehandling =
+        dataFraCucumber.behandlinger.values
+            .filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.id }
     dataFraCucumber.behandlingTilForrigeBehandling.put(nyBehanldingId, forrigeBehandling?.id)
 
     val ecbService = mockk<ECBService>()

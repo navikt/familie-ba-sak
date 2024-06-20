@@ -34,8 +34,8 @@ class IverksettMotFamilieTilbakeTask(
         fun opprettTask(
             behandlingsId: Long,
             metadata: Properties,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
                 properties =
@@ -43,6 +43,5 @@ class IverksettMotFamilieTilbakeTask(
                         this["behandlingId"] = behandlingsId.toString()
                     },
             )
-        }
     }
 }

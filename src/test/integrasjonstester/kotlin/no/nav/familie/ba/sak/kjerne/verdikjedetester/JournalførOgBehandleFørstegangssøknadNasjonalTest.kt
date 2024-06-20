@@ -315,7 +315,11 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         // Godkjenner alle vilkår på førstegangsbehandling.
         assertEquals(
             3,
-            restUtvidetBehandling.data!!.personResultater.find { it.personIdent == scenario.søker.ident }?.vilkårResultater?.size,
+            restUtvidetBehandling.data!!
+                .personResultater
+                .find { it.personIdent == scenario.søker.ident }
+                ?.vilkårResultater
+                ?.size,
         )
 
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->

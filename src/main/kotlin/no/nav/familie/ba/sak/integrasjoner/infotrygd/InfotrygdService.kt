@@ -15,26 +15,25 @@ class InfotrygdService(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val personidentService: PersonidentService,
 ) {
-    fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> {
-        return infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
-    }
+    fun hentInfotrygdsakerForSøker(aktør: Aktør): InfotrygdSøkResponse<Sak> = infotrygdBarnetrygdClient.hentSaker(listOf(aktør.aktivFødselsnummer()), emptyList())
 
-    fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? {
-        return familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+    fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? =
+        familieIntegrasjonerTilgangskontrollService
+            .hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?.let {
                 RestInfotrygdsaker(
                     adressebeskyttelsegradering = it.adressebeskyttelseGradering,
                     harTilgang = false,
                 )
             }
-    }
 
     fun hentInfotrygdstønaderForSøker(
         ident: String,
         historikk: Boolean = false,
     ): InfotrygdSøkResponse<Stønad> {
         val søkerIdenter =
-            personidentService.hentIdenter(personIdent = ident, historikk = true)
+            personidentService
+                .hentIdenter(personIdent = ident, historikk = true)
                 .filter { it.gruppe == "FOLKEREGISTERIDENT" }
                 .map { it.ident }
         return infotrygdBarnetrygdClient.hentStønader(søkerIdenter, emptyList(), historikk)
@@ -43,16 +42,12 @@ class InfotrygdService(
     fun harÅpenSakIInfotrygd(
         søkerIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
-    ): Boolean {
-        return infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
-    }
+    ): Boolean = infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(søkerIdenter, barnasIdenter)
 
     fun harLøpendeSakIInfotrygd(
         søkerIdenter: List<String>,
         barnasIdenter: List<String> = emptyList(),
-    ): Boolean {
-        return infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
-    }
+    ): Boolean = infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(søkerIdenter, barnasIdenter)
 
     fun harSendtbrev(
         søkerIdenter: List<String>,

@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.RestTilbakekrevingsbeh
 import org.springframework.stereotype.Service
 
 @Service
-class TilbakekrevingsbehandlingService(private val tilbakekrevingKlient: TilbakekrevingKlient) {
+class TilbakekrevingsbehandlingService(
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
+) {
     fun hentRestTilbakekrevingsbehandlinger(fagsakId: Long): List<RestTilbakekrevingsbehandling> {
         val behandlinger = tilbakekrevingKlient.hentTilbakekrevingsbehandlinger(fagsakId)
         return behandlinger.map {

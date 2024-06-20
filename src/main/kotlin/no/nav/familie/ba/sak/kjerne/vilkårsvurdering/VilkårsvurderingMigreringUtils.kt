@@ -75,4 +75,8 @@ object VilkårsvurderingMigreringUtils {
     }
 }
 
-data class VilkårResultatMedNyPeriode(val vilkårResultat: VilkårResultat, val fom: LocalDate, val tom: LocalDate?)
+data class VilkårResultatMedNyPeriode(
+    val vilkårResultat: VilkårResultat,
+    val fom: LocalDate,
+    val tom: LocalDate?,
+)

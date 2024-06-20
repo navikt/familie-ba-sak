@@ -92,7 +92,8 @@ class SnikeIKøenService(
     private fun finnBehandlingPåMaskinellVent(
         fagsakId: Long,
     ): Behandling? =
-        behandlingHentOgPersisterService.hentBehandlinger(fagsakId, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+        behandlingHentOgPersisterService
+            .hentBehandlinger(fagsakId, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
             .takeIf { it.isNotEmpty() }
             ?.let { it.singleOrNull() ?: error("Forventer kun en behandling på vent for fagsak=$fagsakId") }
 
@@ -136,7 +137,8 @@ class SnikeIKøenService(
      * Ellers settes UTREDES
      */
     private fun utledStatusForBehandlingPåVent(behandlingPåVent: Behandling) =
-        påVentService.finnAktivSettPåVentPåBehandling(behandlingPåVent.id)
+        påVentService
+            .finnAktivSettPåVentPåBehandling(behandlingPåVent.id)
             ?.let { BehandlingStatus.SATT_PÅ_VENT }
             ?: BehandlingStatus.UTREDES
 }
@@ -144,7 +146,9 @@ class SnikeIKøenService(
 private fun Behandling.harVærtPåVilkårsvurderingSteg() =
     behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
 
-enum class SettPåMaskinellVentÅrsak(val årsak: String) {
+enum class SettPåMaskinellVentÅrsak(
+    val årsak: String,
+) {
     SATSENDRING("Satsendring"),
     OMREGNING_6_ELLER_18_ÅR("Omregning 6 eller 18 år"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
@@ -152,5 +156,6 @@ enum class SettPåMaskinellVentÅrsak(val årsak: String) {
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
 }
 
-class BehandlingErIkkeAvsluttetException(val behandling: Behandling) :
-    RuntimeException("Behandling=${behandling.id} har status=${behandling.status} og er ikke avsluttet")
+class BehandlingErIkkeAvsluttetException(
+    val behandling: Behandling,
+) : RuntimeException("Behandling=${behandling.id} har status=${behandling.status} og er ikke avsluttet")

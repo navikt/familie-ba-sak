@@ -114,7 +114,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
                 .map { it.kildeBehandlingId }
                 .sortedBy { it }
                 .distinct()
@@ -148,7 +149,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -180,7 +182,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -212,7 +215,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
         val behandlingerMedRelevanteAndeler =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger)
                 .map { it.kildeBehandlingId }
                 .distinct()
 
@@ -296,11 +300,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,
         stønadFom =
-            LocalDate.now()
+            LocalDate
+                .now()
                 .minusMonths(12)
                 .toYearMonth(),
         stønadTom =
-            LocalDate.now()
+            LocalDate
+                .now()
                 .plusMonths(12)
                 .toYearMonth(),
         type = YtelseType.ORDINÆR_BARNETRYGD,

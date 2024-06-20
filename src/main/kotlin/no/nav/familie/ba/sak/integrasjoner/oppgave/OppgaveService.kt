@@ -164,9 +164,7 @@ class OppgaveService(
         antallOppgaveTyper[oppgavetype]?.increment()
     }
 
-    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        return integrasjonClient.patchOppgave(patchOppgave)
-    }
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse = integrasjonClient.patchOppgave(patchOppgave)
 
     fun patchOppgaverForBehandling(
         behandling: Behandling,
@@ -225,31 +223,26 @@ class OppgaveService(
     fun hentOppgaverSomIkkeErFerdigstilt(
         oppgavetype: Oppgavetype,
         behandling: Behandling,
-    ): List<DbOppgave> {
-        return oppgaveRepository.finnOppgaverSomSkalFerdigstilles(oppgavetype, behandling)
-    }
+    ): List<DbOppgave> = oppgaveRepository.finnOppgaverSomSkalFerdigstilles(oppgavetype, behandling)
 
-    fun hentOppgaverSomIkkeErFerdigstilt(behandling: Behandling): List<DbOppgave> {
-        return oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(behandling)
-    }
+    fun hentOppgaverSomIkkeErFerdigstilt(behandling: Behandling): List<DbOppgave> = oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(behandling)
 
-    fun hentOppgave(oppgaveId: Long): Oppgave {
-        return integrasjonClient.finnOppgaveMedId(oppgaveId)
-    }
+    fun hentOppgave(oppgaveId: Long): Oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
 
     fun ferdigstillOppgaver(
         behandlingId: Long,
         oppgavetype: Oppgavetype,
     ) {
-        oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
-            oppgavetype = oppgavetype,
-            behandling =
-                behandlingHentOgPersisterService.hent(
-                    behandlingId = behandlingId,
-                ),
-        ).forEach {
-            it.ferdigstill()
-        }
+        oppgaveRepository
+            .finnOppgaverSomSkalFerdigstilles(
+                oppgavetype = oppgavetype,
+                behandling =
+                    behandlingHentOgPersisterService.hent(
+                        behandlingId = behandlingId,
+                    ),
+            ).forEach {
+                it.ferdigstill()
+            }
     }
 
     private fun DbOppgave.ferdigstill() {
@@ -307,19 +300,21 @@ class OppgaveService(
         val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger()
 
         val behandlingsfrister =
-            åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
-                val behandleSakOppgave =
-                    try {
-                        oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
-                            ?.let {
-                                hentOppgave(it.gsakId.toLong())
-                            }
-                    } catch (e: Exception) {
-                        secureLogger.warn("Klarte ikke hente BehandleSak-oppgaven for behandling ${behandling.id}", e)
-                        null
-                    }
-                "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
-            }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
+            åpneUtvidetBarnetrygdBehandlinger
+                .map { behandling ->
+                    val behandleSakOppgave =
+                        try {
+                            oppgaveRepository
+                                .findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
+                                ?.let {
+                                    hentOppgave(it.gsakId.toLong())
+                                }
+                        } catch (e: Exception) {
+                            secureLogger.warn("Klarte ikke hente BehandleSak-oppgaven for behandling ${behandling.id}", e)
+                            null
+                        }
+                    "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
+                }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
 
         return "behandlingId;oppgaveId;frist\n" + behandlingsfrister
     }
@@ -348,19 +343,16 @@ class OppgaveService(
     fun lagOppgaveTekst(
         fagsakId: Long,
         beskrivelse: String? = null,
-    ): String {
-        return if (beskrivelse != null) {
+    ): String =
+        if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } +
             "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
             "https://barnetrygd.intern.nav.no/fagsak/$fagsakId"
-    }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
-        return integrasjonClient.hentOppgaver(finnOppgaveRequest)
-    }
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = integrasjonClient.hentOppgaver(finnOppgaveRequest)
 
     fun ferdigstillOppgave(oppgave: Oppgave) {
         require(oppgave.id != null) { "Oppgaven må ha en id for å kunne ferdigstilles" }

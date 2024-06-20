@@ -17,7 +17,10 @@ fun mockAutovedtakSmåbarnstilleggService(
     internPeriodeOvergangsstønadNyBehandling: List<InternPeriodeOvergangsstønad>,
     småbarnstilleggBehandlingId: Long,
 ): AutovedtakStegService {
-    val forrigeBehandling = dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id }
+    val forrigeBehandling =
+        dataFraCucumber.behandlinger.values
+            .filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.id }
     dataFraCucumber.behandlingTilForrigeBehandling.put(småbarnstilleggBehandlingId, forrigeBehandling?.id)
 
     val efSakRestClient = mockEfSakRestClient(internPeriodeOvergangsstønadNyBehandling)

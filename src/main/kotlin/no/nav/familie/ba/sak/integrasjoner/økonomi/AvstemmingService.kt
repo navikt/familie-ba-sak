@@ -52,9 +52,7 @@ class AvstemmingService(
         return batch.status == KjøreStatus.FERDIG
     }
 
-    fun erKonsistensavstemmingStartet(transaksjonsId: UUID): Boolean {
-        return dataChunkRepository.findByTransaksjonsId(transaksjonsId).isNotEmpty()
-    }
+    fun erKonsistensavstemmingStartet(transaksjonsId: UUID): Boolean = dataChunkRepository.findByTransaksjonsId(transaksjonsId).isNotEmpty()
 
     fun skalOppretteFinnPerioderForRelevanteBehandlingerTask(
         transaksjonsId: UUID,
@@ -167,8 +165,8 @@ class AvstemmingService(
     fun hentDataForKonsistensavstemming(
         avstemmingstidspunkt: LocalDateTime,
         relevanteBehandlinger: List<Long>,
-    ): List<PerioderForBehandling> {
-        return relevanteBehandlinger
+    ): List<PerioderForBehandling> =
+        relevanteBehandlinger
             .chunked(1000)
             .map { chunk ->
                 val relevanteAndeler =
@@ -186,7 +184,8 @@ class AvstemmingService(
                         relevanteAndeler.mapNotNull { it.kildeBehandlingId },
                     )
 
-                relevanteAndeler.groupBy { it.kildeBehandlingId }
+                relevanteAndeler
+                    .groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->
                         if (kildeBehandlingId == null) {
                             secureLogger.warn("Finner ikke behandlingsId for andeler=$andeler")
@@ -201,13 +200,11 @@ class AvstemmingService(
                                     .map {
                                         it.periodeOffset
                                             ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
-                                    }
-                                    .toSet(),
+                                    }.toSet(),
                             utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId],
                         )
                     }
             }.flatten()
-    }
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(AvstemmingService::class.java)

@@ -99,16 +99,20 @@ class FødselshendelseRevurderingTest(
         )
 
         val aktivBehandling =
-            restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
+            restFagsakEtterBehandlingAvsluttet
+                .getDataOrThrow()
+                .behandlinger
                 .single {
                     it.behandlingId ==
-                        behandlingHentOgPersisterService.finnAktivForFagsak(
-                            restFagsakEtterBehandlingAvsluttet.data!!.id,
-                        )?.id
+                        behandlingHentOgPersisterService
+                            .finnAktivForFagsak(
+                                restFagsakEtterBehandlingAvsluttet.data!!.id,
+                            )?.id
                 }
 
         val vurderteVilkårIDenneBehandlingen =
-            aktivBehandling.personResultater.flatMap { it.vilkårResultater }
+            aktivBehandling.personResultater
+                .flatMap { it.vilkårResultater }
                 .filter { it.behandlingId == aktivBehandling.behandlingId }
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
         assertEquals(5, vurderteVilkårIDenneBehandlingen.size)

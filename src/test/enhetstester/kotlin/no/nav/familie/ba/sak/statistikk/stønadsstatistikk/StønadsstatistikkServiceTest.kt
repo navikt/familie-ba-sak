@@ -133,7 +133,10 @@ internal class StønadsstatistikkServiceTest(
         val andelTilkjentYtelseSøker =
             lagAndelTilkjentYtelseUtvidet(
                 barn2.fødselsdato.nesteMåned().toString(),
-                barn2.fødselsdato.plusYears(2).toYearMonth().toString(),
+                barn2.fødselsdato
+                    .plusYears(2)
+                    .toYearMonth()
+                    .toString(),
                 YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 person = personopplysningGrunnlag.søker,
@@ -311,15 +314,16 @@ internal class StønadsstatistikkServiceTest(
     }
 
     inline fun <reified T : Enum<T>> ikkeAvvikleteEnumverdier(): List<String> {
-        return enumValues<T>().filter { value ->
-            try {
-                val field: Field = T::class.java.getField(value.name)
-                return@filter !field.isAnnotationPresent(Deprecated::class.java)
-            } catch (e: NoSuchFieldException) {
-                return@filter false
-            } catch (e: SecurityException) {
-                return@filter false
-            }
-        }.map { it.name }
+        return enumValues<T>()
+            .filter { value ->
+                try {
+                    val field: Field = T::class.java.getField(value.name)
+                    return@filter !field.isAnnotationPresent(Deprecated::class.java)
+                } catch (e: NoSuchFieldException) {
+                    return@filter false
+                } catch (e: SecurityException) {
+                    return@filter false
+                }
+            }.map { it.name }
     }
 }

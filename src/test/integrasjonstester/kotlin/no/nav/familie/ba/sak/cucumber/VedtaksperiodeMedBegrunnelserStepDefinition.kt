@@ -194,8 +194,10 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             )
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
-        Assertions.assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
-            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
+        Assertions
+            .assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
             .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
     }
 }

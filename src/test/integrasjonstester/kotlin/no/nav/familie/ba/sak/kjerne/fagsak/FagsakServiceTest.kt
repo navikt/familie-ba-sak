@@ -257,8 +257,11 @@ class FagsakServiceTest(
 
         assertEquals(
             FagsakStatus.OPPRETTET.name,
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
-                .last().jsonToSakDVH().sakStatus,
+            saksstatistikkMellomlagringRepository
+                .findByTypeAndTypeId(SAK, fagsak.id)
+                .last()
+                .jsonToSakDVH()
+                .sakStatus,
         )
     }
 

@@ -91,9 +91,7 @@ data class VedtaksperiodeMedBegrunnelser(
     )
     val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 ) : BaseEntitet() {
-    override fun toString(): String {
-        return "VedtaksperiodeMedBegrunnelser(id=$id, fom=$fom, tom=$tom, type=$type, begrunnelser=$begrunnelser, eøsBegrunnelser=$eøsBegrunnelser, fritekster=$fritekster)"
-    }
+    override fun toString(): String = "VedtaksperiodeMedBegrunnelser(id=$id, fom=$fom, tom=$tom, type=$type, begrunnelser=$begrunnelser, eøsBegrunnelser=$eøsBegrunnelser, fritekster=$fritekster)"
 
     fun settBegrunnelser(nyeBegrunnelser: List<Vedtaksbegrunnelse>) {
         begrunnelser.clear()
@@ -110,9 +108,7 @@ data class VedtaksperiodeMedBegrunnelser(
         fritekster.addAll(nyeFritekster)
     }
 
-    fun harFriteksterUtenStandardbegrunnelser(): Boolean {
-        return (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && begrunnelser.isEmpty() && eøsBegrunnelser.isEmpty()
-    }
+    fun harFriteksterUtenStandardbegrunnelser(): Boolean = (type == Vedtaksperiodetype.OPPHØR || type == Vedtaksperiodetype.AVSLAG) && fritekster.isNotEmpty() && begrunnelser.isEmpty() && eøsBegrunnelser.isEmpty()
 
     fun erBegrunnet() = !(begrunnelser.isEmpty() && fritekster.isEmpty() && eøsBegrunnelser.isEmpty())
 }
@@ -120,11 +116,10 @@ data class VedtaksperiodeMedBegrunnelser(
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     standardbegrunnelser: List<Standardbegrunnelse>,
     måned: YearMonth,
-): Boolean {
-    return this.any {
+): Boolean =
+    this.any {
         it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.standardbegrunnelse in standardbegrunnelser }
     }
-}
 
 fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -138,7 +133,8 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val løpendeUtbetalingsperiode =
-                utbetalingsperiodeDetaljer.perioder()
+                utbetalingsperiodeDetaljer
+                    .perioder()
                     .lastOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid() <= inneværendeMåned() }
                     ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
 
@@ -162,15 +158,18 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
 
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedtaksperiode(
     utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
-): Iterable<UtbetalingsperiodeDetalj>? = utbetalingsperiodeDetaljer.beskjær((this.fom ?: TIDENES_MORGEN).tilMånedTidspunkt(), (this.tom ?: TIDENES_ENDE).tilMånedTidspunkt()).perioder().firstNotNullOfOrNull { it.innhold }
+): Iterable<UtbetalingsperiodeDetalj>? = utbetalingsperiodeDetaljer
+    .beskjær((this.fom ?: TIDENES_MORGEN).tilMånedTidspunkt(), (this.tom ?: TIDENES_ENDE).tilMånedTidspunkt()).perioder().firstNotNullOfOrNull { it.innhold }
 
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(
     utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
 ): Iterable<UtbetalingsperiodeDetalj>? {
     val innhold =
-        utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
-            andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate() == this.fom
-        }?.innhold
+        utbetalingsperiodeDetaljer
+            .perioder()
+            .find { andelerVertikal ->
+                andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate() == this.fom
+            }?.innhold
 
     return innhold
 }
@@ -179,17 +178,18 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
     personopplysningGrunnlag: PersonopplysningGrunnlag,
 ) = groupBy { Pair(it.aktør, it.type) }
     .map { (_, andelerForAktørOgType) ->
-        andelerForAktørOgType.map {
-            TidslinjePeriode(
-                fraOgMed = it.stønadFom.tilTidspunkt(),
-                tilOgMed = it.stønadTom.tilTidspunkt(),
-                innhold =
-                    UtbetalingsperiodeDetalj(
-                        andel = it,
-                        personopplysningGrunnlag = personopplysningGrunnlag,
-                    ),
-            )
-        }.tilTidslinje()
+        andelerForAktørOgType
+            .map {
+                TidslinjePeriode(
+                    fraOgMed = it.stønadFom.tilTidspunkt(),
+                    tilOgMed = it.stønadTom.tilTidspunkt(),
+                    innhold =
+                        UtbetalingsperiodeDetalj(
+                            andel = it,
+                            personopplysningGrunnlag = personopplysningGrunnlag,
+                        ),
+                )
+            }.tilTidslinje()
     }.kombiner { it.takeIf { it.toList().isNotEmpty() } }
     .slåSammenLike()
 

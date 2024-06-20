@@ -86,7 +86,8 @@ class AutovedtakBrevService(
         }
 
         val tidligereVedtatteBehandlinger =
-            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+            behandlingHentOgPersisterService
+                .hentBehandlinger(fagsakId = fagsakId)
                 .filter { behandling -> behandling.erVedtatt() }
 
         val standardbegrunnelserIPeriodeFraTidligereBehandlinger =
@@ -142,8 +143,8 @@ class AutovedtakBrevService(
     override fun skalAutovedtakBehandles(behandlingsdata: OmregningBrevData): Boolean = true
 }
 
-private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
-    return when (this) {
+private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> =
+    when (this) {
         BehandlingÅrsak.OMREGNING_6ÅR ->
             listOf(
                 InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR,
@@ -164,4 +165,3 @@ private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
 
         else -> emptyList()
     }
-}

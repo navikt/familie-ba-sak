@@ -174,25 +174,25 @@ private fun erEndringIBeløpForPersonOgType(
     val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
     val endringIBeløpTidslinje =
-        nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+        nåværendeTidslinje
+            .kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-            if (erFremstiltKravForPerson) {
-                // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
-                when {
-                    forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
-                    else -> false
+                if (erFremstiltKravForPerson) {
+                    // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
+                    when {
+                        forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
+                        else -> false
+                    }
+                } else {
+                    // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
+                    when {
+                        forrigeBeløp != nåværendeBeløp -> true
+                        else -> false
+                    }
                 }
-            } else {
-                // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
-                when {
-                    forrigeBeløp != nåværendeBeløp -> true
-                    else -> false
-                }
-            }
-        }
-            .fjernPerioderEtterOpphørsdato(opphørstidspunktForBehandling)
+            }.fjernPerioderEtterOpphørsdato(opphørstidspunktForBehandling)
             .fjernPerioderLengreEnnEnMånedFramITid(nåMåned)
 
     return endringIBeløpTidslinje.perioder().any { it.innhold == true }

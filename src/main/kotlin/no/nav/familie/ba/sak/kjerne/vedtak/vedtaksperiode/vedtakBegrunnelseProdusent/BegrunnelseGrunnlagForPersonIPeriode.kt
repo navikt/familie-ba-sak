@@ -67,9 +67,7 @@ data class BegrunnelseGrunnlagForPersonIPeriode(
     }
 }
 
-fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>> {
-    return this.persongrunnlag.personer.associateWith { this.lagBegrunnelseGrunnlagForPersonTidslinje(it) }
-}
+fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>> = this.persongrunnlag.personer.associateWith { this.lagBegrunnelseGrunnlagForPersonTidslinje(it) }
 
 fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslinje(
     person: Person,
@@ -87,26 +85,35 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
         lagTidslinjeForEksplisitteAvslag(forskjøvedeVilkårMedPeriode, generelleAvslag)
 
     val kompetanseTidslinje =
-        this.utfylteKompetanser.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
+        this.utfylteKompetanser
+            .filtrerPåAktør(person.aktør)
+            .tilTidslinje()
+            .mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
     val utenlandskPeriodebeløpTidslinje =
-        utfylteUtenlandskPeriodebeløp.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
+        utfylteUtenlandskPeriodebeløp
+            .filtrerPåAktør(person.aktør)
+            .tilTidslinje()
+            .mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
 
     val valutakursTidslinje =
-        utfylteValutakurs.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
+        utfylteValutakurs
+            .filtrerPåAktør(person.aktør)
+            .tilTidslinje()
+            .mapIkkeNull { ValutakursForVedtaksperiode(it) }
 
     val endredeUtbetalingerTidslinje =
-        this.utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
-            .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
+        this.utfylteEndredeUtbetalinger
+            .filtrerPåAktør(person.aktør)
+            .tilTidslinje()
+            .mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
     val andelerTilkjentYtelseTidslinje =
         this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForBrevPeriodeTidslinje()
 
     val overgangsstønadTidslinje =
-        this.perioderOvergangsstønad.filtrerPåAktør(person.aktør)
+        this.perioderOvergangsstønad
+            .filtrerPåAktør(person.aktør)
             .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(andelerTilkjentYtelseTidslinje.hentErUtbetalingSmåbarnstilleggTidslinje())
 
     return forskjøvedeVilkårTidslinje

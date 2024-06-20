@@ -196,8 +196,8 @@ data class UtfyltKompetanseUtenTidsperiode(
     override val erAnnenForelderOmfattetAvNorskLovgivning: Boolean,
 ) : IUtfyltKompetanse
 
-fun Kompetanse.tilIKompetanse(): IKompetanse {
-    return if (this.erObligatoriskeFelterSatt()) {
+fun Kompetanse.tilIKompetanse(): IKompetanse =
+    if (this.erObligatoriskeFelterSatt()) {
         UtfyltKompetanse(
             id = this.id,
             behandlingId = this.behandlingId,
@@ -231,26 +231,32 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
             behandlingId = this.behandlingId,
         )
     }
-}
 
 fun List<UtfyltKompetanse>.tilTidslinje() =
-    this.map {
-        Periode(
-            fraOgMed = it.fom.tilTidspunkt(),
-            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
-            innhold = it,
-        )
-    }.tilTidslinje()
+    this
+        .map {
+            Periode(
+                fraOgMed = it.fom.tilTidspunkt(),
+                tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
+                innhold = it,
+            )
+        }.tilTidslinje()
 
 fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt: MånedTidspunkt): Map<Aktør, List<UtfyltKompetanse>> {
     val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
 
     val utfylteKompetanser =
-        this.map { it.tilIKompetanse() }
+        this
+            .map { it.tilIKompetanse() }
             .filterIsInstance<UtfyltKompetanse>()
 
     return alleBarnAktørIder.associateWith { aktør ->
-        utfylteKompetanser.filter { it.barnAktører.contains(aktør) }.tilTidslinje().beskjærFraOgMed(endringstidspunkt).perioder().mapNotNull { it.innhold }
+        utfylteKompetanser
+            .filter { it.barnAktører.contains(aktør) }
+            .tilTidslinje()
+            .beskjærFraOgMed(endringstidspunkt)
+            .perioder()
+            .mapNotNull { it.innhold }
     }
 }
 

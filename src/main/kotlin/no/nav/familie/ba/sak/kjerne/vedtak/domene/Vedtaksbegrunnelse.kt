@@ -47,9 +47,7 @@ class Vedtaksbegrunnelse(
             standardbegrunnelse = this.standardbegrunnelse,
         )
 
-    override fun toString(): String {
-        return "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
-    }
+    override fun toString(): String = "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
 }
 
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>) =
@@ -70,8 +68,8 @@ sealed interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
     val type: Begrunnelsetype
     val vedtakBegrunnelseType: VedtakBegrunnelseType?
 
-    override fun compareTo(other: BrevBegrunnelse): Int {
-        return when {
+    override fun compareTo(other: BrevBegrunnelse): Int =
+        when {
             this.type == Begrunnelsetype.FRITEKST -> Int.MAX_VALUE
             other.type == Begrunnelsetype.FRITEKST -> -Int.MAX_VALUE
             this.vedtakBegrunnelseType == null -> Int.MAX_VALUE
@@ -79,7 +77,6 @@ sealed interface BrevBegrunnelse : Comparable<BrevBegrunnelse> {
 
             else -> this.vedtakBegrunnelseType!!.sorteringsrekkefølge - other.vedtakBegrunnelseType!!.sorteringsrekkefølge
         }
-    }
 }
 
 interface BegrunnelseMedData : BrevBegrunnelse {

@@ -49,11 +49,12 @@ class UtenlandskPeriodebeløpTestController(
 private fun Map<LocalDate, String>.tilUtenlandskePeriodebeløp(
     behandlingId: BehandlingId,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-): Collection<UtenlandskPeriodebeløp> {
-    return this.map { (dato, tidslinje) ->
-        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
-        UtenlandskPeriodebeløpBuilder(dato.tilMånedTidspunkt(), behandlingId)
-            .medBeløp(tidslinje, "EUR", "fr", person)
-            .bygg()
-    }.flatten().slåSammen()
-}
+): Collection<UtenlandskPeriodebeløp> =
+    this
+        .map { (dato, tidslinje) ->
+            val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
+            UtenlandskPeriodebeløpBuilder(dato.tilMånedTidspunkt(), behandlingId)
+                .medBeløp(tidslinje, "EUR", "fr", person)
+                .bygg()
+        }.flatten()
+        .slåSammen()

@@ -84,9 +84,7 @@ data class GrStatsborgerskap(
 
 fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
 
-fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> {
-    return this.filter { it.gjeldendeNå() }
-}
+fun List<GrStatsborgerskap>.filtrerGjeldendeNå(): List<GrStatsborgerskap> = this.filter { it.gjeldendeNå() }
 
 fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
     val nåværendeMedlemskap = finnNåværendeMedlemskap(this)
@@ -96,8 +94,8 @@ fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
 fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
     statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
 
-fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
-    return with(medlemskap) {
+fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? =
+    with(medlemskap) {
         when {
             contains(Medlemskap.NORDEN) -> Medlemskap.NORDEN
             contains(Medlemskap.EØS) -> Medlemskap.EØS
@@ -107,4 +105,3 @@ fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? {
             else -> null
         }
     }
-}

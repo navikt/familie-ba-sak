@@ -41,14 +41,13 @@ data class AnnenVurdering(
     @Column(name = "begrunnelse")
     var begrunnelse: String? = null,
 ) : BaseEntitet() {
-    fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering {
-        return AnnenVurdering(
+    fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering =
+        AnnenVurdering(
             personResultat = nyPersonResultat ?: personResultat,
             type = type,
             resultat = resultat,
             begrunnelse = begrunnelse,
         )
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -59,17 +58,11 @@ data class AnnenVurdering(
         return type == other.type
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(type)
-    }
+    override fun hashCode(): Int = Objects.hash(type)
 
-    override fun toString(): String {
-        return "AnnenVurdering(id=$id, type=$type, personident=${personResultat.aktør.aktørId})"
-    }
+    override fun toString(): String = "AnnenVurdering(id=$id, type=$type, personident=${personResultat.aktør.aktørId})"
 
-    fun toSecureString(): String {
-        return "AnnenVurdering(id=$id, type=$type, personident=${personResultat.aktør.aktivFødselsnummer()})"
-    }
+    fun toSecureString(): String = "AnnenVurdering(id=$id, type=$type, personident=${personResultat.aktør.aktivFødselsnummer()})"
 }
 
 enum class AnnenVurderingType {

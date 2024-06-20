@@ -5,7 +5,6 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
-import kotlinx.coroutines.runBlocking
 import lagSvarFraEcbMock
 import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
@@ -37,9 +36,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
@@ -124,16 +121,18 @@ class BegrunnelseTeksterStepDefinition {
         persongrunnlag.putAll(personGrunnlagMap)
 
         fagsaker =
-            fagsaker.mapValues { (_, fagsak) ->
-                val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
-                val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
-                fagsak.copy(aktør = søkerAktør)
-            }.toMutableMap()
+            fagsaker
+                .mapValues { (_, fagsak) ->
+                    val behandlingerPåFagsak = behandlinger.values.filter { it.fagsak.id == fagsak.id }
+                    val søkerAktør = persongrunnlag[behandlingerPåFagsak.first().id]!!.søker.aktør
+                    fagsak.copy(aktør = søkerAktør)
+                }.toMutableMap()
 
         behandlinger =
-            behandlinger.mapValues { (_, behandling) ->
-                behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
-            }.toMutableMap()
+            behandlinger
+                .mapValues { (_, behandling) ->
+                    behandling.copy(fagsak = fagsaker[behandling.fagsak.id]!!)
+                }.toMutableMap()
     }
 
     @Og("følgende dagens dato {}")
@@ -289,8 +288,10 @@ class BegrunnelseTeksterStepDefinition {
         return utvidedeVedtaksperioderMedBegrunnelser.map {
             it.copy(
                 gyldigeBegrunnelser =
-                    it.tilVedtaksperiodeMedBegrunnelser(vedtak)
-                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser).toList(),
+                    it
+                        .tilVedtaksperiodeMedBegrunnelser(vedtak)
+                        .hentGyldigeBegrunnelserForPeriode(grunnlagForBegrunnelser)
+                        .toList(),
             )
         }
     }
@@ -402,7 +403,8 @@ class BegrunnelseTeksterStepDefinition {
             )
 
         val faktiskeBegrunnelser: List<BegrunnelseMedData> =
-            vedtaksperiodeMedBegrunnelser.lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
+            vedtaksperiodeMedBegrunnelser
+                .lagBrevPeriode(grunnlagForBegrunnelse, LANDKODER)!!
                 .begrunnelser
                 .filterIsInstance<BegrunnelseMedData>()
 
@@ -450,7 +452,8 @@ class BegrunnelseTeksterStepDefinition {
     ) {
         val fagsak = fagsaker[fagsakId]!!
         val internePerioderOvergangsstønad =
-            dataTable.asMaps()
+            dataTable
+                .asMaps()
                 .map({ rad ->
                     InternPeriodeOvergangsstønad(
                         fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
@@ -479,15 +482,19 @@ class BegrunnelseTeksterStepDefinition {
         dataTable: DataTable,
     ) {
         val beregnetTilkjentYtelse =
-            tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList()!!
+            tilkjenteYtelser[behandlingId]
+                ?.andelerTilkjentYtelse
+                ?.toList()!!
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!.andelerTilkjentYtelse
+            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!
+                .andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         assertThat(beregnetTilkjentYtelse)
-            .usingRecursiveComparison().ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id", ".*forrigePeriodeOffset", ".*periodeOffset")
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*kildeBehandlingId", ".*tilkjentYtelse", ".*id", ".*forrigePeriodeOffset", ".*periodeOffset")
             .isEqualTo(forventedeAndeler)
     }
 
@@ -499,12 +506,14 @@ class BegrunnelseTeksterStepDefinition {
         dataTable: DataTable,
     ) {
         val aktørTilDødsfall: Map<String, LocalDate> =
-            dataTable.asMaps().map { rad ->
-                val aktørId = parseAktørId(rad)
-                val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
+            dataTable
+                .asMaps()
+                .map { rad ->
+                    val aktørId = parseAktørId(rad)
+                    val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
 
-                aktørId to dødsfallDato
-            }.toMap()
+                    aktørId to dødsfallDato
+                }.toMap()
 
         aktørTilDødsfall.forEach { (aktørId, dødsfallDato) ->
             persongrunnlag.values.flatMap { it.personer }.filter { it.aktør.aktørId == aktørId }.forEach {
@@ -585,35 +594,17 @@ class BegrunnelseTeksterStepDefinition {
         assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
     }
 
-    @Når("vi kjører beslutte vedtakssteg for behandling {} med beslutning {}")
-    fun `når vi kjører beslutte vedtakssteg for behandling med beslutning`(
+    @Når("vi oppdaterer valutakursene for beslutter på behandling {}")
+    fun `vi oppdaterer valutakursene for beslutter på behandling`(
         behandlingId: Long,
-        beslutning: Beslutning,
     ) {
-        val behandling = behandlinger[behandlingId]!!
-        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehanldingId = behandlingId,
+            )
 
-        if (totrinnskontroller[behandlingId] == null) {
-            totrinnskontroller[behandlingId] = Totrinnskontroll(behandling = behandling, saksbehandler = "Test", saksbehandlerId = "Test")
-        }
-
-        val dataFraCucumber = this
-        runBlocking {
-            val mock =
-                CucumberMock(
-                    dataFraCucumber = dataFraCucumber,
-                    nyBehanldingId = behandlingId,
-                    forrigeBehandling = forrigeBehandlingId?.let { behandlinger[forrigeBehandlingId] },
-                    scope = this,
-                )
-
-            val restBeslutning =
-                RestBeslutningPåVedtak(
-                    beslutning = beslutning,
-                )
-
-            mock.stegService.håndterBeslutningForVedtak(behandling, restBeslutning)
-        }
+        mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
     }
 
     /**
@@ -682,7 +673,8 @@ private object SanityBegrunnelseMock {
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
-            objectMapper.readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
+            objectMapper
+                .readValue(restSanityBegrunnelserJson, Array<RestSanityBegrunnelse>::class.java)
                 .toList()
 
         val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
@@ -704,10 +696,11 @@ private object SanityBegrunnelseMock {
             this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
-            objectMapper.readValue(
-                restSanityEØSBegrunnelserJson,
-                Array<RestSanityEØSBegrunnelse>::class.java,
-            ).toList()
+            objectMapper
+                .readValue(
+                    restSanityEØSBegrunnelserJson,
+                    Array<RestSanityEØSBegrunnelse>::class.java,
+                ).toList()
 
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
         val sanityEØSBegrunnelser = restSanityEØSBegrunnelser.mapNotNull { it.tilSanityEØSBegrunnelse() }

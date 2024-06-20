@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.springframework.stereotype.Service
 
 @Service
@@ -62,19 +65,25 @@ class TilgangService(
     /**
      * sjekkTilgangTilPersoner er cachet i [familieIntegrasjonerTilgangskontrollService]
      */
-    private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
-        return familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(personIdenter)
+    private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean =
+        familieIntegrasjonerTilgangskontrollService
+            .sjekkTilgangTilPersoner(personIdenter)
             .all { it.value.harTilgang }
-    }
 
     fun validerTilgangTilBehandling(
         behandlingId: Long,
         event: AuditLoggerEvent,
     ) {
         val personIdenter =
-            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
+            persongrunnlagService
+                .hentSøkerOgBarnPåBehandling(behandlingId)
                 ?.map { it.aktør.aktivFødselsnummer() }
-                ?: listOf(behandlingHentOgPersisterService.hent(behandlingId).fagsak.aktør.aktivFødselsnummer())
+                ?: listOf(
+                    behandlingHentOgPersisterService
+                        .hent(behandlingId)
+                        .fagsak.aktør
+                        .aktivFødselsnummer(),
+                )
 
         if (!SikkerhetContext.erSystemKontekst()) {
             personIdenter.forEach {
@@ -103,11 +112,11 @@ class TilgangService(
         val aktør = fagsakService.hentAktør(fagsakId)
         val personIdenterIFagsak =
             (
-                persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
+                persongrunnlagService
+                    .hentSøkerOgBarnPåFagsak(fagsakId)
                     ?.map { it.aktør.aktivFødselsnummer() }
                     ?: emptyList()
-            )
-                .ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+            ).ifEmpty { listOf(aktør.aktivFødselsnummer()) }
 
         personIdenterIFagsak.forEach { fnr ->
             auditLogger.log(
@@ -150,5 +159,12 @@ class TilgangService(
 
     fun validerKanRedigereBehandling(behandlingId: Long) {
         validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+    }
+
+    fun validerErPåBeslutteVedtakSteg(behandlingId: Long) {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        if (behandling.status != BehandlingStatus.FATTER_VEDTAK && behandling.steg == StegType.BESLUTTE_VEDTAK) {
+            throw Feil(message = "Er ikke i riktig steg eller status. Forventer status FATTER_VEDTAK og steg BESLUTTE_VEDTAK")
+        }
     }
 }

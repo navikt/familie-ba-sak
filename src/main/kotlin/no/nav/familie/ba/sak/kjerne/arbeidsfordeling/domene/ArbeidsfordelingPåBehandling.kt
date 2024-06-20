@@ -31,11 +31,7 @@ data class ArbeidsfordelingPåBehandling(
     @Column(name = "manuelt_overstyrt", nullable = false)
     var manueltOverstyrt: Boolean = false,
 ) {
-    override fun toString(): String {
-        return "ArbeidsfordelingPåBehandling(id=$id, manueltOverstyrt=$manueltOverstyrt)"
-    }
+    override fun toString(): String = "ArbeidsfordelingPåBehandling(id=$id, manueltOverstyrt=$manueltOverstyrt)"
 
-    fun toSecureString(): String {
-        return "ArbeidsfordelingPåBehandling(id=$id, behandlendeEnhetId=$behandlendeEnhetId, behandlendeEnhetNavn=$behandlendeEnhetNavn, manueltOverstyrt=$manueltOverstyrt)"
-    }
+    fun toSecureString(): String = "ArbeidsfordelingPåBehandling(id=$id, behandlendeEnhetId=$behandlendeEnhetId, behandlendeEnhetNavn=$behandlendeEnhetNavn, manueltOverstyrt=$manueltOverstyrt)"
 }

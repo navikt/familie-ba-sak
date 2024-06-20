@@ -53,10 +53,12 @@ class EndringIUtbetalingUtilTest {
             )
 
         val perioderMedEndring =
-            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-            ).perioder().filter { it.innhold == true }
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = nåværendeAndeler,
+                    forrigeAndeler = forrigeAndeler,
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(sep22, perioderMedEndring.single().fraOgMed.tilYearMonth())
@@ -93,10 +95,12 @@ class EndringIUtbetalingUtilTest {
             )
 
         val perioderMedEndring =
-            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-                nåværendeAndeler = andeler,
-                forrigeAndeler = andeler,
-            ).perioder().filter { it.innhold == true }
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = andeler,
+                    forrigeAndeler = andeler,
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
@@ -155,10 +159,12 @@ class EndringIUtbetalingUtilTest {
             )
 
         val perioderMedEndring =
-            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-                nåværendeAndeler = nåværendeAndeler,
-                forrigeAndeler = forrigeAndeler,
-            ).perioder().filter { it.innhold == true }
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = nåværendeAndeler,
+                    forrigeAndeler = forrigeAndeler,
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(mai22, perioderMedEndring.single().fraOgMed.tilYearMonth())
@@ -194,10 +200,12 @@ class EndringIUtbetalingUtilTest {
             )
 
         val perioderMedEndring =
-            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-                nåværendeAndeler = listOf(andelBarn2),
-                forrigeAndeler = listOf(andelBarn2, andelBarn1),
-            ).perioder().filter { it.innhold == true }
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = listOf(andelBarn2),
+                    forrigeAndeler = listOf(andelBarn2, andelBarn1),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
@@ -233,10 +241,12 @@ class EndringIUtbetalingUtilTest {
             )
 
         val perioderMedEndring =
-            EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
-                nåværendeAndeler = listOf(andelBarn2),
-                forrigeAndeler = listOf(andelBarn2, andelBarn1),
-            ).perioder().filter { it.innhold == true }
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = listOf(andelBarn2),
+                    forrigeAndeler = listOf(andelBarn2, andelBarn1),
+                ).perioder()
+                .filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 

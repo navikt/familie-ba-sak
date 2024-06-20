@@ -34,9 +34,10 @@ fun utledEndringstidspunkt(
             .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.copy(
-            personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling.personResultater.beholdKunOppfylteVilkårResultater(),
-        )?.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
+        behandlingsGrunnlagForVedtaksperioderForrigeBehandling
+            ?.copy(
+                personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling.personResultater.beholdKunOppfylteVilkårResultater(),
+            )?.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
             ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
@@ -83,13 +84,15 @@ private fun loggEndringstidspunktOgEndringer(
     val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørMedFørsteForandring]
 
     val grunnlagIPeriodeMedEndring =
-        grunnlagDenneBehandlingen?.innholdForTidspunkt(
-            datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
-        )?.innhold
+        grunnlagDenneBehandlingen
+            ?.innholdForTidspunkt(
+                datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
+            )?.innhold
     val grunnlagIPeriodeMedEndringForrigeBehanlding =
-        grunnlagForrigeBehandling?.innholdForTidspunkt(
-            datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
-        )?.innhold
+        grunnlagForrigeBehandling
+            ?.innholdForTidspunkt(
+                datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
+            )?.innhold
 
     val endringer = mutableListOf<String>()
 
@@ -142,15 +145,17 @@ private fun loggEndringstidspunktOgEndringer(
 }
 
 private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() =
-    this.map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
-        val førsteEndringForAktør =
-            erPeriodeLikTidslinje.perioder()
-                .filter { it.innhold == false }
-                .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
-                ?: TIDENES_ENDE
+    this
+        .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
+            val førsteEndringForAktør =
+                erPeriodeLikTidslinje
+                    .perioder()
+                    .filter { it.innhold == false }
+                    .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
+                    ?: TIDENES_ENDE
 
-        aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
-    }.minByOrNull { it.second }
+            aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
+        }.minByOrNull { it.second }
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,

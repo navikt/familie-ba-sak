@@ -11,7 +11,9 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
-class SanityService(private val sanityKlient: SanityKlient) {
+class SanityService(
+    private val sanityKlient: SanityKlient,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")

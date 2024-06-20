@@ -58,19 +58,19 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
         audience: String = DEFAULT_AUDIENCE,
         issuerId: String = DEFAULT_ISSUER_ID,
         clientId: String = DEFAULT_CLIENT_ID,
-    ): String {
-        return mockOAuth2Server.issueToken(
-            issuerId,
-            clientId,
-            DefaultOAuth2TokenCallback(
-                issuerId = issuerId,
-                subject = subject,
-                audience = listOf(audience),
-                claims = claims,
-                expiry = 3600,
-            ),
-        ).serialize()
-    }
+    ): String =
+        mockOAuth2Server
+            .issueToken(
+                issuerId,
+                clientId,
+                DefaultOAuth2TokenCallback(
+                    issuerId = issuerId,
+                    subject = subject,
+                    audience = listOf(audience),
+                    claims = claims,
+                    expiry = 3600,
+                ),
+            ).serialize()
 
     fun hentHeaders(groups: List<String>? = null): HttpHeaders {
         val httpHeaders = HttpHeaders()

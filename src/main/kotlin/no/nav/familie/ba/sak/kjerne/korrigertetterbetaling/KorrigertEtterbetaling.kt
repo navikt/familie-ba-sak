@@ -57,7 +57,9 @@ fun KorrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling: Behandli
         aktiv = true,
     )
 
-enum class KorrigertEtterbetalingÅrsak(val visningsnavn: String) {
+enum class KorrigertEtterbetalingÅrsak(
+    val visningsnavn: String,
+) {
     FEIL_TIDLIGERE_UTBETALT_BELØP("Feil i tidligere utbetalt beløp"),
     REFUSJON_FRA_UDI("Refusjon fra UDI"),
     REFUSJON_FRA_ANDRE_MYNDIGHETER("Refusjon fra andre myndigheter"),

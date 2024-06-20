@@ -180,8 +180,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                             YearMonth.now().minusYears(4)
                         }" }""",
                     ),
-                )
-                .willReturn(
+                ).willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -243,8 +242,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                             YearMonth.now().minusYears(4)
                         }" }""",
                     ),
-                )
-                .willReturn(
+                ).willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
@@ -342,10 +340,9 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
             clientId = "dummy",
         )
 
-    private fun gyldigOppgaveResponse(filnavn: String): String {
-        return Files.readString(
+    private fun gyldigOppgaveResponse(filnavn: String): String =
+        Files.readString(
             ClassPathResource("ekstern/bisys-$filnavn.json").file.toPath(),
             StandardCharsets.UTF_8,
         )
-    }
 }

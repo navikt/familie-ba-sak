@@ -169,10 +169,11 @@ class SatsendringUtilTest {
 
         Assertions.assertThat(atyMedBareTilleggOrba.erOppdatertMedSisteSatser(personopplysningGrunnlag)).isEqualTo(true)
 
-        Assertions.assertThat(
-            (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg)
-                .erOppdatertMedSisteSatser(personopplysningGrunnlag),
-        ).isEqualTo(true)
+        Assertions
+            .assertThat(
+                (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg)
+                    .erOppdatertMedSisteSatser(personopplysningGrunnlag),
+            ).isEqualTo(true)
     }
 
     @Test
@@ -251,9 +252,10 @@ class SatsendringUtilTest {
                 person = person15År,
             )
 
-        Assertions.assertThat(
-            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatser(personopplysningGrunnlag),
-        ).isEqualTo(false)
+        Assertions
+            .assertThat(
+                (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatser(personopplysningGrunnlag),
+            ).isEqualTo(false)
     }
 
     @Test
@@ -350,8 +352,18 @@ class SatsendringUtilTest {
         person: Person,
     ) = listOf(
         lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            fom = SatsService.finnSisteSatsFor(satsType).gyldigFom.minusMonths(1).toYearMonth(),
-            tom = SatsService.finnSisteSatsFor(satsType).gyldigFom.plusMonths(1).toYearMonth(),
+            fom =
+                SatsService
+                    .finnSisteSatsFor(satsType)
+                    .gyldigFom
+                    .minusMonths(1)
+                    .toYearMonth(),
+            tom =
+                SatsService
+                    .finnSisteSatsFor(satsType)
+                    .gyldigFom
+                    .plusMonths(1)
+                    .toYearMonth(),
             ytelseType = ytelseType,
             behandling = behandling,
             person = person,
@@ -367,10 +379,9 @@ class SatsendringUtilTest {
     private fun lagPersonopplysningsgrunnlag(
         personer: MutableSet<Person>,
         behandlingId: Long,
-    ): PersonopplysningGrunnlag {
-        return PersonopplysningGrunnlag(
+    ): PersonopplysningGrunnlag =
+        PersonopplysningGrunnlag(
             personer = personer,
             behandlingId = behandlingId,
         )
-    }
 }

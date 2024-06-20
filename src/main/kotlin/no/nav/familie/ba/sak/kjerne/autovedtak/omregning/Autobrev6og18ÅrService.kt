@@ -143,11 +143,16 @@ class Autobrev6og18ÅrService(
         behandlingId: Long,
         alder: Int,
     ): List<Person> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
-            ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
+        personopplysningGrunnlagRepository
+            .findByBehandlingAndAktiv(behandlingId = behandlingId)
+            ?.barna
+            ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }
+            ?.toList() ?: listOf()
 
     private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
+        personopplysningGrunnlagRepository
+            .findByBehandlingAndAktiv(behandlingId = behandlingId)
+            ?.barna
             ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.ATTEN.år) } ?: false
 
     private fun barnIBrytningsalderHarLøpendeYtelse(
@@ -200,9 +205,10 @@ class Autobrev6og18ÅrService(
         }
 
         val andelerTilBarnIBrytningsalder =
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandlingId,
-            ).filter { it.aktør in barnIBrytningsalder }
+            andelerTilkjentYtelseOgEndreteUtbetalingerService
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                    behandlingId,
+                ).filter { it.aktør in barnIBrytningsalder }
         return andelerTilBarnIBrytningsalder
     }
 
@@ -211,7 +217,9 @@ class Autobrev6og18ÅrService(
     }
 }
 
-enum class Alder(val år: Int) {
+enum class Alder(
+    val år: Int,
+) {
     SEKS(år = 6),
     ATTEN(år = 18),
 }

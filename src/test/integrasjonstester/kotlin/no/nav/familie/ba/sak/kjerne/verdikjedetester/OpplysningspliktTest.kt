@@ -90,10 +90,16 @@ class OpplysningspliktTest(
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
 
         val opplysningspliktVilkårPåSøker =
-            vilkårsvurdering?.personResultater?.single { it.erSøkersResultater() }?.andreVurderinger?.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+            vilkårsvurdering
+                ?.personResultater
+                ?.single { it.erSøkersResultater() }
+                ?.andreVurderinger
+                ?.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
 
         val opplysningspliktVilkårPåBarna =
-            vilkårsvurdering?.personResultater?.filter { !it.erSøkersResultater() }
+            vilkårsvurdering
+                ?.personResultater
+                ?.filter { !it.erSøkersResultater() }
                 ?.flatMap { it.andreVurderinger.filter { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT } } ?: emptyList()
 
         Assertions.assertTrue(opplysningspliktVilkårPåSøker != null)
@@ -105,7 +111,14 @@ class OpplysningspliktTest(
 
         val vilkårsvurderingOppdatert = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
 
-        Assertions.assertTrue(vilkårsvurderingOppdatert?.personResultater?.single { it.erSøkersResultater() }?.andreVurderinger?.single { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }?.resultat == Resultat.IKKE_OPPFYLT)
+        Assertions.assertTrue(
+            vilkårsvurderingOppdatert
+                ?.personResultater
+                ?.single { it.erSøkersResultater() }
+                ?.andreVurderinger
+                ?.single { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+                ?.resultat == Resultat.IKKE_OPPFYLT,
+        )
 
         familieBaSakKlient().validerVilkårsvurdering(
             behandlingId = behandling.id,
@@ -144,7 +157,10 @@ class OpplysningspliktTest(
 
         val vedtaksbrev = brevService.hentVedtaksbrevData(vedtak)
 
-        val hjemmeltekst = (vedtaksbrev as Førstegangsvedtak).data.delmalData.hjemmeltekst.hjemler!!.first()
+        val hjemmeltekst =
+            (vedtaksbrev as Førstegangsvedtak)
+                .data.delmalData.hjemmeltekst.hjemler!!
+                .first()
 
         Assertions.assertTrue(hjemmeltekst.contains("17"))
         Assertions.assertTrue(hjemmeltekst.contains("18"))

@@ -68,7 +68,8 @@ data class GrSivilstand(
             fom = this.fom,
             tom = null,
             verdi =
-                this.type.toString()
+                this.type
+                    .toString()
                     .replace("_", " ")
                     .storForbokstav(),
         )

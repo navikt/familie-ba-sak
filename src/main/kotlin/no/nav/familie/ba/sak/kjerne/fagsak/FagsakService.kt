@@ -117,7 +117,8 @@ class FagsakService(
             }
 
             if (type == FagsakType.INSTITUSJON) {
-                institusjonService.hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
+                institusjonService
+                    .hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
                     .apply {
                         nyFagsak.institusjon = this
                     }
@@ -130,9 +131,7 @@ class FagsakService(
         }
     }
 
-    fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
-        return personRepository.findFagsakerByAktør(aktør)
-    }
+    fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> = personRepository.findFagsakerByAktør(aktør)
 
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
@@ -186,9 +185,7 @@ class FagsakService(
     fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
         Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
 
-    fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> {
-        return fagsaker.map { lagRestMinimalFagsak(it.id) }
-    }
+    fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> = fagsaker.map { lagRestMinimalFagsak(it.id) }
 
     fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
@@ -215,7 +212,8 @@ class FagsakService(
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger =
-            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
+            behandlingHentOgPersisterService
+                .hentBehandlinger(fagsakId = fagsakId)
                 .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
 
         return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
@@ -263,42 +261,30 @@ class FagsakService(
         fraAutomatiskBehandling: Boolean = false,
         fagsakType: FagsakType = FagsakType.NORMAL,
         institusjon: RestInstitusjon? = null,
-    ): Fagsak {
-        return hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon)
-    }
+    ): Fagsak = hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon)
 
-    fun hentNormalFagsak(aktør: Aktør): Fagsak? {
-        return fagsakRepository.finnFagsakForAktør(
+    fun hentNormalFagsak(aktør: Aktør): Fagsak? =
+        fagsakRepository.finnFagsakForAktør(
             aktør,
             FagsakType.NORMAL,
         )
-    }
 
-    fun hentPåFagsakId(fagsakId: Long): Fagsak {
-        return fagsakRepository.finnFagsak(fagsakId) ?: throw FunksjonellFeil(
+    fun hentPåFagsakId(fagsakId: Long): Fagsak =
+        fagsakRepository.finnFagsak(fagsakId) ?: throw FunksjonellFeil(
             melding = "Finner ikke fagsak med id $fagsakId",
             frontendFeilmelding = "Finner ikke fagsak med id $fagsakId",
         )
-    }
 
-    fun hentAktør(fagsakId: Long): Aktør {
-        return hentPåFagsakId(fagsakId).aktør
-    }
+    fun hentAktør(fagsakId: Long): Aktør = hentPåFagsakId(fagsakId).aktør
 
     fun hentFagsakPåPerson(
         aktør: Aktør,
         fagsakType: FagsakType = FagsakType.NORMAL,
-    ): Fagsak? {
-        return fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
-    }
+    ): Fagsak? = fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
 
-    fun hentAlleFagsakerForAktør(aktør: Aktør): List<Fagsak> {
-        return fagsakRepository.finnFagsakerForAktør(aktør)
-    }
+    fun hentAlleFagsakerForAktør(aktør: Aktør): List<Fagsak> = fagsakRepository.finnFagsakerForAktør(aktør)
 
-    fun hentLøpendeFagsaker(): List<Fagsak> {
-        return fagsakRepository.finnLøpendeFagsaker()
-    }
+    fun hentLøpendeFagsaker(): List<Fagsak> = fagsakRepository.finnLøpendeFagsaker()
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
         val aktør = personidentService.hentAktør(personIdent)
@@ -344,46 +330,47 @@ class FagsakService(
         }
 
         if (erBarn) {
-            personInfoMedRelasjoner.forelderBarnRelasjon.filter { relasjon ->
-                relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
-                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
-                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
-            }.forEach { relasjon ->
-                if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                        fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
-                    } == null
-                ) {
-                    val maskertForelder =
-                        hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)
-                    if (maskertForelder != null) {
-                        assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
-                    } else {
-                        val forelderInfo =
-                            runCatching {
-                                personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
-                            }.fold(
-                                onSuccess = { it },
-                                onFailure = {
-                                    throw IllegalStateException("Feil ved henting av person fra PDL", it)
-                                },
-                            )
+            personInfoMedRelasjoner.forelderBarnRelasjon
+                .filter { relasjon ->
+                    relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.FAR ||
+                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MOR ||
+                        relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
+                }.forEach { relasjon ->
+                    if (assosierteFagsakDeltagere.find { fagsakDeltager ->
+                            fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
+                        } == null
+                    ) {
+                        val maskertForelder =
+                            hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)
+                        if (maskertForelder != null) {
+                            assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
+                        } else {
+                            val forelderInfo =
+                                runCatching {
+                                    personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
+                                }.fold(
+                                    onSuccess = { it },
+                                    onFailure = {
+                                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                    },
+                                )
 
-                        val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
-                        fagsakerForRelasjon.forEach { fagsak ->
-                            assosierteFagsakDeltagere.add(
-                                RestFagsakDeltager(
-                                    navn = forelderInfo.navn,
-                                    ident = relasjon.aktør.aktivFødselsnummer(),
-                                    rolle = FagsakDeltagerRolle.FORELDER,
-                                    kjønn = forelderInfo.kjønn,
-                                    fagsakId = fagsak?.id,
-                                    fagsakType = fagsak?.type,
-                                ),
-                            )
+                            val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
+                            fagsakerForRelasjon.forEach { fagsak ->
+                                assosierteFagsakDeltagere.add(
+                                    RestFagsakDeltager(
+                                        navn = forelderInfo.navn,
+                                        ident = relasjon.aktør.aktivFødselsnummer(),
+                                        rolle = FagsakDeltagerRolle.FORELDER,
+                                        kjønn = forelderInfo.kjønn,
+                                        fagsakId = fagsak?.id,
+                                        fagsakType = fagsak?.type,
+                                    ),
+                                )
+                            }
                         }
                     }
                 }
-            }
         }
         return assosierteFagsakDeltagere
     }
@@ -409,7 +396,8 @@ class FagsakService(
         personRepository.findByAktør(aktør).forEach { person: Person ->
             if (person.personopplysningGrunnlag.aktiv) {
                 val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
-                if (behandling.aktiv && !behandling.fagsak.arkivert &&
+                if (behandling.aktiv &&
+                    !behandling.fagsak.arkivert &&
                     !assosierteFagsakDeltagerMap.containsKey(
                         behandling.fagsak.id,
                     )
@@ -469,8 +457,9 @@ class FagsakService(
         return assosierteFagsakDeltagerMap.values.toMutableList()
     }
 
-    private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? {
-        return familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+    private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? =
+        familieIntegrasjonerTilgangskontrollService
+            .hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?.let {
                 RestFagsakDeltager(
                     rolle = FagsakDeltagerRolle.UKJENT,
@@ -478,21 +467,22 @@ class FagsakService(
                     harTilgang = false,
                 )
             }
-    }
 
     fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
         aktør: Aktør,
         ytelseTyper: List<YtelseType>,
     ): List<Fagsak> {
         val ordinæreAndelerPåAktør =
-            andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør = aktør)
+            andelerTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForAktør(aktør = aktør)
                 .filter { it.type in ytelseTyper }
 
         val løpendeAndeler = ordinæreAndelerPåAktør.filter { it.erLøpende() }
 
         val behandlingerMedLøpendeAndeler =
             løpendeAndeler
-                .map { it.behandlingId }.toSet()
+                .map { it.behandlingId }
+                .toSet()
                 .map { behandlingHentOgPersisterService.hent(behandlingId = it) }
 
         val behandlingerSomErSisteIverksattePåFagsak = behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }

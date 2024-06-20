@@ -39,19 +39,20 @@ data class UtvidetBarnetrygdGenerator(
                 .kombinerUtenNullOgIkkeTom { andeler -> andeler.maxOf { it.prosent } }
 
         val utvidetAndeler =
-            utvidetVilkårTidslinje.kombinerMedKunVerdi(
-                størsteProsentTidslinje,
-                satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
-            ) { _, prosent, sats ->
-                val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
-                AndelTilkjentYtelseForTidslinje(
-                    aktør = søkerAktør,
-                    beløp = nasjonaltPeriodebeløp,
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    sats = sats,
-                    prosent = prosent,
-                )
-            }.tilAndelerTilkjentYtelse(tilkjentYtelse)
+            utvidetVilkårTidslinje
+                .kombinerMedKunVerdi(
+                    størsteProsentTidslinje,
+                    satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
+                ) { _, prosent, sats ->
+                    val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
+                    AndelTilkjentYtelseForTidslinje(
+                        aktør = søkerAktør,
+                        beløp = nasjonaltPeriodebeløp,
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        sats = sats,
+                        prosent = prosent,
+                    )
+                }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 
         if (utvidetAndeler.isEmpty()) {
             throw FunksjonellFeil(

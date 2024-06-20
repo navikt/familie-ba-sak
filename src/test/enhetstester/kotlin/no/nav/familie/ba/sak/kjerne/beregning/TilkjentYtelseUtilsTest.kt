@@ -222,8 +222,7 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse
+            ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
 
@@ -284,8 +283,8 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList()
+            ).andelerTilkjentYtelse
+                .toList()
                 .sortedBy { it.stønadFom }
 
         val andelTilkjentYtelseFør6ÅrSeptember2020 = andeler[0]
@@ -327,8 +326,8 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårsvurdering = oppdatertVilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList()
+            ).andelerTilkjentYtelse
+                .toList()
                 .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -361,8 +360,8 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårsvurdering = oppdatertVilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
-            )
-                .andelerTilkjentYtelse.toList()
+            ).andelerTilkjentYtelse
+                .toList()
                 .sortedBy { it.stønadFom }
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
@@ -377,7 +376,8 @@ internal class TilkjentYtelseUtilsTest {
         backToBackFom: LocalDate? = null,
     ): Vilkårsvurdering {
         personResultat.setSortedVilkårResultater(
-            personResultat.vilkårResultater.filter { it.vilkårType != Vilkår.BOSATT_I_RIKET }
+            personResultat.vilkårResultater
+                .filter { it.vilkårType != Vilkår.BOSATT_I_RIKET }
                 .toSet() +
                 setOf(
                     VilkårResultat(
@@ -502,11 +502,10 @@ internal class TilkjentYtelseUtilsTest {
                 fødselsdato = barnFødselsdato,
                 navn = "Barn",
                 kjønn = Kjønn.MANN,
-            )
-                .apply {
-                    sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
-                    barnDødsfallDato?.let { dødsfall = lagDødsfallFraPdl(this, it.tilyyyyMMdd(), null) }
-                }
+            ).apply {
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                barnDødsfallDato?.let { dødsfall = lagDødsfallFraPdl(this, it.tilyyyyMMdd(), null) }
+            }
         val søker =
             Person(
                 aktør = tilAktør(søkerFnr),
@@ -515,8 +514,7 @@ internal class TilkjentYtelseUtilsTest {
                 fødselsdato = barnFødselsdato.minusYears(20),
                 navn = "Barn",
                 kjønn = Kjønn.MANN,
-            )
-                .apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+            ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.add(barn)
 
@@ -653,8 +651,16 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal støtte endret utbetaling som delvis overlapper delt bosted på søker og barn og småbarnstillegg på søker`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 =
+            barnFødtAugust2019.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
         val tilkjentYtelse =
@@ -727,8 +733,16 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal støtte endret utbetaling som kun gjelder barn på delt bosted utbetaling`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 =
+            barnFødtAugust2019.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
         val tilkjentYtelse =
@@ -789,8 +803,16 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal gi riktig resultat når barnetrygden går over til å være delt, kun småbarnstillegg og utvidet blir delt i første periode`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 =
+            barnFødtAugust2019.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
         val tilkjentYtelse =
@@ -868,8 +890,16 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Delt, utvidet og ordinær barnetrygd deles fra juni, men skal utbetales fult fra juni til og med juli - deles som vanlig fra August`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 =
+            barnFødtAugust2019.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
         val barnFyller3ÅrDato = barnFødtAugust2019.fødselsdato.plusYears(3).toYearMonth()
 
         val tilkjentYtelse =
@@ -957,7 +987,11 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Småbarnstillleg, utvidet og ordinær barnetrygd fra april, men skal ikke utbetales før august på grunn av etterbetaling 3 år`() {
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
-        val månedFørBarnBlir18 = barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 =
+            barnFødtAugust2016.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
 
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
@@ -1029,7 +1063,10 @@ internal class TilkjentYtelseUtilsTest {
     fun `Det er småbarnstillegg på søker og ordinær barnetrygd på barn 1 fra april, men det skal ikke utbetales før august på grunn av etterbetaling 3 år - Søker og barn 2 har utbetalinger fra tidligere behandlinger som ikke skal overstyres`() {
         val barnFødtAugust2016 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 8, 15))
         val månedFørBarnFødtAugust2016Blir18 =
-            barnFødtAugust2016.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
+            barnFødtAugust2016.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
         val barnFødtDesember2006 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2006, 12, 1))
         val månedFørBarnFødtDesember2006Blir18 = barnFødtDesember2006.fødselsdato.til18ÅrsVilkårsdato().toYearMonth()
 
@@ -1121,7 +1158,11 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
 
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
@@ -1174,7 +1215,11 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal gi riktig resultat når det overgangsstønad i deler av utbetalingen - Overgangsstønaden stopper før barn fyller 3 år fordi søker ikke lenger har rett til utvidet barnetrygd`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
 
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
@@ -1228,8 +1273,16 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal gi riktig resultat når søker har rett på ordinær og utvidet barnetrygd fra mars og rett på overgangsstønad fra April`() {
         val barnFødtAugust2019 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
-        val månedFørBarnBlir18 = barnFødtAugust2019.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth()
-        val månedFørBarnBlir6 = barnFødtAugust2019.fødselsdato.plusYears(6).minusMonths(1).toYearMonth()
+        val månedFørBarnBlir18 =
+            barnFødtAugust2019.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth()
+        val månedFørBarnBlir6 =
+            barnFødtAugust2019.fødselsdato
+                .plusYears(6)
+                .minusMonths(1)
+                .toYearMonth()
 
         val tilkjentYtelse =
             settOppScenarioOgBeregnTilkjentYtelse(
@@ -1369,25 +1422,23 @@ internal class TilkjentYtelseUtilsTest {
     private fun lagPersonopplysningsgrunnlag(
         personer: List<Person>,
         behandlingId: Long,
-    ): PersonopplysningGrunnlag {
-        return PersonopplysningGrunnlag(
+    ): PersonopplysningGrunnlag =
+        PersonopplysningGrunnlag(
             personer = personer.toMutableSet(),
             behandlingId = behandlingId,
         )
-    }
 
     private fun lagOvergangsstønadPerioder(
         perioder: List<MånedPeriode>,
         søkerIdent: String,
-    ): List<InternPeriodeOvergangsstønad> {
-        return perioder.map {
+    ): List<InternPeriodeOvergangsstønad> =
+        perioder.map {
             InternPeriodeOvergangsstønad(
                 søkerIdent,
                 it.fom.førsteDagIInneværendeMåned(),
                 it.tom.sisteDagIInneværendeMåned(),
             )
         }
-    }
 
     private data class AtypiskVilkår(
         val aktør: Aktør,
@@ -1405,8 +1456,8 @@ internal class TilkjentYtelseUtilsTest {
         resultat: Resultat = Resultat.OPPFYLT,
         vilkårType: Vilkår,
         utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
-    ): VilkårResultat {
-        return VilkårResultat(
+    ): VilkårResultat =
+        VilkårResultat(
             personResultat = personResultat,
             vilkårType = vilkårType,
             resultat = resultat,
@@ -1416,7 +1467,6 @@ internal class TilkjentYtelseUtilsTest {
             sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
         )
-    }
 
     private fun lagVilkårsvurdering(
         søker: Person,
