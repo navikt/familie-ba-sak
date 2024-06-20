@@ -85,7 +85,7 @@ object BehandlingsresultatValideringUtils {
         val endringerIAndelerTilbakeITidTidslinjer =
             andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
                 if (nyAndel?.kalkulertUtbetalingsbeløp != gammelAndel?.kalkulertUtbetalingsbeløp) {
-                    ErEndringIAndel(gammelAndel, nyAndel)
+                    ErEndringIAndel(andelForrigeBehandling = gammelAndel, andelDenneBehandlingen = nyAndel)
                 } else {
                     IngenEndringIAndel
                 }
@@ -104,7 +104,7 @@ object BehandlingsresultatValideringUtils {
         val endringISatsTidslinjer =
             andelerDenneBehandlingTidslinje.outerJoin(andelerForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
                 if (nyAndel?.sats != gammelAndel?.sats) {
-                    ErEndringIAndel(gammelAndel, nyAndel)
+                    ErEndringIAndel(andelForrigeBehandling = gammelAndel, andelDenneBehandlingen = nyAndel)
                 } else {
                     IngenEndringIAndel
                 }
