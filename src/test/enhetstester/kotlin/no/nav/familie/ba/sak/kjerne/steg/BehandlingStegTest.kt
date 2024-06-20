@@ -251,12 +251,42 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg =
                 hentNesteSteg(
-                    behandling =
-                        lagBehandling(
-                            årsak = BehandlingÅrsak.OMREGNING_18ÅR,
-                        ),
+                    behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR),
                     utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
                 )
+        }
+    }
+
+    @Test
+    fun `Tester at man ikke får lov til å komme videre etter behandlingsresultat dersom det er endringer i utbetaling for omregningsårsak`() {
+        var steg = FØRSTE_STEG
+
+        listOf(
+            StegType.REGISTRERE_PERSONGRUNNLAG,
+            StegType.VILKÅRSVURDERING,
+            StegType.BEHANDLINGSRESULTAT,
+        ).forEach {
+            assertEquals(it, steg)
+            if (it == StegType.BEHANDLINGSRESULTAT) {
+                assertThrows<Feil> {
+                    hentNesteSteg(
+                        behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR),
+                        utførendeStegType = it,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                    )
+                }
+            } else {
+                steg =
+                    hentNesteSteg(
+                        behandling =
+                            lagBehandling(
+                                årsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                            ),
+                        utførendeStegType = it,
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
+                    )
+            }
         }
     }
 

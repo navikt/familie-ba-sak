@@ -200,7 +200,7 @@ fun hentNesteSteg(
         return when (utførendeStegType) {
             REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
             VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-            BEHANDLINGSRESULTAT -> JOURNALFØR_VEDTAKSBREV
+            BEHANDLINGSRESULTAT -> hentStegEtterBehandlingsresultatForOmregning(endringerIUtbetaling)
             JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
             DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
             FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -415,6 +415,13 @@ private fun hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling: E
     when (endringerIUtbetaling) {
         EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
         EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
+        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
+    }
+
+private fun hentStegEtterBehandlingsresultatForOmregning(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
+    when (endringerIUtbetaling) {
+        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> JOURNALFØR_VEDTAKSBREV
+        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> throw Feil("Det finnes endringer i utbetaling for behandling med omregningsårsak.")
         EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
 
