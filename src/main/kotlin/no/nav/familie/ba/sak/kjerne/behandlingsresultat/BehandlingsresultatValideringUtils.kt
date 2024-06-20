@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
@@ -79,8 +79,8 @@ object BehandlingsresultatValideringUtils {
         nåMåned: YearMonth,
     ) {
         val forrigeMåned = nåMåned.minusMonths(1)
-        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerPersonOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
-        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerPersonOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
+        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
+        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
 
         val endringerIAndelerTilbakeITidTidslinjer =
             andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
@@ -98,8 +98,8 @@ object BehandlingsresultatValideringUtils {
         andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
         andelerForrigeBehandling: List<AndelTilkjentYtelse>,
     ) {
-        val andelerDenneBehandlingTidslinje = andelerDenneBehandlingen.tilTidslinjerPerPersonOgType()
-        val andelerForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerPersonOgType()
+        val andelerDenneBehandlingTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
+        val andelerForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
 
         val endringISatsTidslinjer =
             andelerDenneBehandlingTidslinje.outerJoin(andelerForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->

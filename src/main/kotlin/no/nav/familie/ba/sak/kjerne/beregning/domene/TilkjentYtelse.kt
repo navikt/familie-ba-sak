@@ -66,7 +66,7 @@ data class TilkjentYtelse(
 
 fun TilkjentYtelse.tilTidslinjeMedAndeler(): Tidslinje<Iterable<AndelTilkjentYtelse>, Måned> =
     this.andelerTilkjentYtelse
-        .tilTidslinjerPerPersonOgType()
+        .tilTidslinjerPerAktørOgType()
         .values
         .kombiner()
 
