@@ -115,6 +115,21 @@ type Foedsel {
     metadata: Metadata!
 }
 
+type Foedested {
+    foedeland: String
+    foedested: String
+    foedekommune: String
+    folkeregistermetadata: Folkeregistermetadata
+    metadata: Metadata!
+}
+
+type Foedselsdato {
+    foedselsdato: Date
+    foedselsaar: Int
+    folkeregistermetadata: Folkeregistermetadata
+    metadata: Metadata!
+}
+
 type Folkeregisteridentifikator {
     folkeregistermetadata: Folkeregistermetadata!
     identifikasjonsnummer: String!
