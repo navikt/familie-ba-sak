@@ -114,15 +114,15 @@ object BehandlingsresultatValideringUtils {
     }
 
     private fun Map<Pair<Aktør, YtelseType>, Tidslinje<EndringIAndel, Måned>>.kastFeilOgLoggVedEndringerIAndeler() {
-        this.forEach { _, endringIAndelTidslinje ->
+        this.forEach { (aktør, ytelsetype), endringIAndelTidslinje ->
             endringIAndelTidslinje.perioder().forEach {
                 if (it.innhold is ErEndringIAndel) {
                     secureLogger.info(
-                        "Er endring i andel i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.\n" +
+                        "Det er en uforventet endring i $ytelsetype-andel for $aktør i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.\n" +
                             "Andel denne behandlingen: ${it.innhold.andelDenneBehandlingen}\n" +
                             "Andel forrige behandling: ${it.innhold.andelForrigeBehandling}",
                     )
-                    throw Feil("Det er en uforventet endring i andel. Gjelder andel fra ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}. Se secure log for mer detaljer.")
+                    throw Feil("Det er en uforventet endring i andel. Gjelder andel i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}. Se secure log for mer detaljer.")
                 }
             }
         }
@@ -133,4 +133,7 @@ private sealed interface EndringIAndel
 
 private object IngenEndringIAndel : EndringIAndel
 
-private data class ErEndringIAndel(val andelForrigeBehandling: AndelTilkjentYtelse?, val andelDenneBehandlingen: AndelTilkjentYtelse?) : EndringIAndel
+private data class ErEndringIAndel(
+    val andelForrigeBehandling: AndelTilkjentYtelse?,
+    val andelDenneBehandlingen: AndelTilkjentYtelse?,
+) : EndringIAndel
