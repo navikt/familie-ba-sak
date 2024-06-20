@@ -52,22 +52,69 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
                     vilkårResultaterForVedtaksperiode,
                 )
 
-            is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> this.copy(person, vilkårResultaterForVedtaksperiode)
+
+            is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
     }
 }
 
-data class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+sealed class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-    val andeler: Iterable<AndelForVedtaksperiode>,
-    val kompetanse: KompetanseForVedtaksperiode? = null,
-    val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
-    val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
-    val valutakurs: ValutakursForVedtaksperiode? = null,
-    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
+    open val andeler: Iterable<AndelForBrevobjekt>,
+    open val kompetanse: KompetanseForVedtaksperiode? = null,
+    open val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
+    open val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
+    open val valutakurs: ValutakursForVedtaksperiode? = null,
+    open val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : VedtaksperiodeGrunnlagForPerson {
-    fun erInnvilgetEndretUtbetaling() =
+    abstract fun erInnvilgetEndretUtbetaling(): Boolean
+}
+
+data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy(
+    override val person: Person,
+    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
+    override val andeler: Iterable<AndelForVedtaksperiode>,
+    override val kompetanse: KompetanseForVedtaksperiode? = null,
+    override val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
+    override val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
+    override val valutakurs: ValutakursForVedtaksperiode? = null,
+    override val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
+) : VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+        person,
+        vilkårResultaterForVedtaksperiode,
+        andeler,
+        kompetanse,
+        endretUtbetalingAndel,
+        utenlandskPeriodebeløp,
+        valutakurs,
+        overgangsstønad,
+    ) {
+    override fun erInnvilgetEndretUtbetaling() =
+        endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+}
+
+data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel(
+    override val person: Person,
+    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
+    override val andeler: Iterable<AndelForBrevperiode>,
+    override val kompetanse: KompetanseForVedtaksperiode? = null,
+    override val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
+    override val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
+    override val valutakurs: ValutakursForVedtaksperiode? = null,
+    override val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
+) : VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+        person,
+        vilkårResultaterForVedtaksperiode,
+        andeler,
+        kompetanse,
+        endretUtbetalingAndel,
+        utenlandskPeriodebeløp,
+        valutakurs,
+        overgangsstønad,
+) {
+    override fun erInnvilgetEndretUtbetaling() =
         endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }
 
@@ -119,13 +166,21 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
             vilkårsresutlatet?.resultat == Resultat.OPPFYLT
         }
 
+sealed interface AndelForBrevobjekt {
+    val kalkulertUtbetalingsbeløp: Int
+    val nasjonaltPeriodebeløp: Int?
+    val type: YtelseType
+    val prosent: BigDecimal
+    val sats: Int
+}
+
 data class AndelForVedtaksperiode(
-    val kalkulertUtbetalingsbeløp: Int,
-    val nasjonaltPeriodebeløp: Int?,
-    val type: YtelseType,
-    val prosent: BigDecimal,
-    val sats: Int,
-) {
+    override val kalkulertUtbetalingsbeløp: Int,
+    override val nasjonaltPeriodebeløp: Int?,
+    override val type: YtelseType,
+    override val prosent: BigDecimal,
+    override val sats: Int,
+) : AndelForBrevobjekt {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
@@ -163,13 +218,13 @@ data class AndelForVedtaksperiode(
 }
 
 data class AndelForBrevperiode(
-    val kalkulertUtbetalingsbeløp: Int,
-    val nasjonaltPeriodebeløp: Int?,
+    override val kalkulertUtbetalingsbeløp: Int,
+    override val nasjonaltPeriodebeløp: Int?,
     val differanseberegnetPeriodebeløp: Int?,
-    val type: YtelseType,
-    val prosent: BigDecimal,
-    val sats: Int,
-) {
+    override val type: YtelseType,
+    override val prosent: BigDecimal,
+    override val sats: Int,
+) : AndelForBrevobjekt {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,

@@ -44,6 +44,7 @@ fun genererVedtaksperioder(
     grunnlagForVedtakPerioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
     nåDato: LocalDate,
+    erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
         return lagPeriodeForOmregningsbehandling(
@@ -59,10 +60,10 @@ fun genererVedtaksperioder(
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtakPerioderForrigeBehandling
-            ?.let { grunnlagForVedtakPerioderForrigeBehandling.utledGrunnlagTidslinjePerPerson() }
+            ?.let { grunnlagForVedtakPerioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå) }
             ?: emptyMap()
 
-    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
+    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
 
     val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
         finnPerioderSomSkalBegrunnes(
@@ -72,6 +73,7 @@ fun genererVedtaksperioder(
                 vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
                     behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
                     behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
+                    erToggleForÅIkkeSplittePåValutakursendringerPå = erToggleForÅIkkeSplittePåValutakursendringerPå,
                 ),
         )
 

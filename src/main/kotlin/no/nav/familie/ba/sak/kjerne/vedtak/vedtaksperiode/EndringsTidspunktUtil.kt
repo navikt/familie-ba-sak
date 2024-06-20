@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AktørOgRolleBegrunnelseGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevobjekt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
@@ -24,16 +24,20 @@ fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     erVedtaksperiodeGrunnlagForPersonLik: VedtaksperiodeGrunnlagForPerson?.(VedtaksperiodeGrunnlagForPerson?) -> Boolean = VedtaksperiodeGrunnlagForPerson?::erLik,
+    erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
-        behandlingsGrunnlagForVedtaksperioder.copy(
+        behandlingsGrunnlagForVedtaksperioder
+            .copy(
             personResultater = behandlingsGrunnlagForVedtaksperioder.personResultater.beholdKunOppfylteVilkårResultater(),
-        ).utledGrunnlagTidslinjePerPerson().mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
+        ).utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
+            .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling?.copy(
             personResultater = behandlingsGrunnlagForVedtaksperioderForrigeBehandling.personResultater.beholdKunOppfylteVilkårResultater(),
-        )?.utledGrunnlagTidslinjePerPerson()?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
+        )?.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
+            ?.mapValues { it.value.vedtaksperiodeGrunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
         grunnlagTidslinjePerPerson.outerJoin(grunnlagTidslinjePerPersonForrigeBehandling) { grunnlagForVedtaksperiode, grunnlagForVedtaksperiodeForrigeBehandling ->
@@ -56,10 +60,12 @@ fun utledEndringstidspunkt(
 fun utledEndringstidspunktUtenValutakursendringer(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
+    erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
 ): LocalDate =
     utledEndringstidspunkt(
         behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+        erToggleForÅIkkeSplittePåValutakursendringerPå = erToggleForÅIkkeSplittePåValutakursendringerPå,
     )
 
 private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> =
@@ -168,4 +174,4 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
         null -> grunnlagForVedtaksperiodeForrigeBehandling == null
     }
 
-private fun Iterable<AndelForVedtaksperiode>.erLik(andreAndeler: Iterable<AndelForVedtaksperiode>) = this.toSet() == andreAndeler.toSet()
+private fun Iterable<AndelForBrevobjekt>.erLik(andreAndeler: Iterable<AndelForBrevobjekt>) = this.toSet() == andreAndeler.toSet()
