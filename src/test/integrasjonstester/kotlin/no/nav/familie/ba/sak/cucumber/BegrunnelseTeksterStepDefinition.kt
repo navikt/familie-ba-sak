@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
@@ -632,6 +633,34 @@ class BegrunnelseTeksterStepDefinition {
             )
 
         mock.utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp.single())
+    }
+
+    @Og("med overstyrt endringstidspunkt {} for behandling {}")
+    fun settEndringstidspunkt(
+        endringstidspunkt: String,
+        behandlingId: Long,
+    ) {
+        overstyrteEndringstidspunkt[behandlingId] = parseDato(endringstidspunkt)
+    }
+
+    @Så("forvent følgende vedtaksperioder for behandling {}")
+    fun `forvent følgende vedtaksperioder for behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeVedtaksperioder =
+            mapForventetVedtaksperioderMedBegrunnelser(
+                dataTable = dataTable,
+                vedtak =
+                    vedtaksliste.find { it.behandling.id == behandlingId }
+                        ?: throw Feil("Fant ingen vedtak for behandling $behandlingId"),
+            )
+
+        val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
+        assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
+            .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
     }
 }
 
