@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -347,7 +347,7 @@ fun hentUtbetalingerPerMndEøs(
 ): Map<String, UtbetalingMndEøs> {
     // Ønsker kun andeler som ikke er satt til 0 pga endret utbetaling andel med årsakene ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR
     val filtrerteAndelTilkjentYtelser = andelTilkjentYtelserForBehandling.filtrerBortIrrelevanteAndeler(endretutbetalingAndeler)
-    val andelerForVedtaksperioderPerAktørOgType = filtrerteAndelTilkjentYtelser.tilTidslinjerPerPersonOgType()
+    val andelerForVedtaksperioderPerAktørOgType = filtrerteAndelTilkjentYtelser.tilTidslinjerPerAktørOgType()
 
     // Ønsker kun andeler etter endringstidspunkt så beskjærer fra og med endringstidspunktet
     val andelerForVedtaksperioderPerAktørOgTypeAvgrensetTilVedtaksperioder =

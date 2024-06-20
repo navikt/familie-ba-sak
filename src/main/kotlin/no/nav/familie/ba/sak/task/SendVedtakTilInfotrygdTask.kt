@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedD
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
@@ -50,7 +50,7 @@ class SendVedtakTilInfotrygdTask(
         val førsteUtbetalingsperiode =
             andelerMedEndringer
                 .map { it.andel }
-                .tilTidslinjerPerPersonOgType()
+                .tilTidslinjerPerAktørOgType()
                 .values
                 .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
                 .perioder()

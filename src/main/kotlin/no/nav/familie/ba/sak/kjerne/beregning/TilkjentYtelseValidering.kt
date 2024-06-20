@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
@@ -68,8 +68,8 @@ object TilkjentYtelseValidering {
         andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
-        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
-        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
+        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType()
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerAktørOgType()
 
         andelerGruppert
             .outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
