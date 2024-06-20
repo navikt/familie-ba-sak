@@ -224,7 +224,7 @@ fun List<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType
         )
     }
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgTypeForBrevperiode(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForBrevperioderTidslinje> =
+fun List<AndelTilkjentYtelse>.tilAndelForBrevperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForBrevperioderTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseForBrevperioderTidslinje(
             andelerTilkjentYtelsePåPerson,

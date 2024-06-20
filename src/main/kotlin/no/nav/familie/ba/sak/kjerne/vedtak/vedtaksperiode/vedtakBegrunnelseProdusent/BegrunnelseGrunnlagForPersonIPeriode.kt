@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProd
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgTypeForBrevperiode
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForBrevperiodeTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
@@ -172,7 +172,7 @@ private fun lagTidslinjeForEksplisitteAvslag(
 
 fun List<AndelTilkjentYtelse>.tilAndelerForBrevPeriodeTidslinje(): Tidslinje<Iterable<AndelForBrevperiode>, Måned> =
     this
-        .tilTidslinjerPerAktørOgTypeForBrevperiode()
+        .tilAndelForBrevperiodeTidslinjerPerAktørOgType()
         .values
         .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
         .kombiner()
