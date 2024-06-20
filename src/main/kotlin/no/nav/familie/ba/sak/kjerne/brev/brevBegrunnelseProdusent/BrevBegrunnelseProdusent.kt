@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.BegrunnelseGrunnlagForPeriodeMedOpphør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentGyldigeBegrunnelserPerPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiodeDeltBosted
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
@@ -410,14 +410,13 @@ private fun ISanityBegrunnelse.validerBrevbegrunnelse(
     }
 }
 
-private fun hentSøkersRettTilUtvidet(utvidetUtbetalingsdetaljer: List<AndelForVedtaksperiode>): SøkersRettTilUtvidet {
-    return when {
+private fun hentSøkersRettTilUtvidet(utvidetUtbetalingsdetaljer: List<AndelForBrevperiode>): SøkersRettTilUtvidet =
+    when {
         utvidetUtbetalingsdetaljer.any { it.prosent > BigDecimal.ZERO } -> SøkersRettTilUtvidet.SØKER_FÅR_UTVIDET
         utvidetUtbetalingsdetaljer.isNotEmpty() && utvidetUtbetalingsdetaljer.all { it.prosent == BigDecimal.ZERO } -> SøkersRettTilUtvidet.SØKER_HAR_RETT_MEN_FÅR_IKKE
 
         else -> SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT
     }
-}
 
 enum class SøkersRettTilUtvidet {
     SØKER_FÅR_UTVIDET,

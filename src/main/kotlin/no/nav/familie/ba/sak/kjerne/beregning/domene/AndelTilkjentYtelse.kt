@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForBrevperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -219,9 +220,16 @@ fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Akt
         )
     }
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgTypeForVedtaksperiode(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseForVedtaksperioderTidslinje(
+            andelerTilkjentYtelsePåPerson,
+        )
+    }
+
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgTypeForBrevperiode(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForBrevperioderTidslinje> =
+    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+        AndelTilkjentYtelseForBrevperioderTidslinje(
             andelerTilkjentYtelsePåPerson,
         )
     }

@@ -37,7 +37,7 @@ fun utledEndringstidspunkt(
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
         grunnlagTidslinjePerPerson.outerJoin(grunnlagTidslinjePerPersonForrigeBehandling) { grunnlagForVedtaksperiode, grunnlagForVedtaksperiodeForrigeBehandling ->
-            grunnlagForVedtaksperiode.erVedtaksperiodeGrunnlagForPersonLik(grunnlagForVedtaksperiodeForrigeBehandling)
+            grunnlagForVedtaksperiode.erLik(grunnlagForVedtaksperiodeForrigeBehandling)
         }
 
     val (aktørMedFørsteEndring, datoTidligsteForskjell) =
@@ -60,9 +60,7 @@ fun utledEndringstidspunktUtenValutakursendringer(
     utledEndringstidspunkt(
         behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
         behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-    ) { vedtaksperiodeGrunnlagForPerson ->
-        this.erLik(vedtaksperiodeGrunnlagForPerson, erAndelerLike = Iterable<AndelForVedtaksperiode>::erLikUtenDifferanseberegning)
-    }
+    )
 
 private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> =
     map {
@@ -150,11 +148,6 @@ private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.fi
 
 private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
-): Boolean = this.erLik(grunnlagForVedtaksperiodeForrigeBehandling, erAndelerLike = Iterable<AndelForVedtaksperiode>::erLik)
-
-private fun VedtaksperiodeGrunnlagForPerson?.erLik(
-    grunnlagForVedtaksperiodeForrigeBehandling: VedtaksperiodeGrunnlagForPerson?,
-    erAndelerLike: Iterable<AndelForVedtaksperiode>.(Iterable<AndelForVedtaksperiode>) -> Boolean = Iterable<AndelForVedtaksperiode>::erLik,
 ): Boolean =
     when (this) {
         is VedtaksperiodeGrunnlagForPersonVilkårInnvilget ->
@@ -166,7 +159,7 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
                 this.utenlandskPeriodebeløp == grunnlagForVedtaksperiodeForrigeBehandling.utenlandskPeriodebeløp &&
                 this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
                 this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
-                andeler.erAndelerLike(grunnlagForVedtaksperiodeForrigeBehandling.andeler)
+                andeler.erLik(grunnlagForVedtaksperiodeForrigeBehandling.andeler)
 
         is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget ->
             grunnlagForVedtaksperiodeForrigeBehandling is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget &&
@@ -176,6 +169,3 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
     }
 
 private fun Iterable<AndelForVedtaksperiode>.erLik(andreAndeler: Iterable<AndelForVedtaksperiode>) = this.toSet() == andreAndeler.toSet()
-
-private fun Iterable<AndelForVedtaksperiode>.erLikUtenDifferanseberegning(andreAndeler: Iterable<AndelForVedtaksperiode>) =
-    this.map { it.nasjonaltPeriodebeløp ?: it.kalkulertUtbetalingsbeløp }.toSet() == andreAndeler.map { it.nasjonaltPeriodebeløp ?: it.kalkulertUtbetalingsbeløp }.toSet()

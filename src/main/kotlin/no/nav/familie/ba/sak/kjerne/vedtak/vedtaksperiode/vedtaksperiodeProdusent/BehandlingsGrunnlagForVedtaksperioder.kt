@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgTypeForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -42,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.tilAndelerForBrevPeriodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplittForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -216,12 +216,10 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                 .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
         val utenlandskPeriodebeløpTidslinje =
-            utfylteUtenlandskPeriodebeløp.filtrerPåAktør(person.aktør)
-                .tilTidslinje().mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
-
-        val valutakursTidslinje =
-            utfylteValutakurs.filtrerPåAktør(person.aktør)
-                .tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) }
+            utfylteUtenlandskPeriodebeløp
+                .filtrerPåAktør(person.aktør)
+                .tilTidslinje()
+                .mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
 
         val endredeUtbetalingerTidslinje =
             utfylteEndredeUtbetalinger.filtrerPåAktør(person.aktør)
@@ -245,8 +243,6 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     )
                 }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
                     lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
-                }.kombinerMedNullable(valutakursTidslinje) { grunnlagForPerson, valutakurs ->
-                    lagGrunnlagMedValutakurs(grunnlagForPerson, valutakurs)
                 }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
                     lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
                 }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
@@ -444,15 +440,6 @@ private fun lagGrunnlagMedKompetanse(
     null -> null
 }
 
-private fun lagGrunnlagMedValutakurs(
-    vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
-    valutakursForVedtaksperiode: ValutakursForVedtaksperiode?,
-) = when (vedtaksperiodeGrunnlagForPerson) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(valutakurs = valutakursForVedtaksperiode)
-    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
-    null -> null
-}
-
 private fun lagGrunnlagMedUtenlandskPeriodebeløp(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
     utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode?,
@@ -481,7 +468,8 @@ private fun lagGrunnlagMedOvergangsstønad(
 }
 
 fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<Iterable<AndelForVedtaksperiode>, Måned> =
-    this.tilTidslinjerPerAktørOgType()
+    this
+        .tilTidslinjerPerAktørOgTypeForVedtaksperiode()
         .values
         .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
         .kombiner()
@@ -534,11 +522,9 @@ private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEks
     return erInnvilget || erEksplisittAvslag
 }
 
-private fun List<AndelTilkjentYtelse>.hentErUtbetalingSmåbarnstilleggTidslinje(): Tidslinje<Boolean, Måned> {
-    return tilAndelerForVedtaksPeriodeTidslinje().hentErUtbetalingSmåbarnstilleggTidslinje()
-}
+private fun List<AndelTilkjentYtelse>.hentErUtbetalingSmåbarnstilleggTidslinje(): Tidslinje<Boolean, Måned> = this.tilAndelerForBrevPeriodeTidslinje().hentErUtbetalingSmåbarnstilleggTidslinje()
 
-fun Tidslinje<Iterable<AndelForVedtaksperiode>, Måned>.hentErUtbetalingSmåbarnstilleggTidslinje() =
+fun Tidslinje<Iterable<AndelForBrevperiode>, Måned>.hentErUtbetalingSmåbarnstilleggTidslinje() =
     this.mapIkkeNull { andelerIPeriode ->
         andelerIPeriode.any {
             it.type == YtelseType.SMÅBARNSTILLEGG && it.kalkulertUtbetalingsbeløp > 0

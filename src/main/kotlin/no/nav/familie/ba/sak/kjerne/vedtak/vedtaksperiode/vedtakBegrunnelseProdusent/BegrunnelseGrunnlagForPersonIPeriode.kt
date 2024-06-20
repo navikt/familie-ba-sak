@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgTypeForBrevperiode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
@@ -12,12 +14,13 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.KompetanseForVedtaksperiode
@@ -27,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.filtrerPåAktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.hentErUtbetalingSmåbarnstilleggTidslinje
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilAndelerForVedtaksPeriodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
@@ -38,7 +40,7 @@ import java.math.BigDecimal
 data class BegrunnelseGrunnlagForPersonIPeriode(
     val person: Person,
     val vilkårResultater: Iterable<VilkårResultatForVedtaksperiode>,
-    val andeler: Iterable<AndelForVedtaksperiode>,
+    val andeler: Iterable<AndelForBrevperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
     val valutakurs: ValutakursForVedtaksperiode? = null,
@@ -101,7 +103,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
             .tilTidslinje().mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
     val andelerTilkjentYtelseTidslinje =
-        this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje()
+        this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForBrevPeriodeTidslinje()
 
     val overgangsstønadTidslinje =
         this.perioderOvergangsstønad.filtrerPåAktør(person.aktør)
@@ -109,7 +111,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 
     return forskjøvedeVilkårTidslinje
         .kombinerMed(
-            andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje(),
+            andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForBrevPeriodeTidslinje(),
         ) { vilkårResultater, andeler ->
             vilkårResultater?.let {
                 BegrunnelseGrunnlagForPersonIPeriode(
@@ -160,3 +162,10 @@ private fun lagTidslinjeForEksplisitteAvslag(
         }
     return eksplisitteAvslagTidslinje
 }
+
+fun List<AndelTilkjentYtelse>.tilAndelerForBrevPeriodeTidslinje(): Tidslinje<Iterable<AndelForBrevperiode>, Måned> =
+    this
+        .tilTidslinjerPerAktørOgTypeForBrevperiode()
+        .values
+        .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
+        .kombiner()

@@ -122,6 +122,49 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
     val nasjonaltPeriodebeløp: Int?,
+    val type: YtelseType,
+    val prosent: BigDecimal,
+    val sats: Int,
+) {
+    constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
+        kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+        nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
+        type = andelTilkjentYtelse.type,
+        prosent = andelTilkjentYtelse.prosent,
+        sats = andelTilkjentYtelse.sats,
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is AndelForVedtaksperiode) return false
+
+        val erBeggeNull = kalkulertUtbetalingsbeløp == 0 && other.kalkulertUtbetalingsbeløp == 0
+        val erIngenNull = kalkulertUtbetalingsbeløp != 0 && other.kalkulertUtbetalingsbeløp != 0
+
+        return Objects.equals(type, other.type) &&
+            Objects.equals(prosent, other.prosent) &&
+            (erBeggeNull || (erIngenNull && sats == other.sats))
+    }
+
+    override fun hashCode(): Int =
+        if (kalkulertUtbetalingsbeløp == 0) {
+            Objects.hash(
+                kalkulertUtbetalingsbeløp,
+                type,
+                prosent,
+            )
+        } else {
+            Objects.hash(
+                type,
+                prosent,
+                sats,
+            )
+        }
+}
+
+data class AndelForBrevperiode(
+    val kalkulertUtbetalingsbeløp: Int,
+    val nasjonaltPeriodebeløp: Int?,
     val differanseberegnetPeriodebeløp: Int?,
     val type: YtelseType,
     val prosent: BigDecimal,
@@ -137,7 +180,7 @@ data class AndelForVedtaksperiode(
     )
 
     override fun equals(other: Any?): Boolean {
-        if (other !is AndelForVedtaksperiode) {
+        if (other !is AndelForBrevperiode) {
             return false
         } else if (this === other) {
             return true
