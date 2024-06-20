@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -55,8 +54,6 @@ internal class StønadsstatistikkServiceTest(
     @MockK
     private val personopplysningerService: PersonopplysningerService,
     @MockK
-    private val taskRepository: TaskRepositoryWrapper,
-    @MockK
     private val kompetanseService: KompetanseService,
     @MockK
     private val vedtakRepository: VedtakRepository,
@@ -70,7 +67,6 @@ internal class StønadsstatistikkServiceTest(
             vedtakService,
             personopplysningerService,
             vedtakRepository,
-            taskRepository,
             kompetanseService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
