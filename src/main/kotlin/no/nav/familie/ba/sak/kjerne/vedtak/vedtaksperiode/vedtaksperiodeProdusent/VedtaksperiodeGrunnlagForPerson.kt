@@ -193,6 +193,15 @@ data class AndelForVedtaksperiode(
         sats = andelTilkjentYtelse.sats,
     )
 
+    /**
+     * Dette objektet er for å finne ut hvilke splitter vi skal ha på vedtaksperiodene.
+     * I utgangspunktet ønsker vi å lage en splitt hver gang det er en endring i andelene.
+     * Unntakene er:
+     * - Dersom det er to nullutbetalinger etter hverandre ønsker vi ikke at det skal bli nye vedtaksperioder.
+     * - Dersom endringen skyldes en valutajustering ønsker vi heller ikke at det skal bli nye vedtaksperioder.
+     *
+     * equals og hashcode er derfor endret for å reflektere dette.
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AndelForVedtaksperiode) return false
