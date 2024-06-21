@@ -12,6 +12,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -21,6 +22,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -36,6 +38,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -45,6 +48,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.SMÅBARNSTILLEGG,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -59,6 +63,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -68,6 +73,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("60.0"),
                 sats = 100,
@@ -82,6 +88,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 0,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -91,6 +98,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 0,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 200,
@@ -106,6 +114,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 0,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -115,6 +124,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -129,6 +139,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -138,6 +149,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 200,
@@ -152,6 +164,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 2000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
@@ -161,6 +174,7 @@ class AndelForVedtaksperiodeTest {
             AndelForVedtaksperiode(
                 kalkulertUtbetalingsbeløp = 1000,
                 nasjonaltPeriodebeløp = 2000,
+                differanseberegnetPeriodebeløp = 1000,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 prosent = BigDecimal("50.0"),
                 sats = 100,
