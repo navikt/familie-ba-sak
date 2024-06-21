@@ -29,8 +29,8 @@ fun finnFørsteEndringIValutakurs(
             .outerJoin(valutakurserForrigeBehandlingTidslinje) { valutakursDenneBehandling, valutakursForrigeBehandling ->
                 valutakursDenneBehandling != valutakursForrigeBehandling
             }.values
-            .kombiner { erValutakursForPersonLikIPeriode ->
-                erValutakursForPersonLikIPeriode.any { it }
+            .kombiner { erValutakursForPersonEndretIPeriode ->
+                erValutakursForPersonEndretIPeriode.any { it }
             }
 
     return erEndringIValutakursTidslinje
