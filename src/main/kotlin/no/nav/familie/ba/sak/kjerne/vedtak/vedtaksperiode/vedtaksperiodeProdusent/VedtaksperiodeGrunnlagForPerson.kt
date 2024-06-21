@@ -169,6 +169,7 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
 sealed interface AndelForBrevobjekt {
     val kalkulertUtbetalingsbeløp: Int
     val nasjonaltPeriodebeløp: Int?
+    val differanseberegnetPeriodebeløp: Int?
     val type: YtelseType
     val prosent: BigDecimal
     val sats: Int
@@ -177,6 +178,7 @@ sealed interface AndelForBrevobjekt {
 data class AndelForVedtaksperiode(
     override val kalkulertUtbetalingsbeløp: Int,
     override val nasjonaltPeriodebeløp: Int?,
+    override val differanseberegnetPeriodebeløp: Int?,
     override val type: YtelseType,
     override val prosent: BigDecimal,
     override val sats: Int,
@@ -184,6 +186,7 @@ data class AndelForVedtaksperiode(
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
+        differanseberegnetPeriodebeløp = andelTilkjentYtelse.differanseberegnetPeriodebeløp,
         type = andelTilkjentYtelse.type,
         prosent = andelTilkjentYtelse.prosent,
         sats = andelTilkjentYtelse.sats,
@@ -220,7 +223,7 @@ data class AndelForVedtaksperiode(
 data class AndelForBrevperiode(
     override val kalkulertUtbetalingsbeløp: Int,
     override val nasjonaltPeriodebeløp: Int?,
-    val differanseberegnetPeriodebeløp: Int?,
+    override val differanseberegnetPeriodebeløp: Int?,
     override val type: YtelseType,
     override val prosent: BigDecimal,
     override val sats: Int,
