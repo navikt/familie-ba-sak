@@ -343,7 +343,7 @@ class VedtaksperiodeService(
             erToggleForÅIkkeSplittePåValutakursendringerPå =
                 unleashNextMedContextService.isEnabled(
                     FeatureToggleConfig.IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS,
-            ),
+                ),
         )
     }
 

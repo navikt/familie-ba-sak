@@ -114,7 +114,7 @@ data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel(
         utenlandskPeriodebeløp,
         valutakurs,
         overgangsstønad,
-) {
+    ) {
     override fun erInnvilgetEndretUtbetaling() =
         endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }

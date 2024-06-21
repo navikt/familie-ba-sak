@@ -158,8 +158,11 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
 
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedtaksperiode(
     utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
-): Iterable<UtbetalingsperiodeDetalj>? = utbetalingsperiodeDetaljer
-    .beskjær((this.fom ?: TIDENES_MORGEN).tilMånedTidspunkt(), (this.tom ?: TIDENES_ENDE).tilMånedTidspunkt()).perioder().firstNotNullOfOrNull { it.innhold }
+): Iterable<UtbetalingsperiodeDetalj>? =
+    utbetalingsperiodeDetaljer
+        .beskjær((this.fom ?: TIDENES_MORGEN).tilMånedTidspunkt(), (this.tom ?: TIDENES_ENDE).tilMånedTidspunkt())
+        .perioder()
+        .firstNotNullOfOrNull { it.innhold }
 
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(
     utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,

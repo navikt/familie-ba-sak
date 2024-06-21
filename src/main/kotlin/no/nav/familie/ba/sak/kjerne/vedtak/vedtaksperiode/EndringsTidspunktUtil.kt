@@ -28,8 +28,8 @@ fun utledEndringstidspunkt(
     val grunnlagTidslinjePerPerson =
         behandlingsGrunnlagForVedtaksperioder
             .copy(
-            personResultater = behandlingsGrunnlagForVedtaksperioder.personResultater.beholdKunOppfylteVilkårResultater(),
-        ).utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
+                personResultater = behandlingsGrunnlagForVedtaksperioder.personResultater.beholdKunOppfylteVilkårResultater(),
+            ).utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
             .mapValues { it.value.vedtaksperiodeGrunnlagForPerson }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
