@@ -277,6 +277,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             .tilTidslinje()
     }
 
+    @Deprecated("Bruk heller tilGrunnlagForPersonTidslinjeNy. Kan fjernes når feature toggle IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS ikke lenger er i bruk.")
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinjeGammel(
         person: Person,
         erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
@@ -523,6 +524,7 @@ private fun lagGrunnlagForVilkårOgAndelNy(
     }
 }
 
+@Deprecated("Bruk heller lagGrunnlagForVilkårOgAndelNy. Kan fjernes når feature toggle IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS ikke lenger er i bruk.")
 private fun lagGrunnlagForVilkårOgAndelGammel(
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
