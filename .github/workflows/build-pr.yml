@@ -70,8 +70,17 @@ jobs:
 
   verdikjedetesterFeatureToggleOff:
     name: Verdikjedetester m/ feature toggles slått av
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     steps:
+      - name: Login GAR
+        uses: nais/login@v0
+        with:
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          team: teamfamilie
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
@@ -88,8 +97,17 @@ jobs:
 
   verdikjedetesterFeatureToggleOn:
     name: Verdikjedetester m/ feature toggles slått på
+    permissions:
+      contents: "read"
+      id-token: "write"
     runs-on: ubuntu-latest
     steps:
+      - name: Login GAR
+        uses: nais/login@v0
+        with:
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
+          team: teamfamilie
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
