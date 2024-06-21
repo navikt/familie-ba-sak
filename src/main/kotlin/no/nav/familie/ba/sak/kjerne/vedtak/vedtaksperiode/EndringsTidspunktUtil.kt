@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AktørOgRolleBegrunnelseGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevobjekt
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksobjekt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget
@@ -178,4 +178,4 @@ private fun VedtaksperiodeGrunnlagForPerson?.erLik(
         null -> grunnlagForVedtaksperiodeForrigeBehandling == null
     }
 
-private fun Iterable<AndelForBrevobjekt>.erLik(andreAndeler: Iterable<AndelForBrevobjekt>) = this.toSet() == andreAndeler.toSet()
+private fun Iterable<AndelForVedtaksobjekt>.erLik(andreAndeler: Iterable<AndelForVedtaksobjekt>) = this.toSet() == andreAndeler.toSet()

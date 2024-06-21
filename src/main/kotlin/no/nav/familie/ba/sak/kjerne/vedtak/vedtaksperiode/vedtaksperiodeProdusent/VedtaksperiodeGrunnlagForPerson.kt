@@ -63,7 +63,7 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
 sealed class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-    open val andeler: Iterable<AndelForBrevobjekt>,
+    open val andeler: Iterable<AndelForVedtaksobjekt>,
     open val kompetanse: KompetanseForVedtaksperiode? = null,
     open val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
     open val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
@@ -99,7 +99,7 @@ data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy(
 data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-    override val andeler: Iterable<AndelForBrevperiode>,
+    override val andeler: Iterable<AndelForVedtaksbegrunnelse>,
     override val kompetanse: KompetanseForVedtaksperiode? = null,
     override val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
     override val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
@@ -166,7 +166,7 @@ fun Iterable<VilkårResultatForVedtaksperiode>.erOppfyltForBarn(): Boolean =
             vilkårsresutlatet?.resultat == Resultat.OPPFYLT
         }
 
-sealed interface AndelForBrevobjekt {
+sealed interface AndelForVedtaksobjekt {
     val kalkulertUtbetalingsbeløp: Int
     val nasjonaltPeriodebeløp: Int?
     val differanseberegnetPeriodebeløp: Int?
@@ -182,7 +182,7 @@ data class AndelForVedtaksperiode(
     override val type: YtelseType,
     override val prosent: BigDecimal,
     override val sats: Int,
-) : AndelForBrevobjekt {
+) : AndelForVedtaksobjekt {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
@@ -220,14 +220,14 @@ data class AndelForVedtaksperiode(
         }
 }
 
-data class AndelForBrevperiode(
+data class AndelForVedtaksbegrunnelse(
     override val kalkulertUtbetalingsbeløp: Int,
     override val nasjonaltPeriodebeløp: Int?,
     override val differanseberegnetPeriodebeløp: Int?,
     override val type: YtelseType,
     override val prosent: BigDecimal,
     override val sats: Int,
-) : AndelForBrevobjekt {
+) : AndelForVedtaksobjekt {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = andelTilkjentYtelse.nasjonaltPeriodebeløp,
@@ -238,7 +238,7 @@ data class AndelForBrevperiode(
     )
 
     override fun equals(other: Any?): Boolean {
-        if (other !is AndelForBrevperiode) {
+        if (other !is AndelForVedtaksbegrunnelse) {
             return false
         } else if (this === other) {
             return true

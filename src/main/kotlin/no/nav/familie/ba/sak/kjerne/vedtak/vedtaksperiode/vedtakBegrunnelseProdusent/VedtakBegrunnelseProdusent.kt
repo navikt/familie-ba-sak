@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser.hentEØSStandardBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser.hentStandardBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -383,7 +383,7 @@ fun ISanityBegrunnelse.erBarnDød(
 
 fun ISanityBegrunnelse.erSatsendring(
     person: Person,
-    andeler: Iterable<AndelForBrevperiode>,
+    andeler: Iterable<AndelForVedtaksbegrunnelse>,
     fomVedtaksperiode: LocalDate?,
 ): Boolean {
     val satstyperPåAndelene = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()

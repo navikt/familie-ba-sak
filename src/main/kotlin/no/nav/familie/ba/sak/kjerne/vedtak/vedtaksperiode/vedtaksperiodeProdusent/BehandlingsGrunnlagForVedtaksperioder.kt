@@ -42,7 +42,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.tilAndelerForBrevPeriodeTidslinje
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.tilAndelerForVedtaksbegrunnelseTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplittForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -315,7 +315,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             andelerTilkjentYtelse
                 .filtrerPåAktør(person.aktør)
                 .filtrerPåRolle(vilkårRolle)
-                .tilAndelerForBrevPeriodeTidslinje()
+                .tilAndelerForVedtaksbegrunnelseTidslinje()
 
         val grunnlagTidslinje =
             this
@@ -526,7 +526,7 @@ private fun lagGrunnlagForVilkårOgAndelNy(
 private fun lagGrunnlagForVilkårOgAndelGammel(
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
-    andeler: Iterable<AndelForBrevperiode>?,
+    andeler: Iterable<AndelForVedtaksbegrunnelse>?,
 ): VedtaksperiodeGrunnlagForPerson {
     val andelerListe = andeler?.toList()
 
@@ -651,9 +651,9 @@ private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEks
     return erInnvilget || erEksplisittAvslag
 }
 
-private fun List<AndelTilkjentYtelse>.hentErUtbetalingSmåbarnstilleggTidslinje(): Tidslinje<Boolean, Måned> = this.tilAndelerForBrevPeriodeTidslinje().hentErUtbetalingSmåbarnstilleggTidslinje()
+private fun List<AndelTilkjentYtelse>.hentErUtbetalingSmåbarnstilleggTidslinje(): Tidslinje<Boolean, Måned> = this.tilAndelerForVedtaksbegrunnelseTidslinje().hentErUtbetalingSmåbarnstilleggTidslinje()
 
-fun Tidslinje<Iterable<AndelForBrevperiode>, Måned>.hentErUtbetalingSmåbarnstilleggTidslinje() =
+fun Tidslinje<Iterable<AndelForVedtaksbegrunnelse>, Måned>.hentErUtbetalingSmåbarnstilleggTidslinje() =
     this.mapIkkeNull { andelerIPeriode ->
         andelerIPeriode.any {
             it.type == YtelseType.SMÅBARNSTILLEGG && it.kalkulertUtbetalingsbeløp > 0

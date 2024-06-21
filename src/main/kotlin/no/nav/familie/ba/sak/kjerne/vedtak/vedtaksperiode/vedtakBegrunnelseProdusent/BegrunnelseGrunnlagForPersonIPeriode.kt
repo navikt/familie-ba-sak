@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProd
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForBrevperiodeTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.KompetanseForVedtaksperiode
@@ -40,7 +40,7 @@ import java.math.BigDecimal
 data class BegrunnelseGrunnlagForPersonIPeriode(
     val person: Person,
     val vilkårResultater: Iterable<VilkårResultatForVedtaksperiode>,
-    val andeler: Iterable<AndelForBrevperiode>,
+    val andeler: Iterable<AndelForVedtaksbegrunnelse>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
     val valutakurs: ValutakursForVedtaksperiode? = null,
@@ -109,7 +109,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
             .mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
     val andelerTilkjentYtelseTidslinje =
-        this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForBrevPeriodeTidslinje()
+        this.andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksbegrunnelseTidslinje()
 
     val overgangsstønadTidslinje =
         this.perioderOvergangsstønad
@@ -118,7 +118,7 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 
     return forskjøvedeVilkårTidslinje
         .kombinerMed(
-            andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForBrevPeriodeTidslinje(),
+            andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksbegrunnelseTidslinje(),
         ) { vilkårResultater, andeler ->
             vilkårResultater?.let {
                 BegrunnelseGrunnlagForPersonIPeriode(
@@ -170,9 +170,9 @@ private fun lagTidslinjeForEksplisitteAvslag(
     return eksplisitteAvslagTidslinje
 }
 
-fun List<AndelTilkjentYtelse>.tilAndelerForBrevPeriodeTidslinje(): Tidslinje<Iterable<AndelForBrevperiode>, Måned> =
+fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksbegrunnelseTidslinje(): Tidslinje<Iterable<AndelForVedtaksbegrunnelse>, Måned> =
     this
-        .tilAndelForBrevperiodeTidslinjerPerAktørOgType()
+        .tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType()
         .values
         .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
         .kombiner()

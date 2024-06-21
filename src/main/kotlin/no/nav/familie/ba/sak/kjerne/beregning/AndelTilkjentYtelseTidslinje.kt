@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForBrevperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 
 class AndelTilkjentYtelseTidslinje(
@@ -34,15 +34,15 @@ class AndelTilkjentYtelseForVedtaksperioderTidslinje(
         }
 }
 
-class AndelTilkjentYtelseForBrevperioderTidslinje(
+class AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-) : Tidslinje<AndelForBrevperiode, Måned>() {
-    override fun lagPerioder(): List<Periode<AndelForBrevperiode, Måned>> =
+) : Tidslinje<AndelForVedtaksbegrunnelse, Måned>() {
+    override fun lagPerioder(): List<Periode<AndelForVedtaksbegrunnelse, Måned>> =
         andelerTilkjentYtelse.map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
-                innhold = AndelForBrevperiode(it),
+                innhold = AndelForVedtaksbegrunnelse(it),
             )
         }
 }
