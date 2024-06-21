@@ -23,7 +23,6 @@ import java.time.LocalDate
 fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
     behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-    erVedtaksperiodeGrunnlagForPersonLik: VedtaksperiodeGrunnlagForPerson?.(VedtaksperiodeGrunnlagForPerson?) -> Boolean = VedtaksperiodeGrunnlagForPerson?::erLik,
     erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
 ): LocalDate {
     val grunnlagTidslinjePerPerson =
