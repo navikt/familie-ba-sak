@@ -57,17 +57,6 @@ fun utledEndringstidspunkt(
     return datoTidligsteForskjell
 }
 
-fun utledEndringstidspunktUtenValutakursendringer(
-    behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
-    behandlingsGrunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
-    erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
-): LocalDate =
-    utledEndringstidspunkt(
-        behandlingsGrunnlagForVedtaksperioder = behandlingsGrunnlagForVedtaksperioder,
-        behandlingsGrunnlagForVedtaksperioderForrigeBehandling = behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-        erToggleForÅIkkeSplittePåValutakursendringerPå = erToggleForÅIkkeSplittePåValutakursendringerPå,
-    )
-
 private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<PersonResultat> =
     map {
         it.tilKopiForNyVilkårsvurdering(it.vilkårsvurdering)

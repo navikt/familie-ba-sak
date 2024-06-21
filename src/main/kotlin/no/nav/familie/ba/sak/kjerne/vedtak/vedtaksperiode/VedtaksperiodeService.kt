@@ -129,22 +129,6 @@ class VedtaksperiodeService(
         )
     }
 
-    fun finnEndringstidspunktForBehandlingUtenValutakursendringer(behandlingId: Long): LocalDate {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
-
-        return utledEndringstidspunktUtenValutakursendringer(
-            behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
-            behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
-            erToggleForÅIkkeSplittePåValutakursendringerPå =
-                unleashNextMedContextService.isEnabled(
-                    FeatureToggleConfig.IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS,
-                ),
-        )
-    }
-
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId: Long,
         standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,

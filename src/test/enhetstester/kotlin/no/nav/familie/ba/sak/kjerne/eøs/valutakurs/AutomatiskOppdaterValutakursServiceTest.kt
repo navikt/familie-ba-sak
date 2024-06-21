@@ -144,7 +144,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             .medVurderingsform(Vurderingsform.AUTOMATISK)
             .lagreTil(valutakursRepository)
 
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandlingUtenValutakursendringer(behandlingId.id) } returns LocalDate.of(2023, 5, 15)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 5, 15)
 
         automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(behandlingId)
 
