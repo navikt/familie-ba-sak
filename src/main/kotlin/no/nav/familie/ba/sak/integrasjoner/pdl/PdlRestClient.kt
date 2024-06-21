@@ -88,7 +88,7 @@ class PdlRestClient(
 
             pdlPerson.person.let {
                 PersonInfo(
-                    fødselsdato = LocalDate.parse(it.foedsel.first().foedselsdato),
+                    fødselsdato = LocalDate.parse(it.foedselsdato.first().foedselsdato),
                     navn = it.navn.firstOrNull()?.fulltNavn(),
                     kjønn = it.kjoenn.firstOrNull()?.kjoenn,
                     forelderBarnRelasjon = forelderBarnRelasjon,

@@ -25,7 +25,7 @@ class PdlGraphqlTest {
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlOkResponse.json")))
         assertThat(
             resp.data.person!!
-                .foedsel
+                .foedselsdato
                 .first()
                 .foedselsdato,
         ).isEqualTo("1955-09-13")
@@ -187,7 +187,7 @@ class PdlGraphqlTest {
             mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(File(getFile("pdl/pdlManglerFoedselResponse.json")))
         assertThat(
             resp.data.person!!
-                .foedsel
+                .foedselsdato
                 .first()
                 .foedselsdato,
         ).isNull()

@@ -4,7 +4,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         status
         type
     }
-    foedsel {
+    foedselsdato {
         foedselsdato
     }
     navn {
