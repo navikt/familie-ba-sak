@@ -328,10 +328,10 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                     )
                 }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
                     lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
-                }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
-                    lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
                 }.kombinerMedNullable(valutakursTidslinje) { grunnlagForPerson, valutakurs ->
                     lagGrunnlagMedValutakurs(grunnlagForPerson, valutakurs)
+                }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
+                    lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
                 }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
                     lagGrunnlagMedEndretUtbetalingAndel(grunnlagForPerson, endretUtbetalingAndel)
                 }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
