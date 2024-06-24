@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.rangeTo
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER
@@ -139,12 +140,23 @@ class AutomatiskOppdaterValutakursService(
 
         val førsteEndringIValutakurs = finnFørsteEndringIValutakurs(valutakurserDenneBehandling, valutakurserForrigeBehandling)
 
+        logger.info("Finner minste av første endringstidspunkt for vedtaksperioder $endringstidspunkt og valutakurser $førsteEndringIValutakurs")
+
         return minOf(endringstidspunkt, førsteEndringIValutakurs)
     }
 
     private fun Collection<UtenlandskPeriodebeløp>.tilAutomatiskeValutakurserEtter(
         månedForTidligsteTillatteAutomatiskeValutakurs: YearMonth,
     ): List<Valutakurs> {
+        logger.info(
+            "Lager automatisk valutakurs for perioder etter $månedForTidligsteTillatteAutomatiskeValutakurs. + " +
+                "Se securelogger for info om de utenlandske periodebeløpene",
+        )
+        secureLogger.info(
+            "Lager automatisk valutakurs for perioder etter $månedForTidligsteTillatteAutomatiskeValutakurs. " +
+                "Utenlandske periodebeløp: $this",
+        )
+
         val valutakoder =
             filtrerErUtfylt().map { it.valutakode }.toSet()
 

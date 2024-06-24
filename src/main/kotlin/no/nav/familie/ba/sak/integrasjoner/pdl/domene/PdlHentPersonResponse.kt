@@ -17,7 +17,7 @@ data class PdlHentPersonResponse(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonData(
     val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
-    val foedsel: List<PdlFødselsDato>,
+    val foedselsdato: List<PdlFødselsDato>,
     val navn: List<PdlNavn> = emptyList(),
     val kjoenn: List<PdlKjoenn> = emptyList(),
     val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
@@ -30,7 +30,7 @@ data class PdlPersonData(
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
-        if (foedsel.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
+        if (foedselsdato.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
         if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
                 "er opphørt",

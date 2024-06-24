@@ -13,7 +13,7 @@ import org.springframework.web.client.RestOperations
 import org.testcontainers.containers.FixedHostPortGenericContainer
 import org.testcontainers.images.PullPolicy
 
-val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
+val MOCK_SERVER_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teamfamilie/familie-mock-server:latest"
 
 class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
