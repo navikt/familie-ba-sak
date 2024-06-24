@@ -169,3 +169,5 @@ fun Collection<Valutakurs>.erAlleValutakurserOppdaterteIMåned(
 
     fom < måned && tom >= måned
 }
+
+fun Collection<Valutakurs>.filtrerUtfylteValutakurser() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
