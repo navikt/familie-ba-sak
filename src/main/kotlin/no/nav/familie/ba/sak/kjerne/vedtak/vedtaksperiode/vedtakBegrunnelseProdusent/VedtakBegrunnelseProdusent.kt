@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.mapInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
@@ -29,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFramtid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -220,8 +220,6 @@ fun finnRegelverkSomBlirBorte(
 private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
 ): Map<Person, Set<IVedtakBegrunnelse>> {
-    val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
-
     return behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
         val vilkårResultaterForPerson =
             behandlingsGrunnlagForVedtaksperioder
@@ -231,27 +229,16 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
 
         val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) = vilkårResultaterForPerson.partition { it.erEksplisittAvslagUtenPeriode() }
 
-        val generelleAvslagsBegrunnelser =
-            generelleAvslag.groupBy { it.vilkårType }.mapNotNull { (_, vilkårResultater) ->
-                listOf(månedPeriodeAv(null, null, vilkårResultater.single())).tilTidslinje()
-            }
+        val generelleAvslagsbegrunnelser = generelleAvslag.flatMap { it.standardbegrunnelser }
 
-        val ikkeGenerelleAvslagsbegrunnelserTidslinjer =
+        val avslagsbegrunnelserMedPeriodeTidslinjer =
             vilkårResultaterUtenGenerelleAvslag
                 .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
                 .filtrerKunEksplisittAvslagsPerioder()
 
-        val avslagsBegrunnelserTidslinje =
-            (generelleAvslagsBegrunnelser + ikkeGenerelleAvslagsbegrunnelserTidslinjer)
-                .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
+        val avslagsbegrunnelserMedPeriode = avslagsbegrunnelserMedPeriodeTidslinjer.flatMap { it.perioder() }.filter { it.fraOgMed.tilYearMonthEllerNull() == this.fom?.toYearMonth() }.flatMap { it.innhold?.standardbegrunnelser ?: emptyList() }
 
-        tidslinjeMedVedtaksperioden
-            .kombinerMed(avslagsBegrunnelserTidslinje) { vedtaksperiode, avslagsbegrunnelser ->
-                avslagsbegrunnelser.takeIf { vedtaksperiode != null }
-            }.perioder()
-            .mapNotNull { it.innhold }
-            .flatten()
-            .toSet()
+        (generelleAvslagsbegrunnelser + avslagsbegrunnelserMedPeriode).toSet()
     }
 }
 
