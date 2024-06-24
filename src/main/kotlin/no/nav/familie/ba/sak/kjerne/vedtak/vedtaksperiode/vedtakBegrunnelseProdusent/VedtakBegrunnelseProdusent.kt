@@ -219,8 +219,8 @@ fun finnRegelverkSomBlirBorte(
 
 private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
-): Map<Person, Set<IVedtakBegrunnelse>> {
-    return behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
+): Map<Person, Set<IVedtakBegrunnelse>> =
+    behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
         val vilkårResultaterForPerson =
             behandlingsGrunnlagForVedtaksperioder
                 .personResultater
@@ -240,7 +240,6 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
 
         (generelleAvslagsbegrunnelser + avslagsbegrunnelserMedPeriode).toSet()
     }
-}
 
 private fun List<Tidslinje<VilkårResultat, Måned>>.filtrerKunEksplisittAvslagsPerioder(): List<Tidslinje<VilkårResultat, Måned>> =
     this.map { tidslinjeForVilkår ->
