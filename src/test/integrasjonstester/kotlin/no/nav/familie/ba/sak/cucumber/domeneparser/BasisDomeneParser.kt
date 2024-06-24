@@ -178,6 +178,14 @@ fun parseBigDecimal(
     return verdi.toBigDecimal()
 }
 
+fun parseValgfriBigDecimal(
+    domenebegrep: Domenenøkkel,
+    rad: Map<String, String>,
+): BigDecimal? {
+    val verdi = valgfriVerdi(domenebegrep.nøkkel, rad)
+    return verdi?.toBigDecimal()
+}
+
 fun parseValgfriLong(
     domenebegrep: Domenenøkkel,
     rad: Map<String, String>,

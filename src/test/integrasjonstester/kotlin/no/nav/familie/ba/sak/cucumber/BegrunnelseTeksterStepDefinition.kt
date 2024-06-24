@@ -624,6 +624,19 @@ class BegrunnelseTeksterStepDefinition {
 
         mock.utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp.single())
     }
+
+    @Når("vi automatisk oppdaterer valutakurser for behandling {}")
+    fun `når vi automatisk oppdaterer valutakurser for behandling`(
+        behandlingId: Long,
+    ) {
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehanldingId = behandlingId,
+            )
+
+        mock.automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
+    }
 }
 
 data class SammenlignbarBegrunnelse(
