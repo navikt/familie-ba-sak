@@ -277,17 +277,22 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                                                                 | Ugyldige begrunnelser |
-      | 01.10.2023 |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER, AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
-      | 01.12.2023 |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER, AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                              | Ugyldige begrunnelser |
+      | 01.10.2023 |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
+      | 01.12.2023 |          | AVSLAG             |                                | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
 
     Og når disse begrunnelsene er valgt for behandling 1
-      | Fra dato   | Til dato | Standardbegrunnelser                                                                                 | Eøsbegrunnelser | Fritekster |
-      | 01.10.2023 |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER, AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
+      | Fra dato   | Til dato | Standardbegrunnelser                              | Eøsbegrunnelser | Fritekster |
+      | 01.10.2023 |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
+      | 01.12.2023 |          | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                 |            |
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.10.2023 til -
       | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 16.02.13 og 02.08.16 | 2           | september 2023                       | NB      | 0     |                  |                         |                             |
+      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 16.02.13 og 02.08.16 | 0           | september 2023                       | NB      | 0     |                  |                         |                             |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2023 til -
+      | Begrunnelse                                       | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Nei           | 16.02.13 og 02.08.16 | 2           | november 2023                        | NB      | 0     |                  |                         |                             |
 
   Scenario: Skal forskyve eksplisitt avslag når avslaget starter og opphører innenfor samme måned
 
@@ -484,3 +489,73 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.11.2023 til -
       | Begrunnelse                 | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | AVSLAG_BARN_HAR_FAST_BOSTED | STANDARD | Nei           | 21.01.16             | 1           | oktober 2023                         | NB      | 0     |                  |                         |                             |
+
+  Scenario: Skal flette inn riktige barn når samme begrunnelse gjelder to overlappende avslagsperioder
+    Gitt følgende fagsaker for begrunnelse
+      | FagsakId | Fagsaktype | Status    |
+      | 1        | NORMAL     | OPPRETTET |
+
+    Gitt følgende behandling
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | EØS                 | UTREDES           |
+
+    Og følgende persongrunnlag for begrunnelse
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 28.03.1989  |              |
+      | 1            | 2       | BARN       | 05.05.2017  |              |
+      | 1            | 3       | BARN       | 09.05.2019  |              |
+      | 1            | 4       | BARN       | 10.11.2021  |              |
+
+    Og følgende dagens dato 24.06.2024
+    Og lag personresultater for begrunnelse for behandling 1
+
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                          | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD   |                              | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+      | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+
+      | 2       | UNDER_18_ÅR      |                              | 05.05.2017 | 04.05.2035 | OPPFYLT      | Nei                  |                                               |                  |
+      | 2       | GIFT_PARTNERSKAP |                              | 05.05.2017 |            | OPPFYLT      | Nei                  |                                               |                  |
+      | 2       | LOVLIG_OPPHOLD   |                              | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+      | 2       | BOR_MED_SØKER    |                              | 31.05.2020 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+
+      | 3       | UNDER_18_ÅR      |                              | 09.05.2019 | 08.05.2037 | OPPFYLT      | Nei                  |                                               |                  |
+      | 3       | GIFT_PARTNERSKAP |                              | 09.05.2019 |            | OPPFYLT      | Nei                  |                                               |                  |
+      | 3       | LOVLIG_OPPHOLD   |                              | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+      | 3       | BOR_MED_SØKER    |                              | 31.05.2020 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS_FORORDNINGEN |
+      | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+
+      | 4       | UNDER_18_ÅR      |                              | 10.11.2021 | 09.11.2039 | OPPFYLT      | Nei                  |                                               |                  |
+      | 4       | GIFT_PARTNERSKAP |                              | 10.11.2021 |            | OPPFYLT      | Nei                  |                                               |                  |
+      | 4       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 10.11.2021 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+      | 4       | BOR_MED_SØKER    |                              | 10.11.2021 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS_FORORDNINGEN |
+      | 4       | LOVLIG_OPPHOLD   |                              | 10.11.2021 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
+
+    Og med andeler tilkjent ytelse for begrunnelse
+      | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
+
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                          | Ugyldige begrunnelser |
+      | 01.06.2020 |          | AVSLAG             |                                |                                               |                       |
+      | 01.06.2020 |          | AVSLAG             | EØS_FORORDNINGEN               | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN |                       |
+
+      | 01.12.2021 |          | AVSLAG             |                                |                                               |                       |
+      | 01.12.2021 |          | AVSLAG             | EØS_FORORDNINGEN               | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN |                       |
+
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato | Standardbegrunnelser | Eøsbegrunnelser                               | Fritekster |
+      | 01.06.2020 |          |                      | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN |            |
+      | 01.12.2021 |          |                      | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.06.2020 til -
+      | Begrunnelse                                   | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS  | Nei           | 05.05.17 og 09.05.19 | 2           | nb      |                  |                           |                       |                                |                     |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2021 til -
+      | Begrunnelse                                   | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS  | Nei           | 10.11.21             | 1           | nb      |                  |                           |                       |                                |                     |
