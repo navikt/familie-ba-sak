@@ -1,1 +1,0 @@
-drop index if exists tilkjent_ytelse_utbetalingsoppdrag_not_null_idx;
