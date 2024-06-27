@@ -185,7 +185,7 @@ class CucumberMock(
             søknadGrunnlagRepository = søknadGrunnlagRepository,
             personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
-    )
+        )
 
     val vedtaksperiodeService =
         VedtaksperiodeService(

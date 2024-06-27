@@ -408,11 +408,12 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
         type = this.tilVedtaksperiodeType(personerFremstiltKravFor = personerFremstiltKravFor),
     ).let { vedtaksperiode ->
         val begrunnelser =
-            this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
-                grunnlagForGjeldendeOgForrigeBehandling.gjeldende
-                    ?.finnVilkårResultaterSomGjelderPersonIVedtaksperiode(personerFremstiltKravFor)
-                    ?.flatMap { it.standardbegrunnelser } ?: emptyList()
-            }?.toSet() ?: emptyList()
+            this.innhold
+                ?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
+                    grunnlagForGjeldendeOgForrigeBehandling.gjeldende
+                        ?.finnVilkårResultaterSomGjelderPersonIVedtaksperiode(personerFremstiltKravFor)
+                        ?.flatMap { it.standardbegrunnelser } ?: emptyList()
+                }?.toSet() ?: emptyList()
 
         vedtaksperiode.begrunnelser.addAll(
             begrunnelser
