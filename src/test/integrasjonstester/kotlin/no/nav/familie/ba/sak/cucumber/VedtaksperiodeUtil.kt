@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnumListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBigDecimal
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
@@ -348,7 +349,7 @@ fun lagValutakurs(
                         VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTA_KODE,
                         rad,
                     ),
-                kurs = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad),
+                kurs = parseValgfriBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad),
                 vurderingsform = parseValgfriEnum<Vurderingsform>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VURDERINGSFORM, rad) ?: Vurderingsform.MANUELL,
             ).also { it.behandlingId = behandlingId }
         }.groupBy { it.behandlingId }
