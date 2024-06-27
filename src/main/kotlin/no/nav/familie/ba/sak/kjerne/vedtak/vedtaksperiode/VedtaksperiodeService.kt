@@ -324,11 +324,21 @@ class VedtaksperiodeService(
         val behandling = vedtak.behandling
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+
+        val personerFremstiltKravFor =
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
+                behandling = behandling,
+                søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+                forrigeBehandling = forrigeBehandling,
+            )
+
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
+            personerFremstiltKravFor = personerFremstiltKravFor,
         )
     }
 
