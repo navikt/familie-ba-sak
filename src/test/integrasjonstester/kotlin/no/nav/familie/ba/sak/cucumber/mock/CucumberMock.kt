@@ -302,7 +302,6 @@ class CucumberMock(
         BehandlingsresultatService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             søknadGrunnlagService = søknadGrunnlagService,
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,

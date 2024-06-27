@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.behandlingsresultat
+package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -6,23 +6,17 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -34,12 +28,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.hamcrest.CoreMatchers.`is` as Is
 
 @ExtendWith(MockKExtension::class)
-internal class BehandlingsresultatServiceTest {
+internal class SøknadGrunnlagServiceTest {
     @MockK
-    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-
-    @MockK
-    private lateinit var søknadGrunnlagService: SøknadGrunnlagService
+    private lateinit var søknadGrunnlagRepository: SøknadGrunnlagRepository
 
     @MockK
     private lateinit var personidentService: PersonidentService
@@ -50,27 +41,15 @@ internal class BehandlingsresultatServiceTest {
     @MockK
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
 
-    @MockK
-    private lateinit var kompetanseService: KompetanseService
-
-    @MockK
-    private lateinit var endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
-
-    @MockK
-    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
-    @MockK
-    private lateinit var localDateProvider: LocalDateProvider
-
     @InjectMockKs
-    private lateinit var behandlingsresultatService: BehandlingsresultatService
+    private lateinit var søknadGrunnlagService: SøknadGrunnlagService
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = null,
                 forrigeBehandling = null,
@@ -102,7 +81,7 @@ internal class BehandlingsresultatServiceTest {
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = søknadDto,
                 forrigeBehandling = null,
@@ -136,7 +115,7 @@ internal class BehandlingsresultatServiceTest {
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = søknadDto,
                 forrigeBehandling = null,
@@ -192,7 +171,7 @@ internal class BehandlingsresultatServiceTest {
         every { personidentService.hentAktør(barn1Fnr) } returns mocketAktør
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = søknadDto,
                 forrigeBehandling = null,
@@ -212,7 +191,7 @@ internal class BehandlingsresultatServiceTest {
         every { persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling) } returns listOf(nyttBarn)
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = null,
                 forrigeBehandling = forrigeBehandling,
@@ -237,7 +216,7 @@ internal class BehandlingsresultatServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns eksisterendePersonpplysningGrunnlag
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = null,
                 forrigeBehandling = null,
@@ -281,7 +260,7 @@ internal class BehandlingsresultatServiceTest {
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
 
         val personerFramstiltForKrav =
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
                 søknadDTO = søknadDto,
                 forrigeBehandling = null,
