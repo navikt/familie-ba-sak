@@ -13,6 +13,10 @@ Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+
   Scenario: Skal kun ta med første opphørsperiode etter siste utbetalingsperiode. Eksplisitte avslag skal med uansett.
 
     Og lag personresultater for behandling 1

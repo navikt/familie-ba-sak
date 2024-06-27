@@ -14,9 +14,11 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 01.02.2016  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
 
   Scenario: Skal kun lage én avslagsperiode når det er avslag på søker hele perioden og ingen andre avslag
-
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
@@ -76,6 +78,11 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 1            | 3456    | BARN       | 01.12.2016  |
       | 1            | 5678    | BARN       | 01.02.2017  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+      | 1            | 5678    |
+
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
@@ -118,6 +125,11 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 02.12.2016  |
       | 1            | 5678    | BARN       | 02.12.2016  |
+
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+      | 1            | 5678    |
 
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1

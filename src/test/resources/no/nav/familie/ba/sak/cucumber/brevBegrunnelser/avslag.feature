@@ -255,6 +255,11 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Og følgende dagens dato 01.02.2024
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+      | 1            | 3       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD               |                  | 25.09.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
@@ -303,6 +308,10 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Og følgende dagens dato 25.01.2024
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
@@ -346,6 +355,10 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Og følgende dagens dato 25.01.2024
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.03.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
@@ -387,6 +400,10 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
     Og følgende dagens dato 25.01.2024
     Og lag personresultater for begrunnelse for behandling 1
+
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
@@ -445,6 +462,10 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
     Og følgende dagens dato 30.04.2024
     Og lag personresultater for begrunnelse for behandling 1
+
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser         | Vurderes etter   |

@@ -16,6 +16,10 @@ Egenskap: Gyldige begrunnelser for avslag
   Scenario: Skal ikke krasje ved avslag uten fom- eller tomdato
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                            | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1       | LOVLIG_OPPHOLD                    |                  |            |            | IKKE_OPPFYLT | Ja                   |
