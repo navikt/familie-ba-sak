@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
@@ -39,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -87,6 +89,7 @@ class BegrunnelseTeksterStepDefinition {
 
     var målform: Målform = Målform.NB
     var søknadstidspunkt: LocalDate? = null
+    var personerFremstiltKravFor = mapOf<Long, List<Aktør>>()
 
     /**
      * Mulige verdier: | FagsakId | Fagsaktype | Status |
@@ -137,6 +140,21 @@ class BegrunnelseTeksterStepDefinition {
     @Og("følgende dagens dato {}")
     fun `følgende dagens dato`(dagensDatoString: String) {
         dagensDato = parseDato(dagensDatoString)
+    }
+
+    /**
+     * Mulige verdier: | BehandlingId | AktørId |
+     */
+    @Og("med personer fremstilt krav for i behandling")
+    fun `med personer fremstilt krav for`(dataTable: DataTable) {
+        personerFremstiltKravFor =
+            dataTable
+                .asMaps()
+                .map { rad ->
+                    val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+                    val person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { parseAktørId(rad) == it.aktør.aktørId } ?: throw Feil("Person fremstilt krav for finnes ikke i persongrunnlag")
+                    Pair(behandlingId, person.aktør)
+                }.groupBy({ it.first }, { it.second })
     }
 
     @Og("lag personresultater for begrunnelse for behandling {}")
@@ -267,6 +285,7 @@ class BegrunnelseTeksterStepDefinition {
                 grunnlagForVedtakPerioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
+                personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
             )
 
         val utvidedeVedtaksperioderMedBegrunnelser =

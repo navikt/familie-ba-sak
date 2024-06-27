@@ -63,6 +63,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -588,6 +589,7 @@ fun lagVedtaksPerioder(
     overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
     uregistrerteBarn: List<BarnMedOpplysninger>,
     nåDato: LocalDate,
+    personerFremstiltKravFor: Map<Long, List<Aktør>>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak =
         vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
@@ -634,6 +636,7 @@ fun lagVedtaksPerioder(
         grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         nåDato = nåDato,
+        personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
     )
 }
 
