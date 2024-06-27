@@ -409,9 +409,9 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
         val begrunnelser =
             this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
                 grunnlagForGjeldendeOgForrigeBehandling.gjeldende
-                    ?.vilkårResultaterForVedtaksperiode
+                    ?.finnVilkårResultaterSomGjelderPersonIVedtaksperiode(personerFremstiltKravFor)
                     ?.flatMap { it.standardbegrunnelser } ?: emptyList()
-            } ?: emptyList()
+            }?.toSet() ?: emptyList()
 
         vedtaksperiode.begrunnelser.addAll(
             begrunnelser
@@ -427,6 +427,9 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
 
         vedtaksperiode
     }
+
+private fun VedtaksperiodeGrunnlagForPerson.finnVilkårResultaterSomGjelderPersonIVedtaksperiode(personerFremstiltKravFor: List<Aktør>): List<VilkårResultatForVedtaksperiode> =
+    this.vilkårResultaterForVedtaksperiode.filter { !it.erEksplisittAvslagPåSøknad || personerFremstiltKravFor.contains(this.person.aktør) }
 
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(personerFremstiltKravFor: List<Aktør>): Vedtaksperiodetype {
     val erUtbetalingsperiode =
