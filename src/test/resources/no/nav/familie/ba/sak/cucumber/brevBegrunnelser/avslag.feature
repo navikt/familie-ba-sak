@@ -530,6 +530,12 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Og følgende dagens dato 24.06.2024
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+      | 1            | 3       |
+      | 1            | 4       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                          | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                              | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
