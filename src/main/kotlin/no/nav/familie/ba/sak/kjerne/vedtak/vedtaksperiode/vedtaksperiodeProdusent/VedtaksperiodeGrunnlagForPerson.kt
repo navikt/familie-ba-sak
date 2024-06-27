@@ -77,7 +77,7 @@ data class VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
 ) : VedtaksperiodeGrunnlagForPerson {
     fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag(personerFremstiltKravFor: List<Aktør>) =
-        this.any { it.erEksplisittAvslagPåSøknad } && personerFremstiltKravFor.contains(person.aktør)
+        this.any { it.erEksplisittAvslagPåSøknad } && (personerFremstiltKravFor.contains(person.aktør) || person.type == PersonType.SØKER)
 }
 
 data class VilkårResultatForVedtaksperiode(

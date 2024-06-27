@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -429,7 +430,7 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     }
 
 private fun VedtaksperiodeGrunnlagForPerson.finnVilkårResultaterSomGjelderPersonIVedtaksperiode(personerFremstiltKravFor: List<Aktør>): List<VilkårResultatForVedtaksperiode> =
-    this.vilkårResultaterForVedtaksperiode.filter { !it.erEksplisittAvslagPåSøknad || personerFremstiltKravFor.contains(this.person.aktør) }
+    this.vilkårResultaterForVedtaksperiode.filter { !it.erEksplisittAvslagPåSøknad || personerFremstiltKravFor.contains(this.person.aktør) || this.person.type == PersonType.SØKER }
 
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(personerFremstiltKravFor: List<Aktør>): Vedtaksperiodetype {
     val erUtbetalingsperiode =
