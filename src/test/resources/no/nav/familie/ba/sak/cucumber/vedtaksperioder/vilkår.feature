@@ -13,6 +13,10 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og et barn
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+
   Scenario: Skal lage vedtaksperioder for mor med ett barn med vilkår
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1

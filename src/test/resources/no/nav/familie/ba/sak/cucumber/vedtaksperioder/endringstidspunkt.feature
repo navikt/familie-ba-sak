@@ -17,6 +17,10 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2            | 1234    | SØKER      | 24.12.1987  |
       | 2            | 3456    | BARN       | 02.12.2016  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+      | 2            | 3456    |
 
   Scenario: Skal kun ta med vedtaksperioder som kommer etter endringstidspunktet
 

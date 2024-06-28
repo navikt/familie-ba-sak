@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -45,6 +46,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var overstyrteEndringstidspunkt = mapOf<Long, LocalDate>()
     private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
     private var uregistrerteBarn = listOf<BarnMedOpplysninger>()
+    private var personerFremstiltKravFor = mapOf<Long, List<Aktør>>()
     private var dagensDato: LocalDate = LocalDate.now()
 
     private var gjeldendeBehandlingId: Long? = null
@@ -116,6 +118,21 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     }
 
     /**
+     * Mulige verdier: | BehandlingId | AktørId |
+     */
+    @Og("med personer fremstilt krav for")
+    fun `med personer fremstilt krav for`(dataTable: DataTable) {
+        personerFremstiltKravFor =
+            dataTable
+                .asMaps()
+                .map { rad ->
+                    val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+                    val person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { parseAktørId(rad) == it.aktør.aktørId } ?: throw Feil("Person fremstilt krav for finnes ikke i persongrunnlag")
+                    Pair(behandlingId, person.aktør)
+                }.groupBy({ it.first }, { it.second })
+    }
+
+    /**
      * Mulige verdier: | AktørId | Fra dato | Til dato | Resultat | BehandlingId |
      */
     @Og("med kompetanser")
@@ -180,6 +197,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 nåDato = dagensDato,
                 valutakurs = valutakurs,
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp,
+                personerFremstiltKravFor = personerFremstiltKravFor,
             )
     }
 

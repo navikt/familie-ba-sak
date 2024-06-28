@@ -34,6 +34,10 @@ Egenskap: Vedtaksperioder for behandling med uregistrert barn
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 02.12.2016  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |

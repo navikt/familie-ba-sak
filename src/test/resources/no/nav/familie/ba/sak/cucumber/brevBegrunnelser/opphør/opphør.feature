@@ -321,6 +321,12 @@ Egenskap: Brevbegrunnelser ved opphør
     Og lag personresultater for begrunnelse for behandling 1
     Og lag personresultater for begrunnelse for behandling 2
 
+
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 2            | 2       |
+      | 2            | 3       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET                              |                  | 29.03.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
