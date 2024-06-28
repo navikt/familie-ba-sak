@@ -117,5 +117,5 @@ Egenskap: Gyldige begrunnelser ved ingen endring
     Når vedtaksperiodene genereres for behandling 1
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                   | Ugyldige begrunnelser |
-      | 01.09.2020 | 31.12.2020 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |                       |
+      | 01.09.2020 | 31.03.2021 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |                       |
 
