@@ -72,7 +72,7 @@ Egenskap: Automatisk valutajustering
 
     Og når disse begrunnelsene er valgt for behandling 1
       | Fra dato   | Til dato   | Standardbegrunnelser | Eøsbegrunnelser                                        | Fritekster |
-      | 01.04.2024 | 30.04.2024 |                      | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |            |
+      | 01.04.2024 | 28.02.2033 |                      | INNVILGET_TILLEGGSTEKST_SATSENDRING_OG_VALUTAJUSTERING |            |
 
 
   Scenario: Skal oppdatere valutakursene og andel tilkjente ytelser når vi oppdaterer valutakursene for beslutter
