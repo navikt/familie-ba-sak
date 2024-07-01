@@ -35,7 +35,7 @@ class ECBService(
         utenlandskValuta: String,
         kursDato: LocalDate,
     ): BigDecimal {
-        val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)
+        val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato(utenlandskValuta, kursDato)?.firstOrNull()
         if (valutakurs == null) {
             logger.info("Henter valutakurs for ${utenlandskValuta.saner()} på $kursDato")
             try {
