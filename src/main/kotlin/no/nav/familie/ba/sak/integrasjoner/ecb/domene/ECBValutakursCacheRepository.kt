@@ -7,5 +7,5 @@ interface ECBValutakursCacheRepository : JpaRepository<ECBValutakursCache, Long>
     fun findByValutakodeAndValutakursdato(
         valutakode: String,
         valutakursdato: LocalDate,
-    ): ECBValutakursCache?
+    ): List<ECBValutakursCache>?
 }
