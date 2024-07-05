@@ -12,11 +12,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -75,13 +72,25 @@ class BehandlingSatsendringTest(
     fun `Skal kjøre satsendring på løpende fagsak hvor brukeren har barnetrygd under 6 år`() {
         val scenario = mockServerKlient().lagScenario(restScenario)
         val behandling = opprettBehandling(scenario)
+        val atyForBehandlingMedGammelSatsFraFørMars2024 =
+            andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                behandling.id,
+            )
+
+        // Sjekk at behandling har riktig tilstand før man kjører satsendring
+        assertThat(atyForBehandlingMedGammelSatsFraFørMars2024.map { Triple(it.stønadFom, it.stønadTom, it.sats) })
+            .hasSize(2)
+            .containsExactly(
+                Triple(YearMonth.of(2023, 2), YearMonth.of(2028, 12), 1676),
+                Triple(YearMonth.of(2029, 1), YearMonth.of(2040, 12), 1054),
+            )
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023))
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
         val satsendringResultat =
-            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
+            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, SATSENDRINGMÅNED_MARS_2023))
 
         assertEquals(SatsendringSvar.SATSENDRING_KJØRT_OK, satsendringResultat)
 
@@ -97,12 +106,13 @@ class BehandlingSatsendringTest(
                 satsendringBehandling.id,
             )
 
-        val atyMedSenesteTilleggOrbaSats =
-            aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2023, 7) }
-        val atyMedVanligOrbaSats =
-            aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2029, 1) }
-        assertThat(atyMedSenesteTilleggOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp)
-        assertThat(atyMedVanligOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.ORBA).beløp)
+        assertThat(aty.map { Triple(it.stønadFom, it.stønadTom, it.sats) })
+            .hasSize(3)
+            .containsExactly(
+                Triple(YearMonth.of(2023, 2), YearMonth.of(2023, 2), 1676),
+                Triple(YearMonth.of(2023, 3), YearMonth.of(2023, 6), 1723),
+                Triple(YearMonth.of(2023, 7), YearMonth.of(2040, 12), 1766),
+            )
 
         val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
         assertThat(satskjøring?.ferdigTidspunkt)
