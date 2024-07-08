@@ -310,8 +310,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                                 barnMistetUtbetalingFraForrigeBehandling
                         }.toSet()
 
-                    relevanteBarn.map { it.fødselsdato } +
-                        uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+                    relevanteBarn.map { it.fødselsdato }
                 }
 
                 else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
