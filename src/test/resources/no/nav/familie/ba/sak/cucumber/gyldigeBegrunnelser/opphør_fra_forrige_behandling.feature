@@ -179,6 +179,10 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling
     Og følgende dagens dato 28.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                       | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser  |
       | 1234    | LOVLIG_OPPHOLD               |                          | 23.04.1985 |            | OPPFYLT      | Nei                  |                       |

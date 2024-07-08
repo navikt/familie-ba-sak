@@ -21,6 +21,11 @@ Egenskap: Brevbegrunnelser ved opphør for EØS.
     Og følgende dagens dato 23.02.2022
     Og lag personresultater for begrunnelse for behandling 1
 
+    Og med personer fremstilt krav for i behandling
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+      | 1            | 3       |
+
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser            | Vurderes etter   |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 01.09.2019 | 31.07.2020 | OPPFYLT      | Nei                  |                                 | EØS_FORORDNINGEN |

@@ -72,6 +72,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
     val uregistrerteBarn: List<BarnMedOpplysninger>,
     val utenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
     val valutakurs: List<Valutakurs>,
+    val personerFremstiltKravFor: List<Aktør>,
 ) {
     val utfylteEndredeUtbetalinger =
         endredeUtbetalinger

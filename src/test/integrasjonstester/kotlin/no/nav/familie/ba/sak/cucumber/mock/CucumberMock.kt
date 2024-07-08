@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BeslutteVedtak
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
@@ -99,7 +100,7 @@ class CucumberMock(
     val loggService = mockLoggService()
     val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehanldingId)
     val periodeOvergangsstønadGrunnlagRepository = mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber)
-    val søknadGrunnlagService = mockSøknadGrunnlagService(dataFraCucumber)
+    val søknadGrunnlagRepository = mockSøknadGrunnlagRepository(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)
     val vedtakRepository = mockVedtakRepository(dataFraCucumber)
     val dokumentGenereringService = mockDokumentGenereringService()
@@ -177,6 +178,13 @@ class CucumberMock(
         VedtakService(
             vedtakRepository = vedtakRepository,
             dokumentGenereringService = dokumentGenereringService,
+        )
+
+    val søknadGrunnlagService =
+        SøknadGrunnlagService(
+            søknadGrunnlagRepository = søknadGrunnlagRepository,
+            personidentService = personidentService,
+            persongrunnlagService = persongrunnlagService,
         )
 
     val vedtaksperiodeService =
@@ -303,7 +311,6 @@ class CucumberMock(
         BehandlingsresultatService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             søknadGrunnlagService = søknadGrunnlagService,
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,

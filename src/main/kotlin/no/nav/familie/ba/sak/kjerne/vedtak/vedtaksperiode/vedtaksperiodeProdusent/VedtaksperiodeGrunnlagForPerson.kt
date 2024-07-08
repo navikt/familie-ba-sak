@@ -28,8 +28,8 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
     val person: Person
     val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
 
-    fun erEksplisittAvslag(): Boolean =
-        this is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && this.erEksplisittAvslag
+    fun erEksplisittAvslag(personerFremstiltKravFor: List<Aktør>): Boolean =
+        this is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && this.vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag(personerFremstiltKravFor)
 
     fun erInnvilget() = this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
 
@@ -124,10 +124,8 @@ data class VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
 ) : VedtaksperiodeGrunnlagForPerson {
-    val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
-
-    fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
-        this.any { it.erEksplisittAvslagPåSøknad }
+    fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag(personerFremstiltKravFor: List<Aktør>) =
+        this.any { it.erEksplisittAvslagPåSøknad } && (personerFremstiltKravFor.contains(person.aktør) || person.type == PersonType.SØKER)
 }
 
 data class VilkårResultatForVedtaksperiode(

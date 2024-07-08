@@ -17,6 +17,9 @@ Egenskap: Vedtaksperioder for enslig mindreårig
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 3456    | BARN       | 02.12.2016  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
 
   Scenario: Enslig barn har utvidet oppfylt
 

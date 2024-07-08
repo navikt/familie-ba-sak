@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import org.apache.commons.lang3.RandomStringUtils
@@ -33,6 +34,7 @@ fun lagVedtaksperioderTest(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
+    personerFremstiltKravFor: List<Aktør>,
 ): String {
     val test =
         """
@@ -49,6 +51,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
+            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
             lagPersonresultaterTekst(forrigeBehandling) +
             lagPersonresultaterTekst(behandling) +
             hentTekstForVilkårresultater(
@@ -110,6 +113,18 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
         """
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
     } ?: ""
+
+private fun hentTekstForPersonerFremstiltKravFor(
+    behandlingId: Long?,
+    personerFremstiltKravFor: List<Aktør>,
+) =
+    """
+        Og med personer fremstilt krav for
+        | BehandlingId | AktørId |""" +
+        personerFremstiltKravFor.joinToString {
+            """
+        | $behandlingId | ${it.aktørId} |"""
+        }
 
 private fun hentTekstForVilkårresultater(
     personResultater: List<PersonResultat>?,
