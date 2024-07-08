@@ -47,11 +47,11 @@ internal class SøknadGrunnlagServiceTest {
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = null,
                 forrigeBehandling = null,
             )
 
@@ -79,11 +79,11 @@ internal class SøknadGrunnlagServiceTest {
             )
 
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = søknadDto,
                 forrigeBehandling = null,
             )
 
@@ -113,11 +113,11 @@ internal class SøknadGrunnlagServiceTest {
 
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = søknadDto,
                 forrigeBehandling = null,
             )
 
@@ -169,11 +169,11 @@ internal class SøknadGrunnlagServiceTest {
             )
 
         every { personidentService.hentAktør(barn1Fnr) } returns mocketAktør
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = søknadDto,
                 forrigeBehandling = null,
             )
 
@@ -189,11 +189,11 @@ internal class SøknadGrunnlagServiceTest {
         val nyttBarn = lagPerson()
 
         every { persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling) } returns listOf(nyttBarn)
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = null,
                 forrigeBehandling = forrigeBehandling,
             )
 
@@ -214,11 +214,11 @@ internal class SøknadGrunnlagServiceTest {
             PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(eksisterendeBarn))
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns eksisterendePersonpplysningGrunnlag
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = null,
                 forrigeBehandling = null,
             )
 
@@ -258,11 +258,11 @@ internal class SøknadGrunnlagServiceTest {
 
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
+        every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
         val personerFramstiltForKrav =
             søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = søknadDto,
                 forrigeBehandling = null,
             )
 

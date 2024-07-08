@@ -348,7 +348,6 @@ class VedtaksperiodeService(
             personerFremstiltKravFor =
                 søknadGrunnlagService.finnPersonerFremstiltKravFor(
                     behandling = this,
-                    søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentSøknadDto(),
                     forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(this),
                 ),
         )

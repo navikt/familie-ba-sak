@@ -31,11 +31,13 @@ class SøknadGrunnlagService(
 
     fun hentAktiv(behandlingId: Long): SøknadGrunnlag? = søknadGrunnlagRepository.hentAktiv(behandlingId)
 
+    fun hentAktivSøknadDto(behandlingId: Long): SøknadDTO? = hentAktiv(behandlingId)?.hentSøknadDto()
+
     internal fun finnPersonerFremstiltKravFor(
         behandling: Behandling,
-        søknadDTO: SøknadDTO?,
         forrigeBehandling: Behandling?,
     ): List<Aktør> {
+        val søknadDTO = hentAktivSøknadDto(behandlingId = behandling.id)
         val personerFremstiltKravFor =
             when {
                 behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
