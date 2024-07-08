@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -49,6 +50,7 @@ fun lagGyldigeBegrunnelserTest(
     utenlandskePeriodebeløpForrigeBehandling: Collection<UtenlandskPeriodebeløp>?,
     valutakurser: Collection<Valutakurs>,
     valutakurserForrigeBehandling: Collection<Valutakurs>?,
+    personerFremstiltKravFor: List<Aktør>,
 ): String {
     val test =
         """
@@ -65,7 +67,8 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
-            lagPersonresultaterTekst(forrigeBehandling) +
+            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor)
+    lagPersonresultaterTekst(forrigeBehandling) +
             lagPersonresultaterTekst(behandling) +
             hentTekstForVilkårresultater(
                 personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
@@ -152,6 +155,18 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
         """
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato?.tilddMMyyyy() ?: ""}|"""
     } ?: ""
+
+fun hentTekstForPersonerFremstiltKravFor(
+    behandlingId: Long?,
+    personerFremstiltKravFor: List<Aktør>,
+) =
+    """
+        Og med personer fremstilt krav for i behandling
+        | BehandlingId | AktørId |""" +
+        personerFremstiltKravFor.joinToString {
+            """
+        | $behandlingId | ${it.aktørId} |"""
+        }
 
 fun hentTekstForVilkårresultater(
     personResultater: List<PersonResultat>?,

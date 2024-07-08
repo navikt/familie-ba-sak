@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -33,6 +34,7 @@ class TestVerktøyService(
     private val kompetanseRepository: KompetanseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
+    private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
     @Transactional
     fun oppdaterVilkårUtenFomTilFødselsdato(behandlingId: Long) {
@@ -117,6 +119,7 @@ class TestVerktøyService(
             utenlandskePeriodebeløpForrigeBehandling = utenlandskePeriodebeløpForrigeBehandling,
             valutakurser = valutakurser,
             valutakurserForrigeBehandling = valutakurserForrigeBehandling,
+            personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling),
         )
     }
 
