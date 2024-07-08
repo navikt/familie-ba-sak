@@ -52,20 +52,20 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
-            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor)
-    lagPersonresultaterTekst(forrigeBehandling) +
-        lagPersonresultaterTekst(behandling) +
-        hentTekstForVilkårresultater(
-            personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
-            forrigeBehandling?.id,
-        ) +
-        hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
-        hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
-        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
+            lagPersonresultaterTekst(forrigeBehandling) +
+            lagPersonresultaterTekst(behandling) +
+            hentTekstForVilkårresultater(
+                personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+                forrigeBehandling?.id,
+            ) +
+            hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
+            hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
+            hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når vedtaksperioder med begrunnelser genereres for behandling ${behandling.id}""" +
-        hentTekstForVedtaksperioder(vedtaksperioder) + """
+            hentTekstForVedtaksperioder(vedtaksperioder) + """
     """
 
     return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
