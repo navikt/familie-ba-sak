@@ -432,7 +432,11 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     }
 
 private fun VedtaksperiodeGrunnlagForPerson.finnVilkårResultaterSomGjelderPersonIVedtaksperiode(personerFremstiltKravFor: List<Aktør>): List<VilkårResultatForVedtaksperiode> =
-    this.vilkårResultaterForVedtaksperiode.filter { !it.erEksplisittAvslagPåSøknad || personerFremstiltKravFor.contains(this.person.aktør) || this.person.type == PersonType.SØKER }
+    if (personerFremstiltKravFor.contains(this.person.aktør) || this.person.type == PersonType.SØKER) {
+        this.vilkårResultaterForVedtaksperiode
+    } else {
+        this.vilkårResultaterForVedtaksperiode.filter { !it.erEksplisittAvslagPåSøknad }
+    }
 
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(personerFremstiltKravFor: List<Aktør>): Vedtaksperiodetype {
     val erUtbetalingsperiode =
