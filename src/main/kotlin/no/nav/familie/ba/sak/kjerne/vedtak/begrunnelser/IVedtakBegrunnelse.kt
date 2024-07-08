@@ -34,14 +34,15 @@ fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
     this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
 
 fun IVedtakBegrunnelse.støtterFritekst(sanityBegrunnelser: List<ISanityBegrunnelse>): Boolean {
-    val begrunnelseTyperSomAlltidSkalStøtteFritekst = listOf(
-        VedtakBegrunnelseType.REDUKSJON,
-        VedtakBegrunnelseType.EØS_REDUKSJON,
-        VedtakBegrunnelseType.OPPHØR,
-        VedtakBegrunnelseType.EØS_OPPHØR,
-        VedtakBegrunnelseType.AVSLAG,
-        VedtakBegrunnelseType.EØS_AVSLAG
-    )
+    val begrunnelseTyperSomAlltidSkalStøtteFritekst =
+        listOf(
+            VedtakBegrunnelseType.REDUKSJON,
+            VedtakBegrunnelseType.EØS_REDUKSJON,
+            VedtakBegrunnelseType.OPPHØR,
+            VedtakBegrunnelseType.EØS_OPPHØR,
+            VedtakBegrunnelseType.AVSLAG,
+            VedtakBegrunnelseType.EØS_AVSLAG,
+        )
 
     return sanityBegrunnelser.first { it.apiNavn == this.sanityApiNavn }.støtterFritekst || this.vedtakBegrunnelseType in begrunnelseTyperSomAlltidSkalStøtteFritekst
 }
