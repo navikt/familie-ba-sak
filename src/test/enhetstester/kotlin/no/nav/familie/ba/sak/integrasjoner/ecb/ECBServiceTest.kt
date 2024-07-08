@@ -52,7 +52,7 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
                 valutakursDato.toString(),
             )
-        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every { evbValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(10.6543), valutakode = "SEK", valutakursdato = valutakursDato)
         every {
             ecbClient.hentValutakurs(
@@ -74,7 +74,7 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(10.337))),
                 valutakursDato.toString(),
             )
-        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -94,7 +94,7 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
                 valutakursDato.minusDays(1).toString(),
             )
-        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
@@ -115,7 +115,7 @@ class ECBServiceTest {
                 listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
                 valutakursDato.toString(),
             )
-        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns null
+        every { evbValutakursCacheRepository.findByValutakodeAndValutakursdato(any(), any()) } returns emptyList()
         every { evbValutakursCacheRepository.save(any()) } returns ECBValutakursCache(kurs = BigDecimal.valueOf(9.4567), valutakode = "EUR", valutakursdato = valutakursDato)
         every {
             ecbClient.hentValutakurs(

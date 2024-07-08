@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.0</version>
+        <version>3.3.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,17 +22,17 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240603145215_c56e179</prosessering.version>
-        <felles.version>3.20240515152313_9dd5659</felles.version>
+        <felles.version>3.20240624143824_64bf8f2</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20240607101709_d35e18c</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20240604142436_76988ba</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20240624093832_8242223</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.18.0</cucumber.version>
         <mockk.version>1.13.11</mockk.version>
-        <wiremock.version>3.6.0</wiremock.version>
-        <token-validation-spring.version>4.1.8</token-validation-spring.version>
+        <wiremock.version>3.7.0</wiremock.version>
+        <token-validation-spring.version>5.0.1</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.5.0</springdoc.version>
         <sentry.version>7.10.0</sentry.version>
@@ -40,7 +40,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.1.7</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.8</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -181,7 +181,7 @@ class PensjonService(
     private fun testidenter(
         fraDato: LocalDate,
     ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
-        emptyList()
+        emptyList() // Skal egentlig ikke kunne havne her, tror jeg, siden hentBarnetrygd() i dette tilfellet skulle returnert på linje 54 for å unngå at det på linje 57 forsøkes å hente data fra pdl på en ident som ikke finnes der i testmiljø
     } else {
         listOfNotNull(
             tilfeldigUttrekkInfotrygdBaQ(fraDato.year),

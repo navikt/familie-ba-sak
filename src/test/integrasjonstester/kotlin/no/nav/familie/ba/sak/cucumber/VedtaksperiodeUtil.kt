@@ -637,6 +637,7 @@ fun lagVedtaksPerioder(
         grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         nåDato = nåDato,
+        erToggleForÅIkkeSplittePåValutakursendringerPå = true,
         personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
     )
 }

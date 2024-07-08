@@ -337,6 +337,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEosBorgerUtbetalingFraNAV"
     },
+    INNVILGET_EØS_BORGER_SØKER_HAR_OPPHOLDSRETT_UTEN_DATO {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetEosBorgerSokerHarOppholdsrettUtenDato"
+    },
     INNVILGET_EØS_BORGER_EKTEFELLE_JOBBER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEosBorgerEktefelleJobber"

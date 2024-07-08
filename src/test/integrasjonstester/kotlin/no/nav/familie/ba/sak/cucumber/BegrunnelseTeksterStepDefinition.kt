@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
@@ -285,6 +286,7 @@ class BegrunnelseTeksterStepDefinition {
                 grunnlagForVedtakPerioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
+                erToggleForÅIkkeSplittePåValutakursendringerPå = true,
                 personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
             )
 
@@ -603,6 +605,7 @@ class BegrunnelseTeksterStepDefinition {
             utledEndringstidspunkt(
                 behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+                erToggleForÅIkkeSplittePåValutakursendringerPå = true,
             )
 
         val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")
@@ -655,6 +658,34 @@ class BegrunnelseTeksterStepDefinition {
             )
 
         mock.automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
+    }
+
+    @Og("med overstyrt endringstidspunkt {} for behandling {}")
+    fun settEndringstidspunkt(
+        endringstidspunkt: String,
+        behandlingId: Long,
+    ) {
+        overstyrteEndringstidspunkt[behandlingId] = parseDato(endringstidspunkt)
+    }
+
+    @Så("forvent følgende vedtaksperioder for behandling {}")
+    fun `forvent følgende vedtaksperioder for behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeVedtaksperioder =
+            mapForventetVedtaksperioderMedBegrunnelser(
+                dataTable = dataTable,
+                vedtak =
+                    vedtaksliste.find { it.behandling.id == behandlingId }
+                        ?: throw Feil("Fant ingen vedtak for behandling $behandlingId"),
+            )
+
+        val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
+        assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
+            .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
     }
 }
 
