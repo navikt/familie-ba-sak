@@ -319,15 +319,6 @@ class VedtaksperiodeService(
         val behandling = vedtak.behandling
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
-        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-
-        val personerFremstiltKravFor =
-            søknadGrunnlagService.finnPersonerFremstiltKravFor(
-                behandling = behandling,
-                søknadDTO = søknadGrunnlag?.hentSøknadDto(),
-                forrigeBehandling = forrigeBehandling,
-            )
-
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
@@ -337,7 +328,6 @@ class VedtaksperiodeService(
                 unleashNextMedContextService.isEnabled(
                     FeatureToggleConfig.IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS,
                 ),
-            personerFremstiltKravFor = personerFremstiltKravFor,
         )
     }
 
@@ -355,6 +345,12 @@ class VedtaksperiodeService(
             uregistrerteBarn =
                 søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentUregistrerteBarn()
                     ?: emptyList(),
+            personerFremstiltKravFor =
+                søknadGrunnlagService.finnPersonerFremstiltKravFor(
+                    behandling = this,
+                    søknadDTO = søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentSøknadDto(),
+                    forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(this),
+                ),
         )
 
     @Transactional

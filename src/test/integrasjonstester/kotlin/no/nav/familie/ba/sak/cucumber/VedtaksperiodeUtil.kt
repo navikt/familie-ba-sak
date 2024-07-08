@@ -609,6 +609,7 @@ fun lagVedtaksPerioder(
             uregistrerteBarn = uregistrerteBarn,
             utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
             valutakurs = valutakurs[behandlingId] ?: emptyList(),
+            personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
         )
 
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -629,6 +630,7 @@ fun lagVedtaksPerioder(
                 uregistrerteBarn = emptyList(),
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
                 valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
+                personerFremstiltKravFor = personerFremstiltKravFor[forrigeBehandlingId] ?: emptyList(),
             )
         }
 
@@ -638,7 +640,6 @@ fun lagVedtaksPerioder(
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         nåDato = nåDato,
         erToggleForÅIkkeSplittePåValutakursendringerPå = true,
-        personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
     )
 }
 

@@ -47,7 +47,6 @@ fun genererVedtaksperioder(
     vedtak: Vedtak,
     nåDato: LocalDate,
     erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
-    personerFremstiltKravFor: List<Aktør>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (vedtak.behandling.opprettetÅrsak.erOmregningsårsak()) {
         return lagPeriodeForOmregningsbehandling(
@@ -78,11 +77,11 @@ fun genererVedtaksperioder(
                     behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
                     erToggleForÅIkkeSplittePåValutakursendringerPå = erToggleForÅIkkeSplittePåValutakursendringerPå,
                 ),
-            personerFremstiltKravFor = personerFremstiltKravFor,
+            personerFremstiltKravFor = grunnlagForVedtakPerioder.personerFremstiltKravFor,
         )
 
     val vedtaksperioder =
-        perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak, personerFremstiltKravFor) }
+        perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak, grunnlagForVedtakPerioder.personerFremstiltKravFor) }
 
     return if (grunnlagForVedtakPerioder.uregistrerteBarn.isNotEmpty()) {
         vedtaksperioder.leggTilPeriodeForUregistrerteBarn(vedtak)

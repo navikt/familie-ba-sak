@@ -287,7 +287,6 @@ class BegrunnelseTeksterStepDefinition {
                 grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
                 erToggleForÅIkkeSplittePåValutakursendringerPå = true,
-                personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
             )
 
         val utvidedeVedtaksperioderMedBegrunnelser =
@@ -332,6 +331,7 @@ class BegrunnelseTeksterStepDefinition {
                 uregistrerteBarn = emptyList(),
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
                 valutakurs = valutakurs[behandlingId] ?: emptyList(),
+                personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
             )
 
         val grunnlagForVedtaksperiodeForrigeBehandling =
@@ -349,6 +349,7 @@ class BegrunnelseTeksterStepDefinition {
                     uregistrerteBarn = emptyList(),
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
                     valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
+                    personerFremstiltKravFor = personerFremstiltKravFor[forrigeBehandlingId] ?: emptyList(),
                 )
             }
 
