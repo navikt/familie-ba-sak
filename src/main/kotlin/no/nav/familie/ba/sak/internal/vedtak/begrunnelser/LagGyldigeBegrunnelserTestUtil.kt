@@ -156,7 +156,7 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|${it.dødsfall?.dødsfallDato?.tilddMMyyyy() ?: ""}|"""
     } ?: ""
 
-fun hentTekstForPersonerFremstiltKravFor(
+private fun hentTekstForPersonerFremstiltKravFor(
     behandlingId: Long?,
     personerFremstiltKravFor: List<Aktør>,
 ) =

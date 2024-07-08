@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.VilkårResultatRad
 import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.anonymiser
-import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.hentTekstForPersonerFremstiltKravFor
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -114,6 +113,18 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
         """
       | ${persongrunnlag.behandlingId} |${it.aktør.aktørId}|${it.type}|${it.fødselsdato.tilddMMyyyy()}|"""
     } ?: ""
+
+private fun hentTekstForPersonerFremstiltKravFor(
+    behandlingId: Long?,
+    personerFremstiltKravFor: List<Aktør>,
+) =
+    """
+        Og med personer fremstilt krav for
+        | BehandlingId | AktørId |""" +
+        personerFremstiltKravFor.joinToString {
+            """
+        | $behandlingId | ${it.aktørId} |"""
+        }
 
 private fun hentTekstForVilkårresultater(
     personResultater: List<PersonResultat>?,
