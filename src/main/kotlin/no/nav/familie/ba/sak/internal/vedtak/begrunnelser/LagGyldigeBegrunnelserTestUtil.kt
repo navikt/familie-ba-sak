@@ -67,26 +67,26 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
-            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor)
-    lagPersonresultaterTekst(forrigeBehandling) +
-        lagPersonresultaterTekst(behandling) +
-        hentTekstForVilkårresultater(
-            personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
-            forrigeBehandling?.id,
-        ) +
-        hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
-        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) +
-        hentTekstForUtenlandskPeriodebeløp(utenlandskePeriodebeløp, utenlandskePeriodebeløpForrigeBehandling) +
-        hentTekstForValutakurser(valutakurser, valutakurserForrigeBehandling) +
-        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-        hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) + """
+            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
+            lagPersonresultaterTekst(forrigeBehandling) +
+            lagPersonresultaterTekst(behandling) +
+            hentTekstForVilkårresultater(
+                personResultaterForrigeBehandling?.sorterPåFødselsdato(persongrunnlagForrigeBehandling!!),
+                forrigeBehandling?.id,
+            ) +
+            hentTekstForVilkårresultater(personResultater.sorterPåFødselsdato(persongrunnlag), behandling.id) +
+            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) +
+            hentTekstForUtenlandskPeriodebeløp(utenlandskePeriodebeløp, utenlandskePeriodebeløpForrigeBehandling) +
+            hentTekstForValutakurser(valutakurser, valutakurserForrigeBehandling) +
+            hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+            hentTekstForTilkjentYtelse(andeler, persongrunnlag, andelerForrigeBehandling, persongrunnlagForrigeBehandling) + """
     
     Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
-        hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
-        hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
-        hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
-        hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
-        hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
+            hentTekstForGyligeBegrunnelserForVedtaksperiodene(vedtaksperioder) +
+            hentTekstValgteBegrunnelser(behandling.id, vedtaksperioder) +
+            hentTekstBrevPerioder(behandling.id, vedtaksperioder) +
+            hentBrevBegrunnelseTekster(behandling.id, vedtaksperioder) +
+            hentEØSBrevBegrunnelseTekster(behandling.id, vedtaksperioder) + """
 """
     return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
 }
