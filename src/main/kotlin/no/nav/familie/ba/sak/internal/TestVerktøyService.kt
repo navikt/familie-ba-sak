@@ -101,6 +101,8 @@ class TestVerktøyService(
                 vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
             )
 
+        val personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
+
         return lagGyldigeBegrunnelserTest(
             behandling = behandling,
             forrigeBehandling = forrigeBehandling,
@@ -119,7 +121,7 @@ class TestVerktøyService(
             utenlandskePeriodebeløpForrigeBehandling = utenlandskePeriodebeløpForrigeBehandling,
             valutakurser = valutakurser,
             valutakurserForrigeBehandling = valutakurserForrigeBehandling,
-            personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling),
+            personerFremstiltKravFor = personerFremstiltKravFor,
         )
     }
 
@@ -146,6 +148,7 @@ class TestVerktøyService(
             vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
                 vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
             )
+        val personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
 
         return lagVedtaksperioderTest(
             behandling = behandling,
@@ -161,6 +164,7 @@ class TestVerktøyService(
             endredeUtbetalingerForrigeBehandling = endredeUtbetalingerForrigeBehandling,
             kompetanse = kompetanse,
             kompetanseForrigeBehandling = kompetanseForrigeBehandling,
+            personerFremstiltKravFor = personerFremstiltKravFor,
         )
     }
 }

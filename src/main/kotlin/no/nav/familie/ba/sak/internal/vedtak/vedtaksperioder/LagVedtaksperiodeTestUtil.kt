@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.VilkårResultatRad
 import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.anonymiser
+import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.hentTekstForPersonerFremstiltKravFor
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import org.apache.commons.lang3.RandomStringUtils
@@ -33,6 +35,7 @@ fun lagVedtaksperioderTest(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     kompetanse: Collection<Kompetanse>,
     kompetanseForrigeBehandling: Collection<Kompetanse>?,
+    personerFremstiltKravFor: List<Aktør>,
 ): String {
     val test =
         """
@@ -49,19 +52,20 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
     Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
-            lagPersonresultaterTekst(forrigeBehandling) +
-            lagPersonresultaterTekst(behandling) +
-            hentTekstForVilkårresultater(
-                personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
-                forrigeBehandling?.id,
-            ) +
-            hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
-            hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
-            hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
-            hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
+            hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor)
+    lagPersonresultaterTekst(forrigeBehandling) +
+        lagPersonresultaterTekst(behandling) +
+        hentTekstForVilkårresultater(
+            personResultaterForrigeBehandling?.sorterPåFøselsdato(persongrunnlagForrigeBehandling!!),
+            forrigeBehandling?.id,
+        ) +
+        hentTekstForVilkårresultater(personResultater.sorterPåFøselsdato(persongrunnlag), behandling.id) +
+        hentTekstForTilkjentYtelse(andeler, andelerForrigeBehandling) +
+        hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
+        hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
     Når vedtaksperioder med begrunnelser genereres for behandling ${behandling.id}""" +
-            hentTekstForVedtaksperioder(vedtaksperioder) + """
+        hentTekstForVedtaksperioder(vedtaksperioder) + """
     """
 
     return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
