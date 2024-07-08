@@ -636,8 +636,8 @@ fun lagVedtaksPerioder(
 
     return genererVedtaksperioder(
         vedtak = vedtak,
-        grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
-        grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+        grunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
+        grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         nåDato = nåDato,
         erToggleForÅIkkeSplittePåValutakursendringerPå = true,
     )

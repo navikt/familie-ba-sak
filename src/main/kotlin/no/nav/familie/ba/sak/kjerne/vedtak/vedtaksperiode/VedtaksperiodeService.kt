@@ -320,8 +320,8 @@ class VedtaksperiodeService(
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         return genererVedtaksperioder(
-            grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
-            grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+            grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
+            grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
             erToggleForÅIkkeSplittePåValutakursendringerPå =

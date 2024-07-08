@@ -283,8 +283,8 @@ class BegrunnelseTeksterStepDefinition {
         vedtaksperioderMedBegrunnelser =
             genererVedtaksperioder(
                 vedtak = vedtak,
-                grunnlagForVedtakPerioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
-                grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+                grunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
+                grunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
                 erToggleForÅIkkeSplittePåValutakursendringerPå = true,
             )

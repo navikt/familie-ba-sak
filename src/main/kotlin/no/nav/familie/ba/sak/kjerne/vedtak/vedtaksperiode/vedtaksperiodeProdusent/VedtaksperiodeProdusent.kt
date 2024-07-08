@@ -42,8 +42,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledEndringstidspunkt
 import java.time.LocalDate
 
 fun genererVedtaksperioder(
-    grunnlagForVedtakPerioder: BehandlingsGrunnlagForVedtaksperioder,
-    grunnlagForVedtakPerioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
+    grunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
+    grunnlagForVedtaksperioderForrigeBehandling: BehandlingsGrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
     nåDato: LocalDate,
     erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
@@ -52,7 +52,7 @@ fun genererVedtaksperioder(
         return lagPeriodeForOmregningsbehandling(
             vedtak = vedtak,
             nåDato = nåDato,
-            andelTilkjentYtelser = grunnlagForVedtakPerioder.andelerTilkjentYtelse,
+            andelTilkjentYtelser = grunnlagForVedtaksperioder.andelerTilkjentYtelse,
         )
     }
 
@@ -61,11 +61,11 @@ fun genererVedtaksperioder(
     }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtakPerioderForrigeBehandling
-            ?.let { grunnlagForVedtakPerioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå) }
+        grunnlagForVedtaksperioderForrigeBehandling
+            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå) }
             ?: emptyMap()
 
-    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
+    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson(erToggleForÅIkkeSplittePåValutakursendringerPå)
 
     val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
         finnPerioderSomSkalBegrunnes(
@@ -73,17 +73,17 @@ fun genererVedtaksperioder(
             grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
             endringstidspunkt =
                 vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
-                    behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
-                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
+                    behandlingsGrunnlagForVedtaksperioder = grunnlagForVedtaksperioder,
+                    behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperioderForrigeBehandling,
                     erToggleForÅIkkeSplittePåValutakursendringerPå = erToggleForÅIkkeSplittePåValutakursendringerPå,
                 ),
-            personerFremstiltKravFor = grunnlagForVedtakPerioder.personerFremstiltKravFor,
+            personerFremstiltKravFor = grunnlagForVedtaksperioder.personerFremstiltKravFor,
         )
 
     val vedtaksperioder =
-        perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak, grunnlagForVedtakPerioder.personerFremstiltKravFor) }
+        perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak, grunnlagForVedtaksperioder.personerFremstiltKravFor) }
 
-    return if (grunnlagForVedtakPerioder.uregistrerteBarn.isNotEmpty()) {
+    return if (grunnlagForVedtaksperioder.uregistrerteBarn.isNotEmpty()) {
         vedtaksperioder.leggTilPeriodeForUregistrerteBarn(vedtak)
     } else {
         vedtaksperioder
