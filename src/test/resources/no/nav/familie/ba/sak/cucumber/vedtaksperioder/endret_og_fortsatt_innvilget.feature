@@ -4,16 +4,16 @@
 Egenskap: Vedtaksperioder for endret og fortsatt innvilget
 
   Bakgrunn:
-    Gitt følgende fagsaker
+    Gitt følgende fagsaker for begrunnelse
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandling
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat          | Behandlingsårsak |
       | 1            | 1        |                     | ENDRET_UTBETALING            | SATSENDRING      |
       | 2            | 1        | 1                   | ENDRET_OG_FORTSATT_INNVILGET | SØKNAD           |
 
-    Og følgende persongrunnlag
+    Og følgende persongrunnlag for begrunnelse
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 05.09.1993  |
       | 1            | 2       | BARN       | 19.08.2021  |
@@ -21,11 +21,11 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | 2            | 2       | BARN       | 19.08.2021  |
 
   Scenario: Skal gi riktige perioder når behandlingsresultatet er endret og fortsatt innvilget
-    Og dagens dato er 16.11.2023
-    Og lag personresultater for behandling 1
-    Og lag personresultater for behandling 2
+    Og følgende dagens dato 16.11.2023
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
 
-    Og legg til nye vilkårresultater for behandling 1
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                                           | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
       | 1       | LOVLIG_OPPHOLD,UTVIDET_BARNETRYGD,BOSATT_I_RIKET |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
 
@@ -33,7 +33,7 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | 2       | GIFT_PARTNERSKAP                                 |                  | 19.08.2021 |            | OPPFYLT  | Nei                  |                      |
       | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER      |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
 
-    Og legg til nye vilkårresultater for behandling 2
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
       | 1       | UTVIDET_BARNETRYGD                          |                  | 01.04.2022 | 05.10.2023 | OPPFYLT  | Nei                  |                      |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
@@ -42,7 +42,7 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | 2       | GIFT_PARTNERSKAP                            |                  | 19.08.2021 |            | OPPFYLT  | Nei                  |                      |
       | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      |
 
-    Og med andeler tilkjent ytelse
+    Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 1       | 1            | 01.05.2022 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1       | 1            | 01.07.2022 | 30.09.2022 | 660   | SMÅBARNSTILLEGG    | 100     | 660  |
@@ -67,9 +67,9 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | 2       | 2            | 01.07.2023 | 31.07.2027 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 2       | 2            | 01.08.2027 | 31.07.2039 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar          |
       | 01.08.2023 | 31.10.2023 | UTBETALING         | Utvidet og ordinær |
       | 01.11.2023 | 31.07.2027 | UTBETALING         | Kun ordinær        |

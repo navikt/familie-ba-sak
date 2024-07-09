@@ -4,16 +4,16 @@
 Egenskap: Vedtaksperioder for fortsatt innvilget
 
   Bakgrunn:
-    Gitt følgende fagsaker
+    Gitt følgende fagsaker for begrunnelse
       | FagsakId  | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandling
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
       | 2            | 1        | 1                   | FORTSATT_INNVILGET  | ÅRLIG_KONTROLL   |
 
-    Og følgende persongrunnlag
+    Og følgende persongrunnlag for begrunnelse
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 27.04.1991  |
       | 1            | 2       | BARN       | 07.10.2021  |
@@ -21,10 +21,10 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 2            | 2       | BARN       | 07.10.2021  |
 
   Scenario: Skal gi én vedtaksperiode når behandlingsresultatet er fortsatt innvilget
-    Og lag personresultater for behandling 1
-    Og lag personresultater for behandling 2
+    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for begrunnelse for behandling 2
 
-    Og legg til nye vilkårresultater for behandling 1
+    Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 2       | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP |                              | 07.10.2021 |            | OPPFYLT  | Nei                  |
       | 2       | BOR_MED_SØKER                   | BARN_BOR_I_EØS_MED_SØKER     | 07.10.2021 |            | OPPFYLT  | Nei                  |
@@ -34,7 +34,7 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 1       | LOVLIG_OPPHOLD                  |                              | 27.04.1991 |            | OPPFYLT  | Nei                  |
       | 1       | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 11.05.2021 |            | OPPFYLT  | Nei                  |
 
-    Og legg til nye vilkårresultater for behandling 2
+    Og legg til nye vilkårresultater for begrunnelse for behandling 2
       | AktørId | Vilkår                          | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | LOVLIG_OPPHOLD                  |                              | 27.04.1991 |            | OPPFYLT  | Nei                  |
       | 1       | BOSATT_I_RIKET                  | OMFATTET_AV_NORSK_LOVGIVNING | 11.05.2021 |            | OPPFYLT  | Nei                  |
@@ -44,7 +44,7 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 2       | BOSATT_I_RIKET                  | BARN_BOR_I_EØS               | 07.10.2021 |            | OPPFYLT  | Nei                  |
       | 2       | UNDER_18_ÅR                     |                              | 07.10.2021 | 06.10.2039 | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse
+    Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
       | 2       | 1            | 01.11.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     |
       | 2       | 1            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
@@ -61,7 +61,7 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 2       | 2            | 01.03.2022 | 30.11.2022 | 553   | ORDINÆR_BARNETRYGD | 100     |
       | 2       | 2            | 01.12.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     |
 
-    Og med kompetanser
+    Og med kompetanser for begrunnelse
       | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.11.2021 | 28.02.2022 | NORGE_ER_PRIMÆRLAND   | 1            | ARBEIDER         | INAKTIV                   | NO                    | PL                             | PL                  |
       | 2       | 01.03.2022 | 30.11.2022 | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
@@ -70,8 +70,8 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 2       | 01.03.2022 | 30.11.2022 | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
       | 2       | 01.12.2022 |            | NORGE_ER_PRIMÆRLAND   | 2            | ARBEIDER         | INAKTIV                   | NO                    | PL                             | PL                  |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato | Til dato | Vedtaksperiodetype |
       |          |          | FORTSATT_INNVILGET |

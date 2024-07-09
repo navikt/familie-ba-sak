@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -82,6 +83,7 @@ class BegrunnelseTeksterStepDefinition {
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var totrinnskontroller = mutableMapOf<Long, Totrinnskontroll>()
+    var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
 
     var gjeldendeBehandlingId: Long? = null
@@ -246,6 +248,11 @@ class BegrunnelseTeksterStepDefinition {
             ).toMutableMap()
     }
 
+    @Og("med uregistrerte barn for begrunnelse")
+    fun `med uregistrerte barn for begrunnelse`() {
+        uregistrerteBarn = listOf(BarnMedOpplysninger(ident = ""))
+    }
+
     /**
      * Mulige verdier: | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |
      */
@@ -328,7 +335,7 @@ class BegrunnelseTeksterStepDefinition {
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                 perioderOvergangsstønad = overgangsstønader[behandlingId] ?: emptyList(),
-                uregistrerteBarn = emptyList(),
+                uregistrerteBarn = uregistrerteBarn,
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
                 valutakurs = valutakurs[behandlingId] ?: emptyList(),
                 personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
@@ -346,7 +353,7 @@ class BegrunnelseTeksterStepDefinition {
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                     andelerTilkjentYtelse = tilkjenteYtelser[forrigeBehandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                     perioderOvergangsstønad = overgangsstønader[forrigeBehandlingId] ?: emptyList(),
-                    uregistrerteBarn = emptyList(),
+                    uregistrerteBarn = uregistrerteBarn,
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
                     valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
                     personerFremstiltKravFor = personerFremstiltKravFor[forrigeBehandlingId] ?: emptyList(),

@@ -18,7 +18,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
       | 1            | 4567    | BARN       | 07.09.2019  |
 
   Scenario: Man skal ikke få nasjonale begrunnelser dersom vedtaksperiode overlapper med eøs perioder
-    Og følgende dagens dato 2023-09-13
+    Og følgende dagens dato 13.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
@@ -59,7 +59,7 @@ Egenskap: Gyldige begrunnelser for behandlingstema
       | 01.09.2037 |            | OPPHØR             |                                |                               |                                 |                           |
 
   Scenario: Man skal ikke få eøs begrunnelser dersom vedtaksperiode ikke overlapper med nasjonale perioder
-    Og følgende dagens dato 2023-09-13
+    Og følgende dagens dato 13.09.2023
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
