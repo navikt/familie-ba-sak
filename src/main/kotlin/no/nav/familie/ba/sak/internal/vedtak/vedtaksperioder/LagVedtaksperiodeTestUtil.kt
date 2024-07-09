@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.internal.vedtak.vedtaksperioder
 
 import no.nav.familie.ba.sak.common.tilddMMyyyy
-
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 fun hentTekstForVedtaksperioder(
