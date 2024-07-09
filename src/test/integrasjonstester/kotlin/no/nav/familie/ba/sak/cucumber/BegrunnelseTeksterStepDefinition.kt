@@ -97,8 +97,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | FagsakId | Fagsaktype | Status |
      */
-    @Gitt("følgende fagsaker for begrunnelse")
-    fun `følgende fagsaker for begrunnelse`(dataTable: DataTable) {
+    @Gitt("følgende fagsaker")
+    fun `følgende fagsaker`(dataTable: DataTable) {
         fagsaker = lagFagsaker(dataTable)
     }
 
@@ -106,8 +106,8 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige felter:
      * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus |
      */
-    @Gitt("følgende behandling")
-    fun `følgende behandling`(dataTable: DataTable) {
+    @Gitt("følgende behandlinger")
+    fun `følgende behandlinger`(dataTable: DataTable) {
         lagVedtak(
             dataTable = dataTable,
             behandlinger = behandlinger,
@@ -120,8 +120,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | BehandlingId |  AktørId | Persontype | Fødselsdato |
      */
-    @Og("følgende persongrunnlag for begrunnelse")
-    fun `følgende persongrunnlag for begrunnelse`(dataTable: DataTable) {
+    @Og("følgende persongrunnlag")
+    fun `følgende persongrunnlag`(dataTable: DataTable) {
         val personGrunnlagMap = lagPersonGrunnlag(dataTable)
         persongrunnlag.putAll(personGrunnlagMap)
 
@@ -140,15 +140,15 @@ class BegrunnelseTeksterStepDefinition {
                 }.toMutableMap()
     }
 
-    @Og("følgende dagens dato {}")
-    fun `følgende dagens dato`(dagensDatoString: String) {
+    @Og("dagens dato er {}")
+    fun `dagens dato er`(dagensDatoString: String) {
         dagensDato = parseDato(dagensDatoString)
     }
 
     /**
      * Mulige verdier: | BehandlingId | AktørId |
      */
-    @Og("med personer fremstilt krav for i behandling")
+    @Og("med personer fremstilt krav for")
     fun `med personer fremstilt krav for`(dataTable: DataTable) {
         personerFremstiltKravFor =
             dataTable
@@ -160,7 +160,7 @@ class BegrunnelseTeksterStepDefinition {
                 }.groupBy({ it.first }, { it.second })
     }
 
-    @Og("lag personresultater for begrunnelse for behandling {}")
+    @Og("lag personresultater for behandling {}")
     fun `lag personresultater for begrunnelse`(behandlingId: Long) {
         val persongrunnlagForBehandling = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId)
         val behandling = behandlinger.finnBehandling(behandlingId)
@@ -171,7 +171,7 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Vurderes etter |
      */
-    @Og("legg til nye vilkårresultater for begrunnelse for behandling {}")
+    @Og("legg til nye vilkårresultater for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(
         behandlingId: Long,
         dataTable: DataTable,
@@ -190,8 +190,8 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige felt:
      * | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
      */
-    @Og("med kompetanser for begrunnelse")
-    fun `med kompetanser for begrunnelse`(dataTable: DataTable) {
+    @Og("med kompetanser")
+    fun `med kompetanser`(dataTable: DataTable) {
         val nyeKompetanserPerBarn = dataTable.asMaps()
         kompetanser = lagKompetanser(nyeKompetanserPerBarn, persongrunnlag)
     }
@@ -201,8 +201,8 @@ class BegrunnelseTeksterStepDefinition {
      * | AktørId | Fra dato | Til dato | BehandlingId | Valutakursdato | Valuta kode | Kurs
      */
 
-    @Og("med valutakurs for begrunnelse")
-    fun `med valutakurs for begrunnelse`(dataTable: DataTable) {
+    @Og("med valutakurser")
+    fun `med valutakurser`(dataTable: DataTable) {
         val nyeValutakursPerBarn = dataTable.asMaps()
         valutakurs = lagValutakurs(nyeValutakursPerBarn, persongrunnlag)
     }
@@ -211,8 +211,8 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige felt:
      * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland
      */
-    @Og("med utenlandsk periodebeløp for begrunnelse")
-    fun `med utenlandsk periodebeløp for begrunnelse`(dataTable: DataTable) {
+    @Og("med utenlandsk periodebeløp")
+    fun `med utenlandsk periodebeløp`(dataTable: DataTable) {
         val nyeUtenlandskPeriodebeløpPerBarn = dataTable.asMaps()
         utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(nyeUtenlandskPeriodebeløpPerBarn, persongrunnlag)
     }
@@ -220,8 +220,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
      */
-    @Og("med endrede utbetalinger for begrunnelse")
-    fun `med endrede utbetalinger for begrunnelse`(dataTable: DataTable) {
+    @Og("med endrede utbetalinger")
+    fun `med endrede utbetalinger`(dataTable: DataTable) {
         val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
         endredeUtbetalinger = lagEndredeUtbetalinger(nyeEndredeUtbetalingAndeler, persongrunnlag)
     }
@@ -229,16 +229,16 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
      */
-    @Og("med andeler tilkjent ytelse for begrunnelse")
-    fun `med andeler tilkjent ytelse for begrunnelse`(dataTable: DataTable) {
+    @Og("med andeler tilkjent ytelse")
+    fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
         tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
     }
 
     /**
      * Mulige verdier: | BehandlingId | AktørId | Fra dato | Til dato |
      */
-    @Og("med overgangsstønad for begrunnelse")
-    fun `med overgangsstønad for begrunnelse`(dataTable: DataTable) {
+    @Og("med overgangsstønad")
+    fun `med overgangsstønad`(dataTable: DataTable) {
         overgangsstønader =
             lagOvergangsstønad(
                 dataTable = dataTable,
@@ -248,8 +248,8 @@ class BegrunnelseTeksterStepDefinition {
             ).toMutableMap()
     }
 
-    @Og("med uregistrerte barn for begrunnelse")
-    fun `med uregistrerte barn for begrunnelse`() {
+    @Og("med uregistrerte barn")
+    fun `med uregistrerte barn`() {
         uregistrerteBarn = listOf(BarnMedOpplysninger(ident = ""))
     }
 
@@ -504,7 +504,7 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
      */
     @Så("forvent følgende andeler tilkjent ytelse for behandling {}")
-    fun `med andeler tilkjent ytelse`(
+    fun `forvent andeler tilkjent ytelse`(
         behandlingId: Long,
         dataTable: DataTable,
     ) {
@@ -557,7 +557,7 @@ class BegrunnelseTeksterStepDefinition {
      * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus | Behandlingssteg | Underkategori |
      */
     @Så("forvent disse behandlingene")
-    fun `med andeler tilkjent ytelse`(
+    fun `forvent disse behandlingene`(
         dataTable: DataTable,
     ) {
         val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker)

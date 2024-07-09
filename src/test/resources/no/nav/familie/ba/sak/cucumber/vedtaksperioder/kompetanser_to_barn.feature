@@ -4,19 +4,19 @@
 Egenskap: Vedtaksperioder med kompetanser for flere barn
 
   Bakgrunn:
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
       | 1            | 7890    | BARN       | 07.12.2022  |
 
   Scenario: Skal lage vedtaksperioder for mor med to barn med kompetanser
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -24,14 +24,14 @@ Egenskap: Vedtaksperioder med kompetanser for flere barn
       | 7890    | UNDER_18_ÅR                                                     | 07.12.2022 | 06.12.2040 | Oppfylt  |
       | 7890    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 07.12.2022 |            | Oppfylt  |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId   | Fra dato   | Til dato   | Resultat              | BehandlingId |
       | 3456       | 01.05.2020 | 31.12.2022 | NORGE_ER_PRIMÆRLAND   | 1            |
       | 3456, 7890 | 01.01.2023 | 30.04.2023 | NORGE_ER_SEKUNDÆRLAND | 1            |
       | 3456, 7890 | 01.05.2023 | 31.03.2038 | NORGE_ER_PRIMÆRLAND   | 1            |
       | 7890       | 01.04.2038 | 30.11.2040 | NORGE_ER_SEKUNDÆRLAND | 1            |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
       | 7890    | 01.01.2023 | 30.11.2040 | 1354  | 1            |

@@ -4,12 +4,12 @@
 Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
 
   Bakgrunn:
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | ForrigeBehandlingId |
       | 1            |                     |
       | 2            | 1                   |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 22.02.1988  |
       | 1            | 3456    | BARN       | 27.05.2005  |
@@ -19,11 +19,11 @@ Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
       | 2            | 5678    | BARN       | 06.10.2007  |
 
   Scenario: Skal ikke splitte når det er reduksjon fra forrige periode selv om det er reduksjon fra forrige behandling
-    Og følgende dagens dato 18.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 18.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                         | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  | 22.02.1988 |            | OPPFYLT  |
 
@@ -36,7 +36,7 @@ Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
       | 5678    | BOR_MED_SØKER                                  | 15.03.2022 |            | OPPFYLT  |
 
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                         | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  | 22.02.1988 |            | OPPFYLT  |
 
@@ -48,7 +48,7 @@ Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
       | 5678    | UNDER_18_ÅR                                    | 06.10.2007 | 05.10.2025 | OPPFYLT  |
       | 5678    | BOR_MED_SØKER                                  | 15.03.2022 |            | OPPFYLT  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Sats |
       | 3456    | 1            | 01.04.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 1054 |
       | 3456    | 1            | 01.03.2023 | 30.04.2023 | 1083  | ORDINÆR_BARNETRYGD | 1083 |

@@ -4,24 +4,24 @@
 Egenskap: Gyldige begrunnelser for delt bosted i EØS-saker
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
   Scenario: Skal få begrunnelser for delt bosted skal deles i EØS-sak
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat  | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | INNVILGET_OG_OPPHØRT | SØKNAD           | Nei                       | EØS                 |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 28.09.1977  |
       | 1            | 2       | BARN       | 18.06.2009  |
       | 1            | 3       | BARN       | 03.02.2018  |
-    Og følgende dagens dato 11.12.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 11.12.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår                     | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                                      | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING         | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -38,12 +38,12 @@ Egenskap: Gyldige begrunnelser for delt bosted i EØS-saker
       | 3       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER,DELT_BOSTED | 01.08.2023 | 01.10.2023 | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                       | 01.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.09.2023 | 30.11.2023 | 655   | ORDINÆR_BARNETRYGD | 50      | 1310 |
       | 3       | 1            | 01.09.2023 | 31.10.2023 | 883   | ORDINÆR_BARNETRYGD | 50      | 1766 |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 3, 2    | 01.09.2023 | 31.10.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | INAKTIV                   | NO                    | DK                             | DK                  |
       | 2       | 01.11.2023 | 30.11.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | INAKTIV                   | NO                    | DK                             | DK                  |
@@ -58,30 +58,30 @@ Egenskap: Gyldige begrunnelser for delt bosted i EØS-saker
 
 
   Scenario: Skal få begrunnelser for delt bosted skal ikke deles i EØS-sak
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 11.01.1970  |
       | 1            | 2       | BARN       | 13.04.2020  |
 
-    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Utdypende vilkår                                     | Fra dato   | Til dato   | Resultat | Vurderes etter   |
       | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   |                                                      | 11.01.1970 |            | Oppfylt  |                  |
       | 2       | UNDER_18_ÅR                                      |                                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                  |
       | 2       | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD |                                                      | 13.04.2020 |            | Oppfylt  |                  |
       | 2       | BOR_MED_SØKER                                    | BARN_BOR_I_EØS_MED_SØKER,DELT_BOSTED_SKAL_IKKE_DELES | 13.04.2020 | 10.03.2021 | Oppfylt  | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 2       | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Annen forelders aktivitet | Barnets bostedsland |
       | 2       | 01.05.2020 | 31.03.2021 | NORGE_ER_PRIMÆRLAND | 1            | IKKE_AKTUELT              | NO                  |
 

@@ -5,22 +5,22 @@
 Egenskap: Vedtaksperioder med mor og to barn
 
   Bakgrunn:
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 01.02.2016  |
 
-    Og med personer fremstilt krav for i behandling
+    Og med personer fremstilt krav for
       | BehandlingId | AktørId |
       | 1            | 3456    |
 
   Scenario: Skal kun lage én avslagsperiode når det er avslag på søker hele perioden og ingen andre avslag
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET                                                  | 24.12.1987 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                                  | 24.12.1987 |            | ikke_oppfylt | Ja                   |
@@ -36,8 +36,8 @@ Egenskap: Vedtaksperioder med mor og to barn
 
   Scenario: Skal kun lage én avslagsperiode når det er avslag på søker hele perioden og ingen andre avslag. Ingen startdato
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET                                                  | 24.12.1987 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                                  |            |            | ikke_oppfylt | Ja                   |
@@ -52,8 +52,8 @@ Egenskap: Vedtaksperioder med mor og to barn
 
   Scenario: Skal lage to avslagsperioder når søker har konstant avslag og barn har en avslagsperiode med fom og tom
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET                                   | 24.12.1987 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                   |            |            | ikke_oppfylt | Ja                   |
@@ -72,19 +72,19 @@ Egenskap: Vedtaksperioder med mor og to barn
 
   Scenario: Skal lage avslagsperioder når søker har konstant avslag og barn har vilkår med overlappende avslag
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 01.12.2016  |
       | 1            | 5678    | BARN       | 01.02.2017  |
 
-    Og med personer fremstilt krav for i behandling
+    Og med personer fremstilt krav for
       | BehandlingId | AktørId |
       | 1            | 3456    |
       | 1            | 5678    |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET                   | 24.12.1987 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                   |            |            | ikke_oppfylt | Ja                   |
@@ -120,19 +120,19 @@ Egenskap: Vedtaksperioder med mor og to barn
 
   Scenario: Skal lage avslagsperiode og ekstra opphørsperiode når søker og barn 1 har eksplisitt avslag
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 02.12.2016  |
       | 1            | 5678    | BARN       | 02.12.2016  |
 
-    Og med personer fremstilt krav for i behandling
+    Og med personer fremstilt krav for
       | BehandlingId | AktørId |
       | 1            | 3456    |
       | 1            | 5678    |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET                                   | 24.12.1987 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                   | 24.12.1987 | 01.12.2020 | Oppfylt      |                      |
@@ -155,7 +155,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5678    | BOR_MED_SØKER                                    | 01.10.2021 |            | Oppfylt      |                      |
 
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
       | 3456    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
@@ -175,14 +175,14 @@ Egenskap: Vedtaksperioder med mor og to barn
 
   Scenario: Skal lage separate opphør- og avslagsperioder når barn 1 har eksplisitt avslag og barn 2 har ingen utbetaling
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 02.12.2016  |
       | 1            | 5678    | BARN       | 02.12.2016  |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET                                   | 24.12.1987 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                   | 24.12.1987 |            | Oppfylt      |                      |
@@ -199,7 +199,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5678    | BOR_MED_SØKER                                    | 01.10.2021 |            | Oppfylt      |                      |
 
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
       | 3456    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
@@ -216,16 +216,16 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 01.12.2034 |            | Opphør             | Barna er over 18  |
 
   Scenario: Skal kun lage avslagsperiode for eksplisitte avslåtte perioder for personer fremstilt krav for
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat       | Behandlingsårsak |
       | 1            | 1        |                     | FORTSATT_INNVILGET        | SATSENDRING      |
       | 2            | 1        | 1                   | AVSLÅTT_ENDRET_OG_OPPHØRT | SØKNAD           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 15.10.1988  |
       | 1            | 5       | BARN       | 24.05.2023  |
@@ -235,17 +235,17 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 2            | 4       | BARN       | 17.06.2020  |
       | 2            | 5       | BARN       | 24.05.2023  |
 
-    Og følgende dagens dato 24.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 24.06.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og med personer fremstilt krav for i behandling
+    Og med personer fremstilt krav for
       | BehandlingId | AktørId |
       | 2            | 2       |
       | 2            | 3       |
       | 2            | 4       |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 24.05.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
@@ -254,7 +254,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5       | UNDER_18_ÅR                                 |                  | 24.05.2023 | 23.05.2041 | OPPFYLT  | Nei                  |                      |                  |
 
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår   | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser         | Vurderes etter   |
       | 1       | BOSATT_I_RIKET                              | VURDERT_MEDLEMSKAP | 30.09.2022 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_MEDLEM_I_FOLKETRYGDEN | NASJONALE_REGLER |
       | 1       | LOVLIG_OPPHOLD                              |                    | 04.10.2022 |            | OPPFYLT      | Nei                  |                              | NASJONALE_REGLER |
@@ -279,7 +279,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5       | GIFT_PARTNERSKAP                            |                    | 24.05.2023 |            | OPPFYLT      | Nei                  |                              |                  |
 
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 5       | 1            | 01.06.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
       | 5       | 1            | 01.07.2023 | 30.04.2029 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |

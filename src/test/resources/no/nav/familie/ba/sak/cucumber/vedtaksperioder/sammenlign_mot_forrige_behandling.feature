@@ -4,33 +4,33 @@
 Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behandling
 
   Bakgrunn:
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | ForrigeBehandlingId |
       | 1            |                     |
       | 2            | 1                   |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1,2          | 1234    | SØKER      | 11.01.1970  |
       | 1,2          | 3456    | BARN       | 13.04.2020  |
 
   Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor det viser seg at barnet ikke bodde hos mor det første året.
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
-    Og lag personresultater for begrunnelse for behandling 2
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og lag personresultater for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
       | 3456    | BOR_MED_SØKER                                    | 12.01.2021 |            | Oppfylt  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
       | 3456    | 01.02.2021 | 31.03.2038 | 1354  | 2            |
@@ -45,14 +45,14 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
 
   Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor ett barn mister andel i perioden
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1,2          | 1234    | SØKER      | 11.01.1970  |
       | 1,2          | 3456    | BARN       | 13.04.2020  |
       | 1,2          | 5678    | BARN       | 13.04.2021  |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -60,8 +60,8 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 5678    | UNDER_18_ÅR                                                     | 13.04.2021 | 12.04.2039 | Oppfylt  |
       | 5678    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2021 |            | Oppfylt  |
 
-    Og lag personresultater for begrunnelse for behandling 2
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og lag personresultater for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -71,7 +71,7 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 5678    | BOR_MED_SØKER                                                   | 12.01.2022 |            | Oppfylt  |
 
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
       | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 2            |
@@ -91,8 +91,8 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 01.04.2039 |            | Opphør                                                  | Kun søker har vilkår oppfylt                                                                                                       |
 
   Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor gjeldende behandling har opphør av flere grunner enn forrige.
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt      |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
@@ -102,8 +102,8 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 3456    | BOR_MED_SØKER                                    | 01.01.2021 | 31.12.2021 | ikke_oppfylt |
       | 3456    | BOR_MED_SØKER                                    | 01.01.2022 |            | Oppfylt      |
 
-    Og lag personresultater for begrunnelse for behandling 2
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og lag personresultater for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat     |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD   | 11.01.1970 |            | Oppfylt      |
       | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
@@ -116,7 +116,7 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 3456    | BOSATT_I_RIKET                   | 01.01.2022 |            | Oppfylt      |
       | 3456    | BOR_MED_SØKER                    | 01.01.2022 |            | Oppfylt      |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.12.2020 | 1354  | 1            |
       | 3456    | 01.02.2022 | 31.03.2038 | 1354  | 1            |

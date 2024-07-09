@@ -4,25 +4,25 @@
 Egenskap: Automatisk valutajustering
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status    |
       | 1        | NORMAL     | OPPRETTET |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus | Behandlingssteg |
       | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | EØS                 | FATTER_VEDTAK     | BESLUTTE_VEDTAK |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 18.01.1986  |              |
       | 1            | 2       | BARN       | 23.01.2008  |              |
       | 1            | 3       | BARN       | 31.03.2015  |              |
       | 1            | 4       | BARN       | 20.10.2017  |              |
 
-    Og følgende dagens dato 10.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 10.06.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                      | Vurderes etter   |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 15.03.2024 |            | OPPFYLT      | Nei                  |                                           | EØS_FORORDNINGEN |
       | 1       | LOVLIG_OPPHOLD   |                              | 01.02.2020 |            | OPPFYLT      | Nei                  |                                           | EØS_FORORDNINGEN |
@@ -45,20 +45,20 @@ Egenskap: Automatisk valutajustering
       | 4       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 01.02.2020 |            | OPPFYLT      | Nei                  |                                           | EØS_FORORDNINGEN |
       | 4       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 01.02.2020 |            | OPPFYLT      | Nei                  |                                           | EØS_FORORDNINGEN |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 3, 4    | 01.04.2024 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | LT                             | LT                  |
 
-    Og med utenlandsk periodebeløp for begrunnelse
+    Og med utenlandsk periodebeløp
       | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
       | 3, 4    | 04.2024   |           | 1            | 150   | EUR         | MÅNEDLIG  | LT              |
 
-    Og med valutakurs for begrunnelse
+    Og med valutakurser
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs    | Vurderingsform |
       | 3, 4    | 01.04.2024 | 30.04.2024 | 1            | 2024-03-27     | EUR         | 11.6825 | AUTOMATISK     |
       | 3, 4    | 01.05.2024 |            | 1            | 2024-04-30     | EUR         | 11.815  | AUTOMATISK     |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3       | 1            | 01.04.2024 | 30.04.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
       | 3       | 1            | 01.05.2024 | 31.05.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |

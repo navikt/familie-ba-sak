@@ -4,24 +4,24 @@
 Egenskap: Vedtaksperioder med andeler tilkjent ytelse
 
   Bakgrunn:
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med andeler tilkjent ytelse
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 30.04.2021 | 1054  | 1            |
       | 3456    | 01.05.2021 | 31.03.2038 | 1354  | 1            |
@@ -36,14 +36,14 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
 
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med andel tilkjent ytelse med lik verdi og forskjellig begrunnelse
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 30.04.2021 | 1054  | 1            |
       | 3456    | 01.05.2021 | 31.03.2038 | 1054  | 1            |
@@ -56,27 +56,27 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
       | 01.04.2038 |            | Opphør             | Kun søker     |
 
   Scenario: Skal lage vedtaksperioder selv om andel tilkjent ytelse har 0 i beløp
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 11.10.1987  |
       | 1            | 3456    | BARN       | 04.09.2020  |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.10.1987 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 04.09.2020 | 03.09.2038 | Oppfylt  |
       | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 04.09.2020 |            | Oppfylt  |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId |
       | 3456    | 01.10.2020 |          | NORGE_ER_SEKUNDÆRLAND | 1            |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.10.2020 | 31.08.2038 | 0     | 1            |
 
