@@ -481,13 +481,13 @@ class BegrunnelseTeksterStepDefinition {
         val internePerioderOvergangsstønad =
             dataTable
                 .asMaps()
-                .map({ rad ->
+                .map { rad ->
                     InternPeriodeOvergangsstønad(
                         fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
                         tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
                         personIdent = fagsak.aktør.aktivFødselsnummer(),
                     )
-                })
+                }
 
         mockAutovedtakSmåbarnstilleggService(
             dataFraCucumber = this,
