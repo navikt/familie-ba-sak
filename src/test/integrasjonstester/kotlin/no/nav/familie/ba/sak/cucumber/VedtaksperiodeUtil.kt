@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.tilSisteAndelPerAktørOgType
-import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterAndelerMedPeriodeOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
@@ -64,7 +63,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -73,11 +71,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -573,74 +568,6 @@ fun lagOvergangsstønad(
             dagensDato,
         )
     }
-}
-
-fun lagVedtaksPerioder(
-    behandlingId: Long,
-    vedtaksListe: List<Vedtak>,
-    behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
-    personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
-    vilkårsvurderinger: Map<Long, Vilkårsvurdering>,
-    kompetanser: Map<Long, List<Kompetanse>>,
-    utenlandskPeriodebeløp: Map<Long, List<UtenlandskPeriodebeløp>>,
-    valutakurs: Map<Long, List<Valutakurs>>,
-    endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
-    tilkjenteYtelser: Map<Long, TilkjentYtelse>,
-    overstyrteEndringstidspunkt: Map<Long, LocalDate?>,
-    overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
-    uregistrerteBarn: List<BarnMedOpplysninger>,
-    nåDato: LocalDate,
-    personerFremstiltKravFor: Map<Long, List<Aktør>>,
-): List<VedtaksperiodeMedBegrunnelser> {
-    val vedtak =
-        vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
-            ?: error("Finner ikke vedtak")
-
-    vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
-    val grunnlagForVedtaksperiode =
-        BehandlingsGrunnlagForVedtaksperioder(
-            persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-            personResultater = vilkårsvurderinger[behandlingId]?.personResultater ?: error("Finner ikke personresultater"),
-            behandling = vedtak.behandling,
-            kompetanser = kompetanser[behandlingId] ?: emptyList(),
-            endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
-            andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-            perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
-            uregistrerteBarn = uregistrerteBarn,
-            utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
-            valutakurs = valutakurs[behandlingId] ?: emptyList(),
-            personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
-        )
-
-    val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
-
-    val grunnlagForVedtaksperiodeForrigeBehandling =
-        forrigeBehandlingId?.let {
-            val forrigeVedtak =
-                vedtaksListe.find { it.behandling.id == forrigeBehandlingId && it.aktiv }
-                    ?: error("Finner ikke vedtak")
-            BehandlingsGrunnlagForVedtaksperioder(
-                persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                personResultater = vilkårsvurderinger[forrigeBehandlingId]?.personResultater ?: error("Finner ikke personresultater"),
-                behandling = forrigeVedtak.behandling,
-                kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
-                endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
-                andelerTilkjentYtelse = tilkjenteYtelser[forrigeBehandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
-                perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
-                uregistrerteBarn = emptyList(),
-                utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
-                valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
-                personerFremstiltKravFor = personerFremstiltKravFor[forrigeBehandlingId] ?: emptyList(),
-            )
-        }
-
-    return genererVedtaksperioder(
-        vedtak = vedtak,
-        grunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
-        grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
-        nåDato = nåDato,
-        erToggleForÅIkkeSplittePåValutakursendringerPå = true,
-    )
 }
 
 fun leggBegrunnelserIVedtaksperiodene(
