@@ -86,8 +86,6 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
 
-    var gjeldendeBehandlingId: Long? = null
-
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
     var målform: Målform = Målform.NB
@@ -277,8 +275,6 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     }
 
     private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
-        gjeldendeBehandlingId = behandlingId
-
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
 
         vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
