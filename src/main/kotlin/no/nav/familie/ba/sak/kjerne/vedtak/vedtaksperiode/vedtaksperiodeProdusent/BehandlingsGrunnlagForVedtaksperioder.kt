@@ -104,8 +104,6 @@ data class BehandlingsGrunnlagForVedtaksperioder(
         val erMinstEttBarnMedUtbetalingTidslinje =
             hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, behandling.fagsak.type, persongrunnlag)
 
-        val erUtbetalingSmåbarnstilleggTidslinje = this.andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
-
         val personresultaterOgRolleForVilkår =
             if (behandling.fagsak.type.erBarnSøker()) {
                 personResultater.single().splittOppVilkårForBarnOgSøkerRolle()
@@ -147,13 +145,12 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                             if (erToggleForÅIkkeSplittePåValutakursendringerPå) {
                                 forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinjeNy(
                                     person = person,
-                                    erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
                                     vilkårRolle = vilkårRolle,
                                 )
                             } else {
                                 forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinjeGammel(
                                     person = person,
-                                    erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
+                                    erUtbetalingSmåbarnstilleggTidslinje = this.andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje(),
                                     vilkårRolle = vilkårRolle,
                                 )
                             },
@@ -220,9 +217,9 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinjeNy(
         person: Person,
-        erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
         vilkårRolle: PersonType,
     ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> {
+        val småbarnstilleggTidslinje = andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
         val kompetanseTidslinje =
             utfylteKompetanser
                 .filtrerPåAktør(person.aktør)
@@ -244,7 +241,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
         val overgangsstønadTidslinje =
             perioderOvergangsstønad
                 .filtrerPåAktør(person.aktør)
-                .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
+                .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(småbarnstilleggTidslinje)
 
         val andelTilkjentYtelseTidslinje =
             andelerTilkjentYtelse
