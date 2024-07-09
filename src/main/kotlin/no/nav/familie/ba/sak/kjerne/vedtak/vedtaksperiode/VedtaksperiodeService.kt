@@ -10,8 +10,6 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.common.validerBehandlingIkkeErAvsluttet
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -88,7 +86,6 @@ class VedtaksperiodeService(
     private val integrasjonClient: IntegrasjonClient,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -122,10 +119,6 @@ class VedtaksperiodeService(
         return utledEndringstidspunkt(
             behandlingsGrunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
             behandlingsGrunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
-            erToggleForÅIkkeSplittePåValutakursendringerPå =
-                unleashNextMedContextService.isEnabled(
-                    FeatureToggleConfig.IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS,
-                ),
         )
     }
 
@@ -324,10 +317,6 @@ class VedtaksperiodeService(
             grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtak,
             nåDato = LocalDate.now(),
-            erToggleForÅIkkeSplittePåValutakursendringerPå =
-                unleashNextMedContextService.isEnabled(
-                    FeatureToggleConfig.IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS,
-                ),
         )
     }
 

@@ -55,8 +55,6 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
                 )
 
             is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> this.copy(person, vilkårResultaterForVedtaksperiode)
-
-            is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
 }
 
@@ -77,30 +75,6 @@ data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     override val andeler: Iterable<AndelForVedtaksperiode>,
-    override val kompetanse: KompetanseForVedtaksperiode? = null,
-    override val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
-    override val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
-    override val valutakurs: ValutakursForVedtaksperiode? = null,
-    override val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
-) : VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
-        person,
-        vilkårResultaterForVedtaksperiode,
-        andeler,
-        kompetanse,
-        endretUtbetalingAndel,
-        utenlandskPeriodebeløp,
-        valutakurs,
-        overgangsstønad,
-    ) {
-    override fun erInnvilgetEndretUtbetaling() =
-        endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
-}
-
-@Deprecated("Bruk heller tilGrunnlagForPersonTidslinjeNy. Kan fjernes når feature toggle IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS ikke lenger er i bruk.")
-data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel(
-    override val person: Person,
-    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-    override val andeler: Iterable<AndelForVedtaksbegrunnelse>,
     override val kompetanse: KompetanseForVedtaksperiode? = null,
     override val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
     override val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
