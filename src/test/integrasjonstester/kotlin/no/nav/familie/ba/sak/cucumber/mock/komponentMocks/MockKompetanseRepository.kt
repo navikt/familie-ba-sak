@@ -2,11 +2,11 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 
-fun mockKompetanseRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): KompetanseRepository {
+fun mockKompetanseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): KompetanseRepository {
     val kompetanseRepository = mockk<KompetanseRepository>()
     every { kompetanseRepository.finnFraBehandlingId(any()) } answers {
         val behandlingId = firstArg<Long>()

@@ -1,6 +1,6 @@
 ﻿import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -12,7 +12,7 @@ import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 
 fun mockAutovedtakSmåbarnstilleggService(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     fagsak: Fagsak,
     internPeriodeOvergangsstønadNyBehandling: List<InternPeriodeOvergangsstønad>,
     småbarnstilleggBehandlingId: Long,

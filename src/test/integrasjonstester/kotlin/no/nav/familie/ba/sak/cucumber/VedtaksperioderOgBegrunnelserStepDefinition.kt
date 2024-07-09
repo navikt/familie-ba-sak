@@ -67,7 +67,7 @@ val sanityBegrunnelserMock = SanityBegrunnelseMock.hentSanityBegrunnelserMock()
 val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelserMock()
 
 @Suppress("ktlint:standard:function-naming")
-class BegrunnelseTeksterStepDefinition {
+class VedtaksperioderOgBegrunnelserStepDefinition {
     var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
     var behandlinger = mutableMapOf<Long, Behandling>()
     var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
