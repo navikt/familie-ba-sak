@@ -54,43 +54,21 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
                     vilkårResultaterForVedtaksperiode,
                 )
 
-            is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
         }
 }
 
-sealed class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
+data class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-    open val andeler: Iterable<AndelForVedtaksobjekt>,
-    open val kompetanse: KompetanseForVedtaksperiode? = null,
-    open val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
-    open val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
-    open val valutakurs: ValutakursForVedtaksperiode? = null,
-    open val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
+    val andeler: Iterable<AndelForVedtaksobjekt>,
+    val kompetanse: KompetanseForVedtaksperiode? = null,
+    val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
+    val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
+    val valutakurs: ValutakursForVedtaksperiode? = null,
+    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : VedtaksperiodeGrunnlagForPerson {
-    abstract fun erInnvilgetEndretUtbetaling(): Boolean
-}
-
-data class VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy(
-    override val person: Person,
-    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
-    override val andeler: Iterable<AndelForVedtaksperiode>,
-    override val kompetanse: KompetanseForVedtaksperiode? = null,
-    override val endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode? = null,
-    override val utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode? = null,
-    override val valutakurs: ValutakursForVedtaksperiode? = null,
-    override val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
-) : VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
-        person,
-        vilkårResultaterForVedtaksperiode,
-        andeler,
-        kompetanse,
-        endretUtbetalingAndel,
-        utenlandskPeriodebeløp,
-        valutakurs,
-        overgangsstønad,
-    ) {
-    override fun erInnvilgetEndretUtbetaling() =
+    fun erInnvilgetEndretUtbetaling() =
         endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }
 

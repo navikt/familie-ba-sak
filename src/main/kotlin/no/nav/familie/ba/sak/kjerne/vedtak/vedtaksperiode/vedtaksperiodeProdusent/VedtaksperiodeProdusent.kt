@@ -61,10 +61,10 @@ fun genererVedtaksperioder(
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtaksperioderForrigeBehandling
-            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson() }
+            ?.let { grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false) }
             ?: emptyMap()
 
-    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson(skalSplittePåValutakursendringer = false)
 
     val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
         finnPerioderSomSkalBegrunnes(
