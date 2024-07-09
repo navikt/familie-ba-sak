@@ -66,7 +66,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             """
       
   Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
-    Og følgende dagens dato ${LocalDate.now().tilddMMyyyy()}""" +
+    Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
             hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
             lagPersonresultaterTekst(forrigeBehandling) +
             lagPersonresultaterTekst(behandling) +
@@ -115,12 +115,12 @@ fun String.anonymiser(
 private fun lagPersonresultaterTekst(behandling: Behandling?) =
     behandling?.let {
         """
-    Og lag personresultater for begrunnelse for behandling ${it.id}"""
+    Og lag personresultater for behandling ${it.id}"""
     } ?: ""
 
 fun hentTekstForFagsak(behandling: Behandling) =
     """
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status |
       | 1 | ${behandling.fagsak.type} | ${behandling.fagsak.status} |"""
 
@@ -130,7 +130,7 @@ fun hentTekstForBehandlinger(
 ) =
     """
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |${
         forrigeBehandling?.let {
             """ 
@@ -145,7 +145,7 @@ fun hentTekstForPersongrunnlag(
 ) =
     """
     
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |""" +
         hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
         hentPersongrunnlagRader(persongrunnlag)
@@ -161,7 +161,7 @@ private fun hentTekstForPersonerFremstiltKravFor(
     personerFremstiltKravFor: List<Aktør>,
 ) =
     """
-        Og med personer fremstilt krav for i behandling
+        Og med personer fremstilt krav for
         | BehandlingId | AktørId |""" +
         personerFremstiltKravFor.joinToString {
             """
@@ -178,7 +178,7 @@ fun hentTekstForVilkårresultater(
 
     return """
         
-    Og legg til nye vilkårresultater for begrunnelse for behandling $behandlingId
+    Og legg til nye vilkårresultater for behandling $behandlingId
       | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter |""" +
         tilVilkårResultatRader(personResultater)
 }
@@ -232,7 +232,7 @@ fun hentTekstForTilkjentYtelse(
 ) =
     """
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats | """ +
         hentAndelRader(andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
         "\n" +
@@ -271,7 +271,7 @@ fun hentTekstForEndretUtbetaling(
     } else {
         """
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId  | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |""" +
             hentEndretUtbetalingRader(endredeUtbetalingerForrigeBehandling) +
             hentEndretUtbetalingRader(endredeUtbetalinger)
@@ -304,7 +304,7 @@ fun hentTekstForKompetanse(
     } else {
         """
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |""" +
             rader
     }
@@ -352,7 +352,7 @@ fun hentTekstForUtenlandskPeriodebeløp(
     } else {
         """
 
-    Og med utenlandsk periodebeløp for begrunnelse
+    Og med utenlandsk periodebeløp
       | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |""" +
             rader
     }
@@ -396,7 +396,7 @@ fun hentTekstForValutakurser(
     } else {
         """
 
-    Og med valutakurs for begrunnelse
+    Og med valutakurser
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs | Vurderingsform |""" +
             rader
     }

@@ -63,8 +63,8 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             hentTekstForEndretUtbetaling(endredeUtbetalinger, endredeUtbetalingerForrigeBehandling) +
             hentTekstForKompetanse(kompetanse, kompetanseForrigeBehandling) + """
     
-    Når vedtaksperioder med begrunnelser genereres for behandling ${behandling.id}""" +
-            hentTekstForVedtaksperioder(vedtaksperioder) + """
+    Når vedtaksperiodene genereres for behandling ${behandling.id}""" +
+            hentTekstForVedtaksperioder(vedtaksperioder, behandling.id) + """
     """
 
     return test.anonymiser(persongrunnlag, persongrunnlagForrigeBehandling, forrigeBehandling, behandling)
@@ -88,7 +88,7 @@ private fun hentTekstForBehandlinger(
 ) =
     """
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |${
         forrigeBehandling?.let {
             """ 
@@ -277,10 +277,11 @@ private fun hentKompetanseRader(kompetanser: Collection<Kompetanse>?): String =
 
 private fun hentTekstForVedtaksperioder(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+    behandlingId: Long?,
 ) =
     """
         
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling $behandlingId
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |""" +
         hentVedtaksperiodeRader(vedtaksperioder)
 
