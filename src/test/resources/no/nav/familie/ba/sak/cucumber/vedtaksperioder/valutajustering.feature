@@ -86,28 +86,28 @@ Egenskap: Vedtaksperioder med valutajustering
 
 
   Scenario: Årlig kontroll får riktige vedtaksperioder når automatiske valutajusteringer er eneste endring tilbake i tid
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak         |
       | 1            | 1        |                     | FORTSATT_INNVILGET  | MÅNEDLIG_VALUTAJUSTERING |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | ÅRLIG_KONTROLL           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 18.01.1975  |
       | 1            | 2       | BARN       | 16.07.2008  |
       | 2            | 1       | SØKER      | 18.01.1975  |
       | 2            | 2       | BARN       | 16.07.2008  |
 
-    Og følgende dagens dato 09.07.2024
+    Og dagens dato er 09.07.2024
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -119,7 +119,7 @@ Egenskap: Vedtaksperioder med valutajustering
       | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -131,7 +131,7 @@ Egenskap: Vedtaksperioder med valutajustering
       | 2       | LOVLIG_OPPHOLD   |                              | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.01.2022 | 28.02.2023 | 796   | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 2       | 1            | 01.03.2023 | 30.06.2023 | 825   | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -158,17 +158,17 @@ Egenskap: Vedtaksperioder med valutajustering
       | 2       | 2            | 01.05.2024 | 31.05.2024 | 1215  | ORDINÆR_BARNETRYGD | 100     | 1510 |
       | 2       | 2            | 01.06.2024 | 30.06.2026 | 1226  | ORDINÆR_BARNETRYGD | 100     | 1510 |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.01.2022 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | LV                             | LV                  |
       | 2       | 01.01.2022 |          | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | LV                             | LV                  |
 
-    Og med utenlandsk periodebeløp for begrunnelse
+    Og med utenlandsk periodebeløp
       | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
       | 2       | 01.2022   |           | 1            | 25    | EUR         | MÅNEDLIG  | LV              |
       | 2       | 01.2022   |           | 2            | 25    | EUR         | MÅNEDLIG  | LV              |
 
-    Og med valutakurs for begrunnelse
+    Og med valutakurser
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs    | Vurderingsform |
       | 2       | 01.01.2022 | 31.05.2024 | 1            | 2022-06-30     | EUR         | 10.3485 | MANUELL        |
       | 2       | 01.06.2024 | 30.06.2024 | 1            | 2024-05-31     | EUR         | 11.383  | AUTOMATISK     |
