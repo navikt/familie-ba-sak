@@ -286,7 +286,6 @@ class BegrunnelseTeksterStepDefinition {
                 grunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 grunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
-                erToggleForÅIkkeSplittePåValutakursendringerPå = true,
             )
 
         val utvidedeVedtaksperioderMedBegrunnelser =
@@ -606,7 +605,6 @@ class BegrunnelseTeksterStepDefinition {
             utledEndringstidspunkt(
                 behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                erToggleForÅIkkeSplittePåValutakursendringerPå = true,
             )
 
         val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")

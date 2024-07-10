@@ -639,7 +639,6 @@ fun lagVedtaksPerioder(
         grunnlagForVedtaksperioder = grunnlagForVedtaksperiode,
         grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         nåDato = nåDato,
-        erToggleForÅIkkeSplittePåValutakursendringerPå = true,
     )
 }
 
