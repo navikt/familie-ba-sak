@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperioder med andeler tilkjent ytelse
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -26,9 +26,9 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
       | 3456    | 01.05.2020 | 30.04.2021 | 1054  | 1            |
       | 3456    | 01.05.2021 | 31.03.2038 | 1354  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
       | 01.05.2020 | 30.04.2021 | Utbetaling         | Barn og søker |
       | 01.05.2021 | 31.03.2038 | Utbetaling         | Barn og søker |
@@ -48,15 +48,15 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
       | 3456    | 01.05.2020 | 30.04.2021 | 1054  | 1            |
       | 3456    | 01.05.2021 | 31.03.2038 | 1054  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
       | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn og søker |
       | 01.04.2038 |            | Opphør             | Kun søker     |
 
   Scenario: Skal lage vedtaksperioder selv om andel tilkjent ytelse har 0 i beløp
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -80,9 +80,9 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.10.2020 | 31.08.2038 | 0     | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
       | 01.10.2020 | 31.08.2038 | Utbetaling         | Barn og søker |
       | 01.09.2038 |            | Opphør             | Kun søker     |

@@ -2,14 +2,14 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 
 fun mockBehandlingHentOgPersisterService(
     forrigeBehandling: Behandling?,
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     idForNyBehandling: Long,
 ): BehandlingHentOgPersisterService {
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -59,7 +59,7 @@ fun mockBehandlingHentOgPersisterService(
 }
 
 fun oppdaterEllerLagreBehandling(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     behandlingSomSkalLagres: Behandling,
     idForNyBehandling: Long,
 ): Behandling {

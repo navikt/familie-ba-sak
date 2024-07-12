@@ -4,16 +4,16 @@
 Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
 
   Scenario: Antall barn - Ett barn skal utbetales delt bosted, men ikke det andre
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status  |
       | 1        | NORMAL     | LØPENDE |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            | AVSLUTTET         |
       | 2            | 1        | 1                   | INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 11.05.1987  |              |
       | 1            | 3       | BARN       | 26.11.2014  |              |
@@ -21,11 +21,11 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 2            | 2       | BARN       | 16.05.2006  |              |
       | 2            | 3       | BARN       | 26.11.2014  |              |
 
-    Og følgende dagens dato 05.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 05.06.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.01.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
@@ -33,7 +33,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 3       | UNDER_18_ÅR                                 |                  | 26.11.2014 | 25.11.2032 | OPPFYLT  | Nei                  |                      |                  |
       | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                  | 01.01.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 01.01.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                  | 21.04.2023 |            | OPPFYLT  | Nei                  |                      |                  |
@@ -49,12 +49,12 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.01.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 3       | BOR_MED_SØKER                 | DELT_BOSTED      | 01.05.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 3       | 2            | 01.06.2023 | 30.04.2024 | DELT_BOSTED | 100     | 10.04.2024       | 2023-05-01                  |
       | 2       | 2            | 01.06.2023 | 29.02.2024 | DELT_BOSTED | 0       | 18.02.2024       | 2023-05-01                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3       | 1            | 01.02.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -101,27 +101,27 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY | STANDARD |               | 26.11.14             | 1           | mai 2023                             |         | 1 083 | 10.04.24         | SØKER_FÅR_UTVIDET       |                             |
 
   Scenario: Etterbetalt utvidet på søker,
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status    |
       | 1        | NORMAL     | AVSLUTTET |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            | AVSLUTTET         |
       | 2            | 1        | 1                   | INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 21.07.1972  |              |
       | 1            | 2       | BARN       | 14.12.2010  |              |
       | 2            | 1       | SØKER      | 21.07.1972  |              |
       | 2            | 2       | BARN       | 14.12.2010  |              |
 
-    Og følgende dagens dato 17.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 17.06.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
 
@@ -131,7 +131,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 2       | BOR_MED_SØKER                 | DELT_BOSTED      | 01.04.2022 | 20.07.2022 | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
       | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                          | 01.04.2022 |            | OPPFYLT      | Nei                  |                      | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                          | 18.12.2022 |            | OPPFYLT      | Nei                  |                      |                  |
@@ -143,11 +143,11 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 2       | BOR_MED_SØKER                 | VURDERING_ANNET_GRUNNLAG | 21.07.2022 | 17.12.2022 | IKKE_OPPFYLT | Nei                  |                      | NASJONALE_REGLER |
       | 2       | BOR_MED_SØKER                 | DELT_BOSTED              | 18.12.2022 |            | OPPFYLT      | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 2       | 2            | 01.01.2023 | 30.04.2023 | DELT_BOSTED | 0       | 13.04.2023       | 2022-12-18                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.05.2022 | 31.07.2022 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
 
@@ -186,16 +186,16 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT                                   | STANDARD |               | 14.12.10             | 1           | desember 2022                        |         | 0     |                  | SØKER_FÅR_UTVIDET       |                             |
 
   Scenario: Endret utbetaling, delt bosted, søker får kun etterbetalt utvidet
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status    |
       | 1        | NORMAL     | AVSLUTTET |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            | AVSLUTTET         |
       | 2            | 1        | 1                   | INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 05.01.1981  |              |
       | 1            | 2       | BARN       | 26.09.2011  |              |
@@ -206,11 +206,11 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 2            | 3       | BARN       | 03.06.2014  |              |
       | 2            | 4       | BARN       | 18.12.2018  |              |
 
-    Og følgende dagens dato 19.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 19.06.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 05.01.1981 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                  | 31.08.2023 |            | OPPFYLT      | Nei                  |                                   |                  |
@@ -230,7 +230,7 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 4       | UNDER_18_ÅR                   |                  | 18.12.2018 | 17.12.2036 | OPPFYLT      | Nei                  |                                   |                  |
       | 4       | GIFT_PARTNERSKAP              |                  | 18.12.2018 |            | OPPFYLT      | Nei                  |                                   |                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 05.01.1981 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                  | 31.08.2023 |            | OPPFYLT  | Nei                  |                      |                  |
@@ -250,13 +250,13 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
       | 4       | UNDER_18_ÅR                   |                  | 18.12.2018 | 17.12.2036 | OPPFYLT  | Nei                  |                      |                  |
       | 4       | BOR_MED_SØKER                 | DELT_BOSTED      | 30.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 4       | 2            | 01.05.2024 | 31.05.2024 | DELT_BOSTED | 0       | 15.05.2024       | 2024-04-30                  |
       | 3       | 2            | 01.05.2024 | 31.05.2024 | DELT_BOSTED | 0       | 15.05.2024       | 2024-04-30                  |
       | 2       | 2            | 01.05.2024 | 31.05.2024 | DELT_BOSTED | 0       | 15.05.2024       | 2024-04-30                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
 
       | 1       | 2            | 01.05.2024 | 30.11.2036 | 1258  | UTVIDET_BARNETRYGD | 50      | 2516 |

@@ -3,11 +3,11 @@
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 
-fun mockVedtakRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): VedtakRepository {
+fun mockVedtakRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): VedtakRepository {
     val vedtakRepository = mockk<VedtakRepository>()
     every { vedtakRepository.findByBehandlingAndAktiv(any()) } answers {
         val behandlingId = firstArg<Long>()
@@ -33,7 +33,7 @@ fun mockVedtakRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): Ved
 }
 
 private fun lagreVedtak(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     oppdatertVedtak: Vedtak,
 ): Vedtak {
     dataFraCucumber.vedtaksliste = dataFraCucumber.vedtaksliste.map { if (it.id == oppdatertVedtak.id) oppdatertVedtak else it }.toMutableList()
@@ -44,7 +44,7 @@ private fun lagreVedtak(
 }
 
 private fun opprettEllerHentVedtak(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     behandlingId: Long,
 ): Vedtak {
     val vedtakForBehandling =

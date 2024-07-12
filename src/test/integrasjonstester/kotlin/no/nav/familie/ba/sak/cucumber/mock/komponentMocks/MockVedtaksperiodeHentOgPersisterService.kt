@@ -2,12 +2,12 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 
-fun mockVedtaksperiodeHentOgPersisterService(dataFraCucumber: BegrunnelseTeksterStepDefinition): VedtaksperiodeHentOgPersisterService {
+fun mockVedtaksperiodeHentOgPersisterService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): VedtaksperiodeHentOgPersisterService {
     val vedtaksperiodeHentOgPersisterService = mockk<VedtaksperiodeHentOgPersisterService>()
     every { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(any()) } answers {
         val vedtak = firstArg<Vedtak>()

@@ -5,7 +5,7 @@
 Egenskap: Vedtaksperioder - Endringstidspunkt
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
       | 2            |
@@ -43,13 +43,11 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 3456    | 01.12.2016 | 31.12.2020 | 1234  | 1            |
       | 3456    | 01.10.2021 | 30.11.2034 | 1234  | 1            |
 
-    Og med overstyrt endringstidspunkt
-      | Endringstidspunkt | BehandlingId |
-      | 01.11.2021        | 1            |
+    Og med overstyrt endringstidspunkt 01.11.2021 for behandling 1
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                     |
       | 01.01.2021 | 30.09.2021 | Avslag             | Avslag skal alltid med, selv om de er før endringstidspunktet |
       | 01.11.2021 | 30.11.2034 | Utbetaling         | Etter endringstidspunktet                                     |
@@ -68,9 +66,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.08.2021 | 30.11.2034 | 1234  | 1            |
 
-    Og med overstyrt endringstidspunkt
-      | Endringstidspunkt | BehandlingId |
-      | 01.11.2021        | 1            |
+    Og med overstyrt endringstidspunkt 01.11.2021 for behandling 1
 
     Og lag personresultater for behandling 2
     Og legg til nye vilkårresultater for behandling 2
@@ -92,9 +88,9 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 3456    | 01.07.2021 | 31.07.2021 | 0     | 2            |
       | 3456    | 01.08.2021 | 30.11.2034 | 1234  | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar        |
       | 01.07.2021 | 31.07.2021 | Utbetaling         | Sekundærland EØS |
       | 01.08.2021 | 30.11.2034 | Utbetaling         |                  |
@@ -105,7 +101,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId |
       | 1            | 1        |                     |
       | 2            | 1        | 1                   |
@@ -176,9 +172,9 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Avtaletidspunkt delt bosted |
       | 3       | 2            | 01.02.2023 | 28.02.2023 | DELT_BOSTED | 100     | 02.02.2023                  |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype |
       | 2023-02-01 | 2023-02-28 | UTBETALING         |
       | 2023-03-01 |            | OPPHØR             |
@@ -188,7 +184,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat          | Behandlingsårsak |
       | 1            | 1        |                     | ENDRET_OG_FORTSATT_INNVILGET | SØKNAD           |
       | 2            | 1        | 1                   | AVSLÅTT                      | SØKNAD           |
@@ -236,9 +232,9 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 2       | 1            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       | 02.02.2020                  |
       | 2       | 2            | 01.10.2020 | 01.05.2035 | DELT_BOSTED | 0       | 02.02.2020                  |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato | Vedtaksperiodetype |
       | 01.06.2035 |          | OPPHØR             |
       |            |          | AVSLAG             |
@@ -248,7 +244,7 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat          | Behandlingsårsak |
       | 1            | 1        |                     | ENDRET_UTBETALING            | SATSENDRING      |
       | 2            | 1        | 1                   | ENDRET_OG_FORTSATT_INNVILGET | SØKNAD           |
@@ -292,9 +288,9 @@ Egenskap: Vedtaksperioder - Endringstidspunkt
       | 1       | 2            | 01.02.2024 | 30.11.2029 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
       | 2       | 2            | 01.02.2024 | 30.11.2029 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
       | 01.04.2024 | 31.11.2029 | UTBETALING         |           |
       | 01.12.2029 |            | OPPHØR             |           |

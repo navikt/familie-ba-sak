@@ -5,7 +5,7 @@
 Egenskap: Vedtaksperioder med mor og to barn
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -27,9 +27,9 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 01.12.2016 |            | Oppfylt      |                      |
       | 3456    | UNDER_18_ÅR                                                     | 01.12.2016 | 30.11.2034 | Oppfylt      |                      |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar |
       | 1988-01-01 |          | AVSLAG             | Kun søker |
 
@@ -44,9 +44,9 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 01.12.2016 |            | Oppfylt      |                      |
       | 3456    | UNDER_18_ÅR                                                     | 01.12.2016 | 30.11.2034 | Oppfylt      |                      |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato | Til dato | Vedtaksperiodetype | Kommentar |
       |          |          | AVSLAG             | Kun søker |
 
@@ -62,9 +62,9 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 3456    | UNDER_18_ÅR                                      | 01.12.2016 | 30.11.2034 | Oppfylt      |                      |
       | 3456    | BOR_MED_SØKER                                    | 02.12.2020 | 30.09.2021 | ikke_oppfylt | Ja                   |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
       |            |            | AVSLAG             | Kun søker har avslag |
       | 01.01.2021 | 30.09.2021 | AVSLAG             | Barn har avslag      |
@@ -103,9 +103,9 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5678    | LOVLIG_OPPHOLD                   | 08.06.2021 | 30.09.2022 | ikke_oppfylt | Ja                   |
       | 5678    | BOR_MED_SØKER                    | 02.12.2021 | 31.12.2022 | ikke_oppfylt | Ja                   |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                          |
       |            |            | AVSLAG             | Søker har avslag                   |
 
@@ -162,9 +162,9 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5678    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
       | 5678    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                                                             |
       | 01.01.2017 | 31.12.2020 | Utbetaling         |                                                                                                       |
       | 01.01.2021 | 31.09.2021 | Avslag             | Søker har opphør som overlapper med avslag hos barn                                                   |
@@ -206,8 +206,8 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5678    | 01.01.2017 | 31.12.2020 | 1234  | 1            |
       | 5678    | 01.11.2021 | 30.11.2034 | 1234  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Når vedtaksperiodene genereres for behandling 1
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar         |
       | 01.01.2017 | 31.12.2020 | Utbetaling         |                   |
       | 01.01.2021 | 30.09.2021 | Avslag             | Barn 1 har avslag |
@@ -220,7 +220,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat       | Behandlingsårsak |
       | 1            | 1        |                     | FORTSATT_INNVILGET        | SATSENDRING      |
       | 2            | 1        | 1                   | AVSLÅTT_ENDRET_OG_OPPHØRT | SØKNAD           |
@@ -285,9 +285,9 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 5       | 1            | 01.07.2023 | 30.04.2029 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 5       | 1            | 01.05.2029 | 30.04.2041 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar | Begrunnelser                 |
       | 01.10.2022 |          | AVSLAG             |           | AVSLAG_MEDLEM_I_FOLKETRYGDEN |
       | 01.06.2023 |          | OPPHØR             |           |                              |
