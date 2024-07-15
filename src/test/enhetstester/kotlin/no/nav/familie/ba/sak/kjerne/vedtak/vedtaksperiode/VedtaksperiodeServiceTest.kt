@@ -65,7 +65,6 @@ class VedtaksperiodeServiceTest {
                 integrasjonClient = integrasjonClient,
                 valutakursRepository = mockk(),
                 utenlandskPeriodebeløpRepository = mockk(),
-                unleashNextMedContextService = mockk(),
             ),
         )
 

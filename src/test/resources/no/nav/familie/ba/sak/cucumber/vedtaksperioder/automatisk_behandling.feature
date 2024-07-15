@@ -10,7 +10,7 @@ Egenskap: Vedtaksperioder ved automatisk behandling
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | ENDRET_UTBETALING   | SMÅBARNSTILLEGG  |
       | 2            | 1        | 1                   | FORTSATT_INNVILGET  | OMREGNING_6ÅR    |
@@ -76,8 +76,8 @@ Egenskap: Vedtaksperioder ved automatisk behandling
       | 2       | 2            | 01.11.2023 | 28.02.2024 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 3       | 2            | 01.10.2023 | 28.02.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
       | 01.11.2023 | 30.11.2023 | UTBETALING         |           |

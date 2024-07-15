@@ -2,12 +2,8 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.skalUtledeSøknadsresultatForBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
@@ -15,8 +11,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 
@@ -24,7 +18,6 @@ import org.springframework.stereotype.Service
 class BehandlingsresultatService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
-    private val personidentService: PersonidentService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -32,43 +25,11 @@ class BehandlingsresultatService(
     private val kompetanseService: KompetanseService,
     private val localDateProvider: LocalDateProvider,
 ) {
-    internal fun finnPersonerFremstiltKravFor(
-        behandling: Behandling,
-        søknadDTO: SøknadDTO?,
-        forrigeBehandling: Behandling?,
-    ): List<Aktør> {
-        val personerFremstiltKravFor =
-            when {
-                behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
-                    // alle barna som er krysset av på søknad
-                    val barnFraSøknad =
-                        søknadDTO
-                            ?.barnaMedOpplysninger
-                            ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
-                            ?.map { personidentService.hentAktør(it.ident) }
-                            ?: emptyList()
-
-                    // hvis det søkes om utvidet skal søker med
-                    val utvidetBarnetrygdSøker =
-                        if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
-
-                    barnFraSøknad + utvidetBarnetrygdSøker
-                }
-
-                behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
-                behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
-                else -> emptyList()
-            }
-
-        return personerFremstiltKravFor.distinct()
-    }
-
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
-        val søknadDTO = søknadGrunnlag?.hentSøknadDto()
 
         val forrigeAndelerTilkjentYtelse = forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) } ?: emptyList()
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
@@ -82,9 +43,8 @@ class BehandlingsresultatService(
         val personerIForrigeBehandling = forrigeBehandling?.let { persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandling.id).personer.toSet() } ?: emptySet()
 
         val personerFremstiltKravFor =
-            finnPersonerFremstiltKravFor(
+            søknadGrunnlagService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
-                søknadDTO = søknadDTO,
                 forrigeBehandling = forrigeBehandling,
             )
 

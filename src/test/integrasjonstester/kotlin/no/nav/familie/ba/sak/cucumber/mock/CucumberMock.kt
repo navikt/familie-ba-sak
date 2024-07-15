@@ -4,7 +4,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.common.MockedDateProvider
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BeslutteVedtak
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
@@ -70,7 +71,7 @@ import org.slf4j.LoggerFactory
 val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 
 class CucumberMock(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     nyBehanldingId: Long,
     forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehanldingId]?.let { dataFraCucumber.behandlinger[it] },
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
@@ -99,7 +100,7 @@ class CucumberMock(
     val loggService = mockLoggService()
     val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehanldingId)
     val periodeOvergangsstønadGrunnlagRepository = mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber)
-    val søknadGrunnlagService = mockSøknadGrunnlagService(dataFraCucumber)
+    val søknadGrunnlagRepository = mockSøknadGrunnlagRepository(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)
     val vedtakRepository = mockVedtakRepository(dataFraCucumber)
     val dokumentGenereringService = mockDokumentGenereringService()
@@ -179,6 +180,13 @@ class CucumberMock(
             dokumentGenereringService = dokumentGenereringService,
         )
 
+    val søknadGrunnlagService =
+        SøknadGrunnlagService(
+            søknadGrunnlagRepository = søknadGrunnlagRepository,
+            personidentService = personidentService,
+            persongrunnlagService = persongrunnlagService,
+        )
+
     val vedtaksperiodeService =
         VedtaksperiodeService(
             personidentService = personidentService,
@@ -199,7 +207,6 @@ class CucumberMock(
             integrasjonClient = mockk(),
             valutakursRepository = valutakursRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val behandlingService =
@@ -303,7 +310,6 @@ class CucumberMock(
         BehandlingsresultatService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             søknadGrunnlagService = søknadGrunnlagService,
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,

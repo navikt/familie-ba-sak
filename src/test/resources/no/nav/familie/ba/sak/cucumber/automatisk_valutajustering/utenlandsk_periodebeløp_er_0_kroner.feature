@@ -4,16 +4,16 @@
 Egenskap: Automatiske valutakurser - Utenlandsk periodebeløp er 0 kroner
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status  |
       | 1        | NORMAL     | LØPENDE |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat         | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | FORTSATT_INNVILGET          | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | AVSLUTTET         |
       | 2            | 1        | 1                   | HENLAGT_FEILAKTIG_OPPRETTET | ÅRLIG_KONTROLL           | Nei                       | EØS                 | AVSLUTTET         |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 24.11.1987  |              |
       | 1            | 2       | BARN       | 12.05.2015  |              |
@@ -23,11 +23,11 @@ Egenskap: Automatiske valutakurser - Utenlandsk periodebeløp er 0 kroner
       | 2            | 3       | BARN       | 08.02.2019  |              |
 
   Scenario: Automatisk oppdatering av valutakurser skal skje selv om det ikke fører til noen endringer i andelene
-    Og følgende dagens dato 24.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 24.06.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                              | 01.11.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 01.11.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -44,7 +44,7 @@ Egenskap: Automatiske valutakurser - Utenlandsk periodebeløp er 0 kroner
       | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 01.11.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 3       | LOVLIG_OPPHOLD   |                              | 01.11.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 01.11.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | LOVLIG_OPPHOLD   |                              | 01.11.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -61,24 +61,24 @@ Egenskap: Automatiske valutakurser - Utenlandsk periodebeløp er 0 kroner
       | 3       | LOVLIG_OPPHOLD   |                              | 01.11.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 3       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 01.11.2022 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2, 3    | 01.12.2023 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | BG                             | BG                  |
       | 2, 3    | 01.12.2023 |          | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | BG                             | BG                  |
 
-    Og med utenlandsk periodebeløp for begrunnelse
+    Og med utenlandsk periodebeløp
       | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
       | 2, 3    | 12.2023   |           | 1            | 0     | BGN         | MÅNEDLIG  | BG              |
       | 2, 3    | 12.2023   |           | 2            | 0     | BGN         | MÅNEDLIG  | BG              |
 
-    Og med valutakurs for begrunnelse
+    Og med valutakurser
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs         | Vurderingsform |
       | 2, 3    | 01.12.2023 | 31.05.2024 | 1            | 2023-07-31     | BGN         | 5.7165865630 | MANUELL        |
       | 2, 3    | 01.06.2024 |            | 1            | 2024-05-31     | BGN         | 5.8201247571 | AUTOMATISK     |
       | 2, 3    | 01.12.2023 | 31.12.2023 | 2            | 2023-07-31     | BGN         | 5.7165865630 | MANUELL        |
       | 2, 3    | 01.01.2024 |            | 2            |                | BGN         |              | IKKE_VURDERT   |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.12.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 2       | 1            | 01.01.2024 | 30.04.2033 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |

@@ -6,24 +6,24 @@ Egenskap: Brevbegrunnelser ved endring av utdypende vilkår
   Bakgrunn:
 
   Scenario: Skal flette inn alle barna ved overgang til bosatt i riket med vurdert medlemskap for søker
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 02.10.1970  |
       | 1            | 2       | BARN       | 03.12.2007  |
       | 1            | 3       | BARN       | 21.07.2014  |
 
-    Og følgende dagens dato 16.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 16.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Utdypende vilkår   | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | LOVLIG_OPPHOLD                                               |                    | 02.10.1970 |            | OPPFYLT  | Nei                  |
       | 1       | BOSATT_I_RIKET                                               |                    | 15.06.2023 | 31.07.2023 | OPPFYLT  | Nei                  |
@@ -36,7 +36,7 @@ Egenskap: Brevbegrunnelser ved endring av utdypende vilkår
       | 3       | GIFT_PARTNERSKAP,LOVLIG_OPPHOLD,BOR_MED_SØKER                |                    | 21.07.2014 |            | OPPFYLT  | Nei                  |
       | 3       | BOSATT_I_RIKET                                               | VURDERT_MEDLEMSKAP | 21.07.2014 |            | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.07.2023 | 30.11.2025 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 3       | 1            | 01.07.2023 | 30.06.2032 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |

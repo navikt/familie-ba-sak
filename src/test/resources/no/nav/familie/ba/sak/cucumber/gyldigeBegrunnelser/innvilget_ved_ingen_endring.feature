@@ -4,24 +4,24 @@
 Egenskap: Gyldige begrunnelser ved ingen endring
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 06.11.1984  |
       | 1            | 2       | BARN       | 07.09.2019  |
 
   Scenario: Gi innvilget-begrunnelser når det ikke er endring i andelene
-    Og følgende dagens dato 15.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 15.09.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
       | 2       | UNDER_18_ÅR                                 |                              | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |                  |
       | 2       | GIFT_PARTNERSKAP                            |                              | 07.09.2019 |            | OPPFYLT  | Nei                  |                  |
@@ -35,11 +35,11 @@ Egenskap: Gyldige begrunnelser ved ingen endring
       | 1       | LOVLIG_OPPHOLD                              |                              | 15.07.2023 |            | OPPFYLT  | Nei                  |                  |
       | 1       | BOSATT_I_RIKET                              |                              | 15.07.2023 |            | OPPFYLT  | Nei                  |                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.07.2023 | 31.08.2023 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.07.2023 | 31.07.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | BE                             | BE                  |
 
@@ -52,24 +52,24 @@ Egenskap: Gyldige begrunnelser ved ingen endring
       | 01.09.2023 |            | OPPHØR             |           |                                                        |                       |
 
   Scenario: Skal inkludere begrunnelser med "Innvilget eller økning" resultat dersom periode resultatet er ingen endring for EØS
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | BARN       | 18.11.2015  |
       | 1            | 4567    | SØKER      | 01.11.1976  |
       | 1            | 5678    | BARN       | 09.03.2021  |
 
-    Og følgende dagens dato 25.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 25.09.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
       | 1234    | GIFT_PARTNERSKAP |                              | 18.11.2015 |            | OPPFYLT  | Nei                  |                  |
       | 1234    | UNDER_18_ÅR      |                              | 18.11.2015 | 17.11.2033 | OPPFYLT  | Nei                  |                  |
@@ -86,7 +86,7 @@ Egenskap: Gyldige begrunnelser ved ingen endring
       | 5678    | LOVLIG_OPPHOLD   |                              | 09.03.2021 |            | OPPFYLT  | Nei                  |                  |
       | 5678    | GIFT_PARTNERSKAP |                              | 09.03.2021 |            | OPPFYLT  | Nei                  |                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 5678    | 1            | 01.04.2021 | 31.08.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
       | 5678    | 1            | 01.09.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     | 1654 |
@@ -105,11 +105,11 @@ Egenskap: Gyldige begrunnelser ved ingen endring
       | 1234    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 1234    | 1            | 01.07.2023 | 31.10.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 1234    | 1            | 01.02.2016 | 01.07.2019 | ETTERBETALING_3ÅR | 0       |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId    | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 1234       | 01.08.2019 | 31.03.2021 | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | LV                             | LV                  |
       | 5678, 1234 | 01.04.2021 |            | NORGE_ER_PRIMÆRLAND   | 1            | ARBEIDER         | INAKTIV                   | NO                    | LV                             | LV                  |
