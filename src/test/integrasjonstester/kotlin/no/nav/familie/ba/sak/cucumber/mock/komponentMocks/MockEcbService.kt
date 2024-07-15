@@ -2,12 +2,12 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import java.math.BigDecimal
 import java.time.LocalDate
 
-fun mockEcbService(dataFraCucumber: BegrunnelseTeksterStepDefinition): ECBService {
+fun mockEcbService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): ECBService {
     val ecbService = mockk<ECBService>()
     every { ecbService.hentValutakurs(any(), any()) } answers {
         val valuta = firstArg<String>()
