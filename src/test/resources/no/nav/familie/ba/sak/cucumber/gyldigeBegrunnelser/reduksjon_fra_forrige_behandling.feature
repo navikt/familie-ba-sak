@@ -4,12 +4,12 @@
 Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
   Scenario: Skal gi reduksjon fra forrige behandling-begrunnelser knyttet til bor med søker når bor med søker er innvilget en måned senere i revurdering
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId |
       | 1            | 1        |                     |
       | 2            | 1        | 1                   |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 31.12.1993  |
       | 1            | 2       | BARN       | 15.03.2023  |
@@ -18,10 +18,10 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 2            | 2       | BARN       | 15.03.2023  |
       | 2            | 3       | BARN       | 15.03.2023  |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |
 
@@ -32,7 +32,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 3       | BOR_MED_SØKER,GIFT_PARTNERSKAP,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 15.03.2023 | 30.06.2023 | OPPFYLT  | Nei                  |
 
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |
 
@@ -43,7 +43,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 3       | UNDER_18_ÅR                                                  |                  | 15.03.2023 | 14.03.2041 | OPPFYLT  | Nei                  |
       | 3       | BOR_MED_SØKER,GIFT_PARTNERSKAP,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 15.03.2023 | 30.06.2023 | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
       | 2       | 1            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
       | 3       | 1            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
@@ -59,22 +59,22 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 01.07.2023 |            | OPPHØR                                                  |           |                                   |                                   |
 
   Scenario: Skal gi reduksjon fra forrige behandling-begrunnelser knyttet til utvidet når utvidet ikke lenger er oppfylt
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId  | ForrigeBehandlingId |
       | 1            | 200056155 |                     |
       | 2            | 200056155 | 1                   |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | BARN       | 22.08.2022  |
       | 1            | 3456    | SØKER      | 07.05.1985  |
       | 2            | 1234    | BARN       | 22.08.2022  |
       | 2            | 3456    | SØKER      | 07.05.1985  |
 
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 07.05.1985 |            | OPPFYLT  | Nei                  |
       | 3456    | UTVIDET_BARNETRYGD                                           |                  | 19.01.2023 |            | OPPFYLT  | Nei                  |
@@ -82,7 +82,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOR_MED_SØKER |                  | 22.08.2022 |            | OPPFYLT  | Nei                  |
       | 1234    | UNDER_18_ÅR                                                  |                  | 22.08.2022 | 21.08.2040 | OPPFYLT  | Nei                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                                |                  | 07.05.1985 |            | OPPFYLT      | Nei                  |
       | 3456    | UTVIDET_BARNETRYGD                                           |                  | 19.01.2023 |            | IKKE_OPPFYLT | Nei                  |
@@ -90,7 +90,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 1234    | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET,GIFT_PARTNERSKAP |                  | 22.08.2022 |            | OPPFYLT      | Nei                  |
       | 1234    | UNDER_18_ÅR                                                  |                  | 22.08.2022 | 21.08.2040 | OPPFYLT      | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent |
       | 1234    | 1            | 01.09.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     |
       | 1234    | 1            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     |
@@ -115,16 +115,16 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 01.08.2040 |            | OPPHØR                                                  |           |                         |                          |
 
   Scenario: Skal få reduksjon fra forrige behandling-begrunnelse knyttet til småbarnstillegg når overgangsstønad forsvinner
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | SMÅBARNSTILLEGG  |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 19.11.1984  |
       | 1            | 3456    | BARN       | 26.08.2016  |
@@ -132,11 +132,11 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 2            | 3456    | BARN       | 26.08.2016  |
 
 
-    Og følgende dagens dato 17.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 17.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
       | 1234    | UTVIDET_BARNETRYGD                            |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
@@ -145,7 +145,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2016 | 31.12.2018 | OPPFYLT  | Nei                  |
       | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2016 | 25.08.2034 | OPPFYLT  | Nei                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
       | 1234    | UTVIDET_BARNETRYGD                            |                  | 26.08.2016 |            | OPPFYLT  | Nei                  |
@@ -154,7 +154,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 3456    | BOSATT_I_RIKET                                |                  | 26.08.2016 | 31.12.2018 | OPPFYLT  | Nei                  |
       | 3456    | UNDER_18_ÅR                                   |                  | 26.08.2016 | 25.08.2034 | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 1234    | 1            | 01.09.2016 | 31.12.2018 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1234    | 1            | 01.04.2017 | 31.12.2018 | 660   | SMÅBARNSTILLEGG    | 100     | 660  |
@@ -165,7 +165,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
       | 3456    | 2            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
 
-    Og med overgangsstønad for begrunnelse
+    Og med overgangsstønad
       | AktørId | BehandlingId | Fra dato   | Til dato   |
       | 3456    | 1            | 01.04.2017 | 30.06.2017 |
       | 3456    | 1            | 01.07.2017 | 30.09.2017 |
@@ -183,16 +183,16 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 01.01.2019 |            | OPPHØR                                                  |           |                                                 |                          |
 
   Scenario: Skal få reduksjon fra forrige behandling-begrunnelser knyttet til bor fast hos søker for det ene barnet
-  Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 29.12.1984  |
       | 1            | 3456    | BARN       | 31.03.2019  |
@@ -201,11 +201,11 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 2            | 3456    | BARN       | 31.03.2019  |
       | 2            | 5678    | BARN       | 23.02.2022  |
 
-    Og følgende dagens dato 17.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 17.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat     |
       | 1234    | LOVLIG_OPPHOLD                                               | 29.12.1984 |            | OPPFYLT      |
       | 1234    | BOSATT_I_RIKET                                               | 11.11.2021 |            | OPPFYLT      |
@@ -220,7 +220,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 5678    | UNDER_18_ÅR                                                  | 23.02.2022 | 22.02.2040 | OPPFYLT      |
       | 5678    | LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOSATT_I_RIKET,BOR_MED_SØKER | 23.02.2022 |            | OPPFYLT      |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat     |
       | 1234    | LOVLIG_OPPHOLD                                               | 29.12.1984 |            | OPPFYLT      |
       | 1234    | BOSATT_I_RIKET                                               | 11.11.2021 |            | OPPFYLT      |
@@ -235,7 +235,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 5678    | UNDER_18_ÅR                                                  | 23.02.2022 | 22.02.2040 | OPPFYLT      |
       | 5678    | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP | 23.02.2022 |            | OPPFYLT      |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.12.2021 | 31.12.2021 | 1654  | ORDINÆR_BARNETRYGD | 100     | 1654 |
       | 3456    | 1            | 01.01.2022 | 31.01.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
@@ -271,16 +271,16 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 01.02.2040 |            | OPPHØR                                                  |           |                                   |                          |
 
   Scenario: Skal ikke få reduksjon fra forrige behandling-begrunnelse, men vanlig reduksjon
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 19.11.1984  |
       | 1            | 3456    | BARN       | 26.08.2016  |
@@ -290,11 +290,11 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 2            | 5678    | BARN       | 23.08.2017  |
 
 
-    Og følgende dagens dato 28.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 28.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                 |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
 
@@ -306,7 +306,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 5678    | BOSATT_I_RIKET                                |                  | 23.08.2017 | 31.12.2018 | OPPFYLT  | Nei                  |
       | 5678    | UNDER_18_ÅR                                   |                  | 23.08.2017 | 22.08.2035 | OPPFYLT  | Nei                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                          | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                   |                  | 19.11.1984 |            | OPPFYLT  | Nei                  |
 
@@ -318,7 +318,7 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
       | 5678    | BOR_MED_SØKER                                   |                  | 23.08.2017 | 31.08.2018 | OPPFYLT  | Nei                  |
       | 5678    | UNDER_18_ÅR                                     |                  | 23.08.2017 | 22.08.2035 | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.09.2016 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 5678    | 1            | 01.09.2017 | 31.12.2018 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |

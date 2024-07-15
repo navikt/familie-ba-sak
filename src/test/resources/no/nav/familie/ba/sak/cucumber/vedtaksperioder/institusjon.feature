@@ -8,7 +8,7 @@ Egenskap: Vedtaksperioder for institusjonssaker
       | FagsakId | Fagsaktype  |
       | 1        | INSTITUSJON |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | IKKE_VURDERT        | SØKNAD           |
 
@@ -34,9 +34,9 @@ Egenskap: Vedtaksperioder for institusjonssaker
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 1       | 1            | 01.09.2018 | 30.09.2020 | ETTERBETALING_3ÅR | 0       |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar          |
       | 01.09.2020 | 30.09.2020 | OPPHØR             | Etterbetaling 3 år |
       | 01.10.2020 | 31.10.2020 | UTBETALING         |                    |

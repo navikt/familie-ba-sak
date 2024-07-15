@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.internal
 
-import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.lagGyldigeBegrunnelserTest
-import no.nav.familie.ba.sak.internal.vedtak.vedtaksperioder.lagVedtaksperioderTest
+import no.nav.familie.ba.sak.internal.vedtak.begrunnelser.lagTeksterForGyldigeBegrunnelser
+import no.nav.familie.ba.sak.internal.vedtak.lagTestForVedtaksperioderOgBegrunnelser
+import no.nav.familie.ba.sak.internal.vedtak.vedtaksperioder.hentTekstForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -33,6 +35,7 @@ class TestVerktøyService(
     private val kompetanseRepository: KompetanseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
+    private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
     @Transactional
     fun oppdaterVilkårUtenFomTilFødselsdato(behandlingId: Long) {
@@ -62,6 +65,33 @@ class TestVerktøyService(
     }
 
     fun hentBegrunnelsetest(behandlingId: Long): String {
+        val vedtaksperioder =
+            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
+                vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
+            )
+
+        return hentTestoppsettForVedtaksperioderOgBegrunnelser(
+            behandlingId = behandlingId,
+            testSpesifikkeTekster = lagTeksterForGyldigeBegrunnelser(behandlingId, vedtaksperioder),
+        )
+    }
+
+    fun hentVedtaksperioderTest(behandlingId: Long): String {
+        val vedtaksperioder =
+            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
+                vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
+            )
+
+        return hentTestoppsettForVedtaksperioderOgBegrunnelser(
+            behandlingId = behandlingId,
+            testSpesifikkeTekster = hentTekstForVedtaksperioder(behandlingId = behandlingId, vedtaksperioder = vedtaksperioder),
+        )
+    }
+
+    private fun hentTestoppsettForVedtaksperioderOgBegrunnelser(
+        behandlingId: Long,
+        testSpesifikkeTekster: String,
+    ): String {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
@@ -94,12 +124,9 @@ class TestVerktøyService(
         val valutakurserForrigeBehandling =
             forrigeBehandling?.let { valutakursRepository.finnFraBehandlingId(it.id) }
 
-        val vedtaksperioder =
-            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
-                vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
-            )
+        val personerFremstiltKravFor = søknadGrunnlagService.finnPersonerFremstiltKravFor(behandling = behandling, forrigeBehandling = forrigeBehandling)
 
-        return lagGyldigeBegrunnelserTest(
+        return lagTestForVedtaksperioderOgBegrunnelser(
             behandling = behandling,
             forrigeBehandling = forrigeBehandling,
             persongrunnlag = persongrunnlag,
@@ -108,7 +135,6 @@ class TestVerktøyService(
             personResultaterForrigeBehandling = personResultaterForrigeBehandling,
             andeler = andeler,
             andelerForrigeBehandling = andelerForrigeBehandling,
-            vedtaksperioder = vedtaksperioder,
             endredeUtbetalinger = endredeUtbetalinger,
             endredeUtbetalingerForrigeBehandling = endredeUtbetalingerForrigeBehandling,
             kompetanse = kompetanse,
@@ -117,47 +143,8 @@ class TestVerktøyService(
             utenlandskePeriodebeløpForrigeBehandling = utenlandskePeriodebeløpForrigeBehandling,
             valutakurser = valutakurser,
             valutakurserForrigeBehandling = valutakurserForrigeBehandling,
-        )
-    }
-
-    fun hentVedtaksperioderTest(behandlingId: Long): String {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-        val persongrunnlag: PersonopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!
-        val persongrunnlagForrigeBehandling =
-            forrigeBehandling?.let { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(it.id)!! }
-        val personResultater = vilkårService.hentVilkårsvurderingThrows(behandlingId).personResultater
-        val personResultaterForrigeBehandling =
-            forrigeBehandling?.let { vilkårService.hentVilkårsvurderingThrows(it.id).personResultater }
-        val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
-        val andelerForrigeBehandling =
-            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
-        val endredeUtbetalinger = endretUtbetalingRepository.findByBehandlingId(behandlingId)
-        val endredeUtbetalingerForrigeBehandling =
-            forrigeBehandling?.let { endretUtbetalingRepository.findByBehandlingId(it.id) }
-        val kompetanse = kompetanseRepository.finnFraBehandlingId(behandlingId)
-        val kompetanseForrigeBehandling =
-            forrigeBehandling?.let { kompetanseRepository.finnFraBehandlingId(it.id) }
-        val vedtaksperioder =
-            vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(
-                vedtakRepository.findByBehandlingAndAktiv(behandlingId).id,
-            )
-
-        return lagVedtaksperioderTest(
-            behandling = behandling,
-            forrigeBehandling = forrigeBehandling,
-            persongrunnlag = persongrunnlag,
-            persongrunnlagForrigeBehandling = persongrunnlagForrigeBehandling,
-            personResultater = personResultater,
-            personResultaterForrigeBehandling = personResultaterForrigeBehandling,
-            andeler = andeler,
-            andelerForrigeBehandling = andelerForrigeBehandling,
-            vedtaksperioder = vedtaksperioder,
-            endredeUtbetalinger = endredeUtbetalinger,
-            endredeUtbetalingerForrigeBehandling = endredeUtbetalingerForrigeBehandling,
-            kompetanse = kompetanse,
-            kompetanseForrigeBehandling = kompetanseForrigeBehandling,
+            personerFremstiltKravFor = personerFremstiltKravFor,
+            testSpesifikkeTekster = testSpesifikkeTekster,
         )
     }
 }

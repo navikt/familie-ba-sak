@@ -4,16 +4,16 @@
 Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilbake i tid
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat         | Behandlingsårsak |
       | 1            | 1        |                     | ENDRET_UTBETALING           | NYE_OPPLYSNINGER |
       | 2            | 1        | 1                   | DELVIS_INNVILGET_OG_OPPHØRT | SØKNAD           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 09.07.1986  |
       | 1            | 2       | BARN       | 13.02.2005  |
@@ -23,11 +23,11 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 2            | 3       | BARN       | 06.11.2010  |
 
   Scenario: Skal kunne begrunne utvidet for to barn etter endret utbetaling med etterbetaling tre år tilbake i tid
-    Og følgende dagens dato 09.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 09.10.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET                                |                  | 09.07.1986 |            | OPPFYLT  | Nei                  |
 
@@ -39,7 +39,7 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 3       | UNDER_18_ÅR                                                  |                  | 06.11.2010 | 05.11.2028 | OPPFYLT  | Nei                  |
       | 3       | BOR_MED_SØKER                                                | DELT_BOSTED      | 15.03.2018 |            | OPPFYLT  | Nei                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | BOSATT_I_RIKET                                               |                  | 09.07.1986 | 28.02.2023 | OPPFYLT  | Nei                  |
       | 1       | LOVLIG_OPPHOLD                                               |                  | 09.07.1986 |            | OPPFYLT  | Nei                  |
@@ -53,7 +53,7 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 3       | BOR_MED_SØKER                                                |                  | 06.11.2010 | 14.03.2018 | OPPFYLT  | Nei                  |
       | 3       | BOR_MED_SØKER                                                | DELT_BOSTED      | 15.03.2018 |            | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.03.2005 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
       | 2       | 1            | 01.03.2019 | 31.01.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
@@ -74,7 +74,7 @@ Egenskap: Brevbegrunnelser for endret utbetaling med etterbetaling tre år tilba
       | 3       | 2            | 01.04.2018 | 28.02.2019 | 485   | ORDINÆR_BARNETRYGD | 50      | 970  |
       | 3       | 2            | 01.03.2019 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 1       | 2            | 01.02.2020 | 31.05.2020 | ETTERBETALING_3ÅR | 0       | 30.06.2023       | 02.02.2020                  |
 

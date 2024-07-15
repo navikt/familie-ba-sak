@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperiode for behandling med opphør fra start
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | ForrigeBehandlingId |
       | 1            |                     |
       | 2            | 1                   |
@@ -36,9 +36,9 @@ Egenskap: Vedtaksperiode for behandling med opphør fra start
       | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
       | 3456     | 01.06.2020 | 31.04.2038 | 1354  | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                     |
       | 01.05.2020 | 31.05.2020 | Opphør             | Mister fra forrige behandling |
       | 01.06.2020 | 31.04.2038 | Utbetaling         | Barn og søker                 |

@@ -2,7 +2,7 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -11,7 +11,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun mockAutovedtakMånedligValutajusteringService(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     fagsak: Fagsak,
     nyBehanldingId: Long,
     svarFraEcbMock: Map<Pair<String, LocalDate>, BigDecimal>,

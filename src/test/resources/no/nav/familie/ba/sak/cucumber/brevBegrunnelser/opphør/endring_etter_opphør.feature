@@ -4,16 +4,16 @@
 Egenskap: Brevbegrunnelser ved endring etter opphør
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Fagsakstatus |
       | 1        | NORMAL     | LØPENDE      |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | NASJONAL            | AVSLUTTET         |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 25.02.1975  |              |
       | 1            | 2       | BARN       | 07.01.2005  |              |
@@ -25,11 +25,11 @@ Egenskap: Brevbegrunnelser ved endring etter opphør
       | 2            | 4       | BARN       | 11.05.2006  |              |
 
   Scenario: Skal kun flette inn ett barn i begrunnelse når to barn fyller 18 samtidig, men det allerede har vært et opphør for det ene barnet
-    Og følgende dagens dato 23.05.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 23.05.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT      | Nei                  |                      | NASJONALE_REGLER |
 
@@ -47,7 +47,7 @@ Egenskap: Brevbegrunnelser ved endring etter opphør
       | 4       | BOR_MED_SØKER                               |                  | 10.11.2023 | 08.01.2024 | IKKE_OPPFYLT | Ja                   | AVSLAG_BOR_HOS_SØKER | NASJONALE_REGLER |
       | 4       | BOR_MED_SØKER                               |                  | 09.01.2024 |            | OPPFYLT      | Nei                  |                      | NASJONALE_REGLER |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
@@ -64,7 +64,7 @@ Egenskap: Brevbegrunnelser ved endring etter opphør
       | 4       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 4       | BOR_MED_SØKER                               |                  | 09.01.2024 | 06.03.2024 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.03.2022 | 31.12.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3       | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
