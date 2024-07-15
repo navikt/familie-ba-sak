@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
@@ -22,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.UtfyltValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilIValutakurs
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -72,6 +72,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
     val uregistrerteBarn: List<BarnMedOpplysninger>,
     val utenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
     val valutakurs: List<Valutakurs>,
+    val personerFremstiltKravFor: List<Aktør>,
 ) {
     val utfylteEndredeUtbetalinger =
         endredeUtbetalinger
@@ -94,7 +95,7 @@ data class BehandlingsGrunnlagForVedtaksperioder(
             .filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
 
     fun utledGrunnlagTidslinjePerPerson(
-        erToggleForÅIkkeSplittePåValutakursendringerPå: Boolean,
+        skalSplittePåValutakursendringer: Boolean = true,
     ): Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag> {
         val søker = persongrunnlag.søker
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
@@ -102,8 +103,6 @@ data class BehandlingsGrunnlagForVedtaksperioder(
 
         val erMinstEttBarnMedUtbetalingTidslinje =
             hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, behandling.fagsak.type, persongrunnlag)
-
-        val erUtbetalingSmåbarnstilleggTidslinje = this.andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
 
         val personresultaterOgRolleForVilkår =
             if (behandling.fagsak.type.erBarnSøker()) {
@@ -143,19 +142,11 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                                 person,
                             ),
                         vedtaksperiodeGrunnlagForPerson =
-                            if (erToggleForÅIkkeSplittePåValutakursendringerPå) {
-                                forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinjeNy(
-                                    person = person,
-                                    erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
-                                    vilkårRolle = vilkårRolle,
-                                )
-                            } else {
-                                forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinjeGammel(
-                                    person = person,
-                                    erUtbetalingSmåbarnstilleggTidslinje = erUtbetalingSmåbarnstilleggTidslinje,
-                                    vilkårRolle = vilkårRolle,
-                                )
-                            },
+                            forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                                person = person,
+                                vilkårRolle = vilkårRolle,
+                                skalSplittePåValutakursendringer = skalSplittePåValutakursendringer,
+                            ),
                     )
             }
 
@@ -217,11 +208,12 @@ data class BehandlingsGrunnlagForVedtaksperioder(
                 }
             }
 
-    private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinjeNy(
+    private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
         person: Person,
-        erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
         vilkårRolle: PersonType,
+        skalSplittePåValutakursendringer: Boolean,
     ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> {
+        val småbarnstilleggTidslinje = andelerTilkjentYtelse.hentErUtbetalingSmåbarnstilleggTidslinje()
         val kompetanseTidslinje =
             utfylteKompetanser
                 .filtrerPåAktør(person.aktør)
@@ -243,94 +235,25 @@ data class BehandlingsGrunnlagForVedtaksperioder(
         val overgangsstønadTidslinje =
             perioderOvergangsstønad
                 .filtrerPåAktør(person.aktør)
-                .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
+                .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(småbarnstilleggTidslinje)
 
         val andelTilkjentYtelseTidslinje =
             andelerTilkjentYtelse
                 .filtrerPåAktør(person.aktør)
                 .filtrerPåRolle(vilkårRolle)
-                .tilAndelerForVedtaksPeriodeTidslinje()
+                .tilAndelerTidslinje(skalSplittePåValutakursendringer = skalSplittePåValutakursendringer)
 
         val grunnlagTidslinje =
             this
                 .tilVilkårResultaterForVedtaksPeriodeTidslinje()
                 .kombinerMed(andelTilkjentYtelseTidslinje) { vilkårResultater, andeler ->
-                    lagGrunnlagForVilkårOgAndelNy(
+                    lagGrunnlagForVilkårOgAndel(
                         vilkårResultater = vilkårResultater,
                         person = person,
                         andeler = andeler,
                     )
                 }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
                     lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
-                }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
-                    lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
-                }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
-                    lagGrunnlagMedEndretUtbetalingAndel(grunnlagForPerson, endretUtbetalingAndel)
-                }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
-                    lagGrunnlagMedOvergangsstønad(grunnlagForPerson, overgangsstønad)
-                }.filtrerIkkeNull()
-
-        return grunnlagTidslinje
-            .slåSammenLike()
-            .perioder()
-            .dropWhile { !it.erInnvilgetEllerEksplisittAvslag() }
-            .tilTidslinje()
-    }
-
-    @Deprecated("Bruk heller tilGrunnlagForPersonTidslinjeNy. Kan fjernes når feature toggle IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS ikke lenger er i bruk.")
-    private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinjeGammel(
-        person: Person,
-        erUtbetalingSmåbarnstilleggTidslinje: Tidslinje<Boolean, Måned>,
-        vilkårRolle: PersonType,
-    ): Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned> {
-        val kompetanseTidslinje =
-            utfylteKompetanser
-                .filtrerPåAktør(person.aktør)
-                .tilTidslinje()
-                .mapIkkeNull { KompetanseForVedtaksperiode(it) }
-
-        val utenlandskPeriodebeløpTidslinje =
-            utfylteUtenlandskPeriodebeløp
-                .filtrerPåAktør(person.aktør)
-                .tilTidslinje()
-                .mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
-
-        val endredeUtbetalingerTidslinje =
-            utfylteEndredeUtbetalinger
-                .filtrerPåAktør(person.aktør)
-                .tilTidslinje()
-                .mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
-
-        val valutakursTidslinje =
-            utfylteValutakurs
-                .filtrerPåAktør(person.aktør)
-                .tilTidslinje()
-                .mapIkkeNull { ValutakursForVedtaksperiode(it) }
-
-        val overgangsstønadTidslinje =
-            perioderOvergangsstønad
-                .filtrerPåAktør(person.aktør)
-                .tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(erUtbetalingSmåbarnstilleggTidslinje)
-
-        val andelTilkjentYtelseTidslinje =
-            andelerTilkjentYtelse
-                .filtrerPåAktør(person.aktør)
-                .filtrerPåRolle(vilkårRolle)
-                .tilAndelerForVedtaksbegrunnelseTidslinje()
-
-        val grunnlagTidslinje =
-            this
-                .tilVilkårResultaterForVedtaksPeriodeTidslinje()
-                .kombinerMed(andelTilkjentYtelseTidslinje) { vilkårResultater, andeler ->
-                    lagGrunnlagForVilkårOgAndelGammel(
-                        vilkårResultater = vilkårResultater,
-                        person = person,
-                        andeler = andeler,
-                    )
-                }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
-                    lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
-                }.kombinerMedNullable(valutakursTidslinje) { grunnlagForPerson, valutakurs ->
-                    lagGrunnlagMedValutakurs(grunnlagForPerson, valutakurs)
                 }.kombinerMedNullable(utenlandskPeriodebeløpTidslinje) { grunnlagForPerson, utenlandskPeriodebeløp ->
                     lagGrunnlagMedUtenlandskPeriodebeløp(grunnlagForPerson, utenlandskPeriodebeløp)
                 }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
@@ -501,39 +424,15 @@ private fun Iterable<VilkårResultat>.filtrerErIkkeOrdinærtFor(persontype: Pers
     return this.filterNot { ordinæreVilkårForPerson.contains(it.vilkårType) }
 }
 
-private fun lagGrunnlagForVilkårOgAndelNy(
+private fun lagGrunnlagForVilkårOgAndel(
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
-    andeler: Iterable<AndelForVedtaksperiode>?,
+    andeler: Iterable<AndelForVedtaksobjekt>?,
 ): VedtaksperiodeGrunnlagForPerson {
     val andelerListe = andeler?.toList()
 
     return if (!andelerListe.isNullOrEmpty()) {
-        VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy(
-            vilkårResultaterForVedtaksperiode =
-                vilkårResultater
-                    ?: error("vilkårResultatene burde alltid finnes om vi har andeler."),
-            person = person,
-            andeler = andeler,
-        )
-    } else {
-        VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
-            vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
-            person = person,
-        )
-    }
-}
-
-@Deprecated("Bruk heller lagGrunnlagForVilkårOgAndelNy. Kan fjernes når feature toggle IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS ikke lenger er i bruk.")
-private fun lagGrunnlagForVilkårOgAndelGammel(
-    vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
-    person: Person,
-    andeler: Iterable<AndelForVedtaksbegrunnelse>?,
-): VedtaksperiodeGrunnlagForPerson {
-    val andelerListe = andeler?.toList()
-
-    return if (!andelerListe.isNullOrEmpty()) {
-        VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel(
+        VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
             vilkårResultaterForVedtaksperiode =
                 vilkårResultater
                     ?: error("vilkårResultatene burde alltid finnes om vi har andeler."),
@@ -552,18 +451,7 @@ private fun lagGrunnlagMedKompetanse(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
     kompetanse: KompetanseForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> vedtaksperiodeGrunnlagForPerson.copy(kompetanse = kompetanse)
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> vedtaksperiodeGrunnlagForPerson.copy(kompetanse = kompetanse)
-    is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
-    null -> null
-}
-
-private fun lagGrunnlagMedValutakurs(
-    vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
-    valutakursForVedtaksperiode: ValutakursForVedtaksperiode?,
-) = when (vedtaksperiodeGrunnlagForPerson) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> vedtaksperiodeGrunnlagForPerson.copy(valutakurs = valutakursForVedtaksperiode)
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> vedtaksperiodeGrunnlagForPerson.copy(valutakurs = valutakursForVedtaksperiode)
+    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(kompetanse = kompetanse)
     is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
@@ -572,8 +460,7 @@ private fun lagGrunnlagMedUtenlandskPeriodebeløp(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
     utenlandskPeriodebeløp: UtenlandskPeriodebeløpForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> vedtaksperiodeGrunnlagForPerson.copy(utenlandskPeriodebeløp = utenlandskPeriodebeløp)
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> vedtaksperiodeGrunnlagForPerson.copy(utenlandskPeriodebeløp = utenlandskPeriodebeløp)
+    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(utenlandskPeriodebeløp = utenlandskPeriodebeløp)
     is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
@@ -582,8 +469,7 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
     endretUtbetalingAndel: IEndretUtbetalingAndelForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
+    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(endretUtbetalingAndel = endretUtbetalingAndel)
     is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
@@ -592,18 +478,25 @@ private fun lagGrunnlagMedOvergangsstønad(
     vedtaksperiodeGrunnlagForPerson: VedtaksperiodeGrunnlagForPerson?,
     overgangsstønad: OvergangsstønadForVedtaksperiode?,
 ) = when (vedtaksperiodeGrunnlagForPerson) {
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetNy -> vedtaksperiodeGrunnlagForPerson.copy(overgangsstønad = overgangsstønad)
-    is VedtaksperiodeGrunnlagForPersonVilkårInnvilgetGammel -> vedtaksperiodeGrunnlagForPerson.copy(overgangsstønad = overgangsstønad)
+    is VedtaksperiodeGrunnlagForPersonVilkårInnvilget -> vedtaksperiodeGrunnlagForPerson.copy(overgangsstønad = overgangsstønad)
     is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget -> vedtaksperiodeGrunnlagForPerson
     null -> null
 }
 
-fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje(): Tidslinje<Iterable<AndelForVedtaksperiode>, Måned> =
-    this
-        .tilAndelForVedtaksperiodeTidslinjerPerAktørOgType()
-        .values
-        .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
-        .kombiner()
+fun List<AndelTilkjentYtelse>.tilAndelerTidslinje(skalSplittePåValutakursendringer: Boolean): Tidslinje<out Iterable<AndelForVedtaksobjekt>, Måned> =
+    if (skalSplittePåValutakursendringer) {
+        this
+            .tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType()
+            .values
+            .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
+            .kombiner()
+    } else {
+        this
+            .tilAndelForVedtaksperiodeTidslinjerPerAktørOgType()
+            .values
+            .map { tidslinje -> tidslinje.mapIkkeNull { it }.slåSammenLike() }
+            .kombiner()
+    }
 
 // Vi trenger dette for å kunne begrunne nye perioder med småbarnstillegg som vi ikke hadde i forrige behandling
 fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(

@@ -6,24 +6,24 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
   Bakgrunn:
 
   Scenario: Når det er et avslag samtidig som et eksplisitt avslag skal kun barnet med eksplisitt avslag flettes inn i begrunnelsen
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat         | Behandlingsårsak | Skal behandles automatisk |
       | 1            | 1        |                     | DELVIS_INNVILGET_OG_OPPHØRT | SØKNAD           | Nei                       |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 14.10.1987  |
       | 1            | 3456    | BARN       | 13.01.2017  |
       | 1            | 5678    | BARN       | 08.02.2013  |
 
-    Og følgende dagens dato 12.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 12.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser |
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 05.05.2022 |            | OPPFYLT      | Nei                  |                      |
 
@@ -39,7 +39,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 05.05.2022 |            | OPPFYLT      | Nei                  |                      |
       | 3456    | BOR_MED_SØKER                 |                  | 03.03.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_BOR_HOS_SØKER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 5678    | 1            | 01.06.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 5678    | 1            | 01.03.2023 | 31.03.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -57,24 +57,24 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
 
   Scenario: Når det er et avslag samtidig som et eksplisitt avslag og det ikke er valgt noen begrunnelse for avslaget skal vi ikke få opp noen avslagsbegrunnelse
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat         | Behandlingsårsak | Skal behandles automatisk |
       | 1            | 1        |                     | DELVIS_INNVILGET_OG_OPPHØRT | SØKNAD           | Nei                       |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 14.10.1987  |
       | 1            | 3456    | BARN       | 13.01.2017  |
       | 1            | 5678    | BARN       | 08.02.2013  |
 
-    Og følgende dagens dato 12.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 12.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser |
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 05.05.2022 |            | OPPFYLT      | Nei                  |                      |
 
@@ -90,7 +90,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 3456    | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 05.05.2022 |            | OPPFYLT      | Nei                  |                      |
       | 3456    | BOR_MED_SØKER                 |                  | 03.03.2023 |            | IKKE_OPPFYLT | Ja                   |                      |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 5678    | 1            | 01.06.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 5678    | 1            | 01.03.2023 | 31.03.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -106,25 +106,25 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
 
   Scenario: Skal ta med barna med avslag når det er avslag på søker og barn
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 30.07.1983  |
       | 1            | 2       | BARN       | 28.07.2012  |
       | 1            | 3       | BARN       | 24.06.2014  |
       | 1            | 4       | BARN       | 09.05.2018  |
 
-    Og følgende dagens dato 25.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 25.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              |
       | 1       | UTVIDET_BARNETRYGD            |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_BOR_IKKE_FAST_MED_BARNET   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 30.07.1983 |            | OPPFYLT      | Nei                  |                                   |
@@ -144,7 +144,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 4       | GIFT_PARTNERSKAP              |                  | 09.05.2018 |            | OPPFYLT      | Nei                  |                                   |
       | 4       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 09.05.2018 |            | OPPFYLT      | Nei                  |                                   |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
     Når vedtaksperiodene genereres for behandling 1
@@ -159,23 +159,23 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | AVSLAG_BOR_IKKE_FAST_MED_BARNET   | STANDARD | Ja            | 28.07.12, 24.06.14 og 09.05.18 | 0           |                                      | NB      | 0     |                         |
 
   Scenario: Skal flette inn barn i begrunnelse når vilkårene til barn er oppfylt, men det er avslag på søker
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 19.05.1997  |
       | 1            | 2       | BARN       | 07.08.2020  |
 
-    Og følgende dagens dato 26.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 26.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              |
       | 1       | LOVLIG_OPPHOLD                              |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |
       | 1       | BOSATT_I_RIKET                              |                  | 30.05.2023 |            | IKKE_OPPFYLT | Nei                  |                                                   |
@@ -184,7 +184,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 2       | UNDER_18_ÅR                                 |                  | 07.08.2020 | 06.08.2038 | OPPFYLT      | Nei                  |                                                   |
       | 2       | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 30.05.2023 |            | OPPFYLT      | Nei                  |                                                   |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
     Når vedtaksperiodene genereres for behandling 1
@@ -198,23 +198,23 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 0           | 0     |
 
   Scenario: Skal flette inn "du og barnet" når både søker og barn har avslag på samme vilkår
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 19.05.1997  |
       | 1            | 2       | BARN       | 07.08.2020  |
 
-    Og følgende dagens dato 26.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 26.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              |
       | 1       | LOVLIG_OPPHOLD               |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |
       | 1       | BOSATT_I_RIKET               |                  | 30.05.2023 |            | IKKE_OPPFYLT | Nei                  |                                                   |
@@ -224,7 +224,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 2       | BOR_MED_SØKER,BOSATT_I_RIKET |                  | 30.05.2023 |            | OPPFYLT      | Nei                  |                                                   |
       | 2       | LOVLIG_OPPHOLD               |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
     Når vedtaksperiodene genereres for behandling 1
@@ -238,24 +238,29 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | STANDARD | Ja            | 07.08.20             | 1           | 0     |
 
   Scenario: Skal ta med alle barna i begrunnelse når det er avslag på søker
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 30.01.1984  |              |
       | 1            | 2       | BARN       | 16.02.2013  |              |
       | 1            | 3       | BARN       | 02.08.2016  |              |
 
-    Og følgende dagens dato 01.02.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 01.02.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+      | 1            | 3       |
+
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                              | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD               |                  | 25.09.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
       | 1       | BOSATT_I_RIKET               |                  | 25.09.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
@@ -271,7 +276,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 3       | BOR_MED_SØKER                |                  | 02.11.2023 |            | OPPFYLT      | Nei                  |                                                   | NASJONALE_REGLER |
       | 3       | LOVLIG_OPPHOLD               |                  | 02.11.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
     Når vedtaksperiodene genereres for behandling 1
@@ -296,19 +301,23 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
   Scenario: Skal forskyve eksplisitt avslag når avslaget starter og opphører innenfor samme måned
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | DELVIS_INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 26.03.1977  |              |
       | 1            | 2       | BARN       | 09.01.2012  |              |
 
-    Og følgende dagens dato 25.01.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 25.01.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                             | 16.01.2023 | 31.01.2023 | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                  |
@@ -339,19 +348,23 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
   Scenario: Skal ikke forskyve eksplisitt avslag når det varer mer enn én måned
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | DELVIS_INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 26.03.1977  |              |
       | 1            | 2       | BARN       | 09.01.2012  |              |
 
-    Og følgende dagens dato 25.01.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 25.01.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.03.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                             | 16.01.2023 | 28.02.2023 | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                  |
@@ -381,19 +394,23 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
 
   Scenario: Skal forskyve avslagsperioder når de etterfølges av innvilget periode
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | DELVIS_INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 26.03.1977  |              |
       | 1            | 2       | BARN       | 09.01.2012  |              |
 
-    Og følgende dagens dato 25.01.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 25.01.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser              | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                             | 16.01.2023 | 31.01.2023 | IKKE_OPPFYLT | Ja                   | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE |                  |
@@ -405,7 +422,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 2       | BOR_MED_SØKER                 |                             | 01.02.2022 | 31.01.2023 | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
       | 2       | BOR_MED_SØKER                 | DELT_BOSTED_SKAL_IKKE_DELES | 01.02.2023 |            | OPPFYLT      | Nei                  |                                   | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 1       | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
       | 1       | 1            | 01.07.2023 | 31.12.2029 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
@@ -435,23 +452,27 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE | STANDARD | Ja            | 09.01.12             | 0           | januar 2023                          | 1 054 |
 
   Scenario: Skal lage riktige vedtaksperioder ved to sammenhengende eksplisitte avslag-perioder
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Fagsakstatus |
       | 1        | NORMAL     | OPPRETTET    |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 08.03.1994  |              |
       | 1            | 2       | BARN       | 21.01.2016  |              |
 
-    Og følgende dagens dato 30.04.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 30.04.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser         | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                          | 30.03.2023 |            | OPPFYLT      | Nei                  |                              | NASJONALE_REGLER |
 
@@ -461,7 +482,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                          | 31.03.2023 |            | OPPFYLT      | Nei                  |                              | NASJONALE_REGLER |
       | 2       | BOR_MED_SØKER                 |                          | 02.10.2023 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_BARN_HAR_FAST_BOSTED  | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
 
@@ -491,25 +512,31 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | AVSLAG_BARN_HAR_FAST_BOSTED | STANDARD | Nei           | 21.01.16             | 1           | oktober 2023                         | NB      | 0     |                  |                         |                             |
 
   Scenario: Skal flette inn riktige barn når samme begrunnelse gjelder to overlappende avslagsperioder
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Status    |
       | 1        | NORMAL     | OPPRETTET |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | AVSLÅTT             | SØKNAD           | Nei                       | EØS                 | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 28.03.1989  |              |
       | 1            | 2       | BARN       | 05.05.2017  |              |
       | 1            | 3       | BARN       | 09.05.2019  |              |
       | 1            | 4       | BARN       | 10.11.2021  |              |
 
-    Og følgende dagens dato 24.06.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 24.06.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 2       |
+      | 1            | 3       |
+      | 1            | 4       |
+
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser                          | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                              | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 31.05.2020 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
@@ -532,7 +559,7 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
       | 4       | BOR_MED_SØKER    |                              | 10.11.2021 |            | IKKE_OPPFYLT | Ja                   | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS_FORORDNINGEN |
       | 4       | LOVLIG_OPPHOLD   |                              | 10.11.2021 |            | OPPFYLT      | Nei                  |                                               | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
 
 

@@ -4,24 +4,24 @@
 Egenskap: Brevbegrunnelse ved endret utbeetaling
 
   Scenario: Skal gi to brevbegrunnelse når vi har delt bosted med flere avtaletidspunkt samme måned.
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 24.08.1987  |
       | 1            | 2       | BARN       | 15.06.2012  |
       | 1            | 3       | BARN       | 16.06.2016  |
 
-    Og følgende dagens dato 24.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 24.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser |
       | 1       | UTVIDET_BARNETRYGD,BOSATT_I_RIKET              |                  | 24.08.1987 |            | OPPFYLT  | Nei                  |                      |
       | 1       | LOVLIG_OPPHOLD                                 |                  | 15.02.2022 | 15.05.2022 | OPPFYLT  | Nei                  |                      |
@@ -36,14 +36,14 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 3       | UNDER_18_ÅR                                    |                  | 16.06.2016 | 15.06.2034 | OPPFYLT  | Nei                  |                      |
       | 3       | BOR_MED_SØKER                                  | DELT_BOSTED      | 02.02.2022 |            | OPPFYLT  | Nei                  |                      |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 1       | 1            | 01.03.2022 | 30.04.2022 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1       | 1            | 01.05.2022 | 31.05.2022 | 527   | UTVIDET_BARNETRYGD | 50      | 1054 |
       | 2       | 1            | 01.03.2022 | 31.05.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3       | 1            | 01.03.2022 | 31.05.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 3       | 1            | 01.03.2022 | 31.05.2022 | DELT_BOSTED | 100     | 02.02.2022       | 02.02.2022                  |
       | 2       | 1            | 01.05.2022 | 31.05.2022 | DELT_BOSTED | 100     | 04.04.2022       | 04.04.2022                  |
@@ -74,16 +74,16 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
 
   Scenario: Skal flette inn to barn med endret utbetaling delt bosted 100% hvor ett av barna også har redusert sats pga 6år
 
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | FORTSATT_INNVILGET  | OMREGNING_6ÅR    | Ja                        | NASJONAL            |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 28.05.1986  |
       | 1            | 2       | BARN       | 23.02.2011  |
@@ -93,11 +93,11 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 2            | 2       | BARN       | 23.02.2011  |
       | 2            | 3       | BARN       | 07.05.2015  |
       | 2            | 4       | BARN       | 03.12.2017  |
-    Og følgende dagens dato 18.12.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 18.12.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
@@ -114,7 +114,7 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 4       | GIFT_PARTNERSKAP                            |                  | 03.12.2017 |            | OPPFYLT  | Nei                  |                      |                  |
       | 4       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 31.12.2021 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
@@ -135,7 +135,7 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 4       | BOR_MED_SØKER                 |                  | 31.12.2021 | 14.11.2023 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 4       | BOR_MED_SØKER                 | DELT_BOSTED      | 15.11.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.01.2022 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
       | 2       | 1            | 01.03.2023 | 30.06.2023 | 542   | ORDINÆR_BARNETRYGD | 50      | 1083 |
@@ -161,7 +161,7 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 4       | 2            | 01.12.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 4       | 2            | 01.01.2024 | 30.11.2035 | 655   | ORDINÆR_BARNETRYGD | 50      | 1310 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 4       | 2            | 01.12.2023 | 31.12.2023 | DELT_BOSTED | 100     | 06.12.2023       | 2023-11-05                  |
       | 3       | 2            | 01.12.2023 | 31.12.2023 | DELT_BOSTED | 100     | 06.12.2023       | 2023-11-05                  |
@@ -189,16 +189,16 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY | STANDARD | Nei           | 07.05.15 og 03.12.17 | 2           | november 2023                        | NB      | 2 620 | 06.12.23         |                         |                             |
 
   Scenario: Skal ikke flette inn barn som ikke har utbetaling pga allerede utbetalt i begrunnelse som gjelder søker
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Fagsakstatus |
       | 1        | NORMAL     | AVSLUTTET    |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | AVSLUTTET         |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 01.01.1990  |              |
       | 1            | 2       | BARN       | 13.04.2021  |              |
@@ -206,11 +206,11 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 2            | 2       | BARN       | 13.04.2021  |              |
       | 2            | 3       | BARN       | 22.12.2022  |              |
 
-    Og følgende dagens dato 22.03.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 22.03.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                       | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD               |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | BOSATT_I_RIKET               |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
@@ -220,7 +220,7 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 2       | BOR_MED_SØKER,LOVLIG_OPPHOLD |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 2       | BOSATT_I_RIKET               |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET                              |                  | 01.03.2022 | 01.10.2022 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | LOVLIG_OPPHOLD                              |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
@@ -236,7 +236,7 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 3       | UNDER_18_ÅR                                 |                  | 22.12.2022 | 21.12.2040 | OPPFYLT  | Nei                  |                      |                  |
       | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 22.09.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.04.2022 | 31.10.2022 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
 
@@ -247,7 +247,7 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
       | 3       | 2            | 01.01.2024 | 30.11.2028 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 3       | 2            | 01.12.2028 | 30.11.2040 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 3       | 2            | 01.10.2023 | 31.12.2023 | ALLEREDE_UTBETALT | 0       | 14.12.2023       |                             |
 

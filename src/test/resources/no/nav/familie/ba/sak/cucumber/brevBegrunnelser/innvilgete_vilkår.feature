@@ -4,25 +4,25 @@
 Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkår
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 31.01.1985  |
       | 1            | 3456    | BARN       | 02.02.2015  |
       | 1            | 5678    | BARN       | 07.09.2019  |
 
   Scenario: Du og barna - skal ha med begge barn og søker
-    Og følgende dagens dato 26.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 26.09.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                        | Fra dato   | Til dato   | Resultat |
       | 1234    | LOVLIG_OPPHOLD                                | 31.01.1985 |            | OPPFYLT  |
       | 1234    | BOSATT_I_RIKET                                | 11.11.2022 |            | OPPFYLT  |
@@ -35,7 +35,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 5678    | UNDER_18_ÅR                                   | 07.09.2019 | 06.09.2037 | OPPFYLT  |
       | 5678    | BOSATT_I_RIKET                                | 11.11.2022 |            | OPPFYLT  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.12.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3456    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -55,11 +55,11 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
 
   Scenario: barnet - skal kun ta med et barn når det bare er et barn som har endring i vilkår
-    Og følgende dagens dato 27.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 27.09.2023
+    Og lag personresultater for behandling 1
 
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                         | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  | 31.01.1985 |            | OPPFYLT  |
 
@@ -71,7 +71,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 5678    | UNDER_18_ÅR                                    | 07.09.2019 | 06.09.2037 | OPPFYLT  |
       | 5678    | BOSATT_I_RIKET                                 | 11.11.2022 |            | OPPFYLT  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.06.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 3456    | 1            | 01.07.2023 | 31.01.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
@@ -90,10 +90,10 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
 
   Scenario: Back to back perioder - ønsker kun å begrunne barnet som har flyttet til søker i INNVILGET_BOR_HOS_SØKER
-    Og følgende dagens dato 27.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 27.09.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 5678    | BOSATT_I_RIKET,GIFT_PARTNERSKAP,LOVLIG_OPPHOLD |                  | 07.09.2019 |            | OPPFYLT  | Nei                  |
       | 5678    | UNDER_18_ÅR                                    |                  | 07.09.2019 | 06.09.2037 | OPPFYLT  | Nei                  |
@@ -106,7 +106,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  |                  | 26.11.1984 |            | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.06.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 3456    | 1            | 01.07.2023 | 31.01.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
@@ -132,10 +132,10 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
 
 
   Scenario:Endret for 1 av 2 - Skal kun flette inn barnet som det er utbetaling for når det andre barnet etterbetales
-    Og følgende dagens dato 27.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 27.09.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat |
       | 5678    | BOSATT_I_RIKET,LOVLIG_OPPHOLD,GIFT_PARTNERSKAP,BOR_MED_SØKER | 07.09.2019 |            | OPPFYLT  |
       | 5678    | UNDER_18_ÅR                                                  | 07.09.2019 | 06.09.2037 | OPPFYLT  |
@@ -146,7 +146,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 3456    | UNDER_18_ÅR                                                  | 02.02.2015 | 01.02.2033 | OPPFYLT  |
       | 3456    | BOR_MED_SØKER                                                | 07.09.2019 |            | OPPFYLT  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.10.2019 | 30.09.2020 | 0     | ORDINÆR_BARNETRYGD | 0       | 1054 |
       | 3456    | 1            | 01.10.2020 | 31.01.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
@@ -161,7 +161,7 @@ Egenskap: Brevbegrunnelser med riktig fletting av personer med innvilgede vilkå
       | 5678    | 1            | 01.07.2023 | 31.08.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 5678    | 1            | 01.09.2025 | 31.08.2037 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
       | 3456    | 1            | 01.10.2019 | 30.09.2020 | ETTERBETALING_3ÅR | 0       |
 
