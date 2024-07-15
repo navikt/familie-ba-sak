@@ -2,11 +2,11 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 
-fun mockTotrinnskontrollRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): TotrinnskontrollRepository {
+fun mockTotrinnskontrollRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): TotrinnskontrollRepository {
     val totrinnskontrollRepository = mockk<TotrinnskontrollRepository>()
 
     every { totrinnskontrollRepository.save(any()) } answers {
