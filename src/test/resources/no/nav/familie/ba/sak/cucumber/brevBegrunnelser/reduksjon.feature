@@ -4,15 +4,15 @@
 Egenskap: Brevbegrunnelser ved reduksjon
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 5678    | BARN       | 06.04.2006  |
       | 1            | 3456    | BARN       | 09.04.2005  |
@@ -20,10 +20,10 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 1            | 7890    | BARN       | 24.06.2010  |
 
   Scenario: Frafall av andeler og ikke kompetanse
-    Og følgende dagens dato 11.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 11.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Vurderes etter   |
       | 7890    | UNDER_18_ÅR      |                              | 24.06.2010 | 23.06.2028 | OPPFYLT  |                  |
       | 7890    | GIFT_PARTNERSKAP |                              | 24.06.2010 |            | OPPFYLT  |                  |
@@ -46,7 +46,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 5678    | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 11.11.2022 |            | OPPFYLT  | EØS_FORORDNINGEN |
       | 5678    | BOSATT_I_RIKET   | BARN_BOR_I_NORGE             | 11.11.2022 |            | OPPFYLT  | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.12.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3456    | 1            | 01.03.2023 | 31.03.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -59,7 +59,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 7890    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 7890    | 1            | 01.07.2023 | 31.05.2028 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId          | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 7890, 3456, 5678 | 01.12.2022 | 31.03.2023 | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | DK                             | DK                  |
       | 7890, 5678       | 01.04.2023 |            | NORGE_ER_PRIMÆRLAND | 1            | ARBEIDER         | I_ARBEID                  | NO                    | DK                             | DK                  |
@@ -81,16 +81,16 @@ Egenskap: Brevbegrunnelser ved reduksjon
 
   Scenario: Reduksjon før fylt 18
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 5678    | BARN       | 18.10.2009  |
       | 1            | 1234    | SØKER      | 30.03.1988  |
       | 1            | 3456    | BARN       | 15.04.2005  |
 
-    Og følgende dagens dato 12.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 12.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 3456    | GIFT_PARTNERSKAP                            |                  | 15.04.2005 |            | OPPFYLT  | Nei                  |
       | 3456    | UNDER_18_ÅR                                 |                  | 15.04.2005 | 14.04.2023 | OPPFYLT  | Nei                  |
@@ -103,7 +103,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 5678    | UNDER_18_ÅR                                 |                  | 18.10.2009 | 17.10.2027 | OPPFYLT  | Nei                  |
       | 5678    | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.03.2022 |            | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.04.2022 | 30.06.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 5678    | 1            | 01.04.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
@@ -121,16 +121,16 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | REDUKSJON_FLYTTET_BARN | 15.04.05             | 1           | NB      | 0     | Nei           | juni 2022                            |
 
   Scenario: Reduksjon på ett barn - innvilgelse på det andre barnet - kun barnet som har flyttet vekk skal flettes inn i reduksjonstekst
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 16.07.1975  |
       | 1            | 2       | BARN       | 09.06.2009  |
@@ -138,11 +138,11 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 2            | 1       | SØKER      | 16.07.1975  |
       | 2            | 2       | BARN       | 09.06.2009  |
       | 2            | 3       | BARN       | 07.08.2011  |
-    Og følgende dagens dato 19.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 19.10.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |
 
@@ -156,7 +156,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 3       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |
       | 3       | BOR_MED_SØKER                 | DELT_BOSTED      | 01.04.2022 |            | OPPFYLT  | Nei                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT      | Nei                  |
 
@@ -172,7 +172,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT      | Nei                  |
       | 3       | BOR_MED_SØKER                 |                  | 03.01.2023 |            | IKKE_OPPFYLT | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.05.2022 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
       | 2       | 1            | 01.03.2023 | 30.06.2023 | 542   | ORDINÆR_BARNETRYGD | 50      | 1083 |
@@ -210,16 +210,16 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | REDUKSJON_AVTALE_FAST_BOSTED                         | STANDARD | Nei           | 07.08.11             | 1           | januar 2023                          | NB      | 0     |
 
   Scenario: Skal ikke flette inn barn som tidligere har opphørt i reduksjonstekst
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 17.11.1986  |              |
       | 1            | 2       | BARN       | 01.09.2007  |              |
@@ -230,11 +230,11 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 2            | 3       | BARN       | 18.02.2011  | 08.03.2022   |
       | 2            | 4       | BARN       | 10.10.2023  |              |
 
-    Og følgende dagens dato 29.02.2024
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 29.02.2024
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD                          |                  | 01.02.2022 | 10.10.2023 | OPPFYLT  | Nei                  |                      |                  |
@@ -251,7 +251,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 4       | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 10.10.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 4       | UNDER_18_ÅR                                 |                  | 10.10.2023 | 09.10.2041 | OPPFYLT  | Nei                  |                      |                  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD                          |                  | 01.02.2022 | 10.10.2023 | OPPFYLT  | Nei                  |                      |                  |
@@ -269,7 +269,7 @@ Egenskap: Brevbegrunnelser ved reduksjon
       | 4       | UNDER_18_ÅR                                 |                  | 10.10.2023 | 09.10.2041 | OPPFYLT  | Nei                  |                      |                  |
       | 4       | GIFT_PARTNERSKAP                            |                  | 10.10.2023 |            | OPPFYLT  | Nei                  |                      |                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 1       | 1            | 01.03.2022 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
       | 1       | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |

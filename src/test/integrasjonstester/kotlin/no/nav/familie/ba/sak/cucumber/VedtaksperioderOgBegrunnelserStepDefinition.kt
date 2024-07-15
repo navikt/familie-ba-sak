@@ -16,9 +16,11 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -40,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -64,7 +67,7 @@ val sanityBegrunnelserMock = SanityBegrunnelseMock.hentSanityBegrunnelserMock()
 val sanityEØSBegrunnelserMock = SanityBegrunnelseMock.hentSanityEØSBegrunnelserMock()
 
 @Suppress("ktlint:standard:function-naming")
-class BegrunnelseTeksterStepDefinition {
+class VedtaksperioderOgBegrunnelserStepDefinition {
     var fagsaker: MutableMap<Long, Fagsak> = mutableMapOf()
     var behandlinger = mutableMapOf<Long, Behandling>()
     var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
@@ -80,20 +83,20 @@ class BegrunnelseTeksterStepDefinition {
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()
     var overgangsstønader = mutableMapOf<Long, List<InternPeriodeOvergangsstønad>>()
     var totrinnskontroller = mutableMapOf<Long, Totrinnskontroll>()
+    var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
-
-    var gjeldendeBehandlingId: Long? = null
 
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
     var målform: Målform = Målform.NB
     var søknadstidspunkt: LocalDate? = null
+    var personerFremstiltKravFor = mapOf<Long, List<Aktør>>()
 
     /**
      * Mulige verdier: | FagsakId | Fagsaktype | Status |
      */
-    @Gitt("følgende fagsaker for begrunnelse")
-    fun `følgende fagsaker for begrunnelse`(dataTable: DataTable) {
+    @Gitt("følgende fagsaker")
+    fun `følgende fagsaker`(dataTable: DataTable) {
         fagsaker = lagFagsaker(dataTable)
     }
 
@@ -101,8 +104,8 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige felter:
      * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus |
      */
-    @Gitt("følgende behandling")
-    fun `følgende behandling`(dataTable: DataTable) {
+    @Gitt("følgende behandlinger")
+    fun `følgende behandlinger`(dataTable: DataTable) {
         lagVedtak(
             dataTable = dataTable,
             behandlinger = behandlinger,
@@ -115,8 +118,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | BehandlingId |  AktørId | Persontype | Fødselsdato |
      */
-    @Og("følgende persongrunnlag for begrunnelse")
-    fun `følgende persongrunnlag for begrunnelse`(dataTable: DataTable) {
+    @Og("følgende persongrunnlag")
+    fun `følgende persongrunnlag`(dataTable: DataTable) {
         val personGrunnlagMap = lagPersonGrunnlag(dataTable)
         persongrunnlag.putAll(personGrunnlagMap)
 
@@ -135,12 +138,27 @@ class BegrunnelseTeksterStepDefinition {
                 }.toMutableMap()
     }
 
-    @Og("følgende dagens dato {}")
-    fun `følgende dagens dato`(dagensDatoString: String) {
+    @Og("dagens dato er {}")
+    fun `dagens dato er`(dagensDatoString: String) {
         dagensDato = parseDato(dagensDatoString)
     }
 
-    @Og("lag personresultater for begrunnelse for behandling {}")
+    /**
+     * Mulige verdier: | BehandlingId | AktørId |
+     */
+    @Og("med personer fremstilt krav for")
+    fun `med personer fremstilt krav for`(dataTable: DataTable) {
+        personerFremstiltKravFor =
+            dataTable
+                .asMaps()
+                .map { rad ->
+                    val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+                    val person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { parseAktørId(rad) == it.aktør.aktørId } ?: throw Feil("Person fremstilt krav for finnes ikke i persongrunnlag")
+                    Pair(behandlingId, person.aktør)
+                }.groupBy({ it.first }, { it.second })
+    }
+
+    @Og("lag personresultater for behandling {}")
     fun `lag personresultater for begrunnelse`(behandlingId: Long) {
         val persongrunnlagForBehandling = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId)
         val behandling = behandlinger.finnBehandling(behandlingId)
@@ -151,7 +169,7 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | AktørId | Vilkår | Utdypende vilkår | Fra dato | Til dato | Resultat | Er eksplisitt avslag | Vurderes etter |
      */
-    @Og("legg til nye vilkårresultater for begrunnelse for behandling {}")
+    @Og("legg til nye vilkårresultater for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(
         behandlingId: Long,
         dataTable: DataTable,
@@ -170,8 +188,8 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige felt:
      * | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
      */
-    @Og("med kompetanser for begrunnelse")
-    fun `med kompetanser for begrunnelse`(dataTable: DataTable) {
+    @Og("med kompetanser")
+    fun `med kompetanser`(dataTable: DataTable) {
         val nyeKompetanserPerBarn = dataTable.asMaps()
         kompetanser = lagKompetanser(nyeKompetanserPerBarn, persongrunnlag)
     }
@@ -181,8 +199,8 @@ class BegrunnelseTeksterStepDefinition {
      * | AktørId | Fra dato | Til dato | BehandlingId | Valutakursdato | Valuta kode | Kurs
      */
 
-    @Og("med valutakurs for begrunnelse")
-    fun `med valutakurs for begrunnelse`(dataTable: DataTable) {
+    @Og("med valutakurser")
+    fun `med valutakurser`(dataTable: DataTable) {
         val nyeValutakursPerBarn = dataTable.asMaps()
         valutakurs = lagValutakurs(nyeValutakursPerBarn, persongrunnlag)
     }
@@ -191,8 +209,8 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige felt:
      * | AktørId | Fra dato | Til dato | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland
      */
-    @Og("med utenlandsk periodebeløp for begrunnelse")
-    fun `med utenlandsk periodebeløp for begrunnelse`(dataTable: DataTable) {
+    @Og("med utenlandsk periodebeløp")
+    fun `med utenlandsk periodebeløp`(dataTable: DataTable) {
         val nyeUtenlandskPeriodebeløpPerBarn = dataTable.asMaps()
         utenlandskPeriodebeløp = lagUtenlandskperiodeBeløp(nyeUtenlandskPeriodebeløpPerBarn, persongrunnlag)
     }
@@ -200,8 +218,8 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | AktørId | Fra dato | Til dato | BehandlingId |  Årsak | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
      */
-    @Og("med endrede utbetalinger for begrunnelse")
-    fun `med endrede utbetalinger for begrunnelse`(dataTable: DataTable) {
+    @Og("med endrede utbetalinger")
+    fun `med endrede utbetalinger`(dataTable: DataTable) {
         val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
         endredeUtbetalinger = lagEndredeUtbetalinger(nyeEndredeUtbetalingAndeler, persongrunnlag)
     }
@@ -209,16 +227,16 @@ class BegrunnelseTeksterStepDefinition {
     /**
      * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
      */
-    @Og("med andeler tilkjent ytelse for begrunnelse")
-    fun `med andeler tilkjent ytelse for begrunnelse`(dataTable: DataTable) {
+    @Og("med andeler tilkjent ytelse")
+    fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
         tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
     }
 
     /**
      * Mulige verdier: | BehandlingId | AktørId | Fra dato | Til dato |
      */
-    @Og("med overgangsstønad for begrunnelse")
-    fun `med overgangsstønad for begrunnelse`(dataTable: DataTable) {
+    @Og("med overgangsstønad")
+    fun `med overgangsstønad`(dataTable: DataTable) {
         overgangsstønader =
             lagOvergangsstønad(
                 dataTable = dataTable,
@@ -226,6 +244,11 @@ class BegrunnelseTeksterStepDefinition {
                 tidligereBehandlinger = behandlingTilForrigeBehandling,
                 dagensDato = dagensDato,
             ).toMutableMap()
+    }
+
+    @Og("med uregistrerte barn")
+    fun `med uregistrerte barn`() {
+        uregistrerteBarn = listOf(BarnMedOpplysninger(ident = ""))
     }
 
     /**
@@ -252,8 +275,6 @@ class BegrunnelseTeksterStepDefinition {
     }
 
     private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
-        gjeldendeBehandlingId = behandlingId
-
         val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
 
         vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
@@ -265,10 +286,9 @@ class BegrunnelseTeksterStepDefinition {
         vedtaksperioderMedBegrunnelser =
             genererVedtaksperioder(
                 vedtak = vedtak,
-                grunnlagForVedtakPerioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
-                grunnlagForVedtakPerioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
+                grunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
+                grunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
                 nåDato = dagensDato,
-                erToggleForÅIkkeSplittePåValutakursendringerPå = true,
             )
 
         val utvidedeVedtaksperioderMedBegrunnelser =
@@ -310,9 +330,10 @@ class BegrunnelseTeksterStepDefinition {
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                 perioderOvergangsstønad = overgangsstønader[behandlingId] ?: emptyList(),
-                uregistrerteBarn = emptyList(),
+                uregistrerteBarn = uregistrerteBarn,
                 utenlandskPeriodebeløp = utenlandskPeriodebeløp[behandlingId] ?: emptyList(),
                 valutakurs = valutakurs[behandlingId] ?: emptyList(),
+                personerFremstiltKravFor = personerFremstiltKravFor[behandlingId] ?: emptyList(),
             )
 
         val grunnlagForVedtaksperiodeForrigeBehandling =
@@ -327,9 +348,10 @@ class BegrunnelseTeksterStepDefinition {
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                     andelerTilkjentYtelse = tilkjenteYtelser[forrigeBehandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList(),
                     perioderOvergangsstønad = overgangsstønader[forrigeBehandlingId] ?: emptyList(),
-                    uregistrerteBarn = emptyList(),
+                    uregistrerteBarn = uregistrerteBarn,
                     utenlandskPeriodebeløp = utenlandskPeriodebeløp[forrigeBehandlingId] ?: emptyList(),
                     valutakurs = valutakurs[forrigeBehandlingId] ?: emptyList(),
+                    personerFremstiltKravFor = personerFremstiltKravFor[forrigeBehandlingId] ?: emptyList(),
                 )
             }
 
@@ -454,13 +476,13 @@ class BegrunnelseTeksterStepDefinition {
         val internePerioderOvergangsstønad =
             dataTable
                 .asMaps()
-                .map({ rad ->
+                .map { rad ->
                     InternPeriodeOvergangsstønad(
                         fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
                         tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
                         personIdent = fagsak.aktør.aktivFødselsnummer(),
                     )
-                })
+                }
 
         mockAutovedtakSmåbarnstilleggService(
             dataFraCucumber = this,
@@ -477,7 +499,7 @@ class BegrunnelseTeksterStepDefinition {
      * Mulige verdier: | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats |
      */
     @Så("forvent følgende andeler tilkjent ytelse for behandling {}")
-    fun `med andeler tilkjent ytelse`(
+    fun `forvent andeler tilkjent ytelse`(
         behandlingId: Long,
         dataTable: DataTable,
     ) {
@@ -530,7 +552,7 @@ class BegrunnelseTeksterStepDefinition {
      * | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Behandlingsstatus | Behandlingssteg | Underkategori |
      */
     @Så("forvent disse behandlingene")
-    fun `med andeler tilkjent ytelse`(
+    fun `forvent disse behandlingene`(
         dataTable: DataTable,
     ) {
         val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker)
@@ -586,7 +608,6 @@ class BegrunnelseTeksterStepDefinition {
             utledEndringstidspunkt(
                 behandlingsGrunnlagForVedtaksperioder = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioder,
                 behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
-                erToggleForÅIkkeSplittePåValutakursendringerPå = true,
             )
 
         val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")

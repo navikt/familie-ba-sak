@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -12,6 +12,10 @@ Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
+
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
 
   Scenario: Skal kun ta med første opphørsperiode etter siste utbetalingsperiode. Eksplisitte avslag skal med uansett.
 
@@ -31,9 +35,9 @@ Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 30.06.2021 | 1054  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                               |
       | 01.05.2020 | 30.06.2021 | Utbetaling         | Barn1 og søker                                                          |
       | 01.07.2021 |            | Opphør             | Første opphør etter siste utbetalingsperiode                            |
@@ -54,9 +58,9 @@ Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar      |
       | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn1 og søker |
       | 01.04.2038 |            | Opphør             | Første opphør  |
@@ -76,9 +80,9 @@ Egenskap: Vedtaksperioder skal filtrere vekk irrelevante perioder
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar      |
       | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn1 og søker |
       | 01.04.2038 |            | Opphør             | Første opphør  |
