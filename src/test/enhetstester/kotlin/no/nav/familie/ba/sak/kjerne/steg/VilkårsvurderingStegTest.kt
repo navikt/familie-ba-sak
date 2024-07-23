@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -48,7 +47,6 @@ class VilkårsvurderingStegTest {
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
-    private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -63,7 +61,6 @@ class VilkårsvurderingStegTest {
             månedligValutajusteringSevice = mockk(),
             localDateProvider = RealDateProvider(),
             automatiskOppdaterValutakursService = mockk(),
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val behandling =
@@ -89,7 +86,6 @@ class VilkårsvurderingStegTest {
             )
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
-        every { unleashNextMedContextService.isEnabled(any()) } returns true
     }
 
     @Test

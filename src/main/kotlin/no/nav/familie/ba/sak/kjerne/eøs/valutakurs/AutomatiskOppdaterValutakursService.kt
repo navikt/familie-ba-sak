@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
@@ -217,9 +216,7 @@ class AutomatiskOppdaterValutakursService(
         behandlingId: BehandlingId,
         nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
-        if (!unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) ||
-            !unleashNextMedContextService.isEnabled(KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER)
-        ) {
+        if (!unleashNextMedContextService.isEnabled(KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER)) {
             throw Feil("Relevante toggler for å overstyre vurderingsstrategi for valutakurser er ikke satt.")
         }
 

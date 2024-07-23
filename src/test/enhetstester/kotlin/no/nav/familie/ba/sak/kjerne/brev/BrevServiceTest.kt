@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -43,8 +42,6 @@ class BrevServiceTest {
             utenlandskPeriodebeløpRepository = mockk(),
             valutakursRepository = mockk(),
             kompetanseRepository = mockk(),
-            unleashService = unleashService,
-            sammensattKontrollsakService = mockk(),
             endretUtbetalingAndelRepository = mockk(),
         )
 
@@ -131,21 +128,9 @@ class BrevServiceTest {
     }
 
     @Test
-    fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom featuretoggle er skrudd av`() {
-        val behandling = lagBehandling()
-
-        every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns false
-
-        val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
-
-        assertThat(erLøpendeDifferanseUtbetalingPåBehandling).isFalse()
-    }
-
-    @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det ikke er noe andeler i behandlingen`() {
         val behandling = lagBehandling()
 
-        every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns true
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns emptyList()
 
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
@@ -164,7 +149,6 @@ class BrevServiceTest {
                 ),
             )
 
-        every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns true
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andeler
 
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
@@ -183,7 +167,6 @@ class BrevServiceTest {
                 ),
             )
 
-        every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns true
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andeler
 
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)
@@ -203,7 +186,6 @@ class BrevServiceTest {
                 ),
             )
 
-        every { unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) } returns true
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andeler
 
         val erLøpendeDifferanseUtbetalingPåBehandling = brevService.sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling)

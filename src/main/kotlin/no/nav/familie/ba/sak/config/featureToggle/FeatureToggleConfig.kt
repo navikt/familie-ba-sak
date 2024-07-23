@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.config
 class FeatureToggleConfig {
     companion object {
         // Release
-        const val KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER = "familie-ba-sak.kan-opprette-automatiske-valutakurser-paa-manuelle-saker"
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
