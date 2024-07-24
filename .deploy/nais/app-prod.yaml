@@ -115,6 +115,43 @@ spec:
         - host: sentry.gc.nav.no
         - host: data-api.ecb.europa.eu
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
+        # Sanity IPs https://www.sanity.io/docs/api-cdn#5fa01dfe1285 (Fjernes når feilen er rettet av platform teamet https://nav-it.slack.com/archives/C5KUST8N6/p1719994144462539)
+        - ipv4: 35.241.31.122
+        - ipv4: 35.190.70.79
+        - ipv4: 35.186.208.30
+        - ipv4: 34.102.229.159
+        - ipv4: 34.102.211.197
+        - ipv4: 34.102.168.221
+        - ipv4: 34.102.220.13
+        - ipv4: 34.102.190.179
+        - ipv4: 34.102.233.224
+        - ipv4: 34.117.95.95
+        - ipv4: 34.160.140.40
+        - ipv4: 34.111.181.219
+        - ipv4: 34.111.150.233
+        - ipv4: 34.107.216.191
+        - ipv4: 34.102.242.91
+        - ipv4: 35.201.85.63
+        - ipv4: 35.190.90.94
+        - ipv4: 34.117.92.90
+        - ipv4: 34.149.250.58
+        - ipv4: 34.160.166.218
+        - ipv4: 34.160.171.86
+        - ipv4: 34.36.58.112
+        - ipv4: 34.117.0.159
+        - ipv4: 34.117.101.53
+        - ipv4: 34.49.170.196
+        - ipv4: 34.49.206.188
+        - ipv4: 35.201.69.243
+        - ipv4: 34.149.200.141
+        - ipv4: 34.98.114.57
+        - ipv4: 34.36.101.172
+        - ipv4: 34.49.15.205
+        - ipv4: 34.117.26.18
+        - ipv4: 34.95.108.139
+        - ipv4: 34.49.19.79
+        - ipv4: 34.49.99.193
+        - ipv4: 34.110.228.169
   replicas:
     min: 2
     max: 4
