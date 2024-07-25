@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -29,13 +29,13 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240624093832_8242223</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.18.0</cucumber.version>
+        <cucumber.version>7.18.1</cucumber.version>
         <mockk.version>1.13.12</mockk.version>
         <wiremock.version>3.8.0</wiremock.version>
         <token-validation-spring.version>5.0.1</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <sentry.version>7.10.0</sentry.version>
+        <sentry.version>7.12.0</sentry.version>
         <kotlinx.version>1.8.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -45,12 +45,12 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.8</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.20.0</testcontainers.postgresql.version>
         <unleash.version>9.2.2</unleash.version>
         <maven.model.version>3.9.8</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.11.3</avro.version>
-        <confluent.version>7.6.1</confluent.version>
+        <confluent.version>7.6.2</confluent.version>
     </properties>
 
     <dependencyManagement>
@@ -58,7 +58,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
