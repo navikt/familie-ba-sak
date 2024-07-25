@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
@@ -64,7 +65,13 @@ object EndringIUtbetalingUtil {
                 val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
                 val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-                nåværendeBeløp != forrigeBeløp
+                val erEndringIBeløp = nåværendeBeløp != forrigeBeløp
+
+                if (erEndringIBeløp) {
+                    secureLogger.info("Endring i beløp for ytelseType ${nåværende?.type ?: forrige?.type}. Nytt beløp = $nåværendeBeløp , forrige beløp = $forrigeBeløp")
+                }
+
+                erEndringIBeløp
             }
 
         return endringIBeløpTidslinje
