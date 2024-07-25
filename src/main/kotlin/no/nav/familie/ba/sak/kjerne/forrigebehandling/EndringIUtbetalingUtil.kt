@@ -60,6 +60,8 @@ object EndringIUtbetalingUtil {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
+        val endringer = mutableListOf<String>()
+
         val endringIBeløpTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
                 val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
@@ -68,11 +70,15 @@ object EndringIUtbetalingUtil {
                 val erEndringIBeløp = nåværendeBeløp != forrigeBeløp
 
                 if (erEndringIBeløp) {
-                    secureLogger.info("Endring i beløp for ytelseType ${nåværende?.type ?: forrige?.type}. Nytt beløp = $nåværendeBeløp , forrige beløp = $forrigeBeløp")
+                    endringer.add("Endring i beløp for ytelseType ${nåværende?.type ?: forrige?.type}. Nytt beløp = $nåværendeBeløp , forrige beløp = $forrigeBeløp")
                 }
 
                 erEndringIBeløp
             }
+
+        if (endringer.isNotEmpty()) {
+            secureLogger.info(endringer.joinToString(" ,"))
+        }
 
         return endringIBeløpTidslinje
     }
