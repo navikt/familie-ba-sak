@@ -30,7 +30,7 @@
         <utbetalingsgenerator.version>1.0_20240624093832_8242223</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.18.1</cucumber.version>
-        <mockk.version>1.13.11</mockk.version>
+        <mockk.version>1.13.12</mockk.version>
         <wiremock.version>3.9.0</wiremock.version>
         <token-validation-spring.version>5.0.1</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
