@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
@@ -60,25 +59,13 @@ object EndringIUtbetalingUtil {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
-        val endringer = mutableListOf<String>()
-
         val endringIBeløpTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
                 val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
                 val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-                val erEndringIBeløp = nåværendeBeløp != forrigeBeløp
-
-                if (erEndringIBeløp) {
-                    endringer.add("Endring i beløp for ytelseType ${nåværende?.type ?: forrige?.type}. Nytt beløp = $nåværendeBeløp , forrige beløp = $forrigeBeløp")
-                }
-
-                erEndringIBeløp
+                nåværendeBeløp != forrigeBeløp
             }
-
-        if (endringer.isNotEmpty()) {
-            secureLogger.info(endringer.joinToString(" ,"))
-        }
 
         return endringIBeløpTidslinje
     }
