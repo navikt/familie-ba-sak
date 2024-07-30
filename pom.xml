@@ -50,7 +50,7 @@
         <maven.model.version>3.9.8</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.11.3</avro.version>
-        <confluent.version>7.6.2</confluent.version>
+        <confluent.version>7.7.0</confluent.version>
     </properties>
 
     <dependencyManagement>
