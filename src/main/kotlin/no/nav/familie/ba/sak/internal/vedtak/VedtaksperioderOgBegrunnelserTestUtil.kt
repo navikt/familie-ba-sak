@@ -192,7 +192,7 @@ private fun hentTekstForPersonerFremstiltKravFor(
     """
     Og med personer fremstilt krav for
     | BehandlingId | AktørId |""" +
-        personerFremstiltKravFor.joinToString {
+        personerFremstiltKravFor.joinToString(separator = "") {
             """
     | $behandlingId | ${it.aktørId} |"""
         }
