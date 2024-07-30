@@ -22,7 +22,10 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
             "FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
             "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
-        mockServer.start()
+        val brukLokalMockserver = System.getProperty("brukLokalMockserver")?.toBoolean() ?: false
+        if (!brukLokalMockserver) {
+            mockServer.start()
+        }
     }
 
     companion object {
