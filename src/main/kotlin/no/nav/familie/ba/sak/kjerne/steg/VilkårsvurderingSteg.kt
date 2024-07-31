@@ -86,7 +86,10 @@ class VilkårsvurderingSteg(
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
-        if (behandling.type == BehandlingType.REVURDERING && !behandling.skalBehandlesAutomatisk) {
+        if (
+            behandling.type in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) &&
+            !behandling.skalBehandlesAutomatisk
+        ) {
             automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
         }
 
