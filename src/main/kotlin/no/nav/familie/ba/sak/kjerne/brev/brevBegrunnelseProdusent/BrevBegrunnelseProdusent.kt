@@ -271,6 +271,12 @@ private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnla
                     .isNullOrEmpty()
         }.keys
 
+private fun hentBarnMedAlleredeUtbetalt(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson
+        .filterKeys { it.type == PersonType.BARN }
+        .filterValues { it.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT }
+        .keys
+
 private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
     personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
@@ -283,6 +289,13 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnPåBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
     val barnMedUtbetaling =
         hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+    val erUtvidet = hentUtvidetAndelerIPeriode(begrunnelsesGrunnlagPerPerson).isNotEmpty()
+    val barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode =
+        if (barnMedUtbetaling.isEmpty() && erUtvidet) {
+            hentBarnMedAlleredeUtbetalt(begrunnelsesGrunnlagPerPerson)
+        } else {
+            barnMedUtbetaling
+        }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
@@ -313,7 +326,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                     relevanteBarn.map { it.fødselsdato }
                 }
 
-                else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
+                else -> (barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode + barnPåBegrunnelse).toSet().map { it.fødselsdato }
             }
         }
 

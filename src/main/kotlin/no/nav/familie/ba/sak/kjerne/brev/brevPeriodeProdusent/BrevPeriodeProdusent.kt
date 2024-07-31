@@ -75,7 +75,14 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
     begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
 ): BrevPeriode {
-    val barnMedUtbetaling = begrunnelseGrunnlagPerPerson.finnBarnMedUtbetaling().keys
+    val barnMedUtbetaling = begrunnelseGrunnlagPerPerson.finnBarnMedUtbetaling()
+    val erUtvidetIPeriode = begrunnelseGrunnlagPerPerson.erUtvidetIPeriode()
+    val barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode =
+        if (barnMedUtbetaling.isEmpty() && erUtvidetIPeriode) {
+            begrunnelseGrunnlagPerPerson.finnBarnMedAlleredeUtbetalt()
+        } else {
+            barnMedUtbetaling
+        }
     val beløp = begrunnelseGrunnlagPerPerson.hentTotaltUtbetaltIPeriode()
 
     val brevPeriodeType =
@@ -90,8 +97,8 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
         beløp = beløp.toString(),
         begrunnelser = begrunnelserOgFritekster,
         brevPeriodeType = brevPeriodeType,
-        antallBarn = barnMedUtbetaling.size.toString(),
-        barnasFodselsdager = barnMedUtbetaling.tilBarnasFødselsdatoer(),
+        antallBarn = barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode.size.toString(),
+        barnasFodselsdager = barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode.tilBarnasFødselsdatoer(),
         duEllerInstitusjonen =
             hentDuEllerInstitusjonenTekst(
                 brevPeriodeType = brevPeriodeType,
@@ -118,27 +125,29 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() =
     this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling(): Map<Person, IBegrunnelseGrunnlagForPeriode> {
-    val utbetalesUtvidetIDennePerioden =
-        any {
-            it.value.dennePerioden.andeler
-                .any { andel -> andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 }
-        }
-
-    return filterKeys { it.type == PersonType.BARN }
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling(): Set<Person> =
+    this
+        .filterKeys { it.type == PersonType.BARN }
         .filterValues { grunnlag ->
             val endretUtbetalingGjelderDeltBosted =
                 grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
-
-            val erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt =
-                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT && utbetalesUtvidetIDennePerioden
-
             val harAndelerSomIkkeErPåNullProsent =
                 grunnlag.dennePerioden.andeler.any { it.prosent != BigDecimal.ZERO }
 
-            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
-        }
-}
+            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderDeltBosted
+        }.keys
+
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erUtvidetIPeriode(): Boolean =
+    this.any {
+        it.value.dennePerioden.andeler
+            .any { andel -> andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 }
+    }
+
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedAlleredeUtbetalt(): Set<Person> =
+    this
+        .filterKeys { it.type == PersonType.BARN }
+        .filterValues { grunnlag -> grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT }
+        .keys
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
     val barnasFødselsdatoerListe: List<String> =
