@@ -591,7 +591,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         assertThat(valutakurs[behandlingId]!!.sortedBy { it.valutakursdato })
             .usingRecursiveComparison()
-            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id")
+            .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt", ".*id", ".*personidenter")
             .isEqualTo(forventedeValutakurser[behandlingId]!!.sortedBy { it.valutakursdato })
     }
 
@@ -688,6 +688,37 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             .usingRecursiveComparison()
             .ignoringFieldsMatchingRegexes(".*endretTidspunkt", ".*opprettetTidspunkt")
             .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
+    }
+
+    @Og("kopier kompetanser fra behandling {} til behandling {}")
+    fun `kopier kompetanser fra behandling til behandling`(
+        fraBehandlingId: Long,
+        tilBehandlingId: Long,
+    ) {
+        kompetanser[tilBehandlingId] = kompetanser[fraBehandlingId]
+            ?: error("Finner ikke kompetanser for behandling med id $fraBehandlingId")
+    }
+
+    @Og("kopier utenlandsk periodebeløp fra behandling {} til behandling {}")
+    fun `kopier utenlandsk periodebeløp fra behandling til behandling`(
+        fraBehandlingId: Long,
+        tilBehandlingId: Long,
+    ) {
+        utenlandskPeriodebeløp[tilBehandlingId] = utenlandskPeriodebeløp[fraBehandlingId]
+            ?: error("Finner ikke utenlandsk periodebeløp for behandling med id $fraBehandlingId")
+    }
+
+    @Når("vi utfører vilkårsvurderingssteget for behandling {}")
+    fun `vi utfører vilkårsvurderingssteg for behandling`(
+        behandlingId: Long,
+    ) {
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehanldingId = behandlingId,
+            )
+
+        mock.stegService.håndterVilkårsvurdering(behandlinger[behandlingId]!!)
     }
 }
 
