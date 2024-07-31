@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -53,7 +51,6 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -62,9 +59,7 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
 
-        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId, utenlandskePeriodebeløp)
-        }
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId, utenlandskePeriodebeløp)
 
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 

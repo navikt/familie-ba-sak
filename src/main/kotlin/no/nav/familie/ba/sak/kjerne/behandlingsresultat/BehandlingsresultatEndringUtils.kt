@@ -176,13 +176,13 @@ private fun erEndringIBeløpForPersonOgType(
     val endringIBeløpTidslinje =
         nåværendeTidslinje
             .kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+                val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
+                val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
 
                 if (erFremstiltKravForPerson) {
                     // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
                     when {
-                        forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
+                        forrigeBeløp.erStørreEnn0() && nåværendeBeløp.er0EllerNull() -> true
                         else -> false
                     }
                 } else {
@@ -197,6 +197,10 @@ private fun erEndringIBeløpForPersonOgType(
 
     return endringIBeløpTidslinje.perioder().any { it.innhold == true }
 }
+
+private fun Int?.erStørreEnn0(): Boolean = this != null && this > 0
+
+private fun Int?.er0EllerNull(): Boolean = this == null || this == 0
 
 private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
     this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())

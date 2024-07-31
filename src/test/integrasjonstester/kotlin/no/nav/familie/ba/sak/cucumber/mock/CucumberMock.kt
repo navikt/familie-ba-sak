@@ -272,7 +272,6 @@ class CucumberMock(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utenlandskPeriodebeløpEndretAbonnenter =
@@ -426,7 +425,6 @@ class CucumberMock(
             månedligValutajusteringSevice = månedligValutajusteringSevice,
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val ferdigstillBehandlingSteg =
