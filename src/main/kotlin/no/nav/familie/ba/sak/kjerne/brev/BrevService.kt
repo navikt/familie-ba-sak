@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -67,7 +65,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
-import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -96,8 +93,6 @@ class BrevService(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
-    private val unleashService: UnleashNextMedContextService,
-    private val sammensattKontrollsakService: SammensattKontrollsakService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -265,8 +260,6 @@ class BrevService(
     }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) return false
-
         val andelerIBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val andelerIBehandlingSomErDifferanseBeregnet = andelerIBehandling.filter { it.differanseberegnetPeriodebeløp != null }
         val andelerIBehandlingSomErDifferanseBeregnetOgLøpende = andelerIBehandlingSomErDifferanseBeregnet.filter { it.erLøpende() }
@@ -598,10 +591,6 @@ class BrevService(
     private fun hentUtbetalingerPerMndEøs(
         vedtak: Vedtak,
     ): Map<String, UtbetalingMndEøs>? {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            return null
-        }
-
         val behandlingId = vedtak.behandling.id
         val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandlingId)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)

@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
@@ -35,7 +33,6 @@ class ValutakursController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val ecbService: ECBService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     @PutMapping(path = ["{behandlingId}/oppdater-valutakurser-og-simulering-automatisk"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurserOgSimuleringAutomatisk(
@@ -75,9 +72,7 @@ class ValutakursController(
             }
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
-        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
-        }
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -95,9 +90,7 @@ class ValutakursController(
 
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
-        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
-        }
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
