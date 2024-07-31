@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
@@ -218,7 +218,7 @@ class AutomatiskOppdaterValutakursService(
         nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
         if (!unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) ||
-            !unleashNextMedContextService.isEnabled(KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER)
+            !unleashNextMedContextService.isEnabled(TEKNISK_ENDRING)
         ) {
             throw Feil("Relevante toggler for å overstyre vurderingsstrategi for valutakurser er ikke satt.")
         }
