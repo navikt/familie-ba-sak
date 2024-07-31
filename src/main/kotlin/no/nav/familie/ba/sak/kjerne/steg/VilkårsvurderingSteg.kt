@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -36,7 +34,6 @@ class VilkårsvurderingSteg(
     private val månedligValutajusteringSevice: MånedligValutajusteringSevice,
     private val localDateProvider: LocalDateProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -89,7 +86,7 @@ class VilkårsvurderingSteg(
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
-        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) &&
+        if (
             behandling.type in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) &&
             !behandling.skalBehandlesAutomatisk
         ) {
