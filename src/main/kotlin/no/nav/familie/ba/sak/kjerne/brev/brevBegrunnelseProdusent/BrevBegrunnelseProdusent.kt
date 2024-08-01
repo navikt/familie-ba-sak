@@ -7,6 +7,9 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltUtvidetIPeriode
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erNullPgaDifferanseberegningEllerDeltBosted
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.finnBarnMedAlleredeUtbetalt
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -234,22 +237,13 @@ fun IVedtakBegrunnelse.hentSanityBegrunnelse(grunnlag: GrunnlagForBegrunnelse) =
         is Standardbegrunnelse -> grunnlag.sanityBegrunnelser[this]
     } ?: throw Feil("Fant ikke tilsvarende sanitybegrunnelse for $this")
 
-private fun hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
-    begrunnelsesGrunnlagPerPerson
-        .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
-            val endretUtbetalingAndelIPeriode = begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
+    this
+        .filterKeys { it.type == PersonType.BARN }
+        .filterValues { grunnlag ->
+            val erUtbetalingsbeløpStørreEnnNull = grunnlag.dennePerioden.andeler.any { it.kalkulertUtbetalingsbeløp > 0 }
 
-            val erUtbetalingsbeløpStørreEnnNull =
-                begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler
-                    .toList()
-                    .any { it.kalkulertUtbetalingsbeløp > 0 }
-            val erNullPgaDifferanseberegning =
-                begrunnelseGrunnlagForPersonIPeriode.dennePerioden.andeler
-                    .toList()
-                    .any { it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0 }
-            val erNullPgaDeltBosted = endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED && endretUtbetalingAndelIPeriode.prosent == BigDecimal.ZERO
-
-            erUtbetalingsbeløpStørreEnnNull || erNullPgaDifferanseberegning || erNullPgaDeltBosted
+            erUtbetalingsbeløpStørreEnnNull || erNullPgaDifferanseberegningEllerDeltBosted(grunnlag)
         }.keys
 
 private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
@@ -271,12 +265,6 @@ private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnla
                     .isNullOrEmpty()
         }.keys
 
-private fun hentBarnMedAlleredeUtbetalt(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
-    begrunnelsesGrunnlagPerPerson
-        .filterKeys { it.type == PersonType.BARN }
-        .filterValues { it.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT }
-        .keys
-
 private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
     personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
@@ -288,12 +276,12 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 ): List<LocalDate> {
     val barnPåBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
     val barnMedUtbetaling =
-        hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson)
-            .filter { it.type == PersonType.BARN }
+        begrunnelsesGrunnlagPerPerson
+            .finnBarnMedUtbetaling()
             .ifEmpty {
-                val erUtvidet = hentUtvidetAndelerIPeriode(begrunnelsesGrunnlagPerPerson).isNotEmpty()
+                val erBetaltUtvidetIPeriode = begrunnelsesGrunnlagPerPerson.erBetaltUtvidetIPeriode()
                 when {
-                    erUtvidet -> hentBarnMedAlleredeUtbetalt(begrunnelsesGrunnlagPerPerson)
+                    erBetaltUtvidetIPeriode -> begrunnelsesGrunnlagPerPerson.finnBarnMedAlleredeUtbetalt()
                     else -> emptySet()
                 }
             }
