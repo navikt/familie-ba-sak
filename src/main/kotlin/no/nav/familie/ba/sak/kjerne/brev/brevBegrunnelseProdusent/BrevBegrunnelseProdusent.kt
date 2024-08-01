@@ -288,14 +288,15 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 ): List<LocalDate> {
     val barnPåBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
     val barnMedUtbetaling =
-        hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
-    val erUtvidet = hentUtvidetAndelerIPeriode(begrunnelsesGrunnlagPerPerson).isNotEmpty()
-    val barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode =
-        if (barnMedUtbetaling.isEmpty() && erUtvidet) {
-            hentBarnMedAlleredeUtbetalt(begrunnelsesGrunnlagPerPerson)
-        } else {
-            barnMedUtbetaling
-        }
+        hentPersonerMedUtbetalingIPeriode(begrunnelsesGrunnlagPerPerson)
+            .filter { it.type == PersonType.BARN }
+            .ifEmpty {
+                val erUtvidet = hentUtvidetAndelerIPeriode(begrunnelsesGrunnlagPerPerson).isNotEmpty()
+                when {
+                    erUtvidet -> hentBarnMedAlleredeUtbetalt(begrunnelsesGrunnlagPerPerson)
+                    else -> emptySet()
+                }
+            }
     val uregistrerteBarnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.uregistrerteBarn
 
     val barnPåBehandlingen = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.barna
@@ -326,7 +327,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                     relevanteBarn.map { it.fødselsdato }
                 }
 
-                else -> (barnMedUtbetalingEllerAlleredeBetaltIUtvidetPeriode + barnPåBegrunnelse).toSet().map { it.fødselsdato }
+                else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
             }
         }
 
