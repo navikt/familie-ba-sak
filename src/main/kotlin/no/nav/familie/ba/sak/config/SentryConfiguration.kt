@@ -36,7 +36,7 @@ class SentryConfiguration(
                     val metodeSomFeiler = finnMetodeSomFeiler(mostSpecificThrowable)
                     val prosess = MDC.get("prosess")
 
-                    event.setTag("metodeSomFeier", metodeSomFeiler)
+                    event.setTag("metodeSomFeiler", metodeSomFeiler)
                     event.setTag("bruker", SikkerhetContext.hentSaksbehandlerEpost())
                     event.setTag("kibanalenke", hentKibanalenke(MDC.get("callId")))
                     event.setTag("prosess", prosess)
