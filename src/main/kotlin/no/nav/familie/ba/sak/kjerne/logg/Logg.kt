@@ -93,4 +93,7 @@ enum class LoggType(
     REFUSJON_EØS_LAGT_TIL("Refusjon EØS lagt til"),
     REFUSJON_EØS_FJERNET("Refusjon EØS fjernet"),
     MANUELL_DØDSFALL_DATO_REGISTRERT("Manuell dødsfallsdato registrert"),
+    SAMMENSATT_KONTROLLSAK_LAGT_TIL("Sammensatt kontrollsak lagt til"),
+    SAMMENSATT_KONTROLLSAK_ENDRET("Sammensatt kontrollsak endret"),
+    SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
 }
