@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
@@ -661,6 +662,45 @@ class LoggService(
                     Periode: ${refusjonEøs.fom.tilKortString()} - ${refusjonEøs.tom.tilKortString()}
                     Beløp: ${refusjonEøs.refusjonsbeløp} kr/mnd
                     """.trimIndent(),
+            ),
+        )
+
+    fun loggSammensattKontrollsakLagtTil(sammensattKontrollsak: SammensattKontrollsak) =
+        lagre(
+            Logg(
+                behandlingId = sammensattKontrollsak.behandlingId,
+                type = LoggType.SAMMENSATT_KONTROLLSAK_LAGT_TIL,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggSammensattKontrollsakEndret(sammensattKontrollsak: SammensattKontrollsak) =
+        lagre(
+            Logg(
+                behandlingId = sammensattKontrollsak.behandlingId,
+                type = LoggType.SAMMENSATT_KONTROLLSAK_ENDRET,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggSammensattKontrollsakFjernet(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.SAMMENSATT_KONTROLLSAK_FJERNET,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
             ),
         )
 

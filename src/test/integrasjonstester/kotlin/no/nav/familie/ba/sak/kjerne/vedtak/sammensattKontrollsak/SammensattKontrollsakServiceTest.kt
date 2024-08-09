@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -22,6 +24,8 @@ class SammensattKontrollsakServiceTest(
     private val fagsakRepository: FagsakRepository,
     @Autowired
     private val behandlingRepository: BehandlingRepository,
+    @Autowired
+    private val loggService: LoggService,
     @Autowired
     private val sammensattKontrollsakRepository: SammensattKontrollsakRepository,
 ) : AbstractSpringIntegrationTest() {
@@ -54,6 +58,10 @@ class SammensattKontrollsakServiceTest(
 
         assertThat(sammensattKontrollsak.behandlingId).isEqualTo(behandling.id)
         assertThat(sammensattKontrollsak.fritekst).isEqualTo("Fritekst")
+
+        val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
+
+        assertThat(loggForBehandling.any { it.type == LoggType.SAMMENSATT_KONTROLLSAK_LAGT_TIL }).isTrue()
     }
 
     @Test
@@ -68,6 +76,11 @@ class SammensattKontrollsakServiceTest(
         assertThat(oppdatertSammensattKontrollsak.id).isEqualTo(eksisterendeSammensattKontrollsak.id)
         assertThat(oppdatertSammensattKontrollsak.behandlingId).isEqualTo(behandling.id)
         assertThat(oppdatertSammensattKontrollsak.fritekst).isEqualTo("Oppdatert fritekst")
+
+        val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
+
+        assertThat(loggForBehandling.any { it.type == LoggType.SAMMENSATT_KONTROLLSAK_LAGT_TIL }).isTrue()
+        assertThat(loggForBehandling.any { it.type == LoggType.SAMMENSATT_KONTROLLSAK_ENDRET }).isTrue()
     }
 
     @Test
@@ -80,5 +93,10 @@ class SammensattKontrollsakServiceTest(
         sammensattKontrollsakService.slettSammensattKontrollsak(eksisterendeSammensattKontrollsak.id)
 
         assertThat(sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandling.id)).isNull()
+
+        val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
+
+        assertThat(loggForBehandling.any { it.type == LoggType.SAMMENSATT_KONTROLLSAK_LAGT_TIL }).isTrue()
+        assertThat(loggForBehandling.any { it.type == LoggType.SAMMENSATT_KONTROLLSAK_FJERNET }).isTrue()
     }
 }
