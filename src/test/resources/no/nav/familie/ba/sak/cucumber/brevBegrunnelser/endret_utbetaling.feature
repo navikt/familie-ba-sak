@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Brevbegrunnelse ved endret utbeetaling
+Egenskap: Brevbegrunnelse ved endret utbetaling
 
   Scenario: Skal gi to brevbegrunnelse når vi har delt bosted med flere avtaletidspunkt samme måned.
     Gitt følgende fagsaker
@@ -283,3 +283,122 @@ Egenskap: Brevbegrunnelse ved endret utbeetaling
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2024 til 31.03.2027
       | Begrunnelse                            | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt |
       | ETTER_ENDRET_UTBETALING_ENDRE_MOTTAKER | STANDARD | Nei           | 22.12.22             | 1           | desember 2023                        | NB      | 1 766 | 14.12.23         |
+
+  Scenario: Skal flette inn barn som ikke har utbetaling pga allerede utbetalt i begrunnelse for utvidet dersom søker bare har ett barn
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype | Status    |
+      | 1        | NORMAL     | OPPRETTET |
+
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingsstatus |
+      | 1            | 1        | DELVIS_INNVILGET    | SØKNAD           | Nei                       | UTREDES           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 08.10.1989  |
+      | 1            | 2       | BARN       | 23.06.2015  |
+
+    Og dagens dato er 29.07.2024
+    Og lag personresultater for behandling 1
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                        | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1       | UTVIDET_BARNETRYGD                            | 06.06.2019 |            | OPPFYLT  | Nei                  |
+      | 1       | BOSATT_I_RIKET, LOVLIG_OPPHOLD                | 06.06.2019 |            | OPPFYLT  | Nei                  |
+
+      | 2       | UNDER_18_ÅR                                   | 23.06.2015 | 22.06.2033 | OPPFYLT  | Nei                  |
+      | 2       | GIFT_PARTNERSKAP                              | 23.06.2015 |            | OPPFYLT  | Nei                  |
+      | 2       | LOVLIG_OPPHOLD, BOSATT_I_RIKET, BOR_MED_SØKER | 06.06.2019 |            | OPPFYLT  | Nei                  |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |
+      | 2       | 1            | 01.07.2019 | 30.04.2024 | ALLEREDE_UTBETALT | 0       | 17.11.2019       |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.07.2019 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1       | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+      | 1       | 1            | 01.07.2023 | 31.05.2033 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 1            | 01.07.2019 | 30.04.2024 | 0     | ORDINÆR_BARNETRYGD | 0       | 1054 |
+      | 2       | 1            | 01.05.2024 | 31.05.2033 | 373   | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                                                          |
+      | 01.07.2019 | 28.02.2023 | UTBETALING         | INNVILGET_SKILT, ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL |
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser                                                          |
+      | 01.07.2019 | 28.02.2023 | INNVILGET_SKILT, ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL |
+
+    Så forvent følgende brevperioder for behandling 1
+      | Brevperiodetype | Fra dato  | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
+      | UTBETALING      | juli 2019 | til februar 2023 | 1054  | 1                          | 23.06.15            | du                     |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2019 til 28.02.2023
+      | Begrunnelse                                                  | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søknadstidspunkt | Søkers rett til utvidet |
+      | ENDRET_UTBETALING_SELVSTENDIG_RETT_ETTERBETALING_UTVIDET_DEL | STANDARD | Nei           | 23.06.15             | 1           | juni 2019                            | 0     | 17.11.19         | SØKER_FÅR_UTVIDET       |
+      | INNVILGET_SKILT                                              | STANDARD | Ja            | 23.06.15             | 1           | juni 2019                            | 1 054 |                  | SØKER_FÅR_UTVIDET       |
+
+  Scenario: Skal kun flette inn barn som har utbetaling i begrunnelse for utvidet dersom søker har ett barn med utbetaling og ett barn som ikke har utbetaling pga allerede utbetalt
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype | Status    |
+      | 1        | NORMAL     | OPPRETTET |
+
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingsstatus |
+      | 1            | 1        | INNVILGET           | SØKNAD           | Nei                       | UTREDES           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | SØKER      | 08.10.1989  |
+      | 1            | 2       | BARN       | 23.06.2015  |
+      | 1            | 3       | BARN       | 23.06.2016  |
+
+    Og dagens dato er 29.07.2024
+    Og lag personresultater for behandling 1
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                        | Fra dato   | Til dato   | Resultat |
+      | 1       | UTVIDET_BARNETRYGD                            | 06.06.2019 |            | OPPFYLT  |
+      | 1       | BOSATT_I_RIKET                                | 06.06.2019 |            | OPPFYLT  |
+      | 1       | LOVLIG_OPPHOLD                                | 06.06.2019 |            | OPPFYLT  |
+
+      | 2       | UNDER_18_ÅR                                   | 23.06.2015 | 22.06.2033 | OPPFYLT  |
+      | 2       | GIFT_PARTNERSKAP                              | 23.06.2015 |            | OPPFYLT  |
+      | 2       | LOVLIG_OPPHOLD, BOSATT_I_RIKET, BOR_MED_SØKER | 06.06.2019 |            | OPPFYLT  |
+
+      | 3       | UNDER_18_ÅR                                   | 23.06.2016 | 22.06.2034 | OPPFYLT  |
+      | 3       | GIFT_PARTNERSKAP                              | 23.06.2016 |            | OPPFYLT  |
+      | 3       | LOVLIG_OPPHOLD, BOSATT_I_RIKET, BOR_MED_SØKER | 06.06.2019 |            | OPPFYLT  |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt |
+      | 2       | 1            | 01.07.2019 | 30.04.2024 | ALLEREDE_UTBETALT | 0       | 17.11.2019       |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.07.2019 | 28.02.2023 | 1054  | UTVIDET_BARNETRYGD | 100     | 1054 |
+      | 1       | 1            | 01.03.2023 | 30.06.2023 | 2489  | UTVIDET_BARNETRYGD | 100     | 2489 |
+      | 1       | 1            | 01.07.2023 | 31.05.2033 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+
+      | 2       | 1            | 01.07.2019 | 30.04.2024 | 0     | ORDINÆR_BARNETRYGD | 0       | 1054 |
+      | 2       | 1            | 01.05.2024 | 31.05.2033 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+      | 3       | 1            | 01.07.2019 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 1            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 1            | 01.01.2024 | 31.05.2034 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+
+    Og når disse begrunnelsene er valgt for behandling 1
+      | Fra dato   | Til dato   | Standardbegrunnelser |
+      | 01.07.2019 | 28.02.2023 | INNVILGET_SKILT      |
+
+    Så forvent følgende brevperioder for behandling 1
+      | Brevperiodetype | Fra dato  | Til dato         | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
+      | UTBETALING      | juli 2019 | til februar 2023 | 2108  | 1                          | 23.06.16            | du                     |
+
+    Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2019 til 28.02.2023
+      | Begrunnelse     | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søkers rett til utvidet |
+      | INNVILGET_SKILT | STANDARD | Ja            | 23.06.16             | 1           | juni 2019                            | 2 108 | SØKER_FÅR_UTVIDET       |
