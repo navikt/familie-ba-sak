@@ -3,10 +3,6 @@ package no.nav.familie.ba.sak.config
 class FeatureToggleConfig {
     companion object {
         // Release
-        const val ENDRET_EØS_REGELVERKFILTER_FOR_BARN = "familie-ba-sak.endret-eos-regelverkfilter-for-barn"
-        const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ALLE_SAKER = "familie-ba-sak.kan-kjore-autmatisk-valutajustering-behandling-for-alle-saker"
-        const val KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER = "familie-ba-sak.kan-opprette-automatiske-valutakurser-paa-manuelle-saker"
-        const val IKKE_SPLITT_VEDTAKSPERIODE_PÅ_ENDRING_I_VALUTAKURS = "familie-ba-sak.ikke-splitt-vedtaksperiode-paa-endring-i-valutakurs"
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
@@ -14,7 +10,6 @@ class FeatureToggleConfig {
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD = "familie-ba-sak.hent-identer-til-psys-fra-infotrygd"
         const val KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK = "familie-ba-sak.kan-kjore-autmatisk-valutajustering-behandling-for-enkelt-sak"
-        const val KAN_OVERSTYRE_AUTOMATISKE_VALUTAKURSER = "familie-ba-sak.kan-overstyre-automatiske-valutakurser"
         const val KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER = "familie-ba-sak.kan-opprette-og-endre-sammensatte-kontrollsaker"
 
         // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen

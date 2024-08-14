@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,20 +22,20 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20240603145215_c56e179</prosessering.version>
-        <felles.version>3.20240624143824_64bf8f2</felles.version>
+        <felles.version>3.20240806111424_fff2930</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240607101709_d35e18c</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20240801145104_f611578</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20240624093832_8242223</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20240729145155_57174aa</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.18.0</cucumber.version>
-        <mockk.version>1.13.11</mockk.version>
-        <wiremock.version>3.7.0</wiremock.version>
+        <cucumber.version>7.18.1</cucumber.version>
+        <mockk.version>1.13.12</mockk.version>
+        <wiremock.version>3.9.1</wiremock.version>
         <token-validation-spring.version>5.0.1</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.5.0</springdoc.version>
-        <sentry.version>7.10.0</sentry.version>
+        <springdoc.version>2.6.0</springdoc.version>
+        <sentry.version>7.13.0</sentry.version>
         <kotlinx.version>1.8.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -45,12 +45,13 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.19.8</testcontainers.postgresql.version>
-        <unleash.version>9.2.2</unleash.version>
+        <testcontainers.postgresql.version>1.20.1</testcontainers.postgresql.version>
+        <unleash.version>9.2.4</unleash.version>
+        <testcontainers.postgresql.version>1.20.1</testcontainers.postgresql.version>
         <maven.model.version>3.9.8</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
-        <avro.version>1.11.3</avro.version>
-        <confluent.version>7.6.1</confluent.version>
+        <avro.version>1.12.0</avro.version>
+        <confluent.version>7.7.0</confluent.version>
     </properties>
 
     <dependencyManagement>
@@ -58,7 +59,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.3.1</version>
+                <version>3.3.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -389,7 +390,7 @@
         <dependency>
             <groupId>com.github.jsqlparser</groupId>
             <artifactId>jsqlparser</artifactId>
-            <version>4.9</version>
+            <version>5.0</version>
         </dependency>
 
         <dependency>
@@ -479,7 +480,7 @@
                         <dependency>
                             <groupId>com.pinterest.ktlint</groupId>
                             <artifactId>ktlint-cli</artifactId>
-                            <version>1.3.0</version>
+                            <version>1.3.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -537,7 +538,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
@@ -592,7 +593,7 @@
                 <!-- For å få dependency graph i SLSA som pushes av docker-build-push parameter byosbom -->
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
-                <version>2.8.0</version>
+                <version>2.8.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>

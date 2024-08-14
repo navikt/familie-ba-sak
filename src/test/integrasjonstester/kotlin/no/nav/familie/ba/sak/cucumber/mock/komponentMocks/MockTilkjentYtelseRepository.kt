@@ -4,12 +4,12 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import kotlin.random.Random
 
-fun mockTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): TilkjentYtelseRepository {
+fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): TilkjentYtelseRepository {
     val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     every { tilkjentYtelseRepository.findByBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()

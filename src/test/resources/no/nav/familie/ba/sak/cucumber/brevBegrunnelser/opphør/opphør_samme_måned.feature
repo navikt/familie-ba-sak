@@ -4,16 +4,16 @@
 Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt innenfor samme måned.
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
       | 2            | 1        | 1                   | OPPHØRT             | NYE_OPPLYSNINGER |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 18.09.1984  |
       | 1            | 3456    | BARN       | 16.06.2015  |
@@ -24,11 +24,11 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
       | 2            | 5678    | BARN       | 30.11.2016  |
 
   Scenario: Vilkårresultat er oppfylt for kun én måned. Forventer ikke utbetaling
-    Og følgende dagens dato 28.09.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 28.09.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat |
       | 1234    | LOVLIG_OPPHOLD                                               | 18.09.1984 |            | OPPFYLT  |
       | 1234    | BOSATT_I_RIKET                                               | 15.08.2020 |            | OPPFYLT  |
@@ -39,7 +39,7 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
       | 5678    | LOVLIG_OPPHOLD,BOSATT_I_RIKET,GIFT_PARTNERSKAP,BOR_MED_SØKER | 30.11.2016 |            | OPPFYLT  |
       | 5678    | UNDER_18_ÅR                                                  | 30.11.2016 | 29.11.2034 | OPPFYLT  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat |
       | 1234    | LOVLIG_OPPHOLD                                               | 18.09.1984 |            | OPPFYLT  |
       | 1234    | BOSATT_I_RIKET                                               | 15.08.2020 | 16.08.2020 | OPPFYLT  |
@@ -50,7 +50,7 @@ Egenskap: Brevbegrunnelser ved opphør der vilkår blir innvilget og opphørt in
       | 5678    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP,BOSATT_I_RIKET | 30.11.2016 |            | OPPFYLT  |
       | 5678    | UNDER_18_ÅR                                                  | 30.11.2016 | 29.11.2034 | OPPFYLT  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.09.2020 | 31.05.2021 | 1354  | ORDINÆR_BARNETRYGD | 100     | 1354 |
       | 3456    | 1            | 01.06.2021 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |

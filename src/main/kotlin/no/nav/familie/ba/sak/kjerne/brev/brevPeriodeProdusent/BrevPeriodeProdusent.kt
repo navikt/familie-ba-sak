@@ -75,7 +75,16 @@ private fun VedtaksperiodeMedBegrunnelser.byggBrevPeriode(
     begrunnelseGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
 ): BrevPeriode {
-    val barnMedUtbetaling = begrunnelseGrunnlagPerPerson.finnBarnMedUtbetaling().keys
+    val barnMedUtbetaling =
+        begrunnelseGrunnlagPerPerson
+            .finnBarnMedUtbetaling()
+            .ifEmpty {
+                val erBetaltUtvidetIPeriode = begrunnelseGrunnlagPerPerson.erBetaltUtvidetIPeriode()
+                when {
+                    erBetaltUtvidetIPeriode -> begrunnelseGrunnlagPerPerson.finnBarnMedAlleredeUtbetalt()
+                    else -> emptySet()
+                }
+            }
     val beløp = begrunnelseGrunnlagPerPerson.hentTotaltUtbetaltIPeriode()
 
     val brevPeriodeType =
@@ -118,27 +127,31 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() =
     this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling(): Map<Person, IBegrunnelseGrunnlagForPeriode> {
-    val utbetalesUtvidetIDennePerioden =
-        any {
-            it.value.dennePerioden.andeler
-                .any { andel -> andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 }
-        }
-
-    return filterKeys { it.type == PersonType.BARN }
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
+    this
+        .filterKeys { it.type == PersonType.BARN }
         .filterValues { grunnlag ->
-            val endretUtbetalingGjelderDeltBosted =
-                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+            val harAndelerSomIkkeErPåNullProsent = grunnlag.dennePerioden.andeler.any { it.prosent != BigDecimal.ZERO }
 
-            val erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt =
-                grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT && utbetalesUtvidetIDennePerioden
+            harAndelerSomIkkeErPåNullProsent || erNullPgaDifferanseberegningEllerDeltBosted(grunnlag)
+        }.keys
 
-            val harAndelerSomIkkeErPåNullProsent =
-                grunnlag.dennePerioden.andeler.any { it.prosent != BigDecimal.ZERO }
+fun erNullPgaDifferanseberegningEllerDeltBosted(grunnlag: IBegrunnelseGrunnlagForPeriode): Boolean =
+    grunnlag.dennePerioden.andeler.any { it.differanseberegnetPeriodebeløp != null && it.differanseberegnetPeriodebeløp < 0 } ||
+        grunnlag.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 
-            harAndelerSomIkkeErPåNullProsent || endretUtbetalingGjelderDeltBosted || erUtvidetIPeriodenOgBarnHarEndretUtbetalingAlleredeUtbetalt
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltUtvidetIPeriode(): Boolean =
+    this.any {
+        it.value.dennePerioden.andeler.any { andel ->
+            andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0
         }
-}
+    }
+
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedAlleredeUtbetalt(): Set<Person> =
+    this
+        .filterKeys { it.type == PersonType.BARN }
+        .filterValues { it.dennePerioden.endretUtbetalingAndel?.årsak == Årsak.ALLEREDE_UTBETALT }
+        .keys
 
 fun Set<Person>.tilBarnasFødselsdatoer(): String {
     val barnasFødselsdatoerListe: List<String> =

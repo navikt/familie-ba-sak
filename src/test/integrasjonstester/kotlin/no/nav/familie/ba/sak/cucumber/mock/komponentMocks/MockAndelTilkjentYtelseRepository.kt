@@ -2,12 +2,12 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 
-fun mockAndelTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): AndelTilkjentYtelseRepository {
+fun mockAndelTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): AndelTilkjentYtelseRepository {
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
