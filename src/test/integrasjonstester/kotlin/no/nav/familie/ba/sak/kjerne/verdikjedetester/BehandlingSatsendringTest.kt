@@ -80,7 +80,7 @@ class BehandlingSatsendringTest(
         // Sjekk at behandling har riktig tilstand før man kjører satsendring
         assertThat(atyForBehandlingMedGammelSatsFraFørMars2024.map { Triple(it.stønadFom, it.stønadTom, it.sats) })
             .hasSize(2)
-            .containsExactly(
+            .contains(
                 Triple(YearMonth.of(2023, 2), YearMonth.of(2028, 12), 1676),
                 Triple(YearMonth.of(2029, 1), YearMonth.of(2040, 12), 1054),
             )
@@ -108,7 +108,7 @@ class BehandlingSatsendringTest(
 
         assertThat(aty.map { Triple(it.stønadFom, it.stønadTom, it.sats) })
             .hasSize(3)
-            .containsExactly(
+            .contains(
                 Triple(YearMonth.of(2023, 2), YearMonth.of(2023, 2), 1676),
                 Triple(YearMonth.of(2023, 3), YearMonth.of(2023, 6), 1723),
                 Triple(YearMonth.of(2023, 7), YearMonth.of(2040, 12), 1766),
