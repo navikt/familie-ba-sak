@@ -356,19 +356,24 @@ private fun erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype(
     innvilgedeYtelsestyperDennePeriodenForrigeBehandling: Set<YtelseType>?,
 ): Boolean =
     YtelseType.entries.any { ytelseType ->
-        val ytelseInnvilgetDennePerioden =
-            innvilgedeYtelsestyperDennePerioden?.contains(ytelseType) ?: false
-        val ytelseInnvilgetForrigePeriode =
-            innvilgedeYtelsestyperForrigePeriode?.contains(ytelseType) ?: false
-        val ytelseInnvilgetDennePeriodenForrigeBehandling =
-            innvilgedeYtelsestyperDennePeriodenForrigeBehandling?.contains(ytelseType) ?: false
-        val ytelseInnvilgetForrigePeriodeForrigeBehandling =
-            innvilgedeYtelsestyperForrigePeriodeForrigeBehandling?.contains(ytelseType) ?: false
 
-        !ytelseInnvilgetForrigePeriode &&
-            !ytelseInnvilgetDennePerioden &&
-            !ytelseInnvilgetForrigePeriodeForrigeBehandling &&
-            ytelseInnvilgetDennePeriodenForrigeBehandling
+        if (innvilgedeYtelsestyperDennePerioden == null) {
+            innvilgedeYtelsestyperDennePeriodenForrigeBehandling?.contains(ytelseType) ?: false
+        } else {
+            val ytelseInnvilgetDennePerioden =
+                innvilgedeYtelsestyperDennePerioden.contains(ytelseType)
+            val ytelseInnvilgetForrigePeriode =
+                innvilgedeYtelsestyperForrigePeriode?.contains(ytelseType) ?: false
+            val ytelseInnvilgetDennePeriodenForrigeBehandling =
+                innvilgedeYtelsestyperDennePeriodenForrigeBehandling?.contains(ytelseType) ?: false
+            val ytelseInnvilgetForrigePeriodeForrigeBehandling =
+                innvilgedeYtelsestyperForrigePeriodeForrigeBehandling?.contains(ytelseType) ?: false
+
+            !ytelseInnvilgetForrigePeriode &&
+                !ytelseInnvilgetDennePerioden &&
+                !ytelseInnvilgetForrigePeriodeForrigeBehandling &&
+                ytelseInnvilgetDennePeriodenForrigeBehandling
+        }
     }
 
 private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.slåSammenSammenhengendeOpphørsperioder(personerFremstiltKravFor: List<Aktør>): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned> {
