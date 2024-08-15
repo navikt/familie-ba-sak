@@ -63,6 +63,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -99,6 +100,7 @@ fun lagFagsaker(dataTable: DataTable) =
                 type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
                 aktør = randomAktør(),
                 status = parseValgfriEnum<FagsakStatus>(Domenebegrep.STATUS, rad) ?: FagsakStatus.OPPRETTET,
+                institusjon = Institusjon(orgNummer = "", tssEksternId = ""),
             )
         }.associateBy { it.id }
         .toMutableMap()
