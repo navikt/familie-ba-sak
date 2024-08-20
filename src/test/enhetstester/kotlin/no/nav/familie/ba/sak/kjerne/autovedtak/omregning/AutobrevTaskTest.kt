@@ -35,7 +35,7 @@ internal class AutobrevTaskTest {
         )
 
     @Test
-    fun `oppretter autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
+    fun `oppretter ingen autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
         val fagsaker =
             setOf(
                 Fagsak(1, aktør = tilAktør(randomFnr())),
@@ -50,7 +50,7 @@ internal class AutobrevTaskTest {
 
         autobrevTask.doTask(autoBrevTask)
 
-        verify(exactly = 2) {
+        verify(exactly = 0) {
             opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), 6)
         }
         verify(exactly = 2) {

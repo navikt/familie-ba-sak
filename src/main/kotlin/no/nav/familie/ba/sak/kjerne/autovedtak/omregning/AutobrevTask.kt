@@ -31,7 +31,7 @@ class AutobrevTask(
     }
 
     private fun opprettTaskerForReduksjonPgaAlder() {
-        listOf<Long>(6, 18).forEach { alder ->
+        listOf<Long>(18).forEach { alder ->
             val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
             logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->

@@ -128,9 +128,8 @@ class Autobrev6og18ÅrService(
 
     private fun finnBehandlingÅrsakForAlder(alder: Int): BehandlingÅrsak =
         when (alder) {
-            Alder.SEKS.år -> BehandlingÅrsak.OMREGNING_6ÅR
             Alder.ATTEN.år -> BehandlingÅrsak.OMREGNING_18ÅR
-            else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
+            else -> throw Feil("Alder må være oppgitt til 18 år.")
         }
 
     private fun barnMedAngittAlderInneværendeMånedEksisterer(
@@ -172,7 +171,6 @@ class Autobrev6og18ÅrService(
         årMåned: YearMonth,
     ) = when (alder) {
         Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned }
-        Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
         else -> throw Feil("Ugyldig alder")
     }
 
@@ -188,7 +186,7 @@ class Autobrev6og18ÅrService(
             finnAndelerTilBarnIBrytningsalder(behandling.id, alder)
 
         return when (alder) {
-            Alder.ATTEN.år, Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && it.erAndelSomharNullutbetalingPgaDifferanseberegning() }
+            Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned && it.erAndelSomharNullutbetalingPgaDifferanseberegning() }
             else -> false
         }
     }
@@ -220,7 +218,6 @@ class Autobrev6og18ÅrService(
 enum class Alder(
     val år: Int,
 ) {
-    SEKS(år = 6),
     ATTEN(år = 18),
 }
 
