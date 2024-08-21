@@ -50,7 +50,8 @@ Egenskap: Automatisk valutajustering ved opphør
       | 3       | 2            | 01.01.2023 | 28.02.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3       | 2            | 01.03.2023 | 30.06.2023 | 0     | ORDINÆR_BARNETRYGD | 100     | 1083 |
       | 3       | 2            | 01.07.2023 | 31.12.2023 | 15    | ORDINÆR_BARNETRYGD | 100     | 1310 |
-      | 3       | 2            | 01.01.2024 | 31.03.2025 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 2            | 01.01.2024 | 31.08.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 2            | 01.09.2024 | 31.03.2025 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
     Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
