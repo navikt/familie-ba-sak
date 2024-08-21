@@ -10,7 +10,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -25,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -42,23 +43,23 @@ class TriggingAvAutobrev6og18ÅrTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
     @Test
-    fun `Omregning og autobrev skal kjøres for 18 år og ikke 6 år`() {
-        kjørFørstegangsbehandlingOgTriggAutobrev(6)
+    fun `Omregning og autobrev skal ikke kjøre hvis behandling er begrunnet for 18 åringer`() {
+        val behandlinger = kjørFørstegangsbehandlingOgTriggAutobrev(Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR)
+        assertThat(behandlinger).hasSize(1)
+        assertThat(behandlinger.filter { it.opprettetÅrsak == BehandlingÅrsak.SØKNAD }).hasSize(1)
     }
 
     @Test
-    fun `Omregning og autobrev skal kjøres for 6 år og ikke 18 år`() {
-        kjørFørstegangsbehandlingOgTriggAutobrev(18)
+    fun `Omregning og autobrev skal kjøre hvis behandling IKKE er begrunnet for 18 åringer`() {
+        val behandlinger = kjørFørstegangsbehandlingOgTriggAutobrev(null)
+        assertThat(behandlinger.size).isEqualTo(2)
+        assertThat(behandlinger.filter { it.opprettetÅrsak == BehandlingÅrsak.SØKNAD }).hasSize(1)
+        assertThat(behandlinger.filter { it.opprettetÅrsak == BehandlingÅrsak.OMREGNING_18ÅR }).hasSize(1)
     }
 
-    fun kjørFørstegangsbehandlingOgTriggAutobrev(årMedReduksjonsbegrunnelse: Int) {
-        val reduksjonsbegrunnelse =
-            if (årMedReduksjonsbegrunnelse == 6) {
-                Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
-            } else {
-                Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR
-            }
-
+    fun kjørFørstegangsbehandlingOgTriggAutobrev(
+        årMedReduksjonsbegrunnelse: Standardbegrunnelse?,
+    ): List<Behandling> {
         val scenario =
             mockServerKlient().lagScenario(
                 RestScenario(
@@ -167,13 +168,16 @@ class TriggingAvAutobrev6og18ÅrTest(
                 ) &&
                     it.type == Vedtaksperiodetype.UTBETALING
             }
-        familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = reduksjonVedtaksperiodeId.id,
-            restPutVedtaksperiodeMedStandardbegrunnelser =
-                RestPutVedtaksperiodeMedStandardbegrunnelser(
-                    standardbegrunnelser = listOf(reduksjonsbegrunnelse.enumnavnTilString()),
-                ),
-        )
+
+        if (årMedReduksjonsbegrunnelse != null) {
+            familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
+                vedtaksperiodeId = reduksjonVedtaksperiodeId.id,
+                restPutVedtaksperiodeMedStandardbegrunnelser =
+                    RestPutVedtaksperiodeMedStandardbegrunnelser(
+                        standardbegrunnelser = listOf(årMedReduksjonsbegrunnelse.enumnavnTilString()),
+                    ),
+            )
+        }
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
             familieBaSakKlient().sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
@@ -212,45 +216,11 @@ class TriggingAvAutobrev6og18ÅrTest(
             autobrev6og18ÅrDTO =
                 Autobrev6og18ÅrDTO(
                     fagsakId = fagsakId,
-                    alder = årMedReduksjonsbegrunnelse,
+                    alder = 18,
                     årMåned = YearMonth.now(),
                 ),
         )
 
-        var behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
-        // Her forventer vi ikke at autobrev skal trigges pga vedtaksbegrunnelsen som er satt på FGB.
-        assertEquals(1, behandlinger.size)
-
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
-            autobrev6og18ÅrDTO =
-                Autobrev6og18ÅrDTO(
-                    fagsakId = fagsakId,
-                    alder = if (årMedReduksjonsbegrunnelse == 6) 18 else 6,
-                    årMåned = YearMonth.now(),
-                ),
-        )
-
-        behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
-        // Her forventer vi at autobrev skal trigges pga manglende vedtaksbegrunnelse for denne alderen på FGB.
-        assertEquals(2, behandlinger.size)
-
-        // Skal nye autobrev trigges må aktiv behandling være avsluttet. Gjør dette eksplisitt (og utenfor normal
-        // flyt) ettersom dette skjer via en task når autobrev-koden kjøres.
-        val revurderingMedAutobrev = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId)!!
-        revurderingMedAutobrev.status = BehandlingStatus.AVSLUTTET
-        behandlingHentOgPersisterService.lagreEllerOppdater(revurderingMedAutobrev)
-
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
-            autobrev6og18ÅrDTO =
-                Autobrev6og18ÅrDTO(
-                    fagsakId = fagsakId,
-                    alder = if (årMedReduksjonsbegrunnelse == 6) 18 else 6,
-                    årMåned = YearMonth.now(),
-                ),
-        )
-
-        behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
-        // Her forventer vi ikke at autobrev skal trigges fordi det har blitt kjørt.
-        assertEquals(2, behandlinger.size)
+        return behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
     }
 }
