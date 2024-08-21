@@ -62,7 +62,6 @@ class AutovedtakSatsendringService(
         } catch (e: VilkårFeil) {
             return utledSatsendringSvar(satskjøringForFagsak, SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_VILKÅR)
         } catch (e: SatsendringFeil) {
-            logger.error(e.message)
             return utledSatsendringSvar(satskjøringForFagsak, e.satsendringSvar)
         }
 
