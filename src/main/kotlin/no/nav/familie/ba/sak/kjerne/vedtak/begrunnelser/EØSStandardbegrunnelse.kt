@@ -368,7 +368,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "opphorSokerBoddeIkkeIEosLand"
     },
     OPPHØR_SEKUNDÆRLAND_INGEN_AV_FORELDRENE_JOBBER {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSekundarlandIngenAvForeldreneJobber"
     },
     AVSLAG_EØS_IKKE_EØS_BORGER {
