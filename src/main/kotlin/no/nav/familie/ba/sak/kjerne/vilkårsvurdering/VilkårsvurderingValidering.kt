@@ -74,7 +74,7 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
-            if (behandling.erSatsendring() || behandling.opprettetÅrsak.erOmregningsårsak() || behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
+            if (behandling.erSatsendring() || behandling.opprettetÅrsak.erOmregningsårsak()) {
                 secureLogger.warn(
                     "Fødselsdato ${person.fødselsdato} ulik fom ${
                         personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
@@ -83,7 +83,10 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
                 )
             } else {
                 throw FunksjonellFeil(
-                    melding = "Barn født ${person.fødselsdato} har ikke fått under 18-vilkåret vurdert fra fødselsdato",
+                    melding = "\"Fødselsdato ${person.fødselsdato} ulik fom ${
+                        personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
+                            .sortedBy { it.periodeFom }.first().periodeFom
+                    } i 18års-vilkåret i fagsak ${behandling.fagsak.id}.\"",
                     frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato",
                 )
             }
