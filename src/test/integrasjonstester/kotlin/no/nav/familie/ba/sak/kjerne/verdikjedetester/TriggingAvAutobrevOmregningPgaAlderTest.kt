@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
+import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevOmregningPgaAlderService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
-import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
+import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.assertj.core.api.Assertions.assertThat
@@ -33,12 +33,12 @@ import org.springframework.http.HttpHeaders
 import java.time.LocalDate
 import java.time.YearMonth
 
-class TriggingAvAutobrev6og18ÅrTest(
+class TriggingAvAutobrevOmregningPgaAlderTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
+    @Autowired private val autobrevOmregningPgaAlderService: AutobrevOmregningPgaAlderService,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
 ) : AbstractVerdikjedetest() {
@@ -212,9 +212,9 @@ class TriggingAvAutobrev6og18ÅrTest(
             brevmalService = brevmalService,
         )
 
-        autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(
-            autobrev6og18ÅrDTO =
-                Autobrev6og18ÅrDTO(
+        autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(
+            autobrevPgaAlderDTO =
+                AutobrevPgaAlderDTO(
                     fagsakId = fagsakId,
                     alder = 18,
                     årMåned = YearMonth.now(),
