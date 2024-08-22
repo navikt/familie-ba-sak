@@ -88,7 +88,7 @@ class SnikeIKøenIntegrationTest(
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = randomFnr()
     val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 18.årSiden.withDayOfMonth(10)))
-    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 2.årSiden.withDayOfMonth(10)))
+    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 6.årSiden.withDayOfMonth(10)))
 
     @BeforeEach
     fun init() {
@@ -227,7 +227,7 @@ class SnikeIKøenIntegrationTest(
         kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = steg,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barn18år),
+            barnasIdenter = listOf(barn18år, barn2år),
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = fagsakId,
