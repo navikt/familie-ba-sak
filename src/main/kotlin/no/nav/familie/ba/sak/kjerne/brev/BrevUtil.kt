@@ -70,7 +70,6 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
             }
         }
 
-        BehandlingÅrsak.OMREGNING_6ÅR,
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
