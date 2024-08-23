@@ -78,7 +78,7 @@ class OpprettTaskService(
         taskRepository.save(SendStartBehandlingTilInfotrygdTask.opprettTask(aktørStoenadsmottaker))
     }
 
-    fun opprettAutovedtakFor6Og18ÅrBarn(
+    fun opprettSendAutobrevPgaAlderTask(
         fagsakId: Long,
         alder: Int,
     ) {

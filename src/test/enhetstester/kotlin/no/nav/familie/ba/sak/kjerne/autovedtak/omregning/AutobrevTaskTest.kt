@@ -44,17 +44,17 @@ internal class AutobrevTaskTest {
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }
         every { fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(any()) } returns listOf(1L)
-        every { opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), any()) } just runs
+        every { opprettTaskService.opprettSendAutobrevPgaAlderTask(any(), any()) } just runs
         every { opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(any()) } just runs
         every { behandlingHentOgPersisterService.partitionByIverksatteBehandlinger<Long>(any()) } returns listOf(1L)
 
         autobrevTask.doTask(autoBrevTask)
 
         verify(exactly = 0) {
-            opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), 6)
+            opprettTaskService.opprettSendAutobrevPgaAlderTask(any(), 6)
         }
         verify(exactly = 2) {
-            opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(any(), 18)
+            opprettTaskService.opprettSendAutobrevPgaAlderTask(any(), 18)
         }
         verify(exactly = 1) {
             opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(1L)

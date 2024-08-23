@@ -35,7 +35,7 @@ class AutobrevTask(
             val berørteFagsaker = finnAlleBarnMedFødselsdagInneværendeMåned(alder)
             logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med barn som fyller $alder år inneværende måned.")
             berørteFagsaker.forEach { fagsak ->
-                opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(
+                opprettTaskService.opprettSendAutobrevPgaAlderTask(
                     fagsakId = fagsak.id,
                     alder = alder.toInt(),
                 )
