@@ -99,7 +99,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18)
+        ).isEqualTo(AutobrevOmregningSvar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -117,7 +117,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.INGEN_BARN_I_ALDER)
+        ).isEqualTo(AutobrevOmregningSvar.INGEN_BARN_I_ALDER)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -135,7 +135,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.FAGSAK_IKKE_LØPENDE)
+        ).isEqualTo(AutobrevOmregningSvar.FAGSAK_IKKE_LØPENDE)
 
         verify(exactly = 0) { stegService.håndterVilkårsvurdering(any()) }
     }
@@ -159,7 +159,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.OK)
+        ).isEqualTo(AutobrevOmregningSvar.OK)
 
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -213,7 +213,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER)
+        ).isEqualTo(AutobrevOmregningSvar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER)
 
         verify(exactly = 0) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -242,7 +242,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.EØS_MED_NULLUTBETALING)
+        ).isEqualTo(AutobrevOmregningSvar.EØS_MED_NULLUTBETALING)
 
         verify(exactly = 0) {
             autovedtakStegService.kjørBehandlingOmregning(
@@ -271,7 +271,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
 
         assertThat(
             autobrevOmregningPgaAlderService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrevPgaAlderDTO),
-        ).isEqualTo(Autobrev6Og18Svar.HAR_ALT_SENDT)
+        ).isEqualTo(AutobrevOmregningSvar.HAR_ALT_SENDT)
 
         verify(exactly = 0) {
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(

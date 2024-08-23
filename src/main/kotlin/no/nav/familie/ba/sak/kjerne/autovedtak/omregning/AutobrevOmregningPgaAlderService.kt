@@ -35,7 +35,7 @@ class AutobrevOmregningPgaAlderService(
     fun opprettOmregningsoppgaveForBarnIBrytingsalder(
         autobrevPgaAlderDTO: AutobrevPgaAlderDTO,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): Autobrev6Og18Svar {
+    ): AutobrevOmregningSvar {
         logger.info("opprettOmregningsoppgaveForBarnIBrytingsalder for fagsak ${autobrevPgaAlderDTO.fagsakId}")
 
         val behandling =
@@ -53,12 +53,12 @@ class AutobrevOmregningPgaAlderService(
                 standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrevPgaAlderDTO.alder),
             )
         ) {
-            return Autobrev6Og18Svar.HAR_ALT_SENDT
+            return AutobrevOmregningSvar.HAR_ALT_SENDT
         }
 
         if (behandling.fagsak.status != FagsakStatus.LØPENDE) {
             logger.info("Fagsak ${behandling.fagsak.id} har ikke status løpende, og derfor prosesseres den ikke videre.")
-            return Autobrev6Og18Svar.FAGSAK_IKKE_LØPENDE
+            return AutobrevOmregningSvar.FAGSAK_IKKE_LØPENDE
         }
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(
@@ -67,12 +67,12 @@ class AutobrevOmregningPgaAlderService(
             )
         ) {
             logger.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrevPgaAlderDTO.alder} ")
-            return Autobrev6Og18Svar.INGEN_BARN_I_ALDER
+            return AutobrevOmregningSvar.INGEN_BARN_I_ALDER
         }
 
         if (barnetrygdOpphører(autobrevPgaAlderDTO, behandling)) {
             logger.info("Fagsak ${behandling.fagsak.id} har ikke løpende utbetalinger for barn under 18 år og vil opphøre.")
-            return Autobrev6Og18Svar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18
+            return AutobrevOmregningSvar.INGEN_LØPENDE_UTBETALING_FOR_BARN_UNDER_18
         }
 
         if (!barnIBrytningsalderHarLøpendeYtelse(
@@ -82,7 +82,7 @@ class AutobrevOmregningPgaAlderService(
             )
         ) {
             logger.info("Ingen løpende ytelse for barnet i brytningsalder for fagsak=${behandling.fagsak.id} behandlingsårsak=$behandlingsårsak")
-            return Autobrev6Og18Svar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER
+            return AutobrevOmregningSvar.INGEN_LØPENDE_YTELSE_FOR_BARN_I_BRYTNINGSALDER
         }
 
         if (startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(autobrevPgaAlderDTO.fagsakId)) {
@@ -99,7 +99,7 @@ class AutobrevOmregningPgaAlderService(
             )
         ) {
             logger.info("Sender ikke ut omregningsbrev for EØS med nullutbetaling for fagsak=${behandling.fagsak.id}")
-            return Autobrev6Og18Svar.EØS_MED_NULLUTBETALING
+            return AutobrevOmregningSvar.EØS_MED_NULLUTBETALING
         }
 
         autovedtakStegService.kjørBehandlingOmregning(
@@ -116,7 +116,7 @@ class AutobrevOmregningPgaAlderService(
                 ),
             førstegangKjørt = førstegangKjørt,
         )
-        return Autobrev6Og18Svar.OK
+        return AutobrevOmregningSvar.OK
     }
 
     private fun barnetrygdOpphører(
@@ -221,7 +221,7 @@ enum class Alder(
     ATTEN(år = 18),
 }
 
-enum class Autobrev6Og18Svar {
+enum class AutobrevOmregningSvar {
     OK,
     FAGSAK_IKKE_LØPENDE,
     INGEN_BARN_I_ALDER,
