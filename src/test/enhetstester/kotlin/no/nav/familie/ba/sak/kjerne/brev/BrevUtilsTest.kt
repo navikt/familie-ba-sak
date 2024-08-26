@@ -50,10 +50,7 @@ internal class BrevUtilsTest {
         assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
         val revurdering = lagBehandling().copy(type = BehandlingType.REVURDERING)
         assertNull(hentOverstyrtDokumenttittel(revurdering))
-        Assertions.assertEquals(
-            "Vedtak om endret barnetrygd - barn 6 år",
-            hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_6ÅR)),
-        )
+
         Assertions.assertEquals(
             "Vedtak om endret barnetrygd - barn 18 år",
             hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_18ÅR)),

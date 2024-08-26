@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
+import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
@@ -78,7 +78,7 @@ class OpprettTaskService(
         taskRepository.save(SendStartBehandlingTilInfotrygdTask.opprettTask(aktørStoenadsmottaker))
     }
 
-    fun opprettAutovedtakFor6Og18ÅrBarn(
+    fun opprettSendAutobrevPgaAlderTask(
         fagsakId: Long,
         alder: Int,
     ) {
@@ -87,10 +87,10 @@ class OpprettTaskService(
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
-                    type = SendAutobrev6og18ÅrTask.TASK_STEP_TYPE,
+                    type = SendAutobrevPgaAlderTask.TASK_STEP_TYPE,
                     payload =
                         objectMapper.writeValueAsString(
-                            Autobrev6og18ÅrDTO(
+                            AutobrevPgaAlderDTO(
                                 fagsakId = fagsakId,
                                 alder = alder,
                                 årMåned = inneværendeMåned,

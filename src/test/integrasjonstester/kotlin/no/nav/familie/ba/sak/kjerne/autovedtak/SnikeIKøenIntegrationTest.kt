@@ -87,7 +87,8 @@ class SnikeIKøenIntegrationTest(
     private val loggRepository: LoggRepository,
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = randomFnr()
-    val barnFnr = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 6.årSiden.withDayOfMonth(10)))
+    val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 18.årSiden.withDayOfMonth(10)))
+    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 6.årSiden.withDayOfMonth(10)))
 
     @BeforeEach
     fun init() {
@@ -107,8 +108,8 @@ class SnikeIKøenIntegrationTest(
                 åpenBehandling.fagsak.aktør,
                 OmregningBrevData(
                     aktør = åpenBehandling.fagsak.aktør,
-                    behandlingsårsak = BehandlingÅrsak.OMREGNING_6ÅR,
-                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
+                    behandlingsårsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
                     fagsakId = åpenBehandling.fagsak.id,
                 ),
             ),
@@ -145,8 +146,8 @@ class SnikeIKøenIntegrationTest(
                 åpenBehandling.fagsak.aktør,
                 OmregningBrevData(
                     aktør = åpenBehandling.fagsak.aktør,
-                    behandlingsårsak = BehandlingÅrsak.OMREGNING_6ÅR,
-                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
+                    behandlingsårsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
                     fagsakId = åpenBehandling.fagsak.id,
                 ),
                 førstegangKjørt = tid6DagerSiden,
@@ -157,8 +158,8 @@ class SnikeIKøenIntegrationTest(
             åpenBehandling.fagsak.aktør,
             OmregningBrevData(
                 aktør = åpenBehandling.fagsak.aktør,
-                behandlingsårsak = BehandlingÅrsak.OMREGNING_6ÅR,
-                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
+                behandlingsårsak = BehandlingÅrsak.OMREGNING_18ÅR,
+                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
                 fagsakId = åpenBehandling.fagsak.id,
             ),
             førstegangKjørt = tid6DagerSiden.minusDays(1),
@@ -208,7 +209,7 @@ class SnikeIKøenIntegrationTest(
         kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
+            barnasIdenter = listOf(barn18år, barn2år),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
@@ -226,7 +227,7 @@ class SnikeIKøenIntegrationTest(
         kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = steg,
             søkerFnr = søkerFnr,
-            barnasIdenter = listOf(barnFnr),
+            barnasIdenter = listOf(barn18år, barn2år),
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = fagsakId,

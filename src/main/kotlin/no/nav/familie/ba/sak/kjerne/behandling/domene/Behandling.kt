@@ -326,7 +326,7 @@ enum class BehandlingÅrsak(
     KLAGE("Klage"),
     TEKNISK_ENDRING("Teknisk endring"), // Brukes i tilfeller ved systemfeil og vi ønsker å iverksette mot OS på nytt
     KORREKSJON_VEDTAKSBREV("Korrigere vedtak med egen brevmal"),
-    OMREGNING_6ÅR("Omregning 6 år"),
+    OMREGNING_6ÅR("Omregning 6 år"), // Behandlingsårsak som forsvant i forbindelse med satsendring 2024-09-01
     OMREGNING_18ÅR("Omregning 18 år"),
     OMREGNING_SMÅBARNSTILLEGG("Omregning småbarnstillegg"),
     SATSENDRING("Satsendring"),
@@ -339,11 +339,10 @@ enum class BehandlingÅrsak(
     ;
 
     fun erOmregningsårsak(): Boolean =
-        this == OMREGNING_6ÅR || this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
+        this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
 
     fun hentOverstyrtDokumenttittelForOmregningsbehandling(): String? =
         when (this) {
-            OMREGNING_6ÅR -> "Vedtak om endret barnetrygd - barn 6 år"
             OMREGNING_18ÅR -> "Vedtak om endret barnetrygd - barn 18 år"
             OMREGNING_SMÅBARNSTILLEGG -> "Vedtak om endret barnetrygd - småbarnstillegg"
             else -> null
