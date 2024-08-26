@@ -594,12 +594,12 @@ class BrevService(
     }
 
     fun finnStarttidspunktForUtbetalingstabell(behandling: Behandling): LocalDate {
+        val førsteJanuarIFjor = LocalDate.now().minusYears(1).withDayOfYear(1)
         val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id)
 
         return when {
-            behandling.opprettetÅrsak != BehandlingÅrsak.ÅRLIG_KONTROLL || endringstidspunkt != TIDENES_ENDE -> endringstidspunkt
+            behandling.opprettetÅrsak != BehandlingÅrsak.ÅRLIG_KONTROLL || endringstidspunkt.isBefore(førsteJanuarIFjor) -> endringstidspunkt
             else -> {
-                val førsteJanuarIFjor = LocalDate.now().minusYears(1).withDayOfYear(1)
                 val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id)
                 val tidligsteUtbetaling =
                     andelTilkjentYtelseRepository

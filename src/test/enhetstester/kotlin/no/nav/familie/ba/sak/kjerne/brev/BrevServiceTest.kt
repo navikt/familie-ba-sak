@@ -236,6 +236,25 @@ class BrevServiceTest {
     }
 
     @Test
+    fun `finnStarttidspunktForUtbetalingstabell returnerer første januar i fjor selv om endringstidspunkt er senere`() {
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2024, 1, 1)
+        every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.now().plusYears(1),
+                ),
+            )
+
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
+
+        val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
+
+        assertThat(starttidspunkt).isEqualTo(LocalDate.now().minusYears(1).withDayOfYear(1))
+    }
+
+    @Test
     fun `finnStarttidspunktForUtbetalingstabell returnerer første utbetalingstidspunkt hvis endringstidspunkt er TIDENES_ENDE`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
