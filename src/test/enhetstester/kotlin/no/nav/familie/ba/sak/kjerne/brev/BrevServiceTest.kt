@@ -207,13 +207,13 @@ class BrevServiceTest {
     fun `finnStarttidspunktForUtbetalingstabell returnerer endringstidspunkt for alle behandlingsårsaker`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2024, 1, 1)
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2020, 1, 1)
 
         val behandling = lagBehandling(årsak = behandlingÅrsak)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
-        assertThat(starttidspunkt).isEqualTo(LocalDate.of(2024, 1, 1))
+        assertThat(starttidspunkt).isEqualTo(LocalDate.of(2020, 1, 1))
     }
 
     @Test
