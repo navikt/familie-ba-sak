@@ -266,7 +266,7 @@ class BrevServiceTest {
     }
 
     @Test
-    fun `finnStarttidspunktForUtbetalingstabell returnerer første utbetalingstidspunkt hvis endringstidspunkt er TIDENES_ENDE`() {
+    fun `finnStarttidspunktForUtbetalingstabell returnerer første utbetalingstidspunkt ved ÅRLIG_KONTROLL dersom endringstidspunkt er TIDENES_ENDE og første utbetaling er etter 1 januar i fjor`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
