@@ -217,7 +217,7 @@ class BrevServiceTest {
     }
 
     @Test
-    fun `finnStarttidspunktForUtbetalingstabell returnerer endringstidspunkt for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er tidligere enn første januar i fjor`() {
+    fun `finnStarttidspunktForUtbetalingstabell returnerer endringstidspunkt for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er tidligere enn 1 januar i fjor`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2020, 1, 1)
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
@@ -228,7 +228,7 @@ class BrevServiceTest {
     }
 
     @Test
-    fun `finnStarttidspunktForUtbetalingstabell returnerer tidligst første januar i fjor for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er TIDENES_ENDE`() {
+    fun `finnStarttidspunktForUtbetalingstabell returnerer tidligst 1 januar i fjor for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er TIDENES_ENDE`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns TIDENES_ENDE
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
@@ -247,7 +247,7 @@ class BrevServiceTest {
     }
 
     @Test
-    fun `finnStarttidspunktForUtbetalingstabell returnerer første januar i fjor for behandlingsårsak ÅRLIG_KONTROLL, selv om endringstidspunkt er senere`() {
+    fun `finnStarttidspunktForUtbetalingstabell returnerer 1 januar i fjor for behandlingsårsak ÅRLIG_KONTROLL, selv om endringstidspunkt er senere`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2024, 1, 1)
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
