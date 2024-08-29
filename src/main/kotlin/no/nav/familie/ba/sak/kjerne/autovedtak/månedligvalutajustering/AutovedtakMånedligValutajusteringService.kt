@@ -3,7 +3,6 @@
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.common.MånedligValutaJusteringFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -23,10 +23,14 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.prosessering.error.RekjørSenereException
+import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -69,15 +73,7 @@ class AutovedtakMånedligValutajusteringService(
         val aktivOgÅpenBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
 
         if (aktivOgÅpenBehandling != null) {
-            if (snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling)) {
-                snikeIKøenService.settAktivBehandlingPåMaskinellVent(
-                    aktivOgÅpenBehandling.id,
-                    SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
-                )
-            } else {
-                månedligvalutajusteringIgnorertÅpenBehandling.increment()
-                throw MånedligValutaJusteringFeil(melding = "Kan ikke utføre månedlig valutajustering for fagsak=$fagsakId fordi det er en åpen behandling vi ikke klarer å snike forbi")
-            }
+            validerOgSettÅpenBehandlingPåMaskinellVent(aktivOgÅpenBehandling)
         }
 
         val søkerAktør = sisteVedtatteBehandling.fagsak.aktør
@@ -128,5 +124,39 @@ class AutovedtakMånedligValutajusteringService(
                 else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved månedlig valutajustering for fagsak=$fagsakId")
             }
         taskRepository.save(task)
+    }
+
+    private fun validerOgSettÅpenBehandlingPåMaskinellVent(åpenBehandling: Behandling) {
+        when (åpenBehandling.status) {
+            BehandlingStatus.UTREDES,
+            BehandlingStatus.SATT_PÅ_VENT,
+            ->
+                if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
+                    snikeIKøenService.settAktivBehandlingPåMaskinellVent(
+                        åpenBehandling.id,
+                        SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+                    )
+                } else {
+                    throw RekjørSenereException(
+                        årsak = "Åpen behandling med status ${åpenBehandling.status} ble endret for under fire timer siden. Prøver igjen klokken 06.00 neste virkedag",
+                        triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0),
+                    )
+                }
+
+            BehandlingStatus.IVERKSETTER_VEDTAK,
+            BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
+            -> throw RekjørSenereException(
+                årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen om én time",
+                triggerTid = LocalDateTime.now().plusHours(1),
+            )
+
+            BehandlingStatus.FATTER_VEDTAK,
+            -> throw RekjørSenereException(
+                årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen klokken 06.00 neste virkedag",
+                triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0),
+            )
+
+            else -> throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
+        }
     }
 }

@@ -14,11 +14,9 @@ import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType =
-        MånedligValutajusteringTask
-            .TASK_STEP_TYPE,
+    taskStepType = MånedligValutajusteringTask.TASK_STEP_TYPE,
     beskrivelse = "månedlig valutajustering",
-    maxAntallFeil = 1,
+    maxAntallFeil = 3,
     settTilManuellOppfølgning = true,
 )
 class MånedligValutajusteringTask(
