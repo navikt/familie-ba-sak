@@ -12,22 +12,17 @@ import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.legg
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggRepository
-import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -46,10 +41,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
-import org.springframework.context.annotation.Profile
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 
@@ -233,46 +224,4 @@ class SnikeIKøenIntegrationTest(
             fagsakId = fagsakId,
             brevmalService = brevmalService,
         )
-}
-
-@TestConfiguration
-class SnikeIKøenServiceTestConfig(
-    @Autowired
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    @Autowired
-    private val loggRepository: LoggRepository,
-    @Autowired
-    private val loggService: LoggService,
-    @Autowired
-    private val påVentService: SettPåVentService,
-    @Autowired
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
-) {
-    @Bean
-    @Profile("snike-i-koen-test-config")
-    @Primary
-    fun snikeIKøenService() =
-        object : SnikeIKøenService(
-            behandlingHentOgPersisterService,
-            påVentService,
-            loggService,
-            tilbakestillBehandlingService,
-        ) {
-            override fun kanSnikeForbi(aktivOgÅpenBehandling: Behandling): Boolean {
-                mockEndringstidspunkt(aktivOgÅpenBehandling)
-                return super.kanSnikeForbi(aktivOgÅpenBehandling)
-            }
-
-            private fun mockEndringstidspunkt(aktivOgÅpenBehandling: Behandling) {
-                aktivOgÅpenBehandling.endretTidspunkt = endringstidspunktMock
-                loggRepository.hentLoggForBehandling(aktivOgÅpenBehandling.id).forEach {
-                    loggRepository.deleteById(it.id)
-                    loggRepository.saveAndFlush(it.copy(opprettetTidspunkt = endringstidspunktMock))
-                }
-            }
-        }
-
-    companion object {
-        var endringstidspunktMock = LocalDateTime.now()
-    }
 }
