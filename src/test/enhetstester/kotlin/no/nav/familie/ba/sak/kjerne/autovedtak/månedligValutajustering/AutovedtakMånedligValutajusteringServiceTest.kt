@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.månedligValutajustering
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.defaultFagsak
@@ -22,14 +24,13 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 
 class AutovedtakMånedligValutajusteringServiceTest {
-    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    val valutaKursService = mockk<ValutakursService>()
-    val localDateProvider = mockk<LocalDateProvider>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val valutaKursService = mockk<ValutakursService>()
+    private val localDateProvider = mockk<LocalDateProvider>()
 
-    val autovedtakMånedligValutajusteringService =
+    private val autovedtakMånedligValutajusteringService =
         AutovedtakMånedligValutajusteringService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             valutakursService = valutaKursService,
@@ -135,8 +136,10 @@ class AutovedtakMånedligValutajusteringServiceTest {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
         val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
         val åpenBehandling = lagBehandling(fagsak = fagsak, status = behandlingStatus)
-        val omEnTime = LocalDateTime.now().plusMinutes(119).truncatedTo(ChronoUnit.HOURS)
+        val nå = LocalDateTime.now()
 
+        mockkStatic(LocalDateTime::class)
+        every { LocalDateTime.now() } returns nå
         every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns åpenBehandling
@@ -157,7 +160,9 @@ class AutovedtakMånedligValutajusteringServiceTest {
         }.run {
             assertThat(message).startsWith("Rekjører senere")
             assertThat(årsak).startsWith("Åpen behandling har status $behandlingStatus")
-            assertThat(triggerTid).isEqualTo(omEnTime)
+            assertThat(triggerTid).isEqualTo(nå.plusHours(1))
         }
+
+        unmockkStatic(LocalDateTime::class)
     }
 }

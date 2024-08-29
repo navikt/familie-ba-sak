@@ -31,7 +31,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.temporal.ChronoUnit
 
 @Service
 class AutovedtakMånedligValutajusteringService(
@@ -132,14 +131,10 @@ class AutovedtakMånedligValutajusteringService(
             BehandlingStatus.SATT_PÅ_VENT,
             ->
                 if (snikeIKøenService.kanSnikeForbi(åpenBehandling)) {
-                    try {
-                        snikeIKøenService.settAktivBehandlingPåMaskinellVent(
-                            åpenBehandling.id,
-                            SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
-                        )
-                    } catch (e: Exception) {
-                        throw Feil("Behandling ${åpenBehandling.id} er ikke aktiv")
-                    }
+                    snikeIKøenService.settAktivBehandlingPåMaskinellVent(
+                        åpenBehandling.id,
+                        SettPåMaskinellVentÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+                    )
                 } else {
                     throw RekjørSenereException(
                         årsak = "Åpen behandling med status ${åpenBehandling.status} ble endret for under fire timer siden. Prøver igjen klokken 06.00 i morgen",
@@ -151,7 +146,7 @@ class AutovedtakMånedligValutajusteringService(
             BehandlingStatus.SATT_PÅ_MASKINELL_VENT,
             -> throw RekjørSenereException(
                 årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen om én time",
-                triggerTid = LocalDateTime.now().plusMinutes(119).truncatedTo(ChronoUnit.HOURS), // Nærmeste hele time minst en time frem i tid
+                triggerTid = LocalDateTime.now().plusHours(1),
             )
 
             BehandlingStatus.FATTER_VEDTAK,
