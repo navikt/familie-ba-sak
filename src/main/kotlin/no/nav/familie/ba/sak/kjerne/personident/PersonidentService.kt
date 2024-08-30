@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -25,7 +26,7 @@ class PersonidentService(
     private val aktørIdRepository: AktørIdRepository,
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val taskRepository: TaskRepositoryWrapper,
-    private val fagsakService: FagsakService,
+    @Lazy private val fagsakService: FagsakService,
     private val opprettTaskService: OpprettTaskService,
 ) {
     fun hentIdenter(
