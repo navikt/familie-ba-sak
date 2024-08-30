@@ -10,11 +10,17 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.PatchMergetIdentTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -24,6 +30,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -39,12 +46,16 @@ internal class PersonidentServiceTest {
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val personIdentSlot = slot<Personident>()
     private val aktørSlot = slot<Aktør>()
+    private val fagsakService = mockk<FagsakService>()
+    private val opprettTaskService = mockk<OpprettTaskService>()
     private val personidentService =
         PersonidentService(
             personidentRepository,
             aktørIdRepository,
             pdlIdentRestClient,
             mockk(),
+            fagsakService,
+            opprettTaskService,
         )
 
     @BeforeAll
@@ -124,6 +135,8 @@ internal class PersonidentServiceTest {
                     aktørIdRepository,
                     pdlIdentRestClient,
                     mockk(),
+                    mockk(),
+                    mockk(),
                 )
 
             val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
@@ -165,6 +178,8 @@ internal class PersonidentServiceTest {
                     aktørIdRepository,
                     pdlIdentRestClient,
                     mockk(),
+                    mockk(),
+                    mockk(),
                 )
 
             val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
@@ -174,43 +189,6 @@ internal class PersonidentServiceTest {
             assertEquals(personIdentSomFinnes, aktør?.personidenter?.single()?.fødselsnummer)
             verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
-        }
-
-        @Test
-        fun `Hendelse på en ident hvor gammel ident1 er merget med ny ident2 skal kaste feil når bruker har en sak på gammel aktør`() {
-            val fnrIdent1 = randomFnr()
-            val aktørIdent1 = tilAktør(fnrIdent1)
-            val aktivFnrIdent2 = randomFnr()
-            val aktivAktørIdent2 = tilAktør(aktivFnrIdent2)
-
-            secureLogger.info("gammelIdent=$fnrIdent1,${aktørIdent1.aktørId}   nyIdent=$aktivFnrIdent2,${aktivAktørIdent2.aktørId}")
-
-            every { pdlIdentRestClient.hentIdenter(aktivFnrIdent2, true) } answers {
-                listOf(
-                    IdentInformasjon(aktivAktørIdent2.aktørId, false, "AKTORID"),
-                    IdentInformasjon(aktivFnrIdent2, false, "FOLKEREGISTERIDENT"),
-                    IdentInformasjon(aktørIdent1.aktørId, true, "AKTORID"),
-                    IdentInformasjon(fnrIdent1, true, "FOLKEREGISTERIDENT"),
-                )
-            }
-
-            every { aktørIdRepository.findByAktørIdOrNull(aktivAktørIdent2.aktørId) }.answers {
-                null
-            }
-            every { aktørIdRepository.findByAktørIdOrNull(aktørIdent1.aktørId) }.answers {
-                aktørIdent1
-            }
-
-            val personidentService =
-                PersonidentService(
-                    personidentRepository,
-                    aktørIdRepository,
-                    pdlIdentRestClient,
-                    mockk(),
-                )
-
-            val feil = assertThrows<Feil> { personidentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2)) }
-            assertThat(feil.message).contains("Mottok potensielt en hendelse på en merget ident for aktørId=${aktivAktørIdent2.aktørId}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt")
         }
 
         @Test
@@ -238,14 +216,6 @@ internal class PersonidentServiceTest {
                 null
             }
 
-            val personidentService =
-                PersonidentService(
-                    personidentRepository,
-                    aktørIdRepository,
-                    pdlIdentRestClient,
-                    mockk(),
-                )
-
             val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
             assertEquals(aktivAktørIdent2.aktørId, aktør?.aktørId)
             assertEquals(1, aktør?.personidenter?.size)
@@ -253,6 +223,161 @@ internal class PersonidentServiceTest {
             verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         }
+
+        @Test
+        fun `håndterNyIdent kaster Feil når det eksisterer flere fagsaker for identer`() {
+            val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
+            val aktørGammel = tilAktør(fnrGammel)
+
+            val fnrNy = randomFnr(LocalDate.of(2000, 1, 1))
+            val identNy = PersonIdent(fnrNy)
+            val aktørNy = tilAktør(fnrGammel)
+
+            every { pdlIdentRestClient.hentIdenter(fnrNy, true) } answers {
+                listOf(
+                    IdentInformasjon(aktørNy.aktørId, false, "AKTORID"),
+                    IdentInformasjon(fnrNy, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(aktørGammel.aktørId, true, "AKTORID"),
+                    IdentInformasjon(fnrGammel, true, "FOLKEREGISTERIDENT"),
+                )
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+
+            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.BARN), RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER))
+
+            val feil =
+                assertThrows<Feil> {
+                    personidentService.håndterNyIdent(identNy)
+                }
+
+            assertThat(feil.message).startsWith("Det eksisterer flere fagsaker på identer som skal merges")
+        }
+    }
+
+    @Test
+    fun `håndterNyIdent kaster Feil når det ikke eksisterer en fagsak for identer`() {
+        val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
+        val aktørGammel = tilAktør(fnrGammel)
+
+        val fnrNy = randomFnr(LocalDate.of(2000, 1, 2))
+        val identNy = PersonIdent(fnrNy)
+        val aktørNy = tilAktør(fnrGammel)
+
+        every { pdlIdentRestClient.hentIdenter(fnrNy, true) } answers {
+            listOf(
+                IdentInformasjon(aktørNy.aktørId, false, "AKTORID"),
+                IdentInformasjon(fnrNy, false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(aktørGammel.aktørId, true, "AKTORID"),
+                IdentInformasjon(fnrGammel, true, "FOLKEREGISTERIDENT"),
+            )
+        }
+
+        every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+
+        every { fagsakService.hentFagsakDeltager(any()) } returns emptyList()
+
+        val feil =
+            assertThrows<Feil> {
+                personidentService.håndterNyIdent(identNy)
+            }
+
+        assertThat(feil.message).startsWith("Fant ingen fagsaker på identer som skal merges")
+    }
+
+    @Test
+    fun `håndterNyIdent kaster Feil når det eksisterer en fagsak uten fagsakId for identer`() {
+        val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
+        val aktørGammel = tilAktør(fnrGammel)
+
+        val fnrNy = randomFnr(LocalDate.of(2000, 1, 2))
+        val identNy = PersonIdent(fnrNy)
+        val aktørNy = tilAktør(fnrGammel)
+
+        every { pdlIdentRestClient.hentIdenter(fnrNy, true) } answers {
+            listOf(
+                IdentInformasjon(aktørNy.aktørId, false, "AKTORID"),
+                IdentInformasjon(fnrNy, false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(aktørGammel.aktørId, true, "AKTORID"),
+                IdentInformasjon(fnrGammel, true, "FOLKEREGISTERIDENT"),
+            )
+        }
+
+        every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+
+        every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER))
+
+        val feil =
+            assertThrows<Feil> {
+                personidentService.håndterNyIdent(identNy)
+            }
+
+        assertThat(feil.message).startsWith("Fant ingen fagsakId på fagsak for identer som skal merges")
+    }
+
+    @Test
+    fun `håndterNyIdent kaster Feil når fødselsdato er endret for identer`() {
+        val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
+        val aktørGammel = tilAktør(fnrGammel)
+
+        val fnrNy = randomFnr(LocalDate.of(2000, 1, 2))
+        val identNy = PersonIdent(fnrNy)
+        val aktørNy = tilAktør(fnrGammel)
+
+        every { pdlIdentRestClient.hentIdenter(fnrNy, true) } answers {
+            listOf(
+                IdentInformasjon(aktørNy.aktørId, false, "AKTORID"),
+                IdentInformasjon(fnrNy, false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(aktørGammel.aktørId, true, "AKTORID"),
+                IdentInformasjon(fnrGammel, true, "FOLKEREGISTERIDENT"),
+            )
+        }
+
+        every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+
+        every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 0))
+
+        val feil =
+            assertThrows<Feil> {
+                personidentService.håndterNyIdent(identNy)
+            }
+
+        assertThat(feil.message).startsWith("Det er forskjellige fødselsdatoer på identer som skal merges")
+    }
+
+    @Test
+    fun `håndterNyIdent lager en PatchMergetIdent task`() {
+        val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
+        val aktørGammel = tilAktør(fnrGammel)
+
+        val fnrNy = randomFnr(LocalDate.of(2000, 1, 1))
+        val identNy = PersonIdent(fnrNy)
+        val aktørNy = tilAktør(fnrGammel)
+
+        every { pdlIdentRestClient.hentIdenter(fnrNy, true) } answers {
+            listOf(
+                IdentInformasjon(aktørNy.aktørId, false, "AKTORID"),
+                IdentInformasjon(fnrNy, false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(aktørGammel.aktørId, true, "AKTORID"),
+                IdentInformasjon(fnrGammel, true, "FOLKEREGISTERIDENT"),
+            )
+        }
+
+        every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+        every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 0))
+        every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns
+            Task(
+                type = PatchMergetIdentTask.TASK_STEP_TYPE,
+                payload = "",
+            )
+
+        val feil =
+            assertThrows<RekjørSenereException> {
+                personidentService.håndterNyIdent(identNy)
+            }
+
+        verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
+        assertThat(feil.årsak).startsWith("Mottok identhendelse som blir forsøkt patchet automatisk")
     }
 
     @Nested
@@ -372,6 +497,8 @@ internal class PersonidentServiceTest {
                     aktørIdRepository,
                     pdlIdentRestClient,
                     taskRepositoryMock,
+                    mockk(),
+                    mockk(),
                 )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
@@ -422,6 +549,8 @@ internal class PersonidentServiceTest {
                     aktørIdRepository,
                     pdlIdentRestClient,
                     taskRepositoryMock,
+                    mockk(),
+                    mockk(),
                 )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
@@ -475,6 +604,8 @@ internal class PersonidentServiceTest {
                     aktørIdRepository,
                     pdlIdentRestClient,
                     taskRepositoryMock,
+                    mockk(),
+                    mockk(),
                 )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
