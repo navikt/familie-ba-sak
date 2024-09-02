@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HOPP_OVER_INFOTRYGD_SJEKK
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -59,6 +61,7 @@ class BehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -195,11 +198,12 @@ class BehandlingService(
     @Transactional
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val hoppOverInfotrygdSjekkToggleErSkruddPå = unleashNextMedContextService.isEnabled(HOPP_OVER_INFOTRYGD_SJEKK)
 
         if (aktivBehandling != null) {
             behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
             saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
-        } else if (harAktivInfotrygdSak(behandling)) {
+        } else if (!hoppOverInfotrygdSjekkToggleErSkruddPå && harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
                 "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
                 "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
