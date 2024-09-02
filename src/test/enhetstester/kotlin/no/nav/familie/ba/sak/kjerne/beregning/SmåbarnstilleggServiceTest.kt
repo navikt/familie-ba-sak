@@ -49,9 +49,8 @@ class SmåbarnstilleggServiceTest {
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 persongrunnlagService = persongrunnlagService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                localDateProvider = localDateProvider
-
-        )
+                localDateProvider = localDateProvider,
+            )
 
         every { periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(any()) } just Runs
         every { localDateProvider.now() } returns LocalDate.now()

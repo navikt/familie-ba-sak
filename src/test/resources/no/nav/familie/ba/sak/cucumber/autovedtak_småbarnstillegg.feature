@@ -67,8 +67,8 @@ Egenskap: Småbarnstillegg autovedtak
       | Brevperiodetype | Fra dato | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |
 
   Scenario: Skal sende autovedtak småbarnstillegg til manuell behandling dersom noe endrer seg tilbake i tid
-'    Og dagens dato er 27.11.2023
-'    Og lag personresultater for behandling 2
+    Og dagens dato er 27.11.2023
+    Og lag personresultater for behandling 2
 
     Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
