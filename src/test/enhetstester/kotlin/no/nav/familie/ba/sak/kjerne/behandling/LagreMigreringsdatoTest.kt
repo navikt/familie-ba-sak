@@ -68,6 +68,7 @@ class LagreMigreringsdatoTest {
             vedtaksperiodeService,
             taskRepository,
             vilkårsvurderingService,
+            unleashNextMedContextService = mockk(),
         )
 
     @Test

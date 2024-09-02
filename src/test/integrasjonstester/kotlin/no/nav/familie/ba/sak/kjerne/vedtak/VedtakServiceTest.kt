@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -82,6 +83,8 @@ class VedtakServiceTest(
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
     @Autowired
+    private val unleashNextMedContextService: UnleashNextMedContextService,
+    @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
@@ -113,6 +116,7 @@ class VedtakServiceTest(
                 vedtaksperiodeService,
                 taskRepository,
                 vilkårsvurderingService,
+                unleashNextMedContextService,
             )
 
         val personAktørId = randomAktør()
