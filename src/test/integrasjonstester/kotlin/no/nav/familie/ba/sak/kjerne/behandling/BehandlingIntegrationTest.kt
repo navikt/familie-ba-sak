@@ -107,7 +107,7 @@ class BehandlingIntegrationTest(
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
     @Autowired
-    private val unleashNextMedContextService: UnleashNextMedContextService
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun truncate() {
