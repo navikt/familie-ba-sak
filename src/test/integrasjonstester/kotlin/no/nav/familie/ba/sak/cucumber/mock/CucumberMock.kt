@@ -142,6 +142,7 @@ class CucumberMock(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            localDateProvider = mockedDateProvider
         )
 
     val tilpassDifferanseberegningSøkersYtelserService =

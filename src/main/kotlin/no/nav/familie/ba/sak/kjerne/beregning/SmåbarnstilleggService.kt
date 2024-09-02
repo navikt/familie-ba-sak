@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -28,6 +29,7 @@ class SmåbarnstilleggService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val localDateProvider: LocalDateProvider,
 ) {
     @Transactional
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
@@ -88,7 +90,7 @@ class SmåbarnstilleggService(
     fun hentPerioderMedFullOvergangsstønad(
         behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        val dagensDato = LocalDate.now()
+        val dagensDato = localDateProvider.now()
 
         val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id).map { it.tilInternPeriodeOvergangsstønad() }
         val overgangsstønadPerioderFraForrigeBehandling =
@@ -121,7 +123,7 @@ class SmåbarnstilleggService(
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.id)
 
-        val dagensDato = LocalDate.now()
+        val dagensDato = localDateProvider.now()
 
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør)
