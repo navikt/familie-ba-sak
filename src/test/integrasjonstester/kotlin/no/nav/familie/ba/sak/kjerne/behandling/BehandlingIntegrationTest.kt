@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HOPP_OVER_INFOTRYGD_SJEKK
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -107,8 +106,6 @@ class BehandlingIntegrationTest(
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
 ) : AbstractSpringIntegrationTest() {
-    private lateinit var unleashNextMedContextService: UnleashNextMedContextService
-
     @BeforeEach
     fun truncate() {
         databaseCleanupService.truncate()
@@ -118,7 +115,6 @@ class BehandlingIntegrationTest(
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
-        every { unleashNextMedContextService.isEnabled(HOPP_OVER_INFOTRYGD_SJEKK) } returns false
         settToggleMock(HOPP_OVER_INFOTRYGD_SJEKK, false)
     }
 
