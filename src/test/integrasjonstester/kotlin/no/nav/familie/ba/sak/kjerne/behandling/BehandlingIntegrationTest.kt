@@ -106,9 +106,9 @@ class BehandlingIntegrationTest(
     private val personidentService: PersonidentService,
     @Autowired
     private val taskRepository: TaskRepositoryWrapper,
-    @Autowired
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) : AbstractSpringIntegrationTest() {
+    private lateinit var unleashNextMedContextService: UnleashNextMedContextService
+
     @BeforeEach
     fun truncate() {
         databaseCleanupService.truncate()
@@ -119,6 +119,7 @@ class BehandlingIntegrationTest(
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
         every { unleashNextMedContextService.isEnabled(HOPP_OVER_INFOTRYGD_SJEKK) } returns false
+        settToggleMock(HOPP_OVER_INFOTRYGD_SJEKK, false)
     }
 
     @AfterEach
