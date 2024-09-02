@@ -13,13 +13,14 @@ import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.person.pdl.aktor.v2.Type
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 class MergeIdentService(
     private val aktørIdRepository: AktørIdRepository,
-    private val fagsakService: FagsakService,
+    @Lazy private val fagsakService: FagsakService,
     private val opprettTaskService: OpprettTaskService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personopplysningerService: PersonopplysningerService,
