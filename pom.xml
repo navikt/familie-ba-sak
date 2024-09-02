@@ -27,7 +27,7 @@
         <felles-kontrakter.version>3.0_20240829084024_9af69d0</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20240729145155_57174aa</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20240902095239_88c7bc0</utbetalingsgenerator.version>
         <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.18.1</cucumber.version>
         <mockk.version>1.13.12</mockk.version>
