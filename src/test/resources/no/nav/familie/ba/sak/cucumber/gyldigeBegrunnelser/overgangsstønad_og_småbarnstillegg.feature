@@ -59,6 +59,7 @@ Egenskap: Gyldige begrunnelser for overgangsstønad og småbarnstillegg
       | 01.08.2040 |            | OPPHØR             |           |                           |                           |
 
   Scenario: Skal splitte på riktige tidspunkter dersom overgangsstønaden har blitt forlenget siden siste behandling
+    Og dagens dato er 01.07.2024
     Og lag personresultater for behandling 1
 
     Og legg til nye vilkårresultater for behandling 1

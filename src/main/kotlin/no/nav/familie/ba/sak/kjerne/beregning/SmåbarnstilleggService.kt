@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -18,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class SmåbarnstilleggService(
@@ -28,6 +28,7 @@ class SmåbarnstilleggService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val localDateProvider: LocalDateProvider,
 ) {
     @Transactional
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
@@ -88,7 +89,7 @@ class SmåbarnstilleggService(
     fun hentPerioderMedFullOvergangsstønad(
         behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        val dagensDato = LocalDate.now()
+        val dagensDato = localDateProvider.now()
 
         val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id).map { it.tilInternPeriodeOvergangsstønad() }
         val overgangsstønadPerioderFraForrigeBehandling =
@@ -121,7 +122,7 @@ class SmåbarnstilleggService(
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.id)
 
-        val dagensDato = LocalDate.now()
+        val dagensDato = localDateProvider.now()
 
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør)
