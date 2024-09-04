@@ -21,7 +21,6 @@ class PersonidentService(
     private val aktørIdRepository: AktørIdRepository,
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val taskRepository: TaskRepositoryWrapper,
-    private val mergeIdentService: MergeIdentService,
 ) {
     fun hentIdenter(
         personIdent: String,
@@ -40,27 +39,6 @@ class PersonidentService(
             return aktører.firstOrNull { it.harIdent(nyIdent.ident) } == null
         }
         return false
-    }
-
-    @Transactional
-    fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
-        logger.info("Håndterer ny ident")
-        secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
-        val identerFraPdl = hentIdenter(nyIdent.ident, true)
-
-        val aktørId = identerFraPdl.hentAktivAktørId()
-
-        mergeIdentService.mergeIdentOgRekjørSenere(identerFraPdl)
-
-        val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-
-        return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
-            logger.info("Legger til ny ident")
-            secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-            opprettPersonIdent(aktør, nyIdent.ident)
-        } else {
-            aktør
-        }
     }
 
     @Transactional
@@ -155,7 +133,7 @@ class PersonidentService(
         }
     }
 
-    private fun opprettPersonIdent(
+    fun opprettPersonIdent(
         aktør: Aktør,
         fødselsnummer: String,
         lagre: Boolean = true,

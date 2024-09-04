@@ -2,9 +2,7 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.randomFnr
@@ -12,7 +10,12 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -38,15 +41,30 @@ internal class PersonidentServiceTest {
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val personIdentSlot = slot<Personident>()
     private val aktørSlot = slot<Aktør>()
-    private val mergeIdentService: MergeIdentService = mockk()
     private val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
+    private val fagsakService: FagsakService = mockk()
+    private val opprettTaskService: OpprettTaskService = mockk()
+    private val persongrunnlagService: PersongrunnlagService = mockk()
+    private val personopplysningerService: PersonopplysningerService = mockk()
+    private val behandlingRepository: BehandlingRepository = mockk()
+
     private val personidentService =
         PersonidentService(
             personidentRepository = personidentRepository,
             aktørIdRepository = aktørIdRepository,
             pdlIdentRestClient = pdlIdentRestClient,
             taskRepository = taskRepositoryMock,
-            mergeIdentService = mergeIdentService,
+        )
+
+    private val håndterNyIdentService =
+        HåndterNyIdentService(
+            aktørIdRepository = aktørIdRepository,
+            fagsakService = fagsakService,
+            opprettTaskService = opprettTaskService,
+            persongrunnlagService = persongrunnlagService,
+            personopplysningerService = personopplysningerService,
+            behandlingRepository = behandlingRepository,
+            personIdentService = personidentService,
         )
 
     @BeforeAll
@@ -63,7 +81,6 @@ internal class PersonidentServiceTest {
                 IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
             )
         }
-        every { mergeIdentService.mergeIdentOgRekjørSenere(any()) } just runs
     }
 
     @BeforeEach
@@ -122,7 +139,7 @@ internal class PersonidentServiceTest {
                 null
             }
 
-            val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
+            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
             assertEquals(2, aktør?.personidenter?.size)
             assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivFødselsnummer())
@@ -161,7 +178,7 @@ internal class PersonidentServiceTest {
                 ).personidenter.first()
             }
 
-            val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
+            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
 
             assertEquals(aktørIdSomFinnes.aktørId, aktør?.aktørId)
             assertEquals(1, aktør?.personidenter?.size)
@@ -195,7 +212,7 @@ internal class PersonidentServiceTest {
                 null
             }
 
-            val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
+            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
             assertEquals(aktivAktørIdent2.aktørId, aktør?.aktørId)
             assertEquals(1, aktør?.personidenter?.size)
             assertEquals(aktivFnrIdent2, aktør?.personidenter?.single()?.fødselsnummer)

@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchMergetIdentTask
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
@@ -27,22 +28,24 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
-class MergeIdentServiceTest {
+internal class HåndterNyIdentServiceTest {
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val fagsakService: FagsakService = mockk()
     private val opprettTaskService: OpprettTaskService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val personopplysningerService: PersonopplysningerService = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
+    private val personIdentService: PersonidentService = mockk()
 
-    private val mergeIdentService =
-        MergeIdentService(
+    private val håndterNyIdentService =
+        HåndterNyIdentService(
             aktørIdRepository = aktørIdRepository,
             fagsakService = fagsakService,
             opprettTaskService = opprettTaskService,
             persongrunnlagService = persongrunnlagService,
             personopplysningerService = personopplysningerService,
             behandlingRepository = behandlingRepository,
+            personIdentService = personIdentService,
         )
 
     val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
@@ -62,6 +65,7 @@ class MergeIdentServiceTest {
     @BeforeEach
     fun init() {
         every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+        every { personIdentService.hentIdenter(any(), true) } returns identInformasjonFraPdl
     }
 
     @Test
@@ -76,7 +80,7 @@ class MergeIdentServiceTest {
         val feil =
             assertThrows<Feil> {
                 // act
-                mergeIdentService.mergeIdentOgRekjørSenere(identInformasjonFraPdl)
+                håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
             }
 
         // assert
@@ -91,7 +95,7 @@ class MergeIdentServiceTest {
         // act
         val feil =
             assertThrows<Feil> {
-                mergeIdentService.mergeIdentOgRekjørSenere(identInformasjonFraPdl)
+                håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
             }
 
         // assert
@@ -106,7 +110,7 @@ class MergeIdentServiceTest {
         // act
         val feil =
             assertThrows<Feil> {
-                mergeIdentService.mergeIdentOgRekjørSenere(identInformasjonFraPdl)
+                håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
             }
 
         // assert
@@ -140,7 +144,7 @@ class MergeIdentServiceTest {
         // act
         val feil =
             assertThrows<Feil> {
-                mergeIdentService.mergeIdentOgRekjørSenere(identInformasjonFraPdl)
+                håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
             }
 
         // assert
@@ -179,7 +183,7 @@ class MergeIdentServiceTest {
         // act
         val feil =
             assertThrows<RekjørSenereException> {
-                mergeIdentService.mergeIdentOgRekjørSenere(identInformasjonFraPdl)
+                håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
             }
 
         // assert

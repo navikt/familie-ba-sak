@@ -8,25 +8,48 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService.Companion.logger
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.person.pdl.aktor.v2.Type
-import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
-class MergeIdentService(
+class HåndterNyIdentService(
     private val aktørIdRepository: AktørIdRepository,
-    @Lazy private val fagsakService: FagsakService,
+    private val fagsakService: FagsakService,
     private val opprettTaskService: OpprettTaskService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personopplysningerService: PersonopplysningerService,
     private val behandlingRepository: BehandlingRepository,
+    private val personIdentService: PersonidentService,
 ) {
-    fun mergeIdentOgRekjørSenere(alleIdenterFraPdl: List<IdentInformasjon>) {
+    @Transactional
+    fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
+        logger.info("Håndterer ny ident")
+        secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
+        val identerFraPdl = personIdentService.hentIdenter(nyIdent.ident, true)
+
+        val aktørId = identerFraPdl.hentAktivAktørId()
+
+        mergeIdentOgRekjørSenere(identerFraPdl)
+
+        val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
+
+        return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
+            logger.info("Legger til ny ident")
+            secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
+            personIdentService.opprettPersonIdent(aktør, nyIdent.ident)
+        } else {
+            aktør
+        }
+    }
+
+    private fun mergeIdentOgRekjørSenere(alleIdenterFraPdl: List<IdentInformasjon>) {
         val alleHistoriskeAktørIder = alleIdenterFraPdl.filter { it.gruppe == Type.AKTORID.name && it.historisk }.map { it.ident }
 
         val aktiveAktørerForHistoriskAktørIder =
