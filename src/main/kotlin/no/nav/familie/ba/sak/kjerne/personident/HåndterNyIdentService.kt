@@ -57,32 +57,34 @@ class HåndterNyIdentService(
                 .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
                 .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
 
-        if (aktiveAktørerForHistoriskAktørIder.isNotEmpty()) {
-            val alleAktørerMedAktivPersonIdent =
-                alleIdenterFraPdl
-                    .filter { it.gruppe == Type.AKTORID.name }
-                    .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it.ident) }
-                    .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
-
-            val fagsakId = validerKunÉnFagsakId(alleAktørerMedAktivPersonIdent)
-
-            validerUendretFødselsdatoFraForrigeBehandling(alleIdenterFraPdl, fagsakId)
-
-            val task =
-                opprettTaskService.opprettTaskForÅPatcheMergetIdent(
-                    PatchMergetIdentDto(
-                        fagsakId = fagsakId,
-                        nyIdent = PersonIdent(alleIdenterFraPdl.first { it.gruppe == "FOLKEREGISTERIDENT" && !it.historisk }.ident),
-                        gammelIdent = PersonIdent(alleIdenterFraPdl.first { it.gruppe == "FOLKEREGISTERIDENT" && it.historisk }.ident),
-                    ),
-                )
-
-            secureLogger.info("Potensielt merget ident for $alleIdenterFraPdl")
-            throw RekjørSenereException(
-                årsak = "Mottok identhendelse som blir forsøkt patchet automatisk: ${task.id}. Prøver å rekjøre etter patching av merget ident. Se secure logger for mer info.",
-                triggerTid = LocalDateTime.now().plusHours(1),
-            )
+        if (aktiveAktørerForHistoriskAktørIder.isEmpty()) {
+            return
         }
+
+        val alleAktørerMedAktivPersonIdent =
+            alleIdenterFraPdl
+                .filter { it.gruppe == Type.AKTORID.name }
+                .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it.ident) }
+                .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
+
+        val fagsakId = validerKunÉnFagsakId(alleAktørerMedAktivPersonIdent)
+
+        validerUendretFødselsdatoFraForrigeBehandling(alleIdenterFraPdl, fagsakId)
+
+        val task =
+            opprettTaskService.opprettTaskForÅPatcheMergetIdent(
+                PatchMergetIdentDto(
+                    fagsakId = fagsakId,
+                    nyIdent = PersonIdent(alleIdenterFraPdl.first { it.gruppe == "FOLKEREGISTERIDENT" && !it.historisk }.ident),
+                    gammelIdent = PersonIdent(alleIdenterFraPdl.first { it.gruppe == "FOLKEREGISTERIDENT" && it.historisk }.ident),
+                ),
+            )
+
+        secureLogger.info("Potensielt merget ident for $alleIdenterFraPdl")
+        throw RekjørSenereException(
+            årsak = "Mottok identhendelse som blir forsøkt patchet automatisk: ${task.id}. Prøver å rekjøre etter patching av merget ident. Se secure logger for mer info.",
+            triggerTid = LocalDateTime.now().plusHours(1),
+        )
     }
 
     private fun validerKunÉnFagsakId(aktiveAktørerForHistoriskAktørIder: List<Aktør>): Long {

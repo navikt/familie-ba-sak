@@ -6,27 +6,19 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class PersonidentServiceTest {
@@ -42,11 +34,6 @@ internal class PersonidentServiceTest {
     private val personIdentSlot = slot<Personident>()
     private val aktørSlot = slot<Aktør>()
     private val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
-    private val fagsakService: FagsakService = mockk()
-    private val opprettTaskService: OpprettTaskService = mockk()
-    private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val personopplysningerService: PersonopplysningerService = mockk()
-    private val behandlingRepository: BehandlingRepository = mockk()
 
     private val personidentService =
         PersonidentService(
@@ -54,17 +41,6 @@ internal class PersonidentServiceTest {
             aktørIdRepository = aktørIdRepository,
             pdlIdentRestClient = pdlIdentRestClient,
             taskRepository = taskRepositoryMock,
-        )
-
-    private val håndterNyIdentService =
-        HåndterNyIdentService(
-            aktørIdRepository = aktørIdRepository,
-            fagsakService = fagsakService,
-            opprettTaskService = opprettTaskService,
-            persongrunnlagService = persongrunnlagService,
-            personopplysningerService = personopplysningerService,
-            behandlingRepository = behandlingRepository,
-            personIdentService = personidentService,
         )
 
     @BeforeAll
@@ -95,129 +71,6 @@ internal class PersonidentServiceTest {
 
         every { aktørIdRepository.saveAndFlush(capture(aktørSlot)) } answers {
             aktørSlot.captured
-        }
-    }
-
-    @Nested
-    inner class HåndterNyIdentTest {
-        @Test
-        fun `Skal legge til ny ident på aktør som finnes i systemet`() {
-            val personIdentSomFinnes = randomFnr()
-            val personIdentSomSkalLeggesTil = randomFnr()
-            val historiskIdent = randomFnr()
-            val historiskAktør = tilAktør(historiskIdent)
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
-
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
-                listOf(
-                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                    IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
-                )
-            }
-
-            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
-                listOf(
-                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                    IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
-                    IdentInformasjon(historiskAktør.aktørId, true, "AKTORID"),
-                    IdentInformasjon(historiskIdent, true, "FOLKEREGISTERIDENT"),
-                )
-            }
-
-            every { personidentRepository.findByFødselsnummerOrNull(personIdentSomFinnes) }.answers {
-                Personident(fødselsnummer = personidentAktiv, aktør = aktørIdSomFinnes, aktiv = true)
-            }
-
-            every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
-                aktørIdSomFinnes
-            }
-
-            every { aktørIdRepository.findByAktørIdOrNull(historiskAktør.aktørId) }.answers {
-                null
-            }
-            every { personidentRepository.findByFødselsnummerOrNull(personIdentSomSkalLeggesTil) }.answers {
-                null
-            }
-
-            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
-
-            assertEquals(2, aktør?.personidenter?.size)
-            assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivFødselsnummer())
-            assertTrue(
-                aktør.personidenter
-                    .first { !it.aktiv }
-                    .gjelderTil!!
-                    .isBefore(LocalDateTime.now()),
-            )
-            assertTrue(
-                aktør.personidenter
-                    .first { !it.aktiv }
-                    .gjelderTil!!
-                    .isBefore(LocalDateTime.now()),
-            )
-            verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
-            verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
-        }
-
-        @Test
-        fun `Skal ikke legge til ny ident på aktør som allerede har denne identen registert i systemet`() {
-            val personIdentSomFinnes = randomFnr()
-            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
-
-            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, true) } answers {
-                listOf(
-                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                    IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
-                )
-            }
-
-            every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
-            every { personidentRepository.findByFødselsnummerOrNull(personIdentSomFinnes) }.answers {
-                tilAktør(
-                    personIdentSomFinnes,
-                ).personidenter.first()
-            }
-
-            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
-
-            assertEquals(aktørIdSomFinnes.aktørId, aktør?.aktørId)
-            assertEquals(1, aktør?.personidenter?.size)
-            assertEquals(personIdentSomFinnes, aktør?.personidenter?.single()?.fødselsnummer)
-            verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
-            verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
-        }
-
-        @Test
-        fun `Hendelse på en ident hvor gammel ident1 er merget med ny ident2 skal ikke kaste feil når bruker har alt bruker ny ident`() {
-            val fnrIdent1 = randomFnr()
-            val aktørIdent1 = tilAktør(fnrIdent1)
-            val aktivFnrIdent2 = randomFnr()
-            val aktivAktørIdent2 = tilAktør(aktivFnrIdent2)
-
-            secureLogger.info("gammelIdent=$fnrIdent1,${aktørIdent1.aktørId}   nyIdent=$aktivFnrIdent2,${aktivAktørIdent2.aktørId}")
-
-            every { pdlIdentRestClient.hentIdenter(aktivFnrIdent2, true) } answers {
-                listOf(
-                    IdentInformasjon(aktivAktørIdent2.aktørId, false, "AKTORID"),
-                    IdentInformasjon(aktivFnrIdent2, false, "FOLKEREGISTERIDENT"),
-                    IdentInformasjon(aktørIdent1.aktørId, true, "AKTORID"),
-                    IdentInformasjon(fnrIdent1, true, "FOLKEREGISTERIDENT"),
-                )
-            }
-
-            every { aktørIdRepository.findByAktørIdOrNull(aktivAktørIdent2.aktørId) }.answers {
-                aktivAktørIdent2
-            }
-            every { aktørIdRepository.findByAktørIdOrNull(aktørIdent1.aktørId) }.answers {
-                null
-            }
-
-            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
-            assertEquals(aktivAktørIdent2.aktørId, aktør?.aktørId)
-            assertEquals(1, aktør?.personidenter?.size)
-            assertEquals(aktivFnrIdent2, aktør?.personidenter?.single()?.fødselsnummer)
-            verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
-            verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         }
     }
 
