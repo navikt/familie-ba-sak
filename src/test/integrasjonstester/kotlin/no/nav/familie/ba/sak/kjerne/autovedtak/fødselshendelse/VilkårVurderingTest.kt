@@ -30,7 +30,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.GyldigVilkårsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -116,7 +116,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         grBostedsadresse: GrBostedsadresse? = null,
         kjønn: Kjønn = Kjønn.KVINNE,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
+        sivilstand: SIVILSTANDTYPE = SIVILSTANDTYPE.UGIFT,
     ): Person {
         val fnr = randomFnr()
         return Person(
@@ -278,7 +278,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - barn er gift`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
         assertEquals(
@@ -291,11 +291,11 @@ class VilkårVurderingTest(
     fun `Negativ vurdering - barn har vært gift`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val barn =
-            genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
+            genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT).apply {
                 sivilstander =
                     mutableListOf(
-                        GrSivilstand(fom = LocalDate.now().minusMonths(2), type = SIVILSTAND.GIFT, person = this),
-                        GrSivilstand(fom = LocalDate.now().minusMonths(1), type = SIVILSTAND.UGIFT, person = this),
+                        GrSivilstand(fom = LocalDate.now().minusMonths(2), type = SIVILSTANDTYPE.GIFT, person = this),
+                        GrSivilstand(fom = LocalDate.now().minusMonths(1), type = SIVILSTANDTYPE.UGIFT, person = this),
                     )
             }
         personopplysningGrunnlag.personer.add(barn)
@@ -309,7 +309,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - søker er ikke bosatt i norge`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT)
         personopplysningGrunnlag.personer.add(søker)
 
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurderVilkår(søker, LocalDate.now()).resultat)
@@ -319,7 +319,7 @@ class VilkårVurderingTest(
     fun `Negativ vurdering - søker har ikke vært bosatt i norge siden barnets fødselsdato`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val søker =
-            genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
+            genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT).apply {
                 bostedsadresser =
                     mutableListOf(
                         GrVegadresse(
@@ -429,7 +429,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - mor er ikke bosatt i norge`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
-        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+        val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT)
         personopplysningGrunnlag.personer.add(mor)
 
         assertEquals(Resultat.IKKE_OPPFYLT, Vilkår.BOSATT_I_RIKET.vurderVilkår(mor, LocalDate.now()).resultat)
@@ -439,7 +439,7 @@ class VilkårVurderingTest(
     fun `Lovlig opphold - nordisk statsborger`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val person =
-            genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+            genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT)
                 .also {
                     it.statsborgerskap =
                         mutableListOf(
@@ -464,7 +464,7 @@ class VilkårVurderingTest(
     fun `Mor er fra EØS og har et løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
         val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
         val person =
-            genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
+            genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTANDTYPE.GIFT)
                 .also {
                     it.statsborgerskap =
                         mutableListOf(
@@ -496,7 +496,7 @@ class VilkårVurderingTest(
             genererPerson(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
-                sivilstand = SIVILSTAND.GIFT,
+                sivilstand = SIVILSTANDTYPE.GIFT,
             ).also {
                 it.statsborgerskap =
                     mutableListOf(
@@ -531,7 +531,7 @@ class VilkårVurderingTest(
             genererPerson(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
-                sivilstand = SIVILSTAND.GIFT,
+                sivilstand = SIVILSTANDTYPE.GIFT,
             ).also {
                 it.statsborgerskap =
                     mutableListOf(
@@ -570,7 +570,7 @@ class VilkårVurderingTest(
             genererPerson(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
-                sivilstand = SIVILSTAND.GIFT,
+                sivilstand = SIVILSTANDTYPE.GIFT,
             ).also {
                 it.statsborgerskap =
                     mutableListOf(
@@ -608,7 +608,7 @@ class VilkårVurderingTest(
             genererPerson(
                 PersonType.SØKER,
                 personopplysningGrunnlag,
-                sivilstand = SIVILSTAND.GIFT,
+                sivilstand = SIVILSTANDTYPE.GIFT,
             ).also {
                 it.statsborgerskap =
                     mutableListOf(
@@ -644,7 +644,7 @@ class VilkårVurderingTest(
         genererPerson(
             PersonType.ANNENPART,
             personopplysningGrunnlag,
-            sivilstand = SIVILSTAND.GIFT,
+            sivilstand = SIVILSTANDTYPE.GIFT,
         ).also {
             it.statsborgerskap =
                 mutableListOf(

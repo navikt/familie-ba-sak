@@ -105,7 +105,7 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import java.math.BigDecimal
@@ -231,7 +231,7 @@ fun tilfeldigPerson(
         kjønn = kjønn,
         målform = Målform.NB,
         dødsfall = dødsfall,
-    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
 
 fun Person.tilPersonEnkel() =
     PersonEnkel(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
@@ -251,7 +251,7 @@ fun tilfeldigSøker(
         navn = "",
         kjønn = kjønn,
         målform = Målform.NB,
-    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
 
 fun lagVedtak(
     behandling: Behandling = lagBehandling(),
@@ -440,7 +440,7 @@ fun lagTestPersonopplysningGrunnlag(
             søker.sivilstander =
                 mutableListOf(
                     GrSivilstand(
-                        type = SIVILSTAND.GIFT,
+                        type = SIVILSTANDTYPE.GIFT,
                         person = søker,
                     ),
                 )
@@ -463,7 +463,7 @@ fun lagTestPersonopplysningGrunnlag(
                 barn.sivilstander =
                     mutableListOf(
                         GrSivilstand(
-                            type = SIVILSTAND.UGIFT,
+                            type = SIVILSTANDTYPE.UGIFT,
                             person = barn,
                         ),
                     )

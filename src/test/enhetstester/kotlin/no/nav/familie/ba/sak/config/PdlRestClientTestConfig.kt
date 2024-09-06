@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -38,7 +38,7 @@ class PdlRestClientTestConfig {
                         ),
                     ),
                 adressebeskyttelseGradering = null,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
             )

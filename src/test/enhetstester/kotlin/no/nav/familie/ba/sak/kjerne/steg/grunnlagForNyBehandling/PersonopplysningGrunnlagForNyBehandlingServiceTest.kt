@@ -33,7 +33,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -137,7 +137,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                 person = søkerPerson,
             )
         val sivilstand =
-            GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
+            GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTANDTYPE.REGISTRERT_PARTNER, person = søkerPerson)
         val dødsfall =
             Dødsfall(
                 id = 1,
@@ -228,7 +228,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                 person = søkerPerson,
             )
         val sivilstand =
-            GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
+            GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTANDTYPE.REGISTRERT_PARTNER, person = søkerPerson)
         val dødsfall =
             Dødsfall(
                 id = 1,

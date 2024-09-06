@@ -25,7 +25,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.FAR
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.MEDMOR
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.context.annotation.Primary
@@ -233,8 +233,8 @@ private val bostedsadresseHistorikk =
 
 private val sivilstandHistorisk =
     listOf(
-        Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-        Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+        Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+        Sivilstand(type = SIVILSTANDTYPE.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
     )
 
 private val personInfoSøker1 =
@@ -262,7 +262,7 @@ private val personInfoBarn1 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.UOPPGITT,
+                    type = SIVILSTANDTYPE.UOPPGITT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
@@ -277,7 +277,7 @@ private val personInfoBarn2 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.GIFT,
+                    type = SIVILSTANDTYPE.GIFT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
@@ -293,7 +293,7 @@ private val personInfoSøker2 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.GIFT,
+                    type = SIVILSTANDTYPE.GIFT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
@@ -308,7 +308,7 @@ private val personInfoSøker3 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.GIFT,
+                    type = SIVILSTANDTYPE.GIFT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
