@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
 import no.nav.familie.kontrakter.felles.PersonIdent
+import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,7 +31,7 @@ class PersonidentService(
         val identerFraPdl = hentIdenter(nyIdent.ident, true)
         val aktører =
             identerFraPdl
-                .filter { it.gruppe == "AKTORID" }
+                .filter { it.gruppe == Type.AKTORID.name }
                 .map { it.ident }
                 .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
 
@@ -38,27 +39,6 @@ class PersonidentService(
             return aktører.firstOrNull { it.harIdent(nyIdent.ident) } == null
         }
         return false
-    }
-
-    @Transactional
-    fun håndterNyIdent(nyIdent: PersonIdent): Aktør? {
-        logger.info("Håndterer ny ident")
-        secureLogger.info("Håndterer ny ident ${nyIdent.ident}")
-        val identerFraPdl = hentIdenter(nyIdent.ident, true)
-
-        val aktørId = identerFraPdl.hentAktivAktørId()
-
-        validerOmAktørIdErMerget(identerFraPdl)
-
-        val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-
-        return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
-            logger.info("Legger til ny ident")
-            secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-            opprettPersonIdent(aktør, nyIdent.ident)
-        } else {
-            aktør
-        }
     }
 
     @Transactional
@@ -133,28 +113,6 @@ class PersonidentService(
 
     fun hentAktørIder(barnasFødselsnummer: List<String>): List<Aktør> = barnasFødselsnummer.map { hentAktør(it) }
 
-    /*
-    Ved merge vil èn av de to gjeldende aktør-IDene videreføres som gjeldende. Vi trenger dermed å sjekke
-    om det finnes en aktiv personident rad for den gamle aktørId
-
-     */
-
-    private fun validerOmAktørIdErMerget(alleHistoriskeIdenterFraPdl: List<IdentInformasjon>) {
-        val alleHistoriskeAktørIder = alleHistoriskeIdenterFraPdl.filter { it.gruppe == "AKTORID" && it.historisk == true }.map { it.ident }
-
-        val aktiveAktørerForHistoriskAktørIder =
-            alleHistoriskeAktørIder
-                .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
-                .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
-
-        if (aktiveAktørerForHistoriskAktørIder.isNotEmpty()) {
-            secureLogger.warn("Potensielt merget ident for $alleHistoriskeIdenterFraPdl")
-            throw Feil(
-                message = "Mottok potensielt en hendelse på en merget ident for aktørId=${alleHistoriskeIdenterFraPdl.hentAktivAktørId()}. Sjekk securelogger for liste med identer. Sjekk om identen har flere saker. Disse må løses manuelt. Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3%B8r-sak.md#manuell-patching-av-akt%C3%B8r-for-en-behandling for mer info.",
-            )
-        }
-    }
-
     private fun opprettAktørIdOgPersonident(
         aktørIdStr: String,
         fødselsnummer: String,
@@ -175,14 +133,14 @@ class PersonidentService(
         }
     }
 
-    private fun opprettPersonIdent(
+    fun opprettPersonIdent(
         aktør: Aktør,
         fødselsnummer: String,
         lagre: Boolean = true,
     ): Aktør {
         secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}")
         val eksisterendePersonIdent = aktør.personidenter.filter { it.fødselsnummer == fødselsnummer && it.aktiv }
-        secureLogger.info("Aktøren har fødselsnummer ${aktør.personidenter.map { it.fødselsnummer } }")
+        secureLogger.info("Aktøren har fødselsnummer ${aktør.personidenter.map { it.fødselsnummer }}")
         if (eksisterendePersonIdent.isEmpty()) {
             secureLogger.info("Fins ikke eksisterende personIdent for. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}, så lager ny")
             aktør.personidenter.filter { it.aktiv }.map {
