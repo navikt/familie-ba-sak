@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Assertions
@@ -61,7 +61,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 dødsfall = DødsfallData(erDød = true, dødsdato = dødsdato),
                 kontaktinformasjonForDoedsbo =
                     PdlKontaktinformasjonForDødsbo(
@@ -84,7 +84,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
             ),
@@ -131,7 +131,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 statsborgerskap =
                     listOf(
                         Statsborgerskap(
@@ -155,7 +155,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
             ),
@@ -199,7 +199,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 statsborgerskap =
                     listOf(
                         Statsborgerskap(
@@ -223,7 +223,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
                 dødsfall = null,
                 kontaktinformasjonForDoedsbo = null,
             ),
@@ -266,7 +266,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.KVINNE,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
             ),
         )
 
@@ -279,7 +279,7 @@ class PersongrunnlagIntegrationTest(
                 kjønn = Kjønn.MANN,
                 forelderBarnRelasjon = emptySet(),
                 bostedsadresser = mutableListOf(Bostedsadresse()) + defaultBostedsadresseHistorikk,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UOPPGITT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UOPPGITT)),
             ),
         )
 

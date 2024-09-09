@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
@@ -120,7 +120,7 @@ val mockSøkerAutomatiskBehandling =
         forelderBarnRelasjonMaskert = emptySet(),
         adressebeskyttelseGradering = null,
         bostedsadresser = konstantAdresse,
-        sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT, gyldigFraOgMed = null)),
+        sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT, gyldigFraOgMed = null)),
         opphold = emptyList(),
         statsborgerskap = emptyList(),
     )

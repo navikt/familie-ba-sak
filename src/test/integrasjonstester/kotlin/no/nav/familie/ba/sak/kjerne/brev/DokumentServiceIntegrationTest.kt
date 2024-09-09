@@ -44,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -537,7 +537,7 @@ class DokumentServiceIntegrationTest(
                     barn.sivilstander =
                         mutableListOf(
                             GrSivilstand(
-                                type = SIVILSTAND.UGIFT,
+                                type = SIVILSTANDTYPE.UGIFT,
                                 person = barn,
                             ),
                         )

@@ -42,7 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -316,7 +316,7 @@ class FiltreringsregelForFlereBarnTest {
         fødselsDato: LocalDate? = null,
         grBostedsadresse: GrBostedsadresse? = null,
         kjønn: Kjønn = Kjønn.KVINNE,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
+        sivilstand: SIVILSTANDTYPE = SIVILSTANDTYPE.UGIFT,
         dødsfallDato: String? = null,
     ): Person =
         Person(
@@ -350,7 +350,7 @@ class FiltreringsregelForFlereBarnTest {
         fødselsDato: LocalDate? = null,
         adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
         bostedsadresse: Bostedsadresse? = null,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
+        sivilstand: SIVILSTANDTYPE = SIVILSTANDTYPE.UGIFT,
     ): PersonInfo =
         PersonInfo(
             fødselsdato = fødselsDato ?: LocalDate.now().minusYears(20),
