@@ -37,7 +37,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate) =
@@ -121,11 +120,8 @@ object TilkjentYtelseValidering {
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
-        kravDato: LocalDateTime,
+        gyldigEtterbetalingFom: YearMonth,
     ): List<Aktør> {
-        // TODO: Finne ut hvordan etterbetaling 3 måneder skal håndteres her
-        val gyldigEtterbetalingFom = hentGyldigEtterbetaling3ÅrFom(kravDato.toLocalDate())
-
         val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val personerMedUgyldigEtterbetaling =

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -22,6 +23,7 @@ class TilkjentYtelseValideringServiceTest {
     private val beregningServiceMock = mockk<BeregningService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
 
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
@@ -33,6 +35,7 @@ class TilkjentYtelseValideringServiceTest {
                 totrinnskontrollService = totrinnskontrollServiceMock,
                 persongrunnlagService = persongrunnlagServiceMock,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                unleashNextMedContextService = unleashNextMedContextService,
             )
 
         every {
@@ -139,6 +142,7 @@ class TilkjentYtelseValideringServiceTest {
         every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
         every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
+        every { unleashNextMedContextService.isEnabled(any()) } returns true
 
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
         Assertions.assertEquals(
