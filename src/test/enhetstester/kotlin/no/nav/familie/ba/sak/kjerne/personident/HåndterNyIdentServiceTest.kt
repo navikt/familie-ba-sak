@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -28,8 +29,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -75,6 +74,7 @@ internal class HåndterNyIdentServiceTest {
 
         @BeforeEach
         fun init() {
+            clearMocks(answers = true, firstMock = fagsakService)
             every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
             every { personIdentService.hentIdenter(any(), true) } returns identInformasjonFraPdl
         }
@@ -88,44 +88,43 @@ internal class HåndterNyIdentServiceTest {
                     RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 2),
                 )
 
-            // act
+            // act & assert
             val feil =
                 assertThrows<Feil> {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
                 }
 
-            // assert
             assertThat(feil.message).startsWith("Det eksisterer flere fagsaker på identer som skal merges")
         }
 
         @Test
-        fun `håndterNyIdent kaster Feil når det ikke eksisterer en fagsak for identer`() {
+        fun `håndterNyIdent skipper mering av ident når det ikke eksisterer en fagsak for identer`() {
             // arrange
             every { fagsakService.hentFagsakDeltager(any()) } returns emptyList()
+            every { personIdentService.opprettPersonIdent(any(), any()) } returns randomAktør()
+            every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
 
             // act
-            val feil =
-                assertThrows<Feil> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
-                }
+            håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
 
             // assert
-            assertThat(feil.message).startsWith("Fant ingen fagsaker på identer som skal merges")
+            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
+            verify(exactly = 1) { personIdentService.opprettPersonIdent(any(), any()) }
         }
 
         @Test
         fun `håndterNyIdent kaster Feil når det eksisterer en fagsak uten fagsakId for identer`() {
             // arrange
             every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER))
+            every { personIdentService.opprettPersonIdent(any(), any()) } returns randomAktør()
+            every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
 
             // act
-            val feil =
-                assertThrows<Feil> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
-                }
+            håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
 
             // assert
-            assertThat(feil.message).startsWith("Fant ingen fagsakId på fagsak for identer som skal merges")
+            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
+            verify(exactly = 1) { personIdentService.opprettPersonIdent(any(), any()) }
         }
 
         @Test
@@ -152,13 +151,12 @@ internal class HåndterNyIdentServiceTest {
                         ),
                 )
 
-            // act
+            // act & assert
             val feil =
                 assertThrows<Feil> {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
                 }
 
-            // assert
             assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt. Se")
         }
 
@@ -191,13 +189,12 @@ internal class HåndterNyIdentServiceTest {
                         ),
                 )
 
-            // act
+            // act & assert
             val feil =
                 assertThrows<RekjørSenereException> {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
                 }
 
-            // assert
             verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
             assertThat(feil.årsak).startsWith("Mottok identhendelse som blir forsøkt patchet automatisk")
         }
@@ -240,6 +237,8 @@ internal class HåndterNyIdentServiceTest {
             clearMocks(answers = true, firstMock = aktørIdRepository)
             clearMocks(answers = true, firstMock = personidentRepository)
             clearMocks(answers = true, firstMock = taskRepositoryMock)
+
+            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 0))
 
             every { personidentRepository.saveAndFlush(capture(personIdentSlot)) } answers {
                 personIdentSlot.captured
@@ -304,15 +303,15 @@ internal class HåndterNyIdentServiceTest {
 
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
 
-            assertEquals(2, aktør?.personidenter?.size)
-            assertEquals(personIdentSomSkalLeggesTil, aktør!!.aktivFødselsnummer())
-            assertTrue(
+            assertThat(aktør?.personidenter?.size).isEqualTo(2)
+            assertThat(personIdentSomSkalLeggesTil).isEqualTo(aktør!!.aktivFødselsnummer())
+            assertThat(
                 aktør.personidenter
                     .first { !it.aktiv }
                     .gjelderTil!!
                     .isBefore(LocalDateTime.now()),
             )
-            assertTrue(
+            assertThat(
                 aktør.personidenter
                     .first { !it.aktiv }
                     .gjelderTil!!
@@ -343,9 +342,9 @@ internal class HåndterNyIdentServiceTest {
 
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
 
-            assertEquals(aktørIdSomFinnes.aktørId, aktør?.aktørId)
-            assertEquals(1, aktør?.personidenter?.size)
-            assertEquals(personIdentSomFinnes, aktør?.personidenter?.single()?.fødselsnummer)
+            assertThat(aktørIdSomFinnes.aktørId).isEqualTo(aktør?.aktørId)
+            assertThat(aktør?.personidenter?.size).isEqualTo(1)
+            assertThat(personIdentSomFinnes).isEqualTo(aktør?.personidenter?.single()?.fødselsnummer)
             verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         }
@@ -376,9 +375,9 @@ internal class HåndterNyIdentServiceTest {
             }
 
             val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(aktivFnrIdent2))
-            assertEquals(aktivAktørIdent2.aktørId, aktør?.aktørId)
-            assertEquals(1, aktør?.personidenter?.size)
-            assertEquals(aktivFnrIdent2, aktør?.personidenter?.single()?.fødselsnummer)
+            assertThat(aktivAktørIdent2.aktørId).isEqualTo(aktør?.aktørId)
+            assertThat(aktør?.personidenter?.size).isEqualTo(1)
+            assertThat(aktivFnrIdent2).isEqualTo(aktør?.personidenter?.single()?.fødselsnummer)
             verify(exactly = 0) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         }
