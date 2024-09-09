@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 object UtvidetBarnetrygdUtil {
     internal fun beregnTilkjentYtelseUtvidet(
         utvidetVilkår: List<VilkårResultat>,
-        andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         personResultater: Set<PersonResultat>,
@@ -36,7 +36,7 @@ object UtvidetBarnetrygdUtil {
                 tilkjentYtelse = tilkjentYtelse,
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
-                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
+                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer.map { it.andel },
                 perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
             )
 

@@ -71,17 +71,17 @@ object TilkjentYtelseUtils {
                     )
                 }
 
-        val barnasAndelerInkludertEtterbetaling3ÅrEndringer =
+        val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
             oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak == Årsak.ETTERBETALING_3ÅR },
+                endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
             )
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer =
             UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet(
                 utvidetVilkår = finnUtvidetVilkår(vilkårsvurdering),
                 tilkjentYtelse = tilkjentYtelse,
-                andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
+                andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                 endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
                 personResultater = vilkårsvurdering.personResultater,
             )
@@ -89,7 +89,7 @@ object TilkjentYtelseUtils {
         val småbarnstilleggErMulig =
             erSmåbarnstilleggMulig(
                 utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
-                barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
+                barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
             )
 
         val andelerTilkjentYtelseSmåbarnstillegg =
@@ -103,7 +103,7 @@ object TilkjentYtelseUtils {
                             personopplysningGrunnlag.søker.aktør,
                         ),
                     utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
-                    barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
+                    barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                     barnasAktørerOgFødselsdatoer =
                         personopplysningGrunnlag.barna.map {
                             Pair(

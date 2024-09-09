@@ -40,10 +40,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 
-// 3 år (krav i loven)
-fun hentGyldigEtterbetalingFom(kravDato: LocalDate) =
+fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate) =
     kravDato
         .minusYears(3)
+        .toYearMonth()
+
+fun hentGyldigEtterbetaling3MndFom(kravDato: LocalDate) =
+    kravDato
+        .minusMonths(3)
         .toYearMonth()
 
 fun hentSøkersAndeler(
@@ -119,7 +123,8 @@ object TilkjentYtelseValidering {
         andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         kravDato: LocalDateTime,
     ): List<Aktør> {
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato.toLocalDate())
+        // TODO: Finne ut hvordan etterbetaling 3 måneder skal håndteres her
+        val gyldigEtterbetalingFom = hentGyldigEtterbetaling3ÅrFom(kravDato.toLocalDate())
 
         val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
