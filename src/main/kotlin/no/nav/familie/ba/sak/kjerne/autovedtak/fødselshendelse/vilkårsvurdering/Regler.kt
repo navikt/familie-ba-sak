@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.ba.søknad.SIVILSTANDTYPE
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import java.time.Duration
 import java.time.LocalDate
 

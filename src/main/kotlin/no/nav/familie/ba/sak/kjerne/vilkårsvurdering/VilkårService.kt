@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.mut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.kontrakter.ba.søknad.SIVILSTANDTYPE
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
