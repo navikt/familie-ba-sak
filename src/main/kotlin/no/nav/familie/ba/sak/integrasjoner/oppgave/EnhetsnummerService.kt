@@ -12,19 +12,44 @@ class EnhetsnummerService(
         behandlendeEnhetId: String,
         navIdent: String?,
     ): String {
-        if (navIdent == null) {
-            when (behandlendeEnhetId) {
-                "4863" -> throw Feil("")
-                else -> behandlendeEnhetId
-            }
-            return behandlendeEnhetId
+        when (behandlendeEnhetId) {
+            "4863" -> håndter4863(navIdent)
+            "2103" -> håndter2103(navIdent)
+            else -> {}
         }
 
+        if (navIdent == null) {
+            return behandlendeEnhetId
+        }
         val enhetTilgang = integrasjonClient.hentEnhetTilgang(navIdent)
-        val enheterNavIdentenHarTilgangTil = enhetTilgang.enheter.map { it.enhetsnummer }
+        val enheterNavIdentenHarTilgangTil = enhetTilgang.enheter
+            .map { it.enhetsnummer }
+            .filter { it != "4863" }
         if (enheterNavIdentenHarTilgangTil.isEmpty()) {
             throw Feil("Nav-ident har ikke tilgang til noen enheter")
         }
         return enheterNavIdentenHarTilgangTil.singleOrNull { it == behandlendeEnhetId } ?: enheterNavIdentenHarTilgangTil.first()
+    }
+
+    private fun håndter4863(navIdent: String?): String {
+        if (navIdent == null) {
+            throw Feil("Kan ikke sette 4863 om man mangler saksbehandler")
+        }
+        val enhetTilgang = integrasjonClient.hentEnhetTilgang(navIdent)
+        val enhetNavIdentenHarTilgangTil = enhetTilgang.enheter
+            .map { it.enhetsnummer }
+            .firstOrNull { it != "4863" }
+        if (enhetNavIdentenHarTilgangTil == null) {
+            throw Feil("Fant ingen enhet for Nav-ident $navIdent")
+        }
+        return enhetNavIdentenHarTilgangTil
+    }
+
+    private fun håndter2103(navIdent: String?): String {
+        if (navIdent == null) {
+            return "2103"
+        }
+        // TODO : Implementer dette
+        return ""
     }
 }
