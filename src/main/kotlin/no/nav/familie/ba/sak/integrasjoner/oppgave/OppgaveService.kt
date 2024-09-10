@@ -69,14 +69,7 @@ class OppgaveService(
             eksisterendeOppgave.gsakId
         } else {
             val arbeidsfordelingsenhet =
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
-
-            if (arbeidsfordelingsenhet == null) {
-                logger.warn(
-                    "Fant ikke behandlende enhet på behandling ${behandling.id} " +
-                        "ved opprettelse av $oppgavetype-oppgave.",
-                )
-            }
+                arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
 
             val opprettOppgave =
                 OpprettOppgaveRequest(
@@ -286,6 +279,7 @@ class OppgaveService(
                 oppgaveErAvsluttet -> {
                     logger.info("Oppgave ${dbOppgave.gsakId} er allerede avsluttet")
                 }
+
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())

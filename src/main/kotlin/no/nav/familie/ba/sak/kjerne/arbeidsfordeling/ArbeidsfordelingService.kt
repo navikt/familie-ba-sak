@@ -38,8 +38,7 @@ class ArbeidsfordelingService(
         endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
     ) {
         val aktivArbeidsfordelingPåBehandling =
-            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
-                ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling ${behandling.id}")
+            arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
 
         val forrigeArbeidsfordelingsenhet =
             Arbeidsfordelingsenhet(
