@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -856,5 +857,28 @@ class EndretUtbetalingAndelValideringTest {
                 vilkårsvurdering = mockk(),
             )
         }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og øker til hundre prosent utbetaling`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusYears(4),
+                tom = YearMonth.now().minusYears(3),
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan ikke endre til full utbetaling når det er mer enn tre år siden søknadstidspunktet.")
     }
 }
