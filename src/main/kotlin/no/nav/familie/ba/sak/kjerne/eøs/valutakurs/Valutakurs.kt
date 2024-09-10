@@ -163,11 +163,12 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
 
 fun Collection<Valutakurs>.erAlleValutakurserOppdaterteIMåned(
     måned: YearMonth,
-) = none {
-    val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
-    val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
+) = isNotEmpty() &&
+    none {
+        val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
+        val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
 
-    fom < måned && tom >= måned
-}
+        fom < måned && tom >= måned
+    }
 
 fun Collection<Valutakurs>.filtrerUtfylteValutakurser() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()
