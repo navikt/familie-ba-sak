@@ -125,6 +125,7 @@ object BehandlingsresultatSøknadUtils {
                             Årsak.ALLEREDE_UTBETALT,
                             Årsak.ENDRE_MOTTAKER,
                             Årsak.ETTERBETALING_3ÅR,
+                            Årsak.ETTERBETALING_3MND,
                             -> Søknadsresultat.AVSLÅTT
                         }
                     }

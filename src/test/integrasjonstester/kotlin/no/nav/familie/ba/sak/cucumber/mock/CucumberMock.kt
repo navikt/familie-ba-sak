@@ -346,6 +346,7 @@ class CucumberMock(
             totrinnskontrollService = totrinnskontrollService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utbetalingsoppdragGeneratorService =
