@@ -55,15 +55,15 @@ class AutovedtakMånedligValutajusteringService(
     ) {
         logger.info("Utfører månedlig valutajustering for fagsak=$fagsakId og måned=$måned")
 
-        if (måned != localDateProvider.now().toYearMonth()) {
-            throw Feil("Prøver å utføre månedlig valutajustering for en annen måned enn nåværende måned.")
-        }
-
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
         val sisteValutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
         if (sisteValutakurser.erAlleValutakurserOppdaterteIMåned(måned)) {
             logger.info("Valutakursene er allerede oppdatert for fagsak $fagsakId. Hopper ut")
             return
+        }
+
+        if (måned != localDateProvider.now().toYearMonth()) {
+            throw Feil("Prøver å utføre månedlig valutajustering for en annen måned enn nåværende måned.")
         }
 
         if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) {
