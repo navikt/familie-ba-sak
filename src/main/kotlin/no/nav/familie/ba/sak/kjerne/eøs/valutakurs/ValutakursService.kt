@@ -23,18 +23,21 @@ class ValutakursService(
     fun hentValutakurser(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
+    @Transactional
     fun oppdaterValutakurs(
         behandlingId: BehandlingId,
         valutakurs: Valutakurs,
     ) =
         skjemaService.endreSkjemaer(behandlingId, valutakurs)
 
+    @Transactional
     fun oppdaterValutakurser(
         behandlingId: BehandlingId,
         valutakurser: List<Valutakurs>,
     ) =
         skjemaService.endreSkjemaer(behandlingId = behandlingId, oppdateringer = valutakurser)
 
+    @Transactional
     fun slettValutakurs(
         behandlingId: BehandlingId,
         valutakursId: Long,

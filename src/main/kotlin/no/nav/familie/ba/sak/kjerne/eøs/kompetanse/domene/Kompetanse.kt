@@ -93,7 +93,7 @@ data class Kompetanse(
         copy(
             fom = fom,
             tom = tom,
-            barnAktører = barnAktører,
+            barnAktører = barnAktører.toSet(),
         )
 
     fun erObligatoriskeFelterSatt() =

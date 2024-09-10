@@ -41,7 +41,7 @@ fun List<InternPeriodeOvergangsstønad>.splittOgSlåSammen(
     dagensDato: LocalDate,
 ) = this
     .slåSammenTidligerePerioder(dagensDato)
-    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, LocalDate.now())
+    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, dagensDato)
 
 class VedtaksperiodefinnerSmåbarnstilleggFeil(
     melding: String,

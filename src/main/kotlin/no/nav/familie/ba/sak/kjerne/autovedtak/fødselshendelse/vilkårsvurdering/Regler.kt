@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import java.time.Duration
 import java.time.LocalDate
 
@@ -142,9 +142,9 @@ data class VurderBarnErUgift(
         val sivilstanderMedGyldigFom = sivilstander.filter { it.harGyldigFom() }
 
         return when {
-            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
+            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTANDTYPE.UOPPGITT } != null ->
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-            sivilstanderMedGyldigFom.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
+            sivilstanderMedGyldigFom.any { it.type == SIVILSTANDTYPE.GIFT || it.type == SIVILSTANDTYPE.REGISTRERT_PARTNER } ->
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
             else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
         }

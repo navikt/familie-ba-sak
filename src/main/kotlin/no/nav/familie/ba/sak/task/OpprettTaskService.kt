@@ -179,7 +179,7 @@ class OpprettTaskService(
     @Transactional
     fun opprettTaskForÅPatcheMergetIdent(
         dto: PatchMergetIdentDto,
-    ) {
+    ) =
         taskRepository.save(
             Task(
                 type = PatchMergetIdentTask.TASK_STEP_TYPE,
@@ -192,7 +192,6 @@ class OpprettTaskService(
                     },
             ),
         )
-    }
 
     @Transactional
     fun opprettTaskForÅPatcheVilkårFom(

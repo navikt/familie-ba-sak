@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -364,7 +364,7 @@ class LoggServiceTest(
                     fødselsdato = LocalDate.of(2018, 5, 1),
                     kjønn = Kjønn.KVINNE,
                     navn = "Barn Barnesen",
-                    sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
+                    sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                 ),
         )
         MockPersonopplysningerService.leggTilPersonInfo(

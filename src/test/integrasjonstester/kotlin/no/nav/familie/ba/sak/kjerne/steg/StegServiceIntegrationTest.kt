@@ -46,7 +46,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -115,7 +115,7 @@ class StegServiceIntegrationTest(
                     fødselsdato = LocalDate.now().minusYears(16),
                     sivilstander =
                         listOf(
-                            Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+                            Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
                         ),
                     kjønn = Kjønn.values().random(),
                     navn = "navn",
@@ -1259,7 +1259,7 @@ class StegServiceIntegrationTest(
                     fødselsdato = LocalDate.of(2018, 5, 1),
                     kjønn = Kjønn.KVINNE,
                     navn = "Barn Barnesen",
-                    sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
+                    sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                 ),
         )
         leggTilPersonInfo(

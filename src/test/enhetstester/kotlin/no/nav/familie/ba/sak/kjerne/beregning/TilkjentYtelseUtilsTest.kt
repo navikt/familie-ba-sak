@@ -45,7 +45,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.assertj.core.api.Assertions
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -503,7 +503,7 @@ internal class TilkjentYtelseUtilsTest {
                 navn = "Barn",
                 kjønn = Kjønn.MANN,
             ).apply {
-                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this))
                 barnDødsfallDato?.let { dødsfall = lagDødsfallFraPdl(this, it.tilyyyyMMdd(), null) }
             }
         val søker =
@@ -514,7 +514,7 @@ internal class TilkjentYtelseUtilsTest {
                 fødselsdato = barnFødselsdato.minusYears(20),
                 navn = "Barn",
                 kjønn = Kjønn.MANN,
-            ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
+            ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
         personopplysningGrunnlag.personer.add(søker)
         personopplysningGrunnlag.personer.add(barn)
 

@@ -20,7 +20,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.unleash.UnleashService
@@ -230,8 +230,8 @@ class ClientMocks {
             )
         private val sivilstandHistorisk =
             listOf(
-                Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-                Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+                Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+                Sivilstand(type = SIVILSTANDTYPE.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
             )
 
         val personInfo =

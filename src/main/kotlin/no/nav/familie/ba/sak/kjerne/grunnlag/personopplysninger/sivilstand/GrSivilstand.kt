@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import java.time.LocalDate
 import java.util.Objects
@@ -39,7 +39,7 @@ data class GrSivilstand(
     val fom: LocalDate? = null,
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    val type: SIVILSTAND,
+    val type: SIVILSTANDTYPE,
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)

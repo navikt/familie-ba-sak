@@ -84,7 +84,7 @@ data class Valutakurs(
     ) = copy(
         fom = fom,
         tom = tom,
-        barnAktører = barnAktører,
+        barnAktører = barnAktører.toSet(),
     )
 
     fun erObligatoriskeFelterSatt() =
