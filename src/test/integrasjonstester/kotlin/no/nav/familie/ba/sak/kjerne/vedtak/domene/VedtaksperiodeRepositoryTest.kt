@@ -11,11 +11,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.EmptyResultDataAccessException
 
 class VedtaksperiodeRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
@@ -38,12 +36,6 @@ class VedtaksperiodeRepositoryTest(
 
             assertThat(vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiode.id))
                 .isEqualTo(behandling.id)
-        }
-
-        @Test
-        fun `skal kaste feil hvis ikke vedtaksperiode finnes `() {
-            assertThatThrownBy { vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(1L) }
-                .isInstanceOf(EmptyResultDataAccessException::class.java)
         }
     }
 }

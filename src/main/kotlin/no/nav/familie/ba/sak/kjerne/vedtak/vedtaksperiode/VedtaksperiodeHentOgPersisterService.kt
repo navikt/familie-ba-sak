@@ -36,5 +36,5 @@ class VedtaksperiodeHentOgPersisterService(
         vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiodeId)
 
     fun hentBehandlingIdFor(vedtaksperiodeId: Long): Long =
-        finnBehandlingIdFor(vedtaksperiodeId) ?: throw Feil("Fant ingen behandling tilhørende vedtaksperiode")
+        finnBehandlingIdFor(vedtaksperiodeId) ?: throw Feil("Fant ingen behandling tilhørende vedtaksperiode med id $vedtaksperiodeId")
 }
