@@ -101,3 +101,43 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
       | Fra dato   | Til dato   | Vedtaksperiodetype |
       | 01.03.2015 | 31.12.2018 | OPPHØR             |
       | 01.01.2019 |            | OPPHØR             |
+
+  Scenario: Skal ikke slå sammen vedtaksperiodene som ikke er innvilget dersom det er på grunn av endret utbetaling 3mnd
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype |
+      | 1        | NORMAL     |
+
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
+      | 1            | 1        |                     | AVSLÅTT             | SØKNAD           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1       | BARN       | 02.02.2015  |
+      | 1            | 2       | SØKER      | 17.04.1985  |
+
+    Og dagens dato er 27.09.2023
+    Og lag personresultater for behandling 1
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  |                  | 17.04.1985 |            | OPPFYLT  | Nei                  |
+
+      | 1       | BOSATT_I_RIKET,GIFT_PARTNERSKAP,LOVLIG_OPPHOLD |                  | 02.02.2015 |            | OPPFYLT  | Nei                  |
+      | 1       | UNDER_18_ÅR                                    |                  | 02.02.2015 | 01.02.2033 | OPPFYLT  | Nei                  |
+      | 1       | BOR_MED_SØKER                                  |                  | 02.02.2015 | 15.12.2018 | OPPFYLT  | Nei                  |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.03.2015 | 31.12.2018 | 0     | ORDINÆR_BARNETRYGD | 0       | 970  |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
+      | 1       | 1            | 01.03.2015 | 31.12.2018 | ETTERBETALING_3MND | 0       |
+
+    Når vedtaksperiodene genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder for behandling 1
+      | Fra dato   | Til dato   | Vedtaksperiodetype |
+      | 01.03.2015 | 31.12.2018 | OPPHØR             |
+      | 01.01.2019 |            | OPPHØR             |
