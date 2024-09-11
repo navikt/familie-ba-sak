@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenInnholdTilOgMed
  * 2a. Lukker periode på det gjeldende skjemaet, dvs til-og-med går fra <null> til en verdi, eller til-og-med er tidligere
  * 2b. og/eller reduserer antall barn
  * så skal det lages en ny oppdatering med blankt skjema for det som ligger "utenfor" [oppdatering], dvs har
- * 1. Perioden som starter måneden etter ny til-og-med-dato, og frem frem til eksisterende til-og-med (kan være <null>)
+ * 1. Perioden som starter måneden etter ny til-og-med-dato, og frem til eksisterende til-og-med (kan være <null>)
  * 2. Barnet/barna som blir fjernet
  *
  * Problemet som skal løses er at skjemaer som kun varierer i periode eller barn, slås sammen fordi de ellers er like

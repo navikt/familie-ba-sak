@@ -29,6 +29,13 @@ class KompetanseService(
     ) =
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
+    fun slettKompetanserForBehandling(behandlingId: BehandlingId) {
+        val kompetanser = skjemaService.hentMedBehandlingId(behandlingId)
+        kompetanser.forEach { kompetanse ->
+            slettKompetanse(behandlingId, kompetanse.id)
+        }
+    }
+
     @Transactional
     fun slettKompetanse(
         behandlingId: BehandlingId,
