@@ -79,7 +79,7 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
+                    enhetsnummer = arbeidsfordelingsenhet.behandlendeEnhetId,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                     tilordnetRessurs = tilordnetNavIdent,

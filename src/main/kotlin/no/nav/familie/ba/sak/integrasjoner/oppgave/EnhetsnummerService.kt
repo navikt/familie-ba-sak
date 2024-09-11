@@ -9,17 +9,17 @@ class EnhetsnummerService(
     val integrasjonClient: IntegrasjonClient,
 ) {
     fun hentEnhetsnummer(
-        behandlendeEnhetId: String,
+        behandlendeEnhetIdFraArbeisfordeling: String,
         navIdent: String?,
     ): String {
-        when (behandlendeEnhetId) {
+        when (behandlendeEnhetIdFraArbeisfordeling) {
             "4863" -> håndter4863(navIdent)
             "2103" -> håndter2103(navIdent)
             else -> {}
         }
 
         if (navIdent == null) {
-            return behandlendeEnhetId
+            return behandlendeEnhetIdFraArbeisfordeling
         }
         val enhetTilgang = integrasjonClient.hentEnhetTilgang(navIdent)
         val enheterNavIdentenHarTilgangTil = enhetTilgang.enheter
@@ -28,7 +28,7 @@ class EnhetsnummerService(
         if (enheterNavIdentenHarTilgangTil.isEmpty()) {
             throw Feil("Nav-ident har ikke tilgang til noen enheter")
         }
-        return enheterNavIdentenHarTilgangTil.singleOrNull { it == behandlendeEnhetId } ?: enheterNavIdentenHarTilgangTil.first()
+        return enheterNavIdentenHarTilgangTil.singleOrNull { it == behandlendeEnhetIdFraArbeisfordeling } ?: enheterNavIdentenHarTilgangTil.first()
     }
 
     private fun håndter4863(navIdent: String?): String {
@@ -53,3 +53,8 @@ class EnhetsnummerService(
         return ""
     }
 }
+
+data class NavIdentOgTilhørendeEnhetsnummer(
+    val tilordnetRessursId: String,
+    val enhetsnummer: String?
+)
