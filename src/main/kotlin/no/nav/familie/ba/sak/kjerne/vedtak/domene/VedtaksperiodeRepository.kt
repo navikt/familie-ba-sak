@@ -24,5 +24,5 @@ interface VedtaksperiodeRepository : JpaRepository<VedtaksperiodeMedBegrunnelser
         """,
         nativeQuery = true,
     )
-    fun finnBehandlingIdForVedtaksperiode(vedtaksperiodeId: Long): Long
+    fun finnBehandlingIdForVedtaksperiode(vedtaksperiodeId: Long): Long?
 }
