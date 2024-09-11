@@ -32,6 +32,9 @@ class VedtaksperiodeHentOgPersisterService(
     fun finnVedtaksperioderFor(vedtakId: Long): List<VedtaksperiodeMedBegrunnelser> =
         vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId)
 
-    fun finnBehandlingIdFor(vedtaksperiodeId: Long): Long =
+    fun finnBehandlingIdFor(vedtaksperiodeId: Long): Long? =
         vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiodeId)
+
+    fun hentBehandlingIdFor(vedtaksperiodeId: Long): Long =
+        finnBehandlingIdFor(vedtaksperiodeId) ?: throw Feil("Fant ingen behandling tilhørende vedtaksperiode med id $vedtaksperiodeId")
 }

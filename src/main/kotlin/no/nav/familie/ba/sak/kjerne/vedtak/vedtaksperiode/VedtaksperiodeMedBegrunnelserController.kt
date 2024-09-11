@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
@@ -52,7 +53,9 @@ class VedtaksperiodeMedBegrunnelserController(
         @RequestBody
         restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser,
     ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
-        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+        val behandlingId =
+            vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+                ?: throw FunksjonellFeil("Vedtaksperiodene har blitt oppdatert. Oppdater siden og forsøk å legge til begrunnelser på nytt.")
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -89,7 +92,7 @@ class VedtaksperiodeMedBegrunnelserController(
         @RequestBody
         restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
     ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
-        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+        val behandlingId = vedtaksperiodeHentOgPersisterService.hentBehandlingIdFor(vedtaksperiodeId)
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -134,7 +137,7 @@ class VedtaksperiodeMedBegrunnelserController(
     fun genererBrevBegrunnelserForPeriode(
         @PathVariable vedtaksperiodeId: Long,
     ): ResponseEntity<Ressurs<Set<String>>> {
-        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+        val behandlingId = vedtaksperiodeHentOgPersisterService.hentBehandlingIdFor(vedtaksperiodeId)
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
