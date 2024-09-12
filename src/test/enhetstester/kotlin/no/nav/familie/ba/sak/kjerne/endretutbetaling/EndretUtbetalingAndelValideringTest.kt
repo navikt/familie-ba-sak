@@ -910,8 +910,8 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                fom = YearMonth.now().minusMonths(2),
-                tom = YearMonth.now().minusMonths(1),
+                fom = YearMonth.now().minusMonths(5),
+                tom = YearMonth.now().minusMonths(3),
                 årsak = Årsak.ETTERBETALING_3MND,
                 prosent = BigDecimal(0),
                 søknadstidspunkt = LocalDate.now(),
@@ -934,7 +934,7 @@ class EndretUtbetalingAndelValideringTest {
             EndretUtbetalingAndel(
                 behandlingId = 1,
                 fom = YearMonth.now().minusMonths(10),
-                tom = YearMonth.now().minusMonths(3),
+                tom = YearMonth.now().minusMonths(4),
                 årsak = Årsak.ETTERBETALING_3MND,
                 prosent = BigDecimal(0),
                 søknadstidspunkt = LocalDate.now(),
