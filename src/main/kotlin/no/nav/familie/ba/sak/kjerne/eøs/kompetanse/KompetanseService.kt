@@ -29,7 +29,7 @@ class KompetanseService(
     ) =
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
-    @Transactional()
+    @Transactional
     fun slettKompetanse(
         behandlingId: BehandlingId,
         kompetanseId: Long,
