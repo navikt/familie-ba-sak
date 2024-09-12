@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -359,13 +360,13 @@ class ForvalterController(
     }
 
     @DeleteMapping("/slett-alle-kompetanser-for-behandling/{behandlingId}")
-    @Operation(summary = "Slett kompetanser, utenlandsk periodebeløp og valutakurser for en behandling som utredes.")
+    @Operation(summary = "Slett kompetanser, utenlandsk periodebeløp og valutakurser for en behandling som er på vilkårsvurderingssteget.")
     fun slettKompetanser(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<String>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        if (!behandling.aktiv || behandling.status != BehandlingStatus.UTREDES) {
-            error("Behandling $behandlingId er enten ikke aktiv eller ikke under utredning.")
+        if (!behandling.aktiv || behandling.status != BehandlingStatus.UTREDES || behandling.steg.rekkefølge <= StegType.BEHANDLINGSRESULTAT.rekkefølge) {
+            error("Behandling $behandlingId er gått forbi behandlingsresultatsteget og bør settes tilbake til et tidligere steg før man sletter kompetanse.")
         }
         kompetanseService.slettKompetanserForBehandling(BehandlingId(behandlingId))
         return ResponseEntity.ok(Ressurs.success("Kompetanser slettet"))
