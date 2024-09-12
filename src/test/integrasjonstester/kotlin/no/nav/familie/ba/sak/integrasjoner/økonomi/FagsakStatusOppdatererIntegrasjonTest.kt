@@ -86,6 +86,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                 personIdent = forelderIdent,
                 offsetPåAndeler = listOf(1L),
                 fagsakId = fagsakOriginal.id,
+                medStatus = BehandlingStatus.AVSLUTTET,
             )
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
