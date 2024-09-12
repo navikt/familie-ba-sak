@@ -38,12 +38,15 @@ class HåndterNyIdentService(
         val aktørId = identerFraPdl.hentAktivAktørId()
 
         val skalMergeIdentOgRekjøreSenere = sjekkOmManSkalMergeIdentOgRekjøreSenere(identerFraPdl)
-        val aktuellFagsakIdVedMerging = hentAktuellFagsakId(identerFraPdl)
 
-        if (skalMergeIdentOgRekjøreSenere && aktuellFagsakIdVedMerging != null) {
-            validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
-            val task = opprettMergeIdentTask(aktuellFagsakIdVedMerging, identerFraPdl)
-            throwRekjørSenereException(task)
+        if (skalMergeIdentOgRekjøreSenere) {
+            val aktuellFagsakIdVedMerging = hentAktuellFagsakId(identerFraPdl)
+
+            if (aktuellFagsakIdVedMerging != null) {
+                validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
+                val task = opprettMergeIdentTask(aktuellFagsakIdVedMerging, identerFraPdl)
+                throwRekjørSenereException(task)
+            }
         }
 
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
@@ -132,6 +135,7 @@ class HåndterNyIdentService(
     }
 
     companion object {
-        const val LENKE_INFO_OM_MERGING: String = "Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3%B8r-sak.md#manuell-patching-av-akt%C3%B8r-for-en-behandling for mer info."
+        const val LENKE_INFO_OM_MERGING: String =
+            "Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3%B8r-sak.md#manuell-patching-av-akt%C3%B8r-for-en-behandling for mer info."
     }
 }
