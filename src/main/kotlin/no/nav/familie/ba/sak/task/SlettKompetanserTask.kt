@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -23,7 +22,7 @@ class SlettKompetanserTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val behandlingId = objectMapper.readValue(task.payload, Long::class.java)
+        val behandlingId = task.payload.toLong()
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.aktiv || behandling.status != BehandlingStatus.UTREDES || behandling.steg.rekkefølge > StegType.BEHANDLINGSRESULTAT.rekkefølge) {
@@ -45,7 +44,7 @@ class SlettKompetanserTask(
         fun opprettTask(behandlingId: Long): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(behandlingId),
+                payload = behandlingId.toString(),
             )
     }
 }
