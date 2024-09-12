@@ -101,7 +101,7 @@ class HåndterNyIdentService(
                     }
                 }
 
-        if (fagsakDeltagere.map { it.fagsakId }.distinct().size > 1) {
+        if (fagsakDeltagere.mapNotNull { it.fagsakId }.distinct().size > 1) {
             throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktiveAktørerForHistoriskAktørIder.first()}. ${Companion.LENKE_INFO_OM_MERGING}")
         }
 
