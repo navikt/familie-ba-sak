@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -29,7 +30,7 @@ class KompetanseService(
     ) =
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun slettKompetanse(
         behandlingId: BehandlingId,
         kompetanseId: Long,
