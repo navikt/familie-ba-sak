@@ -101,6 +101,8 @@ class VilkårsvurderingSteg(
             månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
 
+        automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))
+
         behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
         )
