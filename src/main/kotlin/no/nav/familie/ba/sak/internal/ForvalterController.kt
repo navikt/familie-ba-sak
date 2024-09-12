@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
+import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -80,6 +83,7 @@ class ForvalterController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val kompetanseService: KompetanseService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -351,6 +355,15 @@ class ForvalterController(
     fun lagMånedligValutajusteringTask(): ResponseEntity<Ressurs<String>> {
         månedligValutajusteringScheduler.lagMånedligValutajusteringTask(triggerTid = LocalDateTime.now())
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @DeleteMapping("/slett-alle-kompetanser-for-behandling/{behandlingId}")
+    @Operation(summary = "Slett kompetanser, utenlandsk periodebeløp og valutakurser for en behandling som er på vilkårsvurderingssteget.")
+    fun slettKompetanser(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        val task = taskService.save(SlettKompetanserTask.opprettTask(behandlingId))
+        return ResponseEntity.ok(Ressurs.success("Kompetanser slettes i task ${task.id}"))
     }
 
     @PostMapping("/kjør-oppdater-løpende-flagg-task")
