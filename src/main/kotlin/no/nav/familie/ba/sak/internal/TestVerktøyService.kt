@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class TestVerktøyService(
@@ -38,7 +39,10 @@ class TestVerktøyService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
 ) {
     @Transactional
-    fun oppdaterVilkårUtenFomTilFødselsdato(behandlingId: Long) {
+    fun oppdaterVilkårUtenFomTilFødselsdato(
+        behandlingId: Long,
+        fraDato: LocalDate? = null,
+    ) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val vilkårsvurdering = vilkårService.hentVilkårsvurdering(behandlingId)
 
@@ -49,7 +53,13 @@ class TestVerktøyService(
                 if (vilkårResultat.resultat == Resultat.IKKE_VURDERT) {
                     val person = persongrunnlag?.personer?.find { it.aktør == personResultat.aktør }
                     vilkårResultat.periodeFom =
-                        person?.fødselsdato
+                        when (vilkårResultat.vilkårType) {
+                            Vilkår.UNDER_18_ÅR,
+                            Vilkår.GIFT_PARTNERSKAP,
+                            -> person?.fødselsdato
+
+                            else -> fraDato ?: person?.fødselsdato
+                        }
                     vilkårResultat.resultat = Resultat.OPPFYLT
                     vilkårResultat.begrunnelse = "Opprettet automatisk fra \"Fyll ut vilkårsvurdering\"-knappen"
 

@@ -30,7 +30,7 @@ Egenskap: Vilkårsvurderingssteg
       | 2       | UNDER_18_ÅR        |                                     | 15.07.2018 | 14.07.2036 | OPPFYLT  | Nei                  |                      |                  |
       | 2       | GIFT_PARTNERSKAP   |                                     | 15.07.2018 |            | OPPFYLT  | Nei                  |                      |                  |
       | 2       | BOSATT_I_RIKET     | BARN_BOR_I_EØS                      | 14.11.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
-      | 2       | BOR_MED_SØKER      | BARN_BOR_I_EØS_MED_ANNEN_FORELDER   | 14.11.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOR_MED_SØKER      | BARN_BOR_I_EØS_MED_SØKER            | 14.11.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 2       | LOVLIG_OPPHOLD     |                                     | 14.11.2021 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
     Og med kompetanser
@@ -62,6 +62,7 @@ Egenskap: Vilkårsvurderingssteg
   Scenario: skal generere valutakurser for behandling med type teknisk endring
 
     Og lag personresultater for behandling 2
+    Og kopier vilkårresultater fra behandling 1 til behandling 2
     Og kopier kompetanser fra behandling 1 til behandling 2
     Og kopier utenlandsk periodebeløp fra behandling 1 til behandling 2
 
@@ -81,6 +82,7 @@ Egenskap: Vilkårsvurderingssteg
   Scenario: skal generere valutakurser for behandling med type revurdering
 
     Og lag personresultater for behandling 3
+    Og kopier vilkårresultater fra behandling 1 til behandling 3
     Og kopier kompetanser fra behandling 1 til behandling 3
     Og kopier utenlandsk periodebeløp fra behandling 1 til behandling 3
 
