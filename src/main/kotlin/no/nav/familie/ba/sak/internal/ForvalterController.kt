@@ -20,13 +20,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -34,6 +31,7 @@ import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
+import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
@@ -364,12 +362,8 @@ class ForvalterController(
     fun slettKompetanser(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<String>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        if (!behandling.aktiv || behandling.status != BehandlingStatus.UTREDES || behandling.steg.rekkefølge <= StegType.BEHANDLINGSRESULTAT.rekkefølge) {
-            error("Behandling $behandlingId er gått forbi behandlingsresultatsteget og bør settes tilbake til et tidligere steg før man sletter kompetanse.")
-        }
-        kompetanseService.slettKompetanserForBehandling(BehandlingId(behandlingId))
-        return ResponseEntity.ok(Ressurs.success("Kompetanser slettet"))
+        val task = taskService.save(SlettKompetanserTask.opprettTask(behandlingId))
+        return ResponseEntity.ok(Ressurs.success("Kompetanser slettes i task ${task.id}"))
     }
 
     @PostMapping("/kjør-oppdater-løpende-flagg-task")
