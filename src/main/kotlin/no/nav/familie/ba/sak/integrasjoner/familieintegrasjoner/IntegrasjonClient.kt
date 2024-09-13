@@ -28,7 +28,7 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
-import no.nav.familie.kontrakter.felles.enhet.EnhetTilgang
+import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -234,9 +234,8 @@ class IntegrasjonClient(
         }
     }
 
-    fun hentEnhetTilgang(navIdent: String): EnhetTilgang {
+    fun hentEnheterSomNavIdentHarTilgangTil(navIdent: String): List<Enhet> {
         val uri = URI.create("$integrasjonUri/enhettilgang/$navIdent")
-
         return kallEksternTjenesteRessurs(
             tjeneste = "axsys/noe-annet", // TODO: Finn ut hvilken tjeneste vi skal gå mot.
             uri = uri,

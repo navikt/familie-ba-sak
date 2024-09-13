@@ -5,7 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
-import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhetTilgang
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -47,7 +46,7 @@ class NavIdentOgEnhetsnummerServiceTest {
                     navIdent = null,
                 )
             }
-        assertThat(exception.message).isEqualTo("Kan ikke sette midlertidig enhet 4863 om man mangler nav-ident")
+        assertThat(exception.message).isEqualTo("Kan ikke sette midlertidig enhet 4863 om man mangler NAV-ident")
     }
 
     @Test
@@ -69,20 +68,17 @@ class NavIdentOgEnhetsnummerServiceTest {
             )
 
         every {
-            mockedIntegrasjonClient.hentEnhetTilgang(
+            mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
                 navIdent = navIdent,
             )
         } returns
-            lagEnhetTilgang(
-                enheter =
-                    listOf(
-                        lagEnhet(
-                            enhetsnummer = enhetNavIdentHarTilgangTil1,
-                        ),
-                        lagEnhet(
-                            enhetsnummer = enhetNavIdentHarTilgangTil2,
-                        ),
-                    ),
+            listOf(
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil1,
+                ),
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil2,
+                ),
             )
 
         // Act & assert
@@ -117,26 +113,23 @@ class NavIdentOgEnhetsnummerServiceTest {
             )
 
         every {
-            mockedIntegrasjonClient.hentEnhetTilgang(
+            mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
                 navIdent = navIdent,
             )
         } returns
-            lagEnhetTilgang(
-                enheter =
-                    listOf(
-                        lagEnhet(
-                            enhetsnummer = enhetNavIdentHarTilgangTil1,
-                        ),
-                        lagEnhet(
-                            enhetsnummer = enhetNavIdentHarTilgangTil2,
-                        ),
-                        lagEnhet(
-                            enhetsnummer = enhetNavIdentHarTilgangTil3,
-                        ),
-                        lagEnhet(
-                            enhetsnummer = enhetNavIdentHarTilgangTil4,
-                        ),
-                    ),
+            listOf(
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil1,
+                ),
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil2,
+                ),
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil3,
+                ),
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil4,
+                ),
             )
 
         // Act
@@ -149,5 +142,117 @@ class NavIdentOgEnhetsnummerServiceTest {
         // Assert
         assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
         assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(enhetNavIdentHarTilgangTil3)
+    }
+
+    @Test
+    fun `skal kaste feil hvis arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident er null`() {
+        // Arrange
+        val behandlingId = 1L
+
+        every {
+            mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
+                behandlingId = behandlingId,
+            )
+        } returns
+            lagArbeidsfordelingPåBehandling(
+                behandlingId = behandlingId,
+                behandlendeEnhetId = VIKAFOSSEN_ENHET_2103,
+            )
+
+        // Act & assert
+        val exception =
+            assertThrows<Feil> {
+                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                    behandlingId = behandlingId,
+                    navIdent = null,
+                )
+            }
+        assertThat(exception.message).isEqualTo("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
+    }
+
+    @Test
+    fun `skal returnere Vikafossen 2103 uten NAV-ident om arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident ikke har tilgang til Vikafossen 2103`() {
+        // Arrange
+        val behandlingId = 1L
+        val navIdent = "1"
+        val enhetNavIdentHarTilgangTil1 = "1234"
+        val enhetNavIdentHarTilgangTil2 = "4321"
+
+        every {
+            mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
+                behandlingId = behandlingId,
+            )
+        } returns
+            lagArbeidsfordelingPåBehandling(
+                behandlingId = behandlingId,
+                behandlendeEnhetId = VIKAFOSSEN_ENHET_2103,
+            )
+
+        every {
+            mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                navIdent = navIdent,
+            )
+        } returns
+            listOf(
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil1,
+                ),
+                lagEnhet(
+                    enhetsnummer = enhetNavIdentHarTilgangTil2,
+                ),
+            )
+
+        // Act
+        val navIdentOgEnhetsnummer =
+            navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                behandlingId = behandlingId,
+                navIdent = navIdent,
+            )
+
+        // Assert
+        assertThat(navIdentOgEnhetsnummer.navIdent).isNull()
+        assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(VIKAFOSSEN_ENHET_2103)
+    }
+
+    @Test
+    fun `skal returnere Vikafossen 2103 med NAV-ident om arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident har tilgang til Vikafossen 2103`() {
+        // Arrange
+        val behandlingId = 1L
+        val navIdent = "1"
+
+        every {
+            mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
+                behandlingId = behandlingId,
+            )
+        } returns
+            lagArbeidsfordelingPåBehandling(
+                behandlingId = behandlingId,
+                behandlendeEnhetId = VIKAFOSSEN_ENHET_2103,
+            )
+
+        every {
+            mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                navIdent = navIdent,
+            )
+        } returns
+            listOf(
+                lagEnhet(
+                    enhetsnummer = "1234",
+                ),
+                lagEnhet(
+                    enhetsnummer = VIKAFOSSEN_ENHET_2103,
+                ),
+            )
+
+        // Act
+        val navIdentOgEnhetsnummer =
+            navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                behandlingId = behandlingId,
+                navIdent = navIdent,
+            )
+
+        // Assert
+        assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
+        assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(VIKAFOSSEN_ENHET_2103)
     }
 }
