@@ -74,12 +74,12 @@ class NavIdentOgEnhetsnummerService(
                 .filter { it != MIDLERTIDIG_ENHET_4863 }
                 .filter { it != VIKAFOSSEN_ENHET_2103 }
         if (enheterNavIdentHarTilgangerTil.isEmpty()) {
-            throw Feil("Fant ingen passende enhetsnummer for nav-ident $navIdent")
+            throw Feil("Fant ingen passende enhetsnummer for NAV-ident $navIdent")
         }
         val harTilgangTilBehandledeEnhet = enheterNavIdentHarTilgangerTil.contains(behandlendeEnhetId)
         if (!harTilgangTilBehandledeEnhet) {
             // Velger bare det første enhetsnummeret i tilfeller hvor man har flere, avklart med fag
-            return NavIdentOgEnhetsnummer(null, enheterNavIdentHarTilgangerTil.first())
+            return NavIdentOgEnhetsnummer(navIdent, enheterNavIdentHarTilgangerTil.first())
         }
         return NavIdentOgEnhetsnummer(navIdent, behandlendeEnhetId)
     }
@@ -88,4 +88,10 @@ class NavIdentOgEnhetsnummerService(
 data class NavIdentOgEnhetsnummer(
     val navIdent: String?,
     val enhetsnummer: String,
-)
+) {
+    init {
+        if (enhetsnummer.length != 4) {
+            throw IllegalArgumentException("Enhetsnummer må være 4 siffer")
+        }
+    }
+}
