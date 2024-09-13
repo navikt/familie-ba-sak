@@ -61,6 +61,8 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             personIdent = forelderIdent,
             offsetPåAndeler = listOf(1L),
             fagsakId = fagsakOriginal.id,
+            andelProsent = BigDecimal(100),
+            andelKalkulertUtbetalingsbeløp = 1054,
         )
 
         val fagsak = fagsakService.hentLøpendeFagsaker()
@@ -85,8 +87,10 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
                 offsetPåAndeler = listOf(1L),
-                fagsakId = fagsakOriginal.id,
                 medStatus = BehandlingStatus.AVSLUTTET,
+                fagsakId = fagsakOriginal.id,
+                andelProsent = BigDecimal(100),
+                andelKalkulertUtbetalingsbeløp = 1054,
             )
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
@@ -100,12 +104,60 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         Assertions.assertFalse(fagsak.any { it.id == fagsakOriginal.id })
     }
 
+    @Test
+    fun `skal sette status til avsluttet hvis alle løpende andeler er satt til 0 grunnet endret utbetalingsandeler`() {
+        val forelderIdent = randomFnr()
+
+        val fagsakOriginal =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
+        opprettOgLagreBehandlingMedAndeler(
+            personIdent = forelderIdent,
+            offsetPåAndeler = listOf(1L),
+            medStatus = BehandlingStatus.AVSLUTTET,
+            fagsakId = fagsakOriginal.id,
+            andelProsent = BigDecimal(0),
+            andelKalkulertUtbetalingsbeløp = 0,
+        )
+
+        fagsakService.oppdaterLøpendeStatusPåFagsaker()
+        val fagsak = fagsakService.hentLøpendeFagsaker()
+
+        Assertions.assertFalse(fagsak.any { it.id == fagsakOriginal.id })
+    }
+
+    @Test
+    fun `skal sette ikke status til avsluttet hvis alle løpende andeler er satt til 0 grunnet nullutbetaling`() {
+        val forelderIdent = randomFnr()
+
+        val fagsakOriginal =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(forelderIdent).also {
+                fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE)
+            }
+        opprettOgLagreBehandlingMedAndeler(
+            personIdent = forelderIdent,
+            offsetPåAndeler = listOf(1L),
+            medStatus = BehandlingStatus.AVSLUTTET,
+            fagsakId = fagsakOriginal.id,
+            andelProsent = BigDecimal(100),
+            andelKalkulertUtbetalingsbeløp = 0,
+        )
+
+        fagsakService.oppdaterLøpendeStatusPåFagsaker()
+        val fagsak = fagsakService.hentLøpendeFagsaker()
+
+        Assertions.assertTrue(fagsak.any { it.id == fagsakOriginal.id })
+    }
+
     private fun opprettOgLagreBehandlingMedAndeler(
         personIdent: String,
         offsetPåAndeler: List<Long> = emptyList(),
         erIverksatt: Boolean = true,
         medStatus: BehandlingStatus = BehandlingStatus.UTREDES,
         fagsakId: Long,
+        andelProsent: BigDecimal,
+        andelKalkulertUtbetalingsbeløp: Int,
     ): Behandling {
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
@@ -119,6 +171,8 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                     tilkjentYtelse = tilkjentYtelse,
                     periodeOffset = it,
                     aktør = behandling.fagsak.aktør,
+                    andelProsent = andelProsent,
+                    andelKalkulertUtbetalingsbeløp = andelKalkulertUtbetalingsbeløp,
                 ),
             )
         }
@@ -141,12 +195,14 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         tilkjentYtelse: TilkjentYtelse,
         periodeOffset: Long,
         aktør: Aktør = randomAktør(),
+        andelProsent: BigDecimal,
+        andelKalkulertUtbetalingsbeløp: Int,
     ) = AndelTilkjentYtelse(
         aktør = aktør,
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
-        kalkulertUtbetalingsbeløp = 1054,
-        nasjonaltPeriodebeløp = 1054,
+        kalkulertUtbetalingsbeløp = andelKalkulertUtbetalingsbeløp,
+        nasjonaltPeriodebeløp = andelKalkulertUtbetalingsbeløp,
         stønadFom =
             LocalDate
                 .now()
@@ -160,7 +216,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         type = YtelseType.ORDINÆR_BARNETRYGD,
         periodeOffset = periodeOffset,
         forrigePeriodeOffset = null,
-        sats = 1054,
-        prosent = BigDecimal(100),
+        sats = andelKalkulertUtbetalingsbeløp,
+        prosent = andelProsent,
     )
 }
