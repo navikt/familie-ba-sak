@@ -360,7 +360,7 @@ private fun ISanityBegrunnelse.erEksplisittAvslagPåSøker(
             ?.eksplisitteAvslagForPerson ?: emptyList()
 
     return explisitteAvslagsvilkårForSøker.any {
-        this.begrunnelseTypeForPerson == VedtakBegrunnelseType.AVSLAG &&
+        this.begrunnelseType == VedtakBegrunnelseType.AVSLAG &&
             it.vilkårType in this.vilkår
     }
 }
