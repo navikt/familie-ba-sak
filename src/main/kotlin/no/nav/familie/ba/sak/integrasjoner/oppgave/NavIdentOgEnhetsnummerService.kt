@@ -28,7 +28,9 @@ class NavIdentOgEnhetsnummerService(
         }
     }
 
-    private fun håndterMidlertidigEnhet4863(navIdent: String?): NavIdentOgEnhetsnummer {
+    private fun håndterMidlertidigEnhet4863(
+        navIdent: String?,
+    ): NavIdentOgEnhetsnummer {
         if (navIdent == null) {
             throw Feil("Kan ikke sette midlertidig enhet 4863 om man mangler NAV-ident")
         }
@@ -45,7 +47,9 @@ class NavIdentOgEnhetsnummerService(
         return NavIdentOgEnhetsnummer(navIdent, enhetsnummerSaksbehandlerHarTilgangTil.first())
     }
 
-    private fun håndterVikafossenEnhet2103(navIdent: String?): NavIdentOgEnhetsnummer {
+    private fun håndterVikafossenEnhet2103(
+        navIdent: String?,
+    ): NavIdentOgEnhetsnummer {
         if (navIdent == null) {
             throw Feil("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
         }
