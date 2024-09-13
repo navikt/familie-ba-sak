@@ -234,13 +234,13 @@ class IntegrasjonClient(
         }
     }
 
-    fun hentEnhetTilgang(saksbehandlerId: String): EnhetTilgang {
-        val uri = URI.create("$integrasjonUri/enhettilgang/$saksbehandlerId")
+    fun hentEnhetTilgang(navIdent: String): EnhetTilgang {
+        val uri = URI.create("$integrasjonUri/enhettilgang/$navIdent")
 
         return kallEksternTjenesteRessurs(
             tjeneste = "axsys/noe-annet", // TODO: Finn ut hvilken tjeneste vi skal gå mot.
             uri = uri,
-            formål = "Hent enheter en saksbehandler har tilgang til",
+            formål = "Hent enheter en NAV-ident har tilgang til",
         ) {
             getForEntity(uri)
         }
