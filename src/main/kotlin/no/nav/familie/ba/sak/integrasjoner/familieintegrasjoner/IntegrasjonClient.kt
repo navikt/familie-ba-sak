@@ -39,7 +39,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -235,7 +234,7 @@ class IntegrasjonClient(
     }
 
     fun hentEnheterSomNavIdentHarTilgangTil(navIdent: String): List<Enhet> {
-        val uri = URI.create("$integrasjonUri/enhettilgang/$navIdent")
+        val uri = URI.create("$integrasjonUri/enhet/$navIdent")
         return kallEksternTjenesteRessurs(
             tjeneste = "axsys/noe-annet", // TODO: Finn ut hvilken tjeneste vi skal gå mot.
             uri = uri,
@@ -531,7 +530,6 @@ class IntegrasjonClient(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
 

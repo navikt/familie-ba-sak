@@ -19,7 +19,7 @@ class NavIdentOgEnhetsnummerService(
     ): NavIdentOgEnhetsnummer {
         val behandlendeEnhetId =
             arbeidsfordelingPåBehandlingRepository
-                .hentArbeidsfordelingPåBehandling(behandlingId = behandlingId)
+                .hentArbeidsfordelingPåBehandling(behandlingId)
                 .behandlendeEnhetId
         return when (behandlendeEnhetId) {
             MIDLERTIDIG_ENHET_4863 -> håndterMidlertidigEnhet4863(navIdent)
