@@ -87,10 +87,10 @@ SELECT silp.fk_fagsak_id
 FROM sisteiverksatte silp
 WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
    OR NOT EXISTS (SELECT 1
-                  FROM andel_tilkjent_ytelse
-                  WHERE fk_behandling_id = silp.id
-                    AND stonad_tom >= DATE_TRUNC('month', NOW())
-                    AND prosent > 0);
+                  FROM andel_tilkjent_ytelse aty
+                  WHERE aty.fk_behandling_id = silp.id
+                    AND aty.stonad_tom >= DATE_TRUNC('month', NOW())
+                    AND aty.prosent > 0);
                 """,
         nativeQuery = true,
     )

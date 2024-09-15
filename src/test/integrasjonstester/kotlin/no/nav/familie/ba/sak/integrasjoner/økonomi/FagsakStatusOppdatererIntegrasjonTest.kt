@@ -128,7 +128,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     }
 
     @Test
-    fun `skal sette ikke status til avsluttet hvis alle løpende andeler er satt til 0 grunnet nullutbetaling`() {
+    fun `skal ikke sette status til avsluttet hvis alle løpende andeler er satt til 0 grunnet nullutbetaling`() {
         val forelderIdent = randomFnr()
 
         val fagsakOriginal =
