@@ -69,6 +69,13 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeSkjemaer, oppdaterteKompetanser)
     }
 
+    fun slettSkjemaer(
+        behandlingId: BehandlingId,
+    ) {
+        val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
+        lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeSkjemaer, emptySet())
+    }
+
     fun kopierOgErstattSkjemaer(
         fraBehandlingId: BehandlingId,
         tilBehandlingId: BehandlingId,
