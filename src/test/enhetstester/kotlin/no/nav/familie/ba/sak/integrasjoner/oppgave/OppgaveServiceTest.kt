@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -14,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
@@ -42,60 +38,41 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
-@ExtendWith(MockKExtension::class)
 class OppgaveServiceTest {
-    @MockK
-    lateinit var integrasjonClient: IntegrasjonClient
-
-    @MockK
-    lateinit var personopplysningerService: PersonopplysningerService
-
-    @MockK
-    lateinit var arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository
-
-    @MockK
-    lateinit var arbeidsfordelingService: ArbeidsfordelingService
-
-    @MockK
-    lateinit var behandlingRepository: BehandlingRepository
-
-    @MockK
-    lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-
-    @MockK
-    lateinit var personidentService: PersonidentService
-
-    @MockK
-    lateinit var oppgaveRepository: OppgaveRepository
-
-    @MockK
-    lateinit var opprettTaskService: OpprettTaskService
-
-    @MockK
-    lateinit var loggService: LoggService
-
-    @InjectMockKs
-    lateinit var oppgaveService: OppgaveService
+    private val integrasjonClient: IntegrasjonClient = mockk()
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository = mockk()
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
+    private val behandlingRepository: BehandlingRepository = mockk()
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
+    private val personidentService: PersonidentService = mockk()
+    private val oppgaveRepository: OppgaveRepository = mockk()
+    private val opprettTaskService: OpprettTaskService = mockk()
+    private val loggService: LoggService = mockk()
+    private val navIdentOgEnhetsnummerService: NavIdentOgEnhetsnummerService = mockk()
+    private val oppgaveService: OppgaveService =
+        OppgaveService(
+            integrasjonClient = integrasjonClient,
+            behandlingRepository = behandlingRepository,
+            oppgaveRepository = oppgaveRepository,
+            opprettTaskService = opprettTaskService,
+            loggService = loggService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            navIdentOgEnhetsnummerService = navIdentOgEnhetsnummerService,
+        )
 
     @Test
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra behandlingen`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { behandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any()) } returns lagTestOppgave()
-        every {
-            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
-                any(),
-                any(),
-            )
-        } returns null
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns null
         every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns
@@ -115,8 +92,14 @@ class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
+        every {
+            navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(BEHANDLING_ID, null)
+        } returns NavIdentOgEnhetsnummer(null, ENHETSNUMMER)
+
+        // Act
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
 
+        // Assert
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
         assertThat(slot.captured.ident).isEqualTo(
@@ -136,6 +119,7 @@ class OppgaveServiceTest {
     @ParameterizedTest
     @EnumSource(ManuellOppgaveType::class)
     fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon satt for småbarnstillegg og åpen behandling, men ikke fødselshendelse`(manuellOppgaveType: ManuellOppgaveType) {
+        // Arrange
         every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { behandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any()) } returns lagTestOppgave()
@@ -164,6 +148,11 @@ class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
+        every {
+            navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(BEHANDLING_ID, null)
+        } returns NavIdentOgEnhetsnummer(null, ENHETSNUMMER)
+
+        // Act
         oppgaveService.opprettOppgave(
             behandlingId = BEHANDLING_ID,
             oppgavetype = Oppgavetype.VurderLivshendelse,
@@ -171,6 +160,7 @@ class OppgaveServiceTest {
             manuellOppgaveType = manuellOppgaveType,
         )
 
+        // Assert
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
         assertThat(slot.captured.ident).isEqualTo(
@@ -193,6 +183,7 @@ class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave`() {
+        // Arrange
         every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns mockk {}
         every {
             oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
@@ -205,12 +196,16 @@ class OppgaveServiceTest {
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
         every { integrasjonClient.finnOppgaveMedId(any()) } returns lagTestOppgaveDTO(0L)
 
+        // Act
         oppgaveService.ferdigstillOppgaver(BEHANDLING_ID, Oppgavetype.BehandleSak)
+
+        // Assert
         assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())
     }
 
     @Test
     fun `Fordel oppgave skal tildele oppgave til saksbehandler`() {
+        // Arrange
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
         every {
@@ -221,33 +216,45 @@ class OppgaveServiceTest {
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave()
 
+        // Act
         oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
 
-        assertEquals(OPPGAVE_ID.toLong(), oppgaveSlot.captured)
-        assertEquals(SAKSBEHANDLER_ID, saksbehandlerSlot.captured)
+        // Assert
+        assertThat(OPPGAVE_ID.toLong()).isEqualTo(oppgaveSlot.captured)
+        assertThat(SAKSBEHANDLER_ID).isEqualTo(saksbehandlerSlot.captured)
     }
 
     @Test
     fun `Fordel oppgave skal feile når oppgave allerede er tildelt`() {
+        // Arrange
         val oppgaveSlot = slot<Long>()
         val saksbehandlerSlot = slot<String>()
         val saksbehandler = "Test Testersen"
+
         every {
             integrasjonClient.fordelOppgave(
                 capture(oppgaveSlot),
                 capture(saksbehandlerSlot),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
-        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(tilordnetRessurs = saksbehandler)
 
+        every {
+            integrasjonClient.finnOppgaveMedId(
+                any(),
+            )
+        } returns Oppgave(tilordnetRessurs = saksbehandler)
+
+        // Act & assert
         val funksjonellFeil =
-            assertThrows<FunksjonellFeil> { oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID) }
-
-        assertEquals("Oppgaven er allerede fordelt til $saksbehandler", funksjonellFeil.frontendFeilmelding)
+            assertThrows<FunksjonellFeil> {
+                oppgaveService.fordelOppgave(OPPGAVE_ID.toLong(), SAKSBEHANDLER_ID)
+            }
+        assertThat("Oppgaven er allerede fordelt til $saksbehandler").isEqualTo(funksjonellFeil.frontendFeilmelding)
     }
 
     @Test
     fun `Tilbakestill oppgave skal nullstille tildeling på oppgave`() {
+        // Arrange
         val fordelOppgaveSlot = slot<Long>()
         val finnOppgaveSlot = slot<Long>()
         every {
@@ -258,15 +265,18 @@ class OppgaveServiceTest {
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(capture(finnOppgaveSlot)) } returns Oppgave()
 
+        // Act
         oppgaveService.tilbakestillFordelingPåOppgave(OPPGAVE_ID.toLong())
 
-        assertEquals(OPPGAVE_ID.toLong(), fordelOppgaveSlot.captured)
-        assertEquals(OPPGAVE_ID.toLong(), finnOppgaveSlot.captured)
+        // Assert
+        assertThat(OPPGAVE_ID.toLong()).isEqualTo(fordelOppgaveSlot.captured)
+        assertThat(OPPGAVE_ID.toLong()).isEqualTo(finnOppgaveSlot.captured)
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 
     @Test
     fun `hent oppgavefrister for åpne utvidtet barnetrygd behandlinger`() {
+        // Arrange
         every { behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger() } returns
             listOf(
                 lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
@@ -276,12 +286,15 @@ class OppgaveServiceTest {
 
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
 
-        assertEquals(
+        // Act
+        val frister = oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
+
+        // Assert
+        assertThat(
             "behandlingId;oppgaveId;frist\n" +
                 "1002602;10018798;21.01.23\n" +
                 "1002602;10018798;21.01.23\n",
-            oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger(),
-        )
+        ).isEqualTo(frister)
     }
 
     private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling =
@@ -301,8 +314,7 @@ class OppgaveServiceTest {
         private const val FAGSAK_ID = 10000000L
         private const val BEHANDLING_ID = 20000000L
         private const val OPPGAVE_ID = "42"
-        private const val FNR = "12345678910"
-        private const val ENHETSNUMMER = "enhet"
+        private const val ENHETSNUMMER = "9999"
         private const val AKTØR_ID_FAGSAK = "1234567891000"
         private const val SAKSBEHANDLER_ID = "Z999999"
         private val FRIST_FERDIGSTILLELSE_BEH_SAK = LocalDate.now().plusDays(1)
