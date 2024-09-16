@@ -45,10 +45,16 @@ class PdlRestClient(
     fun hentPerson(
         aktør: Aktør,
         personInfoQuery: PersonInfoQuery,
+    ): PersonInfo = hentPerson(aktør.aktivFødselsnummer(), personInfoQuery)
+
+    @Cacheable("personopplysninger", cacheManager = "shortCache")
+    fun hentPerson(
+        fødselsnummer: String,
+        personInfoQuery: PersonInfoQuery,
     ): PersonInfo {
         val pdlPersonRequest =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                variables = PdlPersonRequestVariables(fødselsnummer),
                 query = personInfoQuery.graphQL,
             )
         val pdlResponse: PdlBaseResponse<PdlHentPersonResponse> =
@@ -65,7 +71,7 @@ class PdlRestClient(
             }
 
         return feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
+            ident = fødselsnummer,
             pdlResponse = pdlResponse,
         ) { pdlPerson ->
             pdlPerson.person!!.validerOmPersonKanBehandlesIFagsystem()
