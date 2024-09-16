@@ -2,10 +2,13 @@ package no.nav.familie.ba.sak.kjerne.personident
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktørIder
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService.Companion.logger
@@ -25,8 +28,8 @@ class HåndterNyIdentService(
     private val fagsakService: FagsakService,
     private val opprettTaskService: OpprettTaskService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val personopplysningerService: PersonopplysningerService,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlinghentOgPersisterService: BehandlingHentOgPersisterService,
+    private val pdlRestClient: PdlRestClient,
     private val personIdentService: PersonidentService,
 ) {
     @Transactional
@@ -69,12 +72,21 @@ class HåndterNyIdentService(
         fagsakId: Long,
         identerFraPdl: List<IdentInformasjon>,
     ): Task {
+        val aktørIder = identerFraPdl.hentAktørIder()
+        val gammelIdent =
+            persongrunnlagService
+                .hentSøkerOgBarnPåFagsak(fagsakId)
+                ?.singleOrNull { it.aktør.aktørId in aktørIder }
+                ?.aktør
+                ?.aktivFødselsnummer()
+                ?: throw Feil("Fant ikke gammel ident for aktør ${identerFraPdl.hentAktivAktørId()} på fagsak $fagsakId")
+
         val task =
             opprettTaskService.opprettTaskForÅPatcheMergetIdent(
                 PatchMergetIdentDto(
                     fagsakId = fagsakId,
-                    nyIdent = PersonIdent(identerFraPdl.first { it.gruppe == "FOLKEREGISTERIDENT" && !it.historisk }.ident),
-                    gammelIdent = PersonIdent(identerFraPdl.first { it.gruppe == "FOLKEREGISTERIDENT" && it.historisk }.ident),
+                    nyIdent = PersonIdent(identerFraPdl.hentAktivFødselsnummer()),
+                    gammelIdent = PersonIdent(gammelIdent),
                 ),
             )
         secureLogger.info("Potensielt merget ident for $identerFraPdl")
@@ -84,16 +96,14 @@ class HåndterNyIdentService(
     private fun sjekkOmManSkalMergeIdentOgRekjøreSenere(alleIdenterFraPdl: List<IdentInformasjon>) =
         alleIdenterFraPdl
             .filter { it.gruppe == Type.AKTORID.name && it.historisk }
-            .map { it.ident }
-            .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId) }
-            .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
-            .isNotEmpty()
+            .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId.ident) }
+            .any { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
 
     private fun hentAktuellFagsakId(alleIdenterFraPdl: List<IdentInformasjon>): Long? {
         val aktiveAktørerForHistoriskAktørIder =
             alleIdenterFraPdl
-                .filter { it.gruppe == Type.AKTORID.name }
-                .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it.ident) }
+                .hentAktørIder()
+                .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
                 .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
 
         val fagsakDeltagere =
@@ -105,7 +115,7 @@ class HåndterNyIdentService(
                 }
 
         if (fagsakDeltagere.mapNotNull { it.fagsakId }.distinct().size > 1) {
-            throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktiveAktørerForHistoriskAktørIder.first()}. ${Companion.LENKE_INFO_OM_MERGING}")
+            throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktiveAktørerForHistoriskAktørIder.first()}. $LENKE_INFO_OM_MERGING")
         }
 
         return fagsakDeltagere.firstOrNull()?.fagsakId
@@ -115,22 +125,21 @@ class HåndterNyIdentService(
         alleIdenterFraPdl: List<IdentInformasjon>,
         fagsakId: Long,
     ) {
-        val aktivAktørIdent = alleIdenterFraPdl.hentAktivAktørId()
-        val aktivAktør =
-            aktørIdRepository.findByAktørIdOrNull(aktivAktørIdent)
-                ?: throw Feil("Finnes ingen aktiv aktør")
+        val aktivFødselsnummer = alleIdenterFraPdl.hentAktivFødselsnummer()
+        val fødselsdatoFraPdl = pdlRestClient.hentPerson(aktivFødselsnummer, PersonInfoQuery.ENKEL).fødselsdato
 
-        val fødselsDatoFraPdl = personopplysningerService.hentPersoninfoEnkel(aktivAktør).fødselsdato
+        val forrigeBehandling =
+            behandlinghentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+                ?: return // Hvis det ikke er noen tidligere behandling kan vi patche uansett
 
-        val forrigeBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId) ?: return
-
+        val aktørIder = alleIdenterFraPdl.hentAktørIder()
         val personGrunnlag = persongrunnlagService.hentAktiv(forrigeBehandling.id)!!
         val fødselsdatoForrigeBehandling =
-            personGrunnlag.personer.singleOrNull { it.aktør.aktørId == aktivAktørIdent }?.fødselsdato
-                ?: throw Feil("Aktør $aktivAktørIdent fantes ikke i behandling $forrigeBehandling")
+            personGrunnlag.personer.singleOrNull { it.aktør.aktørId in aktørIder }?.fødselsdato
+                ?: return // Hvis aktør ikke er med i forrige behandling kan vi patche selv om fødselsdato er ulik
 
-        if (fødselsDatoFraPdl != fødselsdatoForrigeBehandling) {
-            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt. ${Companion.LENKE_INFO_OM_MERGING}")
+        if (fødselsdatoFraPdl != fødselsdatoForrigeBehandling) {
+            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt. $LENKE_INFO_OM_MERGING")
         }
     }
 
