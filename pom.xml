@@ -36,7 +36,7 @@
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
         <sentry.version>7.14.0</sentry.version>
-        <kotlinx.version>1.8.1</kotlinx.version>
+        <kotlinx.version>1.9.0</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
