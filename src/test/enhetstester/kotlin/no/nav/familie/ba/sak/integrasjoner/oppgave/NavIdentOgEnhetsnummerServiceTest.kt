@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandl
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
