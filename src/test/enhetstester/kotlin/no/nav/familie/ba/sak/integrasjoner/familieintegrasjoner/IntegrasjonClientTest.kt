@@ -32,8 +32,8 @@ class IntegrasjonClientTest {
 
         every {
             mockedRestOperations.exchange<Ressurs<List<Enhet>>>(
-                eq(URI("$baseUri/enhet/$navIdent")),
-                eq(HttpMethod.GET),
+                eq(URI("$baseUri/axsys/enheter")),
+                eq(HttpMethod.POST),
                 any(),
             )
         } returns

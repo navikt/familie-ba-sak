@@ -234,13 +234,13 @@ class IntegrasjonClient(
     }
 
     fun hentEnheterSomNavIdentHarTilgangTil(navIdent: String): List<Enhet> {
-        val uri = URI.create("$integrasjonUri/enhet/$navIdent")
+        val uri = URI.create("$integrasjonUri/axsys/enheter")
         return kallEksternTjenesteRessurs(
-            tjeneste = "axsys/noe-annet", // TODO: Finn ut hvilken tjeneste vi skal gå mot.
+            tjeneste = "enhetstilganger",
             uri = uri,
             formål = "Hent enheter en NAV-ident har tilgang til",
         ) {
-            getForEntity(uri)
+            postForEntity(uri, mapOf("ident" to navIdent))
         }
     }
 
