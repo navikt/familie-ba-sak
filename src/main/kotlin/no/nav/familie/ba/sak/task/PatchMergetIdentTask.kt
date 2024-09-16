@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -10,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -32,6 +34,8 @@ class PatchMergetIdentTask(
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val aktørIdRepository: AktørIdRepository,
     private val personidentRepository: PersonidentRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, PatchMergetIdentDto::class.java)
@@ -81,6 +85,11 @@ class PatchMergetIdentTask(
                 mergeTidspunkt = LocalDateTime.now(),
             ),
         )
+
+        val åpenBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = dto.fagsakId)
+        if (åpenBehandling != null) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(åpenBehandling)
+        }
     }
 
     companion object {

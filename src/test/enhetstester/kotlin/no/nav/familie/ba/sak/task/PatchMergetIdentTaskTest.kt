@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLogg
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørMergeLoggRepository
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
@@ -35,6 +37,8 @@ class PatchMergetIdentTaskTest {
     private val aktørIdRepository = mockk<AktørIdRepository>(relaxed = true)
     private val aktørMergeLoggRepository = mockk<AktørMergeLoggRepository>(relaxed = true)
     private val personidentRepository = mockk<PersonidentRepository>()
+    private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
 
     private val task =
         PatchMergetIdentTask(
@@ -44,6 +48,8 @@ class PatchMergetIdentTaskTest {
             aktørIdRepository = aktørIdRepository,
             aktørMergeLoggRepository = aktørMergeLoggRepository,
             personidentRepository = personidentRepository,
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
     private val gammelAktør = tilAktør(randomFnr())
@@ -80,6 +86,7 @@ class PatchMergetIdentTaskTest {
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns null
 
         task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
@@ -171,6 +178,7 @@ class PatchMergetIdentTaskTest {
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns null
 
         task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
@@ -206,6 +214,7 @@ class PatchMergetIdentTaskTest {
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns null
         val aktørMergeLoggSlot = slot<AktørMergeLogg>()
         every { aktørMergeLoggRepository.save(capture(aktørMergeLoggSlot)) } answers { aktørMergeLoggSlot.captured }
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns null
 
         task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE))
 
