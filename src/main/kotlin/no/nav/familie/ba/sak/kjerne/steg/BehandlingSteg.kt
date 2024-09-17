@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -424,16 +425,6 @@ private fun hentStegEtterBehandlingsresultatForOmregning(endringerIUtbetaling: E
         EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> throw Feil("Det finnes endringer i utbetaling for behandling med omregningsårsak.")
         EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
-
-enum class BehandlerRolle(
-    val nivå: Int,
-) {
-    SYSTEM(4),
-    BESLUTTER(3),
-    SAKSBEHANDLER(2),
-    VEILEDER(1),
-    UKJENT(0),
-}
 
 enum class BehandlingStegStatus(
     val navn: String,

@@ -4,13 +4,13 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.springframework.stereotype.Service
 
@@ -34,7 +34,19 @@ class TilgangService(
         minimumBehandlerRolle: BehandlerRolle,
         handling: String,
     ) {
+        // Hvis minimumBehandlerRolle er forvalter, må innlogget bruker ha FORVALTER rolle
+        if (minimumBehandlerRolle == BehandlerRolle.FORVALTER &&
+            !SikkerhetContext.harInnloggetBrukerForvalterRolle(rolleConfig)
+        ) {
+            throw RolleTilgangskontrollFeil(
+                melding =
+                    "${SikkerhetContext.hentSaksbehandlerNavn()} " +
+                        "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle",
+            )
+        }
+
         val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw RolleTilgangskontrollFeil(
                 melding =
