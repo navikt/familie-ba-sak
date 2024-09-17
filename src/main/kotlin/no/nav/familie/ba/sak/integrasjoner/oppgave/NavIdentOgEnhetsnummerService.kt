@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import org.springframework.stereotype.Service
 
 private const val MIDLERTIDIG_ENHET_4863 = "4863"
-private const val VIKAFOSSEN_ENHET_2103 = "2103"
+private const val VIKAFOSSEN_ENHET_2103_ID = "2103"
+private const val VIKAFOSSEN_ENHET_2103_NAVN = "NAV Vikafossen"
 
 @Service
 class NavIdentOgEnhetsnummerService(
@@ -17,82 +19,85 @@ class NavIdentOgEnhetsnummerService(
     fun hentNavIdentOgEnhetsnummer(
         behandlingId: Long,
         navIdent: String?,
-    ): NavIdentOgEnhetsnummer {
-        val behandlendeEnhetId =
+    ): NavIdentOgEnhet {
+        val behandlendeEnhet =
             arbeidsfordelingPåBehandlingRepository
                 .hentArbeidsfordelingPåBehandling(behandlingId)
-                .behandlendeEnhetId
-        return when (behandlendeEnhetId) {
+        return when (behandlendeEnhet.behandlendeEnhetId) {
             MIDLERTIDIG_ENHET_4863 -> håndterMidlertidigEnhet4863(navIdent)
-            VIKAFOSSEN_ENHET_2103 -> håndterVikafossenEnhet2103(navIdent)
-            else -> håndterAndreEnheter(navIdent, behandlendeEnhetId)
+            VIKAFOSSEN_ENHET_2103_ID -> håndterVikafossenEnhet2103(navIdent)
+            else -> håndterAndreEnheter(navIdent, behandlendeEnhet)
         }
     }
 
     private fun håndterMidlertidigEnhet4863(
         navIdent: String?,
-    ): NavIdentOgEnhetsnummer {
+    ): NavIdentOgEnhet {
         if (navIdent == null) {
             throw Feil("Kan ikke sette midlertidig enhet 4863 om man mangler NAV-ident")
         }
-        val enhetsnummerSaksbehandlerHarTilgangTil =
+        val enheterNavIdentHarTilgangTil =
             integrasjonClient
                 .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .map { it.enhetsnummer }
-                .filter { it != MIDLERTIDIG_ENHET_4863 }
-                .filter { it != VIKAFOSSEN_ENHET_2103 }
-        if (enhetsnummerSaksbehandlerHarTilgangTil.isEmpty()) {
+                .filter { it.enhetsnummer != MIDLERTIDIG_ENHET_4863 }
+                .filter { it.enhetsnummer != VIKAFOSSEN_ENHET_2103_ID }
+        if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for nav-ident $navIdent")
         }
         // Velger bare det første enhetsnummeret i tilfeller hvor man har flere, avklart med fag
-        return NavIdentOgEnhetsnummer(navIdent, enhetsnummerSaksbehandlerHarTilgangTil.first())
+        val nyBehandlendeEnhet = enheterNavIdentHarTilgangTil.first()
+        return NavIdentOgEnhet(navIdent, nyBehandlendeEnhet.enhetsnummer, nyBehandlendeEnhet.enhetsnavn)
     }
 
     private fun håndterVikafossenEnhet2103(
         navIdent: String?,
-    ): NavIdentOgEnhetsnummer {
+    ): NavIdentOgEnhet {
         if (navIdent == null) {
             throw Feil("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
         }
-        val harTilgangTilVikafossenEnhet2103 =
+        val enheterNavIdentHarTilgangTil =
             integrasjonClient
                 .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .any { it.enhetsnummer == VIKAFOSSEN_ENHET_2103 }
+                .filter { it.enhetsnummer != MIDLERTIDIG_ENHET_4863 }
+        val harTilgangTilVikafossenEnhet2103 =
+            enheterNavIdentHarTilgangTil
+                .any { it.enhetsnummer == VIKAFOSSEN_ENHET_2103_ID }
         if (!harTilgangTilVikafossenEnhet2103) {
-            return NavIdentOgEnhetsnummer(null, VIKAFOSSEN_ENHET_2103)
+            return NavIdentOgEnhet(null, VIKAFOSSEN_ENHET_2103_ID, VIKAFOSSEN_ENHET_2103_NAVN)
         }
-        return NavIdentOgEnhetsnummer(navIdent, VIKAFOSSEN_ENHET_2103)
+        return NavIdentOgEnhet(navIdent, VIKAFOSSEN_ENHET_2103_ID, VIKAFOSSEN_ENHET_2103_NAVN)
     }
 
     private fun håndterAndreEnheter(
         navIdent: String?,
-        behandlendeEnhetId: String,
-    ): NavIdentOgEnhetsnummer {
+        arbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling,
+    ): NavIdentOgEnhet {
         if (navIdent == null) {
             // navIdent er null ved automatisk journalføring
-            return NavIdentOgEnhetsnummer(null, behandlendeEnhetId)
+            return NavIdentOgEnhet(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
         }
-        val enheterNavIdentHarTilgangerTil =
+        val enheterNavIdentHarTilgangTil =
             integrasjonClient
                 .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .map { it.enhetsnummer }
-                .filter { it != MIDLERTIDIG_ENHET_4863 }
-                .filter { it != VIKAFOSSEN_ENHET_2103 }
-        if (enheterNavIdentHarTilgangerTil.isEmpty()) {
+                .filter { it.enhetsnummer != MIDLERTIDIG_ENHET_4863 }
+                .filter { it.enhetsnummer != VIKAFOSSEN_ENHET_2103_ID }
+        if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for NAV-ident $navIdent")
         }
-        val harTilgangTilBehandledeEnhet = enheterNavIdentHarTilgangerTil.contains(behandlendeEnhetId)
+        val harTilgangTilBehandledeEnhet = enheterNavIdentHarTilgangTil.any { it.enhetsnummer == arbeidsfordelingPåBehandling.behandlendeEnhetId }
         if (!harTilgangTilBehandledeEnhet) {
             // Velger bare det første enhetsnummeret i tilfeller hvor man har flere, avklart med fag
-            return NavIdentOgEnhetsnummer(navIdent, enheterNavIdentHarTilgangerTil.first())
+            val nyBehandlendeEnhet = enheterNavIdentHarTilgangTil.first()
+            return NavIdentOgEnhet(navIdent, nyBehandlendeEnhet.enhetsnummer, nyBehandlendeEnhet.enhetsnavn)
         }
-        return NavIdentOgEnhetsnummer(navIdent, behandlendeEnhetId)
+        return NavIdentOgEnhet(navIdent, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
     }
 }
 
-data class NavIdentOgEnhetsnummer(
+data class NavIdentOgEnhet(
     val navIdent: String?,
     val enhetsnummer: String,
+    val enhetsnavn: String,
 ) {
     init {
         if (enhetsnummer.length != 4) {

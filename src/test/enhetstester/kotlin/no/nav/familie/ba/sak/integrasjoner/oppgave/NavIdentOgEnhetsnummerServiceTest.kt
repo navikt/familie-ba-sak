@@ -433,7 +433,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Act & assert
             val exception =
                 assertThrows<IllegalArgumentException> {
-                    NavIdentOgEnhetsnummer(null, "123")
+                    NavIdentOgEnhet(null, "123")
                 }
             assertThat(exception.message).isEqualTo("Enhetsnummer må være 4 siffer")
         }
@@ -443,7 +443,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Act & assert
             val exception =
                 assertThrows<IllegalArgumentException> {
-                    NavIdentOgEnhetsnummer(null, "12345")
+                    NavIdentOgEnhet(null, "12345")
                 }
             assertThat(exception.message).isEqualTo("Enhetsnummer må være 4 siffer")
         }

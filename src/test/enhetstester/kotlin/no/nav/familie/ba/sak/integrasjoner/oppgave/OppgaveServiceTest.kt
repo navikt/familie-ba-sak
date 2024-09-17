@@ -94,7 +94,7 @@ class OppgaveServiceTest {
 
         every {
             navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(BEHANDLING_ID, null)
-        } returns NavIdentOgEnhetsnummer(null, ENHETSNUMMER)
+        } returns NavIdentOgEnhet(null, ENHETSNUMMER)
 
         // Act
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
@@ -150,7 +150,7 @@ class OppgaveServiceTest {
 
         every {
             navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(BEHANDLING_ID, null)
-        } returns NavIdentOgEnhetsnummer(null, ENHETSNUMMER)
+        } returns NavIdentOgEnhet(null, ENHETSNUMMER)
 
         // Act
         oppgaveService.opprettOppgave(
