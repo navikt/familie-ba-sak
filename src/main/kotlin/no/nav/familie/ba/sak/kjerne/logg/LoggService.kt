@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilddMMyyyy
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -20,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
@@ -420,8 +420,7 @@ class LoggService(
             Logg(
                 behandling.id,
                 type = LoggType.BEHANDLING_SATT_PÅ_MASKINELL_VENT,
-                // TODO FORVALTER_ROLLE
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.FORVALTER),
                 tekst = "Årsak: $årsak",
             )
         lagre(logg)
@@ -432,8 +431,7 @@ class LoggService(
             Logg(
                 behandling.id,
                 type = LoggType.BEHANDLING_TATT_AV_MASKINELL_VENT,
-                // TODO FORVALTER_ROLLE
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.FORVALTER),
             )
         lagre(logg)
     }
