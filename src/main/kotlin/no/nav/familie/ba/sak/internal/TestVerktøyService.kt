@@ -58,7 +58,11 @@ class TestVerktøyService(
                             Vilkår.GIFT_PARTNERSKAP,
                             -> person?.fødselsdato
 
-                            else -> fraDato ?: person?.fødselsdato
+                            Vilkår.BOR_MED_SØKER,
+                            Vilkår.BOSATT_I_RIKET,
+                            Vilkår.LOVLIG_OPPHOLD,
+                            Vilkår.UTVIDET_BARNETRYGD,
+                            -> fraDato ?: person?.fødselsdato
                         }
                     vilkårResultat.resultat = Resultat.OPPFYLT
                     vilkårResultat.begrunnelse = "Opprettet automatisk fra \"Fyll ut vilkårsvurdering\"-knappen"
