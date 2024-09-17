@@ -34,7 +34,19 @@ class TilgangService(
         minimumBehandlerRolle: BehandlerRolle,
         handling: String,
     ) {
+        // Hvis minimumBehandlerRolle er forvalter, må innlogget bruker ha FORVALTER rolle
+        if (minimumBehandlerRolle == BehandlerRolle.FORVALTER &&
+            !SikkerhetContext.harInnloggetBrukerForvalterRolle(rolleConfig)
+        ) {
+            throw RolleTilgangskontrollFeil(
+                melding =
+                    "${SikkerhetContext.hentSaksbehandlerNavn()} " +
+                        "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle",
+            )
+        }
+
         val høyesteRolletilgang = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+
         if (minimumBehandlerRolle.nivå > høyesteRolletilgang.nivå) {
             throw RolleTilgangskontrollFeil(
                 melding =

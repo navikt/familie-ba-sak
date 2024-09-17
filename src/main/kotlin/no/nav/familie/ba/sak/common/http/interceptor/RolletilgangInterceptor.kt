@@ -21,8 +21,10 @@ class RolletilgangInterceptor(
         handler: Any,
     ): Boolean =
         SikkerhetContext
-            .hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.VEILEDER)
-            .takeIf { it != BehandlerRolle.UKJENT }
+            .hentRolletilgangFraSikkerhetscontext(
+                rolleConfig = rolleConfig,
+                lavesteSikkerhetsnivå = BehandlerRolle.VEILEDER,
+            ).takeIf { it != BehandlerRolle.UKJENT }
             ?.let { super.preHandle(request, response, handler) }
             ?: run {
                 logger.info("Bruker ${SikkerhetContext.hentSaksbehandler()} har ikke tilgang.")
