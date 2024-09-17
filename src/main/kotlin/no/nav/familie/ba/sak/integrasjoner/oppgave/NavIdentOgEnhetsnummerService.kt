@@ -2,14 +2,13 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.VIKAFOSSEN_ENHET_2103_NAVN
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import org.springframework.stereotype.Service
-
-private const val MIDLERTIDIG_ENHET_4863 = "4863"
-private const val VIKAFOSSEN_ENHET_2103_ID = "2103"
-private const val VIKAFOSSEN_ENHET_2103_NAVN = "NAV Vikafossen"
 
 @Service
 class NavIdentOgEnhetsnummerService(
@@ -24,8 +23,8 @@ class NavIdentOgEnhetsnummerService(
             arbeidsfordelingPåBehandlingRepository
                 .hentArbeidsfordelingPåBehandling(behandlingId)
         return when (behandlendeEnhet.behandlendeEnhetId) {
-            MIDLERTIDIG_ENHET_4863 -> håndterMidlertidigEnhet4863(navIdent)
-            VIKAFOSSEN_ENHET_2103_ID -> håndterVikafossenEnhet2103(navIdent)
+            BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer -> håndterMidlertidigEnhet4863(navIdent)
+            BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer -> håndterVikafossenEnhet2103(navIdent)
             else -> håndterAndreEnheter(navIdent, behandlendeEnhet)
         }
     }
@@ -39,8 +38,8 @@ class NavIdentOgEnhetsnummerService(
         val enheterNavIdentHarTilgangTil =
             integrasjonClient
                 .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .filter { it.enhetsnummer != MIDLERTIDIG_ENHET_4863 }
-                .filter { it.enhetsnummer != VIKAFOSSEN_ENHET_2103_ID }
+                .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
+                .filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for nav-ident $navIdent")
         }
@@ -55,17 +54,15 @@ class NavIdentOgEnhetsnummerService(
         if (navIdent == null) {
             throw Feil("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
         }
-        val enheterNavIdentHarTilgangTil =
+        val harTilgangTilVikafossenEnhet2103 =
             integrasjonClient
                 .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .filter { it.enhetsnummer != MIDLERTIDIG_ENHET_4863 }
-        val harTilgangTilVikafossenEnhet2103 =
-            enheterNavIdentHarTilgangTil
-                .any { it.enhetsnummer == VIKAFOSSEN_ENHET_2103_ID }
+                .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
+                .any { it.enhetsnummer == BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (!harTilgangTilVikafossenEnhet2103) {
-            return NavIdentOgEnhet(null, VIKAFOSSEN_ENHET_2103_ID, VIKAFOSSEN_ENHET_2103_NAVN)
+            return NavIdentOgEnhet(null, BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, VIKAFOSSEN_ENHET_2103_NAVN)
         }
-        return NavIdentOgEnhet(navIdent, VIKAFOSSEN_ENHET_2103_ID, VIKAFOSSEN_ENHET_2103_NAVN)
+        return NavIdentOgEnhet(navIdent, BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, VIKAFOSSEN_ENHET_2103_NAVN)
     }
 
     private fun håndterAndreEnheter(
@@ -79,8 +76,8 @@ class NavIdentOgEnhetsnummerService(
         val enheterNavIdentHarTilgangTil =
             integrasjonClient
                 .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .filter { it.enhetsnummer != MIDLERTIDIG_ENHET_4863 }
-                .filter { it.enhetsnummer != VIKAFOSSEN_ENHET_2103_ID }
+                .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
+                .filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for NAV-ident $navIdent")
         }
