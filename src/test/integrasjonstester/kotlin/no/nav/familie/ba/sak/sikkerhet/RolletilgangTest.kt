@@ -156,4 +156,70 @@ class RolletilgangTest(
             ressurs.melding,
         )
     }
+
+    @Test
+    fun `Skal kaste feil når innlogget saksbehandler prøver å kalle på et forvalterendepunkt`() {
+        val header = HttpHeaders()
+        header.contentType = MediaType.APPLICATION_JSON
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("SAKSBEHANDLER"),
+                    "name" to "Mock McMockface",
+                    "NAVident" to "Z0000",
+                ),
+            ),
+        )
+        val requestEntity =
+            HttpEntity<String>(
+                objectMapper.writeValueAsString(
+                    listOf(1L, 2L),
+                ),
+                header,
+            )
+
+        val error =
+            assertThrows<HttpClientErrorException> {
+                restTemplate.postForEntity<Ressurs<Fagsak>>(
+                    hentUrl("/api/forvalter/ferdigstill-oppgaver"),
+                    requestEntity,
+                )
+            }
+
+        val ressurs: Ressurs<Fagsak> = objectMapper.readValue(error.responseBodyAsString)
+
+        assertEquals(HttpStatus.FORBIDDEN, error.statusCode)
+        assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
+        assertEquals(
+            "Mock McMockface har ikke tilgang til å Ferdigstill liste med oppgaver. Krever FORVALTER",
+            ressurs.melding,
+        )
+    }
+
+    @Test
+    fun `Skal få 200 OK når innlogget forvalter prøver å kalle på et forvalterendepunkt`() {
+        val header = HttpHeaders()
+        header.contentType = MediaType.APPLICATION_JSON
+        header.setBearerAuth(
+            token(
+                mapOf(
+                    "groups" to listOf("FORVALTER"),
+                    "azp" to "azp-test",
+                    "name" to "Mock McMockface Forvalter",
+                    "NAVident" to "Z0000",
+                ),
+            ),
+        )
+        val requestEntity =
+            HttpEntity<String>(
+                objectMapper.writeValueAsString(
+                    emptyList<Long>(),
+                ),
+                header,
+            )
+
+        val response = restTemplate.postForEntity<Ressurs<Any>>(hentUrl("/api/forvalter/kjor-satsendring-uten-validering"), requestEntity)
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+    }
 }

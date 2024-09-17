@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate
         "rolle.veileder: VEILDER",
         "rolle.saksbehandler: SAKSBEHANDLER",
         "rolle.beslutter: BESLUTTER",
+        "rolle.forvalter: FORVALTER",
     ],
 )
 @ExtendWith(SpringExtension::class)
