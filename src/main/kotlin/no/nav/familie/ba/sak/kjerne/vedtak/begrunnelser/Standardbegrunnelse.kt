@@ -989,6 +989,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagEnsligMindreaarigFlyktning"
     },
+    AVSLAG_ENSLIG_MINDREÅRIG_BOR_MED_OMSORGSPERSON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagEnsligMindreaarigBorMedOmsorgsperson"
+    },
     AVSLAG_IKKE_DELT_FORELDRENE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeDeltForeldreneBorSammen"
