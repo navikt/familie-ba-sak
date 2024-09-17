@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSiste
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -46,7 +47,14 @@ class AutomatiskOppdaterValutakursService(
     private val simuleringService: SimuleringService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
     private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val tilpassDifferanseberegningEtterValutakursService: TilpassDifferanseberegningEtterValutakursService,
 ) {
+    @Transactional
+    fun oppdaterAndelerMedValutakurser(behandlingId: BehandlingId) {
+        val valutakurser = valutakursService.hentValutakurser(behandlingId)
+        tilpassDifferanseberegningEtterValutakursService.skjemaerEndret(behandlingId, valutakurser)
+    }
+
     @Transactional
     fun resettValutakurserOgLagValutakurserEtterEndringstidspunkt(
         behandlingId: BehandlingId,
