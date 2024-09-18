@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -42,6 +44,7 @@ class OppgaveService(
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val navIdentOgEnhetService: NavIdentOgEnhetService,
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -68,11 +71,16 @@ class OppgaveService(
 
             eksisterendeOppgave.gsakId
         } else {
-            val navIdentOgEnhetsnummer =
+            val arbeidsfordelingPåBehandling =
+                arbeidsfordelingPåBehandlingRepository
+                    .hentArbeidsfordelingPåBehandling(behandlingId)
+
+            val navIdentOgEnhet =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = tilordnetNavIdent?.let { NavIdent(it) },
                 )
+
             val opprettOppgave =
                 OpprettOppgaveRequest(
                     ident = OppgaveIdentV2(ident = behandling.fagsak.aktør.aktørId, gruppe = IdentGruppe.AKTOERID),
@@ -81,10 +89,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = navIdentOgEnhetsnummer.enhetsnummer,
+                    enhetsnummer = navIdentOgEnhet.enhetsnummer,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = navIdentOgEnhetsnummer.navIdent?.ident,
+                    tilordnetRessurs = navIdentOgEnhet.navIdent?.ident,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
@@ -98,6 +106,18 @@ class OppgaveService(
             oppgaveRepository.save(oppgave)
 
             økTellerForAntallOppgaveTyper(oppgavetype)
+
+            val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != navIdentOgEnhet.enhetsnummer
+
+            if (erEnhetsnummerEndret) {
+                arbeidsfordelingPåBehandlingRepository.save(
+                    arbeidsfordelingPåBehandling.copy(
+                        behandlendeEnhetId = navIdentOgEnhet.enhetsnummer,
+                        behandlendeEnhetNavn = navIdentOgEnhet.enhetsnavn,
+                        manueltOverstyrt = false,
+                    ),
+                )
+            }
 
             opprettetOppgaveId
         }

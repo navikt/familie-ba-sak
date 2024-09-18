@@ -7,8 +7,6 @@ import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandl
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.kontrakter.felles.NavIdent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -16,13 +14,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class NavIdentOgEnhetServiceTest {
-    private val mockedArbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository = mockk()
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
-    private val navIdentOgEnhetService: NavIdentOgEnhetService =
-        NavIdentOgEnhetService(
-            arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
-            integrasjonClient = mockedIntegrasjonClient,
-        )
+    private val navIdentOgEnhetService: NavIdentOgEnhetService = NavIdentOgEnhetService(integrasjonClient = mockedIntegrasjonClient)
 
     @Nested
     inner class HentNavIdentOgEnhetTest {
@@ -31,11 +24,7 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
@@ -45,7 +34,7 @@ class NavIdentOgEnhetServiceTest {
             val exception =
                 assertThrows<Feil> {
                     navIdentOgEnhetService.hentNavIdentOgEnhet(
-                        behandlingId = behandlingId,
+                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = null,
                     )
                 }
@@ -57,14 +46,11 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = NavIdent("1")
+
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer
             val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
@@ -88,7 +74,7 @@ class NavIdentOgEnhetServiceTest {
             val exception =
                 assertThrows<Feil> {
                     navIdentOgEnhetService.hentNavIdentOgEnhet(
-                        behandlingId = behandlingId,
+                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = navIdent,
                     )
                 }
@@ -100,14 +86,11 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = NavIdent("1")
+
             val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
             val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
@@ -136,7 +119,7 @@ class NavIdentOgEnhetServiceTest {
             // Act
             val navIdentOgEnhetsnummer =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
@@ -150,11 +133,7 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
@@ -164,7 +143,7 @@ class NavIdentOgEnhetServiceTest {
             val exception =
                 assertThrows<Feil> {
                     navIdentOgEnhetService.hentNavIdentOgEnhet(
-                        behandlingId = behandlingId,
+                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = null,
                     )
                 }
@@ -176,14 +155,11 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = NavIdent("1")
+
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.STEINKJER.enhetsnummer
             val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSØ.enhetsnummer
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
@@ -206,7 +182,7 @@ class NavIdentOgEnhetServiceTest {
             // Act
             val navIdentOgEnhetsnummer =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
@@ -221,11 +197,7 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
@@ -248,7 +220,7 @@ class NavIdentOgEnhetServiceTest {
             // Act
             val navIdentOgEnhetsnummer =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
@@ -262,11 +234,7 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = "1234",
@@ -275,7 +243,7 @@ class NavIdentOgEnhetServiceTest {
             // Act
             val navIdentOgEnhetsnummer =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = null,
                 )
 
@@ -290,11 +258,7 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = "1234",
@@ -318,7 +282,7 @@ class NavIdentOgEnhetServiceTest {
             val exception =
                 assertThrows<Feil> {
                     navIdentOgEnhetService.hentNavIdentOgEnhet(
-                        behandlingId = behandlingId,
+                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = navIdent,
                     )
                 }
@@ -330,18 +294,14 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = NavIdent("1")
-            val arbeidsfordelingEnhet = "1234"
+
             val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
             val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = arbeidsfordelingEnhet,
+                    behandlendeEnhetId = BarnetrygdEnhet.STEINKJER.enhetsnummer,
                 )
 
             every {
@@ -367,7 +327,7 @@ class NavIdentOgEnhetServiceTest {
             // Act
             val navIdentOgEnhetsnummer =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
@@ -381,13 +341,10 @@ class NavIdentOgEnhetServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = NavIdent("1")
+
             val arbeidsfordelingEnhet = BarnetrygdEnhet.OSLO.enhetsnummer
 
-            every {
-                mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
-                    behandlingId = behandlingId,
-                )
-            } returns
+            val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = arbeidsfordelingEnhet,
@@ -413,7 +370,7 @@ class NavIdentOgEnhetServiceTest {
             // Act
             val navIdentOgEnhetsnummer =
                 navIdentOgEnhetService.hentNavIdentOgEnhet(
-                    behandlingId = behandlingId,
+                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 

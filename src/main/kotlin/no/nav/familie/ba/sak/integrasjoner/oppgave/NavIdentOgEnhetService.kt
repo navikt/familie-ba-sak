@@ -6,29 +6,22 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.VIKAFOSSEN_ENHET_2103_NAVN
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.kontrakter.felles.NavIdent
 import org.springframework.stereotype.Service
 
 @Service
 class NavIdentOgEnhetService(
-    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val integrasjonClient: IntegrasjonClient,
 ) {
     fun hentNavIdentOgEnhet(
-        behandlingId: Long,
+        arbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling,
         navIdent: NavIdent?,
-    ): NavIdentOgEnhet {
-        val behandlendeEnhet =
-            arbeidsfordelingPåBehandlingRepository
-                .hentArbeidsfordelingPåBehandling(behandlingId)
-        return when (behandlendeEnhet.behandlendeEnhetId) {
+    ): NavIdentOgEnhet =
+        when (arbeidsfordelingPåBehandling.behandlendeEnhetId) {
             BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer -> håndterMidlertidigEnhet4863(navIdent)
             BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer -> håndterVikafossenEnhet2103(navIdent)
-            else -> håndterAndreEnheter(navIdent, behandlendeEnhet)
+            else -> håndterAndreEnheter(navIdent, arbeidsfordelingPåBehandling)
         }
-    }
 
     private fun håndterMidlertidigEnhet4863(
         navIdent: NavIdent?,
