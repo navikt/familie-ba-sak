@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
+import no.nav.familie.kontrakter.felles.NavIdent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -55,7 +56,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal kaste feil om arbeidsfordeling returnerer midlertidig enhet 4863 og NAV-ident ikke har tilgang til noen andre enheter enn 4863 og 2103`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer
             val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
 
@@ -98,7 +99,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal returnere NAV-ident og første enhetsnummer som NAV-identen har tilgang til når arbeidsfordeling returnerer midlertidig enhet 4863`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
             val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
             val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
 
@@ -174,7 +175,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal returnere Vikafossen 2103 uten NAV-ident om arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident ikke har tilgang til Vikafossen 2103`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.STEINKJER.enhetsnummer
             val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSØ.enhetsnummer
 
@@ -218,7 +219,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal returnere Vikafossen 2103 med NAV-ident om arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident har tilgang til Vikafossen 2103`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -287,7 +288,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal kaste feil om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident ikke har tilgang til noen enheter`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -328,7 +329,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal returnere NAV-ident og første enhet NAV-ident har tilgang om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident ikke har tilgang arbeidsfordeling enheten`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
             val arbeidsfordelingEnhet = "1234"
             val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
             val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
@@ -379,7 +380,7 @@ class NavIdentOgEnhetServiceTest {
         fun `skal returnere NAV-ident og arbeidsfordeling enhetsnummer om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident har tilgang arbeidsfordeling enheten`() {
             // Arrange
             val behandlingId = 1L
-            val navIdent = "1"
+            val navIdent = NavIdent("1")
             val arbeidsfordelingEnhet = BarnetrygdEnhet.OSLO.enhetsnummer
 
             every {

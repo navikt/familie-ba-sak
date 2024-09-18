@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
@@ -29,6 +30,7 @@ import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
 import no.nav.familie.kontrakter.felles.enhet.Enhet
+import no.nav.familie.kontrakter.felles.enhet.HentEnheterNavIdentHarTilgangTilRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -233,14 +235,14 @@ class IntegrasjonClient(
         }
     }
 
-    fun hentEnheterSomNavIdentHarTilgangTil(navIdent: String): List<Enhet> {
-        val uri = URI.create("$integrasjonUri/axsys/enheter")
+    fun hentEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<Enhet> {
+        val uri = URI.create("$integrasjonUri/enhetstilganger")
         return kallEksternTjenesteRessurs(
             tjeneste = "enhetstilganger",
             uri = uri,
             formål = "Hent enheter en NAV-ident har tilgang til",
         ) {
-            postForEntity(uri, mapOf("ident" to navIdent))
+            postForEntity(uri, HentEnheterNavIdentHarTilgangTilRequest(navIdent, Tema.BAR))
         }
     }
 

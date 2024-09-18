@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.e
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
+import no.nav.familie.kontrakter.felles.NavIdent
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,7 +18,7 @@ class NavIdentOgEnhetService(
 ) {
     fun hentNavIdentOgEnhet(
         behandlingId: Long,
-        navIdent: String?,
+        navIdent: NavIdent?,
     ): NavIdentOgEnhet {
         val behandlendeEnhet =
             arbeidsfordelingPåBehandlingRepository
@@ -30,7 +31,7 @@ class NavIdentOgEnhetService(
     }
 
     private fun håndterMidlertidigEnhet4863(
-        navIdent: String?,
+        navIdent: NavIdent?,
     ): NavIdentOgEnhet {
         if (navIdent == null) {
             throw Feil("Kan ikke sette midlertidig enhet 4863 om man mangler NAV-ident")
@@ -49,7 +50,7 @@ class NavIdentOgEnhetService(
     }
 
     private fun håndterVikafossenEnhet2103(
-        navIdent: String?,
+        navIdent: NavIdent?,
     ): NavIdentOgEnhet {
         if (navIdent == null) {
             throw Feil("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
@@ -66,7 +67,7 @@ class NavIdentOgEnhetService(
     }
 
     private fun håndterAndreEnheter(
-        navIdent: String?,
+        navIdent: NavIdent?,
         arbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling,
     ): NavIdentOgEnhet {
         if (navIdent == null) {
@@ -92,7 +93,7 @@ class NavIdentOgEnhetService(
 }
 
 data class NavIdentOgEnhet(
-    val navIdent: String?,
+    val navIdent: NavIdent?,
     val enhetsnummer: String,
     val enhetsnavn: String,
 ) {
