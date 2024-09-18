@@ -11,11 +11,11 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordeling
 import org.springframework.stereotype.Service
 
 @Service
-class NavIdentOgEnhetsnummerService(
+class NavIdentOgEnhetService(
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val integrasjonClient: IntegrasjonClient,
 ) {
-    fun hentNavIdentOgEnhetsnummer(
+    fun hentNavIdentOgEnhet(
         behandlingId: Long,
         navIdent: String?,
     ): NavIdentOgEnhet {

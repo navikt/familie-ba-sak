@@ -40,7 +40,7 @@ class OppgaveService(
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val navIdentOgEnhetsnummerService: NavIdentOgEnhetsnummerService,
+    private val navIdentOgEnhetService: NavIdentOgEnhetService,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -68,7 +68,7 @@ class OppgaveService(
             eksisterendeOppgave.gsakId
         } else {
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = tilordnetNavIdent,
                 )

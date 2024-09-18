@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import org.assertj.core.api.Assertions.assertThat
@@ -13,20 +14,17 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-private const val MIDLERTIDIG_ENHET_4863 = "4863"
-private const val VIKAFOSSEN_ENHET_2103 = "2103"
-
-class NavIdentOgEnhetsnummerServiceTest {
+class NavIdentOgEnhetServiceTest {
     private val mockedArbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository = mockk()
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
-    private val navIdentOgEnhetsnummerService: NavIdentOgEnhetsnummerService =
-        NavIdentOgEnhetsnummerService(
+    private val navIdentOgEnhetService: NavIdentOgEnhetService =
+        NavIdentOgEnhetService(
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
             integrasjonClient = mockedIntegrasjonClient,
         )
 
     @Nested
-    inner class HentNavIdentOgEnhetsnummerTest {
+    inner class HentNavIdentOgEnhetTest {
         @Test
         fun `skal kaste feil om arbeidsfordeling returnerer midlertidig enhet 4863 og NAV-ident er null`() {
             // Arrange
@@ -39,13 +37,13 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = MIDLERTIDIG_ENHET_4863,
+                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                    navIdentOgEnhetService.hentNavIdentOgEnhet(
                         behandlingId = behandlingId,
                         navIdent = null,
                     )
@@ -58,8 +56,8 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = "1"
-            val enhetNavIdentHarTilgangTil1 = MIDLERTIDIG_ENHET_4863
-            val enhetNavIdentHarTilgangTil2 = VIKAFOSSEN_ENHET_2103
+            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -68,7 +66,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = MIDLERTIDIG_ENHET_4863,
+                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                 )
 
             every {
@@ -88,7 +86,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                    navIdentOgEnhetService.hentNavIdentOgEnhet(
                         behandlingId = behandlingId,
                         navIdent = navIdent,
                     )
@@ -101,10 +99,8 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = "1"
-            val enhetNavIdentHarTilgangTil1 = MIDLERTIDIG_ENHET_4863
-            val enhetNavIdentHarTilgangTil2 = VIKAFOSSEN_ENHET_2103
-            val enhetNavIdentHarTilgangTil3 = "1234"
-            val enhetNavIdentHarTilgangTil4 = "4321"
+            val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
+            val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -113,7 +109,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = MIDLERTIDIG_ENHET_4863,
+                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                 )
 
             every {
@@ -123,29 +119,29 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1,
+                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2,
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil3,
+                        enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil1,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil4,
+                        enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil2,
                     ),
                 )
 
             // Act
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = navIdent,
                 )
 
             // Assert
             assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(enhetNavIdentHarTilgangTil3)
+            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(enhetsnummerForEnhetNavIdentHarTilgangTil1)
         }
 
         @Test
@@ -160,13 +156,13 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = VIKAFOSSEN_ENHET_2103,
+                    behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                    navIdentOgEnhetService.hentNavIdentOgEnhet(
                         behandlingId = behandlingId,
                         navIdent = null,
                     )
@@ -179,8 +175,8 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = "1"
-            val enhetNavIdentHarTilgangTil1 = "1234"
-            val enhetNavIdentHarTilgangTil2 = "4321"
+            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.STEINKJER.enhetsnummer
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSØ.enhetsnummer
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -189,7 +185,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = VIKAFOSSEN_ENHET_2103,
+                    behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                 )
 
             every {
@@ -208,14 +204,14 @@ class NavIdentOgEnhetsnummerServiceTest {
 
             // Act
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = navIdent,
                 )
 
             // Assert
             assertThat(navIdentOgEnhetsnummer.navIdent).isNull()
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(VIKAFOSSEN_ENHET_2103)
+            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
         }
 
         @Test
@@ -231,7 +227,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = VIKAFOSSEN_ENHET_2103,
+                    behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                 )
 
             every {
@@ -244,20 +240,20 @@ class NavIdentOgEnhetsnummerServiceTest {
                         enhetsnummer = "1234",
                     ),
                     lagEnhet(
-                        enhetsnummer = VIKAFOSSEN_ENHET_2103,
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                     ),
                 )
 
             // Act
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = navIdent,
                 )
 
             // Assert
             assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(VIKAFOSSEN_ENHET_2103)
+            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
         }
 
         @Test
@@ -277,7 +273,7 @@ class NavIdentOgEnhetsnummerServiceTest {
 
             // Act
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = null,
                 )
@@ -310,17 +306,17 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = MIDLERTIDIG_ENHET_4863,
+                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                     ),
                     lagEnhet(
-                        enhetsnummer = VIKAFOSSEN_ENHET_2103,
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                     ),
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                    navIdentOgEnhetService.hentNavIdentOgEnhet(
                         behandlingId = behandlingId,
                         navIdent = navIdent,
                     )
@@ -334,8 +330,8 @@ class NavIdentOgEnhetsnummerServiceTest {
             val behandlingId = 1L
             val navIdent = "1"
             val arbeidsfordelingEnhet = "1234"
-            val enhetsnummerForEnhetNavIdentHarTilgangTil1 = "4321"
-            val enhetsnummerForEnhetNavIdentHarTilgangTil2 = "7789"
+            val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
+            val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -354,10 +350,10 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = MIDLERTIDIG_ENHET_4863,
+                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                     ),
                     lagEnhet(
-                        enhetsnummer = VIKAFOSSEN_ENHET_2103,
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                     ),
                     lagEnhet(
                         enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil1,
@@ -369,7 +365,7 @@ class NavIdentOgEnhetsnummerServiceTest {
 
             // Act
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = navIdent,
                 )
@@ -384,7 +380,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Arrange
             val behandlingId = 1L
             val navIdent = "1"
-            val arbeidsfordelingEnhet = "1234"
+            val arbeidsfordelingEnhet = BarnetrygdEnhet.OSLO.enhetsnummer
 
             every {
                 mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(
@@ -403,10 +399,10 @@ class NavIdentOgEnhetsnummerServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = MIDLERTIDIG_ENHET_4863,
+                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                     ),
                     lagEnhet(
-                        enhetsnummer = VIKAFOSSEN_ENHET_2103,
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                     ),
                     lagEnhet(
                         enhetsnummer = arbeidsfordelingEnhet,
@@ -415,7 +411,7 @@ class NavIdentOgEnhetsnummerServiceTest {
 
             // Act
             val navIdentOgEnhetsnummer =
-                navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(
+                navIdentOgEnhetService.hentNavIdentOgEnhet(
                     behandlingId = behandlingId,
                     navIdent = navIdent,
                 )
@@ -427,13 +423,13 @@ class NavIdentOgEnhetsnummerServiceTest {
     }
 
     @Nested
-    inner class NavIdentOgEnhetsnummerTest {
+    inner class NavIdentOgEnhetTest {
         @Test
         fun `skal kaste exception om enhetsnummer blir satt til mindre enn 4 siffer`() {
             // Act & assert
             val exception =
                 assertThrows<IllegalArgumentException> {
-                    NavIdentOgEnhet(null, "123")
+                    NavIdentOgEnhet(null, "123", "Enhet 123")
                 }
             assertThat(exception.message).isEqualTo("Enhetsnummer må være 4 siffer")
         }
@@ -443,7 +439,7 @@ class NavIdentOgEnhetsnummerServiceTest {
             // Act & assert
             val exception =
                 assertThrows<IllegalArgumentException> {
-                    NavIdentOgEnhet(null, "12345")
+                    NavIdentOgEnhet(null, "12345", "Enhet 12345")
                 }
             assertThat(exception.message).isEqualTo("Enhetsnummer må være 4 siffer")
         }

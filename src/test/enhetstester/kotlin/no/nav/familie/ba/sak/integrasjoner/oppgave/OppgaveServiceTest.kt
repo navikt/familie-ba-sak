@@ -54,7 +54,7 @@ class OppgaveServiceTest {
     private val oppgaveRepository: OppgaveRepository = mockk()
     private val opprettTaskService: OpprettTaskService = mockk()
     private val loggService: LoggService = mockk()
-    private val navIdentOgEnhetsnummerService: NavIdentOgEnhetsnummerService = mockk()
+    private val navIdentOgEnhetService: NavIdentOgEnhetService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
             integrasjonClient = integrasjonClient,
@@ -63,7 +63,7 @@ class OppgaveServiceTest {
             opprettTaskService = opprettTaskService,
             loggService = loggService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            navIdentOgEnhetsnummerService = navIdentOgEnhetsnummerService,
+            navIdentOgEnhetService = navIdentOgEnhetService,
         )
 
     @Test
@@ -93,8 +93,8 @@ class OppgaveServiceTest {
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every {
-            navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(BEHANDLING_ID, null)
-        } returns NavIdentOgEnhet(null, ENHETSNUMMER)
+            navIdentOgEnhetService.hentNavIdentOgEnhet(BEHANDLING_ID, null)
+        } returns NavIdentOgEnhet(null, ENHETSNUMMER, "Enhet")
 
         // Act
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
@@ -149,8 +149,8 @@ class OppgaveServiceTest {
         every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every {
-            navIdentOgEnhetsnummerService.hentNavIdentOgEnhetsnummer(BEHANDLING_ID, null)
-        } returns NavIdentOgEnhet(null, ENHETSNUMMER)
+            navIdentOgEnhetService.hentNavIdentOgEnhet(BEHANDLING_ID, null)
+        } returns NavIdentOgEnhet(null, ENHETSNUMMER, "Enhet")
 
         // Act
         oppgaveService.opprettOppgave(

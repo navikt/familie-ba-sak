@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
@@ -27,8 +28,8 @@ class IntegrasjonClientTest {
         // Arrange
         val navIdent = "1"
 
-        val enhet1 = Enhet("1234")
-        val enhet2 = Enhet("4321")
+        val enhet1 = lagEnhet("1234")
+        val enhet2 = lagEnhet("4321")
 
         every {
             mockedRestOperations.exchange<Ressurs<List<Enhet>>>(
