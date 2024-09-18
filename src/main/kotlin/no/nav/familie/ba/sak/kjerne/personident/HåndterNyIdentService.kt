@@ -16,11 +16,8 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.error.RekjørSenereException
-import no.nav.person.pdl.aktor.v2.Type
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 @Service
 class HåndterNyIdentService(
@@ -39,34 +36,30 @@ class HåndterNyIdentService(
         val identerFraPdl = personIdentService.hentIdenter(nyIdent.ident, true)
 
         val aktørId = identerFraPdl.hentAktivAktørId()
-
-        val skalMergeIdentOgRekjøreSenere = sjekkOmManSkalMergeIdentOgRekjøreSenere(identerFraPdl)
-
-        if (skalMergeIdentOgRekjøreSenere) {
-            val aktuellFagsakIdVedMerging = hentAktuellFagsakId(identerFraPdl)
-
-            if (aktuellFagsakIdVedMerging != null) {
-                validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
-                val task = opprettMergeIdentTask(aktuellFagsakIdVedMerging, identerFraPdl)
-                throwRekjørSenereException(task)
-            }
-        }
-
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
 
-        return if (aktør?.harIdent(fødselsnummer = nyIdent.ident) == false) {
-            logger.info("Legger til ny ident")
-            secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-            personIdentService.opprettPersonIdent(aktør, nyIdent.ident)
-        } else {
-            aktør
+        return when {
+            // Ny aktørId, nytt fødselsnummer -> begge håndteres i PatchMergetIdentTask
+            aktør == null -> {
+                val aktuellFagsakIdVedMerging = hentAktuellFagsakId(identerFraPdl)
+                if (aktuellFagsakIdVedMerging != null) {
+                    validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
+                    opprettMergeIdentTask(aktuellFagsakIdVedMerging, identerFraPdl)
+                }
+                null
+            }
+
+            // Samme aktørId, nytt fødselsnummer -> legg til fødselsnummer på aktør
+            !aktør.harIdent(fødselsnummer = nyIdent.ident) -> {
+                logger.info("Legger til ny ident")
+                secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
+                personIdentService.opprettPersonIdent(aktør, nyIdent.ident)
+            }
+
+            // Samme aktørId, samme fødselsnummer -> ignorer hendelse
+            else -> aktør
         }
     }
-
-    private fun throwRekjørSenereException(task: Task): Unit = throw RekjørSenereException(
-        årsak = "Mottok identhendelse som blir forsøkt patchet automatisk: ${task.id}. Prøver å rekjøre etter patching av merget ident. Se secure logger for mer info.",
-        triggerTid = LocalDateTime.now().plusHours(1),
-    )
 
     private fun opprettMergeIdentTask(
         fagsakId: Long,
@@ -93,32 +86,23 @@ class HåndterNyIdentService(
         return task
     }
 
-    private fun sjekkOmManSkalMergeIdentOgRekjøreSenere(alleIdenterFraPdl: List<IdentInformasjon>) =
-        alleIdenterFraPdl
-            .filter { it.gruppe == Type.AKTORID.name && it.historisk }
-            .mapNotNull { aktørId -> aktørIdRepository.findByAktørIdOrNull(aktørId.ident) }
-            .any { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
-
     private fun hentAktuellFagsakId(alleIdenterFraPdl: List<IdentInformasjon>): Long? {
-        val aktiveAktørerForHistoriskAktørIder =
+        val aktørerMedAktivPersonident =
             alleIdenterFraPdl
                 .hentAktørIder()
                 .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
                 .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
 
-        val fagsakDeltagere =
-            aktiveAktørerForHistoriskAktørIder
-                .flatMap { aktør ->
-                    aktør.personidenter.flatMap { ident ->
-                        fagsakService.hentFagsakDeltager(ident.fødselsnummer)
-                    }
-                }
+        val fagsakIder =
+            aktørerMedAktivPersonident
+                .flatMap { aktør -> aktør.personidenter.flatMap { ident -> fagsakService.hentFagsakDeltager(ident.fødselsnummer) } }
+                .mapNotNull { it.fagsakId }
 
-        if (fagsakDeltagere.mapNotNull { it.fagsakId }.distinct().size > 1) {
-            throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktiveAktørerForHistoriskAktørIder.first()}. $LENKE_INFO_OM_MERGING")
+        if (fagsakIder.toSet().size > 1) {
+            throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktørerMedAktivPersonident.first()}. $LENKE_INFO_OM_MERGING")
         }
 
-        return fagsakDeltagere.firstOrNull()?.fagsakId
+        return fagsakIder.firstOrNull()
     }
 
     private fun validerUendretFødselsdatoFraForrigeBehandling(
@@ -133,7 +117,7 @@ class HåndterNyIdentService(
                 ?: return // Hvis det ikke er noen tidligere behandling kan vi patche uansett
 
         val aktørIder = alleIdenterFraPdl.hentAktørIder()
-        val personGrunnlag = persongrunnlagService.hentAktiv(forrigeBehandling.id)!!
+        val personGrunnlag = persongrunnlagService.hentAktiv(forrigeBehandling.id) ?: throw Feil("Fant ikke persongrunnlag for behandling med id ${forrigeBehandling.id}")
         val fødselsdatoForrigeBehandling =
             personGrunnlag.personer.singleOrNull { it.aktør.aktørId in aktørIder }?.fødselsdato
                 ?: return // Hvis aktør ikke er med i forrige behandling kan vi patche selv om fødselsdato er ulik
