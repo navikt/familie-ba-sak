@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 enum class BarnetrygdEnhet(
     val enhetsnummer: String,
-    val enhetsnavn: String
+    val enhetsnavn: String,
 ) {
     VIKAFOSSEN("2103", "NAV Vikafossen"),
     DRAMMEN("4806", "NAV Familie- og pensjonsytelser Drammen"),
