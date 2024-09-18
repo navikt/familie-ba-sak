@@ -320,7 +320,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         verify(exactly = 1) {
-            integrasjonClient.tilordneEnhetForOppgave(any(), any())
+            integrasjonClient.patchOppgave(any())
         }
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
