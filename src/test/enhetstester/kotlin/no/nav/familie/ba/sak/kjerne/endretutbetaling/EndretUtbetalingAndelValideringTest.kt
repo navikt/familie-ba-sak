@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -854,6 +855,95 @@ class EndretUtbetalingAndelValideringTest {
             validerÅrsak(
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 vilkårsvurdering = mockk(),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og øker til hundre prosent utbetaling`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusYears(4),
+                tom = YearMonth.now().minusYears(3),
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan ikke endre til full utbetaling når det er mer enn tre år siden søknadstidspunktet.")
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og perioden er mindre er 3 år siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusYears(1),
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn tre år tilbake i tid.")
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mindre er 3 måneder siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusMonths(5),
+                tom = YearMonth.now().minusMonths(3),
+                årsak = Årsak.ETTERBETALING_3MND,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn tre måneder tilbake i tid.")
+    }
+
+    @Test
+    fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mellom 3 måneder og 3 år siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusMonths(10),
+                tom = YearMonth.now().minusMonths(4),
+                årsak = Årsak.ETTERBETALING_3MND,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        assertDoesNotThrow {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = null,
             )
         }
     }

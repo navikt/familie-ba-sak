@@ -184,6 +184,36 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
+    @Og("fyll ut vikårresultater for behandling {} fra dato {}")
+    fun `fyll ut vikårresultater for behandling fra dato`(
+        behandlingId: Long,
+        fraDato: String? = null,
+    ) {
+        CucumberMock(
+            this,
+            behandlingId,
+        ).testVerktøyService.oppdaterVilkårUtenFomTilFødselsdato(behandlingId, parseValgfriDato(fraDato))
+    }
+
+    @Og("kopier vilkårresultater fra behandling {} til behandling {}")
+    fun `kopier vilkårresultater fra behandling til behandling`(
+        fraBehandlingId: Long,
+        tilBehandlingId: Long,
+    ) {
+        val personResultatForFraBehandling =
+            vilkårsvurderinger[fraBehandlingId]?.personResultater
+                ?: error("Finner ikke personresultater for behandling med id $fraBehandlingId")
+
+        val vilkårsvurderingTilBehandling =
+            vilkårsvurderinger[tilBehandlingId]
+                ?: error("Finner ikke vilkårsvurdering for behandling med id $tilBehandlingId")
+
+        vilkårsvurderinger[tilBehandlingId]?.personResultater =
+            personResultatForFraBehandling
+                .map { it.apply { vilkårsvurdering = vilkårsvurderingTilBehandling } }
+                .toSet()
+    }
+
     /**
      * Mulige felt:
      * | AktørId | Fra dato | Til dato | Resultat | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |

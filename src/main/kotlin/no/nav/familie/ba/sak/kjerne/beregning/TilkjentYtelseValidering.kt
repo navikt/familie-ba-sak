@@ -37,13 +37,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 
-// 3 år (krav i loven)
-fun hentGyldigEtterbetalingFom(kravDato: LocalDate) =
+fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate) =
     kravDato
         .minusYears(3)
+        .toYearMonth()
+
+fun hentGyldigEtterbetaling3MndFom(kravDato: LocalDate) =
+    kravDato
+        .minusMonths(3)
         .toYearMonth()
 
 fun hentSøkersAndeler(
@@ -117,10 +120,8 @@ object TilkjentYtelseValidering {
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
-        kravDato: LocalDateTime,
+        gyldigEtterbetalingFom: YearMonth,
     ): List<Aktør> {
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato.toLocalDate())
-
         val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val personerMedUgyldigEtterbetaling =

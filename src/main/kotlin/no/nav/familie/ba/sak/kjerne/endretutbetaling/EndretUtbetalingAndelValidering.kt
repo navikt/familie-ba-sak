@@ -22,7 +22,8 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
+import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3MndFom
+import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3ÅrFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -119,8 +120,10 @@ object EndretUtbetalingAndelValidering {
                 )
             }
 
-            Årsak.ETTERBETALING_3ÅR ->
-                validerEtterbetalingMaks3ÅrFørSøknadstidspunkt(
+            Årsak.ETTERBETALING_3MND,
+            Årsak.ETTERBETALING_3ÅR,
+            ->
+                validerEtterbetalingMaks3ÅrEller3MndFørSøknadstidspunkt(
                     endretUtbetalingAndel = endretUtbetalingAndel,
                     behandlingOpprettetTidspunkt = vilkårsvurdering?.behandling?.opprettetTidspunkt?.toLocalDate(),
                 )
@@ -137,25 +140,22 @@ object EndretUtbetalingAndelValidering {
         }
     }
 
-    private fun validerEtterbetalingMaks3ÅrFørSøknadstidspunkt(
+    private fun validerEtterbetalingMaks3ÅrEller3MndFørSøknadstidspunkt(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         behandlingOpprettetTidspunkt: LocalDate?,
     ) {
         val kravDato = endretUtbetalingAndel.søknadstidspunkt ?: behandlingOpprettetTidspunkt
+        val (feilmeldingPeriode, gyldigEtterbetalingFom) =
+            when (endretUtbetalingAndel.årsak) {
+                Årsak.ETTERBETALING_3ÅR -> "tre år" to hentGyldigEtterbetaling3ÅrFom(kravDato = kravDato ?: LocalDate.now())
+                Årsak.ETTERBETALING_3MND -> "tre måneder" to hentGyldigEtterbetaling3MndFom(kravDato = kravDato ?: LocalDate.now())
+                else -> throw FunksjonellFeil("Ugyldig årsak for etterbetaling")
+            }
+
         if (endretUtbetalingAndel.prosent == BigDecimal.valueOf(100)) {
-            throw FunksjonellFeil(
-                "Du kan ikke endre til full utbetaling når det er mer enn tre år siden søknadstidspunktet.",
-            )
-        } else if (
-            endretUtbetalingAndel.tom?.isAfter(
-                hentGyldigEtterbetalingFom(
-                    kravDato = kravDato ?: LocalDate.now(),
-                ),
-            ) == true
-        ) {
-            throw FunksjonellFeil(
-                "Du kan ikke stoppe etterbetaling for en periode som ikke strekker seg mer enn 3 år tilbake i tid.",
-            )
+            throw FunksjonellFeil("Du kan ikke endre til full utbetaling når det er mer enn $feilmeldingPeriode siden søknadstidspunktet.")
+        } else if (endretUtbetalingAndel.tom?.isSameOrAfter(gyldigEtterbetalingFom) == true) {
+            throw FunksjonellFeil("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn $feilmeldingPeriode tilbake i tid.")
         }
     }
 

@@ -183,7 +183,7 @@ fun lagVilkårsvurdering(
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurdering,
                     person = person,
-                    resultat = Resultat.OPPFYLT,
+                    resultat = Resultat.IKKE_VURDERT,
                     personType = person.type,
                     lagFullstendigVilkårResultat = true,
                     periodeFom = null,

@@ -1,6 +1,7 @@
 ﻿package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPost
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -39,6 +41,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> = mockPeriodeBarnSkjemaRepository()
     val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(valutakursRepository = valutakursRepository, utenlandskPeriodebeløpRepository, emptyList())
+    val tilpassDifferanseberegningEtterValutakursService = mockk<TilpassDifferanseberegningEtterValutakursService>()
 
     val valutakursService = ValutakursService(valutakursRepository, emptyList())
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
@@ -60,6 +63,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             simuleringService = simuleringService,
             vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
             unleashNextMedContextService = unleashNextMedContextService,
+            tilpassDifferanseberegningEtterValutakursService = tilpassDifferanseberegningEtterValutakursService,
         )
 
     val forrigeBehandlingId = BehandlingId(9L)
@@ -83,6 +87,7 @@ class AutomatiskOppdaterValutakursServiceTest {
         every { unleashNextMedContextService.isEnabled(any()) } returns true
         valutakursRepository.deleteAll()
         utenlandskPeriodebeløpRepository.deleteAll()
+        justRun { tilpassDifferanseberegningEtterValutakursService.skjemaerEndret(any(), any()) }
     }
 
     @Test

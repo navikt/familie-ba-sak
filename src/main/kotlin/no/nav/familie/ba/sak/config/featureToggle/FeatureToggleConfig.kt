@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 class FeatureToggleConfig {
     companion object {
         // Release
+        const val ETTERBETALING_3_MND = "familie-ba-sak.etterbetaling-3-mnd"
 
         // Operasjonelle
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"

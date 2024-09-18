@@ -989,6 +989,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagEnsligMindreaarigFlyktning"
     },
+    AVSLAG_ENSLIG_MINDREÅRIG_BOR_MED_OMSORGSPERSON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagEnsligMindreaarigBorMedOmsorgsperson"
+    },
     AVSLAG_IKKE_DELT_FORELDRENE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagIkkeDeltForeldreneBorSammen"
@@ -1485,6 +1489,34 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     ENDRET_UTBETALING_REDUKSJON_ENDRE_MOTTAKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingReduksjonEndreMottaker"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreMaanederTilbakeITid"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreMaanederTilbakeITidSED"
+    },
+    ENDRET_UTBETALING_TRE_MÅNEDER_TILBAKE_I_TID_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingTreMaanederTilbakeITidUtbetaling"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_KUN_UTVIDET_DEL_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingTreMaanederTilbakeITidKunUtvidetDelUtbetaling"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TILBAKE_I_TID_SED_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingTreMaanederTilbakeITidSedUtbetaling"
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreMaaneder"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_KUN_UTVIDET_DEL {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreMaanederKunUtvidetDel"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
     ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING

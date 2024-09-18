@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
@@ -188,6 +189,21 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
         )
 
+    val testVerktøyService =
+        TestVerktøyService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vilkårService = vilkårService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            endretUtbetalingRepository = endretUtbetalingAndelRepository,
+            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            vedtakRepository = vedtakRepository,
+            kompetanseRepository = kompetanseRepository,
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            valutakursRepository = valutakursRepository,
+            søknadGrunnlagService = søknadGrunnlagService,
+        )
+
     val vedtaksperiodeService =
         VedtaksperiodeService(
             personidentService = personidentService,
@@ -265,6 +281,7 @@ class CucumberMock(
             simuleringService = simuleringService,
             vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
             unleashNextMedContextService = unleashNextMedContextService,
+            tilpassDifferanseberegningEtterValutakursService = tilpassDifferanseberegningEtterValutakursService,
         )
 
     val tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService =
@@ -346,6 +363,7 @@ class CucumberMock(
             totrinnskontrollService = totrinnskontrollService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utbetalingsoppdragGeneratorService =

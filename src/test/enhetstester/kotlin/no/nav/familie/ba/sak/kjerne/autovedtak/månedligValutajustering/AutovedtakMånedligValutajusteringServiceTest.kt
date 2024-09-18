@@ -46,6 +46,8 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster Feil hvis en annen enn nåværende måned blir sendt inn`() {
         every { localDateProvider.now() } returns LocalDate.now()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+        every { valutaKursService.hentValutakurser(any()) } returns emptyList()
 
         assertThrows<Feil> {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(

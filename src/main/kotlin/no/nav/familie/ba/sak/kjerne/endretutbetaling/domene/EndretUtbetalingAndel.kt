@@ -111,13 +111,14 @@ enum class Årsak(
 ) {
     DELT_BOSTED("Delt bosted"),
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
+    ETTERBETALING_3MND("Etterbetaling 3 måneder"),
     ENDRE_MOTTAKER("Endre mottaker, begge foreldre rett"),
     ALLEREDE_UTBETALT("Allerede utbetalt"),
     ;
 
     fun førerTilOpphørVed0Prosent() =
         when (this) {
-            ALLEREDE_UTBETALT, ENDRE_MOTTAKER, ETTERBETALING_3ÅR -> true
+            ALLEREDE_UTBETALT, ENDRE_MOTTAKER, ETTERBETALING_3ÅR, ETTERBETALING_3MND -> true
             DELT_BOSTED -> false
         }
 }
