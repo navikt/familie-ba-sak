@@ -85,11 +85,6 @@ class PatchMergetIdentTask(
                 mergeTidspunkt = LocalDateTime.now(),
             ),
         )
-
-        val åpenBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = dto.fagsakId)
-        if (åpenBehandling != null) {
-            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(åpenBehandling)
-        }
     }
 
     companion object {
