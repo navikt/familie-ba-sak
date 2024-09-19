@@ -38,7 +38,7 @@ class NavIdentOgEnhetServiceTest {
                         navIdent = null,
                     )
                 }
-            assertThat(exception.message).isEqualTo("Kan ikke sette midlertidig enhet 4863 om man mangler NAV-ident")
+            assertThat(exception.message).isEqualTo("Kan ikke sette ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
         }
 
         @Test
@@ -147,7 +147,7 @@ class NavIdentOgEnhetServiceTest {
                         navIdent = null,
                     )
                 }
-            assertThat(exception.message).isEqualTo("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
+            assertThat(exception.message).isEqualTo("Kan ikke sette ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident")
         }
 
         @Test

@@ -4,8 +4,23 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.e
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class BarnetrygdEnhetTest {
+    @Nested
+    inner class ToStringTest {
+        @ParameterizedTest
+        @EnumSource(BarnetrygdEnhet::class)
+        fun `skal returnere korrekt string`(barnetrygdEnhet: BarnetrygdEnhet) {
+            // Act
+            val result = barnetrygdEnhet.toString()
+
+            // Assert
+            assertThat(result).isEqualTo("${barnetrygdEnhet.enhetsnavn} (${barnetrygdEnhet.enhetsnummer})")
+        }
+    }
+
     @Nested
     inner class ErGyldigBehandlendeBarnetrygdEnhetTest {
         @Test

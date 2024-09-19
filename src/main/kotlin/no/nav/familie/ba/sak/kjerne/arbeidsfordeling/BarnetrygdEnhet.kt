@@ -13,9 +13,20 @@ enum class BarnetrygdEnhet(
     MIDLERTIDIG_ENHET("4863", "Midlertidig enhet"),
     ;
 
-    companion object {
-        private val GYLDIGE_BEHANDLENDE_BARNETRYGD_ENHETER: List<BarnetrygdEnhet> = listOf(VIKAFOSSEN, DRAMMEN, VADSØ, OSLO, STORD, STEINKJER)
+    override fun toString(): String = "$enhetsnavn ($enhetsnummer)"
 
-        fun erGyldigBehandlendeBarnetrygdEnhet(enhetsnummer: String): Boolean = GYLDIGE_BEHANDLENDE_BARNETRYGD_ENHETER.any { it.enhetsnummer == enhetsnummer }
+    companion object {
+        private val GYLDIGE_BEHANDLENDE_BARNETRYGD_ENHETER: List<BarnetrygdEnhet> =
+            listOf(
+                VIKAFOSSEN,
+                DRAMMEN,
+                VADSØ,
+                OSLO,
+                STORD,
+                STEINKJER,
+            )
+
+        fun erGyldigBehandlendeBarnetrygdEnhet(enhetsnummer: String): Boolean =
+            GYLDIGE_BEHANDLENDE_BARNETRYGD_ENHETER.any { it.enhetsnummer == enhetsnummer }
     }
 }

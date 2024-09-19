@@ -26,7 +26,7 @@ class NavIdentOgEnhetService(
         navIdent: NavIdent?,
     ): NavIdentOgEnhet {
         if (navIdent == null) {
-            throw Feil("Kan ikke sette midlertidig enhet 4863 om man mangler NAV-ident")
+            throw Feil("Kan ikke sette ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
         }
         val enheterNavIdentHarTilgangTil =
             integrasjonClient
@@ -45,7 +45,7 @@ class NavIdentOgEnhetService(
         navIdent: NavIdent?,
     ): NavIdentOgEnhet {
         if (navIdent == null) {
-            throw Feil("Kan ikke sette Vikafossen enhet 2103 om man mangler NAV-ident")
+            throw Feil("Kan ikke sette ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident")
         }
         val harTilgangTilVikafossenEnhet2103 =
             integrasjonClient
@@ -90,8 +90,6 @@ data class NavIdentOgEnhet(
     val enhetsnavn: String,
 ) {
     init {
-        if (enhetsnummer.length != 4) {
-            throw IllegalArgumentException("Enhetsnummer må være 4 siffer")
-        }
+        require(enhetsnummer.length == 4) { "Enhetsnummer må være 4 siffer" }
     }
 }
