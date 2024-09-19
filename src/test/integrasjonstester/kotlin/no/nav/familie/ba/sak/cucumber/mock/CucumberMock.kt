@@ -73,8 +73,8 @@ val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 
 class CucumberMock(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
-    nyBehanldingId: Long,
-    forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehanldingId]?.let { dataFraCucumber.behandlinger[it] },
+    nyBehandlingId: Long,
+    forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehandlingId]?.let { dataFraCucumber.behandlinger[it] },
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
     ecbService: ECBService = mockEcbService(dataFraCucumber),
     scope: CoroutineScope? = null,
@@ -99,7 +99,7 @@ class CucumberMock(
     val vilkårsvurderingService = VilkårsvurderingService(vilkårsvurderingRepository, sanityService = mockk())
     val vilkårsvurderingTidslinjeService = mockVilkårsvurderingTidslinjeService(vilkårsvurderingRepository, vilkårsvurderingService, persongrunnlagService)
     val loggService = mockLoggService()
-    val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehanldingId)
+    val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehandlingId)
     val periodeOvergangsstønadGrunnlagRepository = mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber)
     val søknadGrunnlagRepository = mockSøknadGrunnlagRepository(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)

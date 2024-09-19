@@ -652,7 +652,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
             )
 
         mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
@@ -672,7 +672,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
                 forrigeBehandling = null,
             )
 
@@ -686,7 +686,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
             )
 
         mock.automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
@@ -745,7 +745,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
             )
 
         mock.stegService.håndterVilkårsvurdering(behandlinger[behandlingId]!!)

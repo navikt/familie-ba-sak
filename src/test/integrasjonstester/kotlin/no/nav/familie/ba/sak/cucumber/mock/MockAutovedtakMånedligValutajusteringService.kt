@@ -33,7 +33,7 @@ fun mockAutovedtakMånedligValutajusteringService(
     val cucumberMock =
         CucumberMock(
             dataFraCucumber = dataFraCucumber,
-            nyBehanldingId = nyBehanldingId,
+            nyBehandlingId = nyBehanldingId,
             forrigeBehandling = forrigeBehandling,
             ecbService = ecbService,
         )
