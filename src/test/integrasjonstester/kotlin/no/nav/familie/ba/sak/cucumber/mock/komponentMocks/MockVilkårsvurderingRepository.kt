@@ -10,7 +10,7 @@ fun mockVilkårsvurderingRepository(dataFraCucumber: VedtaksperioderOgBegrunnels
     val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers {
         val behandlingId = firstArg<Long>()
-        dataFraCucumber.vilkårsvurderinger[behandlingId]!!
+        dataFraCucumber.vilkårsvurderinger[behandlingId]
     }
 
     every { vilkårsvurderingRepository.saveAndFlush(any()) } answers {

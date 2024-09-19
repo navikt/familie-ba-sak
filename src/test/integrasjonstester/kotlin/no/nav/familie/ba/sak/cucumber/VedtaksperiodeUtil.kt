@@ -507,12 +507,14 @@ fun lagTilkjentYtelse(
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
         ).also { tilkjentYtelse ->
-            if (tilkjentYtelse.behandling.status == BehandlingStatus.AVSLUTTET) {
+            if (tilkjentYtelse.behandling.status == BehandlingStatus.AVSLUTTET && skalIverksettesMotOppdrag(tilkjentYtelse.behandling)) {
                 val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.behandling.id && it.aktiv }
                 tilkjentYtelse.oppdaterMedUtbetalingsoppdrag(vedtak)
             }
         }
     }.toMutableMap()
+
+private fun skalIverksettesMotOppdrag(behandling: Behandling): Boolean = behandling.resultat !in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT)
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     vedtak: Vedtak,

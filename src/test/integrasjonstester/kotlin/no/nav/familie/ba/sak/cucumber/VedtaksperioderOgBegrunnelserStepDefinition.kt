@@ -493,6 +493,22 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             .isEqualTo(forvendtedeBrevperioder)
     }
 
+    @Så("forvent følgende aktører på behandling {}")
+    fun `forvent følgende aktører på behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeAktører = dataTable.asMaps().map { Aktør(aktørId = parseAktørId(it)) }.sortedBy { it.aktørId }
+        val faktiskeAktører =
+            persongrunnlag
+                .finnPersonGrunnlagForBehandling(behandlingId)
+                .personer
+                .map { it.aktør }
+                .sortedBy { it.aktørId }
+
+        assertThat(faktiskeAktører).isEqualTo(forventedeAktører)
+    }
+
     /**
      * Mulige verdier: | Fra dato | Til dato |
      */

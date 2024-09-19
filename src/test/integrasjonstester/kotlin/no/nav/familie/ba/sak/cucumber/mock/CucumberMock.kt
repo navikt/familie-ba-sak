@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterValutakursService
@@ -57,6 +58,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingSteg
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.EøsSkjemaerForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.PersonopplysningGrunnlagForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -86,12 +89,10 @@ class CucumberMock(
     val oppgaveService = mockOppgaveService()
     val personopplysningerService = mockPersonopplysningerService(dataFraCucumber)
     val tilgangService = mockTilgangService()
-    val vilkårsvurderingForNyBehandlingService = mockVilkårsvurderingForNyBehandlingService(dataFraCucumber)
     val vilkårService = mockVilkårService(dataFraCucumber)
     val tilbakestillBehandlingService = mockTilbakestillBehandlingService()
     val personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository(dataFraCucumber.persongrunnlag)
-    val personopplysningGrunnlagForNyBehandlingService = mockPersonopplysningGrunnlagForNyBehandlingService(dataFraCucumber)
-    val personidentService = mockPersonidentService(dataFraCucumber, nyBehanldingId)
+    val personidentService = mockPersonidentService(dataFraCucumber)
     val tilkjentYtelseRepository = mockTilkjentYtelseRepository(dataFraCucumber)
     val vilkårsvurderingRepository = mockVilkårsvurderingRepository(dataFraCucumber)
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumber)
@@ -419,6 +420,37 @@ class CucumberMock(
                 loggService = loggService,
                 tilbakestillBehandlingService = tilbakestillBehandlingService,
             ),
+        )
+
+    val personopplysningGrunnlagForNyBehandlingService =
+        PersonopplysningGrunnlagForNyBehandlingService(
+            personidentService = personidentService,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+        )
+
+    val endretUtbetalingAndelService =
+        EndretUtbetalingAndelService(
+            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            vilkårsvurderingService = vilkårsvurderingService,
+            endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            unleashMedContextService = unleashNextMedContextService,
+        )
+
+    val vilkårsvurderingForNyBehandlingService =
+        VilkårsvurderingForNyBehandlingService(
+            vilkårsvurderingService = vilkårsvurderingService,
+            behandlingService = behandlingService,
+            persongrunnlagService = persongrunnlagService,
+            behandlingstemaService = behandlingstemaService,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            vilkårsvurderingMetrics = mockk(),
+            andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val registrerPersongrunnlag =
