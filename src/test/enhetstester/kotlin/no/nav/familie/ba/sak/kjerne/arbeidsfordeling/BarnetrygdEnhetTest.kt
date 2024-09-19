@@ -18,6 +18,15 @@ class BarnetrygdEnhetTest {
         }
 
         @Test
+        fun `skal returnere false hvis enhetsnummer er 4863 midlertidig enhet`() {
+            // Act
+            val erGyldig = erGyldigBehandlendeBarnetrygdEnhet(BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer)
+
+            // Assert
+            assertThat(erGyldig).isFalse()
+        }
+
+        @Test
         fun `skal returnere true hvis gyldig enhetsnummer`() {
             // Act
             val erGyldig = erGyldigBehandlendeBarnetrygdEnhet(BarnetrygdEnhet.OSLO.enhetsnummer)
