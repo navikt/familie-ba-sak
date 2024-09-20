@@ -259,7 +259,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
-        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
+        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste, behandlingTilForrigeBehandling = behandlingTilForrigeBehandling)
     }
 
     /**
@@ -556,7 +556,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!
+            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste, behandlingTilForrigeBehandling = behandlingTilForrigeBehandling)[behandlingId]!!
                 .andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 

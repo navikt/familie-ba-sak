@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -61,6 +62,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
@@ -464,57 +466,79 @@ fun lagTilkjentYtelse(
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
     vedtaksliste: List<Vedtak>,
-) = dataTable
-    .asMaps()
-    .map { rad ->
-        val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
-        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
-        val beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
-        val differanseberegnetBeløp = parseValgfriInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.DIFFERANSEBEREGNET_BELØP, rad)
-        val sats =
-            parseValgfriInt(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
-                rad,
-            ) ?: beløp
+    behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
+): MutableMap<Long, TilkjentYtelse> {
+    val tilkjenteYtelser =
+        dataTable
+            .asMaps()
+            .map { rad ->
+                val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+                val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+                val beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
+                val differanseberegnetBeløp = parseValgfriInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.DIFFERANSEBEREGNET_BELØP, rad)
+                val sats =
+                    parseValgfriInt(
+                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.SATS,
+                        rad,
+                    ) ?: beløp
 
-        lagAndelTilkjentYtelse(
-            id = Random.nextLong(),
-            fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
-            tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
-            behandling = behandlinger.finnBehandling(behandlingId),
-            person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
-            beløp = beløp,
-            ytelseType =
-                parseValgfriEnum<YtelseType>(
-                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
-                    rad,
-                ) ?: YtelseType.ORDINÆR_BARNETRYGD,
-            prosent =
-                parseValgfriLong(
-                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
-                    rad,
-                )?.toBigDecimal() ?: BigDecimal(100),
-            sats = sats,
-            differanseberegnetPeriodebeløp = differanseberegnetBeløp,
-            nasjonaltPeriodebeløp = sats,
-        )
-    }.groupBy {
-        it.behandlingId
-    }.mapValues { (behandlingId, andeler) ->
-        TilkjentYtelse(
-            behandling = behandlinger.finnBehandling(behandlingId),
-            andelerTilkjentYtelse = andeler.toMutableSet(),
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-        ).also { tilkjentYtelse ->
-            if (tilkjentYtelse.behandling.status == BehandlingStatus.AVSLUTTET && skalIverksettesMotOppdrag(tilkjentYtelse.behandling)) {
-                val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.behandling.id && it.aktiv }
-                tilkjentYtelse.oppdaterMedUtbetalingsoppdrag(vedtak)
+                lagAndelTilkjentYtelse(
+                    id = Random.nextLong(),
+                    fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
+                    tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
+                    behandling = behandlinger.finnBehandling(behandlingId),
+                    person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
+                    beløp = beløp,
+                    ytelseType =
+                        parseValgfriEnum<YtelseType>(
+                            VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
+                            rad,
+                        ) ?: YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent =
+                        parseValgfriLong(
+                            VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
+                            rad,
+                        )?.toBigDecimal() ?: BigDecimal(100),
+                    sats = sats,
+                    differanseberegnetPeriodebeløp = differanseberegnetBeløp,
+                    nasjonaltPeriodebeløp = sats,
+                )
+            }.groupBy {
+                it.behandlingId
+            }.mapValues { (behandlingId, andeler) ->
+                TilkjentYtelse(
+                    behandling = behandlinger.finnBehandling(behandlingId),
+                    andelerTilkjentYtelse = andeler.toMutableSet(),
+                    opprettetDato = LocalDate.now(),
+                    endretDato = LocalDate.now(),
+                )
             }
-        }
-    }.toMutableMap()
 
-private fun skalIverksettesMotOppdrag(behandling: Behandling): Boolean = behandling.resultat !in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT)
+    tilkjenteYtelser.forEach { tilkjentYtelse ->
+        val behandling = tilkjentYtelse.value.behandling
+        val nåværendeAndeler = tilkjentYtelse.value.andelerTilkjentYtelse.toList()
+        val forrigeTilkjentYtelse = tilkjenteYtelser.values.find { it.behandling.id == behandlingTilForrigeBehandling[behandling.id] }
+        val forrigeAndeler = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.toList() ?: emptyList()
+        if (
+            behandling.status == BehandlingStatus.AVSLUTTET &&
+            (skalIverksettesMotOppdrag(nåværendeAndeler, forrigeAndeler) || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
+        ) {
+            val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.value.behandling.id && it.aktiv }
+            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(vedtak)
+        }
+    }
+
+    return tilkjenteYtelser.toMutableMap()
+}
+
+private fun skalIverksettesMotOppdrag(
+    nåværendeAndeler: List<AndelTilkjentYtelse>,
+    forrigeAndeler: List<AndelTilkjentYtelse>,
+): Boolean =
+    EndringIUtbetalingUtil
+        .lagEndringIUtbetalingTidslinje(nåværendeAndeler, forrigeAndeler)
+        .perioder()
+        .any { it.innhold == true }
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     vedtak: Vedtak,
