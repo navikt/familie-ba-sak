@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
@@ -24,7 +25,7 @@ class PdlRestClientTestConfig {
         val klient = mockk<PdlRestClient>(relaxed = true)
 
         every {
-            klient.hentPerson(any(), any())
+            klient.hentPerson(any<Aktør>(), any())
         } returns
             PersonInfo(
                 fødselsdato = LocalDate.of(1980, 5, 12),
