@@ -13,12 +13,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class NavIdentOgEnhetServiceTest {
+class OppgaveArbeidsfordelingServiceTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
-    private val navIdentOgEnhetService: NavIdentOgEnhetService = NavIdentOgEnhetService(integrasjonClient = mockedIntegrasjonClient)
+    private val oppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService = OppgaveArbeidsfordelingService(integrasjonClient = mockedIntegrasjonClient)
 
     @Nested
-    inner class HentNavIdentOgEnhetTest {
+    inner class FinnOppgaveArbeidsfordelingTest {
         @Test
         fun `skal kaste feil om arbeidsfordeling returnerer midlertidig enhet 4863 og NAV-ident er null`() {
             // Arrange
@@ -28,12 +28,13 @@ class NavIdentOgEnhetServiceTest {
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetService.hentNavIdentOgEnhet(
+                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                         arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = null,
                     )
@@ -47,13 +48,14 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer
-            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
+            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.MIDLERTIDIG_ENHET
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN
 
             val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
             every {
@@ -63,17 +65,19 @@ class NavIdentOgEnhetServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1,
+                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2,
+                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetService.hentNavIdentOgEnhet(
+                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                         arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = navIdent,
                     )
@@ -87,13 +91,14 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
-            val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
+            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN
 
             val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
             every {
@@ -104,28 +109,33 @@ class NavIdentOgEnhetServiceTest {
                 listOf(
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil1,
+                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil2,
+                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
             // Act
-            val navIdentOgEnhetsnummer =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
             // Assert
-            assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(enhetsnummerForEnhetNavIdentHarTilgangTil1)
+            assertThat(oppgaveArbeidsfordeling.navIdent).isEqualTo(navIdent)
+            assertThat(oppgaveArbeidsfordeling.enhetsnummer).isEqualTo(enhetNavIdentHarTilgangTil1.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.enhetsnavn).isEqualTo(enhetNavIdentHarTilgangTil1.enhetsnavn)
         }
 
         @Test
@@ -137,12 +147,13 @@ class NavIdentOgEnhetServiceTest {
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetService.hentNavIdentOgEnhet(
+                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                         arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = null,
                     )
@@ -156,13 +167,14 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.STEINKJER.enhetsnummer
-            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSØ.enhetsnummer
+            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.STEINKJER
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSØ
 
             val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                 )
 
             every {
@@ -172,23 +184,26 @@ class NavIdentOgEnhetServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1,
+                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2,
+                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
             // Act
-            val navIdentOgEnhetsnummer =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
             // Assert
-            assertThat(navIdentOgEnhetsnummer.navIdent).isNull()
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.navIdent).isNull()
+            assertThat(oppgaveArbeidsfordeling.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.enhetsnavn).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
         }
 
         @Test
@@ -201,6 +216,7 @@ class NavIdentOgEnhetServiceTest {
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                 )
 
             every {
@@ -211,22 +227,25 @@ class NavIdentOgEnhetServiceTest {
                 listOf(
                     lagEnhet(
                         enhetsnummer = "1234",
+                        enhetsnavn = "Fiktiv enhet",
                     ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                 )
 
             // Act
-            val navIdentOgEnhetsnummer =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
             // Assert
-            assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.navIdent).isEqualTo(navIdent)
+            assertThat(oppgaveArbeidsfordeling.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.enhetsnavn).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
         }
 
         @Test
@@ -238,18 +257,20 @@ class NavIdentOgEnhetServiceTest {
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = "1234",
+                    behandlendeEnhetNavn = "Fiktiv enhet",
                 )
 
             // Act
-            val navIdentOgEnhetsnummer =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = null,
                 )
 
             // Assert
-            assertThat(navIdentOgEnhetsnummer.navIdent).isNull()
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo("1234")
+            assertThat(oppgaveArbeidsfordeling.navIdent).isNull()
+            assertThat(oppgaveArbeidsfordeling.enhetsnummer).isEqualTo(arbeidsfordelingPåBehandling.behandlendeEnhetId)
+            assertThat(oppgaveArbeidsfordeling.enhetsnavn).isEqualTo(arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
         }
 
         @Test
@@ -262,6 +283,7 @@ class NavIdentOgEnhetServiceTest {
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = "1234",
+                    behandlendeEnhetNavn = "Fiktiv enhet",
                 )
 
             every {
@@ -272,16 +294,18 @@ class NavIdentOgEnhetServiceTest {
                 listOf(
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                 )
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    navIdentOgEnhetService.hentNavIdentOgEnhet(
+                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                         arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                         navIdent = navIdent,
                     )
@@ -295,13 +319,14 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            val enhetsnummerForEnhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO.enhetsnummer
-            val enhetsnummerForEnhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN.enhetsnummer
+            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN
 
             val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
                     behandlendeEnhetId = BarnetrygdEnhet.STEINKJER.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.STEINKJER.enhetsnavn,
                 )
 
             every {
@@ -312,28 +337,33 @@ class NavIdentOgEnhetServiceTest {
                 listOf(
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil1,
+                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = enhetsnummerForEnhetNavIdentHarTilgangTil2,
+                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
             // Act
-            val navIdentOgEnhetsnummer =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
             // Assert
-            assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(enhetsnummerForEnhetNavIdentHarTilgangTil1)
+            assertThat(oppgaveArbeidsfordeling.navIdent).isEqualTo(navIdent)
+            assertThat(oppgaveArbeidsfordeling.enhetsnummer).isEqualTo(enhetNavIdentHarTilgangTil1.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.enhetsnavn).isEqualTo(enhetNavIdentHarTilgangTil1.enhetsnavn)
         }
 
         @Test
@@ -342,12 +372,13 @@ class NavIdentOgEnhetServiceTest {
             val behandlingId = 1L
             val navIdent = NavIdent("1")
 
-            val arbeidsfordelingEnhet = BarnetrygdEnhet.OSLO.enhetsnummer
+            val arbeidsfordelingEnhet = BarnetrygdEnhet.OSLO
 
             val arbeidsfordelingPåBehandling =
                 lagArbeidsfordelingPåBehandling(
                     behandlingId = behandlingId,
-                    behandlendeEnhetId = arbeidsfordelingEnhet,
+                    behandlendeEnhetId = arbeidsfordelingEnhet.enhetsnummer,
+                    behandlendeEnhetNavn = arbeidsfordelingEnhet.enhetsnavn,
                 )
 
             every {
@@ -358,36 +389,44 @@ class NavIdentOgEnhetServiceTest {
                 listOf(
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                     lagEnhet(
-                        enhetsnummer = arbeidsfordelingEnhet,
+                        enhetsnummer = arbeidsfordelingEnhet.enhetsnummer,
+                        enhetsnavn = arbeidsfordelingEnhet.enhetsnavn,
                     ),
                 )
 
             // Act
-            val navIdentOgEnhetsnummer =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = navIdent,
                 )
 
             // Assert
-            assertThat(navIdentOgEnhetsnummer.navIdent).isEqualTo(navIdent)
-            assertThat(navIdentOgEnhetsnummer.enhetsnummer).isEqualTo(arbeidsfordelingEnhet)
+            assertThat(oppgaveArbeidsfordeling.navIdent).isEqualTo(navIdent)
+            assertThat(oppgaveArbeidsfordeling.enhetsnummer).isEqualTo(arbeidsfordelingEnhet.enhetsnummer)
+            assertThat(oppgaveArbeidsfordeling.enhetsnavn).isEqualTo(arbeidsfordelingEnhet.enhetsnavn)
         }
     }
 
     @Nested
-    inner class NavIdentOgEnhetTest {
+    inner class OppgaveArbeidsfordelingTest {
         @Test
         fun `skal kaste exception om enhetsnummer blir satt til mindre enn 4 siffer`() {
             // Act & assert
             val exception =
                 assertThrows<IllegalArgumentException> {
-                    NavIdentOgEnhet(null, "123", "Enhet 123")
+                    OppgaveArbeidsfordeling(
+                        null,
+                        "123",
+                        "Enhet 123",
+                    )
                 }
             assertThat(exception.message).isEqualTo("Enhetsnummer må være 4 siffer")
         }
@@ -397,7 +436,11 @@ class NavIdentOgEnhetServiceTest {
             // Act & assert
             val exception =
                 assertThrows<IllegalArgumentException> {
-                    NavIdentOgEnhet(null, "12345", "Enhet 12345")
+                    OppgaveArbeidsfordeling(
+                        null,
+                        "12345",
+                        "Enhet 12345",
+                    )
                 }
             assertThat(exception.message).isEqualTo("Enhetsnummer må være 4 siffer")
         }

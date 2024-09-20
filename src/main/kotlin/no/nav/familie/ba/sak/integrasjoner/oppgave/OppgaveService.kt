@@ -43,7 +43,7 @@ class OppgaveService(
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val navIdentOgEnhetService: NavIdentOgEnhetService,
+    private val oppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
@@ -75,8 +75,8 @@ class OppgaveService(
                 arbeidsfordelingPåBehandlingRepository
                     .hentArbeidsfordelingPåBehandling(behandlingId)
 
-            val navIdentOgEnhet =
-                navIdentOgEnhetService.hentNavIdentOgEnhet(
+            val oppgaveArbeidsfordeling =
+                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
                     arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
                     navIdent = tilordnetNavIdent?.let { NavIdent(it) },
                 )
@@ -89,10 +89,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = navIdentOgEnhet.enhetsnummer,
+                    enhetsnummer = oppgaveArbeidsfordeling.enhetsnummer,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = navIdentOgEnhet.navIdent?.ident,
+                    tilordnetRessurs = oppgaveArbeidsfordeling.navIdent?.ident,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
@@ -107,13 +107,13 @@ class OppgaveService(
 
             økTellerForAntallOppgaveTyper(oppgavetype)
 
-            val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != navIdentOgEnhet.enhetsnummer
+            val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != oppgaveArbeidsfordeling.enhetsnummer
 
             if (erEnhetsnummerEndret) {
                 arbeidsfordelingPåBehandlingRepository.save(
                     arbeidsfordelingPåBehandling.copy(
-                        behandlendeEnhetId = navIdentOgEnhet.enhetsnummer,
-                        behandlendeEnhetNavn = navIdentOgEnhet.enhetsnavn,
+                        behandlendeEnhetId = oppgaveArbeidsfordeling.enhetsnummer,
+                        behandlendeEnhetNavn = oppgaveArbeidsfordeling.enhetsnavn,
                         manueltOverstyrt = false,
                     ),
                 )

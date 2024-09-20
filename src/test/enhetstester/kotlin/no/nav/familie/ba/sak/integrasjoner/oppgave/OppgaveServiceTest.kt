@@ -55,7 +55,7 @@ class OppgaveServiceTest {
     private val mockedOppgaveRepository: OppgaveRepository = mockk()
     private val mockedOpprettTaskService: OpprettTaskService = mockk()
     private val mockedLoggService: LoggService = mockk()
-    private val mockedNavIdentOgEnhetService: NavIdentOgEnhetService = mockk()
+    private val mockedOppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
             integrasjonClient = mockedIntegrasjonClient,
@@ -64,7 +64,7 @@ class OppgaveServiceTest {
             opprettTaskService = mockedOpprettTaskService,
             loggService = mockedLoggService,
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
-            navIdentOgEnhetService = mockedNavIdentOgEnhetService,
+            oppgaveArbeidsfordelingService = mockedOppgaveArbeidsfordelingService,
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
         )
 
@@ -90,8 +90,8 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every {
-            mockedNavIdentOgEnhetService.hentNavIdentOgEnhet(arbeidsfordelingPåBehandling, null)
-        } returns NavIdentOgEnhet(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
+            mockedOppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(arbeidsfordelingPåBehandling, null)
+        } returns OppgaveArbeidsfordeling(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
 
         // Act
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
@@ -141,8 +141,8 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every {
-            mockedNavIdentOgEnhetService.hentNavIdentOgEnhet(arbeidsfordelingPåBehandling, navIdent)
-        } returns NavIdentOgEnhet(navIdent, enhetsnummerSomSkalOverstyresTil, enhetsnavnSomSkalOverstyresTil)
+            mockedOppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(arbeidsfordelingPåBehandling, navIdent)
+        } returns OppgaveArbeidsfordeling(navIdent, enhetsnummerSomSkalOverstyresTil, enhetsnavnSomSkalOverstyresTil)
 
         val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
         every {
@@ -203,8 +203,8 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every {
-            mockedNavIdentOgEnhetService.hentNavIdentOgEnhet(arbeidsfordelingPåBehandling, null)
-        } returns NavIdentOgEnhet(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
+            mockedOppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(arbeidsfordelingPåBehandling, null)
+        } returns OppgaveArbeidsfordeling(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
 
         // Act
         oppgaveService.opprettOppgave(
