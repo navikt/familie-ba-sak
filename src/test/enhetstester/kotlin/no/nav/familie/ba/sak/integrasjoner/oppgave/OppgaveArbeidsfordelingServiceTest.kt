@@ -18,7 +18,7 @@ class OppgaveArbeidsfordelingServiceTest {
     private val oppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService = OppgaveArbeidsfordelingService(integrasjonClient = mockedIntegrasjonClient)
 
     @Nested
-    inner class FinnOppgaveArbeidsfordelingTest {
+    inner class FinnArbeidsfordelingForOppgaveTest {
         @Test
         fun `skal kaste feil om arbeidsfordeling returnerer midlertidig enhet 4863 og NAV-ident er null`() {
             // Arrange
