@@ -93,7 +93,6 @@ class InnkommendeJournalføringServiceEnhetTest {
         every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId1) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
         every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId2) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 
-
         every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.UGRADERT) } returns true
         every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) } returns false
         // Act
