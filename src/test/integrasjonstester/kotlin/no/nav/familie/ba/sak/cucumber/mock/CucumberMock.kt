@@ -354,7 +354,7 @@ class CucumberMock(
             valutakursService = valutakursService,
         )
 
-    val saksbehandlerContext = SaksbehandlerContext("")
+    val saksbehandlerContext = SaksbehandlerContext("", "")
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
     val tilkjentYtelseValideringService =

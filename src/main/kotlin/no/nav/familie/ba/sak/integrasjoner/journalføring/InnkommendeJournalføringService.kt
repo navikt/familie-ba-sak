@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJourn
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService.Companion.BARNETRYGD_SØKNAD_BREVKODER
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService.Companion.NAV_NO
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
@@ -15,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
+import no.nav.familie.ba.sak.integrasjoner.mottak.MottakClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
@@ -28,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
@@ -49,6 +53,8 @@ class InnkommendeJournalføringService(
     private val stegService: StegService,
     private val journalføringMetrikk: JournalføringMetrikk,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
+    private val mottakClient: MottakClient,
+    private val saksbehandlerContext: SaksbehandlerContext,
 ) {
     fun hentDokument(
         journalpostId: String,
@@ -57,14 +63,25 @@ class InnkommendeJournalføringService(
 
     fun hentJournalpost(journalpostId: String): Journalpost = integrasjonClient.hentJournalpost(journalpostId)
 
-    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> =
-        integrasjonClient.hentJournalposterForBruker(
-            JournalposterForBrukerRequest(
-                antall = 1000,
-                brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
-                tema = listOf(Tema.BAR),
-            ),
-        )
+    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> {
+        val journalposterForBruker =
+            integrasjonClient
+                .hentJournalposterForBruker(
+                    JournalposterForBrukerRequest(
+                        antall = 1000,
+                        brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                        tema = listOf(Tema.BAR),
+                    ),
+                ).filter {
+                    if (it.erDigitalSøknad()) {
+                        val strengesteAdressebeskyttelsegradering = mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(it.journalpostId)
+                        saksbehandlerContext.harTilgang(adressebeskyttelsegradering = strengesteAdressebeskyttelsegradering)
+                    } else {
+                        true
+                    }
+                }
+        return journalposterForBruker
+    }
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
@@ -336,5 +353,8 @@ class InnkommendeJournalføringService(
 
     companion object {
         const val NAV_NO = "NAV_NO"
+        val BARNETRYGD_SØKNAD_BREVKODER = listOf("NAV 33-00.07", "NAV 33-00.09")
     }
 }
+
+fun Journalpost.erDigitalSøknad() = this.kanal == NAV_NO && this.dokumenter?.any { dokument -> BARNETRYGD_SØKNAD_BREVKODER.any { brevkode -> brevkode == dokument.brevkode } } ?: false
