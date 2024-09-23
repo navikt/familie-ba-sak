@@ -71,4 +71,60 @@ class InnkommendeJournalføringServiceEnhetTest {
         // Assert
         assertThat(journalposterForBruker).containsExactlyInAnyOrderElementsOf(journalposter)
     }
+
+    @Test
+    fun `skal filtrere vekk journalpost når den er en digital søknad og har personer med adressebeskyttelsegradering dersom saksbehandler ikke har tilgang`() {
+        // Arrange
+        val brukerId = "12345678910"
+        val journalpostId1 = "123"
+        val journalpostId2 = "456"
+        val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId1), lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId2))
+
+        every {
+            integrasjonClient.hentJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    antall = 1000,
+                    brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                    tema = listOf(Tema.BAR),
+                ),
+            )
+        } returns journalposter
+
+        every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId1) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
+        every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId2) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+
+
+        every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.UGRADERT) } returns true
+        every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) } returns false
+        // Act
+        val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
+
+        // Assert
+        assertThat(journalposterForBruker).contains(journalposter.find { it.journalpostId == journalpostId1 })
+        assertThat(journalposterForBruker).doesNotContain(journalposter.find { it.journalpostId == journalpostId2 })
+    }
+
+    @Test
+    fun `skal returnere alle journalposter for bruker når søknadene ikke er digitale, da vet vi ingenting om adressebeskyttelsegradering`() {
+        // Arrange
+        val brukerId = "12345678910"
+        val journalpostId = "123"
+        val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId, kanal = "SKAN_NETS"))
+
+        every {
+            integrasjonClient.hentJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    antall = 1000,
+                    brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                    tema = listOf(Tema.BAR),
+                ),
+            )
+        } returns journalposter
+
+        // Act
+        val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
+
+        // Assert
+        assertThat(journalposterForBruker).containsExactlyInAnyOrderElementsOf(journalposter)
+    }
 }

@@ -31,6 +31,7 @@ import java.time.LocalDateTime
 fun lagTestJournalpost(
     personIdent: String,
     journalpostId: String,
+    kanal: String? = "NAV_NO"
 ): Journalpost =
     Journalpost(
         journalpostId = journalpostId,
@@ -48,7 +49,7 @@ fun lagTestJournalpost(
                 type = AvsenderMottakerIdType.FNR,
             ),
         journalforendeEnhet = DEFAULT_JOURNALFØRENDE_ENHET,
-        kanal = "NAV_NO",
+        kanal = kanal,
         dokumenter =
             listOf(
                 DokumentInfo(
