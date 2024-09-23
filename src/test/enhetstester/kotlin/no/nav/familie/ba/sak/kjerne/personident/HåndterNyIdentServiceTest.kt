@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle.FORELDER
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent as PersonopplysningerPersonIdent
 
 internal class HåndterNyIdentServiceTest {
     private val aktørIdRepository: AktørIdRepository = mockk()
@@ -260,6 +262,26 @@ internal class HåndterNyIdentServiceTest {
             val historiskIdent = randomFnr()
             val historiskAktør = tilAktør(historiskIdent)
             val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val fødselsdato = LocalDate.now().minusYears(4)
+
+            every {
+                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+            } returns PersonInfo(fødselsdato = fødselsdato)
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(any()) } returns
+                PersonopplysningGrunnlag(
+                    behandlingId = 1L,
+                    personer =
+                        mutableSetOf(
+                            lagPerson(
+                                personIdent = PersonopplysningerPersonIdent(personIdentSomFinnes),
+                                aktør = aktørIdSomFinnes,
+                                fødselsdato = fødselsdato,
+                            ),
+                        ),
+                )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
@@ -310,6 +332,59 @@ internal class HåndterNyIdentServiceTest {
             )
             verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
+        }
+
+        @Test
+        fun `Skal kaste feil når vi prøver legge til ny ident på aktør som finnes i systemet og som har endret fødselsdato`() {
+            val personIdentSomFinnes = randomFnr()
+            val personIdentSomSkalLeggesTil = randomFnr()
+            val historiskIdent = randomFnr()
+            val historiskAktør = tilAktør(historiskIdent)
+            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val fødselsdato = LocalDate.now().minusYears(4)
+
+            every {
+                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+            } returns PersonInfo(fødselsdato = fødselsdato.minusMonths(2))
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(any()) } returns
+                PersonopplysningGrunnlag(
+                    behandlingId = 1L,
+                    personer =
+                        mutableSetOf(
+                            lagPerson(
+                                personIdent = PersonopplysningerPersonIdent(personIdentSomFinnes),
+                                aktør = aktørIdSomFinnes,
+                                fødselsdato = fødselsdato,
+                            ),
+                        ),
+                )
+
+            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+                listOf(
+                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                    IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(historiskAktør.aktørId, true, "AKTORID"),
+                    IdentInformasjon(historiskIdent, true, "FOLKEREGISTERIDENT"),
+                )
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
+                aktørIdSomFinnes
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(historiskAktør.aktørId) }.answers {
+                null
+            }
+
+            val exception =
+                assertThrows<Feil> {
+                    håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
+                }
+
+            assertThat(exception.message).startsWith("Fødselsdato er forskjellig fra forrige behandling")
         }
 
         @Test

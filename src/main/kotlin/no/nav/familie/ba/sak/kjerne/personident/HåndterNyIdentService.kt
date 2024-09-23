@@ -37,20 +37,22 @@ class HåndterNyIdentService(
 
         val aktørId = identerFraPdl.hentAktivAktørId()
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
+        val aktuellFagsakIdVedMerging = hentAktuellFagsakId(identerFraPdl)
 
         return when {
+            // Personen er ikke i noen fagsaker
+            aktuellFagsakIdVedMerging == null -> aktør
+
             // Ny aktørId, nytt fødselsnummer -> begge håndteres i PatchMergetIdentTask
             aktør == null -> {
-                val aktuellFagsakIdVedMerging = hentAktuellFagsakId(identerFraPdl)
-                if (aktuellFagsakIdVedMerging != null) {
-                    validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
-                    opprettMergeIdentTask(aktuellFagsakIdVedMerging, identerFraPdl)
-                }
+                validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
+                opprettMergeIdentTask(aktuellFagsakIdVedMerging, identerFraPdl)
                 null
             }
 
             // Samme aktørId, nytt fødselsnummer -> legg til fødselsnummer på aktør
             !aktør.harIdent(fødselsnummer = nyIdent.ident) -> {
+                validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
                 logger.info("Legger til ny ident")
                 secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
                 personIdentService.opprettPersonIdent(aktør, nyIdent.ident)
