@@ -4,6 +4,7 @@ import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalpostMedTilgang
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -36,7 +37,7 @@ class JournalføringController(
     @PostMapping(path = ["/for-bruker"])
     fun hentJournalposterForBruker(
         @RequestBody personIdentBody: PersonIdent,
-    ): ResponseEntity<Ressurs<List<Journalpost>>> =
+    ): ResponseEntity<Ressurs<List<JournalpostMedTilgang>>> =
         ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentJournalposterForBruker(

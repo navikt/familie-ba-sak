@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.mottak
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -12,11 +13,11 @@ import java.net.URI
 
 @Component
 class MottakClient(
-    @Value("\${MOTTAK_URL}") val mottakBaseUrl: URI,
+    @Value("\${FAMILIE_BAKS_MOTTAK_URL}") val mottakBaseUrl: URI,
     @Qualifier("jwtBearer") val restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "baks-mottak") {
     fun hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId: String): ADRESSEBESKYTTELSEGRADERING {
-        val uri = UriUtil.uri(mottakBaseUrl, "søknad/adressebeskyttelse/$journalpostId")
+        val uri = UriUtil.uri(mottakBaseUrl, "soknad/hent-adressebeskyttelse/${Tema.BAR.name}/$journalpostId")
         return kallEksternTjeneste<ADRESSEBESKYTTELSEGRADERING>(
             tjeneste = "baks-mottak",
             uri = uri,

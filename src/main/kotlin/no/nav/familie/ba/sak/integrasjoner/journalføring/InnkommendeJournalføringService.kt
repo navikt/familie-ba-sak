@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalpostMedTilgang
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
@@ -63,25 +64,24 @@ class InnkommendeJournalføringService(
 
     fun hentJournalpost(journalpostId: String): Journalpost = integrasjonClient.hentJournalpost(journalpostId)
 
-    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> {
-        val journalposterForBruker =
-            integrasjonClient
-                .hentJournalposterForBruker(
-                    JournalposterForBrukerRequest(
-                        antall = 1000,
-                        brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
-                        tema = listOf(Tema.BAR),
-                    ),
-                ).filter {
+    fun hentJournalposterForBruker(brukerId: String): List<JournalpostMedTilgang> =
+        integrasjonClient
+            .hentJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    antall = 1000,
+                    brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                    tema = listOf(Tema.BAR),
+                ),
+            ).map {
+                val harTilgang =
                     if (it.erDigitalSøknad()) {
                         val strengesteAdressebeskyttelsegradering = mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(it.journalpostId)
                         saksbehandlerContext.harTilgang(adressebeskyttelsegradering = strengesteAdressebeskyttelsegradering)
                     } else {
                         true
                     }
-                }
-        return journalposterForBruker
-    }
+                JournalpostMedTilgang(journalpost = it, harTilgang = harTilgang)
+            }
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
