@@ -21,12 +21,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
+import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
 import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -83,7 +84,6 @@ class ForvalterController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val kompetanseService: KompetanseService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -448,6 +448,20 @@ class ForvalterController(
 
         val task = taskService.save(SlettKompetanserTask.opprettTask(behandlingId))
         return ResponseEntity.ok(Ressurs.success("Kompetanser slettes i task ${task.id}"))
+    }
+
+    @PutMapping("/maskinelt-underkjenn-vedtak/{behandlingId}")
+    @Operation(summary = "Underkjenner et vedtak på vegne av system")
+    fun maskineltUnderkjennVedtak(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Underkjenner et vedtak på vegne av system",
+        )
+
+        val task = taskService.save(MaskineltUnderkjennVedtakTask.opprettTask(behandlingId))
+        return ResponseEntity.ok(Ressurs.success("Underkjenner vedtak i behandling $behandlingId i task ${task.id}"))
     }
 
     @PostMapping("/kjør-oppdater-løpende-flagg-task")
