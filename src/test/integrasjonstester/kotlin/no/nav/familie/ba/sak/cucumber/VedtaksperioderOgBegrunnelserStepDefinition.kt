@@ -259,7 +259,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
-        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)
+        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste, behandlingTilForrigeBehandling = behandlingTilForrigeBehandling)
     }
 
     /**
@@ -493,6 +493,22 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             .isEqualTo(forvendtedeBrevperioder)
     }
 
+    @Så("forvent følgende aktører på behandling {}")
+    fun `forvent følgende aktører på behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeAktører = dataTable.asMaps().map { Aktør(aktørId = parseAktørId(it)) }.sortedBy { it.aktørId }
+        val faktiskeAktører =
+            persongrunnlag
+                .finnPersonGrunnlagForBehandling(behandlingId)
+                .personer
+                .map { it.aktør }
+                .sortedBy { it.aktørId }
+
+        assertThat(faktiskeAktører).isEqualTo(forventedeAktører)
+    }
+
     /**
      * Mulige verdier: | Fra dato | Til dato |
      */
@@ -540,7 +556,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste)[behandlingId]!!
+            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste, behandlingTilForrigeBehandling = behandlingTilForrigeBehandling)[behandlingId]!!
                 .andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
@@ -652,7 +668,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
             )
 
         mock.automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
@@ -672,7 +688,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
                 forrigeBehandling = null,
             )
 
@@ -686,7 +702,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
             )
 
         mock.automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
@@ -745,7 +761,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val mock =
             CucumberMock(
                 dataFraCucumber = this,
-                nyBehanldingId = behandlingId,
+                nyBehandlingId = behandlingId,
             )
 
         mock.stegService.håndterVilkårsvurdering(behandlinger[behandlingId]!!)
