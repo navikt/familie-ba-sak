@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterValutakursService
@@ -57,6 +58,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingSteg
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.EøsSkjemaerForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.PersonopplysningGrunnlagForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -73,8 +76,8 @@ val logger: Logger = LoggerFactory.getLogger("CucumberMock")
 
 class CucumberMock(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
-    nyBehanldingId: Long,
-    forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehanldingId]?.let { dataFraCucumber.behandlinger[it] },
+    nyBehandlingId: Long,
+    forrigeBehandling: Behandling? = dataFraCucumber.behandlingTilForrigeBehandling[nyBehandlingId]?.let { dataFraCucumber.behandlinger[it] },
     efSakRestClientMock: EfSakRestClient = mockEfSakRestClient(),
     ecbService: ECBService = mockEcbService(dataFraCucumber),
     scope: CoroutineScope? = null,
@@ -86,12 +89,10 @@ class CucumberMock(
     val oppgaveService = mockOppgaveService()
     val personopplysningerService = mockPersonopplysningerService(dataFraCucumber)
     val tilgangService = mockTilgangService()
-    val vilkårsvurderingForNyBehandlingService = mockVilkårsvurderingForNyBehandlingService(dataFraCucumber)
     val vilkårService = mockVilkårService(dataFraCucumber)
     val tilbakestillBehandlingService = mockTilbakestillBehandlingService()
     val personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository(dataFraCucumber.persongrunnlag)
-    val personopplysningGrunnlagForNyBehandlingService = mockPersonopplysningGrunnlagForNyBehandlingService(dataFraCucumber)
-    val personidentService = mockPersonidentService(dataFraCucumber, nyBehanldingId)
+    val personidentService = mockPersonidentService(dataFraCucumber)
     val tilkjentYtelseRepository = mockTilkjentYtelseRepository(dataFraCucumber)
     val vilkårsvurderingRepository = mockVilkårsvurderingRepository(dataFraCucumber)
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumber)
@@ -99,7 +100,7 @@ class CucumberMock(
     val vilkårsvurderingService = VilkårsvurderingService(vilkårsvurderingRepository, sanityService = mockk())
     val vilkårsvurderingTidslinjeService = mockVilkårsvurderingTidslinjeService(vilkårsvurderingRepository, vilkårsvurderingService, persongrunnlagService)
     val loggService = mockLoggService()
-    val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehanldingId)
+    val behandlingHentOgPersisterService = mockBehandlingHentOgPersisterService(forrigeBehandling = forrigeBehandling, dataFraCucumber = dataFraCucumber, idForNyBehandling = nyBehandlingId)
     val periodeOvergangsstønadGrunnlagRepository = mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber)
     val søknadGrunnlagRepository = mockSøknadGrunnlagRepository(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)
@@ -419,6 +420,37 @@ class CucumberMock(
                 loggService = loggService,
                 tilbakestillBehandlingService = tilbakestillBehandlingService,
             ),
+        )
+
+    val personopplysningGrunnlagForNyBehandlingService =
+        PersonopplysningGrunnlagForNyBehandlingService(
+            personidentService = personidentService,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+        )
+
+    val endretUtbetalingAndelService =
+        EndretUtbetalingAndelService(
+            endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            beregningService = beregningService,
+            persongrunnlagService = persongrunnlagService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            vilkårsvurderingService = vilkårsvurderingService,
+            endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            unleashMedContextService = unleashNextMedContextService,
+        )
+
+    val vilkårsvurderingForNyBehandlingService =
+        VilkårsvurderingForNyBehandlingService(
+            vilkårsvurderingService = vilkårsvurderingService,
+            behandlingService = behandlingService,
+            persongrunnlagService = persongrunnlagService,
+            behandlingstemaService = behandlingstemaService,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            vilkårsvurderingMetrics = mockk(),
+            andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
         )
 
     val registrerPersongrunnlag =

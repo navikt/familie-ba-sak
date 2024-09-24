@@ -8,26 +8,25 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle.FORELDER
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.task.OpprettTaskService
-import no.nav.familie.ba.sak.task.PatchMergetIdentTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.prosessering.error.RekjørSenereException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -35,17 +34,18 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent as PersonopplysningerPersonIdent
 
 internal class HåndterNyIdentServiceTest {
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val fagsakService: FagsakService = mockk()
     private val opprettTaskService: OpprettTaskService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val personopplysningerService: PersonopplysningerService = mockk()
-    private val behandlingRepository: BehandlingRepository = mockk()
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
+    private val pdlRestClient: PdlRestClient = mockk()
 
     @Nested
-    inner class MergeIdentOgRekjørSenereTest {
+    inner class OpprettMergeIdentTaskTest {
         private val personIdentService: PersonidentService = mockk()
         private val håndterNyIdentService =
             HåndterNyIdentService(
@@ -53,30 +53,71 @@ internal class HåndterNyIdentServiceTest {
                 fagsakService = fagsakService,
                 opprettTaskService = opprettTaskService,
                 persongrunnlagService = persongrunnlagService,
-                personopplysningerService = personopplysningerService,
-                behandlingRepository = behandlingRepository,
+                behandlinghentOgPersisterService = behandlingHentOgPersisterService,
+                pdlRestClient = pdlRestClient,
                 personIdentService = personIdentService,
             )
 
-        val fnrGammel = randomFnr(LocalDate.of(2000, 1, 1))
-        val aktørGammel = tilAktør(fnrGammel)
+        val gammelFødselsdato = LocalDate.of(2000, 1, 1)
+        val gammeltFnr = randomFnr(gammelFødselsdato)
+        val gammelAktør = tilAktør(gammeltFnr)
+        val gammelPerson = lagPerson(aktør = gammelAktør, fødselsdato = gammelFødselsdato)
 
-        val fnrNy = randomFnr(LocalDate.of(2000, 1, 1))
-        val aktørNy = tilAktør(fnrGammel)
+        val nyFødselsdato = LocalDate.of(2000, 2, 2)
+        val nyttFnr = randomFnr(nyFødselsdato)
+        val nyAktør = tilAktør(nyttFnr)
+
+        val gammelBehandling = lagBehandling()
 
         val identInformasjonFraPdl =
             listOf(
-                IdentInformasjon(aktørNy.aktørId, false, "AKTORID"),
-                IdentInformasjon(fnrNy, false, "FOLKEREGISTERIDENT"),
-                IdentInformasjon(aktørGammel.aktørId, true, "AKTORID"),
-                IdentInformasjon(fnrGammel, true, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(nyAktør.aktørId, false, "AKTORID"),
+                IdentInformasjon(nyttFnr, false, "FOLKEREGISTERIDENT"),
+                IdentInformasjon(gammelAktør.aktørId, true, "AKTORID"),
+                IdentInformasjon(gammeltFnr, true, "FOLKEREGISTERIDENT"),
             )
 
         @BeforeEach
         fun init() {
             clearMocks(answers = true, firstMock = fagsakService)
-            every { aktørIdRepository.findByAktørIdOrNull(aktørGammel.aktørId) } returns aktørGammel
+            every { persongrunnlagService.hentSøkerOgBarnPåFagsak(any()) } returns setOf(gammelPerson.tilPersonEnkel())
             every { personIdentService.hentIdenter(any(), true) } returns identInformasjonFraPdl
+            every { aktørIdRepository.findByAktørIdOrNull(nyAktør.aktørId) } returns null
+            every { aktørIdRepository.findByAktørIdOrNull(gammelAktør.aktørId) } returns gammelAktør
+            every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
+            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FORELDER, fagsakId = 0))
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns gammelBehandling
+            every { persongrunnlagService.hentAktiv(any()) } returns
+                PersonopplysningGrunnlag(
+                    behandlingId = gammelBehandling.id,
+                    personer = mutableSetOf(gammelPerson),
+                )
+        }
+
+        @Test
+        fun `håndterNyIdent dropper merging av identer når det ikke eksisterer en fagsak for identer`() {
+            // arrange
+            every { fagsakService.hentFagsakDeltager(any()) } returns emptyList()
+
+            // act
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
+
+            // assert
+            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
+            assertThat(aktør).isNull()
+        }
+
+        @Test
+        fun `håndterNyIdent dropper merging av identer når det eksisterer en fagsak uten fagsakId for identer`() {
+            // arrange
+            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FORELDER))
+
+            // act
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
+
+            // assert
+            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
+            assertThat(aktør).isNull()
         }
 
         @Test
@@ -84,119 +125,71 @@ internal class HåndterNyIdentServiceTest {
             // arrange
             every { fagsakService.hentFagsakDeltager(any()) } returns
                 listOf(
-                    RestFagsakDeltager(rolle = FagsakDeltagerRolle.BARN, fagsakId = 1),
-                    RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 2),
+                    RestFagsakDeltager(rolle = FORELDER, fagsakId = 1),
+                    RestFagsakDeltager(rolle = FORELDER, fagsakId = 2),
                 )
 
             // act & assert
             val feil =
                 assertThrows<Feil> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
+                    håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
             assertThat(feil.message).startsWith("Det eksisterer flere fagsaker på identer som skal merges")
         }
 
         @Test
-        fun `håndterNyIdent skipper mering av ident når det ikke eksisterer en fagsak for identer`() {
-            // arrange
-            every { fagsakService.hentFagsakDeltager(any()) } returns emptyList()
-            every { personIdentService.opprettPersonIdent(any(), any()) } returns randomAktør()
-            every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
-
-            // act
-            håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
-
-            // assert
-            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
-            verify(exactly = 1) { personIdentService.opprettPersonIdent(any(), any()) }
-        }
-
-        @Test
-        fun `håndterNyIdent kaster Feil når det eksisterer en fagsak uten fagsakId for identer`() {
-            // arrange
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER))
-            every { personIdentService.opprettPersonIdent(any(), any()) } returns randomAktør()
-            every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
-
-            // act
-            håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
-
-            // assert
-            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
-            verify(exactly = 1) { personIdentService.opprettPersonIdent(any(), any()) }
-        }
-
-        @Test
         fun `håndterNyIdent kaster Feil når fødselsdato er endret for identer`() {
             // arrange
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 0))
-
-            every { personopplysningerService.hentPersoninfoEnkel(any()) } returns
-                PersonInfo(
-                    fødselsdato = LocalDate.of(2000, 2, 2),
-                )
-            val gammelBehandling = lagBehandling()
-            every { behandlingRepository.finnSisteIverksatteBehandling(any()) } returns gammelBehandling
-
-            every { persongrunnlagService.hentAktiv(any()) } returns
-                PersonopplysningGrunnlag(
-                    behandlingId = gammelBehandling.id,
-                    personer =
-                        mutableSetOf(
-                            lagPerson(
-                                aktør = aktørGammel,
-                                fødselsdato = LocalDate.of(2000, 1, 1),
-                            ),
-                        ),
-                )
+            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
 
             // act & assert
             val feil =
                 assertThrows<Feil> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
+                    håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
-            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt. Se")
+            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt.")
+        }
+
+        // behandlinghentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+
+        @Test
+        fun `håndterNyIdent lager en PatchMergetIdent task ved endret fødselsdato, hvis det ikke er en vedtatt behandling`() {
+            // arrange
+            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
+
+            // act & assert
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
+
+            assertThat(aktør).isNull()
+            verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
         }
 
         @Test
-        fun `håndterNyIdent lager en PatchMergetIdent task`() {
+        fun `håndterNyIdent lager en PatchMergetIdent task ved endret fødselsdato, hvis aktør ikke er med i forrige vedtatte behandling`() {
             // arrange
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 0))
-            every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns
-                Task(
-                    type = PatchMergetIdentTask.TASK_STEP_TYPE,
-                    payload = "",
-                )
-
-            every { personopplysningerService.hentPersoninfoEnkel(any()) } returns
-                PersonInfo(
-                    fødselsdato = LocalDate.of(2000, 1, 1),
-                )
-            val gammelBehandling = lagBehandling()
-            every { behandlingRepository.finnSisteIverksatteBehandling(any()) } returns gammelBehandling
-
-            every { persongrunnlagService.hentAktiv(any()) } returns
-                PersonopplysningGrunnlag(
-                    behandlingId = gammelBehandling.id,
-                    personer =
-                        mutableSetOf(
-                            lagPerson(
-                                aktør = aktørGammel,
-                                fødselsdato = LocalDate.of(2000, 1, 1),
-                            ),
-                        ),
-                )
+            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = nyFødselsdato)
+            every { persongrunnlagService.hentAktiv(any()) } returns PersonopplysningGrunnlag(behandlingId = gammelBehandling.id)
 
             // act & assert
-            val feil =
-                assertThrows<RekjørSenereException> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(fnrNy))
-                }
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
 
+            assertThat(aktør).isNull()
             verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
-            assertThat(feil.årsak).startsWith("Mottok identhendelse som blir forsøkt patchet automatisk")
+        }
+
+        @Test
+        fun `håndterNyIdent lager en PatchMergetIdent task hvis fødselsdato er uendret`() {
+            // arrange
+            every { pdlRestClient.hentPerson(any<String>(), any()) } returns PersonInfo(fødselsdato = gammelFødselsdato)
+
+            // act & assert
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
+
+            assertThat(aktør).isNull()
+            verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
         }
     }
 
@@ -227,8 +220,8 @@ internal class HåndterNyIdentServiceTest {
                 fagsakService = fagsakService,
                 opprettTaskService = opprettTaskService,
                 persongrunnlagService = persongrunnlagService,
-                personopplysningerService = personopplysningerService,
-                behandlingRepository = behandlingRepository,
+                behandlinghentOgPersisterService = behandlingHentOgPersisterService,
+                pdlRestClient = pdlRestClient,
                 personIdentService = personidentService,
             )
 
@@ -238,7 +231,7 @@ internal class HåndterNyIdentServiceTest {
             clearMocks(answers = true, firstMock = personidentRepository)
             clearMocks(answers = true, firstMock = taskRepositoryMock)
 
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FagsakDeltagerRolle.FORELDER, fagsakId = 0))
+            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FORELDER, fagsakId = 0))
 
             every { personidentRepository.saveAndFlush(capture(personIdentSlot)) } answers {
                 personIdentSlot.captured
@@ -269,6 +262,26 @@ internal class HåndterNyIdentServiceTest {
             val historiskIdent = randomFnr()
             val historiskAktør = tilAktør(historiskIdent)
             val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val fødselsdato = LocalDate.now().minusYears(4)
+
+            every {
+                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+            } returns PersonInfo(fødselsdato = fødselsdato)
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(any()) } returns
+                PersonopplysningGrunnlag(
+                    behandlingId = 1L,
+                    personer =
+                        mutableSetOf(
+                            lagPerson(
+                                personIdent = PersonopplysningerPersonIdent(personIdentSomFinnes),
+                                aktør = aktørIdSomFinnes,
+                                fødselsdato = fødselsdato,
+                            ),
+                        ),
+                )
 
             every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
                 listOf(
@@ -319,6 +332,59 @@ internal class HåndterNyIdentServiceTest {
             )
             verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
+        }
+
+        @Test
+        fun `Skal kaste feil når vi prøver legge til ny ident på aktør som finnes i systemet og som har endret fødselsdato`() {
+            val personIdentSomFinnes = randomFnr()
+            val personIdentSomSkalLeggesTil = randomFnr()
+            val historiskIdent = randomFnr()
+            val historiskAktør = tilAktør(historiskIdent)
+            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val fødselsdato = LocalDate.now().minusYears(4)
+
+            every {
+                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+            } returns PersonInfo(fødselsdato = fødselsdato.minusMonths(2))
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(any()) } returns
+                PersonopplysningGrunnlag(
+                    behandlingId = 1L,
+                    personer =
+                        mutableSetOf(
+                            lagPerson(
+                                personIdent = PersonopplysningerPersonIdent(personIdentSomFinnes),
+                                aktør = aktørIdSomFinnes,
+                                fødselsdato = fødselsdato,
+                            ),
+                        ),
+                )
+
+            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+                listOf(
+                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                    IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(historiskAktør.aktørId, true, "AKTORID"),
+                    IdentInformasjon(historiskIdent, true, "FOLKEREGISTERIDENT"),
+                )
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
+                aktørIdSomFinnes
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(historiskAktør.aktørId) }.answers {
+                null
+            }
+
+            val exception =
+                assertThrows<Feil> {
+                    håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
+                }
+
+            assertThat(exception.message).startsWith("Fødselsdato er forskjellig fra forrige behandling")
         }
 
         @Test
