@@ -40,7 +40,7 @@ data class RestSanityEØSBegrunnelse(
     @Deprecated("Skal bruke periodeResultatForPerson i stedet")
     val periodeType: String?,
     val brevPeriodeType: String?,
-    val begrunnelseTypeForPerson: String?,
+    val begrunnelseType: String?,
     val valgbarhet: String?,
     val ikkeIBruk: Boolean?,
 ) {
@@ -84,7 +84,7 @@ data class RestSanityEØSBegrunnelse(
                 ovrigeTriggere?.mapNotNull {
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),
-            begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
+            begrunnelseType = begrunnelseType.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
             ikkeIBruk = ikkeIBruk ?: false,
         )
     }
