@@ -13,11 +13,11 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalpostMedTilgang
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.TilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.integrasjoner.mottak.MottakClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -64,7 +64,7 @@ class InnkommendeJournalføringService(
 
     fun hentJournalpost(journalpostId: String): Journalpost = integrasjonClient.hentJournalpost(journalpostId)
 
-    fun hentJournalposterForBruker(brukerId: String): List<JournalpostMedTilgang> =
+    fun hentJournalposterForBruker(brukerId: String): List<TilgangsstyrtJournalpost> =
         integrasjonClient
             .hentJournalposterForBruker(
                 JournalposterForBrukerRequest(
@@ -73,14 +73,19 @@ class InnkommendeJournalføringService(
                     tema = listOf(Tema.BAR),
                 ),
             ).map {
-                val harTilgang =
+                val (harTilgang, adressebeskyttelsegradering) =
                     if (it.erDigitalSøknad()) {
                         val strengesteAdressebeskyttelsegradering = mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(it.journalpostId)
-                        saksbehandlerContext.harTilgang(adressebeskyttelsegradering = strengesteAdressebeskyttelsegradering)
+                        val harTilgang = saksbehandlerContext.harTilgang(adressebeskyttelsegradering = strengesteAdressebeskyttelsegradering)
+                        Pair(harTilgang, strengesteAdressebeskyttelsegradering)
                     } else {
-                        true
+                        Pair(true, null)
                     }
-                JournalpostMedTilgang(journalpost = it, harTilgang = harTilgang)
+                TilgangsstyrtJournalpost(
+                    journalpost = it,
+                    harTilgang = harTilgang,
+                    adressebeskyttelsegradering = adressebeskyttelsegradering,
+                )
             }
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
