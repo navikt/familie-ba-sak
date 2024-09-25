@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalpostMedTilgang
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.mottak.MottakClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -47,12 +46,11 @@ class InnkommendeJournalføringServiceEnhetTest {
         )
 
     @Test
-    fun `skal returnere alle journalposter for bruker når ingen av de digitale søknadene har personer med adressebeskyttelsegradering kode 6, 7 eller 19`() {
+    fun `skal returnere alle journalposter med harTilgang satt til true for bruker når ingen av de digitale søknadene har personer med adressebeskyttelsegradering kode 6, 7 eller 19`() {
         // Arrange
         val brukerId = "12345678910"
         val journalpostId = "123"
         val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId))
-        val journalposterMedTilgang = journalposter.map { JournalpostMedTilgang(it, true) }
 
         every {
             integrasjonClient.hentJournalposterForBruker(
@@ -71,11 +69,11 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
         // Assert
-        assertThat(journalposterForBruker).containsExactlyInAnyOrderElementsOf(journalposterMedTilgang)
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.harTilgang).isTrue
     }
 
     @Test
-    fun `skal filtrere vekk journalpost når den er en digital søknad og har personer med adressebeskyttelsegradering dersom saksbehandler ikke har tilgang`() {
+    fun `skal sette harTilgang til false på journalpost når den er en digital søknad og har personer med adressebeskyttelsegradering dersom saksbehandler ikke har tilgang`() {
         // Arrange
         val brukerId = "12345678910"
         val journalpostId1 = "123"
@@ -101,12 +99,12 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
         // Assert
-        assertThat(journalposterForBruker).contains(journalposter.find { it.journalpostId == journalpostId1 })
-        assertThat(journalposterForBruker).doesNotContain(journalposter.find { it.journalpostId == journalpostId2 })
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId1 }.harTilgang).isTrue
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId2 }.harTilgang).isFalse
     }
 
     @Test
-    fun `skal returnere alle journalposter for bruker når søknadene ikke er digitale, da vet vi ingenting om adressebeskyttelsegradering`() {
+    fun `skal returnere alle journalposter med harTilgang satt til true for bruker når søknadene ikke er digitale, da vet vi ingenting om adressebeskyttelsegradering`() {
         // Arrange
         val brukerId = "12345678910"
         val journalpostId = "123"
@@ -126,6 +124,6 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
         // Assert
-        assertThat(journalposterForBruker).containsExactlyInAnyOrderElementsOf(journalposter)
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.harTilgang).isTrue
     }
 }
