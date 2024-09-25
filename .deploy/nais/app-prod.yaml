@@ -103,6 +103,8 @@ spec:
           cluster: prod-fss
         - application: familie-klage
           cluster: prod-gcp
+        - application: familie-baks-mottak
+          cluster: prod-gcp
       external:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
