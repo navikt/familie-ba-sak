@@ -70,6 +70,7 @@ class InnkommendeJournalføringServiceEnhetTest {
 
         // Assert
         assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.harTilgang).isTrue
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
     }
 
     @Test
@@ -100,7 +101,9 @@ class InnkommendeJournalføringServiceEnhetTest {
 
         // Assert
         assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId1 }.harTilgang).isTrue
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId1 }.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.UGRADERT)
         assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId2 }.harTilgang).isFalse
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId2 }.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }
 
     @Test
@@ -125,5 +128,6 @@ class InnkommendeJournalføringServiceEnhetTest {
 
         // Assert
         assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.harTilgang).isTrue
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.adressebeskyttelsegradering).isNull()
     }
 }
