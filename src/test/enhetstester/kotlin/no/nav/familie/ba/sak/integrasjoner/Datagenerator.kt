@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 fun lagTestJournalpost(
     personIdent: String,
     journalpostId: String,
-    kanal: String? = "NAV_NO"
+    kanal: String? = "NAV_NO",
 ): Journalpost =
     Journalpost(
         journalpostId = journalpostId,
