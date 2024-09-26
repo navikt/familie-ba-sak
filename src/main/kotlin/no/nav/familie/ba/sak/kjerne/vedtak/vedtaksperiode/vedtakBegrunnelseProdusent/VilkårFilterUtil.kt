@@ -97,15 +97,17 @@ private fun finnUtgjørendeVilkår(
 
     return if (begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
         when (sanityBegrunnelse.periodeResultat) {
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING -> vilkårTjent + vilkårEndret
+            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
+            SanityPeriodeResultat.IKKE_RELEVANT,
+            -> vilkårTjent + vilkårEndret
+
             SanityPeriodeResultat.INGEN_ENDRING -> vilkårEndret
+
             SanityPeriodeResultat.IKKE_INNVILGET,
             SanityPeriodeResultat.REDUKSJON,
             -> vilkårTapt + vilkårEndret
 
-            SanityPeriodeResultat.IKKE_RELEVANT,
-            null,
-            -> emptyList()
+            null -> emptyList()
         }
     } else {
         vilkårTapt.takeIf {
