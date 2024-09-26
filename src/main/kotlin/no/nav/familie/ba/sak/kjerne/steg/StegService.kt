@@ -603,8 +603,7 @@ class StegService(
     fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? = steg.firstOrNull { it.stegType() == stegType }
 
     private fun hentSisteAvsluttetBehandling(behandling: Behandling): Behandling =
-        behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-            ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
             ?: throw Feil(
                 "Forsøker å opprette en ${behandling.type.visningsnavn} " +
                     "med årsak ${behandling.opprettetÅrsak.visningsnavn}, " +

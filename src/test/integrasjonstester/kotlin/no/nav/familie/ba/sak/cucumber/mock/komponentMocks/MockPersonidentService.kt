@@ -7,22 +7,29 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 
 fun mockPersonidentService(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
-    nyBehandlingId: Long,
 ): PersonidentService {
     val personidentService = mockk<PersonidentService>()
     every { personidentService.hentOgLagreAktør(any(), any()) } answers {
         val personIdent = firstArg<String>()
-        dataFraCucumber.persongrunnlag[nyBehandlingId]!!
-            .personer
-            .single { it.aktør.aktivFødselsnummer() == personIdent }
+        dataFraCucumber.persongrunnlag
+            .flatMap { it.value.personer }
+            .first { it.aktør.aktivFødselsnummer() == personIdent }
             .aktør
     }
     every { personidentService.hentAktør(any()) } answers {
         val personIdent = firstArg<String>()
-        dataFraCucumber.persongrunnlag[nyBehandlingId]!!
-            .personer
-            .single { it.aktør.aktivFødselsnummer() == personIdent }
+        dataFraCucumber.persongrunnlag
+            .flatMap { it.value.personer }
+            .first { it.aktør.aktivFødselsnummer() == personIdent }
             .aktør
+    }
+    every { personidentService.hentOgLagreAktørIder(any(), any()) } answers {
+        val personIdenter = firstArg<List<String>>()
+        dataFraCucumber.persongrunnlag
+            .flatMap { it.value.personer }
+            .distinctBy { it.aktør.aktivFødselsnummer() }
+            .filter { it.aktør.aktivFødselsnummer() in personIdenter }
+            .map { it.aktør }
     }
     return personidentService
 }

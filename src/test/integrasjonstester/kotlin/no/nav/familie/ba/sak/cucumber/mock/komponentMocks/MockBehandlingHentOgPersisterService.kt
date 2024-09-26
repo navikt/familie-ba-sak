@@ -21,9 +21,10 @@ fun mockBehandlingHentOgPersisterService(
     }
     every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(any()) } answers {
         val fagsakId = firstArg<Long>()
-        dataFraCucumber.behandlinger.values
-            .filter { it.fagsak.id == fagsakId && it.status == BehandlingStatus.AVSLUTTET }
-            .maxByOrNull { it.aktivertTidspunkt }
+        dataFraCucumber.tilkjenteYtelser.values
+            .filter { it.behandling.fagsak.id == fagsakId && it.behandling.status == BehandlingStatus.AVSLUTTET && it.utbetalingsoppdrag != null }
+            .maxByOrNull { it.behandling.aktivertTidspunkt }
+            ?.behandling
     }
     every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers {
         val behandling = firstArg<Behandling>()

@@ -28,7 +28,7 @@ fun mockAutovedtakSmåbarnstilleggService(
     val cucumberMock =
         CucumberMock(
             dataFraCucumber = dataFraCucumber,
-            nyBehanldingId = småbarnstilleggBehandlingId,
+            nyBehandlingId = småbarnstilleggBehandlingId,
             forrigeBehandling = forrigeBehandling,
             efSakRestClientMock = efSakRestClient,
         )
