@@ -481,6 +481,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetEnsligMindrearigBorAlene"
     },
+    INNVILGET_FORLENGET_OPPHOLD_ETTER_ETTÅRIG_OPPHOLDSTILLATELSE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetForlengetOppholdEtterEttaarigOppholdstillatelse"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -1037,6 +1041,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
         override val sanityApiNavn = "avslagEnsligMindreaarigFlyktningBorIInstitusjon"
     },
+    AVSLAG_OPPHOLDSTILLATELSE_UTLENDINGSLOVEN_34_ANDRE_LEDD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+        override val sanityApiNavn = "avslagOppholdstillatelseUtlendingsloven34AndreLedd"
+    },
     OPPHØR_BARN_FLYTTET_FRA_SØKER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBarnBorIkkeMedSoker"
@@ -1521,6 +1529,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetalingTreAarTilbakeITid"
+    },
+    ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_TREDJELANDSBORGER {
+        override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreMaanederTredjelandsborger"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
     ENDRET_UTBETALING_ETTERBETALING_TRE_ÅR_TILBAKE_I_TID_SED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
