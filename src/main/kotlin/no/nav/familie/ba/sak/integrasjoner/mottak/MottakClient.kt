@@ -18,7 +18,7 @@ class MottakClient(
 ) : AbstractRestClient(restTemplate, "baks-mottak") {
     fun hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId: String): ADRESSEBESKYTTELSEGRADERING? {
         val uri = UriUtil.uri(mottakBaseUrl, "soknad/adressebeskyttelse/${Tema.BAR.name}/$journalpostId")
-        return kallEksternTjeneste<ADRESSEBESKYTTELSEGRADERING>(
+        return kallEksternTjeneste<ADRESSEBESKYTTELSEGRADERING?>(
             tjeneste = "baks-mottak",
             uri = uri,
             formål = "Finne ut om det finnes personer med adressebeskyttelsegradering i digital søknad",
