@@ -46,7 +46,7 @@ class InnkommendeJournalføringServiceEnhetTest {
         )
 
     @Test
-    fun `skal returnere alle journalposter med harTilgang satt til true for bruker når ingen av de digitale søknadene har personer med adressebeskyttelsegradering kode 6, 7 eller 19`() {
+    fun `skal returnere alle journalposter med harTilgang satt til true for bruker når de digitale søknadene har personer med adressebeskyttelsegradering ugradert`() {
         // Arrange
         val brukerId = "12345678910"
         val journalpostId = "123"

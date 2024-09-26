@@ -11,6 +11,18 @@ class SaksbehandlerContextTest {
     private val saksbehandlerContext = SaksbehandlerContext("kode6", kode7GruppeId = "kode7")
 
     @Test
+    fun `skal returnere true når det ikke finnes adressebeskyttelsegradering`() {
+        // Arrange
+        mockBrukerContext("A", groups = listOf("kode6", "kode7"))
+
+        // Act
+        val harTilgang = saksbehandlerContext.harTilgang(null)
+
+        // Assert
+        assertThat(harTilgang).isTrue()
+    }
+
+    @Test
     fun `skal returnere true på adressebeskyttelsegradering ugradert`() {
         // Arrange
         mockBrukerContext("A", groups = listOf("kode6", "kode7"))
