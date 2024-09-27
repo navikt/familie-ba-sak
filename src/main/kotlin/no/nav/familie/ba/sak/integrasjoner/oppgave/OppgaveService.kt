@@ -78,7 +78,7 @@ class OppgaveService(
                 arbeidsfordelingPåBehandlingRepository
                     .hentArbeidsfordelingPåBehandling(behandlingId)
 
-            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER)
+            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
 
             val oppgaveArbeidsfordeling =
                 if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
