@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -28,6 +29,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -45,6 +47,7 @@ class OppgaveService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val oppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+    private val unleashService: UnleashService,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -81,6 +84,8 @@ class OppgaveService(
                     navIdent = tilordnetNavIdent?.let { NavIdent(it) },
                 )
 
+            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
+
             val opprettOppgave =
                 OpprettOppgaveRequest(
                     ident = OppgaveIdentV2(ident = behandling.fagsak.aktør.aktørId, gruppe = IdentGruppe.AKTOERID),
@@ -89,10 +94,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = oppgaveArbeidsfordeling.enhetsnummer,
+                    enhetsnummer = if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) oppgaveArbeidsfordeling.enhetsnummer else arbeidsfordelingPåBehandling.behandlendeEnhetId,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = oppgaveArbeidsfordeling.navIdent?.ident,
+                    tilordnetRessurs = if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) oppgaveArbeidsfordeling.navIdent?.ident else tilordnetNavIdent,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
@@ -107,16 +112,18 @@ class OppgaveService(
 
             økTellerForAntallOppgaveTyper(oppgavetype)
 
-            val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != oppgaveArbeidsfordeling.enhetsnummer
+            if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
+                val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != oppgaveArbeidsfordeling.enhetsnummer
 
-            if (erEnhetsnummerEndret) {
-                arbeidsfordelingPåBehandlingRepository.save(
-                    arbeidsfordelingPåBehandling.copy(
-                        behandlendeEnhetId = oppgaveArbeidsfordeling.enhetsnummer,
-                        behandlendeEnhetNavn = oppgaveArbeidsfordeling.enhetsnavn,
-                        manueltOverstyrt = false,
-                    ),
-                )
+                if (erEnhetsnummerEndret) {
+                    arbeidsfordelingPåBehandlingRepository.save(
+                        arbeidsfordelingPåBehandling.copy(
+                            behandlendeEnhetId = oppgaveArbeidsfordeling.enhetsnummer,
+                            behandlendeEnhetNavn = oppgaveArbeidsfordeling.enhetsnavn,
+                            manueltOverstyrt = false,
+                        ),
+                    )
+                }
             }
 
             opprettetOppgaveId
