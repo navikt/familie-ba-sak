@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
@@ -38,8 +39,7 @@ class ArbeidsfordelingService(
         endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
     ) {
         val aktivArbeidsfordelingPåBehandling =
-            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
-                ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling ${behandling.id}")
+            arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
 
         val forrigeArbeidsfordelingsenhet =
             Arbeidsfordelingsenhet(
