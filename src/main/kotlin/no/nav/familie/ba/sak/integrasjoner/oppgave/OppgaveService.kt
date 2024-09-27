@@ -78,13 +78,21 @@ class OppgaveService(
                 arbeidsfordelingPåBehandlingRepository
                     .hentArbeidsfordelingPåBehandling(behandlingId)
 
-            val oppgaveArbeidsfordeling =
-                oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
-                    arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
-                    navIdent = tilordnetNavIdent?.let { NavIdent(it) },
-                )
+            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER)
 
-            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
+            val oppgaveArbeidsfordeling =
+                if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
+                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
+                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
+                        navIdent = tilordnetNavIdent?.let { NavIdent(it) },
+                    )
+                } else {
+                    OppgaveArbeidsfordeling(
+                        navIdent = tilordnetNavIdent?.let { NavIdent(it) },
+                        enhetsnummer = arbeidsfordelingPåBehandling.behandlendeEnhetId,
+                        enhetsnavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
+                    )
+                }
 
             val opprettOppgave =
                 OpprettOppgaveRequest(
@@ -94,10 +102,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) oppgaveArbeidsfordeling.enhetsnummer else arbeidsfordelingPåBehandling.behandlendeEnhetId,
+                    enhetsnummer = oppgaveArbeidsfordeling.enhetsnummer,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) oppgaveArbeidsfordeling.navIdent?.ident else tilordnetNavIdent,
+                    tilordnetRessurs = oppgaveArbeidsfordeling.navIdent?.ident,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
