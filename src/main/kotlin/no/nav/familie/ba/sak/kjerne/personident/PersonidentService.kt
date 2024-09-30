@@ -136,23 +136,23 @@ class PersonidentService(
     fun opprettPersonIdent(
         aktør: Aktør,
         fødselsnummer: String,
-        lagre: Boolean = true,
+        lagreNyAktør: Boolean = true,
     ): Aktør {
-        secureLogger.info("Oppretter personIdent. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}")
+        secureLogger.info("Oppretter personIdent: aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagreNyAktør=$lagreNyAktør, personidenter=${aktør.personidenter}")
         val eksisterendePersonIdent = aktør.personidenter.filter { it.fødselsnummer == fødselsnummer && it.aktiv }
         secureLogger.info("Aktøren har fødselsnummer ${aktør.personidenter.map { it.fødselsnummer }}")
         if (eksisterendePersonIdent.isEmpty()) {
-            secureLogger.info("Fins ikke eksisterende personIdent for. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagre, personidenter=${aktør.personidenter}, så lager ny")
+            secureLogger.info("Fins ikke eksisterende personIdent for. aktørIdStr=${aktør.aktørId} fødselsnummer=$fødselsnummer lagre=$lagreNyAktør, personidenter=${aktør.personidenter}, så lager ny")
             aktør.personidenter.filter { it.aktiv }.map {
                 it.aktiv = false
                 it.gjelderTil = LocalDateTime.now()
             }
-            if (lagre) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
+            if (lagreNyAktør) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
 
             aktør.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = aktør),
             )
-            if (lagre) aktørIdRepository.saveAndFlush(aktør)
+            if (lagreNyAktør) aktørIdRepository.saveAndFlush(aktør)
         }
         return aktør
     }
