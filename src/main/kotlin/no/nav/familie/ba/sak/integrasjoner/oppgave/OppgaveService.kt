@@ -5,16 +5,19 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -26,6 +29,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -38,10 +42,12 @@ class OppgaveService(
     private val integrasjonClient: IntegrasjonClient,
     private val behandlingRepository: BehandlingRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val oppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService,
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+    private val unleashService: UnleashService,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -68,15 +74,25 @@ class OppgaveService(
 
             eksisterendeOppgave.gsakId
         } else {
-            val arbeidsfordelingsenhet =
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
+            val arbeidsfordelingPåBehandling =
+                arbeidsfordelingPåBehandlingRepository
+                    .hentArbeidsfordelingPåBehandling(behandlingId)
 
-            if (arbeidsfordelingsenhet == null) {
-                logger.warn(
-                    "Fant ikke behandlende enhet på behandling ${behandling.id} " +
-                        "ved opprettelse av $oppgavetype-oppgave.",
-                )
-            }
+            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
+
+            val oppgaveArbeidsfordeling =
+                if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
+                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
+                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
+                        navIdent = tilordnetNavIdent?.let { NavIdent(it) },
+                    )
+                } else {
+                    OppgaveArbeidsfordeling(
+                        navIdent = tilordnetNavIdent?.let { NavIdent(it) },
+                        enhetsnummer = arbeidsfordelingPåBehandling.behandlendeEnhetId,
+                        enhetsnavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
+                    )
+                }
 
             val opprettOppgave =
                 OpprettOppgaveRequest(
@@ -86,10 +102,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
+                    enhetsnummer = oppgaveArbeidsfordeling.enhetsnummer,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = tilordnetNavIdent,
+                    tilordnetRessurs = oppgaveArbeidsfordeling.navIdent?.ident,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
@@ -103,6 +119,20 @@ class OppgaveService(
             oppgaveRepository.save(oppgave)
 
             økTellerForAntallOppgaveTyper(oppgavetype)
+
+            if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
+                val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != oppgaveArbeidsfordeling.enhetsnummer
+
+                if (erEnhetsnummerEndret) {
+                    arbeidsfordelingPåBehandlingRepository.save(
+                        arbeidsfordelingPåBehandling.copy(
+                            behandlendeEnhetId = oppgaveArbeidsfordeling.enhetsnummer,
+                            behandlendeEnhetNavn = oppgaveArbeidsfordeling.enhetsnavn,
+                            manueltOverstyrt = false,
+                        ),
+                    )
+                }
+            }
 
             opprettetOppgaveId
         }
@@ -192,7 +222,8 @@ class OppgaveService(
             if (oppgave.status == FERDIGSTILT && oppgave.oppgavetype == Oppgavetype.VurderLivshendelse.value) {
                 dbOppgave.erFerdigstilt = true
             } else {
-                integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
+                val oppgaveOppdatering = Oppgave(id = oppgave.id, tildeltEnhetsnr = nyEnhet, tilordnetRessurs = null, mappeId = null)
+                patchOppgave(oppgaveOppdatering)
             }
         }
     }
@@ -286,6 +317,7 @@ class OppgaveService(
                 oppgaveErAvsluttet -> {
                     logger.info("Oppgave ${dbOppgave.gsakId} er allerede avsluttet")
                 }
+
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
