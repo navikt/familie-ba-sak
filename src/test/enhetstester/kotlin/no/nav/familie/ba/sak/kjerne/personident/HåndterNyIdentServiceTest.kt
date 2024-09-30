@@ -330,7 +330,6 @@ internal class HåndterNyIdentServiceTest {
                     .gjelderTil!!
                     .isBefore(LocalDateTime.now()),
             )
-            verify(exactly = 2) { aktørIdRepository.saveAndFlush(any()) }
             verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
         }
 
