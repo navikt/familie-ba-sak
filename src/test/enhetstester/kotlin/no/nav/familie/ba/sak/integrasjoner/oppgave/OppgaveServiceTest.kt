@@ -13,9 +13,9 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingenhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -57,7 +57,7 @@ class OppgaveServiceTest {
     private val mockedOppgaveRepository: OppgaveRepository = mockk()
     private val mockedOpprettTaskService: OpprettTaskService = mockk()
     private val mockedLoggService: LoggService = mockk()
-    private val mockedOppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService = mockk()
+    private val mockedTilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
     private val unleashService: UnleashService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
@@ -67,7 +67,7 @@ class OppgaveServiceTest {
             opprettTaskService = mockedOpprettTaskService,
             loggService = mockedLoggService,
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
-            oppgaveArbeidsfordelingService = mockedOppgaveArbeidsfordelingService,
+            tilpassArbeidsfordelingService = mockedTilpassArbeidsfordelingService,
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
             unleashService = unleashService,
         )
@@ -83,6 +83,9 @@ class OppgaveServiceTest {
                 manueltOverstyrt = true,
             )
 
+        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingenhet()
+        val navIdent = NavIdent("navIdent")
+
         every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { mockedBehandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { mockedOppgaveRepository.save(any()) } returns lagTestOppgave()
@@ -93,9 +96,7 @@ class OppgaveServiceTest {
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
-        every {
-            mockedOppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(arbeidsfordelingPåBehandling, null)
-        } returns OppgaveArbeidsfordeling(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
+        every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
 
         every { unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false) } returns true
 
@@ -121,68 +122,6 @@ class OppgaveServiceTest {
         verify(exactly = 0) { mockedArbeidsfordelingPåBehandlingRepository.save(any()) }
     }
 
-    @Test
-    fun `Opprett oppgave skal lage oppgave med NAV-ident samt enhetsnummer og enhetsnavn som er ulik arbeidsfordelingen da NAV-ident ikke har tilgang til den`() {
-        // Arrange
-        val navIdent = NavIdent("1")
-        val enhetsnummerSomSkalOverstyresTil = "1234"
-        val enhetsnavnSomSkalOverstyresTil = "Fiktiv Enhet"
-
-        val arbeidsfordelingPåBehandling =
-            lagArbeidsfordelingPåBehandling(
-                behandlingId = 1,
-                behandlendeEnhetId = ENHETSNUMMER,
-                behandlendeEnhetNavn = "enhet",
-                manueltOverstyrt = true,
-            )
-
-        every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
-        every { mockedBehandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
-        every { mockedOppgaveRepository.save(any()) } returns lagTestOppgave()
-        every { mockedOppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns null
-        every { mockedPersonidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
-        every { mockedArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(any()) } returns arbeidsfordelingPåBehandling
-
-        val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
-        every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
-
-        every {
-            mockedOppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(arbeidsfordelingPåBehandling, navIdent)
-        } returns OppgaveArbeidsfordeling(navIdent, enhetsnummerSomSkalOverstyresTil, enhetsnavnSomSkalOverstyresTil)
-
-        val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
-        every {
-            mockedArbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot))
-        } returnsArgument 0
-
-        every { unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false) } returns true
-
-        // Act
-        oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK, navIdent.ident)
-
-        // Assert
-        assertThat(opprettOppgaveRequestSlot.captured.enhetsnummer).isEqualTo(enhetsnummerSomSkalOverstyresTil)
-        assertThat(opprettOppgaveRequestSlot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
-        assertThat(opprettOppgaveRequestSlot.captured.ident).isEqualTo(
-            OppgaveIdentV2(
-                ident = AKTØR_ID_FAGSAK,
-                gruppe = IdentGruppe.AKTOERID,
-            ),
-        )
-        assertThat(opprettOppgaveRequestSlot.captured.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
-        assertThat(opprettOppgaveRequestSlot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
-        assertThat(opprettOppgaveRequestSlot.captured.aktivFra).isEqualTo(LocalDate.now())
-        assertThat(opprettOppgaveRequestSlot.captured.tema).isEqualTo(Tema.BAR)
-        assertThat(opprettOppgaveRequestSlot.captured.beskrivelse).contains("https://barnetrygd.intern.nav.no/fagsak/$FAGSAK_ID")
-        assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
-        assertThat(opprettOppgaveRequestSlot.captured.tilordnetRessurs).isEqualTo(navIdent.ident)
-        assertThat(arbeidsfordelingPåBehandlingSlot.captured.id).isEqualTo(arbeidsfordelingPåBehandling.id)
-        assertThat(arbeidsfordelingPåBehandlingSlot.captured.behandlingId).isEqualTo(arbeidsfordelingPåBehandling.behandlingId)
-        assertThat(arbeidsfordelingPåBehandlingSlot.captured.behandlendeEnhetId).isEqualTo(enhetsnummerSomSkalOverstyresTil)
-        assertThat(arbeidsfordelingPåBehandlingSlot.captured.behandlendeEnhetNavn).isEqualTo(enhetsnavnSomSkalOverstyresTil)
-        assertThat(arbeidsfordelingPåBehandlingSlot.captured.manueltOverstyrt).isFalse()
-    }
-
     @ParameterizedTest
     @EnumSource(ManuellOppgaveType::class)
     fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon satt for småbarnstillegg og åpen behandling, men ikke fødselshendelse`(manuellOppgaveType: ManuellOppgaveType) {
@@ -194,6 +133,8 @@ class OppgaveServiceTest {
                 behandlendeEnhetNavn = "enhet",
                 manueltOverstyrt = false,
             )
+
+        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingenhet()
 
         every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { mockedBehandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
@@ -210,9 +151,7 @@ class OppgaveServiceTest {
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
-        every {
-            mockedOppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(arbeidsfordelingPåBehandling, null)
-        } returns OppgaveArbeidsfordeling(null, arbeidsfordelingPåBehandling.behandlendeEnhetId, arbeidsfordelingPåBehandling.behandlendeEnhetNavn)
+        every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
 
         every { unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false) } returns true
 
