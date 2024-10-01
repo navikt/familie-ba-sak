@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.NavIdent
+import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,7 +27,7 @@ class TilpassArbeidsfordelingService(
         arbeidsfordelingsenhet: Arbeidsfordelingsenhet,
         navIdent: NavIdent?,
     ): NavIdent? =
-        if (harSaksbehandlerTilgangTilEnhet(arbeidsfordelingsenhet = arbeidsfordelingsenhet, navIdent = navIdent)
+        if (harSaksbehandlerTilgangTilEnhet(enhetId = arbeidsfordelingsenhet.enhetId, navIdent = navIdent)
         ) {
             navIdent
         } else {
@@ -34,21 +35,27 @@ class TilpassArbeidsfordelingService(
         }
 
     private fun harSaksbehandlerTilgangTilEnhet(
-        arbeidsfordelingsenhet: Arbeidsfordelingsenhet,
+        enhetId: String,
         navIdent: NavIdent?,
     ): Boolean =
-        navIdent?.let { integrasjonClient.hentEnheterSomNavIdentHarTilgangTil(navIdent = navIdent).any { it.enhetsnummer == arbeidsfordelingsenhet.enhetId } } ?: false
+        navIdent?.let {
+            hentGyldigeBehandlendeBarnetrygdEnheter(navIdent = navIdent)
+                .any { it.enhetsnummer == enhetId }
+        } ?: false
+
+    private fun hentGyldigeBehandlendeBarnetrygdEnheter(navIdent: NavIdent): List<Enhet> =
+        integrasjonClient
+            .hentEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
+            .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
 
     private fun håndterMidlertidigEnhet4863(
         navIdent: NavIdent?,
     ): Arbeidsfordelingsenhet {
         if (navIdent == null) {
-            throw Feil("Kan ikke sette ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
+            throw Feil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
         }
         val enheterNavIdentHarTilgangTil =
-            integrasjonClient
-                .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
+            hentGyldigeBehandlendeBarnetrygdEnheter(navIdent = navIdent)
                 .filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for nav-ident $navIdent")
@@ -65,18 +72,7 @@ class TilpassArbeidsfordelingService(
         navIdent: NavIdent?,
     ): Arbeidsfordelingsenhet {
         if (navIdent == null) {
-            throw Feil("Kan ikke sette ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident")
-        }
-        val harTilgangTilVikafossenEnhet2103 =
-            integrasjonClient
-                .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
-                .any { it.enhetsnummer == BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
-        if (!harTilgangTilVikafossenEnhet2103) {
-            return Arbeidsfordelingsenhet(
-                BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-            )
+            throw Feil("Kan ikke håndtere ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident")
         }
         return Arbeidsfordelingsenhet(
             BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
@@ -96,9 +92,7 @@ class TilpassArbeidsfordelingService(
             )
         }
         val enheterNavIdentHarTilgangTil =
-            integrasjonClient
-                .hentEnheterSomNavIdentHarTilgangTil(navIdent)
-                .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
+            hentGyldigeBehandlendeBarnetrygdEnheter(navIdent = navIdent)
                 .filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for NAV-ident $navIdent")
