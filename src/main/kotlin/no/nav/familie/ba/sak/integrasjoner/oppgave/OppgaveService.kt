@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingenhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -78,7 +78,7 @@ class OppgaveService(
             val arbeidsfordelingsenhet =
                 arbeidsfordelingPåBehandlingRepository
                     .hentArbeidsfordelingPåBehandling(behandlingId)
-                    .tilArbeidsfordelingenhet()
+                    .tilArbeidsfordelingsenhet()
 
             val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
 

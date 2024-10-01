@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingenhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -83,7 +83,7 @@ class OppgaveServiceTest {
                 manueltOverstyrt = true,
             )
 
-        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingenhet()
+        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet()
         val navIdent = NavIdent("navIdent")
 
         every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
@@ -134,7 +134,7 @@ class OppgaveServiceTest {
                 manueltOverstyrt = false,
             )
 
-        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingenhet()
+        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet()
 
         every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { mockedBehandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()

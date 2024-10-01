@@ -37,4 +37,4 @@ data class ArbeidsfordelingPåBehandling(
     fun toSecureString(): String = "ArbeidsfordelingPåBehandling(id=$id, behandlendeEnhetId=$behandlendeEnhetId, behandlendeEnhetNavn=$behandlendeEnhetNavn, manueltOverstyrt=$manueltOverstyrt)"
 }
 
-fun ArbeidsfordelingPåBehandling.tilArbeidsfordelingenhet() = Arbeidsfordelingsenhet(enhetId = this.behandlendeEnhetId, enhetNavn = this.behandlendeEnhetNavn)
+fun ArbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet(): Arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = this.behandlendeEnhetId, enhetNavn = this.behandlendeEnhetNavn)

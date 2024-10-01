@@ -26,10 +26,7 @@ class TilpassArbeidsfordelingService(
         arbeidsfordelingsenhet: Arbeidsfordelingsenhet,
         navIdent: NavIdent?,
     ): NavIdent? =
-        if (harSaksbehandlerTilgangTilEnhet(
-                arbeidsfordelingsenhet = arbeidsfordelingsenhet,
-                navIdent = navIdent,
-            )
+        if (harSaksbehandlerTilgangTilEnhet(arbeidsfordelingsenhet = arbeidsfordelingsenhet, navIdent = navIdent)
         ) {
             navIdent
         } else {
