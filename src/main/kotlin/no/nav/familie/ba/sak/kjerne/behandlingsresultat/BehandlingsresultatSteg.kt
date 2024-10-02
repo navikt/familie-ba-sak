@@ -63,7 +63,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendring() && !behandling.erValutajustering() && behandling.skalBehandlesAutomatisk) return
+        if (!behandling.erSatsendringEllerMånedligValutajustering() && behandling.skalBehandlesAutomatisk) return
 
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
@@ -84,14 +84,14 @@ class BehandlingsresultatSteg(
             søkerOgBarn = søkerOgBarn,
         )
 
-        if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+        if (!behandling.erSatsendring()) {
             val endreteUtbetalingerMedAndeler =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService
                     .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
             endreteUtbetalingerMedAndeler.validerEndredeUtbetalingsandeler(tilkjentYtelse, vilkårService.hentVilkårsvurdering(behandling.id))
         }
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
+        if (behandling.erMånedligValutajustering()) {
             BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
                 andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.toList(),
                 andelerForrigeBehandling = andelerForrigeBehandling.toList(),

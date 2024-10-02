@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.skalAndelerSlåsSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
@@ -31,7 +30,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val endreteUtbetalingerMedAndeler = lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
 
-        return if (behandling.opprettetÅrsak != BehandlingÅrsak.SATSENDRING) {
+        return if (!behandling.erSatsendring()) {
             // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
             // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
             // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt

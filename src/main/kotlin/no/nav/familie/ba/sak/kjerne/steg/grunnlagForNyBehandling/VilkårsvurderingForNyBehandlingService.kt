@@ -66,7 +66,7 @@ class VilkårsvurderingForNyBehandlingService(
                 genererVilkårsvurderingForSatsendring(
                     forrigeBehandlingSomErVedtatt =
                         forrigeBehandlingSomErVedtatt
-                            ?: throw Feil("Kan ikke opprette behandling med årsak 'Satsendring' hvis det ikke finnes en tidligere behandling"),
+                            ?: throw Feil("Kan ikke opprette behandling med årsak ${behandling.årsakNavn()} hvis det ikke finnes en tidligere behandling"),
                     inneværendeBehandling = behandling,
                 )
             }

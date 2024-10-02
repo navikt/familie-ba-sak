@@ -24,7 +24,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     ) {
         if (behandling.erSatsendring()) {
             if (forrigeBehandlingSomErVedtatt == null) {
-                throw Feil("Vi kan ikke kjøre satsendring dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
+                throw Feil("Vi kan ikke kjøre ${behandling.årsakNavn()} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }
             opprettKopiAvPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
         } else {
