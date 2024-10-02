@@ -154,7 +154,7 @@ object EndretUtbetalingAndelValidering {
 
         if (endretUtbetalingAndel.prosent == BigDecimal.valueOf(100)) {
             throw FunksjonellFeil("Du kan ikke endre til full utbetaling når det er mer enn $feilmeldingPeriode siden søknadstidspunktet.")
-        } else if (endretUtbetalingAndel.tom?.isSameOrAfter(gyldigEtterbetalingFom) == true) {
+        } else if (endretUtbetalingAndel.tom?.isAfter(gyldigEtterbetalingFom) == true) {
             throw FunksjonellFeil("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn $feilmeldingPeriode tilbake i tid.")
         }
     }
