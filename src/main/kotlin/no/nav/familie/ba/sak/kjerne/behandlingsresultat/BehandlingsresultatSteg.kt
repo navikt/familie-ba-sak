@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBoste
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -59,7 +58,6 @@ class BehandlingsresultatSteg(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
     private val localDateProvider: LocalDateProvider,
-    private val valutakursService: ValutakursService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
