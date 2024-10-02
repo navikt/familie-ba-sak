@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.erAlleValutakurserOppdaterteIMåned
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.måValutakurserOppdateresForMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -57,7 +57,7 @@ class AutovedtakMånedligValutajusteringService(
 
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
         val sisteValutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
-        if (sisteValutakurser.erAlleValutakurserOppdaterteIMåned(måned)) {
+        if (!sisteValutakurser.måValutakurserOppdateresForMåned(måned)) {
             logger.info("Valutakursene er allerede oppdatert for fagsak $fagsakId. Hopper ut")
             return
         }
