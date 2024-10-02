@@ -147,7 +147,7 @@ class ValutakursTest {
         }
 
         @Test
-        fun `gir false når minst én valutakurs ikke er oppdatert for gitt måned`() {
+        fun `gir true når minst én valutakurs ikke er oppdatert for gitt måned`() {
             val måned = LocalDate.now().toYearMonth()
 
             val valutakurs1 =
