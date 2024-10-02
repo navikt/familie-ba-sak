@@ -143,7 +143,7 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
 
-            assertThat(valutakurser.erAlleValutakurserOppdaterteIMåned(måned)).isTrue()
+            assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
         }
 
         @Test
@@ -166,7 +166,7 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
 
-            assertThat(valutakurser.erAlleValutakurserOppdaterteIMåned(måned)).isFalse()
+            assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isFalse()
         }
     }
 }
