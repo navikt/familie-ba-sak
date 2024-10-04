@@ -161,10 +161,10 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
             )
         }.tilTidslinje()
 
-fun Collection<Valutakurs>.erAlleValutakurserOppdaterteIMåned(
+fun Collection<Valutakurs>.måValutakurserOppdateresForMåned(
     måned: YearMonth,
-) = isNotEmpty() &&
-    none {
+) =
+    any {
         val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
         val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
 

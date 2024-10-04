@@ -47,7 +47,14 @@ class AutovedtakMånedligValutajusteringServiceTest {
     fun `utførMånedligValutajustering kaster Feil hvis en annen enn nåværende måned blir sendt inn`() {
         every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
-        every { valutaKursService.hentValutakurser(any()) } returns emptyList()
+        every { valutaKursService.hentValutakurser(any()) } returns
+            listOf(
+                Valutakurs(
+                    fom = YearMonth.now().minusYears(1),
+                    tom = null,
+                    vurderingsform = Vurderingsform.MANUELL,
+                ),
+            )
 
         assertThrows<Feil> {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
