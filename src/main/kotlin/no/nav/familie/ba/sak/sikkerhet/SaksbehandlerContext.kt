@@ -25,7 +25,10 @@ class SaksbehandlerContext(
         val grupper = SikkerhetContext.hentGrupper()
         return when (adressebeskyttelsegradering) {
             ADRESSEBESKYTTELSEGRADERING.FORTROLIG -> grupper.contains(kode7GruppeId)
-            ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG, ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND -> grupper.contains(kode6GruppeId)
+            ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+            ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND,
+            -> grupper.contains(kode6GruppeId)
+
             ADRESSEBESKYTTELSEGRADERING.UGRADERT -> true
             else -> true
         }

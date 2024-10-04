@@ -21,28 +21,28 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class InnkommendeJournalføringServiceEnhetTest {
-    private val integrasjonClient: IntegrasjonClient = mockk()
-    private val fagsakService: FagsakService = mockk()
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val journalføringRepository: JournalføringRepository = mockk()
-    private val loggService: LoggService = mockk()
-    private val stegService: StegService = mockk()
-    private val journalføringMetrikk: JournalføringMetrikk = mockk()
-    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
-    private val mottakClient: MottakClient = mockk()
-    private val saksbehandlerContext: SaksbehandlerContext = mockk()
+    private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
+    private val mockedFagsakService: FagsakService = mockk()
+    private val mockedBehandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
+    private val mockedJournalføringRepository: JournalføringRepository = mockk()
+    private val mockedLoggService: LoggService = mockk()
+    private val mockedStegService: StegService = mockk()
+    private val mockedJournalføringMetrikk: JournalføringMetrikk = mockk()
+    private val mockedBehandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
+    private val mockedMottakClient: MottakClient = mockk()
+    private val mockedSaksbehandlerContext: SaksbehandlerContext = mockk()
     private val innkommendeJournalføringService: InnkommendeJournalføringService =
         InnkommendeJournalføringService(
-            integrasjonClient = integrasjonClient,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            journalføringRepository = journalføringRepository,
-            loggService = loggService,
-            stegService = stegService,
-            journalføringMetrikk = journalføringMetrikk,
-            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
-            mottakClient = mottakClient,
-            saksbehandlerContext = saksbehandlerContext,
+            integrasjonClient = mockedIntegrasjonClient,
+            fagsakService = mockedFagsakService,
+            behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
+            journalføringRepository = mockedJournalføringRepository,
+            loggService = mockedLoggService,
+            stegService = mockedStegService,
+            journalføringMetrikk = mockedJournalføringMetrikk,
+            behandlingSøknadsinfoService = mockedBehandlingSøknadsinfoService,
+            mottakClient = mockedMottakClient,
+            saksbehandlerContext = mockedSaksbehandlerContext,
         )
 
     @Test
@@ -53,7 +53,7 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId))
 
         every {
-            integrasjonClient.hentJournalposterForBruker(
+            mockedIntegrasjonClient.hentJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     antall = 1000,
                     brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
@@ -62,9 +62,10 @@ class InnkommendeJournalføringServiceEnhetTest {
             )
         } returns journalposter
 
-        every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
+        every { mockedMottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
 
-        every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.UGRADERT) } returns true
+        every { mockedSaksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.UGRADERT) } returns true
+
         // Act
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
@@ -82,7 +83,7 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId1), lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId2))
 
         every {
-            integrasjonClient.hentJournalposterForBruker(
+            mockedIntegrasjonClient.hentJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     antall = 1000,
                     brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
@@ -91,11 +92,12 @@ class InnkommendeJournalføringServiceEnhetTest {
             )
         } returns journalposter
 
-        every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId1) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
-        every { mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId2) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+        every { mockedMottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId1) } returns ADRESSEBESKYTTELSEGRADERING.UGRADERT
+        every { mockedMottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(journalpostId = journalpostId2) } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
 
-        every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.UGRADERT) } returns true
-        every { saksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) } returns false
+        every { mockedSaksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.UGRADERT) } returns true
+        every { mockedSaksbehandlerContext.harTilgang(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG) } returns false
+
         // Act
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
@@ -114,7 +116,7 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId, kanal = "SKAN_NETS"))
 
         every {
-            integrasjonClient.hentJournalposterForBruker(
+            mockedIntegrasjonClient.hentJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     antall = 1000,
                     brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
