@@ -97,8 +97,8 @@ class HåndterNyIdentService(
 
         val fagsakIder =
             aktørerMedAktivPersonident
-                .flatMap { aktør -> aktør.personidenter.flatMap { ident -> fagsakService.hentFagsakDeltager(ident.fødselsnummer) } }
-                .mapNotNull { it.fagsakId }
+                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) }
+                .map { it.id }
 
         if (fagsakIder.toSet().size > 1) {
             throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktørerMedAktivPersonident.first()}. $LENKE_INFO_OM_MERGING")
