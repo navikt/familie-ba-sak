@@ -30,7 +30,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val endreteUtbetalingerMedAndeler = lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
 
-        return if (!behandling.erSatsendring()) {
+        return if (!behandling.erSatsendringEllerMånedligValutajustering()) {
             // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
             // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
             // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt

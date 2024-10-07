@@ -22,7 +22,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendring()) {
+        if (behandling.erSatsendringEllerMånedligValutajustering()) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 throw Feil("Vi kan ikke kjøre ${behandling.årsakNavn()} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }

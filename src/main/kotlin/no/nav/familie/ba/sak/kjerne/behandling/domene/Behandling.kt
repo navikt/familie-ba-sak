@@ -115,9 +115,8 @@ data class Behandling(
     fun erBehandlingMedVedtaksbrevutsending(): Boolean =
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
-            erSatsendring() -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
-            erMånedligValutajustering() -> false
+            erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
             else -> true

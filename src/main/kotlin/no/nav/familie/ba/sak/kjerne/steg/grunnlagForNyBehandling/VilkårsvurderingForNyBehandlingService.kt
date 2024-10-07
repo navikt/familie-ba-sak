@@ -62,7 +62,9 @@ class VilkårsvurderingForNyBehandlingService(
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
 
-            BehandlingÅrsak.SATSENDRING -> {
+            BehandlingÅrsak.SATSENDRING,
+            BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+            -> {
                 genererVilkårsvurderingForSatsendring(
                     forrigeBehandlingSomErVedtatt =
                         forrigeBehandlingSomErVedtatt
