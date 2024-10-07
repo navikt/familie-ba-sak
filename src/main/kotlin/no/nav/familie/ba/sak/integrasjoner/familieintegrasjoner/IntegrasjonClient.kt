@@ -376,6 +376,23 @@ class IntegrasjonClient(
         }
     }
 
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
+    )
+    fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
+        val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt")
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "dokarkiv",
+            uri = uri,
+            formål = "Hent journalposter for bruker",
+        ) {
+            postForEntity(uri, journalposterForBrukerRequest)
+        }
+    }
+
     fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
         val uri = URI.create("$integrasjonUri/oppgave/v4")
 
