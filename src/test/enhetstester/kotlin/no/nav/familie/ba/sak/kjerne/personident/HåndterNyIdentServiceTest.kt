@@ -13,14 +13,13 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle.FORELDER
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -85,7 +84,7 @@ internal class HåndterNyIdentServiceTest {
             every { aktørIdRepository.findByAktørIdOrNull(nyAktør.aktørId) } returns null
             every { aktørIdRepository.findByAktørIdOrNull(gammelAktør.aktørId) } returns gammelAktør
             every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FORELDER, fagsakId = 0))
+            every { fagsakService.hentFagsakerPåPerson(any()) } returns listOf(Fagsak(id = 0, aktør = gammelAktør))
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns gammelBehandling
             every { persongrunnlagService.hentAktiv(any()) } returns
                 PersonopplysningGrunnlag(
@@ -98,19 +97,7 @@ internal class HåndterNyIdentServiceTest {
         fun `håndterNyIdent dropper merging av identer når det ikke eksisterer en fagsak for identer`() {
             // arrange
             every { fagsakService.hentFagsakDeltager(any()) } returns emptyList()
-
-            // act
-            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
-
-            // assert
-            verify(exactly = 0) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
-            assertThat(aktør).isNull()
-        }
-
-        @Test
-        fun `håndterNyIdent dropper merging av identer når det eksisterer en fagsak uten fagsakId for identer`() {
-            // arrange
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FORELDER))
+            every { fagsakService.hentFagsakerPåPerson(any()) } returns emptyList()
 
             // act
             val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
@@ -123,10 +110,10 @@ internal class HåndterNyIdentServiceTest {
         @Test
         fun `håndterNyIdent kaster Feil når det eksisterer flere fagsaker for identer`() {
             // arrange
-            every { fagsakService.hentFagsakDeltager(any()) } returns
+            every { fagsakService.hentFagsakerPåPerson(any()) } returns
                 listOf(
-                    RestFagsakDeltager(rolle = FORELDER, fagsakId = 1),
-                    RestFagsakDeltager(rolle = FORELDER, fagsakId = 2),
+                    Fagsak(id = 1, aktør = gammelAktør),
+                    Fagsak(id = 2, aktør = gammelAktør),
                 )
 
             // act & assert
@@ -231,7 +218,7 @@ internal class HåndterNyIdentServiceTest {
             clearMocks(answers = true, firstMock = personidentRepository)
             clearMocks(answers = true, firstMock = taskRepositoryMock)
 
-            every { fagsakService.hentFagsakDeltager(any()) } returns listOf(RestFagsakDeltager(rolle = FORELDER, fagsakId = 0))
+            every { fagsakService.hentFagsakerPåPerson(any()) } returns listOf(Fagsak(id = 0, aktør = aktørIdAktiv))
 
             every { personidentRepository.saveAndFlush(capture(personIdentSlot)) } answers {
                 personIdentSlot.captured

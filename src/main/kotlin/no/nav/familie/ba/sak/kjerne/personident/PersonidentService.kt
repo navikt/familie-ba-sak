@@ -147,7 +147,6 @@ class PersonidentService(
                 it.aktiv = false
                 it.gjelderTil = LocalDateTime.now()
             }
-            if (lagreNyAktør) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
 
             aktør.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = aktør),
