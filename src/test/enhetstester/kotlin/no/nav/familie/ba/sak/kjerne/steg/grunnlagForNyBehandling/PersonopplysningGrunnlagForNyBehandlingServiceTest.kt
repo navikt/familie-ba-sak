@@ -37,6 +37,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 class PersonopplysningGrunnlagForNyBehandlingServiceTest {
@@ -100,10 +102,13 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         }
     }
 
-    @Test
-    fun `hentOgLagrePersonopplysningGrunnlag - skal kopiere persongrunnlaget fra forrige behandling ved satsendring`() {
+    @ParameterizedTest
+    @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
+    fun `hentOgLagrePersonopplysningGrunnlag - skal kopiere persongrunnlaget fra forrige behandling ved satsendring og månedlig valutajustering`(
+        årsak: BehandlingÅrsak,
+    ) {
         val forrigeBehandling = lagBehandling()
-        val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
+        val nyBehandling = lagBehandling(årsak = årsak)
         val søker = PersonIdent(randomFnr())
         val barn = PersonIdent(randomFnr())
         val søkerPerson = lagPerson(personIdent = søker, id = 1)
