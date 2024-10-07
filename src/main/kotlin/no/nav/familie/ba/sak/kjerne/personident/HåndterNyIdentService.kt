@@ -55,7 +55,7 @@ class HåndterNyIdentService(
                 validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
                 logger.info("Legger til ny ident")
                 secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-                personIdentService.opprettPersonIdent(aktør, nyIdent.ident, false)
+                personIdentService.opprettPersonIdent(aktør, nyIdent.ident, true)
             }
 
             // Samme aktørId, samme fødselsnummer -> ignorer hendelse
