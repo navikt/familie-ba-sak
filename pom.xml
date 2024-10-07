@@ -24,7 +24,7 @@
         <prosessering.version>2.20240925091323_ea1bd3c</prosessering.version>
         <felles.version>3.20240913110742_adb42f8</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240919121839_57daa74</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20241004134208_2962899</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240902095239_88c7bc0</utbetalingsgenerator.version>
@@ -73,7 +73,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.24</version>
+                <version>2.2.25</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
