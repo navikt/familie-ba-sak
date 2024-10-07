@@ -148,6 +148,8 @@ class PersonidentService(
                 it.gjelderTil = LocalDateTime.now()
             }
 
+            if (lagreNyAktør) aktørIdRepository.saveAndFlush(aktør)
+
             aktør.personidenter.add(
                 Personident(fødselsnummer = fødselsnummer, aktør = aktør),
             )
