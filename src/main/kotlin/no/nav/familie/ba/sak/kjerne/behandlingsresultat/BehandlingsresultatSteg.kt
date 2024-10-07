@@ -63,7 +63,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendring() && !behandling.erMånedligValutajustering() && behandling.skalBehandlesAutomatisk) return
+        if (!behandling.erSatsendringEllerMånedligValutajustering() && behandling.skalBehandlesAutomatisk) return
 
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
