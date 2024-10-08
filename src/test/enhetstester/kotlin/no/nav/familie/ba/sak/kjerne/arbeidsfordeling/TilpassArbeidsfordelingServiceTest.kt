@@ -15,7 +15,8 @@ import org.junit.jupiter.api.assertThrows
 
 class TilpassArbeidsfordelingServiceTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
-    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService = TilpassArbeidsfordelingService(integrasjonClient = mockedIntegrasjonClient)
+    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService =
+        TilpassArbeidsfordelingService(integrasjonClient = mockedIntegrasjonClient)
 
     @Nested
     inner class TilpassArbeidsfordelingTilSaksbehandler {
@@ -45,7 +46,6 @@ class TilpassArbeidsfordelingServiceTest {
             // Arrange
             val navIdent = NavIdent("1")
 
-            val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.MIDLERTIDIG_ENHET
             val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN
 
             val arbeidsfordelingsenhet =
@@ -61,12 +61,8 @@ class TilpassArbeidsfordelingServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    lagEnhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
@@ -101,10 +97,6 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
-                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                    ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
@@ -272,10 +264,6 @@ class TilpassArbeidsfordelingServiceTest {
             } returns
                 listOf(
                     lagEnhet(
-                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                    ),
-                    lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
@@ -312,10 +300,6 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
-                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                    ),
                     lagEnhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
@@ -393,7 +377,11 @@ class TilpassArbeidsfordelingServiceTest {
         @Test
         fun `skal returnere navIdent dersom navIdent har tilgang til arbeidsfordelingsenhet`() {
             // Arrange
-            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
+                )
             val navIdent = NavIdent("1")
 
             every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
@@ -405,7 +393,8 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             // Act
-            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
+            val tilordnetRessurs =
+                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
 
             // Assert
             assertThat(tilordnetRessurs).isEqualTo(navIdent)
@@ -414,7 +403,11 @@ class TilpassArbeidsfordelingServiceTest {
         @Test
         fun `skal returnere null dersom navIdent ikke har tilgang til arbeidsfordelingsenhet`() {
             // Arrange
-            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
+                )
             val navIdent = NavIdent("1")
 
             every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
@@ -426,7 +419,8 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             // Act
-            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
+            val tilordnetRessurs =
+                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
 
             // Assert
             assertThat(tilordnetRessurs).isNull()
@@ -435,11 +429,16 @@ class TilpassArbeidsfordelingServiceTest {
         @Test
         fun `skal returnere null dersom navIdent er null`() {
             // Arrange
-            val arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
+                )
             val navIdent = null
 
             // Act
-            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
+            val tilordnetRessurs =
+                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
 
             // Assert
             assertThat(tilordnetRessurs).isNull()
