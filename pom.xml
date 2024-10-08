@@ -24,11 +24,10 @@
         <prosessering.version>2.20240925091323_ea1bd3c</prosessering.version>
         <felles.version>3.20240913110742_adb42f8</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20240919121839_57daa74</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20241004134208_2962899</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20240902095239_88c7bc0</utbetalingsgenerator.version>
-        <familie.kontrakter.skatteetaten>2.0_20230214104704_706e9c0</familie.kontrakter.skatteetaten>
         <cucumber.version>7.19.0</cucumber.version>
         <mockk.version>1.13.12</mockk.version>
         <wiremock.version>3.9.1</wiremock.version>
@@ -45,7 +44,7 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.20.1</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.20.2</testcontainers.postgresql.version>
         <unleash.version>9.2.4</unleash.version>
         <testcontainers.postgresql.version>1.20.1</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
@@ -73,7 +72,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.24</version>
+                <version>2.2.25</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -334,11 +333,6 @@
             <groupId>no.nav.familie.eksterne.kontrakter</groupId>
             <artifactId>saksstatistikk</artifactId>
             <version>${familie.kontrakter.saksstatistikk}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.familie.eksterne.kontrakter</groupId>
-            <artifactId>skatteetaten</artifactId>
-            <version>${familie.kontrakter.skatteetaten}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>

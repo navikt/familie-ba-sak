@@ -24,6 +24,7 @@ import no.nav.familie.kontrakter.felles.klage.IkkeOpprettetÅrsak
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
+import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.Opprettet
@@ -73,6 +74,7 @@ class KlageService(
                 fagsystem = Fagsystem.BA,
                 klageMottatt = kravMottattDato,
                 behandlendeEnhet = enhetId,
+                behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
             ),
         )
     }

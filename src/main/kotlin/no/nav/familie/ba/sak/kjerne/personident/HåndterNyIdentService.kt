@@ -55,7 +55,7 @@ class HåndterNyIdentService(
                 validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakIdVedMerging)
                 logger.info("Legger til ny ident")
                 secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
-                personIdentService.opprettPersonIdent(aktør, nyIdent.ident, false)
+                personIdentService.opprettPersonIdent(aktør, nyIdent.ident, true)
             }
 
             // Samme aktørId, samme fødselsnummer -> ignorer hendelse
@@ -97,8 +97,8 @@ class HåndterNyIdentService(
 
         val fagsakIder =
             aktørerMedAktivPersonident
-                .flatMap { aktør -> aktør.personidenter.flatMap { ident -> fagsakService.hentFagsakDeltager(ident.fødselsnummer) } }
-                .mapNotNull { it.fagsakId }
+                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) }
+                .map { it.id }
 
         if (fagsakIder.toSet().size > 1) {
             throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktørerMedAktivPersonident.first()}. $LENKE_INFO_OM_MERGING")
