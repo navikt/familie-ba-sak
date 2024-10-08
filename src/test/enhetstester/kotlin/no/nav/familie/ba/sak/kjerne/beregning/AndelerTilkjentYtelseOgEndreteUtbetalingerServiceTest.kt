@@ -104,7 +104,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
         }
 
         @Test
-        fun `For behandling blir endrete utbetalinger med overlappende andeler kombinert`() {
+        fun `For behandling med årsak nye opplsyninger blir endrete utbetalinger med overlappende andeler kombinert`() {
             val behandling =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
