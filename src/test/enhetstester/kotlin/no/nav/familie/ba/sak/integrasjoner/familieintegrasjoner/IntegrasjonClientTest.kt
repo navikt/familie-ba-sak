@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.enhet.Enhet
@@ -29,8 +30,8 @@ class IntegrasjonClientTest {
         // Arrange
         val navIdent = NavIdent("1")
 
-        val enhet1 = lagEnhet("1234")
-        val enhet2 = lagEnhet("4321")
+        val enhet1 = lagEnhet(BarnetrygdEnhet.VADSØ.enhetsnummer)
+        val enhet2 = lagEnhet(BarnetrygdEnhet.OSLO.enhetsnummer)
 
         every {
             mockedRestOperations.exchange<Ressurs<List<Enhet>>>(
@@ -50,7 +51,7 @@ class IntegrasjonClientTest {
             )
 
         // Act
-        val enheter = integrasjonClient.hentEnheterSomNavIdentHarTilgangTil(navIdent)
+        val enheter = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
 
         // Assert
         assertThat(enheter).hasSize(2)

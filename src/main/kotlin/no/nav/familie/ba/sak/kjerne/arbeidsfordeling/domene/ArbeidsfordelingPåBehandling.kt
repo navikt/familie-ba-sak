@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -35,3 +36,5 @@ data class ArbeidsfordelingPåBehandling(
 
     fun toSecureString(): String = "ArbeidsfordelingPåBehandling(id=$id, behandlendeEnhetId=$behandlendeEnhetId, behandlendeEnhetNavn=$behandlendeEnhetNavn, manueltOverstyrt=$manueltOverstyrt)"
 }
+
+fun ArbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet(): Arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = this.behandlendeEnhetId, enhetNavn = this.behandlendeEnhetNavn)

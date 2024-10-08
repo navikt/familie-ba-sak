@@ -1247,6 +1247,25 @@ fun lagPerson(
     id = id,
 )
 
+fun lagPersonEnkel(
+    personType: PersonType,
+    aktør: Aktør = randomAktør(),
+): PersonEnkel =
+    PersonEnkel(
+        type = personType,
+        aktør = aktør,
+        dødsfallDato = null,
+        fødselsdato =
+            if (personType == PersonType.SØKER) {
+                LocalDate.now().minusYears(34)
+            } else {
+                LocalDate
+                    .now()
+                    .minusYears(4)
+            },
+        målform = Målform.NB,
+    )
+
 fun lagRestSanityBegrunnelse(
     apiNavn: String = "",
     navnISystem: String = "",
