@@ -235,8 +235,6 @@ data class Behandling(
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
-    fun årsakNavn() = opprettetÅrsak.visningsnavn.lowercase()
-
     fun kanLeggeTilOgFjerneUtvidetVilkår() =
         erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage()
 
