@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.NavIdent
-import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.springframework.stereotype.Service
 
 @Service
@@ -37,14 +35,10 @@ class TilpassArbeidsfordelingService(
         navIdent: NavIdent?,
     ): Boolean =
         navIdent?.let {
-            hentGyldigeBehandlendeBarnetrygdEnheter(navIdent = navIdent)
+            integrasjonClient
+                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
                 .any { it.enhetsnummer == enhetId }
         } ?: false
-
-    private fun hentGyldigeBehandlendeBarnetrygdEnheter(navIdent: NavIdent): List<Enhet> =
-        integrasjonClient
-            .hentEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
-            .filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
 
     private fun håndterMidlertidigEnhet4863(
         navIdent: NavIdent?,
@@ -53,7 +47,8 @@ class TilpassArbeidsfordelingService(
             throw Feil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
         }
         val enheterNavIdentHarTilgangTil =
-            hentGyldigeBehandlendeBarnetrygdEnheter(navIdent = navIdent)
+            integrasjonClient
+                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
                 .filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for nav-ident $navIdent")
@@ -90,7 +85,8 @@ class TilpassArbeidsfordelingService(
             )
         }
         val enheterNavIdentHarTilgangTil =
-            hentGyldigeBehandlendeBarnetrygdEnheter(navIdent = navIdent)
+            integrasjonClient
+                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
                 .filter { it.enhetsnummer != BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer }
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             throw Feil("Fant ingen passende enhetsnummer for NAV-ident $navIdent")

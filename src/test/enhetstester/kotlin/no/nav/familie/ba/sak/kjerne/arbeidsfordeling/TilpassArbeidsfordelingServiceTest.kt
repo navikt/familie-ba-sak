@@ -55,7 +55,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -96,7 +96,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -167,7 +167,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -206,7 +206,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -266,7 +266,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -307,7 +307,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -356,7 +356,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
             } returns
@@ -396,7 +396,7 @@ class TilpassArbeidsfordelingServiceTest {
             val arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
             val navIdent = NavIdent("1")
 
-            every { mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
+            every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
                 listOf(
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
@@ -417,7 +417,7 @@ class TilpassArbeidsfordelingServiceTest {
             val arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer, enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
             val navIdent = NavIdent("1")
 
-            every { mockedIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
+            every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
                 listOf(
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.OSLO.enhetsnummer,

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -235,15 +236,15 @@ class IntegrasjonClient(
         }
     }
 
-    fun hentEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<Enhet> {
+    fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<Enhet> {
         val uri = URI.create("$integrasjonUri/enhetstilganger")
-        return kallEksternTjenesteRessurs(
+        return kallEksternTjenesteRessurs<List<Enhet>>(
             tjeneste = "enhetstilganger",
             uri = uri,
             formål = "Hent enheter en NAV-ident har tilgang til",
         ) {
             postForEntity(uri, HentEnheterNavIdentHarTilgangTilRequest(navIdent, Tema.BAR))
-        }
+        }.filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {

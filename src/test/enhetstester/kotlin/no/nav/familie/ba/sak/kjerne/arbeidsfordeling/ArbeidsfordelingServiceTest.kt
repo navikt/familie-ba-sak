@@ -64,8 +64,6 @@ class ArbeidsfordelingServiceTest {
                     enhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
-            val oppdatertArbeidsfordelingPåBehandling = mockk<ArbeidsfordelingPåBehandling>()
-
             every {
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
             } returns null
@@ -97,9 +95,7 @@ class ArbeidsfordelingServiceTest {
 
             every {
                 arbeidsfordelingPåBehandlingRepository.save(capture(arbeidsfordelingPåBehandlingSlot))
-            } returns oppdatertArbeidsfordelingPåBehandling
-
-            every { oppdatertArbeidsfordelingPåBehandling.toSecureString() } returns ""
+            } returnsArgument 0
 
             // Act
             arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, null)

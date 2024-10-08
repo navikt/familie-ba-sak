@@ -182,7 +182,7 @@ class IntegrasjonClientMock {
                 )
             }
 
-            every { mockIntegrasjonClient.hentEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries.map { Enhet(it.enhetsnummer, it.enhetsnavn) }
+            every { mockIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries.map { Enhet(it.enhetsnummer, it.enhetsnavn) }
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {
