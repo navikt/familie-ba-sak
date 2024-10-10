@@ -113,7 +113,7 @@ class HåndterNyIdentService(
         alleIdenterFraPdl: List<IdentInformasjon>,
         fagsak: Fagsak,
     ) {
-        // Dersom søker endrer fødselsdato på virker ikke det andelene og vi kan fint patche ident
+        // Hvis søkers fødselsdato endrer seg kan vi alltid patche siden det ikke påvirker andeler. Med mindre søker er enslig mindreårig.
         if (fagsak.type != FagsakType.BARN_ENSLIG_MINDREÅRIG && fagsak.aktør.aktørId in alleIdenterFraPdl.hentAktørIder()) return
 
         val aktivFødselsnummer = alleIdenterFraPdl.hentAktivFødselsnummer()
