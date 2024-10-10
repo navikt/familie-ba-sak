@@ -19,14 +19,15 @@ class RegistrerInstitusjon(
         behandling: Behandling,
         institusjon: Institusjon,
     ): StegType {
-        institusjonService.hentEllerOpprettInstitusjon(
-            orgNummer = institusjon.orgNummer,
-            tssEksternId = institusjon.tssEksternId,
-        ).apply {
-            val fagsak = behandling.fagsak
-            fagsak.institusjon = this
-            fagsakService.lagre(fagsak)
-        }
+        institusjonService
+            .hentEllerOpprettInstitusjon(
+                orgNummer = institusjon.orgNummer,
+                tssEksternId = institusjon.tssEksternId,
+            ).apply {
+                val fagsak = behandling.fagsak
+                fagsak.institusjon = this
+                fagsakService.lagre(fagsak)
+            }
         loggService.opprettRegistrerInstitusjonLogg(
             behandling,
         )
@@ -34,7 +35,5 @@ class RegistrerInstitusjon(
         return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
     }
 
-    override fun stegType(): StegType {
-        return StegType.REGISTRERE_INSTITUSJON
-    }
+    override fun stegType(): StegType = StegType.REGISTRERE_INSTITUSJON
 }

@@ -171,7 +171,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                                             if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
                                                 barnetsFødselsdato
                                             } else {
-                                                LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
+                                                LocalDate
+                                                    .now()
+                                                    .minusYears(3)
+                                                    .minusMonths(5)
+                                                    .withDayOfMonth(8)
                                             },
                                         utdypendeVilkårsvurderinger =
                                             listOfNotNull(

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
@@ -35,9 +36,7 @@ class DistribuerVedtaksbrev(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.DISTRIBUER_VEDTAKSBREV
-    }
+    override fun stegType(): StegType = StegType.DISTRIBUER_VEDTAKSBREV
 
     companion object {
         private val logger = LoggerFactory.getLogger(DistribuerVedtaksbrev::class.java)

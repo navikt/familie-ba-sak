@@ -4,19 +4,19 @@
 Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
   Bakgrunn:
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
 
   Scenario: Skal gi riktige begrunnelser for delt bosted med og uten deling
-    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat | Utdypende vilkår            |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |                             |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |                             |
@@ -24,7 +24,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 3456    | BOR_MED_SØKER                                    | 13.04.2020 | 10.03.2021 | Oppfylt  | DELT_BOSTED                 |
       | 3456    | BOR_MED_SØKER                                    | 11.03.2021 | 13.04.2022 | Oppfylt  | DELT_BOSTED_SKAL_IKKE_DELES |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 500   | 1            |
       | 3456    | 01.04.2021 | 30.04.2022 | 1354  | 1            |
@@ -38,16 +38,16 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 01.05.2022 |            | OPPHØR             | OPPHØR_FAST_BOSTED_AVTALE                                     |                       |
 
   Scenario: Skal gi riktige begrunnelser for utdypende vilkår vurdering annet grunnlag
-    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                          | Fra dato   | Til dato   | Resultat | Utdypende vilkår         |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                  | 11.01.1970 |            | Oppfylt  |                          |
       | 3456    | UNDER_18_ÅR                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |                          |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |                          |
       | 3456    | LOVLIG_OPPHOLD                                  | 13.04.2020 | 10.03.2021 | Oppfylt  | VURDERING_ANNET_GRUNNLAG |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
@@ -59,9 +59,9 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
 
   Scenario: Skal detektere endring i utdypende vilkår
-    Og lag personresultater for begrunnelse for behandling 1
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat | Utdypende vilkår         |
       | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.1970 |            | Oppfylt  |                          |
       | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 | 10.03.2022 | Oppfylt  | VURDERING_ANNET_GRUNNLAG |
@@ -69,7 +69,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |                          |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |                          |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456    | 01.05.2020 | 31.03.2022 | 1354  | 1            |
 
@@ -82,16 +82,16 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
 
 
   Scenario: Skal få begrunnelser for EØS-sak som har utdypende vilkårsvurdering på utgjørende vilkår, men ikke utdypende vilkårsvurdering på sanity
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            |
       | 2            | 1        | 1                   | INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | EØS                 |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 21.08.1992  |
       | 1            | 2       | BARN       | 06.06.2015  |
@@ -100,11 +100,11 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 2            | 2       | BARN       | 06.06.2015  |
       | 2            | 3       | BARN       | 06.06.2015  |
 
-    Og følgende dagens dato 18.12.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 18.12.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
@@ -118,7 +118,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 2       | BOR_MED_SØKER                 | DELT_BOSTED      | 01.04.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.04.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                        | Utdypende vilkår                       | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                                        | 01.04.2022 | 13.02.2023 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | BOSATT_I_RIKET                | OMFATTET_AV_NORSK_LOVGIVNING           | 14.02.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -143,7 +143,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 3       | BOSATT_I_RIKET                | BARN_BOR_I_NORGE                       | 14.02.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 3       | BOR_MED_SØKER                 | BARN_BOR_I_NORGE_MED_SØKER             | 18.08.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3       | 1            | 01.05.2022 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
       | 2       | 1            | 01.05.2022 | 28.02.2023 | 527   | ORDINÆR_BARNETRYGD | 50      | 1054 |
@@ -164,7 +164,7 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med utbetaling
       | 3       | 2            | 01.09.2023 | 31.05.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 2       | 2            | 01.09.2023 | 31.05.2033 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat            | BehandlingId | Søkers aktivitet                     | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2, 3    | 01.03.2023 |          | NORGE_ER_PRIMÆRLAND | 2            | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | I_ARBEID                  | NO                    | NO                             | NO                  |
 

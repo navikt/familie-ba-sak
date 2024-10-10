@@ -45,7 +45,8 @@ class SendTilBeslutter(
             behandlingId = behandling.id,
             ekstraBarnLagtTilIBrev = emptyList(),
         )
-        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        vilkårsvurderingService
+            .hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAndreVurderingerErVurdert()
 
         val behandlingsresultatSteg: BehandlingsresultatSteg =
@@ -91,9 +92,7 @@ class SendTilBeslutter(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.SEND_TIL_BESLUTTER
-    }
+    override fun stegType(): StegType = StegType.SEND_TIL_BESLUTTER
 }
 
 fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {

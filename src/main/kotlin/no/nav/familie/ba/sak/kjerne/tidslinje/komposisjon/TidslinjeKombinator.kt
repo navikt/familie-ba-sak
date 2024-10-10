@@ -68,10 +68,12 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
     listeKombinator: (Iterable<I>) -> R?,
 ): Tidslinje<R, T> =
     tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        this.map { it.innholdForTidspunkt(tidspunkt) }
+        this
+            .map { it.innholdForTidspunkt(tidspunkt) }
             .filter { it.harVerdi }
             .map { it.verdi }
-            .let(listeKombinator).tilVerdi()
+            .let(listeKombinator)
+            .tilVerdi()
     }
 
 /**
@@ -88,11 +90,13 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNullOgIkkeTom(
     listeKombinator: (Iterable<I>) -> R?,
 ): Tidslinje<R, T> =
     tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        this.map { it.innholdForTidspunkt(tidspunkt) }
+        this
+            .map { it.innholdForTidspunkt(tidspunkt) }
             .filter { it.harVerdi }
             .map { it.verdi }
             .takeIf { it.isNotEmpty() }
-            ?.let(listeKombinator).tilVerdi()
+            ?.let(listeKombinator)
+            .tilVerdi()
     }
 
 /**
@@ -107,7 +111,8 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
     listeKombinator: (Iterable<I>) -> R?,
 ): Tidslinje<R, T> =
     tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        this.map { it.innholdForTidspunkt(tidspunkt) }
+        this
+            .map { it.innholdForTidspunkt(tidspunkt) }
             .filter { it.harVerdi }
             .map { it.verdi }
             .let { listeKombinator(it) }

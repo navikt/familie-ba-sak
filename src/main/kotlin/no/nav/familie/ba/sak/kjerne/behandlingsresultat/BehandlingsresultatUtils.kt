@@ -7,14 +7,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 
 object BehandlingsresultatUtils {
-    internal fun skalUtledeSøknadsresultatForBehandling(behandling: Behandling): Boolean {
-        return behandling.erManuellMigrering() || behandling.opprettetÅrsak in
+    internal fun skalUtledeSøknadsresultatForBehandling(behandling: Behandling): Boolean =
+        behandling.erManuellMigrering() ||
+            behandling.opprettetÅrsak in
             listOf(
                 BehandlingÅrsak.SØKNAD,
                 BehandlingÅrsak.FØDSELSHENDELSE,
                 BehandlingÅrsak.KLAGE,
             )
-    }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
         // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering

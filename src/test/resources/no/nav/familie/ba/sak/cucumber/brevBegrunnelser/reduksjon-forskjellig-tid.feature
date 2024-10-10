@@ -4,16 +4,16 @@
 Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       |
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 16.04.1985  |
       | 1            | 3456    | BARN       | 19.04.2006  |
@@ -25,11 +25,11 @@ Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
       | 2            | 7890    | BARN       | 13.10.2014  |
 
   Scenario: Reduksjon ved forskjellige tidspunkt
-    Og følgende dagens dato 12.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 12.10.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                       | Fra dato   | Til dato   | Resultat |
       | 1234    | LOVLIG_OPPHOLD,BOSATT_I_RIKET                                | 16.04.1985 |            | OPPFYLT  |
       | 1234    | UTVIDET_BARNETRYGD                                           | 02.09.2021 | 05.01.2022 | OPPFYLT  |
@@ -44,7 +44,7 @@ Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
       | 5678    | LOVLIG_OPPHOLD,BOR_MED_SØKER,GIFT_PARTNERSKAP,BOSATT_I_RIKET | 01.10.2007 |            | OPPFYLT  |
       | 5678    | UNDER_18_ÅR                                                  | 01.10.2007 | 30.09.2025 | OPPFYLT  |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                         | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
       | 3456    | GIFT_PARTNERSKAP,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 19.04.2006 |            | OPPFYLT  | Nei                  |
       | 3456    | UNDER_18_ÅR                                    |                  | 19.04.2006 | 18.04.2024 | OPPFYLT  | Nei                  |
@@ -61,7 +61,7 @@ Egenskap: Brevbegrunnelser for reduksjon ved forskjellige tidspunkt
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD                  |                  | 16.04.1985 |            | OPPFYLT  | Nei                  |
       | 1234    | UTVIDET_BARNETRYGD                             |                  | 02.09.2021 | 05.01.2022 | OPPFYLT  | Nei                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 5678    | 1            | 01.11.2007 | 28.02.2019 | 970   | ORDINÆR_BARNETRYGD | 100     | 970  |
       | 5678    | 1            | 01.03.2019 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |

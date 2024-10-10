@@ -10,12 +10,14 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 
-data class PdlHentPersonResponse(val person: PdlPersonData?)
+data class PdlHentPersonResponse(
+    val person: PdlPersonData?,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlPersonData(
     val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator>,
-    val foedsel: List<PdlFødselsDato>,
+    val foedselsdato: List<PdlFødselsDato>,
     val navn: List<PdlNavn> = emptyList(),
     val kjoenn: List<PdlKjoenn> = emptyList(),
     val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
@@ -28,7 +30,7 @@ data class PdlPersonData(
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
-        if (foedsel.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
+        if (foedselsdato.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
         if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
                 "er opphørt",
@@ -49,7 +51,9 @@ enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }
 enum class FolkeregisteridentifikatorType { FNR, DNR }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlFødselsDato(val foedselsdato: String?)
+data class PdlFødselsDato(
+    val foedselsdato: String?,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlNavn(
@@ -57,13 +61,14 @@ data class PdlNavn(
     val mellomnavn: String? = null,
     val etternavn: String,
 ) {
-    fun fulltNavn(): String {
-        return when (mellomnavn) {
+    fun fulltNavn(): String =
+        when (mellomnavn) {
             null -> "$fornavn $etternavn"
             else -> "$fornavn $mellomnavn $etternavn"
         }
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class PdlKjoenn(val kjoenn: Kjønn)
+data class PdlKjoenn(
+    val kjoenn: Kjønn,
+)

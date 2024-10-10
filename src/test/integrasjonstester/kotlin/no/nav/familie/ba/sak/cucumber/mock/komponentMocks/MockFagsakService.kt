@@ -2,13 +2,13 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 
-fun mockFagsakService(dataFraCucumber: BegrunnelseTeksterStepDefinition): FagsakService {
+fun mockFagsakService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): FagsakService {
     val fagsakService = mockk<FagsakService>()
     every { fagsakService.hentNormalFagsak(any()) } answers {
         val aktør = firstArg<Aktør>()

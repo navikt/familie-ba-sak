@@ -87,11 +87,13 @@ class UtbetalingsoppdragGeneratorService(
     }
 
     private fun hentForrigeTilkjentYtelse(behandling: Behandling): TilkjentYtelse? =
-        behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling)
+        behandlingHentOgPersisterService
+            .hentForrigeBehandlingSomErIverksatt(behandling = behandling)
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
     private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
-        andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
+        andelTilkjentYtelseRepository
+            .hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
             .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
 
     private fun beregnOmMigreringsDatoErEndret(
@@ -99,7 +101,8 @@ class UtbetalingsoppdragGeneratorService(
         forrigeTilstandFraDato: YearMonth?,
     ): YearMonth? {
         val erMigrertSak =
-            behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id)
+            behandlingHentOgPersisterService
+                .hentBehandlinger(behandling.fagsak.id)
                 .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
@@ -107,7 +110,8 @@ class UtbetalingsoppdragGeneratorService(
         }
 
         val nyttTilstandFraDato =
-            behandlingService.hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+            behandlingService
+                .hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
                 ?.toYearMonth()
                 ?.plusMonths(1)
 
@@ -192,4 +196,7 @@ fun oppdaterAndelerMedPeriodeOffset(
     }
 }
 
-data class Opphør(val erRentOpphør: Boolean, val opphørsdato: LocalDate?)
+data class Opphør(
+    val erRentOpphør: Boolean,
+    val opphørsdato: LocalDate?,
+)

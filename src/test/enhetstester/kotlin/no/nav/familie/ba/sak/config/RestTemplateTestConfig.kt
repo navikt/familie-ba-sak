@@ -24,71 +24,64 @@ import java.time.Duration
 @Profile("mock-rest-template-config")
 class RestTemplateTestConfig {
     @Bean
-    fun restTemplate(): RestTemplate {
-        return RestTemplate(
+    fun restTemplate(): RestTemplate =
+        RestTemplate(
             listOf(
                 StringHttpMessageConverter(StandardCharsets.UTF_8),
                 ByteArrayHttpMessageConverter(),
                 MappingJackson2HttpMessageConverter(objectMapper),
             ),
         )
-    }
 
     @Bean
     fun restOperations(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
-    ): RestOperations {
-        return RestTemplateBuilder()
+    ): RestOperations =
+        RestTemplateBuilder()
             .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
                 MappingJackson2HttpMessageConverter(objectMapper),
-            )
-            .build()
-    }
+            ).build()
 
     @Bean("jwtBearerClientCredentials")
     fun restTemplateJwtBearerClientCredentials(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
-    ): RestOperations {
-        return RestTemplateBuilder()
+    ): RestOperations =
+        RestTemplateBuilder()
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
             .build()
-    }
 
     @Bean("jwtBearer")
     fun restTemplateJwtBearer(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
-    ): RestOperations {
-        return RestTemplateBuilder()
+    ): RestOperations =
+        RestTemplateBuilder()
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
             .build()
-    }
 
     @Bean("jwtBearerMedLangTimeout")
     fun restTemplateJwtBearerMedLangTimeout(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
-    ): RestOperations {
-        return RestTemplateBuilder()
+    ): RestOperations =
+        RestTemplateBuilder()
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .additionalMessageConverters(MappingJackson2HttpMessageConverter(objectMapper))
             .build()
-    }
 
     @Bean
     fun restTemplateBuilderMedProxy(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
-    ): RestTemplateBuilder {
-        return RestTemplateBuilder()
+    ): RestTemplateBuilder =
+        RestTemplateBuilder()
             .setConnectTimeout(Duration.ofSeconds(5))
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .setReadTimeout(Duration.ofSeconds(5))
-    }
 }

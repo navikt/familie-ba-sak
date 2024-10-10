@@ -14,7 +14,8 @@ fun hentLandkoderISO2(): Map<String, String> {
     val landkoder =
         ClassPathResource("landkoder/landkoder.json").inputStream.bufferedReader().use(BufferedReader::readText)
 
-    return objectMapper.readValue<List<LandkodeISO2>>(landkoder)
+    return objectMapper
+        .readValue<List<LandkodeISO2>>(landkoder)
         .associate { it.code to it.name }
 }
 

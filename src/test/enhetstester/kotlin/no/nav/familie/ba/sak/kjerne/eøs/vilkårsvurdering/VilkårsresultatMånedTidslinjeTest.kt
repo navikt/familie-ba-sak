@@ -54,8 +54,7 @@ class VilkårsresultatMånedTidslinjeTest {
                     periodeFom = periodeFom2,
                     periodeTom = null,
                 ),
-            )
-                .tilVilkårRegelverkResultatTidslinje()
+            ).tilVilkårRegelverkResultatTidslinje()
                 .tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
         val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =

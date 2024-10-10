@@ -30,23 +30,21 @@ class FamilieIntegrasjonerTilgangskontrollService(
         }
     }
 
-    fun sjekkTilgangTilPerson(personIdent: String): Tilgang {
-        return sjekkTilgangTilPersoner(listOf(personIdent)).values.single()
-    }
+    fun sjekkTilgangTilPerson(personIdent: String): Tilgang = sjekkTilgangTilPersoner(listOf(personIdent)).values.single()
 
-    fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> {
-        return cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
+    fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> =
+        cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
             familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
         }
-    }
 
     fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {
         val adresseBeskyttelseBolk = systemOnlyPdlRestClient.hentAdressebeskyttelseBolk(personIdenter)
-        return adresseBeskyttelseBolk.filter { (_, person) ->
-            person.adressebeskyttelse.any { adressebeskyttelse ->
-                adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
-                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
-            }
-        }.map { it.key }
+        return adresseBeskyttelseBolk
+            .filter { (_, person) ->
+                person.adressebeskyttelse.any { adressebeskyttelse ->
+                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+                        adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
+                }
+            }.map { it.key }
     }
 }

@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.hentSterkesteMedlemskap
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import java.time.Duration
 import java.time.LocalDate
 
@@ -90,8 +90,11 @@ data class VurderPersonErBosattIRiket(
                 .filter { it.harGyldigFom() }
                 .maxByOrNull { it.periode?.fom!! } ?: return false
 
-        return sisteAdresse.periode?.fom!!.toYearMonth()
-            .isBefore(vurderFra.toYearMonth()) && sisteAdresse.periode?.tom == null
+        return sisteAdresse.periode
+            ?.fom!!
+            .toYearMonth()
+            .isBefore(vurderFra.toYearMonth()) &&
+            sisteAdresse.periode?.tom == null
     }
 
     private fun erPersonBosattFraVurderingstidspunktet(
@@ -120,8 +123,8 @@ data class VurderBarnErBosattMedSøker(
     val søkerAdresser: List<GrBostedsadresse>,
     val barnAdresser: List<GrBostedsadresse>,
 ) : Vilkårsregel {
-    override fun vurder(): Evaluering {
-        return if (vurderOmPersonerBorSammen(
+    override fun vurder(): Evaluering =
+        if (vurderOmPersonerBorSammen(
                 adresser = barnAdresser,
                 andreAdresser = søkerAdresser,
             )
@@ -130,7 +133,6 @@ data class VurderBarnErBosattMedSøker(
         } else {
             Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARNET_BOR_IKKE_MED_MOR)
         }
-    }
 }
 
 data class VurderBarnErUgift(
@@ -140,9 +142,9 @@ data class VurderBarnErUgift(
         val sivilstanderMedGyldigFom = sivilstander.filter { it.harGyldigFom() }
 
         return when {
-            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTAND.UOPPGITT } != null ->
+            sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTANDTYPE.UOPPGITT } != null ->
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
-            sivilstanderMedGyldigFom.any { it.type == SIVILSTAND.GIFT || it.type == SIVILSTAND.REGISTRERT_PARTNER } ->
+            sivilstanderMedGyldigFom.any { it.type == SIVILSTANDTYPE.GIFT || it.type == SIVILSTANDTYPE.REGISTRERT_PARTNER } ->
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
             else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
         }
@@ -152,9 +154,7 @@ data class VurderBarnErUgift(
 data class VurderBarnHarLovligOpphold(
     val aktør: Aktør,
 ) : Vilkårsregel {
-    override fun vurder(): Evaluering {
-        return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
-    }
+    override fun vurder(): Evaluering = Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
 }
 
 data class LovligOppholdFaktaEØS(
@@ -168,8 +168,8 @@ data class VurderPersonHarLovligOpphold(
     val annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?,
     val opphold: List<GrOpphold>,
 ) : Vilkårsregel {
-    override fun vurder(): Evaluering {
-        return when (morLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
+    override fun vurder(): Evaluering =
+        when (morLovligOppholdFaktaEØS.statsborgerskap.hentSterkesteMedlemskap()) {
             Medlemskap.NORDEN -> Evaluering.oppfylt(VilkårOppfyltÅrsak.NORDISK_STATSBORGER)
             Medlemskap.TREDJELANDSBORGER -> {
                 val morErUkrainskStatsborger = morLovligOppholdFaktaEØS.statsborgerskap.any { it.landkode == "UKR" }
@@ -196,7 +196,6 @@ data class VurderPersonHarLovligOpphold(
             }
             else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
         }
-    }
 }
 
 private fun vurderLovligOppholdForEØSBorger(
@@ -240,7 +239,8 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
     tom: LocalDate,
 ): Long {
     val perioderMedTilkobletTom =
-        perioder.sortedBy { it.fom }
+        perioder
+            .sortedBy { it.fom }
             .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
                 if (acc.isNotEmpty() && acc.last().tom == null) {
                     val sisteDatoIntervall =
@@ -255,8 +255,7 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
                 acc.add(datoIntervallEntitet)
                 acc.sortBy { it.fom }
                 acc
-            }
-            .toList()
+            }.toList()
 
     val perioderInnenAngittTidsrom =
         perioderMedTilkobletTom.filter {
@@ -273,23 +272,25 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
                         tom = it.tom,
                     ),
                 ) ||
-                it.fom >= fom && it.tom <= tom
+                it.fom >= fom &&
+                it.tom <= tom
         }
 
     if (perioderInnenAngittTidsrom.isEmpty()) return Duration.between(fom.atStartOfDay(), tom.atStartOfDay()).toDays()
 
     val defaultAvstand =
         if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom)) {
-            Duration.between(
-                fom.atStartOfDay(),
-                perioderInnenAngittTidsrom.first().fom!!.atStartOfDay(),
-            )
-                .toDays()
+            Duration
+                .between(
+                    fom.atStartOfDay(),
+                    perioderInnenAngittTidsrom.first().fom!!.atStartOfDay(),
+                ).toDays()
         } else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom)) {
-            Duration.between(
-                perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
-                tom.atStartOfDay(),
-            ).toDays()
+            Duration
+                .between(
+                    perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
+                    tom.atStartOfDay(),
+                ).toDays()
         } else {
             0L
         }
@@ -298,8 +299,13 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
         .zipWithNext()
         .fold(defaultAvstand) { maksimumAvstand, pairs ->
             val avstand =
-                Duration.between(pairs.first.tom!!.atStartOfDay().plusDays(1), pairs.second.fom!!.atStartOfDay())
-                    .toDays()
+                Duration
+                    .between(
+                        pairs.first.tom!!
+                            .atStartOfDay()
+                            .plusDays(1),
+                        pairs.second.fom!!.atStartOfDay(),
+                    ).toDays()
             maxOf(avstand, maksimumAvstand)
         }
 }

@@ -60,14 +60,13 @@ data class Tilbakekreving(
         return (id == other.id)
     }
 
-    override fun toString(): String {
-        return "Tilbakekreving(" +
+    override fun toString(): String =
+        "Tilbakekreving(" +
             "id=$id, " +
             "behandlingId=${behandling.id} " +
             "valg=$valg, " +
             "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
             ")"
-    }
 
     fun tilRestTilbakekreving() =
         RestTilbakekreving(

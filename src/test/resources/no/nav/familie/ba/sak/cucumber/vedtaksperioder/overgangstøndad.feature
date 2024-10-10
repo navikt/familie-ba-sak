@@ -5,7 +5,7 @@
 Egenskap: Vedtaksperioder med overgangsstønad
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -40,8 +40,8 @@ Egenskap: Vedtaksperioder med overgangsstønad
       | 1234    | 01.08.2024 | 30.06.2031 | 1            |
       | 1234    | 01.09.2034 | 30.06.2036 | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Når vedtaksperiodene genereres for behandling 1
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                     |
       | 01.08.2023 | 30.06.2024 | Utbetaling         |                                               |
       | 01.07.2024 | 31.07.2024 | Utbetaling         | På grunn av splitt i overgangsstønaden        |
@@ -76,8 +76,8 @@ Egenskap: Vedtaksperioder med overgangsstønad
       | 1234    | 01.08.2024 | 30.06.2031 | 1            |
       | 1234    | 01.09.2034 | 30.06.2036 | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Når vedtaksperiodene genereres for behandling 1
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                     |
       | 01.08.2023 | 30.06.2026 | Utbetaling         |                                               |
       | 01.07.2026 | 30.06.2029 | Utbetaling         | Yngste barn over 3 år. Mister småbarnstillegg |

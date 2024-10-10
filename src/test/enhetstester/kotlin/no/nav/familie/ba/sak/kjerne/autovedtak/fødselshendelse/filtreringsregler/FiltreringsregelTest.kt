@@ -723,7 +723,9 @@ internal class FiltreringsregelTest {
             )
         assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
-            Filtreringsregel.values().zip(fagbestemtFiltreringsregelrekkefølge)
+            Filtreringsregel
+                .values()
+                .zip(fagbestemtFiltreringsregelrekkefølge)
                 .all { (x, y) -> x == y },
         ).isTrue
     }

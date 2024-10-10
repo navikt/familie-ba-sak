@@ -75,7 +75,8 @@ data class PersonopplysningGrunnlag(
         copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also { it ->
             it.personer
                 .addAll(
-                    personer.filter { person -> søkerOgBarnMedTilkjentYtelseFraForrigeBehandling.any { søkerEllerBarn -> søkerEllerBarn.aktørId == person.aktør.aktørId } }
+                    personer
+                        .filter { person -> søkerOgBarnMedTilkjentYtelseFraForrigeBehandling.any { søkerEllerBarn -> søkerEllerBarn.aktørId == person.aktør.aktørId } }
                         .map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
                 )
         }

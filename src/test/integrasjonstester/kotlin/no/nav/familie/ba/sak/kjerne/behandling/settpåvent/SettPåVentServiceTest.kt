@@ -277,13 +277,14 @@ class SettPåVentServiceTest(
                 brevmalService = brevmalService,
             )
 
-        settPåVentService.settBehandlingPåVent(
-            behandlingId = behandling1.id,
-            frist = LocalDate.now(),
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-        ).let {
-            settPåVentRepository.save(it.copy(frist = LocalDate.now().minusDays(1)))
-        }
+        settPåVentService
+            .settBehandlingPåVent(
+                behandlingId = behandling1.id,
+                frist = LocalDate.now(),
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            ).let {
+                settPåVentRepository.save(it.copy(frist = LocalDate.now().minusDays(1)))
+            }
 
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandling2.id,

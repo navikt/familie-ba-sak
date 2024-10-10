@@ -74,8 +74,8 @@ class FiltreringsreglerService(
         evalueringer: List<Evaluering>,
         behandlingId: Long,
         fakta: FiltreringsreglerFakta,
-    ): List<FødselshendelsefiltreringResultat> {
-        return fødselshendelsefiltreringResultatRepository.saveAll(
+    ): List<FødselshendelsefiltreringResultat> =
+        fødselshendelsefiltreringResultatRepository.saveAll(
             evalueringer.map {
                 FødselshendelsefiltreringResultat(
                     behandlingId = behandlingId,
@@ -87,11 +87,8 @@ class FiltreringsreglerService(
                 )
             },
         )
-    }
 
-    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> {
-        return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
-    }
+    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
 
     fun kjørFiltreringsregler(
         nyBehandlingHendelse: NyBehandlingHendelse,
@@ -168,13 +165,15 @@ class FiltreringsreglerService(
     private fun finnRestenAvBarnasPersonInfo(
         morsAktørId: Aktør,
         barnaFraHendelse: List<Person>,
-    ): List<PersonInfo> {
-        return personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsAktørId).forelderBarnRelasjon.filter {
-            it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.aktør == it.aktør }
-        }.map {
-            personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it.aktør)
-        }
-    }
+    ): List<PersonInfo> =
+        personopplysningerService
+            .hentPersoninfoMedRelasjonerOgRegisterinformasjon(morsAktørId)
+            .forelderBarnRelasjon
+            .filter {
+                it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN && barnaFraHendelse.none { barn -> barn.aktør == it.aktør }
+            }.map {
+                personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it.aktør)
+            }
 
     private fun økTellereForFørsteUtfall(
         evaluering: Evaluering,
@@ -204,7 +203,8 @@ class FiltreringsreglerService(
         return forrigeVedtatteBehandling?.let { vedtattBehandling ->
             vilkårsvurderingRepository.findByBehandlingAndAktiv(vedtattBehandling.id)?.let { vilkårsvurdering ->
                 vilkårsvurdering.personResultater.single { personResultat -> personResultat.erSøkersResultater() }.vilkårResultater.any { vilkårResultat ->
-                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD && vilkårResultat.erOppfylt() &&
+                    vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
+                        vilkårResultat.erOppfylt() &&
                         barnaFraHendelse.any { barnFraHendelse ->
                             vilkårResultat.periodeTom?.isAfter(barnFraHendelse.fødselsdato) ?: true &&
                                 vilkårResultat.periodeFom!!.isBefore(barnFraHendelse.fødselsdato.plusYears(18))

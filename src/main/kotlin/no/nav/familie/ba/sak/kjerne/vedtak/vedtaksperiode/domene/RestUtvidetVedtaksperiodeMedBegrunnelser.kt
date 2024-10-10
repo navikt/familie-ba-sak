@@ -21,8 +21,8 @@ data class RestUtvidetVedtaksperiodeMedBegrunnelser(
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
-): RestUtvidetVedtaksperiodeMedBegrunnelser {
-    return RestUtvidetVedtaksperiodeMedBegrunnelser(
+): RestUtvidetVedtaksperiodeMedBegrunnelser =
+    RestUtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
@@ -32,4 +32,3 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunne
         utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
         gyldigeBegrunnelser = this.gyldigeBegrunnelser.map { it.enumnavnTilString() },
     )
-}

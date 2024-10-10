@@ -131,7 +131,7 @@ class UtvidetBarnetrygdUtilTest {
                 beregnTilkjentYtelseUtvidet(
                     utvidetVilkår = listOf(utvidetVilkår),
                     tilkjentYtelse = tilkjentYtelse,
-                    andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer =
+                    andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer =
                         listOf(
                             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                                 person = barn,

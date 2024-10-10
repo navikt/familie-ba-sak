@@ -50,9 +50,11 @@ data class RestSanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             vilkår =
-                vilkaar?.mapNotNull {
-                    it.finnEnumverdi<SanityVilkår>(apiNavn)
-                }?.map { it.tilVilkår() }?.toSet()
+                vilkaar
+                    ?.mapNotNull {
+                        it.finnEnumverdi<SanityVilkår>(apiNavn)
+                    }?.map { it.tilVilkår() }
+                    ?.toSet()
                     ?: emptySet(),
             rolle =
                 rolle?.mapNotNull { it.finnEnumverdi<VilkårRolle>(apiNavn) }
@@ -117,9 +119,7 @@ inline fun <reified T : Enum<T>> String?.finnEnumverdi(apiNavn: String): T? {
     return enumverdi
 }
 
-inline fun <reified T : Enum<T>> String?.finnEnumverdiNullable(): T? {
-    return enumValues<T>().find { this != null && it.name == this }
-}
+inline fun <reified T : Enum<T>> String?.finnEnumverdiNullable(): T? = enumValues<T>().find { this != null && it.name == this }
 
 enum class SanityVilkår {
     UNDER_18_ÅR,
@@ -159,8 +159,8 @@ enum class VilkårTrigger {
     FAST_BOSTED,
 }
 
-fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat: List<UtdypendeVilkårsvurdering>): Boolean {
-    return when (this) {
+fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResultat: List<UtdypendeVilkårsvurdering>): Boolean =
+    when (this) {
         VilkårTrigger.VURDERING_ANNET_GRUNNLAG -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG)
         VilkårTrigger.MEDLEMSKAP -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
         VilkårTrigger.DELT_BOSTED -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
@@ -168,7 +168,6 @@ fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResulta
 
         VilkårTrigger.FAST_BOSTED -> !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
     }
-}
 
 enum class SanityPeriodeResultat {
     INNVILGET_ELLER_ØKNING,

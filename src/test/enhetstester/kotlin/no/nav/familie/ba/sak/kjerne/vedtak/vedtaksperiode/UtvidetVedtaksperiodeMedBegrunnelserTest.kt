@@ -87,7 +87,9 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
         Assertions.assertEquals(
             barn1.tilRestPerson().personIdent,
-            utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.single().person.personIdent,
+            utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer
+                .single()
+                .person.personIdent,
         )
         Assertions.assertFalse(utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.single().erPåvirketAvEndring)
     }

@@ -148,7 +148,8 @@ abstract class AbstractMockkSpringRunner {
 
     private fun clearCaches() {
         listOf(defaultCacheManager, shortCacheManager, dailyCacheManager).forEach {
-            it.cacheNames.mapNotNull { cacheName -> it.getCache(cacheName) }
+            it.cacheNames
+                .mapNotNull { cacheName -> it.getCache(cacheName) }
                 .forEach { cache -> cache.clear() }
         }
     }

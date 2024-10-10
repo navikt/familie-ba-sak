@@ -79,12 +79,13 @@ class SmåbarnstilleggKorrigeringService(
         }
 
         val nyeSmåbarnstilleggAndeler =
-            småbarnstilleggTidslinje.kombinerMed(skalFjernesTidslinje) { andel, skalFjernes ->
-                when (skalFjernes) {
-                    true -> null
-                    else -> andel
-                }
-            }.tilAndelerTilkjentYtelse(tilkjentYtelse)
+            småbarnstilleggTidslinje
+                .kombinerMed(skalFjernesTidslinje) { andel, skalFjernes ->
+                    when (skalFjernes) {
+                        true -> null
+                        else -> andel
+                    }
+                }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 
         val andelerTilkjentYtelserUtenomSmåbarnstillegg =
             tilkjentYtelse.andelerTilkjentYtelse

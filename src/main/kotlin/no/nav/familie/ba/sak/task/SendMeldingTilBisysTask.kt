@@ -76,7 +76,8 @@ class SendMeldingTilBisysTask(
 
         forrigeTilkjentYtelse.andelerTilkjentYtelse.groupBy { it.aktør.aktørId }.entries.forEach { entry ->
             val nyAndelerTilkjentYtelse =
-                tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktørId == entry.key }
+                tilkjentYtelse.andelerTilkjentYtelse
+                    .filter { it.aktør.aktørId == entry.key }
                     .sortedBy { it.stønadFom }
             entry.value.sortedBy { it.periode.fom }.forEach {
                 var forblePeriode: MånedPeriode? = it.periode
@@ -129,8 +130,8 @@ class SendMeldingTilBisysTask(
     companion object {
         const val TASK_STEP_TYPE = "sendMeldingOmOpphørTilBisys"
 
-        fun opprettTask(behandlingsId: Long): Task {
-            return Task(
+        fun opprettTask(behandlingsId: Long): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = behandlingsId.toString(),
                 properties =
@@ -138,23 +139,18 @@ class SendMeldingTilBisysTask(
                         this["behandlingsId"] = behandlingsId.toString()
                     },
             )
-        }
     }
 }
 
 fun earlist(
     yearMonth1: YearMonth,
     yearMonth2: YearMonth,
-): YearMonth {
-    return if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
-}
+): YearMonth = if (yearMonth1.isSameOrBefore(yearMonth2)) yearMonth1 else yearMonth2
 
 fun latest(
     yearMonth1: YearMonth,
     yearMonth2: YearMonth,
-): YearMonth {
-    return if (yearMonth1.isSameOrAfter(yearMonth2)) yearMonth1 else yearMonth2
-}
+): YearMonth = if (yearMonth1.isSameOrAfter(yearMonth2)) yearMonth1 else yearMonth2
 
 fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode?, MånedPeriode?, MånedPeriode?> {
     val overlappetFom = latest(this.fom, periode.fom)

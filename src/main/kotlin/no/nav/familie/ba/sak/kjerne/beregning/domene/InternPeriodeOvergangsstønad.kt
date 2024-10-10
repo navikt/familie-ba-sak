@@ -36,8 +36,9 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenTidligerePerioder(
     return tidligerePerioder.slåSammenSammenhengendePerioder() + nyePerioder
 }
 
-fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List<InternPeriodeOvergangsstønad> {
-    return this.sortedBy { it.fomDato }
+fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List<InternPeriodeOvergangsstønad> =
+    this
+        .sortedBy { it.fomDato }
         .fold(mutableListOf()) { sammenslåttePerioder, nestePeriode ->
             if (sammenslåttePerioder.lastOrNull()?.tomDato?.toYearMonth() == nestePeriode.fomDato.forrigeMåned()
             ) {
@@ -46,7 +47,6 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
                 sammenslåttePerioder.apply { add(nestePeriode) }
             }
         }
-}
 
 /***
  * Dersom vi i en behandling har overgangsstønad i tre måneder:
@@ -80,8 +80,7 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
                 } else {
                     gammelOvergangsstønadPeriode ?: nyOvergangsstønadPeriode
                 }
-            }
-            .lagInternePerioderOvergangsstønad()
+            }.lagInternePerioderOvergangsstønad()
 
     return tidligerePerioder + oppsplittedeFramtigigePerioder
 }

@@ -25,7 +25,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.FAR
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.MEDMOR
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.context.annotation.Primary
@@ -52,8 +52,8 @@ class MockPersonopplysningerService(
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()
     }
 
-    override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
-        return when (val id = aktør.aktivFødselsnummer()) {
+    override fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo =
+        when (val id = aktør.aktivFødselsnummer()) {
             "00000000000" ->
                 throw HttpClientErrorException(
                     HttpStatus.NOT_FOUND,
@@ -63,38 +63,30 @@ class MockPersonopplysningerService(
             else ->
                 personInfo[id] ?: personInfo.getValue(INTEGRASJONER_FNR)
         }
-    }
 
-    override fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo {
-        return personInfo[aktør.aktivFødselsnummer()]
+    override fun hentPersoninfoEnkel(aktør: Aktør): PersonInfo =
+        personInfo[aktør.aktivFødselsnummer()]
             ?: personInfo.getValue(INTEGRASJONER_FNR)
-    }
 
-    override fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo {
-        return hentPersoninfoEnkel(aktør)
-    }
+    override fun hentPersoninfoNavnOgAdresse(aktør: Aktør): PersonInfo = hentPersoninfoEnkel(aktør)
 
-    override fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING {
-        return if (aktør.aktivFødselsnummer() == BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) {
+    override fun hentAdressebeskyttelseSomSystembruker(aktør: Aktør): ADRESSEBESKYTTELSEGRADERING =
+        if (aktør.aktivFødselsnummer() == BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) {
             ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         } else {
             personInfo[aktør.aktivFødselsnummer()]?.adressebeskyttelseGradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
         }
-    }
 
-    override fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap {
-        return personInfo[aktør.aktivFødselsnummer()]?.statsborgerskap?.firstOrNull()
+    override fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap =
+        personInfo[aktør.aktivFødselsnummer()]?.statsborgerskap?.firstOrNull()
             ?: Statsborgerskap(
                 "NOR",
                 LocalDate.of(1990, 1, 25),
                 LocalDate.of(1990, 1, 25),
                 null,
             )
-    }
 
-    override fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {
-        return "NO"
-    }
+    override fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String = "NO"
 
     companion object {
         val personInfo: MutableMap<String, PersonInfo> =
@@ -241,8 +233,8 @@ private val bostedsadresseHistorikk =
 
 private val sivilstandHistorisk =
     listOf(
-        Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
-        Sivilstand(type = SIVILSTAND.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
+        Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
+        Sivilstand(type = SIVILSTANDTYPE.SKILT, gyldigFraOgMed = LocalDate.now().minusMonths(4)),
     )
 
 private val personInfoSøker1 =
@@ -270,7 +262,7 @@ private val personInfoBarn1 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.UOPPGITT,
+                    type = SIVILSTANDTYPE.UOPPGITT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
@@ -285,7 +277,7 @@ private val personInfoBarn2 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.GIFT,
+                    type = SIVILSTANDTYPE.GIFT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
@@ -301,7 +293,7 @@ private val personInfoSøker2 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.GIFT,
+                    type = SIVILSTANDTYPE.GIFT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),
@@ -316,7 +308,7 @@ private val personInfoSøker3 =
         sivilstander =
             listOf(
                 Sivilstand(
-                    type = SIVILSTAND.GIFT,
+                    type = SIVILSTANDTYPE.GIFT,
                     gyldigFraOgMed = LocalDate.now().minusMonths(8),
                 ),
             ),

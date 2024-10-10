@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
@@ -67,13 +69,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
-import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Service
 class BrevService(
@@ -96,8 +98,6 @@ class BrevService(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
-    private val unleashService: UnleashNextMedContextService,
-    private val sammensattKontrollsakService: SammensattKontrollsakService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -253,17 +253,18 @@ class BrevService(
     private fun hentLandOgStartdatoForUtbetalingstabell(
         vedtak: Vedtak,
         utbetalingerPerMndEøs: Map<String, UtbetalingMndEøs>?,
-    ): UtbetalingstabellAutomatiskValutajustering? =
-        utbetalingerPerMndEøs?.let {
-            val endringstidspunkt = hentSorterteVedtaksperioderMedBegrunnelser(vedtak).first { it.fom != null }.fom!!.tilMånedTidspunkt()
+    ): UtbetalingstabellAutomatiskValutajustering? {
+        val behandlingId = vedtak.behandling.id
+
+        return utbetalingerPerMndEøs?.let {
+            val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
             val landkoder = integrasjonClient.hentLandkoderISO2()
-            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id)
-            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt, landkoder, kompetanser)
+            val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
+            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.tilMånedTidspunkt(), landkoder, kompetanser)
         }
+    }
 
     fun sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling(behandling: Behandling): Boolean {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) return false
-
         val andelerIBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val andelerIBehandlingSomErDifferanseBeregnet = andelerIBehandling.filter { it.differanseberegnetPeriodebeløp != null }
         val andelerIBehandlingSomErDifferanseBeregnetOgLøpende = andelerIBehandlingSomErDifferanseBeregnet.filter { it.erLøpende() }
@@ -272,11 +273,13 @@ class BrevService(
     }
 
     private fun beskrivPerioderMedUavklartRefusjonEøs(vedtak: Vedtak) =
-        vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = vedtak.behandling, avklart = false)
+        vedtaksperiodeService
+            .beskrivPerioderMedRefusjonEøs(behandling = vedtak.behandling, avklart = false)
             ?.let { RefusjonEøsUavklart(perioderMedRefusjonEøsUavklart = it) }
 
     private fun beskrivPerioderMedAvklartRefusjonEøs(vedtak: Vedtak) =
-        vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = vedtak.behandling, avklart = true)
+        vedtaksperiodeService
+            .beskrivPerioderMedRefusjonEøs(behandling = vedtak.behandling, avklart = true)
             ?.let { RefusjonEøsAvklart(perioderMedRefusjonEøsAvklart = it) }
 
     private fun validerBrevdata(
@@ -287,7 +290,8 @@ class BrevService(
             listOf(
                 Brevmal.VEDTAK_OPPHØRT,
                 Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-            ) && vedtakFellesfelter.perioder.size > 1
+            ) &&
+            vedtakFellesfelter.perioder.size > 1
         ) {
             throw FunksjonellFeil(
                 "Behandlingsstatusen er \"Opphørt\", men mer enn én periode er begrunnet. Du skal kun begrunne perioden uten utbetaling.",
@@ -312,10 +316,14 @@ class BrevService(
                         flettefelter =
                             DødsfallData.Flettefelter(
                                 navn = data.grunnlag.søker.navn,
-                                fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
+                                fodselsnummer =
+                                    data.grunnlag.søker.aktør
+                                        .aktivFødselsnummer(),
                                 // Selv om det er feil å anta at alle navn er på dette formatet er det ønskelig å skrive
                                 // det slik, da uppercase kan oppleves som skrikende i et brev som skal være skånsomt
-                                navnAvdode = data.grunnlag.søker.navn.storForbokstavIAlleNavn(),
+                                navnAvdode =
+                                    data.grunnlag.søker.navn
+                                        .storForbokstavIAlleNavn(),
                                 virkningstidspunkt =
                                     hentVirkningstidspunktForDødsfallbrev(
                                         opphørsperioder = vedtaksperiodeService.finnVedtaksperioderForBehandling(vedtak).filter { it.type == Vedtaksperiodetype.OPPHØR },
@@ -343,7 +351,9 @@ class BrevService(
                         flettefelter =
                             KorreksjonVedtaksbrevData.Flettefelter(
                                 navn = data.grunnlag.søker.navn,
-                                fodselsnummer = data.grunnlag.søker.aktør.aktivFødselsnummer(),
+                                fodselsnummer =
+                                    data.grunnlag.søker.aktør
+                                        .aktivFødselsnummer(),
                             ),
                     ),
             )
@@ -414,7 +424,8 @@ class BrevService(
     }
 
     private fun hentSorterteVedtaksperioderMedBegrunnelser(vedtak: Vedtak) =
-        vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
+        vedtaksperiodeService
+            .hentPersisterteVedtaksperioder(vedtak)
             .filter { it.erBegrunnet() }
             .sortedBy { it.fom }
 
@@ -466,7 +477,9 @@ class BrevService(
                 refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
             )
 
-        val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
+        val organisasjonsnummer =
+            vedtak.behandling.fagsak.institusjon
+                ?.orgNummer
         val organisasjonsnavn = organisasjonsnummer?.let { organisasjonService.hentOrganisasjon(it).navn }
 
         return VedtakFellesfelter(
@@ -475,7 +488,9 @@ class BrevService(
             beslutter = grunnlagOgSignaturData.beslutter,
             hjemmeltekst = Hjemmeltekst(hjemler),
             søkerNavn = organisasjonsnavn ?: grunnlagOgSignaturData.grunnlag.søker.navn,
-            søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivFødselsnummer(),
+            søkerFødselsnummer =
+                grunnlagOgSignaturData.grunnlag.søker.aktør
+                    .aktivFødselsnummer(),
             perioder = brevperioder,
             organisasjonsnummer = organisasjonsnummer,
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
@@ -490,7 +505,9 @@ class BrevService(
     ): VedtakFellesfelterSammensattKontrollsak {
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
-        val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
+        val organisasjonsnummer =
+            vedtak.behandling.fagsak.institusjon
+                ?.orgNummer
         val organisasjonsnavn = organisasjonsnummer?.let { organisasjonService.hentOrganisasjon(it).navn }
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
@@ -502,7 +519,9 @@ class BrevService(
             saksbehandler = grunnlagOgSignaturData.saksbehandler,
             beslutter = grunnlagOgSignaturData.beslutter,
             søkerNavn = organisasjonsnavn ?: grunnlagOgSignaturData.grunnlag.søker.navn,
-            søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivFødselsnummer(),
+            søkerFødselsnummer =
+                grunnlagOgSignaturData.grunnlag.søker.aktør
+                    .aktivFødselsnummer(),
             organisasjonsnummer = organisasjonsnummer,
             gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
             korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) },
@@ -574,15 +593,31 @@ class BrevService(
         )
     }
 
+    fun finnStarttidspunktForUtbetalingstabell(behandling: Behandling): LocalDate {
+        val førsteJanuarIFjor = LocalDate.now().minusYears(1).withDayOfYear(1)
+        val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id)
+
+        return when {
+            behandling.opprettetÅrsak != BehandlingÅrsak.ÅRLIG_KONTROLL || endringstidspunkt.isBefore(førsteJanuarIFjor) -> endringstidspunkt
+            else -> {
+                val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id)
+                val tidligsteUtbetaling =
+                    andelTilkjentYtelseRepository
+                        .finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                        .filtrerBortIrrelevanteAndeler(endretutbetalingAndeler)
+                        .minOfOrNull { it.stønadFom }
+                        ?.toLocalDate() ?: return TIDENES_ENDE
+
+                tidligsteUtbetaling.coerceAtLeast(førsteJanuarIFjor)
+            }
+        }
+    }
+
     private fun hentUtbetalingerPerMndEøs(
         vedtak: Vedtak,
     ): Map<String, UtbetalingMndEøs>? {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            return null
-        }
-
         val behandlingId = vedtak.behandling.id
-        val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandlingId)
+        val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
         val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandlingId)
 
@@ -605,8 +640,8 @@ class BrevService(
     fun hentSaksbehandlerOgBeslutter(
         behandling: Behandling,
         totrinnskontroll: Totrinnskontroll?,
-    ): Pair<String, String> {
-        return when {
+    ): Pair<String, String> =
+        when {
             behandling.steg <= StegType.SEND_TIL_BESLUTTER || totrinnskontroll == null -> {
                 Pair(saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(), "Beslutter")
             }
@@ -630,7 +665,6 @@ class BrevService(
                 throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
             }
         }
-    }
 
     private data class GrunnlagOgSignaturData(
         val grunnlag: PersonopplysningGrunnlag,

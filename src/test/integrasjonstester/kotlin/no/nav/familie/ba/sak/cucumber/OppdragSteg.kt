@@ -53,9 +53,11 @@ class OppdragSteg {
     @Gitt("følgende behandlingsinformasjon")
     fun `følgendeBehandlingsinformasjon`(dataTable: DataTable) {
         endretMigreringsdatoMap =
-            dataTable.groupByBehandlingId()
+            dataTable
+                .groupByBehandlingId()
                 .mapValues {
-                    it.value.map { entry: Map<String, String> -> parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!) }
+                    it.value
+                        .map { entry: Map<String, String> -> parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!) }
                         .single()
                 }.toMutableMap()
     }
@@ -137,12 +139,14 @@ class OppdragSteg {
     fun `forvent følgende utbetalingsoppdrag`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(
             dataTable,
-            beregnetUtbetalingsoppdrag.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdrag
+                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
-            beregnetUtbetalingsoppdrag.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdrag
+                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
     }
@@ -151,12 +155,14 @@ class OppdragSteg {
     fun `forvent følgende simulering`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(
             dataTable,
-            beregnetUtbetalingsoppdragSimulering.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdragSimulering
+                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
         assertSjekkBehandlingIder(
             dataTable,
-            beregnetUtbetalingsoppdragSimulering.mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
+            beregnetUtbetalingsoppdragSimulering
+                .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
     }
@@ -187,7 +193,8 @@ class OppdragSteg {
     private fun genererBehandlinger(dataTable: DataTable) {
         val fagsak = defaultFagsak()
         behandlinger =
-            dataTable.groupByBehandlingId()
+            dataTable
+                .groupByBehandlingId()
                 .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
                 .associateBy { it.id }
     }

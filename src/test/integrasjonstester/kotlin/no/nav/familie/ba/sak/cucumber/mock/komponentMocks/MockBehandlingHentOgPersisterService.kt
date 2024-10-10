@@ -2,14 +2,14 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 
 fun mockBehandlingHentOgPersisterService(
     forrigeBehandling: Behandling?,
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     idForNyBehandling: Long,
 ): BehandlingHentOgPersisterService {
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -21,11 +21,16 @@ fun mockBehandlingHentOgPersisterService(
     }
     every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(any()) } answers {
         val fagsakId = firstArg<Long>()
-        dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsakId && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.aktivertTidspunkt }
+        dataFraCucumber.tilkjenteYtelser.values
+            .filter { it.behandling.fagsak.id == fagsakId && it.behandling.status == BehandlingStatus.AVSLUTTET && it.utbetalingsoppdrag != null }
+            .maxByOrNull { it.behandling.aktivertTidspunkt }
+            ?.behandling
     }
     every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers {
         val behandling = firstArg<Behandling>()
-        dataFraCucumber.behandlinger.values.filter { it.fagsak.id == behandling.fagsak.id && it.id != behandling.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.aktivertTidspunkt }
+        dataFraCucumber.behandlinger.values
+            .filter { it.fagsak.id == behandling.fagsak.id && it.id != behandling.id && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
     every { behandlingHentOgPersisterService.hent(any()) } answers {
         val behandlingId = firstArg<Long>()
@@ -55,7 +60,7 @@ fun mockBehandlingHentOgPersisterService(
 }
 
 fun oppdaterEllerLagreBehandling(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     behandlingSomSkalLagres: Behandling,
     idForNyBehandling: Long,
 ): Behandling {

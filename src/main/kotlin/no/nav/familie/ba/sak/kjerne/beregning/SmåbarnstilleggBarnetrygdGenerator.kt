@@ -55,19 +55,19 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
     private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
         søkerAktør: Aktør,
-    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        return this.kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
-            val prosentIPeriode = småbarnstilleggPeriode.prosent
-            val beløpIPeriode = sats.avrundetHeltallAvProsent(prosent = prosentIPeriode)
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> =
+        this
+            .kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
+                val prosentIPeriode = småbarnstilleggPeriode.prosent
+                val beløpIPeriode = sats.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 
-            AndelTilkjentYtelseForTidslinje(
-                aktør = søkerAktør,
-                beløp = beløpIPeriode,
-                ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                sats = sats,
-                prosent = prosentIPeriode,
-            )
-        }.tilAndelerTilkjentYtelse(tilkjentYtelse)
+                AndelTilkjentYtelseForTidslinje(
+                    aktør = søkerAktør,
+                    beløp = beløpIPeriode,
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    sats = sats,
+                    prosent = prosentIPeriode,
+                )
+            }.tilAndelerTilkjentYtelse(tilkjentYtelse)
             .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it) }
-    }
 }

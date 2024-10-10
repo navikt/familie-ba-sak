@@ -51,9 +51,7 @@ enum class Vilkår(
     ),
     ;
 
-    override fun toString(): String {
-        return this.name
-    }
+    override fun toString(): String = this.name
 
     companion object {
         fun hentOrdinæreVilkårFor(
@@ -69,8 +67,8 @@ enum class Vilkår(
             personType: PersonType,
             fagsakType: FagsakType,
             behandlingUnderkategori: BehandlingUnderkategori,
-        ): Set<Vilkår> {
-            return when (fagsakType) {
+        ): Set<Vilkår> =
+            when (fagsakType) {
                 FagsakType.NORMAL ->
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
@@ -88,21 +86,19 @@ enum class Vilkår(
                         SØKER, ANNENPART -> emptySet()
                     }
             }
-        }
 
-        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> {
-            return listOf(
+        fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> =
+            listOf(
                 UNDER_18_ÅR,
                 BOR_MED_SØKER,
                 GIFT_PARTNERSKAP,
                 BOSATT_I_RIKET,
                 LOVLIG_OPPHOLD,
             )
-        }
     }
 
-    fun defaultRegelverk(behandlingKategori: BehandlingKategori): Regelverk? {
-        return when (this) {
+    fun defaultRegelverk(behandlingKategori: BehandlingKategori): Regelverk? =
+        when (this) {
             BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD -> {
                 if (behandlingKategori == BehandlingKategori.EØS) {
                     Regelverk.EØS_FORORDNINGEN
@@ -113,7 +109,6 @@ enum class Vilkår(
 
             UTVIDET_BARNETRYGD, UNDER_18_ÅR, GIFT_PARTNERSKAP -> null
         }
-    }
 
     fun vurderVilkår(
         person: Person,
@@ -191,7 +186,5 @@ data class GyldigVilkårsperiode(
     val gyldigFom: LocalDate = LocalDate.MIN,
     val gyldigTom: LocalDate = LocalDate.MAX,
 ) {
-    fun gyldigFor(dato: LocalDate): Boolean {
-        return !(dato.isBefore(gyldigFom) || dato.isAfter(gyldigTom))
-    }
+    fun gyldigFor(dato: LocalDate): Boolean = !(dato.isBefore(gyldigFom) || dato.isAfter(gyldigTom))
 }

@@ -88,31 +88,32 @@ class EndringstidspunktTest(
         val sisteDagMedDeltBosdet = sisteDagUtenDeltBostedOppfylt.plusMonths(2).sisteDagIMåned()
 
         val overstyrendeVilkårResultaterRevurdering =
-            scenario.barna.associate {
-                it.aktørId!! to
-                    listOf(
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                            periodeFom = barnFødselsdato,
-                            periodeTom = førsteDagMedDeltBostedOppfylt,
-                            personResultat = mockk(relaxed = true),
-                        ),
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                            periodeFom = førsteDagMedDeltBostedOppfylt,
-                            periodeTom = sisteDagMedDeltBosdet,
-                            personResultat = mockk(relaxed = true),
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                        ),
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                            periodeFom = førsteDagMedDeltBostedOppfylt,
-                            periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
-                            personResultat = mockk(relaxed = true),
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                        ),
-                    )
-            }.toMutableMap()
+            scenario.barna
+                .associate {
+                    it.aktørId!! to
+                        listOf(
+                            lagVilkårResultat(
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                periodeFom = barnFødselsdato,
+                                periodeTom = førsteDagMedDeltBostedOppfylt,
+                                personResultat = mockk(relaxed = true),
+                            ),
+                            lagVilkårResultat(
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                periodeFom = førsteDagMedDeltBostedOppfylt,
+                                periodeTom = sisteDagMedDeltBosdet,
+                                personResultat = mockk(relaxed = true),
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                            lagVilkårResultat(
+                                vilkårType = Vilkår.BOSATT_I_RIKET,
+                                periodeFom = førsteDagMedDeltBostedOppfylt,
+                                periodeTom = sisteDagMedDeltBosdet.førsteDagINesteMåned(),
+                                personResultat = mockk(relaxed = true),
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                        )
+                }.toMutableMap()
 
         overstyrendeVilkårResultaterRevurdering[scenario.søker.aktørId] = emptyList()
 

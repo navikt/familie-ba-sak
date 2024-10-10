@@ -16,8 +16,7 @@ import org.springframework.stereotype.Service
 )
 class KonsistensavstemMotOppdragDataTask(
     val avstemmingService: AvstemmingService,
-) :
-    AsyncTaskStep {
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val konsistensavstemmingDataTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingDataTaskDTO::class.java)

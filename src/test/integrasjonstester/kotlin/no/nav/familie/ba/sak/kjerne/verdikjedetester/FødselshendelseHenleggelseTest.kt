@@ -332,9 +332,15 @@ class FødselshendelseHenleggelseTest(
 
         val automatiskVurdertBehandling = fagsak?.behandlinger?.first { it.skalBehandlesAutomatisk }!!
         val borMedSøkerVikårForbarn =
-            automatiskVurdertBehandling.personResultater.firstOrNull { it.personIdent == barnIdent }?.vilkårResultater?.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }
+            automatiskVurdertBehandling.personResultater
+                .firstOrNull { it.personIdent == barnIdent }
+                ?.vilkårResultater
+                ?.firstOrNull { it.vilkårType == Vilkår.BOR_MED_SØKER }
         val bosattIRiketVikårForbarn =
-            automatiskVurdertBehandling.personResultater.firstOrNull { it.personIdent == barnIdent }?.vilkårResultater?.firstOrNull { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            automatiskVurdertBehandling.personResultater
+                .firstOrNull { it.personIdent == barnIdent }
+                ?.vilkårResultater
+                ?.firstOrNull { it.vilkårType == Vilkår.BOSATT_I_RIKET }
 
         assertEquals(Resultat.IKKE_OPPFYLT, borMedSøkerVikårForbarn?.resultat)
         assertEquals(Resultat.IKKE_OPPFYLT, bosattIRiketVikårForbarn?.resultat)
@@ -347,7 +353,12 @@ class FødselshendelseHenleggelseTest(
                 RestScenario(
                     søker =
                         RestScenarioPerson(
-                            fødselsdato = now().minusYears(26).førsteDagINesteMåned().plusDays(6).toString(),
+                            fødselsdato =
+                                now()
+                                    .minusYears(26)
+                                    .førsteDagINesteMåned()
+                                    .plusDays(6)
+                                    .toString(),
                             fornavn = "Mor",
                             etternavn = "Søker",
                         ),
@@ -426,7 +437,12 @@ class FødselshendelseHenleggelseTest(
                 RestScenario(
                     søker =
                         RestScenarioPerson(
-                            fødselsdato = now().minusYears(26).førsteDagINesteMåned().plusDays(6).toString(),
+                            fødselsdato =
+                                now()
+                                    .minusYears(26)
+                                    .førsteDagINesteMåned()
+                                    .plusDays(6)
+                                    .toString(),
                             fornavn = "Mor",
                             etternavn = "Søker",
                         ),

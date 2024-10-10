@@ -95,8 +95,8 @@ class BehandlingStegTilstandTest {
         )
     }
 
-    fun opprettBehandling(): Behandling {
-        return Behandling(
+    fun opprettBehandling(): Behandling =
+        Behandling(
             id = 1,
             fagsak = mockk(),
             kategori = BehandlingKategori.NASJONAL,
@@ -106,5 +106,4 @@ class BehandlingStegTilstandTest {
         ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, StegType.REGISTRERE_SØKNAD))
         }
-    }
 }

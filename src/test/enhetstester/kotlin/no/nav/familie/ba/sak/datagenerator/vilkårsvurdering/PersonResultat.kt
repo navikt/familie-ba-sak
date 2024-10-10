@@ -26,41 +26,42 @@ fun lagPersonResultatAvOverstyrteResultater(
     val erUtvidet = overstyrendeVilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
     val vilkårResultater =
-        Vilkår.hentVilkårFor(
-            personType = person.type,
-            fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR,
-        ).foldIndexed(mutableListOf<VilkårResultat>()) { index, acc, vilkårType ->
-            val overstyrteVilkårResultaterForVilkår: List<VilkårResultat> =
-                overstyrendeVilkårResultater
-                    .filter { it.vilkårType == vilkårType }
-            if (overstyrteVilkårResultaterForVilkår.isNotEmpty()) {
-                acc.addAll(overstyrteVilkårResultaterForVilkår)
-            } else {
-                acc.add(
-                    VilkårResultat(
-                        id = if (id != 0L) index + 1L else 0L,
-                        personResultat = personResultat,
-                        periodeFom =
-                            if (vilkårType == Vilkår.UNDER_18_ÅR) {
-                                person.fødselsdato
-                            } else {
-                                maxOf(
-                                    person.fødselsdato,
-                                    LocalDate.now().minusYears(3),
-                                )
-                            },
-                        periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
-                        vilkårType = vilkårType,
-                        resultat = Resultat.OPPFYLT,
-                        begrunnelse = "",
-                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                        utdypendeVilkårsvurderinger = emptyList(),
-                    ),
-                )
-            }
-            acc
-        }.toSet()
+        Vilkår
+            .hentVilkårFor(
+                personType = person.type,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR,
+            ).foldIndexed(mutableListOf<VilkårResultat>()) { index, acc, vilkårType ->
+                val overstyrteVilkårResultaterForVilkår: List<VilkårResultat> =
+                    overstyrendeVilkårResultater
+                        .filter { it.vilkårType == vilkårType }
+                if (overstyrteVilkårResultaterForVilkår.isNotEmpty()) {
+                    acc.addAll(overstyrteVilkårResultaterForVilkår)
+                } else {
+                    acc.add(
+                        VilkårResultat(
+                            id = if (id != 0L) index + 1L else 0L,
+                            personResultat = personResultat,
+                            periodeFom =
+                                if (vilkårType == Vilkår.UNDER_18_ÅR) {
+                                    person.fødselsdato
+                                } else {
+                                    maxOf(
+                                        person.fødselsdato,
+                                        LocalDate.now().minusYears(3),
+                                    )
+                                },
+                            periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
+                            vilkårType = vilkårType,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
+                        ),
+                    )
+                }
+                acc
+            }.toSet()
 
     personResultat.setSortedVilkårResultater(vilkårResultater)
 

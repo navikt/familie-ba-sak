@@ -210,9 +210,7 @@ class JournalførVedtaksbrev(
             manuellAdresseInfo = mottakerInfo.manuellAdresseInfo,
         )
 
-    override fun stegType(): StegType {
-        return StegType.JOURNALFØR_VEDTAKSBREV
-    }
+    override fun stegType(): StegType = StegType.JOURNALFØR_VEDTAKSBREV
 
     companion object {
         val logger = LoggerFactory.getLogger(JournalførVedtaksbrev::class.java)

@@ -32,15 +32,12 @@ data class GrMatrikkeladresse(
             kommunenummer,
         )
 
-    override fun toSecureString(): String {
-        return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
+    override fun toSecureString(): String =
+        """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
 |               postnummer=$postnummer,kommunenummer=$kommunenummer
-            """.trimMargin()
-    }
+        """.trimMargin()
 
-    override fun toString(): String {
-        return "Matrikkeladresse(detaljer skjult)"
-    }
+    override fun toString(): String = "Matrikkeladresse(detaljer skjult)"
 
     override fun tilFrontendString() =
         """Matrikkel $matrikkelId, bruksenhet $bruksenhetsnummer, postnummer $postnummer""".trimMargin()

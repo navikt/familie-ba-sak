@@ -29,9 +29,10 @@ class AutobrevScheduler(
                 // måneden også er en virkedag (slik at både denne skeduleren og tasken som opprettes vil kjøre på samme dato).
                 opprettTask(
                     triggerTid =
-                        VirkedagerProvider.nesteVirkedag(
-                            LocalDate.now().minusDays(1),
-                        ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
+                        VirkedagerProvider
+                            .nesteVirkedag(
+                                LocalDate.now().minusDays(1),
+                            ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
                 )
             }
 

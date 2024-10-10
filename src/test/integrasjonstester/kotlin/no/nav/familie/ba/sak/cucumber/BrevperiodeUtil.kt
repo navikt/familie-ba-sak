@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BrevBegrunnelse
 
-fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
-    return dataTable.asMaps().map { rad: Tabellrad ->
+fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> =
+    dataTable.asMaps().map { rad: Tabellrad ->
 
         val beløp = parseValgfriString(BrevPeriodeParser.DomenebegrepBrevPeriode.BELØP, rad)?.replace(' ', ' ') ?: ""
         val antallBarn = parseValgfriInt(BrevPeriodeParser.DomenebegrepBrevPeriode.ANTALL_BARN, rad) ?: -1
@@ -34,4 +34,3 @@ fun parseBrevPerioder(dataTable: DataTable): List<BrevPeriode> {
             duEllerInstitusjonen = duEllerInstitusjonen,
         )
     }
-}

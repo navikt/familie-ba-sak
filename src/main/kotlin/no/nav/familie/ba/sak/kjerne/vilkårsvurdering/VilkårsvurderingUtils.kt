@@ -239,7 +239,8 @@ object VilkårsvurderingUtils {
             if (personenSomFinnes == null) {
                 // Legg til ny person
                 personTilOppdatert.setSortedVilkårResultater(
-                    personFraInit.vilkårResultater.map { it.kopierMedParent(personTilOppdatert) }
+                    personFraInit.vilkårResultater
+                        .map { it.kopierMedParent(personTilOppdatert) }
                         .toSet(),
                 )
             } else {
@@ -320,7 +321,8 @@ object VilkårsvurderingUtils {
                 personenSomFinnes.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
             if (utvidetVilkår.isNotEmpty()) {
                 personsVilkårOppdatert.addAll(
-                    utvidetVilkår.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
+                    utvidetVilkår
+                        .filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling = kopieringSkjerFraForrigeBehandling)
                         .map { it.kopierMedParent(personTilOppdatert) },
                 )
                 personsVilkårAktivt.removeAll(utvidetVilkår)
@@ -370,7 +372,8 @@ fun standardbegrunnelserTilNedtrekksmenytekster(
 
 fun eøsStandardbegrunnelserTilNedtrekksmenytekster(
     sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-) = EØSStandardbegrunnelse.entries.groupBy { it.vedtakBegrunnelseType }
+) = EØSStandardbegrunnelse.entries
+    .groupBy { it.vedtakBegrunnelseType }
     .mapValues { begrunnelseGruppe ->
         begrunnelseGruppe.value.flatMap { vedtakBegrunnelse ->
             eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
@@ -432,13 +435,12 @@ fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     }
 }
 
-private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> {
-    return if (kopieringSkjerFraForrigeBehandling) {
+private fun List<VilkårResultat>.filtrerVilkårÅKopiere(kopieringSkjerFraForrigeBehandling: Boolean): List<VilkårResultat> =
+    if (kopieringSkjerFraForrigeBehandling) {
         this.filter { it.resultat == Resultat.OPPFYLT }
     } else {
         this
     }
-}
 
 fun genererPersonResultatForPerson(
     vilkårsvurdering: Vilkårsvurdering,
@@ -459,39 +461,40 @@ fun genererPersonResultatForPerson(
         )
 
     val vilkårResultater =
-        vilkårForPerson.flatMap { vilkår ->
-            val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
+        vilkårForPerson
+            .flatMap { vilkår ->
+                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
 
-            val tom: LocalDate? =
-                when {
-                    person.erDød() -> person.dødsfall!!.dødsfallDato
-                    vilkår == Vilkår.UNDER_18_ÅR -> person.fødselsdato.til18ÅrsVilkårsdato()
-                    else -> null
+                val tom: LocalDate? =
+                    when {
+                        person.erDød() -> person.dødsfall!!.dødsfallDato
+                        vilkår == Vilkår.UNDER_18_ÅR -> person.fødselsdato.til18ÅrsVilkårsdato()
+                        else -> null
+                    }
+
+                val erNasjonalBehandling = vilkårsvurdering.behandling.kategori == BehandlingKategori.NASJONAL
+
+                if (vilkår == Vilkår.BOSATT_I_RIKET && erNasjonalBehandling && erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå) {
+                    person.bostedsadresser.tilAutomatiskeVilkårResultaterForBosattIRiket(personResultat)
+                } else {
+                    listOf(
+                        VilkårResultat(
+                            personResultat = personResultat,
+                            erAutomatiskVurdert =
+                                when (vilkår) {
+                                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
+                                    else -> false
+                                },
+                            resultat = utledResultat(vilkår, person),
+                            vilkårType = vilkår,
+                            periodeFom = fom,
+                            periodeTom = tom,
+                            begrunnelse = utledBegrunnelse(vilkår, person),
+                            sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                        ),
+                    )
                 }
-
-            val erNasjonalBehandling = vilkårsvurdering.behandling.kategori == BehandlingKategori.NASJONAL
-
-            if (vilkår == Vilkår.BOSATT_I_RIKET && erNasjonalBehandling && erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå) {
-                person.bostedsadresser.tilAutomatiskeVilkårResultaterForBosattIRiket(personResultat)
-            } else {
-                listOf(
-                    VilkårResultat(
-                        personResultat = personResultat,
-                        erAutomatiskVurdert =
-                            when (vilkår) {
-                                Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP -> true
-                                else -> false
-                            },
-                        resultat = utledResultat(vilkår, person),
-                        vilkårType = vilkår,
-                        periodeFom = fom,
-                        periodeTom = tom,
-                        begrunnelse = utledBegrunnelse(vilkår, person),
-                        sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-                    ),
-                )
-            }
-        }.toSortedSet(VilkårResultat.VilkårResultatComparator)
+            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
     personResultat.setSortedVilkårResultater(vilkårResultater)
 
@@ -550,7 +553,12 @@ private fun utledResultat(
 }
 
 private fun utledResultatForGiftPartnerskap(person: Person) =
-    if (person.sivilstander.isEmpty() || person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == true) {
+    if (person.sivilstander.isEmpty() ||
+        person.sivilstander
+            .sisteSivilstand()
+            ?.type
+            ?.somForventetHosBarn() == true
+    ) {
         Resultat.OPPFYLT
     } else {
         Resultat.IKKE_VURDERT
@@ -563,7 +571,11 @@ private fun utledBegrunnelse(
     person.erDød() -> "Dødsfall"
     vilkår == Vilkår.UNDER_18_ÅR -> "Vurdert og satt automatisk"
     vilkår == Vilkår.GIFT_PARTNERSKAP ->
-        if (person.sivilstander.sisteSivilstand()?.type?.somForventetHosBarn() == false) {
+        if (person.sivilstander
+                .sisteSivilstand()
+                ?.type
+                ?.somForventetHosBarn() == false
+        ) {
             "Vilkåret er forsøkt behandlet automatisk, men barnet er registrert som gift i " +
                 "folkeregisteret. Vurder hvilke konsekvenser dette skal ha for behandlingen"
         } else {

@@ -198,7 +198,8 @@ class FødselshendelseServiceTest {
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         every { stegService.håndterVilkårsvurdering(nyBehandling) } returns
-            nyBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
+            nyBehandling
+                .copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
                 .leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
         every { stegService.håndterHenleggBehandling(any(), any()) } returns nyBehandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any(), any()) } returns ""

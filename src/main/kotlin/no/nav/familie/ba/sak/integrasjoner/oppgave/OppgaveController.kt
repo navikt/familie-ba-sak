@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -12,7 +13,6 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -90,12 +90,13 @@ class OppgaveController(
             handling = "tilbakestille fordeling på oppgave",
         )
 
-        Result.runCatching {
-            oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
-        }.fold(
-            onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
-            onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) },
-        )
+        Result
+            .runCatching {
+                oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
+            }.fold(
+                onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
+                onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) },
+            )
     }
 
     @GetMapping(path = ["/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -113,7 +114,8 @@ class OppgaveController(
                 journalpost = journalpost,
                 person =
                     aktør?.let {
-                        personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
+                        personopplysningerService
+                            .hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                             .tilRestPersonInfo(it.aktivFødselsnummer())
                     },
                 minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null,

@@ -27,7 +27,9 @@ class FagsakIntegrationTest(
 
         val minimalFagsakList = fagsakService.hentMinimalFagsakerForPerson(fagsakOmsorgperson.aktør)
 
-        assertThat(minimalFagsakList.data).hasSize(3).extracting("id")
+        assertThat(minimalFagsakList.data)
+            .hasSize(3)
+            .extracting("id")
             .contains(fagsakInstitusjon.id, fagsakOmsorgperson.id, fagsakEnsligMindreÅrig.id)
     }
 

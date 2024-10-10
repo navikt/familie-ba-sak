@@ -34,7 +34,8 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                     RestTidslinjerForBarn(
                         vilkårTidslinjer =
                             it.value.vilkårsresultatTidslinjer.map {
-                                it.beskjærEtter(erUnder18årTidslinje.tilDag())
+                                it
+                                    .beskjærEtter(erUnder18årTidslinje.tilDag())
                                     .tilRestTidslinje()
                             },
                         oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
@@ -54,12 +55,14 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
             RestTidslinjerForSøker(
                 vilkårTidslinjer =
                     søkersTidslinjer.vilkårsresultatTidslinjer.map {
-                        it.beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
+                        it
+                            .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
                             .tilRestTidslinje()
                     },
                 oppfyllerEgneVilkårTidslinje =
                     søkersTidslinjer
-                        .regelverkResultatTidslinje.map { it?.resultat }
+                        .regelverkResultatTidslinje
+                        .map { it?.resultat }
                         .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
                         .tilRestTidslinje(),
             ),

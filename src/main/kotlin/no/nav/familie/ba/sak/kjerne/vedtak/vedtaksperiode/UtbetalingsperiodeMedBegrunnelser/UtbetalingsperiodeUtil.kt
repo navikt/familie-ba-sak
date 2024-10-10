@@ -1,5 +1,5 @@
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -25,17 +25,19 @@ fun hentPerioderMedUtbetaling(
 
     val alleAndelerKombinertTidslinje =
         andelerTilkjentYtelse
-            .tilTidslinjerPerPersonOgType().values
+            .tilTidslinjerPerAktørOgType()
+            .values
             .kombinerUtenNull { it }
             .filtrer { !it?.toList().isNullOrEmpty() }
 
     val andelerSplittetOppTidslinje =
-        alleAndelerKombinertTidslinje.kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
-            when (andelerIPeriode) {
-                null -> null
-                else -> Pair(andelerIPeriode, splittVilkårIPeriode)
-            }
-        }.filtrerIkkeNull()
+        alleAndelerKombinertTidslinje
+            .kombinerMed(tidslinjeForSplitt) { andelerIPeriode, splittVilkårIPeriode ->
+                when (andelerIPeriode) {
+                    null -> null
+                    else -> Pair(andelerIPeriode, splittVilkårIPeriode)
+                }
+            }.filtrerIkkeNull()
 
     return andelerSplittetOppTidslinje
         .perioder()

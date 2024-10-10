@@ -72,8 +72,8 @@ fun DeltBostedBuilder.oppdaterTilkjentYtelse(): TilkjentYtelse {
     return tilkjentYtelse
 }
 
-fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-    return this
+fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> =
+    this
         .filter { deltBosted -> deltBosted.fom != null && deltBosted.tom != null && deltBosted.prosent != null }
         .flatMap { deltBosted ->
             deltBosted.barnPersoner.map {
@@ -86,4 +86,3 @@ fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAn
                 )
             }
         }
-}

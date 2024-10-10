@@ -64,11 +64,12 @@ class TilkjentYtelseTestController(
 private fun Map<LocalDate, String>.tilEndretUtbetalingAndeler(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     tilkjentYtelse: TilkjentYtelse,
-): Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
-    return this.map { (dato, tidslinje) ->
-        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
-        DeltBostedBuilder(dato.tilMånedTidspunkt(), tilkjentYtelse)
-            .medDeltBosted(tidslinje, person)
-            .bygg().tilEndreteUtebetalingAndeler()
-    }.flatten()
-}
+): Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse> =
+    this
+        .map { (dato, tidslinje) ->
+            val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
+            DeltBostedBuilder(dato.tilMånedTidspunkt(), tilkjentYtelse)
+                .medDeltBosted(tidslinje, person)
+                .bygg()
+                .tilEndreteUtebetalingAndeler()
+        }.flatten()

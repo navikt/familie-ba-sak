@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -30,15 +30,14 @@ class DistribuerVedtaksbrevTilFullmektigEllerVergeTask(
         fun opprettDistribuerVedtaksbrevTilFullmektigEllerVergeTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
             properties: Properties,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
                 triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(),
             )
-        }
 
         const val TASK_STEP_TYPE = "distribuerVedtaksbrevTilVergeEllerManuellBrevMottaker"
     }

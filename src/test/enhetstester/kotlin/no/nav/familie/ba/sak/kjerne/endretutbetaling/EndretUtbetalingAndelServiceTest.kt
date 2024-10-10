@@ -52,6 +52,7 @@ class EndretUtbetalingAndelServiceTest {
                 andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
                 vilkårsvurderingService = mockVilkårsvurderingService,
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
+                unleashMedContextService = mockk(),
             )
     }
 

@@ -104,16 +104,18 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
 }
 
 fun hentPositivFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
-    periode.filter { postering ->
-        postering.posteringType == PosteringType.FEILUTBETALING &&
-            postering.beløp > BigDecimal.ZERO
-    }.sumOf { it.beløp }
+    periode
+        .filter { postering ->
+            postering.posteringType == PosteringType.FEILUTBETALING &&
+                postering.beløp > BigDecimal.ZERO
+        }.sumOf { it.beløp }
 
 fun hentNegativFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
-    periode.filter { postering ->
-        postering.posteringType == PosteringType.FEILUTBETALING &&
-            postering.beløp < BigDecimal.ZERO
-    }.sumOf { it.beløp }
+    periode
+        .filter { postering ->
+            postering.posteringType == PosteringType.FEILUTBETALING &&
+                postering.beløp < BigDecimal.ZERO
+        }.sumOf { it.beløp }
 
 fun hentFeilutbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
@@ -200,20 +202,20 @@ fun hentEtterbetalingIPeriode(
 fun hentTotalEtterbetaling(
     simuleringPerioder: List<SimuleringsPeriode>,
     fomDatoNestePeriode: LocalDate?,
-): BigDecimal {
-    return simuleringPerioder.filter {
-        (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
-    }.sumOf { it.etterbetaling }.takeIf { it > BigDecimal.ZERO } ?: BigDecimal.ZERO
-}
+): BigDecimal =
+    simuleringPerioder
+        .filter {
+            (fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode)
+        }.sumOf { it.etterbetaling }
+        .takeIf { it > BigDecimal.ZERO } ?: BigDecimal.ZERO
 
 fun hentTotalFeilutbetaling(
     simuleringPerioder: List<SimuleringsPeriode>,
     fomDatoNestePeriode: LocalDate?,
-): BigDecimal {
-    return simuleringPerioder
+): BigDecimal =
+    simuleringPerioder
         .filter { fomDatoNestePeriode == null || it.fom < fomDatoNestePeriode }
         .sumOf { it.feilutbetaling }
-}
 
 fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): ØkonomiSimuleringMottaker {
     val behandlingSimuleringMottaker =

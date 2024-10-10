@@ -9,7 +9,7 @@ Egenskap: Vedtaksperioder for enslig mindreårig
       | FagsakId | Fagsaktype             |
       | 1        | BARN_ENSLIG_MINDREÅRIG |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId |
       | 1            | 1        |
 
@@ -17,6 +17,9 @@ Egenskap: Vedtaksperioder for enslig mindreårig
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 3456    | BARN       | 02.12.2016  |
 
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 1            | 3456    |
 
   Scenario: Enslig barn har utvidet oppfylt
 
@@ -32,9 +35,9 @@ Egenskap: Vedtaksperioder for enslig mindreårig
       | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | Ordinær_barnetrygd |
       | 3456    | 01.01.2017 | 30.11.2034 | 2000  | 1            | Utvidet_barnetrygd |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar       |
       | 01.01.2017 | 30.11.2034 | Utbetaling         |                 |
       | 01.12.2034 |            | Opphør             | Barn er over 18 |
@@ -53,9 +56,9 @@ Egenskap: Vedtaksperioder for enslig mindreårig
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId | Ytelse type        |
       | 3456    | 01.01.2017 | 30.11.2034 | 1234  | 1            | Ordinær_barnetrygd |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar       |
       | 01.01.2017 | 30.11.2034 | Utbetaling         |                 |
       | 01.12.2034 |            | Opphør             | Barn er over 18 |

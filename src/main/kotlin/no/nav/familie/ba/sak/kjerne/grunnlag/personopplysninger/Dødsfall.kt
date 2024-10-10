@@ -43,9 +43,7 @@ data class Dødsfall(
     fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
         copy(id = 0, person = nyPerson)
 
-    fun hentAdresseToString(): String {
-        return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
-    }
+    fun hentAdresseToString(): String = """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
 
     fun tilRestRegisteropplysning() =
         RestRegisteropplysning(
@@ -79,12 +77,11 @@ fun lagDødsfall(
     dødsfallAdresse: String? = null,
     dødsfallPostnummer: String? = null,
     dødsfallPoststed: String? = null,
-): Dødsfall {
-    return Dødsfall(
+): Dødsfall =
+    Dødsfall(
         person = person,
         dødsfallDato = dødsfallDato,
         dødsfallAdresse = dødsfallAdresse,
         dødsfallPostnummer = dødsfallPostnummer,
         dødsfallPoststed = dødsfallPoststed,
     )
-}

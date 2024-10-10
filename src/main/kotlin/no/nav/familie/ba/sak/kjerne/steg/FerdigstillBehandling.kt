@@ -82,9 +82,7 @@ class FerdigstillBehandling(
     private fun skalOppdatereStønadFomOgTomForIverksatteBehandlingerIkkeSendtTilOppdrag(tilkjentYtelse: TilkjentYtelse) =
         tilkjentYtelse.stønadFom == null && tilkjentYtelse.stønadTom == null && tilkjentYtelse.utbetalingsoppdrag == null
 
-    override fun stegType(): StegType {
-        return StegType.FERDIGSTILLE_BEHANDLING
-    }
+    override fun stegType(): StegType = StegType.FERDIGSTILLE_BEHANDLING
 
     companion object {
         private val logger = LoggerFactory.getLogger(FerdigstillBehandling::class.java)

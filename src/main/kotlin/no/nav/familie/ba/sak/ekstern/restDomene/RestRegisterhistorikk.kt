@@ -39,5 +39,4 @@ fun List<RestRegisteropplysning>.fyllInnTomDatoer(): List<RestRegisteropplysning
                 acc.add(foregående.copy(tom = acc.last().fom?.minusDays(1)))
             }
             acc
-        }
-        .reversed()
+        }.reversed()

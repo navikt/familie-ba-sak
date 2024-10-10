@@ -16,10 +16,14 @@ fun <T : PeriodeOgBarnSkjema<T>> Collection<T>.slåSammen(): Collection<T> {
     }
 
     val kompetanseSettTidslinje: Tidslinje<Set<T>, Måned> =
-        this.map { it.tilTidslinje() }
+        this
+            .map { it.tilTidslinje() }
             .kombinerUtenNull {
-                it.groupingBy { it.utenBarn() }.reduce { _, acc, kompetanse -> acc.leggSammenBarn(kompetanse) }
-                    .values.toSet()
+                it
+                    .groupingBy { it.utenBarn() }
+                    .reduce { _, acc, kompetanse -> acc.leggSammenBarn(kompetanse) }
+                    .values
+                    .toSet()
             }
 
     val kompetanserSlåttSammenVertikalt =
@@ -32,7 +36,9 @@ fun <T : PeriodeOgBarnSkjema<T>> Collection<T>.slåSammen(): Collection<T> {
             .groupBy { it.utenPeriode() }
             .mapValues { (_, kompetanser) -> kompetanser.tilTidslinje().slåSammenLike() }
             .mapValues { (_, tidslinje) -> tidslinje.perioder() }
-            .values.flatten().mapNotNull { periode -> periode.innhold?.settFomOgTom(periode) }
+            .values
+            .flatten()
+            .mapNotNull { periode -> periode.innhold?.settFomOgTom(periode) }
 
     return kompetanseSlåttSammenHorisontalt
 }

@@ -31,8 +31,8 @@ import java.time.LocalDateTime
 fun lagTestJournalpost(
     personIdent: String,
     journalpostId: String,
-): Journalpost {
-    return Journalpost(
+): Journalpost =
+    Journalpost(
         journalpostId = journalpostId,
         journalposttype = Journalposttype.I,
         journalstatus = Journalstatus.MOTTATT,
@@ -79,10 +79,9 @@ fun lagTestJournalpost(
         tittel = "Søknad om ordinær barnetrygd",
         relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
     )
-}
 
-fun lagTestOppgave(): OpprettOppgaveRequest {
-    return OpprettOppgaveRequest(
+fun lagTestOppgave(): OpprettOppgaveRequest =
+    OpprettOppgaveRequest(
         ident = OppgaveIdentV2(ident = "test", gruppe = IdentGruppe.AKTOERID),
         saksId = "123",
         tema = Tema.BAR,
@@ -92,15 +91,14 @@ fun lagTestOppgave(): OpprettOppgaveRequest {
         enhetsnummer = "1234",
         behandlingstema = "behandlingstema",
     )
-}
 
 fun lagTestOppgaveDTO(
     oppgaveId: Long,
     oppgavetype: Oppgavetype = Oppgavetype.Journalføring,
     tildeltRessurs: String? = null,
     tildeltEnhetsnr: String? = "4820",
-): Oppgave {
-    return Oppgave(
+): Oppgave =
+    Oppgave(
         id = oppgaveId,
         aktoerId = randomAktør().aktørId,
         identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
@@ -114,18 +112,19 @@ fun lagTestOppgaveDTO(
         behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
         behandlingstype = Behandlingstype.NASJONAL.value,
         opprettetTidspunkt =
-            LocalDate.of(
-                2020,
-                1,
-                1,
-            ).toString(),
+            LocalDate
+                .of(
+                    2020,
+                    1,
+                    1,
+                ).toString(),
         fristFerdigstillelse =
-            LocalDate.of(
-                2020,
-                2,
-                1,
-            ).toString(),
+            LocalDate
+                .of(
+                    2020,
+                    2,
+                    1,
+                ).toString(),
         prioritet = OppgavePrioritet.NORM,
         status = StatusEnum.OPPRETTET,
     )
-}

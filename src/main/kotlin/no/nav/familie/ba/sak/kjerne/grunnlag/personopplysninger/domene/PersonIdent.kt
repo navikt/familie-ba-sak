@@ -22,9 +22,7 @@ class PersonIdent(
     @Column(name = "person_ident", updatable = false, length = 50)
     val ident: String,
 ) : Comparable<PersonIdent> {
-    override fun compareTo(other: PersonIdent): Int {
-        return ident.compareTo(other.ident)
-    }
+    override fun compareTo(other: PersonIdent): Int = ident.compareTo(other.ident)
 
     override fun equals(other: Any?): Boolean {
         if (other === this) {
@@ -36,7 +34,5 @@ class PersonIdent(
         return ident == otherObject.ident
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(ident)
-    }
+    override fun hashCode(): Int = Objects.hash(ident)
 }

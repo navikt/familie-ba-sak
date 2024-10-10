@@ -81,7 +81,13 @@ class InfotrygdControllerTest {
 
         Assertions.assertEquals(HttpStatus.OK, respons.statusCode)
         Assertions.assertEquals(true, respons.body?.data?.harTilgang)
-        Assertions.assertEquals("IP", respons.body?.data?.saker!![0].status)
+        Assertions.assertEquals(
+            "IP",
+            respons.body
+                ?.data
+                ?.saker!![0]
+                .status,
+        )
     }
 
     @Test

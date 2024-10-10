@@ -26,7 +26,8 @@ class LoggController(
         behandlingId: Long,
     ): ResponseEntity<Ressurs<List<Logg>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        return Result.runCatching { loggService.hentLoggForBehandling(behandlingId) }
+        return Result
+            .runCatching { loggService.hentLoggForBehandling(behandlingId) }
             .fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {

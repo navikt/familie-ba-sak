@@ -19,7 +19,9 @@ import java.util.concurrent.CountDownLatch
     havingValue = "true",
     matchIfMissing = false,
 )
-class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
+class HentFagsystemsbehandlingRequestConsumer(
+    private val fagsystemsbehandlingService: FagsystemsbehandlingService,
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     var latch: CountDownLatch = CountDownLatch(1)

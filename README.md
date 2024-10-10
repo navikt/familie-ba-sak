@@ -278,6 +278,12 @@ Kjør så:
 * 'Token familie-ba-sak-frontend -> familie-ba-sak', for å få token
 * 'GET kompetanse' (f.eks) for å gjøre det du VIL gjøre
 
+### Verdikjedetester mot lokal versjon av familie-mock-server
+I stedet for å bruke familie-mock-server gjennom TestContainers, som krever at man er logget inn på Google Cloud, så kan
+man manuelt starte familie-mock-server og kjøre testene med Systemproperty ``brukLokalMockserver=true``
+For oppstart av lokal mock-server se: https://github.com/navikt/familie-mock-server/
+
+
 ## Les også
 * [vilkårsperiodeProdusent - README](src%2Fmain%2Fkotlin%2Fno%2Fnav%2Ffamilie%2Fba%2Fsak%2Fkjerne%2Fvedtak%2Fvedtaksperiode%2Fprodusent%2FREADME.md)
 

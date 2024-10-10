@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MockKExtension::class)
 internal class IdentHendelseTaskTest {
     @MockK(relaxed = true)
-    private lateinit var personidentService: PersonidentService
+    private lateinit var håndterNyIdentService: HåndterNyIdentService
 
     @InjectMockKs
     private lateinit var identHendelseTask: IdentHendelseTask
@@ -30,7 +30,7 @@ internal class IdentHendelseTaskTest {
         identHendelseTask.doTask(task)
 
         val slot = slot<PersonIdent>()
-        verify(exactly = 1) { personidentService.håndterNyIdent(capture(slot)) }
+        verify(exactly = 1) { håndterNyIdentService.håndterNyIdent(capture(slot)) }
         assertEquals(nyPersonIdent, slot.captured)
     }
 }

@@ -25,9 +25,10 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
 ): List<EØSBegrunnelseData> {
     val sanityBegrunnelse = hentSanityBegrunnelse(grunnlag)
     val personerGjeldendeForBegrunnelse =
-        vedtaksperiode.hentGyldigeBegrunnelserPerPerson(
-            grunnlag,
-        ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
+        vedtaksperiode
+            .hentGyldigeBegrunnelserPerPerson(
+                grunnlag,
+            ).mapNotNull { (person, begrunnelserPåPerson) -> person.takeIf { this in begrunnelserPåPerson } }
     val periodegrunnlagForPersonerIBegrunnelse =
         begrunnelsesGrunnlagPerPerson.filter { (person, _) -> person in personerGjeldendeForBegrunnelse }
 
@@ -67,7 +68,9 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 apiNavn = sanityBegrunnelse.apiNavn,
                 barnasFodselsdatoer = Utils.slåSammen(barnasFødselsdatoer.sorted().map { it.tilKortString() }),
                 antallBarn = barnasFødselsdatoer.size,
-                maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
+                maalform =
+                    grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
+                        .tilSanityFormat(),
                 gjelderSoker = gjelderSøker,
             ),
         )
@@ -91,7 +94,9 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                     barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
                     barnasFodselsdatoer = Utils.slåSammen(barnIBegrunnelseOgIKompetanse.map { it.fødselsdato.tilKortString() }),
                     antallBarn = barnIBegrunnelseOgIKompetanse.size,
-                    maalform = grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform.tilSanityFormat(),
+                    maalform =
+                        grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
+                            .tilSanityFormat(),
                     sokersAktivitet = kompetanse.søkersAktivitet,
                     sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
                 )
@@ -102,7 +107,10 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
     }
 }
 
-data class Landkode(val kode: String, val navn: String) {
+data class Landkode(
+    val kode: String,
+    val navn: String,
+) {
     init {
         if (this.kode.length != 2) {
             throw Feil("Forventer landkode på 'ISO 3166-1 alpha-2'-format")

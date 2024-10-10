@@ -11,12 +11,14 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
@@ -28,6 +30,8 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
+import no.nav.familie.kontrakter.felles.enhet.Enhet
+import no.nav.familie.kontrakter.felles.enhet.HentEnheterNavIdentHarTilgangTilRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -38,7 +42,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -96,9 +99,11 @@ class IntegrasjonClient(
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
         val uri =
-            UriComponentsBuilder.fromUri(integrasjonUri)
+            UriComponentsBuilder
+                .fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", "BAR")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
@@ -115,7 +120,8 @@ class IntegrasjonClient(
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
                 .pathSegment("arbeidsfordeling", "enhet", Tema.KON.name, "med-relasjoner")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs<List<Arbeidsfordelingsenhet>>(
             tjeneste = "arbeidsfordeling",
@@ -136,9 +142,11 @@ class IntegrasjonClient(
         ansettelsesperiodeFom: LocalDate,
     ): List<Arbeidsforhold> {
         val uri =
-            UriComponentsBuilder.fromUri(integrasjonUri)
+            UriComponentsBuilder
+                .fromUri(integrasjonUri)
                 .pathSegment("aareg", "arbeidsforhold")
-                .build().toUri()
+                .build()
+                .toUri()
 
         return kallEksternTjenesteRessurs(
             tjeneste = "aareg",
@@ -228,6 +236,17 @@ class IntegrasjonClient(
         }
     }
 
+    fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<Enhet> {
+        val uri = URI.create("$integrasjonUri/enhetstilganger")
+        return kallEksternTjenesteRessurs<List<Enhet>>(
+            tjeneste = "enhetstilganger",
+            uri = uri,
+            formål = "Hent enheter en NAV-ident har tilgang til",
+        ) {
+            postForEntity(uri, HentEnheterNavIdentHarTilgangTilRequest(navIdent, Tema.BAR))
+        }.filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
+    }
+
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
         val uri = URI.create("$integrasjonUri/oppgave/opprett")
 
@@ -269,7 +288,11 @@ class IntegrasjonClient(
             if (saksbehandler == null) {
                 baseUri
             } else {
-                UriComponentsBuilder.fromUri(baseUri).queryParam("saksbehandler", saksbehandler).build().toUri()
+                UriComponentsBuilder
+                    .fromUri(baseUri)
+                    .queryParam("saksbehandler", saksbehandler)
+                    .build()
+                    .toUri()
             }
 
         return kallEksternTjenesteRessurs(
@@ -290,7 +313,10 @@ class IntegrasjonClient(
     ): OppgaveResponse {
         val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/enhet/$nyEnhet")
         val uri =
-            UriComponentsBuilder.fromUri(baseUri).queryParam("fjernMappeFraOppgave", true).build()
+            UriComponentsBuilder
+                .fromUri(baseUri)
+                .queryParam("fjernMappeFraOppgave", true)
+                .build()
                 .toUri() // fjerner alltid mappe fra Barnetrygd siden hver enhet sin mappestruktur
 
         return kallEksternTjenesteRessurs(
@@ -507,7 +533,6 @@ class IntegrasjonClient(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(IntegrasjonClient::class.java)
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
 

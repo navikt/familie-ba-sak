@@ -54,8 +54,9 @@ interface KafkaProducer {
 )
 @Primary
 @Profile("!preprod-gcp & !prod-gcp")
-class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
-    KafkaProducer {
+class DefaultKafkaProducer(
+    val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+) : KafkaProducer {
     private val vedtakV2Counter = Metrics.counter(COUNTER_NAME, "type", "vedtakV2")
     private val saksstatistikkSakDvhCounter = Metrics.counter(COUNTER_NAME, "type", "sak")
     private val saksstatistikkBehandlingDvhCounter = Metrics.counter(COUNTER_NAME, "type", "behandling")
@@ -114,15 +115,15 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     ) {
         val meldingIString: String = objectMapper.writeValueAsString(melding)
 
-        kafkaAivenTemplate.send(FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC, key, meldingIString)
+        kafkaAivenTemplate
+            .send(FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC, key, meldingIString)
             .thenAccept {
                 logger.info(
                     "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
                         "$behandlingId med $key er sendt. " +
                         "Fikk offset ${it?.recordMetadata?.offset()}",
                 )
-            }
-            .exceptionally {
+            }.exceptionally {
                 val feilmelding =
                     "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC kan ikke sendes for " +
                         "$behandlingId med $key. Feiler med ${it.message}"
@@ -134,7 +135,8 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     override fun sendIdentTilPSys(
         hentAlleIdenterTilPsysResponseDTO: HentAlleIdenterTilPsysResponseDTO,
     ) {
-        kafkaAivenTemplate.send(BARNETRYGD_PENSJON_TOPIC, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
+        kafkaAivenTemplate
+            .send(BARNETRYGD_PENSJON_TOPIC, objectMapper.writeValueAsString(hentAlleIdenterTilPsysResponseDTO))
             .exceptionally {
                 val feilmelding =
                     "Melding på topic $BARNETRYGD_PENSJON_TOPIC kan ikke sendes for " +
@@ -151,7 +153,8 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         val opphørBarnetrygdBisysMelding =
             objectMapper.writeValueAsString(barnetrygdBisysMelding)
 
-        kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
+        kafkaAivenTemplate
+            .send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
             .thenAccept {
                 logger.info(
                     "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
@@ -159,8 +162,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
                         "Fikk offset ${it?.recordMetadata?.offset()}",
                 )
                 secureLogger.info("Send barnetrygd bisys melding $opphørBarnetrygdBisysMelding")
-            }
-            .exceptionally {
+            }.exceptionally {
                 val feilmelding =
                     "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
                         "$behandlingId. Feiler med ${it.message}"
@@ -183,8 +185,9 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 }
 
 @Service
-class MockKafkaProducer(val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository) :
-    KafkaProducer {
+class MockKafkaProducer(
+    val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
+) : KafkaProducer {
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         logger.info("Skipper sending av vedtakV2 for ${vedtakV2.behandlingsId} fordi kafka Aiven for DVH V2 ikke er enablet")
 

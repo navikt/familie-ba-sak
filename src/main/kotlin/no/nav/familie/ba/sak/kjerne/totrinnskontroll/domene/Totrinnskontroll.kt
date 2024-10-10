@@ -48,13 +48,11 @@ data class Totrinnskontroll(
     @Convert(converter = StringListConverter::class)
     var kontrollerteSider: List<String> = emptyList(),
 ) : BaseEntitet() {
-    fun erBesluttet(): Boolean {
-        return beslutter != null
-    }
+    fun erBesluttet(): Boolean = beslutter != null
 
-    fun erUgyldig(): Boolean {
-        return godkjent && saksbehandlerId == beslutterId &&
+    fun erUgyldig(): Boolean =
+        godkjent &&
+            saksbehandlerId == beslutterId &&
             !(saksbehandler == SikkerhetContext.SYSTEM_NAVN && beslutter == SikkerhetContext.SYSTEM_NAVN) &&
             !(saksbehandlerId == SikkerhetContext.SYSTEM_FORKORTELSE && beslutterId == SikkerhetContext.SYSTEM_FORKORTELSE)
-    }
 }

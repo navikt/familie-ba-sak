@@ -102,7 +102,8 @@ class BehandlingstemaService(
                 ?: return BehandlingKategori.NASJONAL
 
         val barnasTidslinjer =
-            vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeVedtatteBehandling.id))
+            vilkårsvurderingTidslinjeService
+                .hentTidslinjer(behandlingId = BehandlingId(forrigeVedtatteBehandling.id))
                 ?.barnasTidslinjer()
         return utledLøpendeKategori(barnasTidslinjer)
     }
@@ -138,7 +139,8 @@ class BehandlingstemaService(
                 ?: return BehandlingUnderkategori.ORDINÆR
 
         val erUtvidetVilkårBehandlet =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+            vilkårsvurderingRepository
+                .findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
                 ?.personResultater
                 ?.flatMap { it.vilkårResultater }
                 ?.filter { it.sistEndretIBehandlingId == aktivBehandling.id }

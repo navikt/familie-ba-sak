@@ -4,25 +4,25 @@
 Egenskap: Brevperioder: Selvstendig rett
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           | Nei                       | EØS                 |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 21.06.1983  |
       | 1            | 2       | BARN       | 26.01.2010  |
       | 1            | 3       | BARN       | 21.04.2023  |
 
   Scenario: Skal få brevperiode og brevbegrunnelse med eldste barn flettet inn og korrekt kompetansedata
-    Og følgende dagens dato 19.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 19.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                                             | 11.09.2018 |            | OPPFYLT  | Nei                  |                  |
       | 1       | BOSATT_I_RIKET   | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 11.08.2022 |            | OPPFYLT  | Nei                  |                  |
@@ -41,7 +41,7 @@ Egenskap: Brevperioder: Selvstendig rett
       | 3       | BOSATT_I_RIKET   | BARN_BOR_I_NORGE                            | 21.04.2023 |            | OPPFYLT  | Nei                  |                  |
       | 3       | LOVLIG_OPPHOLD   |                                             | 21.04.2023 |            | OPPFYLT  | Nei                  |                  |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.09.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -50,7 +50,7 @@ Egenskap: Brevperioder: Selvstendig rett
       | 3       | 1            | 01.07.2023 | 31.03.2029 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 3       | 1            | 01.04.2029 | 31.03.2041 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato   | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.09.2022 | 30.04.2023 | NORGE_ER_PRIMÆRLAND | 1            | MOTTAR_PENSJON   | ARBEIDER                  | LV                    | NO                             | LV                  |
       | 2, 3    | 01.05.2023 |            | NORGE_ER_PRIMÆRLAND | 1            | MOTTAR_PENSJON   | ARBEIDER                  | LV                    | NO                             | NO                  |

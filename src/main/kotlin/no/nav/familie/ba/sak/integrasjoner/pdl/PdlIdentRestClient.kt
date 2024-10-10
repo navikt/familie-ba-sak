@@ -69,14 +69,13 @@ class PdlIdentRestClient(
         }
     }
 
-    fun httpHeaders(): HttpHeaders {
-        return HttpHeaders().apply {
+    fun httpHeaders(): HttpHeaders =
+        HttpHeaders().apply {
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
             add("behandlingsnummer", Tema.BAR.behandlingsnummer)
         }
-    }
 
     companion object {
         private const val PATH_GRAPHQL = "graphql"

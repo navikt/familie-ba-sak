@@ -4,15 +4,15 @@
 Egenskap: Fast vs. delt bosted
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype | Fagsakstatus |
       | 1        | NORMAL     | OPPRETTET    |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1            | 1       | SØKER      | 05.08.1991  |              |
       | 1            | 2       | BARN       | 18.01.2011  |              |
@@ -20,10 +20,10 @@ Egenskap: Fast vs. delt bosted
       | 1            | 4       | BARN       | 11.06.2012  |              |
 
   Scenario: Fletter inn riktig barn når det er to barn med delt bosted og ett barn med fast bosted
-    Og følgende dagens dato 21.03.2024
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 21.03.2024
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 05.08.1991 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 1       | UTVIDET_BARNETRYGD            |                  | 05.01.2024 |            | OPPFYLT  | Nei                  |                      |                  |
@@ -44,7 +44,7 @@ Egenskap: Fast vs. delt bosted
       | 3       | LOVLIG_OPPHOLD                |                  | 06.12.2012 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
       | 3       | BOR_MED_SØKER                 | DELT_BOSTED      | 05.01.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
 
       | 1       | 1            | 01.02.2024 | 31.12.2028 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
@@ -55,7 +55,7 @@ Egenskap: Fast vs. delt bosted
       | 3       | 1            | 01.03.2024 | 31.05.2030 | 755   | ORDINÆR_BARNETRYGD | 50      | 1510 |
       | 4       | 1            | 01.03.2024 | 31.05.2030 | 755   | ORDINÆR_BARNETRYGD | 50      | 1510 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 4       | 1            | 01.02.2024 | 29.02.2024 | DELT_BOSTED | 0       | 28.02.2024       | 2024-01-05                  |
       | 3       | 1            | 01.02.2024 | 29.02.2024 | DELT_BOSTED | 0       | 28.02.2024       | 2024-01-05                  |

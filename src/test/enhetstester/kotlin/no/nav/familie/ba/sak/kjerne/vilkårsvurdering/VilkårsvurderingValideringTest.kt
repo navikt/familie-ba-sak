@@ -193,16 +193,17 @@ class VilkårsvurderingValideringTest {
     ): PersonResultat {
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
         val vilkårResultater =
-            perioder.flatMap {
-                lagVilkårResultatForPersonIPeriode(
-                    vilkårsvurdering = vilkårsvurdering,
-                    person = lagPerson(type = person.type, aktør = person.aktør),
-                    periodeFom = it.fom,
-                    periodeTom = it.tom,
-                    vurderesEtter = it.regelverk,
-                    personResultat = personResultat,
-                )
-            }.toSet()
+            perioder
+                .flatMap {
+                    lagVilkårResultatForPersonIPeriode(
+                        vilkårsvurdering = vilkårsvurdering,
+                        person = lagPerson(type = person.type, aktør = person.aktør),
+                        periodeFom = it.fom,
+                        periodeTom = it.tom,
+                        vurderesEtter = it.regelverk,
+                        personResultat = personResultat,
+                    )
+                }.toSet()
 
         personResultat.setSortedVilkårResultater(vilkårResultater)
 
@@ -216,27 +217,27 @@ class VilkårsvurderingValideringTest {
         periodeFom: LocalDate,
         periodeTom: LocalDate?,
         vurderesEtter: Regelverk,
-    ): Set<VilkårResultat> {
-        return Vilkår.hentVilkårFor(
-            personType = person.type,
-            fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        ).map {
-            VilkårResultat(
-                personResultat = personResultat,
-                periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,
-                periodeTom = periodeTom,
-                vilkårType = it,
-                resultat = Resultat.OPPFYLT,
-                begrunnelse = "",
-                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                vurderesEtter = vurderesEtter,
-            )
-        }.toSet()
-    }
+    ): Set<VilkårResultat> =
+        Vilkår
+            .hentVilkårFor(
+                personType = person.type,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            ).map {
+                VilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,
+                    periodeTom = periodeTom,
+                    vilkårType = it,
+                    resultat = Resultat.OPPFYLT,
+                    begrunnelse = "",
+                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                    vurderesEtter = vurderesEtter,
+                )
+            }.toSet()
 
-    private fun lagPersonEnkel(personType: PersonType): PersonEnkel {
-        return PersonEnkel(
+    private fun lagPersonEnkel(personType: PersonType): PersonEnkel =
+        PersonEnkel(
             type = personType,
             aktør = randomAktør(),
             dødsfallDato = null,
@@ -244,10 +245,10 @@ class VilkårsvurderingValideringTest {
                 if (personType == PersonType.SØKER) {
                     LocalDate.now().minusYears(34)
                 } else {
-                    LocalDate.now()
+                    LocalDate
+                        .now()
                         .minusYears(4)
                 },
             målform = Målform.NB,
         )
-    }
 }

@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperioder ved endring av vilkår for mor og to barn
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -30,9 +30,9 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og to barn
       | 3456     | 01.05.2020 | 31.03.2038 | 1054  | 1            |
       | 7890     | 01.01.2023 | 30.11.2040 | 1354  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar               |
       | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn1 og søker          |
       | 01.01.2023 | 31.03.2038 | Utbetaling         | Begge barn og søker     |

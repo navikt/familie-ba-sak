@@ -99,8 +99,7 @@ class BehandlingService(
                     kategori = kategori,
                     underkategori = underkategori,
                     skalBehandlesAutomatisk = nyBehandling.skalBehandlesAutomatisk,
-                )
-                    .initBehandlingStegTilstand()
+                ).initBehandlingStegTilstand()
 
             behandling.validerBehandlingstype(
                 sisteBehandlingSomErVedtatt = sisteBehandlingSomErVedtatt,
@@ -165,7 +164,8 @@ class BehandlingService(
             ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak =
-            vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
+            vedtakRepository
+                .findByBehandlingAndAktivOptional(behandlingId = behandling.id)
                 ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
         val nyttVedtak =
@@ -219,9 +219,12 @@ class BehandlingService(
     }
 
     fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
-        val søkerIdenter = behandling.fagsak.aktør.personidenter.map { it.fødselsnummer }
+        val søkerIdenter =
+            behandling.fagsak.aktør.personidenter
+                .map { it.fødselsnummer }
         return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-            !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+            !behandling.erMigrering() &&
+            infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
@@ -271,13 +274,12 @@ class BehandlingService(
         fagsakId: Long,
         behandlingÅrsak: BehandlingÅrsak,
         måned: YearMonth,
-    ): Boolean {
-        return Behandlingutils.harBehandlingsårsakAlleredeKjørt(
+    ): Boolean =
+        Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId),
             behandlingÅrsak = behandlingÅrsak,
             måned = måned,
         )
-    }
 
     @Transactional
     fun lagreNedMigreringsdato(
@@ -288,8 +290,11 @@ class BehandlingService(
             behandlingMigreringsinfoRepository
                 .finnSisteMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
                 ?.toYearMonth()
-                ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
-                    ?.takeIf { it.erMigrering() }?.let { // fordi migreringsdato kun kan lagret for migreringsbehandling
+                ?: behandlingHentOgPersisterService
+                    .hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+                    ?.takeIf { it.erMigrering() }
+                    ?.let {
+                        // fordi migreringsdato kun kan lagret for migreringsbehandling
                         vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(
                             behandlingId = it.id,
                         )
@@ -307,22 +312,20 @@ class BehandlingService(
         behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
     }
 
-    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? {
-        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)?.migreringsdato
-    }
+    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? = behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)?.migreringsdato
 
-    fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate? {
-        return behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
-    }
+    fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate? = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
 
     @Transactional
     fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {
-        behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
+        behandlingMigreringsinfoRepository
+            .findByBehandlingId(behandlingId)
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
     }
 
     fun erLøpende(behandling: Behandling): Boolean =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        andelTilkjentYtelseRepository
+            .finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
             .any { it.erLøpende() }
 
     companion object {

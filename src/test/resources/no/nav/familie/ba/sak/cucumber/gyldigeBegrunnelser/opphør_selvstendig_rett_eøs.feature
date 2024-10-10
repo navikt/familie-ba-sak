@@ -4,16 +4,16 @@
 Egenskap: Gyldige begrunnelser selvstendig rett opphør fra start
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       | EØS                 |
       | 2            | 1        | 1                   | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | EØS                 |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 26.02.1989  |
       | 1            | 2       | BARN       | 13.11.2007  |
@@ -21,11 +21,11 @@ Egenskap: Gyldige begrunnelser selvstendig rett opphør fra start
       | 2            | 2       | BARN       | 13.11.2007  |
 
   Scenario: Skal flette inn barnas kompetanser ved opphør selvstendig rett når søker mister vilkår
-    Og følgende dagens dato 13.12.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 13.12.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                                             | 01.09.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 01.09.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
@@ -36,7 +36,7 @@ Egenskap: Gyldige begrunnelser selvstendig rett opphør fra start
       | 2       | LOVLIG_OPPHOLD   |                                             | 01.09.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
       | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER                    | 01.09.2023 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår           | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
       | 1       | BOSATT_I_RIKET   |                          | 01.09.2023 |            | IKKE_OPPFYLT | Nei                  |                      | EØS_FORORDNINGEN |
       | 1       | LOVLIG_OPPHOLD   |                          | 01.09.2023 |            | OPPFYLT      | Nei                  |                      | EØS_FORORDNINGEN |
@@ -47,12 +47,12 @@ Egenskap: Gyldige begrunnelser selvstendig rett opphør fra start
       | 2       | LOVLIG_OPPHOLD   |                          | 01.09.2023 |            | OPPFYLT      | Nei                  |                      | EØS_FORORDNINGEN |
       | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS           | 01.09.2023 |            | OPPFYLT      | Nei                  |                      | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.10.2023 | 31.10.2025 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat            | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.10.2023 |          | NORGE_ER_PRIMÆRLAND | 1            | INAKTIV          | ARBEIDER                  | BE                    | NO                             | BE                  |
 

@@ -52,11 +52,7 @@ data class BehandlingStegTilstand(
         return behandlingSteg == other.behandlingSteg
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(behandlingSteg)
-    }
+    override fun hashCode(): Int = Objects.hash(behandlingSteg)
 
-    override fun toString(): String {
-        return "BehandlingStegTilstand(id=$id, behandling=${behandling.id}, behandlingSteg=$behandlingSteg, behandlingStegStatus=$behandlingStegStatus)"
-    }
+    override fun toString(): String = "BehandlingStegTilstand(id=$id, behandling=${behandling.id}, behandlingSteg=$behandlingSteg, behandlingStegStatus=$behandlingStegStatus)"
 }

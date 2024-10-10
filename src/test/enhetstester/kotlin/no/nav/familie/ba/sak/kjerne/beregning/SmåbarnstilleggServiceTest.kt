@@ -6,6 +6,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
@@ -34,6 +35,7 @@ class SmåbarnstilleggServiceTest {
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
+    private val localDateProvider = mockk<LocalDateProvider>()
 
     private lateinit var småbarnstilleggService: SmåbarnstilleggService
 
@@ -47,9 +49,11 @@ class SmåbarnstilleggServiceTest {
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 persongrunnlagService = persongrunnlagService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                localDateProvider = localDateProvider,
             )
 
         every { periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(any()) } just Runs
+        every { localDateProvider.now() } returns LocalDate.now()
     }
 
     @Test

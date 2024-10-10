@@ -18,12 +18,14 @@ class TrekkFraSkjemaTest {
         val kompetanse =
             KompetanseBuilder(jan2020)
                 .medKompetanse("------", barn1, barn2, barn3)
-                .byggKompetanser().first()
+                .byggKompetanser()
+                .first()
 
         val oppdatertKompetanse =
             KompetanseBuilder(jan2020)
                 .medKompetanse("  SS  ", barn1)
-                .byggKompetanser().first()
+                .byggKompetanser()
+                .first()
 
         val forventedeKompetanser =
             KompetanseBuilder(jan2020)
@@ -42,12 +44,14 @@ class TrekkFraSkjemaTest {
         val kompetanse =
             KompetanseBuilder(jan2020)
                 .medKompetanse("  --", barn1, barn2)
-                .byggKompetanser().first()
+                .byggKompetanser()
+                .first()
 
         val fjernKompetanse =
             KompetanseBuilder(jan2020)
                 .medKompetanse("   S", barn1)
-                .byggKompetanser().first()
+                .byggKompetanser()
+                .first()
 
         val forventedeKompetanser =
             KompetanseBuilder(jan2020)

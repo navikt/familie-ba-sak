@@ -231,11 +231,11 @@ class BehandlingUtilsTest {
         val fgb = lagBehandling()
         val omregning6År =
             lagBehandling(
-                årsak = BehandlingÅrsak.OMREGNING_6ÅR,
+                årsak = BehandlingÅrsak.OMREGNING_18ÅR,
             )
         val behandlingsårsakHarAlleredeKjørt =
             Behandlingutils.harBehandlingsårsakAlleredeKjørt(
-                behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
+                behandlingÅrsak = BehandlingÅrsak.OMREGNING_18ÅR,
                 behandlinger = listOf(fgb, omregning6År),
                 måned = YearMonth.now(),
             )
@@ -248,7 +248,7 @@ class BehandlingUtilsTest {
         val fgb = lagBehandling()
         val behandlingsårsakHarAlleredeKjørt =
             Behandlingutils.harBehandlingsårsakAlleredeKjørt(
-                behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
+                behandlingÅrsak = BehandlingÅrsak.OMREGNING_18ÅR,
                 behandlinger = listOf(fgb),
                 måned = YearMonth.now(),
             )

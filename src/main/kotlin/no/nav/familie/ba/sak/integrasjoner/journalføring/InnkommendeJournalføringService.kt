@@ -53,33 +53,30 @@ class InnkommendeJournalføringService(
     fun hentDokument(
         journalpostId: String,
         dokumentInfoId: String,
-    ): ByteArray {
-        return integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
-    }
+    ): ByteArray = integrasjonClient.hentDokument(dokumentInfoId, journalpostId)
 
-    fun hentJournalpost(journalpostId: String): Journalpost {
-        return integrasjonClient.hentJournalpost(journalpostId)
-    }
+    fun hentJournalpost(journalpostId: String): Journalpost = integrasjonClient.hentJournalpost(journalpostId)
 
-    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> {
-        return integrasjonClient.hentJournalposterForBruker(
+    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> =
+        integrasjonClient.hentJournalposterForBruker(
             JournalposterForBrukerRequest(
                 antall = 1000,
                 brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
                 tema = listOf(Tema.BAR),
             ),
         )
-    }
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
             val fjernedeVedlegg =
                 (dokument.eksisterendeLogiskeVedlegg ?: emptyList())
-                    .partition { (dokument.logiskeVedlegg ?: emptyList()).contains(it) }.second
+                    .partition { (dokument.logiskeVedlegg ?: emptyList()).contains(it) }
+                    .second
             val nyeVedlegg =
-                (dokument.logiskeVedlegg ?: emptyList()).partition {
-                    (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
-                }.second
+                (dokument.logiskeVedlegg ?: emptyList())
+                    .partition {
+                        (dokument.eksisterendeLogiskeVedlegg ?: emptyList()).contains(it)
+                    }.second
             fjernedeVedlegg.forEach {
                 integrasjonClient.slettLogiskVedlegg(it.logiskVedleggId, dokument.dokumentInfoId)
             }

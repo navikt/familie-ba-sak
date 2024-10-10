@@ -17,16 +17,12 @@ class MockUnleashService : UnleashService {
     override fun isEnabled(
         toggleId: String,
         defaultValue: Boolean,
-    ): Boolean {
-        return isEnabled(toggleId)
-    }
+    ): Boolean = isEnabled(toggleId)
 
     override fun isEnabled(
         toggleId: String,
         properties: Map<String, String>,
-    ): Boolean {
-        return isEnabled(toggleId)
-    }
+    ): Boolean = isEnabled(toggleId)
 
     override fun destroy() {}
 }

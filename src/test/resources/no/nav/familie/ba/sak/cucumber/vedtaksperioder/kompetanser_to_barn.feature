@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperioder med kompetanser for flere barn
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -37,9 +37,9 @@ Egenskap: Vedtaksperioder med kompetanser for flere barn
       | 7890    | 01.01.2023 | 30.11.2040 | 1354  | 1            |
 
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
       | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn og søker        |
       | 01.01.2023 | 30.04.2023 | Utbetaling         | Barna og søker       |

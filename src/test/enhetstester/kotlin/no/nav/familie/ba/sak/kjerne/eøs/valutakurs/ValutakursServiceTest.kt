@@ -85,18 +85,19 @@ internal class ValutakursServiceTest {
         val behandlingId = BehandlingId(10L)
 
         val lagretValutakurs =
-            valutakursRepository.saveAll(
-                listOf(
-                    lagValutakurs(
-                        fom = YearMonth.now(),
-                        tom = YearMonth.now(),
-                        barnAktører = setOf(tilfeldigPerson().aktør),
-                        valutakursdato = LocalDate.now(),
-                        valutakode = "EUR",
-                        kurs = BigDecimal.TEN,
-                    ),
-                ).medBehandlingId(behandlingId),
-            ).single()
+            valutakursRepository
+                .saveAll(
+                    listOf(
+                        lagValutakurs(
+                            fom = YearMonth.now(),
+                            tom = YearMonth.now(),
+                            barnAktører = setOf(tilfeldigPerson().aktør),
+                            valutakursdato = LocalDate.now(),
+                            valutakode = "EUR",
+                            kurs = BigDecimal.TEN,
+                        ),
+                    ).medBehandlingId(behandlingId),
+                ).single()
 
         valutakursService.slettValutakurs(behandlingId, lagretValutakurs.id)
 
@@ -148,7 +149,9 @@ internal class ValutakursServiceTest {
         val oppdatertKompetanse =
             ValutakursBuilder(jan(2020), behandlingId)
                 .medKurs(" 3>", "EUR", barn1)
-                .medVurderingsform(Vurderingsform.AUTOMATISK).bygg().single()
+                .medVurderingsform(Vurderingsform.AUTOMATISK)
+                .bygg()
+                .single()
         valutakursService.oppdaterValutakurs(behandlingId, oppdatertKompetanse)
 
         val forventedeValutakurser =

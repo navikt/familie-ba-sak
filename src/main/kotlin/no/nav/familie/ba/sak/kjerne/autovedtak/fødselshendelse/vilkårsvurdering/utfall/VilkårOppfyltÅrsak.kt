@@ -3,7 +3,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) : EvalueringÅrsak {
+enum class VilkårOppfyltÅrsak(
+    val beskrivelse: String,
+    val vilkår: Vilkår,
+) : EvalueringÅrsak {
     // Under 18 år
     ER_UNDER_18_ÅR("Barn er under 18 år", Vilkår.UNDER_18_ÅR),
 
@@ -48,15 +51,9 @@ enum class VilkårOppfyltÅrsak(val beskrivelse: String, val vilkår: Vilkår) :
     MOR_BODD_OG_JOBBET_I_NORGE_SISTE_5_ÅR("Mor har bodd og jobbet i Norge siste 5 år.", Vilkår.LOVLIG_OPPHOLD),
     ;
 
-    override fun hentBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentBeskrivelse(): String = beskrivelse
 
-    override fun hentMetrikkBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentMetrikkBeskrivelse(): String = beskrivelse
 
-    override fun hentIdentifikator(): String {
-        return vilkår.name
-    }
+    override fun hentIdentifikator(): String = vilkår.name
 }

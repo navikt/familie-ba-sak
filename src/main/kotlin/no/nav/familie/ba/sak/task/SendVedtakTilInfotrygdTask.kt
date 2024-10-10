@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedD
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
@@ -48,10 +48,14 @@ class SendVedtakTilInfotrygdTask(
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
         val førsteUtbetalingsperiode =
-            andelerMedEndringer.map { it.andel }
-                .tilTidslinjerPerPersonOgType().values
-                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }.perioder()
-                .filterNot { it.innhold == null }.firstOrNull()
+            andelerMedEndringer
+                .map { it.andel }
+                .tilTidslinjerPerAktørOgType()
+                .values
+                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
+                .perioder()
+                .filterNot { it.innhold == null }
+                .firstOrNull()
 
         return if (førsteUtbetalingsperiode != null) {
             førsteUtbetalingsperiode.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned()

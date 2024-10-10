@@ -13,17 +13,19 @@ import org.springframework.web.client.RestOperations
 import org.testcontainers.containers.FixedHostPortGenericContainer
 import org.testcontainers.images.PullPolicy
 
-val MOCK_SERVER_IMAGE = "ghcr.io/navikt/familie-mock-server/familie-mock-server:latest"
+val MOCK_SERVER_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teamfamilie/familie-mock-server:latest"
 
-class VerdikjedetesterPropertyOverrideContextInitializer :
-    ApplicationContextInitializer<ConfigurableApplicationContext?> {
+class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
             "FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
             "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
-        mockServer.start()
+        val brukLokalMockserver = System.getProperty("brukLokalMockserver")?.toBoolean() ?: false
+        if (!brukLokalMockserver) {
+            mockServer.start()
+        }
     }
 
     companion object {
@@ -77,4 +79,6 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
  * Hack needed because testcontainers use of generics confuses Kotlin.
  * Må bruke fixed host port for at klientene våres kan konfigureres med fast port.
  */
-class KMockServerContainer(imageName: String) : FixedHostPortGenericContainer<KMockServerContainer>(imageName)
+class KMockServerContainer(
+    imageName: String,
+) : FixedHostPortGenericContainer<KMockServerContainer>(imageName)

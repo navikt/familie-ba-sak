@@ -38,9 +38,7 @@ class VedtaksbegrunnelseFritekst(
             fritekst = this.fritekst,
         )
 
-    override fun toString(): String {
-        return "VedtaksbegrunnelseFritekst(id=$id)"
-    }
+    override fun toString(): String = "VedtaksbegrunnelseFritekst(id=$id)"
 }
 
 fun tilVedtaksbegrunnelseFritekst(

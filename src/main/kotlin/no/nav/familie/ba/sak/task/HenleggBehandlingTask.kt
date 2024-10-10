@@ -53,13 +53,14 @@ class HenleggBehandlingTask(
             }
         }
 
-        stegService.håndterHenleggBehandling(
-            behandling = behandling,
-            henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) },
-        ).apply {
-            task.metadata["behandlendeEnhetId"] = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(id).behandlendeEnhetId
-            task.metadata["Resultat"] = "Henleggelse kjørt OK"
-        }
+        stegService
+            .håndterHenleggBehandling(
+                behandling = behandling,
+                henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) },
+            ).apply {
+                task.metadata["behandlendeEnhetId"] = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(id).behandlendeEnhetId
+                task.metadata["Resultat"] = "Henleggelse kjørt OK"
+            }
     }
 
     companion object {

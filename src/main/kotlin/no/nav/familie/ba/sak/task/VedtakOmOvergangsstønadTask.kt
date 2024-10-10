@@ -40,8 +40,8 @@ class VedtakOmOvergangsstønadTask(
         const val TASK_STEP_TYPE = "vedtakOmOvergangsstønadTask"
         private val logger = LoggerFactory.getLogger(VedtakOmOvergangsstønadTask::class.java)
 
-        fun opprettTask(personIdent: String): Task {
-            return Task(
+        fun opprettTask(personIdent: String): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = personIdent,
                 properties =
@@ -49,6 +49,5 @@ class VedtakOmOvergangsstønadTask(
                         this["personIdent"] = personIdent
                     },
             )
-        }
     }
 }

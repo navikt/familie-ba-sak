@@ -106,9 +106,7 @@ class StatusFraOppdrag(
         taskRepository.save(task)
     }
 
-    override fun stegType(): StegType {
-        return StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
-    }
+    override fun stegType(): StegType = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI
 
     companion object {
         private val logger = LoggerFactory.getLogger(StatusFraOppdrag::class.java)

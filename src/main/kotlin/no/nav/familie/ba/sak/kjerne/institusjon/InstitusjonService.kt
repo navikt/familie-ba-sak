@@ -14,18 +14,15 @@ class InstitusjonService(
     fun hentEllerOpprettInstitusjon(
         orgNummer: String,
         tssEksternId: String?,
-    ): Institusjon {
-        return institusjonRepository.findByOrgNummer(orgNummer) ?: institusjonRepository.saveAndFlush(
+    ): Institusjon =
+        institusjonRepository.findByOrgNummer(orgNummer) ?: institusjonRepository.saveAndFlush(
             Institusjon(
                 orgNummer = orgNummer,
                 tssEksternId = tssEksternId,
             ),
         )
-    }
 
-    fun hentSamhandler(orgNummer: String): SamhandlerInfo {
-        return samhandlerKlient.hentSamhandler(orgNummer)
-    }
+    fun hentSamhandler(orgNummer: String): SamhandlerInfo = samhandlerKlient.hentSamhandler(orgNummer)
 
     fun søkSamhandlere(
         navn: String?,

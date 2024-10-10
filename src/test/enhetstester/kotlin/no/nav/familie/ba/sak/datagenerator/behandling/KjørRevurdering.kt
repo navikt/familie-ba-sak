@@ -253,8 +253,8 @@ private fun håndterBeslutteVedtakSteg(
 private fun hånderSilmuleringssteg(
     stegService: StegService,
     behandlingEtterBehandlingsresultat: Behandling,
-): Behandling {
-    return stegService.håndterVurderTilbakekreving(
+): Behandling =
+    stegService.håndterVurderTilbakekreving(
         behandlingEtterBehandlingsresultat,
         if (behandlingEtterBehandlingsresultat.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
             RestTilbakekreving(
@@ -265,7 +265,6 @@ private fun hånderSilmuleringssteg(
             null
         },
     )
-}
 
 private fun håndterVilkårsvurderingSteg(
     vilkårsvurderingService: VilkårsvurderingService,

@@ -73,8 +73,8 @@ fun lagInfotrygdSak(
     identBarn: List<String>,
     valg: String? = "OR",
     undervalg: String? = "OS",
-): Sak {
-    return Sak(
+): Sak =
+    Sak(
         stønad =
             Stønad(
                 barn = identBarn.map { Barn(it, barnetrygdTom = "000000") },
@@ -98,7 +98,6 @@ fun lagInfotrygdSak(
         valg = valg,
         undervalg = undervalg,
     )
-}
 
 fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     restUtvidetBehandling: RestUtvidetBehandling,

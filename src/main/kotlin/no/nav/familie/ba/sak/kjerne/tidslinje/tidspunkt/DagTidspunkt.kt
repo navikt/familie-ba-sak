@@ -6,27 +6,22 @@ data class DagTidspunkt internal constructor(
     internal val dato: LocalDate,
     override val uendelighet: Uendelighet,
 ) : Tidspunkt<Dag>(uendelighet) {
-    fun tilLocalDateEllerNull(): LocalDate? {
-        return if (uendelighet != Uendelighet.INGEN) {
+    fun tilLocalDateEllerNull(): LocalDate? =
+        if (uendelighet != Uendelighet.INGEN) {
             null
         } else {
             dato
         }
-    }
 
-    fun tilLocalDate(): LocalDate {
-        return tilLocalDateEllerNull() ?: throw IllegalStateException("Tidspunkt er uendelig")
-    }
+    fun tilLocalDate(): LocalDate = tilLocalDateEllerNull() ?: throw IllegalStateException("Tidspunkt er uendelig")
 
-    override fun flytt(tidsenheter: Long): DagTidspunkt {
-        return this.copy(dato = dato.plusDays(tidsenheter), uendelighet)
-    }
+    override fun flytt(tidsenheter: Long): DagTidspunkt = this.copy(dato = dato.plusDays(tidsenheter), uendelighet)
 
     override fun medUendelighet(uendelighet: Uendelighet): DagTidspunkt =
         copy(uendelighet = uendelighet)
 
-    override fun toString(): String {
-        return when (uendelighet) {
+    override fun toString(): String =
+        when (uendelighet) {
             Uendelighet.FORTID -> "<--"
             else -> ""
         } + dato +
@@ -34,27 +29,22 @@ data class DagTidspunkt internal constructor(
                 Uendelighet.FREMTID -> "-->"
                 else -> ""
             }
-    }
 
-    override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int {
-        return dato.compareTo((tidspunkt as DagTidspunkt).dato)
-    }
+    override fun sammenliknMed(tidspunkt: Tidspunkt<Dag>): Int = dato.compareTo((tidspunkt as DagTidspunkt).dato)
 
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
+    override fun equals(other: Any?): Boolean =
+        when (other) {
             is DagTidspunkt -> compareTo(other) == 0
             is Tidspunkt<*> -> this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
             else -> false
         }
-    }
 
-    override fun hashCode(): Int {
-        return if (uendelighet == Uendelighet.INGEN) {
+    override fun hashCode(): Int =
+        if (uendelighet == Uendelighet.INGEN) {
             dato.hashCode()
         } else {
             uendelighet.hashCode()
         }
-    }
 
     companion object {
         fun nå() = DagTidspunkt(LocalDate.now(), Uendelighet.INGEN)

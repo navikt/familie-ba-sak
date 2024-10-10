@@ -4,25 +4,25 @@
 Egenskap: Gyldige begrunnelser endret utbetaling med reduksjon
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | DELVIS_INNVILGET    | SØKNAD           |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 14.10.1987  |
       | 1            | 3456    | BARN       | 08.02.2013  |
       | 1            | 5678    | BARN       | 13.01.2017  |
 
   Scenario: Begrunnelse endret utbetaling - endre mottaker
-    Og følgende dagens dato 04.10.2023
-    Og lag personresultater for begrunnelse for behandling 1
+    Og dagens dato er 04.10.2023
+    Og lag personresultater for behandling 1
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                      | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET,LOVLIG_OPPHOLD               | 14.10.1987 |            | OPPFYLT  |
 
@@ -35,7 +35,7 @@ Egenskap: Gyldige begrunnelser endret utbetaling med reduksjon
       | 5678    | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD | 01.02.2022 |            | OPPFYLT  |
 
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 3456    | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
       | 3456    | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
@@ -46,7 +46,7 @@ Egenskap: Gyldige begrunnelser endret utbetaling med reduksjon
       | 5678    | 1            | 01.07.2023 | 30.09.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
       | 5678    | 1            | 01.10.2023 | 31.12.2034 | 0     | ORDINÆR_BARNETRYGD | 0       | 1310 |
 
-    Og med endrede utbetalinger for begrunnelse
+    Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent |
       | 5678    | 1            | 01.10.2023 | 31.12.2034 | ENDRE_MOTTAKER | 0       |
 

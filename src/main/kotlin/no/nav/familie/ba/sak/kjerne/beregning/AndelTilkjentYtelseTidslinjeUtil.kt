@@ -18,30 +18,25 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import java.math.BigDecimal
 import java.time.YearMonth
 
-fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
-    return this
+fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> =
+    this
         .filter { !it.erSøkersAndel() }
         .groupBy { it.aktør }
         .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
-}
 
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
-    return this.values.flatMap { it.tilAndelTilkjentYtelse() }
-}
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.values.flatMap { it.tilAndelTilkjentYtelse() }
 
-fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> {
-    return this.flatMap { it.tilAndelTilkjentYtelse() }
-}
+fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.flatMap { it.tilAndelTilkjentYtelse() }
 
-fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> {
-    return this
-        .perioder().map {
+fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> =
+    this
+        .perioder()
+        .map {
             it.innhold?.medPeriode(
                 it.fraOgMed.tilYearMonth(),
                 it.tilOgMed.tilYearMonth(),
             )
         }.filterNotNull()
-}
 
 fun AndelTilkjentYtelse.tilPeriode() =
     Periode(

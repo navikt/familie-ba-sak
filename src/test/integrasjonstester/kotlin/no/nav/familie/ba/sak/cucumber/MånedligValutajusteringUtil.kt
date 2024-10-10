@@ -7,10 +7,12 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun lagSvarFraEcbMock(dataTable: DataTable): Map<Pair<String, LocalDate>, BigDecimal> =
-    dataTable.asMaps().map { rad ->
-        val valutakursdato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTAKURSDATO, rad) ?: error("Valutakursdato må være satt")
-        val valutakode = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTA_KODE, rad) ?: error("Valutakode må være satt")
-        val kurs = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad)
+    dataTable
+        .asMaps()
+        .map { rad ->
+            val valutakursdato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTAKURSDATO, rad) ?: error("Valutakursdato må være satt")
+            val valutakode = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTA_KODE, rad) ?: error("Valutakode må være satt")
+            val kurs = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad)
 
-        Pair(valutakode, valutakursdato) to kurs
-    }.toMap()
+            Pair(valutakode, valutakursdato) to kurs
+        }.toMap()

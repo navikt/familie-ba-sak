@@ -19,12 +19,12 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
     behandlingUnderkategori: BehandlingUnderkategori,
 ): RegelverkResultat? {
     val nødvendigeVilkår =
-        Vilkår.hentVilkårFor(
-            personType = personType,
-            fagsakType = fagsakType,
-            behandlingUnderkategori = behandlingUnderkategori,
-        )
-            .filter { it != Vilkår.UTVIDET_BARNETRYGD }
+        Vilkår
+            .hentVilkårFor(
+                personType = personType,
+                fagsakType = fagsakType,
+                behandlingUnderkategori = behandlingUnderkategori,
+            ).filter { it != Vilkår.UTVIDET_BARNETRYGD }
 
     val regelverkVilkår =
         nødvendigeVilkår
@@ -32,11 +32,13 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
 
     val alleVilkårResultaterMedEøs =
         alleVilkårResultater
-            .filter { it.regelverk == Regelverk.EØS_FORORDNINGEN }.map { it.vilkår }
+            .filter { it.regelverk == Regelverk.EØS_FORORDNINGEN }
+            .map { it.vilkår }
 
     val alleVilkårResultaterMedNasjonalt =
         alleVilkårResultater
-            .filter { it.regelverk == Regelverk.NASJONALE_REGLER }.map { it.vilkår }
+            .filter { it.regelverk == Regelverk.NASJONALE_REGLER }
+            .map { it.vilkår }
 
     val erAlleVilkårUtenResultat = alleVilkårResultater.all { it.resultat == null }
 

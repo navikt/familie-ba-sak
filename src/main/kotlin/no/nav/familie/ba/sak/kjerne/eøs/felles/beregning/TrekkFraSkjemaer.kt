@@ -24,11 +24,12 @@ fun <T : PeriodeOgBarnSkjema<T>> T.trekkFra(skjema: T): Collection<T> {
             ).takeIf { it.fom != null && it.fom!! <= it.tom }
 
     val skjemaForEtterfølgendePerioder =
-        gammeltSkjema.kopier(
-            fom = skjema.tom?.plusMonths(1),
-            tom = gammeltSkjema.tom,
-            barnAktører = skjema.barnAktører,
-        ).takeIf { it.fom != null && it.fom!! <= (it.tom ?: MAX_MÅNED) }
+        gammeltSkjema
+            .kopier(
+                fom = skjema.tom?.plusMonths(1),
+                tom = gammeltSkjema.tom,
+                barnAktører = skjema.barnAktører,
+            ).takeIf { it.fom != null && it.fom!! <= (it.tom ?: MAX_MÅNED) }
 
     return listOfNotNull(skjemaForRestBarn, skjemaForForegåendePerioder, skjemaForEtterfølgendePerioder)
 }

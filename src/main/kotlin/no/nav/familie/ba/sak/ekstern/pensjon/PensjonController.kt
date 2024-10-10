@@ -26,9 +26,11 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/api/ekstern/pensjon")
 @ProtectedWithClaims(issuer = "azuread")
-class PensjonController(private val pensjonService: PensjonService) {
+class PensjonController(
+    private val pensjonService: PensjonService,
+) {
     @Operation(
-        description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person.",
+        description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person. Returnerer både fra Infotrygd og BA-SAK",
     )
     @ApiResponses(
         value = [

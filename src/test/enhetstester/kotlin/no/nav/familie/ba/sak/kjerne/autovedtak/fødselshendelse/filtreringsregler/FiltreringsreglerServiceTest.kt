@@ -421,10 +421,9 @@ class FiltreringsreglerServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.now()),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
 
         mockkObject(FiltreringsregelEvaluering)
         val filtreringsreglerFaktaSlot = slot<FiltreringsreglerFakta>()
@@ -516,12 +515,13 @@ class FiltreringsreglerServiceTest {
         every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(mor.aktør) } returns
             PersonInfo(
                 forelderBarnRelasjon =
-                    barna.map {
-                        ForelderBarnRelasjon(
-                            aktør = it.aktør,
-                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                        )
-                    }.toSet(),
+                    barna
+                        .map {
+                            ForelderBarnRelasjon(
+                                aktør = it.aktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            )
+                        }.toSet(),
                 fødselsdato = mor.fødselsdato,
             )
 
@@ -539,10 +539,9 @@ class FiltreringsreglerServiceTest {
         val andelTilkjentytelse =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val fødselshendelsefiltreringResultatSlot = slot<List<FødselshendelsefiltreringResultat>>()

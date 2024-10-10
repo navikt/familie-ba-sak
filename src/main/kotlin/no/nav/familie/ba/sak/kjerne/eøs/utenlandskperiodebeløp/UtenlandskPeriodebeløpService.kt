@@ -21,6 +21,7 @@ class UtenlandskPeriodebeløpService(
     fun hentUtenlandskePeriodebeløp(behandlingId: BehandlingId) =
         skjemaService.hentMedBehandlingId(behandlingId)
 
+    @Transactional
     fun oppdaterUtenlandskPeriodebeløp(
         behandlingId: BehandlingId,
         utenlandskPeriodebeløp: UtenlandskPeriodebeløp,

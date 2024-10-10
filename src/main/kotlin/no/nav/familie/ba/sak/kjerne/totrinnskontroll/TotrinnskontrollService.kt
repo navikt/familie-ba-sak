@@ -18,23 +18,20 @@ class TotrinnskontrollService(
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
     private val saksbehandlerContext: SaksbehandlerContext,
 ) {
-    fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
-        return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
-    }
+    fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? = totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
 
     fun opprettTotrinnskontrollMedSaksbehandler(
         behandling: Behandling,
         saksbehandler: String = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
         saksbehandlerId: String = SikkerhetContext.hentSaksbehandler(),
-    ): Totrinnskontroll {
-        return lagreOgDeaktiverGammel(
+    ): Totrinnskontroll =
+        lagreOgDeaktiverGammel(
             Totrinnskontroll(
                 behandling = behandling,
                 saksbehandler = saksbehandler,
                 saksbehandlerId = saksbehandlerId,
             ),
         )
-    }
 
     fun besluttTotrinnskontroll(
         behandling: Behandling,
@@ -96,9 +93,7 @@ class TotrinnskontrollService(
         return totrinnskontrollRepository.save(totrinnskontroll)
     }
 
-    fun lagreEllerOppdater(totrinnskontroll: Totrinnskontroll): Totrinnskontroll {
-        return totrinnskontrollRepository.save(totrinnskontroll)
-    }
+    fun lagreEllerOppdater(totrinnskontroll: Totrinnskontroll): Totrinnskontroll = totrinnskontrollRepository.save(totrinnskontroll)
 
     companion object {
         private val logger = LoggerFactory.getLogger(TotrinnskontrollService::class.java)

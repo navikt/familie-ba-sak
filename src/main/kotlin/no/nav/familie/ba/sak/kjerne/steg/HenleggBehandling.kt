@@ -49,10 +49,13 @@ class HenleggBehandling(
             )
         }
 
-        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
+        oppgaveService
+            .hentOppgaverSomIkkeErFerdigstilt(behandling)
             .filter {
                 !(
-                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in
+                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD &&
+                        data.begrunnelse == SATSENDRING &&
+                        it.type in
                         listOf(
                             BehandleSak,
                             GodkjenneVedtak,
@@ -60,8 +63,7 @@ class HenleggBehandling(
                             VurderLivshendelse,
                         )
                 )
-            }
-            .forEach {
+            }.forEach {
                 oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
             }
 
@@ -78,7 +80,5 @@ class HenleggBehandling(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.HENLEGG_BEHANDLING
-    }
+    override fun stegType(): StegType = StegType.HENLEGG_BEHANDLING
 }

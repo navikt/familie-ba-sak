@@ -30,9 +30,7 @@ class FiltreringFødselshendelserSteg(
         }
     }
 
-    override fun stegType(): StegType {
-        return StegType.FILTRERING_FØDSELSHENDELSER
-    }
+    override fun stegType(): StegType = StegType.FILTRERING_FØDSELSHENDELSER
 
     companion object {
         private val logger = LoggerFactory.getLogger(FiltreringFødselshendelserSteg::class.java)

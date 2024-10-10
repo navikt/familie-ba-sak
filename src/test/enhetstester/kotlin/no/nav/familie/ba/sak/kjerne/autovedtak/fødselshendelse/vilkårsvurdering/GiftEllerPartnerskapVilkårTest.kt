@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -20,7 +20,7 @@ class GiftEllerPartnerskapVilkårTest {
         val vilkår = Vilkår.GIFT_PARTNERSKAP
         val barn =
             tilfeldigPerson(personType = PersonType.BARN).apply {
-                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UOPPGITT, person = this))
+                sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UOPPGITT, person = this))
             }
     }
 }

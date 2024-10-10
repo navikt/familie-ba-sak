@@ -39,8 +39,7 @@ class DatabaseCleanupService(
                 field = metaModel.managedTypes
                     .filter {
                         it.javaType.kotlin.findAnnotation<Table>() != null || it.javaType.kotlin.findAnnotation<JdbcTable>() != null
-                    }
-                    .map {
+                    }.map {
                         val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
                         val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
                         tableAnnotation?.name ?: jdbcTableAnnotation?.value
@@ -50,11 +49,10 @@ class DatabaseCleanupService(
             return field
         }
 
-    private fun getJdbcTableNames(): List<String> {
-        return relationalMappingContext.persistentEntities.map { entity ->
+    private fun getJdbcTableNames(): List<String> =
+        relationalMappingContext.persistentEntities.map { entity ->
             entity.tableName.toSql(IdentifierProcessing.NONE)
         }
-    }
 
     /**
      * Utility method that truncates all identified tables

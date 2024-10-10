@@ -79,9 +79,7 @@ class IverksettMotOppdrag(
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.IVERKSETT_MOT_OPPDRAG
-    }
+    override fun stegType(): StegType = StegType.IVERKSETT_MOT_OPPDRAG
 
     private fun hentFnrStoenadsmottaker(fagsak: Fagsak) = fagsak.aktør.aktivFødselsnummer()
 }

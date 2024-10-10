@@ -123,9 +123,10 @@ class UtvidetBehandlingService(
                     ?: emptyList(),
             personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
             fødselshendelsefiltreringResultater =
-                fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
-                    behandlingId = behandling.id,
-                ).map { it.tilRestFødselshendelsefiltreringResultat() },
+                fødselshendelsefiltreringResultatRepository
+                    .finnFødselshendelsefiltreringResultater(
+                        behandlingId = behandling.id,
+                    ).map { it.tilRestFødselshendelsefiltreringResultat() },
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse =
                 personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
@@ -138,16 +139,19 @@ class UtvidetBehandlingService(
             kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent =
-                settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
+                settPåVentService
+                    .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                     ?.tilRestSettPåVent(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
             korrigertEtterbetaling =
-                korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
+                korrigertEtterbetalingService
+                    .finnAktivtKorrigeringPåBehandling(behandlingId)
                     ?.tilRestKorrigertEtterbetaling(),
             korrigertVedtak =
-                korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
+                korrigertVedtakService
+                    .finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                     ?.tilRestKorrigertVedtak(),
             feilutbetaltValuta = feilutbetaltValuta,
             brevmottakere = brevmottakere,

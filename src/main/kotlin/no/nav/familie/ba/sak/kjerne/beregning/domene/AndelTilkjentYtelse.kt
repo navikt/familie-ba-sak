@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -107,8 +108,8 @@ data class AndelTilkjentYtelse(
             Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp)
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(
+    override fun hashCode(): Int =
+        Objects.hash(
             id,
             behandlingId,
             type,
@@ -119,13 +120,11 @@ data class AndelTilkjentYtelse(
             nasjonaltPeriodebeløp,
             differanseberegnetPeriodebeløp,
         )
-    }
 
-    override fun toString(): String {
-        return "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
+    override fun toString(): String =
+        "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
             "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset, " +
             "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp)"
-    }
 
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 
@@ -150,9 +149,7 @@ data class AndelTilkjentYtelse(
         }
     }
 
-    fun erAndelSomSkalSendesTilOppdrag(): Boolean {
-        return this.kalkulertUtbetalingsbeløp != 0
-    }
+    fun erAndelSomSkalSendesTilOppdrag(): Boolean = this.kalkulertUtbetalingsbeløp != 0
 
     fun erAndelSomharNullutbetalingPgaDifferanseberegning() =
         this.kalkulertUtbetalingsbeløp == 0 &&
@@ -169,13 +166,14 @@ data class AndelTilkjentYtelse(
             .filter {
                 this.stønadFom > (it.periodeFom ?: TIDENES_MORGEN).toYearMonth() &&
                     (it.periodeTom == null || this.stønadFom <= it.periodeTom?.toYearMonth())
-            }
-            .filter { vilkårResultat ->
+            }.filter { vilkårResultat ->
                 regelverkAvhengigeVilkår().any { it == vilkårResultat.vilkårType }
             }
 }
 
-enum class YtelseType(val klassifisering: String) {
+enum class YtelseType(
+    val klassifisering: String,
+) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
@@ -212,16 +210,23 @@ private fun regelverkAvhengigeVilkår() =
         Vilkår.LOVLIG_OPPHOLD,
     )
 
-fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson,
         )
     }
 
-fun List<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
+fun List<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseForVedtaksperioderTidslinje(
+            andelerTilkjentYtelsePåPerson,
+        )
+    }
+
+fun List<AndelTilkjentYtelse>.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje> =
+    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+        AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje(
             andelerTilkjentYtelsePåPerson,
         )
     }

@@ -135,13 +135,12 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         assertNull(fagsystemsbehandling.verge)
     }
 
-    private fun lagRequest(): String {
-        return objectMapper.writeValueAsString(
+    private fun lagRequest(): String =
+        objectMapper.writeValueAsString(
             HentFagsystemsbehandlingRequest(
                 eksternFagsakId = behandling.fagsak.id.toString(),
                 eksternId = behandling.id.toString(),
                 ytelsestype = Ytelsestype.BARNETRYGD,
             ),
         )
-    }
 }

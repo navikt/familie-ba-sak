@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
@@ -13,7 +14,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -54,7 +54,8 @@ class FagsakController(
         )
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
-        return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
+        return Result
+            .runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
             .fold(
                 onSuccess = { ResponseEntity.status(HttpStatus.CREATED).body(it) },
                 onFailure = { throw it },
@@ -92,13 +93,14 @@ class FagsakController(
             event = AuditLoggerEvent.ACCESS,
         )
 
-        return Result.runCatching {
-            val aktør = personidentService.hentAktør(request.personIdent)
-            fagsakService.hentMinimalFagsakForPerson(aktør, request.fagsakType)
-        }.fold(
-            onSuccess = { return ResponseEntity.ok().body(it) },
-            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) },
-        )
+        return Result
+            .runCatching {
+                val aktør = personidentService.hentAktør(request.personIdent)
+                fagsakService.hentMinimalFagsakForPerson(aktør, request.fagsakType)
+            }.fold(
+                onSuccess = { return ResponseEntity.ok().body(it) },
+                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) },
+            )
     }
 
     @PostMapping(path = ["/hent-fagsaker-paa-person"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -111,13 +113,14 @@ class FagsakController(
             event = AuditLoggerEvent.ACCESS,
         )
 
-        return Result.runCatching {
-            val aktør = personidentService.hentAktør(request.personIdent)
-            fagsakService.hentMinimalFagsakerForPerson(aktør = aktør, fagsakTyper = request.fagsakTyper)
-        }.fold(
-            onSuccess = { return ResponseEntity.ok().body(it) },
-            onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) },
-        )
+        return Result
+            .runCatching {
+                val aktør = personidentService.hentAktør(request.personIdent)
+                fagsakService.hentMinimalFagsakerForPerson(aktør = aktør, fagsakTyper = request.fagsakTyper)
+            }.fold(
+                onSuccess = { return ResponseEntity.ok().body(it) },
+                onFailure = { illegalState("Ukjent feil ved henting data for manuell journalføring.", it) },
+            )
     }
 
     @PostMapping(path = ["/sok"])
@@ -178,7 +181,9 @@ class FagsakController(
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
 
-    data class RestSøkFagsakRequest(val personIdent: String) {
+    data class RestSøkFagsakRequest(
+        val personIdent: String,
+    ) {
         // Bruker init til å validere personidenten
         init {
             Fødselsnummer(personIdent)
@@ -195,13 +200,13 @@ class FagsakController(
         @RequestBody restSøkParam: RestSøkParam,
     ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         restSøkParam.valider()
-        return Result.runCatching {
-            val aktør = personidentService.hentAktør(restSøkParam.personIdent)
-            val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
+        return Result
+            .runCatching {
+                val aktør = personidentService.hentAktør(restSøkParam.personIdent)
+                val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
 
-            fagsakService.oppgiFagsakdeltagere(aktør, barnsAktørId)
-        }
-            .fold(
+                fagsakService.oppgiFagsakdeltagere(aktør, barnsAktørId)
+            }.fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {
                     logger.info("Henting av fagsakdeltagere feilet.")
@@ -221,11 +226,10 @@ class FagsakController(
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harÅpenTilbakekreving(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<Boolean>> {
-        return ResponseEntity.ok(
+    ): ResponseEntity<Ressurs<Boolean>> =
+        ResponseEntity.ok(
             Ressurs.success(tilbakekrevingService.søkerHarÅpenTilbakekreving(fagsakId)),
         )
-    }
 
     @GetMapping(path = ["/{fagsakId}/opprett-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettTilbakekrevingsbehandling(

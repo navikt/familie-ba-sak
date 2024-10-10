@@ -32,26 +32,28 @@ class KompetanseBuilder(
                     )
 
                 'S' ->
-                    Kompetanse.NULL.copy(
-                        søkersAktivitet = søkersAktivitet,
-                        annenForeldersAktivitet = annenForeldersAktivitet,
-                        søkersAktivitetsland = søkersAktivitetsland,
-                        barnetsBostedsland = barnetsBostedsland,
-                        resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                        annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                        erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
-                    ).fyllUt()
+                    Kompetanse.NULL
+                        .copy(
+                            søkersAktivitet = søkersAktivitet,
+                            annenForeldersAktivitet = annenForeldersAktivitet,
+                            søkersAktivitetsland = søkersAktivitetsland,
+                            barnetsBostedsland = barnetsBostedsland,
+                            resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                            annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                            erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
+                        ).fyllUt()
 
                 'P' ->
-                    Kompetanse.NULL.copy(
-                        søkersAktivitet = søkersAktivitet,
-                        annenForeldersAktivitet = annenForeldersAktivitet,
-                        søkersAktivitetsland = søkersAktivitetsland,
-                        barnetsBostedsland = barnetsBostedsland,
-                        resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                        annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                        erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
-                    ).fyllUt()
+                    Kompetanse.NULL
+                        .copy(
+                            søkersAktivitet = søkersAktivitet,
+                            annenForeldersAktivitet = annenForeldersAktivitet,
+                            søkersAktivitetsland = søkersAktivitetsland,
+                            barnetsBostedsland = barnetsBostedsland,
+                            resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                            annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                            erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
+                        ).fyllUt()
 
                 else -> null
             }

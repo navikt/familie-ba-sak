@@ -58,7 +58,8 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
     val andelerTidslinjePerAktørOgType = this.tilKombinertTidslinjePerAktørOgType()
 
     val utbetalingsPerioder =
-        andelerTidslinjePerAktørOgType.perioder()
+        andelerTidslinjePerAktørOgType
+            .perioder()
             .filter { !it.innhold.isNullOrEmpty() }
             .map { periode ->
                 Utbetalingsperiode(
@@ -68,7 +69,8 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
                     utbetaltPerMnd = periode.innhold.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
                     antallBarn =
                         periode.innhold
-                            .map { it.aktør }.toSet()
+                            .map { it.aktør }
+                            .toSet()
                             .count { aktør -> personopplysningGrunnlag.barna.any { barn -> barn.aktør == aktør } },
                     utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag),
                 )

@@ -2,7 +2,7 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -11,12 +11,15 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun mockAutovedtakMånedligValutajusteringService(
-    dataFraCucumber: BegrunnelseTeksterStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     fagsak: Fagsak,
     nyBehanldingId: Long,
     svarFraEcbMock: Map<Pair<String, LocalDate>, BigDecimal>,
 ): AutovedtakMånedligValutajusteringService {
-    val forrigeBehandling = dataFraCucumber.behandlinger.values.filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.id }
+    val forrigeBehandling =
+        dataFraCucumber.behandlinger.values
+            .filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.id }
     dataFraCucumber.behandlingTilForrigeBehandling.put(nyBehanldingId, forrigeBehandling?.id)
 
     val ecbService = mockk<ECBService>()
@@ -30,7 +33,7 @@ fun mockAutovedtakMånedligValutajusteringService(
     val cucumberMock =
         CucumberMock(
             dataFraCucumber = dataFraCucumber,
-            nyBehanldingId = nyBehanldingId,
+            nyBehandlingId = nyBehanldingId,
             forrigeBehandling = forrigeBehandling,
             ecbService = ecbService,
         )

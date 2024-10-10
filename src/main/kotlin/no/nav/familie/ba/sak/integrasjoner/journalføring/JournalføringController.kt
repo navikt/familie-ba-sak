@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -31,29 +31,26 @@ class JournalføringController(
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(
         @PathVariable journalpostId: String,
-    ): ResponseEntity<Ressurs<Journalpost>> {
-        return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
-    }
+    ): ResponseEntity<Ressurs<Journalpost>> = ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
 
     @PostMapping(path = ["/for-bruker"])
     fun hentJournalposterForBruker(
         @RequestBody personIdentBody: PersonIdent,
-    ): ResponseEntity<Ressurs<List<Journalpost>>> {
-        return ResponseEntity.ok(
+    ): ResponseEntity<Ressurs<List<Journalpost>>> =
+        ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentJournalposterForBruker(
                     personIdentBody.ident,
                 ),
             ),
         )
-    }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
-    ): ResponseEntity<Ressurs<ByteArray>> {
-        return ResponseEntity.ok(
+    ): ResponseEntity<Ressurs<ByteArray>> =
+        ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentDokument(
                     journalpostId,
@@ -61,7 +58,6 @@ class JournalføringController(
                 ),
             ),
         )
-    }
 
     @GetMapping(
         path = ["/{journalpostId}/dokument/{dokumentInfoId}"],
@@ -70,9 +66,7 @@ class JournalføringController(
     fun hentDokumentBytearray(
         @PathVariable journalpostId: String,
         @PathVariable dokumentInfoId: String,
-    ): ResponseEntity<ByteArray> {
-        return ResponseEntity.ok(innkommendeJournalføringService.hentDokument(journalpostId, dokumentInfoId))
-    }
+    ): ResponseEntity<ByteArray> = ResponseEntity.ok(innkommendeJournalføringService.hentDokument(journalpostId, dokumentInfoId))
 
     @PostMapping(path = ["/{journalpostId}/journalfør/{oppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun journalførV2(

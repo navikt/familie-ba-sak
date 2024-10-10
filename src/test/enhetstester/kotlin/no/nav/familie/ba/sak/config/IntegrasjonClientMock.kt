@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
+import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -137,7 +139,12 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.ferdigstillOppgave(any()) } just runs
 
             every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
-                listOf(Arbeidsfordelingsenhet("4833", "NAV Familie- og pensjonsytelser Oslo 1"))
+                listOf(
+                    Arbeidsfordelingsenhet(
+                        BarnetrygdEnhet.OSLO.enhetsnummer,
+                        BarnetrygdEnhet.OSLO.enhetsnavn,
+                    ),
+                )
 
             every { mockIntegrasjonClient.hentDokument(any(), any()) } returns TEST_PDF
 
@@ -146,8 +153,8 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
                 listOf(
                     Arbeidsfordelingsenhet(
-                        "100",
-                        "NAV Familie- og pensjonsytelser Oslo 1",
+                        BarnetrygdEnhet.OSLO.enhetsnummer,
+                        BarnetrygdEnhet.OSLO.enhetsnavn,
                     ),
                 )
 
@@ -174,6 +181,8 @@ class IntegrasjonClientMock {
                     "Testinstitusjon",
                 )
             }
+
+            every { mockIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries.map { Enhet(it.enhetsnummer, it.enhetsnavn) }
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {

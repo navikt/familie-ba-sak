@@ -10,13 +10,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 class EndretUtbetalingAndelTidslinje(
     private val endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ) : Tidslinje<EndretUtbetalingAndel, Måned>() {
-    override fun lagPerioder(): Collection<Periode<EndretUtbetalingAndel, Måned>> {
-        return endretUtbetalingAndeler.map {
+    override fun lagPerioder(): Collection<Periode<EndretUtbetalingAndel, Måned>> =
+        endretUtbetalingAndeler.map {
             Periode(
                 fraOgMed = it.fom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen fom-dato: $it"),
                 tilOgMed = it.tom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen tom-dato: $it"),
                 innhold = it,
             )
         }
-    }
 }

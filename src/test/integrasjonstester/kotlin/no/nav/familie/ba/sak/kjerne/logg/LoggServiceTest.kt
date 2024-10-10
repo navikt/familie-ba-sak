@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -19,11 +20,10 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -178,7 +178,8 @@ class LoggServiceTest(
         assertTrue {
             logger.any {
                 it.type == LoggType.VILKÅRSVURDERING &&
-                    it.tittel == "Vilkårsvurdering gjennomført" && it.tekst == "Resultat ble innvilget"
+                    it.tittel == "Vilkårsvurdering gjennomført" &&
+                    it.tekst == "Resultat ble innvilget"
             }
         }
         assertTrue {
@@ -230,7 +231,8 @@ class LoggServiceTest(
         assertTrue {
             logger.any {
                 it.type == LoggType.VILKÅRSVURDERING &&
-                    it.tittel == "Vilkårsvurdering gjennomført" && it.tekst == "Resultat ble innvilget"
+                    it.tittel == "Vilkårsvurdering gjennomført" &&
+                    it.tekst == "Resultat ble innvilget"
             }
         }
         assertTrue {
@@ -362,7 +364,7 @@ class LoggServiceTest(
                     fødselsdato = LocalDate.of(2018, 5, 1),
                     kjønn = Kjønn.KVINNE,
                     navn = "Barn Barnesen",
-                    sivilstander = listOf(Sivilstand(type = SIVILSTAND.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
+                    sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8))),
                 ),
         )
         MockPersonopplysningerService.leggTilPersonInfo(

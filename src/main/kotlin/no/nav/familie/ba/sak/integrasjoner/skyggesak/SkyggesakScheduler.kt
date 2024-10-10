@@ -57,7 +57,8 @@ class SkyggesakScheduler(
 
     @Transactional
     fun fjernGamleSkyggesakInnslag() {
-        skyggesakRepository.finnSkyggesakerSomErSendt()
+        skyggesakRepository
+            .finnSkyggesakerSomErSendt()
             .filter { it.sendtTidspunkt!!.isBefore(LocalDateTime.now().minusDays(SKYGGESAK_RETENTION.toLong())) }
             .run {
                 logger.info("Fjerner ${this.size} rader fra Skyggesak, sendt for mer enn $SKYGGESAK_RETENTION dager siden")

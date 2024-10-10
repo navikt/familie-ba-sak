@@ -43,8 +43,10 @@ object Utils {
     fun hentPropertyFraMaven(key: String): String? = this.properties[key]?.toString()
 
     fun BigDecimal.avrundetHeltallAvProsent(prosent: BigDecimal) =
-        this.times(prosent)
-            .divide(100.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
+        this
+            .times(prosent)
+            .divide(100.toBigDecimal())
+            .setScale(0, RoundingMode.HALF_UP)
             .toInt()
 
     fun Int.avrundetHeltallAvProsent(prosent: BigDecimal) = this.toBigDecimal().avrundetHeltallAvProsent(prosent)
@@ -54,7 +56,8 @@ object Utils {
     fun String.storForbokstavIHvertOrd() = this.split(" ").joinToString(" ") { it.storForbokstav() }.trimEnd()
 
     fun String.storForbokstavIAlleNavn() =
-        this.split(" ")
+        this
+            .split(" ")
             .joinToString(" ") { navn ->
                 navn.split("-").joinToString("-") { it.storForbokstav() }
             }.trimEnd()
@@ -67,6 +70,4 @@ object Utils {
         if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf(it) }
 }
 
-fun Any.convertDataClassToJson(): String {
-    return objectMapper.writeValueAsString(this)
-}
+fun Any.convertDataClassToJson(): String = objectMapper.writeValueAsString(this)

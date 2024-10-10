@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils.mut
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -122,7 +122,8 @@ class VilkårService(
             )
         }
 
-        personResultat.vilkårResultater.filter { it.vilkårType == restSlettVilkår.vilkårType }
+        personResultat.vilkårResultater
+            .filter { it.vilkårType == restSlettVilkår.vilkårType }
             .forEach { personResultat.removeVilkårResultat(it.id) }
 
         if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
@@ -179,7 +180,8 @@ class VilkårService(
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
         if (personopplysningGrunnlag.søkerOgBarn
-                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }
+                .type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
@@ -189,7 +191,9 @@ class VilkårService(
     }
 
     private fun harUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering): Boolean =
-        vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
+        vilkårsvurdering.personResultater
+            .find { it.erSøkersResultater() }
+            ?.vilkårResultater
             ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD } == true
 
     private fun finnesUtvidetBarnetrydIForrigeBehandling(
@@ -206,8 +210,10 @@ class VilkårService(
                             "har ikke en aktiv vilkårsvurdering",
                 )
             val aktør = personidentService.hentAktør(personIdent)
-            return forrigeBehandlingsvilkårsvurdering.personResultater.single { it.aktør == aktør }
-                .vilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            return forrigeBehandlingsvilkårsvurdering.personResultater
+                .single { it.aktør == aktør }
+                .vilkårResultater
+                .any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         }
         return false
     }
@@ -231,4 +237,4 @@ class VilkårService(
 
 fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR
 
-fun SIVILSTAND.somForventetHosBarn() = this == SIVILSTAND.UOPPGITT || this == SIVILSTAND.UGIFT
+fun SIVILSTANDTYPE.somForventetHosBarn() = this == SIVILSTANDTYPE.UOPPGITT || this == SIVILSTANDTYPE.UGIFT

@@ -2,12 +2,12 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 
-fun mockAndelTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): AndelTilkjentYtelseRepository {
+fun mockAndelTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): AndelTilkjentYtelseRepository {
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
@@ -15,7 +15,12 @@ fun mockAndelTilkjentYtelseRepository(dataFraCucumber: BegrunnelseTeksterStepDef
     }
     every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any()) } answers {
         val fagsakId = firstArg<Long>()
-        val behandlingId = dataFraCucumber.behandlinger.filter { it.value.fagsak.id == fagsakId }.filter { it.value.status == BehandlingStatus.AVSLUTTET }.maxByOrNull { it.value.id }?.key
+        val behandlingId =
+            dataFraCucumber.behandlinger
+                .filter { it.value.fagsak.id == fagsakId }
+                .filter { it.value.status == BehandlingStatus.AVSLUTTET }
+                .maxByOrNull { it.value.id }
+                ?.key
         val andelerPåBehandling = dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse ?: emptyList()
         andelerPåBehandling.tilSisteAndelPerAktørOgType()
     }

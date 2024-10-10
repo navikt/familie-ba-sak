@@ -27,7 +27,9 @@ import java.time.YearMonth
 @RestController
 @RequestMapping("/api/bisys")
 @ProtectedWithClaims(issuer = "azuread")
-class BisysController(private val bisysService: BisysService) {
+class BisysController(
+    private val bisysService: BisysService,
+) {
     @Operation(
         description = "Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person.",
     )
@@ -117,7 +119,9 @@ data class BisysUtvidetBarnetrygdRequest(
     @Schema(implementation = String::class, example = "2020-12-01") val fraDato: LocalDate,
 )
 
-class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
+class BisysUtvidetBarnetrygdResponse(
+    val perioder: List<UtvidetBarnetrygdPeriode>,
+)
 
 data class UtvidetBarnetrygdPeriode(
     val stønadstype: BisysStønadstype,

@@ -142,9 +142,7 @@ class KonsistensavstemmingTest {
         tasker: List<Task>,
         transaksjonsId: UUID,
         type: String,
-    ): Task? {
-        return tasker.find { it.payload.contains(transaksjonsId.toString()) && it.type == type }
-    }
+    ): Task? = tasker.find { it.payload.contains(transaksjonsId.toString()) && it.type == type }
 
     @Test
     fun `Rekjøring av start task - Verifiser at konsistensavstemming ikke kjører hvis alle datachunker allerede er sendt til økonomi for transaksjonId`() {
@@ -196,7 +194,8 @@ class KonsistensavstemmingTest {
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 3) } returns null
 
         every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() } returns
-            (1..1450).toList()
+            (1..1450)
+                .toList()
                 .map { it.toLong() }
 
         konistensavstemmingStartTask.doTask(
@@ -262,7 +261,9 @@ class KonsistensavstemmingTest {
         assertEquals(konsistensavstemmingDataDto.chunkNr, 1)
         assertEquals(konsistensavstemmingDataDto.transaksjonsId, transaksjonsId)
         assertThat(konsistensavstemmingDataDto.perioderForBehandling)
-            .hasSize(1).extracting("behandlingId").containsExactly(behandlingId.toString())
+            .hasSize(1)
+            .extracting("behandlingId")
+            .containsExactly(behandlingId.toString())
     }
 
     @Test

@@ -8,7 +8,7 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat          | Behandlingsårsak |
       | 1            | 1        |                     | ENDRET_UTBETALING            | SATSENDRING      |
       | 2            | 1        | 1                   | ENDRET_OG_FORTSATT_INNVILGET | SØKNAD           |
@@ -67,9 +67,9 @@ Egenskap: Vedtaksperioder for endret og fortsatt innvilget
       | 2       | 2            | 01.07.2023 | 31.07.2027 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 2       | 2            | 01.08.2027 | 31.07.2039 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar          |
       | 01.08.2023 | 31.10.2023 | UTBETALING         | Utvidet og ordinær |
       | 01.11.2023 | 31.07.2027 | UTBETALING         | Kun ordinær        |

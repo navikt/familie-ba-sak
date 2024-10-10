@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
@@ -120,7 +120,7 @@ val mockSøkerAutomatiskBehandling =
         forelderBarnRelasjonMaskert = emptySet(),
         adressebeskyttelseGradering = null,
         bostedsadresser = konstantAdresse,
-        sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT, gyldigFraOgMed = null)),
+        sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT, gyldigFraOgMed = null)),
         opphold = emptyList(),
         statsborgerskap = emptyList(),
     )
@@ -130,25 +130,30 @@ fun genererAutomatiskTestperson(
     forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
     sivilstander: List<Sivilstand> = emptyList(),
     bostedsadresser: List<Bostedsadresse> = konstantAdresse,
-): PersonInfo {
-    return PersonInfo(
+): PersonInfo =
+    PersonInfo(
         fødselsdato = fødselsdato,
         navn = "Autogenerert Navn $fødselsdato",
         forelderBarnRelasjon =
-            forelderBarnRelasjon.map {
-                ForelderBarnRelasjon(
-                    aktør = tilAktør(it.aktør.personidenter.first().fødselsnummer),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    navn = null,
-                    fødselsdato = null,
-                    adressebeskyttelseGradering =
-                    null,
-                )
-            }.toSet(),
+            forelderBarnRelasjon
+                .map {
+                    ForelderBarnRelasjon(
+                        aktør =
+                            tilAktør(
+                                it.aktør.personidenter
+                                    .first()
+                                    .fødselsnummer,
+                            ),
+                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                        navn = null,
+                        fødselsdato = null,
+                        adressebeskyttelseGradering =
+                        null,
+                    )
+                }.toSet(),
         sivilstander = sivilstander,
         bostedsadresser = bostedsadresser,
     )
-}
 
 val mockNåværendeBosted =
     GrMatrikkeladresse(

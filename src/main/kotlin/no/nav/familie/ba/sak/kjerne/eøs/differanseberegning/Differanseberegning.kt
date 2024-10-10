@@ -80,11 +80,13 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
     val utvidetBarnetrygdTidslinje =
-        this.tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+        this
+            .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
             .utenDifferanseberegning()
 
     val småbarnstilleggTidslinje =
-        this.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+        this
+            .tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
             .utenDifferanseberegning()
 
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()

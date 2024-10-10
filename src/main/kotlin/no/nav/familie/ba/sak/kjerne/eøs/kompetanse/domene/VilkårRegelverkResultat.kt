@@ -21,7 +21,10 @@ data class VilkårRegelverkResultat(
     val regelverk get() = regelverkResultat.regelverk
 }
 
-enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?) {
+enum class RegelverkResultat(
+    val regelverk: Regelverk?,
+    val resultat: Resultat?,
+) {
     OPPFYLT_EØS_FORORDNINGEN(Regelverk.EØS_FORORDNINGEN, Resultat.OPPFYLT),
     OPPFYLT_NASJONALE_REGLER(Regelverk.NASJONALE_REGLER, Resultat.OPPFYLT),
     OPPFYLT_REGELVERK_IKKE_SATT(null, Resultat.OPPFYLT),

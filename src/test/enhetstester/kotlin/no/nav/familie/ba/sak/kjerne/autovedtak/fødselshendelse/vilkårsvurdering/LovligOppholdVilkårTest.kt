@@ -49,171 +49,179 @@ class LovligOppholdVilkårTest {
     @Test
     fun `Lovlig opphold vurdert på bakgrunn av status for statsløs søker`() {
         var evaluering =
-            vilkår.vurderVilkår(
-                statsløsPerson.copy().apply {
-                    opphold =
-                        mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-                },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    statsløsPerson.copy().apply {
+                        opphold =
+                            mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
+                    },
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         evaluering =
-            vilkår.vurderVilkår(
-                ukjentStatsborger.copy().apply {
-                    opphold =
-                        mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-                },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    ukjentStatsborger.copy().apply {
+                        opphold =
+                            mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
+                    },
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         evaluering =
-            vilkår.vurderVilkår(
-                statsløsPerson.copy().apply {
-                    opphold =
-                        mutableListOf(
-                            GrOpphold(
-                                gyldigPeriode = null,
-                                type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
-                                person = this,
-                            ),
-                        )
-                },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    statsløsPerson.copy().apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    gyldigPeriode = null,
+                                    type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
+                                    person = this,
+                                ),
+                            )
+                    },
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Ikke lovlig opphold dersom utenfor gyldig periode`() {
         var evaluering =
-            vilkår.vurderVilkår(
-                tredjelandsborger.copy(
-                    statsborgerskap =
-                        mutableListOf(
-                            GrStatsborgerskap(
-                                landkode = "ANG",
-                                medlemskap = Medlemskap.TREDJELANDSBORGER,
-                                person = tredjelandsborger,
+            vilkår
+                .vurderVilkår(
+                    tredjelandsborger.copy(
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "ANG",
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = tredjelandsborger,
+                                ),
                             ),
-                        ),
-                    opphold =
-                        mutableListOf(
-                            GrOpphold(
-                                gyldigPeriode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(10),
-                                        tom = LocalDate.now().minusYears(5),
-                                    ),
-                                type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                person = tredjelandsborger,
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(10),
+                                            tom = LocalDate.now().minusYears(5),
+                                        ),
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    person = tredjelandsborger,
+                                ),
                             ),
-                        ),
-                ),
-            ).evaluering
+                    ),
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
         evaluering =
-            vilkår.vurderVilkår(
-                statsløsPerson.copy().apply {
-                    opphold =
-                        mutableListOf(
-                            GrOpphold(
-                                gyldigPeriode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(10),
-                                        tom = LocalDate.now().minusYears(5),
-                                    ),
-                                type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                person = this,
-                            ),
-                        )
-                },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    statsløsPerson.copy().apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(10),
+                                            tom = LocalDate.now().minusYears(5),
+                                        ),
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    person = this,
+                                ),
+                            )
+                    },
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold dersom status med gjeldende periode`() {
         var evaluering =
-            vilkår.vurderVilkår(
-                tredjelandsborger.copy(
-                    statsborgerskap =
-                        mutableListOf(
-                            GrStatsborgerskap(
-                                landkode = "ANG",
-                                medlemskap = Medlemskap.TREDJELANDSBORGER,
-                                person = tredjelandsborger,
+            vilkår
+                .vurderVilkår(
+                    tredjelandsborger.copy(
+                        statsborgerskap =
+                            mutableListOf(
+                                GrStatsborgerskap(
+                                    landkode = "ANG",
+                                    medlemskap = Medlemskap.TREDJELANDSBORGER,
+                                    person = tredjelandsborger,
+                                ),
                             ),
-                        ),
-                    opphold =
-                        mutableListOf(
-                            GrOpphold(
-                                gyldigPeriode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(10),
-                                        tom = LocalDate.now().minusYears(5),
-                                    ),
-                                type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
-                                person = tredjelandsborger,
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(10),
+                                            tom = LocalDate.now().minusYears(5),
+                                        ),
+                                    type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
+                                    person = tredjelandsborger,
+                                ),
+                                GrOpphold(
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(5),
+                                            tom = null,
+                                        ),
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    person = tredjelandsborger,
+                                ),
                             ),
-                            GrOpphold(
-                                gyldigPeriode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(5),
-                                        tom = null,
-                                    ),
-                                type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                person = tredjelandsborger,
-                            ),
-                        ),
-                ),
-            ).evaluering
+                    ),
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
         evaluering =
-            vilkår.vurderVilkår(
-                statsløsPerson.copy().apply {
-                    opphold =
-                        mutableListOf(
-                            GrOpphold(
-                                gyldigPeriode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(10),
-                                        tom = LocalDate.now().minusYears(5),
-                                    ),
-                                type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
-                                person = this,
-                            ),
-                            GrOpphold(
-                                gyldigPeriode =
-                                    DatoIntervallEntitet(
-                                        fom = LocalDate.now().minusYears(5),
-                                        tom = null,
-                                    ),
-                                type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                                person = this,
-                            ),
-                        )
-                },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    statsløsPerson.copy().apply {
+                        opphold =
+                            mutableListOf(
+                                GrOpphold(
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(10),
+                                            tom = LocalDate.now().minusYears(5),
+                                        ),
+                                    type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
+                                    person = this,
+                                ),
+                                GrOpphold(
+                                    gyldigPeriode =
+                                        DatoIntervallEntitet(
+                                            fom = LocalDate.now().minusYears(5),
+                                            tom = null,
+                                        ),
+                                    type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
+                                    person = this,
+                                ),
+                            )
+                    },
+                ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap og har løpende arbeidsforhold`() {
         val evaluering =
-            vilkår.vurderVilkår(
-                eøsBorger.copy().apply {
-                    arbeidsforhold =
-                        mutableListOf(
-                            GrArbeidsforhold(
-                                periode = DatoIntervallEntitet(fom = null, tom = LocalDate.now().plusMonths(6)),
-                                arbeidsgiverId = null,
-                                arbeidsgiverType = null,
-                                person = this,
-                            ),
-                        )
-                },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    eøsBorger.copy().apply {
+                        arbeidsforhold =
+                            mutableListOf(
+                                GrArbeidsforhold(
+                                    periode = DatoIntervallEntitet(fom = null, tom = LocalDate.now().plusMonths(6)),
+                                    arbeidsgiverId = null,
+                                    arbeidsgiverType = null,
+                                    person = this,
+                                ),
+                            )
+                    },
+                ).evaluering
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(listOf(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD), evaluering.evalueringÅrsaker)
     }
@@ -221,13 +229,14 @@ class LovligOppholdVilkårTest {
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder`() {
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                    },
-                annenForelder = null,
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                        },
+                    annenForelder = null,
+                ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(listOf(VilkårIkkeOppfyltÅrsak.EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART), evaluering.evalueringÅrsaker)
     }
@@ -235,25 +244,26 @@ class LovligOppholdVilkårTest {
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder bor ikke med mor`() {
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"))
-                    },
-                annenForelder =
-                    annenForelderNordiskBorger.copy(
-                        bostedsadresser =
-                            mutableListOf(
-                                opprettAdresse(
-                                    adressenavn = "Fågelveien",
-                                    husnummer = "123",
-                                    postnummer = "0245",
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"))
+                        },
+                    annenForelder =
+                        annenForelderNordiskBorger.copy(
+                            bostedsadresser =
+                                mutableListOf(
+                                    opprettAdresse(
+                                        adressenavn = "Fågelveien",
+                                        husnummer = "123",
+                                        postnummer = "0245",
+                                    ),
                                 ),
-                            ),
-                    ),
-            ).evaluering
+                        ),
+                ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER),
@@ -273,29 +283,30 @@ class LovligOppholdVilkårTest {
             }
 
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(
-                                tidligereAdresse,
-                                opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"),
-                            )
-                    },
-                annenForelder =
-                    annenForelderNordiskBorger.copy(
-                        bostedsadresser =
-                            mutableListOf(
-                                tidligereAdresse,
-                                opprettAdresse(
-                                    adressenavn = "Fågelveien",
-                                    husnummer = "123",
-                                    postnummer = "0245",
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(
+                                    tidligereAdresse,
+                                    opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"),
+                                )
+                        },
+                    annenForelder =
+                        annenForelderNordiskBorger.copy(
+                            bostedsadresser =
+                                mutableListOf(
+                                    tidligereAdresse,
+                                    opprettAdresse(
+                                        adressenavn = "Fågelveien",
+                                        husnummer = "123",
+                                        postnummer = "0245",
+                                    ),
                                 ),
-                            ),
-                    ),
-            ).evaluering
+                        ),
+                ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER),
@@ -307,21 +318,22 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder bor med mor og nordisk`() {
         val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-                annenForelder =
-                    annenForelderNordiskBorger.copy(
-                        bostedsadresser =
-                            mutableListOf(
-                                adresse,
-                            ),
-                    ),
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                    annenForelder =
+                        annenForelderNordiskBorger.copy(
+                            bostedsadresser =
+                                mutableListOf(
+                                    adresse,
+                                ),
+                        ),
+                ).evaluering
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK),
@@ -333,22 +345,23 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder(EØS) ikke løpende arbeidsforhold`() {
         val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-                annenForelder =
-                    annenForelderEØS.copy(
-                        bostedsadresser =
-                            mutableListOf(
-                                adresse,
-                            ),
-                        arbeidsforhold = mutableListOf(),
-                    ),
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                    annenForelder =
+                        annenForelderEØS.copy(
+                            bostedsadresser =
+                                mutableListOf(
+                                    adresse,
+                                ),
+                            arbeidsforhold = mutableListOf(),
+                        ),
+                ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD),
@@ -360,30 +373,31 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap, annen forelder(EØS) har løpende arbeidsforhold`() {
         val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-                annenForelder =
-                    annenForelderEØS.copy().apply {
-                        bostedsadresser =
-                            mutableListOf(
-                                adresse,
-                            )
-                        arbeidsforhold =
-                            mutableListOf(
-                                GrArbeidsforhold(
-                                    periode = DatoIntervallEntitet(fom = null, tom = LocalDate.now().plusMonths(6)),
-                                    arbeidsgiverId = null,
-                                    arbeidsgiverType = null,
-                                    person = this,
-                                ),
-                            )
-                    },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                    annenForelder =
+                        annenForelderEØS.copy().apply {
+                            bostedsadresser =
+                                mutableListOf(
+                                    adresse,
+                                )
+                            arbeidsforhold =
+                                mutableListOf(
+                                    GrArbeidsforhold(
+                                        periode = DatoIntervallEntitet(fom = null, tom = LocalDate.now().plusMonths(6)),
+                                        arbeidsgiverId = null,
+                                        arbeidsgiverType = null,
+                                        person = this,
+                                    ),
+                                )
+                        },
+                ).evaluering
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD),
@@ -395,19 +409,20 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder er tredjelandsborger`() {
         val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-                annenForelder =
-                    tredjelandsborger.copy().apply {
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                    annenForelder =
+                        tredjelandsborger.copy().apply {
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER),
@@ -419,19 +434,20 @@ class LovligOppholdVilkårTest {
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder er statsløs`() {
         val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
-            vilkår.vurderVilkår(
-                person =
-                    eøsBorger.copy().apply {
-                        arbeidsforhold = mutableListOf()
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-                annenForelder =
-                    statsløsPerson.copy().apply {
-                        bostedsadresser =
-                            mutableListOf(adresse)
-                    },
-            ).evaluering
+            vilkår
+                .vurderVilkår(
+                    person =
+                        eøsBorger.copy().apply {
+                            arbeidsforhold = mutableListOf()
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                    annenForelder =
+                        statsløsPerson.copy().apply {
+                            bostedsadresser =
+                                mutableListOf(adresse)
+                        },
+                ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS),
@@ -448,8 +464,8 @@ class LovligOppholdVilkårTest {
     private fun faktaPerson(
         oppholdstillatelse: OPPHOLDSTILLATELSE,
         periode: DatoIntervallEntitet?,
-    ): Person {
-        return tredjelandsborger.copy(
+    ): Person =
+        tredjelandsborger.copy(
             statsborgerskap =
                 mutableListOf(
                     GrStatsborgerskap(
@@ -467,7 +483,6 @@ class LovligOppholdVilkårTest {
                     ),
                 ),
         )
-    }
 
     companion object {
         val vilkår = Vilkår.LOVLIG_OPPHOLD

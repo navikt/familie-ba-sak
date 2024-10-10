@@ -50,7 +50,8 @@ internal fun hentEØSStandardBegrunnelser(
     val filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp =
         filtrertPåManuelleBegrunnelser.filterValues { begrunnelse ->
             val endringIKompetanseValutakursEllerUtenlandskPeriodebeløp =
-                erEndringIKompetanse(begrunnelseGrunnlag) || erEndringIValutakurs(begrunnelseGrunnlag) ||
+                erEndringIKompetanse(begrunnelseGrunnlag) ||
+                    erEndringIValutakurs(begrunnelseGrunnlag) ||
                     erEndringIUtenlandskPeriodebeløp(
                         begrunnelseGrunnlag,
                     )
@@ -71,10 +72,11 @@ internal fun hentEØSStandardBegrunnelser(
 
     val filtrertPåTilleggstekstMedLikKompetanseEllerVilkår =
         filtrertPåManuelleBegrunnelser.filterValues {
-            it.valgbarhet == Valgbarhet.TILLEGGSTEKST && (
-                it.erLikKompetanseIPeriode(begrunnelseGrunnlag) ||
-                    it.erLikVilkårOgUtdypendeVilkårIPeriode(oppfylteVilkårDennePerioden)
-            )
+            it.valgbarhet == Valgbarhet.TILLEGGSTEKST &&
+                (
+                    it.erLikKompetanseIPeriode(begrunnelseGrunnlag) ||
+                        it.erLikVilkårOgUtdypendeVilkårIPeriode(oppfylteVilkårDennePerioden)
+                )
         }
 
     val filtrertPåReduksjonFraForrigeBehandling =

@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.mapInnhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
@@ -29,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFramtid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -38,7 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser.hentEØSStandardBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser.hentStandardBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -85,15 +85,21 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
 
     val begrunnelseGrunnlagForSøkerIPeriode =
         begrunnelseGrunnlagPerPerson
-            .filterKeys { it.type == PersonType.SØKER }.values.firstOrNull()
+            .filterKeys { it.type == PersonType.SØKER }
+            .values
+            .firstOrNull()
 
     val utvidetVilkårPåSøkerIPeriode =
         begrunnelseGrunnlagForSøkerIPeriode
-            ?.dennePerioden?.vilkårResultater?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            ?.dennePerioden
+            ?.vilkårResultater
+            ?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
     val utvidetVilkårPåSøkerIForrigePeriode =
         begrunnelseGrunnlagForSøkerIPeriode
-            ?.forrigePeriode?.vilkårResultater?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+            ?.forrigePeriode
+            ?.vilkårResultater
+            ?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
@@ -147,13 +153,12 @@ fun erUtbetalingEllerDeltBostedIPeriode(begrunnelseGrunnlagPerPerson: Map<Person
 
 fun ISanityBegrunnelse.erSammeTemaSomPeriode(
     temaerForBegrunnelser: TemaerForBegrunnelser,
-): Boolean {
-    return if (this.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
+): Boolean =
+    if (this.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {
         temaerForBegrunnelser.temaerForOpphør.contains(tema) || tema == Tema.FELLES
     } else {
         temaerForBegrunnelser.temaForUtbetaling == tema || tema == Tema.FELLES
     }
-}
 
 data class TemaerForBegrunnelser(
     val temaerForOpphør: Set<Tema>,
@@ -199,7 +204,8 @@ fun finnRegelverkSomBlirBorte(
     return if (kompetanseStopperOpp) {
         Tema.EØS
     } else if (finnesVilkårSomStopperOpp) {
-        if (forrigePeriode.vilkårResultater.filter { it.vilkårType in vilkårRelevantForRegelverk }
+        if (forrigePeriode.vilkårResultater
+                .filter { it.vilkårType in vilkårRelevantForRegelverk }
                 .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
         ) {
             Tema.EØS
@@ -213,38 +219,30 @@ fun finnRegelverkSomBlirBorte(
 
 private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
-): Map<Person, Set<IVedtakBegrunnelse>> {
-    val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
-
-    return behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
+): Map<Person, Set<IVedtakBegrunnelse>> =
+    behandlingsGrunnlagForVedtaksperioder.persongrunnlag.personer.associateWith { person ->
         val vilkårResultaterForPerson =
             behandlingsGrunnlagForVedtaksperioder
-                .personResultater.firstOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
+                .personResultater
+                .firstOrNull { it.aktør == person.aktør }
+                ?.vilkårResultater ?: emptyList()
 
         val (generelleAvslag, vilkårResultaterUtenGenerelleAvslag) = vilkårResultaterForPerson.partition { it.erEksplisittAvslagUtenPeriode() }
 
-        val generelleAvslagsBegrunnelser =
-            generelleAvslag.groupBy { it.vilkårType }.mapNotNull { (_, vilkårResultater) ->
-                listOf(månedPeriodeAv(null, null, vilkårResultater.single())).tilTidslinje()
-            }
+        val generelleAvslagsbegrunnelser = generelleAvslag.flatMap { it.standardbegrunnelser }
 
-        val ikkeGenerelleAvslagsbegrunnelserTidslinjer =
+        val avslagsbegrunnelserMedPeriodeTidslinjer =
             vilkårResultaterUtenGenerelleAvslag
                 .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
                 .filtrerKunEksplisittAvslagsPerioder()
 
-        val avslagsBegrunnelserTidslinje =
-            (generelleAvslagsBegrunnelser + ikkeGenerelleAvslagsbegrunnelserTidslinjer)
-                .kombiner { vilkårResultaterIPeriode -> vilkårResultaterIPeriode.flatMap { it.standardbegrunnelser } }
+        val avslagsbegrunnelserMedPeriode = avslagsbegrunnelserMedPeriodeTidslinjer.flatMap { it.perioder() }.filter { it.fraOgMed.tilYearMonthEllerNull() == this.fom?.toYearMonth() }.flatMap { it.innhold?.standardbegrunnelser ?: emptyList() }
 
-        tidslinjeMedVedtaksperioden.kombinerMed(avslagsBegrunnelserTidslinje) { vedtaksperiode, avslagsbegrunnelser ->
-            avslagsbegrunnelser.takeIf { vedtaksperiode != null }
-        }.perioder().mapNotNull { it.innhold }.flatten().toSet()
+        (generelleAvslagsbegrunnelser + avslagsbegrunnelserMedPeriode).toSet()
     }
-}
 
-private fun List<Tidslinje<VilkårResultat, Måned>>.filtrerKunEksplisittAvslagsPerioder(): List<Tidslinje<VilkårResultat, Måned>> {
-    return this.map { tidslinjeForVilkår ->
+private fun List<Tidslinje<VilkårResultat, Måned>>.filtrerKunEksplisittAvslagsPerioder(): List<Tidslinje<VilkårResultat, Måned>> =
+    this.map { tidslinjeForVilkår ->
         val eksplisittAvslagsPerioder =
             tidslinjeForVilkår
                 .perioder()
@@ -252,7 +250,6 @@ private fun List<Tidslinje<VilkårResultat, Måned>>.filtrerKunEksplisittAvslags
 
         tidslinje { eksplisittAvslagsPerioder }
     }
-}
 
 internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
     begrunnelseGrunnlagForPersonIPeriode: BegrunnelseGrunnlagForPersonIPeriode,
@@ -325,7 +322,8 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
     return this.annenForeldersAktivitet.contains(kompetanse.annenForeldersAktivitet) &&
         this.barnetsBostedsland.contains(
             landkodeTilBarnetsBostedsland(kompetanse.barnetsBostedsland),
-        ) && this.kompetanseResultat.contains(kompetanse.resultat)
+        ) &&
+        this.kompetanseResultat.contains(kompetanse.resultat)
 }
 
 fun ISanityBegrunnelse.skalFiltreresPåHendelser(
@@ -364,13 +362,14 @@ fun ISanityBegrunnelse.erBarnDød(
     val personDødeForrigeMåned =
         dødsfall != null && dødsfall.dødsfallDato.toYearMonth().plusMonths(1) == fomVedtaksperiode?.toYearMonth()
 
-    return personDødeForrigeMåned && person.type == PersonType.BARN &&
+    return personDødeForrigeMåned &&
+        person.type == PersonType.BARN &&
         this.øvrigeTriggere.contains(ØvrigTrigger.BARN_DØD)
 }
 
 fun ISanityBegrunnelse.erSatsendring(
     person: Person,
-    andeler: Iterable<AndelForVedtaksperiode>,
+    andeler: Iterable<AndelForVedtaksbegrunnelse>,
     fomVedtaksperiode: LocalDate?,
 ): Boolean {
     val satstyperPåAndelene = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
@@ -404,7 +403,8 @@ private fun hentResultaterForPeriode(
 ): List<SanityPeriodeResultat> {
     val erAndelerPåPersonHvisBarn =
         begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
-            begrunnelseGrunnlagForPeriode.andeler.toList()
+            begrunnelseGrunnlagForPeriode.andeler
+                .toList()
                 .isNotEmpty()
 
     val erInnvilgetEtterVilkårOgEndretUtbetaling =
@@ -587,15 +587,14 @@ private fun Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>.lagTidslinjeGrunnla
     }
 }
 
-private fun VedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<VedtaksperiodeMedBegrunnelser, Måned> {
-    return listOf(
+private fun VedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<VedtaksperiodeMedBegrunnelser, Måned> =
+    listOf(
         månedPeriodeAv(
             fraOgMed = this.fom?.toYearMonth(),
             tilOgMed = this.tom?.toYearMonth(),
             innhold = this,
         ),
     ).tilTidslinje()
-}
 
 data class ForrigeOgDennePerioden(
     val forrige: BegrunnelseGrunnlagForPersonIPeriode?,

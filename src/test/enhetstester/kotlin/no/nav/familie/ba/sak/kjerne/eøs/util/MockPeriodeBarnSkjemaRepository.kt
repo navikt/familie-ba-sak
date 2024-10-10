@@ -44,10 +44,9 @@ private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntite
 
     private val skjemaer = mutableMapOf<Long, S>()
 
-    fun hentSkjemaer(behandlingId: Long): List<S> {
-        return skjemaer.values
+    fun hentSkjemaer(behandlingId: Long): List<S> =
+        skjemaer.values
             .filter { it.behandlingId == behandlingId }
-    }
 
     fun hentSkjema(skjemaId: Long): S =
         skjemaer[skjemaId] ?: throw IllegalArgumentException("Finner ikke skjema for id $skjemaId")

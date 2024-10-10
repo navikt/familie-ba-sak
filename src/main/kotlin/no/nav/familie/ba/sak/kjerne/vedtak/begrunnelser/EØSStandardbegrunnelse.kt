@@ -111,6 +111,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSekundaerlandUkToArbeidslandNorgeUtbetaler"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_SEKUNDÆRLAND_BEGGE_FORELDRE_INAKTIVE_TILBAKE_I_TID {
+        override val sanityApiNavn = "innvilgetSekundaerlandBeggeForeldreInaktiveTilbakeITid"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_TILLEGGSTEKST_SATSENDRING {
         override val sanityApiNavn = "innvilgetTilleggstekstSatsendring"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
@@ -367,6 +371,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSokerBoddeIkkeIEosLand"
     },
+    OPPHØR_SEKUNDÆRLAND_INGEN_AV_FORELDRENE_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorSekundarlandIngenAvForeldreneJobber"
+    },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosIkkeEosBorger"
@@ -446,6 +454,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagSelvstendigRettForeldreneBorSammen"
+    },
+    AVSLAG_SEKUNDÆRLAND_INGEN_AV_FORELDRENE_JOBBER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSekundaerlandIngenAvForeldreneJobber"
     },
     AVSLAG_DELT_BOSTED_BEGGE_FORELDRE_IKKE_OMFATTET_NORSK_LOVVALG {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG

@@ -4,16 +4,16 @@
 Egenskap: Gyldige begrunnelser for opphør fra forrige behandling eøs
 
   Bakgrunn:
-    Gitt følgende fagsaker for begrunnelse
+    Gitt følgende fagsaker
       | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende behandling
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           | Nei                       | EØS                 |
       | 2            | 1        | 1                   | OPPHØRT             | NYE_OPPLYSNINGER | Nei                       | EØS                 |
 
-    Og følgende persongrunnlag for begrunnelse
+    Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1       | SØKER      | 13.09.1976  |
       | 1            | 2       | BARN       | 06.10.2022  |
@@ -21,11 +21,11 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling eøs
       | 2            | 2       | BARN       | 06.10.2022  |
 
   Scenario: Skal gi opphør når det viser seg at søker ikke bodde i eøs i forrige behandling
-    Og følgende dagens dato 22.11.2023
-    Og lag personresultater for begrunnelse for behandling 1
-    Og lag personresultater for begrunnelse for behandling 2
+    Og dagens dato er 22.11.2023
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår           | Utdypende vilkår             | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                              | 01.01.2023 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   | OMFATTET_AV_NORSK_LOVGIVNING | 01.05.2023 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
@@ -36,7 +36,7 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling eøs
       | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER     | 01.05.2023 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
       | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS               | 01.05.2023 |            | OPPFYLT  | Nei                  | EØS_FORORDNINGEN |
 
-    Og legg til nye vilkårresultater for begrunnelse for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår           | Utdypende vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Vurderes etter   |
       | 1       | LOVLIG_OPPHOLD   |                          | 01.01.2023 |            | OPPFYLT      | Nei                  | EØS_FORORDNINGEN |
       | 1       | BOSATT_I_RIKET   |                          | 01.05.2023 |            | IKKE_OPPFYLT | Nei                  | EØS_FORORDNINGEN |
@@ -47,14 +47,14 @@ Egenskap: Gyldige begrunnelser for opphør fra forrige behandling eøs
       | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS           | 01.05.2023 |            | OPPFYLT      | Nei                  | EØS_FORORDNINGEN |
       | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER | 01.05.2023 |            | OPPFYLT      | Nei                  | EØS_FORORDNINGEN |
 
-    Og med andeler tilkjent ytelse for begrunnelse
+    Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.06.2023 | 30.06.2023 | 1513  | ORDINÆR_BARNETRYGD | 100     | 1723 |
       | 2       | 1            | 01.07.2023 | 30.09.2028 | 1556  | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 2       | 1            | 01.10.2028 | 30.09.2040 | 1100  | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
 
-    Og med kompetanser for begrunnelse
+    Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2       | 01.06.2023 |          | NORGE_ER_SEKUNDÆRLAND | 1            | ARBEIDER         | INAKTIV                   | BG                    | NO                             | BG                  |
 

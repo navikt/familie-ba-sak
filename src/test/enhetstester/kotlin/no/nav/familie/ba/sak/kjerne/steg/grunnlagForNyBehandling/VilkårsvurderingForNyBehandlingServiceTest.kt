@@ -289,10 +289,12 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             val kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType =
                 kopiertVilkårsvurdering.personResultater.fold(mutableListOf<Pair<List<VilkårResultat>, List<VilkårResultat>>>()) { acc, personResultat ->
                     val vilkårResultaterForrigeBehandlingForPerson =
-                        forventetNåværendeVilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == personResultat.aktør.aktivFødselsnummer() }
+                        forventetNåværendeVilkårsvurdering.personResultater
+                            .filter { it.aktør.aktivFødselsnummer() == personResultat.aktør.aktivFødselsnummer() }
                             .flatMap { it.vilkårResultater }
                     acc.addAll(
-                        personResultat.vilkårResultater.groupBy { it.vilkårType }
+                        personResultat.vilkårResultater
+                            .groupBy { it.vilkårType }
                             .map { (vilkårType, vilkårResultater) ->
                                 Pair(
                                     vilkårResultater,
@@ -306,12 +308,12 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             val baseEntitetFelter =
                 BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
             kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType.forEach {
-                assertThat(it.first).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
-                    "id",
-                    "personResultat",
-                    *baseEntitetFelter,
-                )
-                    .isEqualTo(it.second)
+                assertThat(it.first)
+                    .usingRecursiveFieldByFieldElementComparatorIgnoringFields(
+                        "id",
+                        "personResultat",
+                        *baseEntitetFelter,
+                    ).isEqualTo(it.second)
             }
         }
     }

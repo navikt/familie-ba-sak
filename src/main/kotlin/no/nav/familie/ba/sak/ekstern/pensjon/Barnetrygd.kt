@@ -19,7 +19,9 @@ data class BarnetrygdTilPensjonRequest(
  * Ett element pr. fagsak barnet er knyttet til.
  * Kan være andre personer enn mor og far.
  */
-data class BarnetrygdTilPensjonResponse(val fagsaker: List<BarnetrygdTilPensjon>)
+data class BarnetrygdTilPensjonResponse(
+    val fagsaker: List<BarnetrygdTilPensjon>,
+)
 
 data class BarnetrygdTilPensjon(
     val fagsakEiersIdent: String,
@@ -35,7 +37,9 @@ data class BarnetrygdPeriode(
     val stønadTom: YearMonth,
     val sakstypeEkstern: SakstypeEkstern,
     val kildesystem: String = "BA",
+    @Schema(description = "Videreføring av felt som fulgte med gammel løype. Settes kun når kildesystem=Infotrygd")
     val pensjonstrygdet: Boolean? = null,
+    @Schema(description = "Brukes til å avgjøre om pensjonspoeng skal godskrives når utbetaltPerMnd=0. Settes kun når kildesystem=BA")
     val norgeErSekundærlandMedNullUtbetaling: Boolean? = false,
 )
 

@@ -26,8 +26,8 @@ data class EndretUtbetalingAndelForVedtaksperiodeDeltBosted(
     override val årsak: Årsak = Årsak.DELT_BOSTED
 }
 
-fun IUtfyltEndretUtbetalingAndel.tilEndretUtbetalingAndelForVedtaksperiode(): IEndretUtbetalingAndelForVedtaksperiode {
-    return if (this is UtfyltEndretUtbetalingAndelDeltBosted) {
+fun IUtfyltEndretUtbetalingAndel.tilEndretUtbetalingAndelForVedtaksperiode(): IEndretUtbetalingAndelForVedtaksperiode =
+    if (this is UtfyltEndretUtbetalingAndelDeltBosted) {
         EndretUtbetalingAndelForVedtaksperiodeDeltBosted(
             prosent = this.prosent,
             søknadstidspunkt = this.søknadstidspunkt,
@@ -40,4 +40,3 @@ fun IUtfyltEndretUtbetalingAndel.tilEndretUtbetalingAndelForVedtaksperiode(): IE
             søknadstidspunkt = this.søknadstidspunkt,
         )
     }
-}

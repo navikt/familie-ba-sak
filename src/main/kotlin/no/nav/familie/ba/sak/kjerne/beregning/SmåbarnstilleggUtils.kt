@@ -41,7 +41,7 @@ fun List<InternPeriodeOvergangsstønad>.splittOgSlåSammen(
     dagensDato: LocalDate,
 ) = this
     .slåSammenTidligerePerioder(dagensDato)
-    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, LocalDate.now())
+    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, dagensDato)
 
 class VedtaksperiodefinnerSmåbarnstilleggFeil(
     melding: String,
@@ -111,8 +111,8 @@ private fun Tidslinje<AndelTilkjentYtelse, Måned>.tilMånedPerioder() = this.pe
 fun kanAutomatiskIverksetteSmåbarnstillegg(
     innvilgedeMånedPerioder: List<MånedPeriode>,
     reduserteMånedPerioder: List<MånedPeriode>,
-): Boolean {
-    return innvilgedeMånedPerioder.all {
+): Boolean =
+    innvilgedeMånedPerioder.all {
         it.fom.isSameOrAfter(
             YearMonth.now(),
         )
@@ -122,7 +122,6 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
                 YearMonth.now(),
             )
         }
-}
 
 @Throws(VedtaksperiodefinnerSmåbarnstilleggFeil::class)
 fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
@@ -206,7 +205,8 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
             barnTidslinje.beskjærEtter(erTilOgMed3ÅrTidslinje)
         }
 
-    return barnasAndelerUnder3ÅrTidslinje.kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
+    return barnasAndelerUnder3ÅrTidslinje
+        .kombinerUtenNull { kombinerBarnasTidslinjerTilUnder3ÅrResultat(it) }
         .filtrerIkkeNull()
 }
 
@@ -219,8 +219,8 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
     perioderMedFullOvergangsstønadTidslinje: InternPeriodeOvergangsstønadTidslinje,
     utvidetBarnetrygdTidslinje: AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje,
     barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>,
-): Tidslinje<SmåbarnstilleggPeriode, Måned> {
-    return perioderMedFullOvergangsstønadTidslinje
+): Tidslinje<SmåbarnstilleggPeriode, Måned> =
+    perioderMedFullOvergangsstønadTidslinje
         .tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
         .kombinerMed(
             tidslinjeB = utvidetBarnetrygdTidslinje,
@@ -241,9 +241,7 @@ fun kombinerAlleTidslinjerTilProsentTidslinje(
             } else {
                 throw Feil("Ugyldig kombinasjon av overgangsstønad, utvidet og barn under 3 år ved generering av småbarnstillegg.")
             }
-        }
-        .filtrerIkkeNull()
-}
+        }.filtrerIkkeNull()
 
 /**
  * EF sender alltid overgangsstønad-perioder som gjelder hele måneder, men formatet vi får er på LocalDate

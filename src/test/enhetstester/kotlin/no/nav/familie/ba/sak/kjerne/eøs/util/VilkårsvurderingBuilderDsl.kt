@@ -43,7 +43,8 @@ internal infix fun Person.død(tidspunkt: Tidspunkt<Dag>) =
 internal val uendelig: Tidspunkt<Dag> = DagTidspunkt(LocalDate.now(), Uendelighet.FREMTID)
 
 internal fun Person.under18år() =
-    DagTidspunkt.med(this.fødselsdato)
+    DagTidspunkt
+        .med(this.fødselsdato)
         .rangeTo(DagTidspunkt.med(this.fødselsdato.plusYears(18).minusDays(1)))
 
 val vilkårsvurdering get() = VilkårsvurderingBuilder<Dag>()

@@ -139,9 +139,10 @@ class HenleggelseTest(
                     ),
                 bekreftEndringerViaFrontend = false,
             )
-        return familieBaSakKlient().registrererSøknad(
-            behandlingId = behandling.id,
-            restRegistrerSøknad = restRegistrerSøknad,
-        ).data!!
+        return familieBaSakKlient()
+            .registrererSøknad(
+                behandlingId = behandling.id,
+                restRegistrerSøknad = restRegistrerSøknad,
+            ).data!!
     }
 }

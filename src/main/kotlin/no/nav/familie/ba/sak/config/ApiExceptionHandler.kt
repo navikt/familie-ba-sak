@@ -39,14 +39,10 @@ class ApiExceptionHandler {
     private val logger = LoggerFactory.getLogger(ApiExceptionHandler::class.java)
 
     @ExceptionHandler(JwtTokenUnauthorizedException::class)
-    fun handleThrowable(jwtTokenUnauthorizedException: JwtTokenUnauthorizedException): ResponseEntity<Ressurs<Nothing>> {
-        return unauthorized("Unauthorized")
-    }
+    fun handleThrowable(jwtTokenUnauthorizedException: JwtTokenUnauthorizedException): ResponseEntity<Ressurs<Nothing>> = unauthorized("Unauthorized")
 
     @ExceptionHandler(RolleTilgangskontrollFeil::class)
-    fun handleRolleTilgangskontrollFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> {
-        return rolleTilgangResponse(rolleTilgangskontrollFeil)
-    }
+    fun handleRolleTilgangskontrollFeil(rolleTilgangskontrollFeil: RolleTilgangskontrollFeil): ResponseEntity<Ressurs<Nothing>> = rolleTilgangResponse(rolleTilgangskontrollFeil)
 
     @ExceptionHandler(Exception::class)
     fun handleException(exception: Exception): ResponseEntity<Ressurs<Nothing>> {
@@ -56,9 +52,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(RessursException::class)
-    fun handleRessursException(ressursException: RessursException): ResponseEntity<Ressurs<Any>> {
-        return ResponseEntity.status(ressursException.httpStatus).body(ressursException.ressurs)
-    }
+    fun handleRessursException(ressursException: RessursException): ResponseEntity<Ressurs<Any>> = ResponseEntity.status(ressursException.httpStatus).body(ressursException.ressurs)
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
     fun handleMethodArgumentTypeMismatchException(e: MethodArgumentTypeMismatchException): ResponseEntity<Ressurs<Nothing>> {
@@ -96,9 +90,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(IntegrasjonException::class)
-    fun handleIntegrasjonException(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> {
-        return illegalState(integrasjonException.message.toString(), integrasjonException)
-    }
+    fun handleIntegrasjonException(integrasjonException: IntegrasjonException): ResponseEntity<Ressurs<Nothing>> = illegalState(integrasjonException.message.toString(), integrasjonException)
 
     @ExceptionHandler(PdlPersonKanIkkeBehandlesIFagsystem::class)
     fun handlePdlPersonKanIkkeBehandlesIFagsystem(feil: PdlPersonKanIkkeBehandlesIFagsystem): ResponseEntity<Ressurs<Nothing>> {
@@ -110,24 +102,25 @@ class ApiExceptionHandler {
     @ExceptionHandler(PdlNotFoundException::class)
     fun handlePdlNotFoundException(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("Finner ikke personen i PDL")
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .body(Ressurs.failure(frontendFeilmelding = "Fant ikke person"))
     }
 
     @ExceptionHandler(MånedligValutaJusteringFeil::class)
-    fun handleMånedligValutaJusteringFeil(feil: MånedligValutaJusteringFeil): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity.status(HttpStatus.OK).body(
+    fun handleMånedligValutaJusteringFeil(feil: MånedligValutaJusteringFeil): ResponseEntity<Ressurs<Nothing>> =
+        ResponseEntity.status(HttpStatus.OK).body(
             Ressurs.funksjonellFeil(
                 frontendFeilmelding = feil.melding,
                 melding = feil.melding,
             ),
         )
-    }
 
     @ExceptionHandler(ECBServiceException::class)
     fun handleECBClientException(feil: ECBServiceException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn(feil.message)
-        return ResponseEntity.internalServerError()
+        return ResponseEntity
+            .internalServerError()
             .body(Ressurs.failure(frontendFeilmelding = feil.message))
     }
 
@@ -140,9 +133,7 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(FunksjonellFeil::class)
-    fun handleFunksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> {
-        return funksjonellFeil(funksjonellFeil)
-    }
+    fun handleFunksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<Nothing>> = funksjonellFeil(funksjonellFeil)
 
     @ExceptionHandler(EksternTjenesteFeilException::class)
     fun handleEksternTjenesteFeil(feil: EksternTjenesteFeilException): ResponseEntity<EksternTjenesteFeil> {
@@ -164,13 +155,14 @@ class ApiExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleInputValideringFeil(valideringFeil: MethodArgumentNotValidException): ResponseEntity<Ressurs<Nothing>> {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+    fun handleInputValideringFeil(valideringFeil: MethodArgumentNotValidException): ResponseEntity<Ressurs<Nothing>> =
+        ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(
                 Ressurs.failure(
-                    valideringFeil.bindingResult.fieldErrors.map { fieldError -> fieldError.defaultMessage }
+                    valideringFeil.bindingResult.fieldErrors
+                        .map { fieldError -> fieldError.defaultMessage }
                         .joinToString(" ,"),
                 ),
             )
-    }
 }

@@ -29,7 +29,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE.MOR
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,7 +66,7 @@ class ArbeidsfordelingIntegrationTest(
                 fødselsdato = now.minusYears(20),
                 navn = "Mor Søker",
                 kjønn = Kjønn.KVINNE,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse),
             ),
@@ -78,7 +78,7 @@ class ArbeidsfordelingIntegrationTest(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn",
                 kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
                 bostedsadresser = mutableListOf(søkerBostedsadresse),
             ),
@@ -91,7 +91,7 @@ class ArbeidsfordelingIntegrationTest(
                 fødselsdato = now.førsteDagIInneværendeMåned(),
                 navn = "Gutt Barn fortrolig",
                 kjønn = Kjønn.MANN,
-                sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
+                sivilstander = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
                 adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
                 bostedsadresser = mutableListOf(søkerBostedsadresse),
             ),
@@ -320,7 +320,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         verify(exactly = 1) {
-            integrasjonClient.tilordneEnhetForOppgave(any(), any())
+            integrasjonClient.patchOppgave(any())
         }
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
@@ -344,9 +344,9 @@ class ArbeidsfordelingIntegrationTest(
     val søkerAktør = randomAktør()
 
     companion object {
-        const val MANUELT_OVERSTYRT_ENHET = "1234"
-        const val IKKE_FORTROLIG_ENHET = "4820"
-        const val FORTROLIG_ENHET = "1122"
+        val MANUELT_OVERSTYRT_ENHET = BarnetrygdEnhet.OSLO.enhetsnummer
+        val IKKE_FORTROLIG_ENHET = BarnetrygdEnhet.DRAMMEN.enhetsnummer
+        val FORTROLIG_ENHET = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
         val SØKER_FNR = randomFnr()
         val BARN_UTEN_DISKRESJONSKODE = randomFnr()
         val BARN_MED_DISKRESJONSKODE = randomFnr()

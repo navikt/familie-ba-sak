@@ -5,16 +5,21 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -26,6 +31,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -38,10 +44,12 @@ class OppgaveService(
     private val integrasjonClient: IntegrasjonClient,
     private val behandlingRepository: BehandlingRepository,
     private val oppgaveRepository: OppgaveRepository,
-    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
+    private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
+    private val unleashService: UnleashService,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -69,14 +77,19 @@ class OppgaveService(
             eksisterendeOppgave.gsakId
         } else {
             val arbeidsfordelingsenhet =
-                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
+                arbeidsfordelingPåBehandlingRepository
+                    .hentArbeidsfordelingPåBehandling(behandlingId)
+                    .tilArbeidsfordelingsenhet()
 
-            if (arbeidsfordelingsenhet == null) {
-                logger.warn(
-                    "Fant ikke behandlende enhet på behandling ${behandling.id} " +
-                        "ved opprettelse av $oppgavetype-oppgave.",
-                )
-            }
+            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
+
+            val navIdent = tilordnetNavIdent?.let { NavIdent(it) }
+            val tilordnetRessurs =
+                if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
+                    tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
+                } else {
+                    navIdent
+                }
 
             val opprettOppgave =
                 OpprettOppgaveRequest(
@@ -86,10 +99,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = arbeidsfordelingsenhet?.behandlendeEnhetId,
+                    enhetsnummer = arbeidsfordelingsenhet.enhetId,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = tilordnetNavIdent,
+                    tilordnetRessurs = tilordnetRessurs?.ident,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
@@ -164,9 +177,7 @@ class OppgaveService(
         antallOppgaveTyper[oppgavetype]?.increment()
     }
 
-    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse {
-        return integrasjonClient.patchOppgave(patchOppgave)
-    }
+    fun patchOppgave(patchOppgave: Oppgave): OppgaveResponse = integrasjonClient.patchOppgave(patchOppgave)
 
     fun patchOppgaverForBehandling(
         behandling: Behandling,
@@ -194,7 +205,8 @@ class OppgaveService(
             if (oppgave.status == FERDIGSTILT && oppgave.oppgavetype == Oppgavetype.VurderLivshendelse.value) {
                 dbOppgave.erFerdigstilt = true
             } else {
-                integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
+                val oppgaveOppdatering = Oppgave(id = oppgave.id, tildeltEnhetsnr = nyEnhet, tilordnetRessurs = null, mappeId = null)
+                patchOppgave(oppgaveOppdatering)
             }
         }
     }
@@ -225,31 +237,26 @@ class OppgaveService(
     fun hentOppgaverSomIkkeErFerdigstilt(
         oppgavetype: Oppgavetype,
         behandling: Behandling,
-    ): List<DbOppgave> {
-        return oppgaveRepository.finnOppgaverSomSkalFerdigstilles(oppgavetype, behandling)
-    }
+    ): List<DbOppgave> = oppgaveRepository.finnOppgaverSomSkalFerdigstilles(oppgavetype, behandling)
 
-    fun hentOppgaverSomIkkeErFerdigstilt(behandling: Behandling): List<DbOppgave> {
-        return oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(behandling)
-    }
+    fun hentOppgaverSomIkkeErFerdigstilt(behandling: Behandling): List<DbOppgave> = oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(behandling)
 
-    fun hentOppgave(oppgaveId: Long): Oppgave {
-        return integrasjonClient.finnOppgaveMedId(oppgaveId)
-    }
+    fun hentOppgave(oppgaveId: Long): Oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
 
     fun ferdigstillOppgaver(
         behandlingId: Long,
         oppgavetype: Oppgavetype,
     ) {
-        oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
-            oppgavetype = oppgavetype,
-            behandling =
-                behandlingHentOgPersisterService.hent(
-                    behandlingId = behandlingId,
-                ),
-        ).forEach {
-            it.ferdigstill()
-        }
+        oppgaveRepository
+            .finnOppgaverSomSkalFerdigstilles(
+                oppgavetype = oppgavetype,
+                behandling =
+                    behandlingHentOgPersisterService.hent(
+                        behandlingId = behandlingId,
+                    ),
+            ).forEach {
+                it.ferdigstill()
+            }
     }
 
     private fun DbOppgave.ferdigstill() {
@@ -293,6 +300,7 @@ class OppgaveService(
                 oppgaveErAvsluttet -> {
                     logger.info("Oppgave ${dbOppgave.gsakId} er allerede avsluttet")
                 }
+
                 else -> {
                     val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
@@ -307,19 +315,21 @@ class OppgaveService(
         val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger()
 
         val behandlingsfrister =
-            åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
-                val behandleSakOppgave =
-                    try {
-                        oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
-                            ?.let {
-                                hentOppgave(it.gsakId.toLong())
-                            }
-                    } catch (e: Exception) {
-                        secureLogger.warn("Klarte ikke hente BehandleSak-oppgaven for behandling ${behandling.id}", e)
-                        null
-                    }
-                "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
-            }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
+            åpneUtvidetBarnetrygdBehandlinger
+                .map { behandling ->
+                    val behandleSakOppgave =
+                        try {
+                            oppgaveRepository
+                                .findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
+                                ?.let {
+                                    hentOppgave(it.gsakId.toLong())
+                                }
+                        } catch (e: Exception) {
+                            secureLogger.warn("Klarte ikke hente BehandleSak-oppgaven for behandling ${behandling.id}", e)
+                            null
+                        }
+                    "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
+                }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
 
         return "behandlingId;oppgaveId;frist\n" + behandlingsfrister
     }
@@ -348,19 +358,16 @@ class OppgaveService(
     fun lagOppgaveTekst(
         fagsakId: Long,
         beskrivelse: String? = null,
-    ): String {
-        return if (beskrivelse != null) {
+    ): String =
+        if (beskrivelse != null) {
             beskrivelse + "\n"
         } else {
             ""
         } +
             "----- Opprettet av familie-ba-sak ${LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME)} --- \n" +
             "https://barnetrygd.intern.nav.no/fagsak/$fagsakId"
-    }
 
-    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto {
-        return integrasjonClient.hentOppgaver(finnOppgaveRequest)
-    }
+    fun hentOppgaver(finnOppgaveRequest: FinnOppgaveRequest): FinnOppgaveResponseDto = integrasjonClient.hentOppgaver(finnOppgaveRequest)
 
     fun ferdigstillOppgave(oppgave: Oppgave) {
         require(oppgave.id != null) { "Oppgaven må ha en id for å kunne ferdigstilles" }

@@ -106,9 +106,7 @@ class AndelTilkjentYtelseOffsetTest(
             ),
         )
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
-        return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
-    }
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
 
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,

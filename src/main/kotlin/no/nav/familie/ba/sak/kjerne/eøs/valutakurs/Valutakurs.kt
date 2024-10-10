@@ -84,7 +84,7 @@ data class Valutakurs(
     ) = copy(
         fom = fom,
         tom = tom,
-        barnAktører = barnAktører,
+        barnAktører = barnAktører.toSet(),
     )
 
     fun erObligatoriskeFelterSatt() =
@@ -131,8 +131,8 @@ data class UtfyltValutakurs(
     val vurderingsform: Vurderingsform,
 ) : IValutakurs
 
-fun Valutakurs.tilIValutakurs(): IValutakurs {
-    return if (this.erObligatoriskeFelterSatt()) {
+fun Valutakurs.tilIValutakurs(): IValutakurs =
+    if (this.erObligatoriskeFelterSatt()) {
         UtfyltValutakurs(
             id = this.id,
             behandlingId = this.behandlingId,
@@ -150,22 +150,25 @@ fun Valutakurs.tilIValutakurs(): IValutakurs {
             behandlingId = this.behandlingId,
         )
     }
-}
 
 fun List<UtfyltValutakurs>.tilTidslinje() =
-    this.map {
-        Periode(
-            fraOgMed = it.fom.tilTidspunkt(),
-            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
-            innhold = it,
-        )
-    }.tilTidslinje()
+    this
+        .map {
+            Periode(
+                fraOgMed = it.fom.tilTidspunkt(),
+                tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
+                innhold = it,
+            )
+        }.tilTidslinje()
 
-fun Collection<Valutakurs>.erAlleValutakurserOppdaterteIMåned(
+fun Collection<Valutakurs>.måValutakurserOppdateresForMåned(
     måned: YearMonth,
-) = none {
-    val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
-    val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
+) =
+    any {
+        val fom = it.fom ?: TIDENES_MORGEN.toYearMonth()
+        val tom = it.tom ?: TIDENES_ENDE.toYearMonth()
 
-    fom < måned && tom >= måned
-}
+        fom < måned && tom >= måned
+    }
+
+fun Collection<Valutakurs>.filtrerUtfylteValutakurser() = this.map { it.tilIValutakurs() }.filterIsInstance<UtfyltValutakurs>()

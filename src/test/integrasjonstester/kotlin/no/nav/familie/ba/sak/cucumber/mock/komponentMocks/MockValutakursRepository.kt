@@ -2,11 +2,11 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 
-fun mockValutakursRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): ValutakursRepository {
+fun mockValutakursRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): ValutakursRepository {
     val valutakursRepository = mockk<ValutakursRepository>()
     every { valutakursRepository.finnFraBehandlingId(any()) } answers {
         val behandlingId = firstArg<Long>()

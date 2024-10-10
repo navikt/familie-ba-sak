@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.utenInnholdTilOgMed
  * 2a. Lukker periode på det gjeldende skjemaet, dvs til-og-med går fra <null> til en verdi, eller til-og-med er tidligere
  * 2b. og/eller reduserer antall barn
  * så skal det lages en ny oppdatering med blankt skjema for det som ligger "utenfor" [oppdatering], dvs har
- * 1. Perioden som starter måneden etter ny til-og-med-dato, og frem frem til eksisterende til-og-med (kan være <null>)
+ * 1. Perioden som starter måneden etter ny til-og-med-dato, og frem til eksisterende til-og-med (kan være <null>)
  * 2. Barnet/barna som blir fjernet
  *
  * Problemet som skal løses er at skjemaer som kun varierer i periode eller barn, slås sammen fordi de ellers er like
@@ -30,27 +30,31 @@ fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjelden
     val oppdatering = this
 
     val skjemaetDerTilOgMedForkortes =
-        gjeldendeSkjemaer.filter { gjeldende ->
-            gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
-                gjeldende.erLikBortsettFraTilOgMed(oppdatering)
-        }.singleOrNull()
+        gjeldendeSkjemaer
+            .filter { gjeldende ->
+                gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
+                    gjeldende.erLikBortsettFraTilOgMed(oppdatering)
+            }.singleOrNull()
 
     val skjemaetDerBarnFjernes =
-        gjeldendeSkjemaer.filter { gjeldende ->
-            oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
-                gjeldende.erLikBortsettFraBarn(oppdatering)
-        }.singleOrNull()
+        gjeldendeSkjemaer
+            .filter { gjeldende ->
+                oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
+                    gjeldende.erLikBortsettFraBarn(oppdatering)
+            }.singleOrNull()
 
     val skjemaetDerTilOgMedForkortesOgBarnFjernes =
-        gjeldendeSkjemaer.filter { gjeldende ->
-            gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
-                oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
-                gjeldende.erLikBortsettFraBarnOgTilOgMed(oppdatering)
-        }.singleOrNull()
+        gjeldendeSkjemaer
+            .filter { gjeldende ->
+                gjeldende.tilOgMedBlirForkortetEllerLukketAv(oppdatering) &&
+                    oppdatering.harEkteDelmengdeAvBarna(gjeldende) &&
+                    gjeldende.erLikBortsettFraBarnOgTilOgMed(oppdatering)
+            }.singleOrNull()
 
     return when {
         skjemaetDerTilOgMedForkortesOgBarnFjernes != null ->
-            oppdatering.medBarnaSomForsvinnerFra(skjemaetDerTilOgMedForkortesOgBarnFjernes)
+            oppdatering
+                .medBarnaSomForsvinnerFra(skjemaetDerTilOgMedForkortesOgBarnFjernes)
                 .utenInnholdTilOgMed(skjemaetDerTilOgMedForkortesOgBarnFjernes.tom)
         skjemaetDerBarnFjernes != null ->
             oppdatering.medBarnaSomForsvinnerFra(skjemaetDerBarnFjernes).utenInnhold()

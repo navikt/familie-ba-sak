@@ -2,12 +2,12 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilEndretUtbetalingAndelMedAndelerTilkjentYtelse
 
-fun mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumber: BegrunnelseTeksterStepDefinition): AndelerTilkjentYtelseOgEndreteUtbetalingerService {
+fun mockAndelerTilkjentYtelseOgEndreteUtbetalingerService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): AndelerTilkjentYtelseOgEndreteUtbetalingerService {
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any()) } answers {
         val behandlingId = firstArg<Long>()

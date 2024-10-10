@@ -45,6 +45,7 @@ class SaksstatistikkEventListener(
 }
 
 val sakstatistikkObjectMapper: ObjectMapper =
-    objectMapper.copy()
+    objectMapper
+        .copy()
         .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
         .configure(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE, false)

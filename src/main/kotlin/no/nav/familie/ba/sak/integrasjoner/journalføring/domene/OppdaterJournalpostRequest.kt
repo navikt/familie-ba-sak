@@ -27,7 +27,9 @@ enum class IdType {
     AKTOERID,
 }
 
-enum class Sakstype(val type: String) {
+enum class Sakstype(
+    val type: String,
+) {
     FAGSAK("FAGSAK"),
     GENERELL_SAK("GENERELL_SAK"),
 }

@@ -76,8 +76,10 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
             )
 
         val utvidetBehandlingFørsteGang =
-            vilkårsvurderingTestController.opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
-                .body?.data!!
+            vilkårsvurderingTestController
+                .opprettBehandlingMedVilkårsvurdering(vilkårsvurderingRequest)
+                .body
+                ?.data!!
 
         val sumUtbetalingFørsteGang = utvidetBehandlingFørsteGang.utbetalingsperioder.sumUtbetaling()
 
@@ -85,7 +87,10 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         val sumUtbetalingDelt =
             tilkjentYtelseTestController
                 .oppdaterEndretUtebetalingAndeler(utvidetBehandlingFørsteGang.behandlingId, deltBosteRequest)
-                .body?.data!!.utbetalingsperioder.sumUtbetaling()
+                .body
+                ?.data!!
+                .utbetalingsperioder
+                .sumUtbetaling()
 
         kompetanseTestController.endreKompetanser(utvidetBehandlingFørsteGang.behandlingId, kompetanseRequest)
         utenlandskPeriodebeløpTestController.endreUtenlandskePeriodebeløp(
@@ -96,7 +101,8 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         val utvidetbehandlingDifferanseberegnet =
             valutakursTestController
                 .endreValutakurser(utvidetBehandlingFørsteGang.behandlingId, valutakursRequest)
-                .body?.data!!
+                .body
+                ?.data!!
 
         val sumUtbetalingDifferanseberegnet =
             utvidetbehandlingDifferanseberegnet.utbetalingsperioder.sumUtbetaling()
@@ -126,8 +132,8 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
                 .oppdaterVilkårsvurderingIBehandling(
                     utvidetbehandlingDifferanseberegnet.behandlingId,
                     vilkårsvurderingRequest2,
-                )
-                .body?.data!!
+                ).body
+                ?.data!!
 
         val sumUtbetalingTilbakestilt =
             utvidetBehandlingTilbakestilt.utbetalingsperioder.sumUtbetaling()

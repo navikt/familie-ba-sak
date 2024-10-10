@@ -525,17 +525,18 @@ class VilkårsvurderingStegUtilsTest {
                 aktør = søkerAktør,
             )
         personResultat.setSortedVilkårResultater(
-            resultater.map {
-                VilkårResultat(
-                    personResultat = personResultat,
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
-                    resultat = it,
-                    periodeFom = LocalDate.now().plusMonths(månedsteller++),
-                    periodeTom = LocalDate.now().plusMonths(månedsteller++),
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = behandling.id,
-                )
-            }.toSet(),
+            resultater
+                .map {
+                    VilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        resultat = it,
+                        periodeFom = LocalDate.now().plusMonths(månedsteller++),
+                        periodeTom = LocalDate.now().plusMonths(månedsteller++),
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = behandling.id,
+                    )
+                }.toSet(),
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
         return vilkårsvurdering

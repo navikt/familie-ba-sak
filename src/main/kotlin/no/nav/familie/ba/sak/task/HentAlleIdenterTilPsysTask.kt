@@ -70,8 +70,8 @@ class HentAlleIdenterTilPsysTask(
         fun lagTask(
             år: Int,
             uuid: UUID,
-        ): Task {
-            return Task(
+        ): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(HentAlleIdenterTilPsysRequestDTO(år = år, requestId = uuid)),
                 properties =
@@ -81,7 +81,6 @@ class HentAlleIdenterTilPsysTask(
                         this["callId"] = uuid.toString()
                     },
             )
-        }
 
         const val TASK_STEP_TYPE = "hentAlleIdenterTilPsys"
     }

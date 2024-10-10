@@ -101,13 +101,9 @@ fun hentNåværendeEllerNesteMånedsUtbetaling(behandling: RestUtvidetBehandling
     return nåværendeUtbetalingsperiode?.utbetaltPerMnd ?: nesteUtbetalingsperiode?.utbetaltPerMnd ?: 0
 }
 
-fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling {
-    return restFagsak.behandlinger.single()
-}
+fun hentAktivBehandling(restFagsak: RestFagsak): RestUtvidetBehandling = restFagsak.behandlinger.single()
 
-fun hentAktivBehandling(restMinimalFagsak: RestMinimalFagsak): RestVisningBehandling {
-    return restMinimalFagsak.behandlinger.single { it.aktiv }
-}
+fun hentAktivBehandling(restMinimalFagsak: RestMinimalFagsak): RestVisningBehandling = restMinimalFagsak.behandlinger.single { it.aktiv }
 
 fun behandleFødselshendelse(
     nyBehandlingHendelse: NyBehandlingHendelse,
@@ -137,7 +133,8 @@ fun behandleFødselshendelse(
     }
 
     val behandlingEtterVurdering =
-        behandlingHentOgPersisterService.hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
+        behandlingHentOgPersisterService
+            .hentBehandlinger(fagsakId = restMinimalFagsakEtterVurdering.data!!.id)
             .maxByOrNull { it.opprettetTidspunkt }!!
     if (behandlingEtterVurdering.erHenlagt()) {
         return behandlingEtterVurdering

@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.jwt.JwtTokenClaims
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
@@ -23,31 +23,31 @@ object SikkerhetContext {
     fun harInnloggetBrukerForvalterRolle(rolleConfig: RolleConfig): Boolean =
         hentGrupper().contains(rolleConfig.FORVALTER_ROLLE)
 
-    fun hentSaksbehandler(): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentSaksbehandler(): String =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     it.hentClaimsForIssuer("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE
                 },
                 onFailure = { SYSTEM_FORKORTELSE },
             )
-    }
 
-    fun hentSaksbehandlerEpost(): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentSaksbehandlerEpost(): String =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = { it.hentClaimsForIssuer("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
                 onFailure = { SYSTEM_FORKORTELSE },
             )
-    }
 
-    fun hentSaksbehandlerNavn(): String {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentSaksbehandlerNavn(): String =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = { it.hentClaimsForIssuer("azuread")?.get("name")?.toString() ?: SYSTEM_NAVN },
                 onFailure = { SYSTEM_NAVN },
             )
-    }
 
     fun hentRolletilgangFraSikkerhetscontext(
         rolleConfig: RolleConfig,
@@ -60,6 +60,7 @@ object SikkerhetContext {
             when {
                 grupper.contains(rolleConfig.BESLUTTER_ROLLE) -> BehandlerRolle.BESLUTTER
                 grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> BehandlerRolle.SAKSBEHANDLER
+                grupper.contains(rolleConfig.FORVALTER_ROLLE) -> BehandlerRolle.FORVALTER
                 grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
                 else -> BehandlerRolle.UKJENT
             }
@@ -78,13 +79,15 @@ object SikkerhetContext {
         return when {
             grupper.contains(rolleConfig.BESLUTTER_ROLLE) -> BehandlerRolle.BESLUTTER
             grupper.contains(rolleConfig.SAKSBEHANDLER_ROLLE) -> BehandlerRolle.SAKSBEHANDLER
+            grupper.contains(rolleConfig.FORVALTER_ROLLE) -> BehandlerRolle.FORVALTER
             grupper.contains(rolleConfig.VEILEDER_ROLLE) -> BehandlerRolle.VEILEDER
             else -> BehandlerRolle.UKJENT
         }
     }
 
-    fun hentGrupper(): List<String> {
-        return Result.runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
+    fun hentGrupper(): List<String> =
+        Result
+            .runCatching { SpringTokenValidationContextHolder().getTokenValidationContext() }
             .fold(
                 onSuccess = {
                     @Suppress("UNCHECKED_CAST")
@@ -92,15 +95,10 @@ object SikkerhetContext {
                 },
                 onFailure = { emptyList() },
             )
-    }
 
-    fun TokenValidationContext.hentClaimsForIssuer(issuer: String): JwtTokenClaims? {
-        return if (this.issuers.contains(issuer)) this.getClaims(issuer) else null
-    }
+    fun TokenValidationContext.hentClaimsForIssuer(issuer: String): JwtTokenClaims? = if (this.issuers.contains(issuer)) this.getClaims(issuer) else null
 
-    fun kallKommerFraKlage(): Boolean {
-        return kallKommerFra("teamfamilie:familie-klage")
-    }
+    fun kallKommerFraKlage(): Boolean = kallKommerFra("teamfamilie:familie-klage")
 
     private fun kallKommerFra(forventetApplikasjonsSuffix: String): Boolean {
         val claims = SpringTokenValidationContextHolder().getTokenValidationContext().getClaims("azuread")

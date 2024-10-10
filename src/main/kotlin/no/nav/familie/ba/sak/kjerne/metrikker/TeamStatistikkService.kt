@@ -163,9 +163,10 @@ class TeamStatistikkService(
 
         listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
             val åpneBehandlinger =
-                behandlingRepository.finnÅpneBehandlinger(
-                    opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong()),
-                ).filter { !acc.contains(it.id) }
+                behandlingRepository
+                    .finnÅpneBehandlinger(
+                        opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong()),
+                    ).filter { !acc.contains(it.id) }
 
             if (åpneBehandlinger.isNotEmpty()) {
                 logger.warn(
@@ -179,9 +180,7 @@ class TeamStatistikkService(
         }
     }
 
-    private fun erLeader(): Boolean {
-        return leaderClientService.isLeader()
-    }
+    private fun erLeader(): Boolean = leaderClientService.isLeader()
 
     companion object {
         const val OPPDATERING_HVER_DAG: Long = 1000 * 60 * 60 * 24

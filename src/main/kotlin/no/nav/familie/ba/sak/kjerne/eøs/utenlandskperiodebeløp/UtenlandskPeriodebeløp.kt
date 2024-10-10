@@ -135,8 +135,8 @@ data class UtfyltUtenlandskPeriodebeløp(
     val kalkulertMånedligBeløp: BigDecimal,
 ) : IUtenlandskPeriodebeløp
 
-fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebeløp {
-    return if (this.erObligatoriskeFelterSatt()) {
+fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebeløp =
+    if (this.erObligatoriskeFelterSatt()) {
         UtfyltUtenlandskPeriodebeløp(
             id = this.id,
             behandlingId = this.behandlingId,
@@ -155,16 +155,16 @@ fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebel
             behandlingId = this.behandlingId,
         )
     }
-}
 
 fun List<UtfyltUtenlandskPeriodebeløp>.tilTidslinje() =
-    this.map {
-        Periode(
-            fraOgMed = it.fom.tilTidspunkt(),
-            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
-            innhold = it,
-        )
-    }.tilTidslinje()
+    this
+        .map {
+            Periode(
+                fraOgMed = it.fom.tilTidspunkt(),
+                tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
+                innhold = it,
+            )
+        }.tilTidslinje()
 
 fun Collection<UtenlandskPeriodebeløp>.filtrerErUtfylt() = this.map { it.tilIUtenlandskPeriodebeløp() }.filterIsInstance<UtfyltUtenlandskPeriodebeløp>()
 

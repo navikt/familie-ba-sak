@@ -11,15 +11,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 open class InternPeriodeOvergangsstønadTidslinje(
     private val internePeriodeOvergangsstønader: List<InternPeriodeOvergangsstønad>,
 ) : Tidslinje<InternPeriodeOvergangsstønad, Dag>() {
-    override fun lagPerioder(): List<Periode<InternPeriodeOvergangsstønad, Dag>> {
-        return internePeriodeOvergangsstønader.map {
+    override fun lagPerioder(): List<Periode<InternPeriodeOvergangsstønad, Dag>> =
+        internePeriodeOvergangsstønader.map {
             Periode(
                 fraOgMed = it.fomDato.tilTidspunktEllerUendeligTidlig(it.tomDato),
                 tilOgMed = it.tomDato.tilTidspunktEllerUendeligSent(it.fomDato),
                 innhold = it,
             )
         }
-    }
 }
 
 fun Tidslinje<InternPeriodeOvergangsstønad, Dag>.lagInternePerioderOvergangsstønad(): List<InternPeriodeOvergangsstønad> =

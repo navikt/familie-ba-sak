@@ -48,11 +48,12 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restUtvidetBehandling =
-            familieBaSakKlient().opprettBehandling(
-                søkersIdent = søkersIdent,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                fagsakId = fagsak.data!!.id,
-            ).data!!
+            familieBaSakKlient()
+                .opprettBehandling(
+                    søkersIdent = søkersIdent,
+                    behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    fagsakId = fagsak.data!!.id,
+                ).data!!
 
         val restRegistrerSøknad =
             RestRegistrerSøknad(
@@ -95,9 +96,10 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         }
 
         val restBehandlingEtterBehandlingsresultat =
-            familieBaSakKlient().validerVilkårsvurdering(
-                behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
-            ).data!!
+            familieBaSakKlient()
+                .validerVilkårsvurdering(
+                    behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
+                ).data!!
 
         val endretFom = barnFødselsdato.nesteMåned()
         val endretTom = endretFom.plusMonths(2)

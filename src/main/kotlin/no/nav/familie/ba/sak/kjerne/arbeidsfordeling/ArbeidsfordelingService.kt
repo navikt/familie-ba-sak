@@ -3,20 +3,26 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -31,6 +37,8 @@ class ArbeidsfordelingService(
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
+    private val unleashService: UnleashService,
 ) {
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(
@@ -38,8 +46,7 @@ class ArbeidsfordelingService(
         endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
     ) {
         val aktivArbeidsfordelingPåBehandling =
-            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
-                ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling ${behandling.id}")
+            arbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandling.id)
 
         val forrigeArbeidsfordelingsenhet =
             Arbeidsfordelingsenhet(
@@ -73,15 +80,7 @@ class ArbeidsfordelingService(
         val aktivArbeidsfordelingPåBehandling =
             arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
-        val forrigeArbeidsfordelingsenhet =
-            if (aktivArbeidsfordelingPåBehandling != null) {
-                Arbeidsfordelingsenhet(
-                    enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
-                    enhetNavn = aktivArbeidsfordelingPåBehandling.behandlendeEnhetNavn,
-                )
-            } else {
-                null
-            }
+        val forrigeArbeidsfordelingsenhet = aktivArbeidsfordelingPåBehandling?.tilArbeidsfordelingsenhet()
 
         val oppdatertArbeidsfordelingPåBehandling =
             if (behandling.erSatsendring()) {
@@ -91,7 +90,13 @@ class ArbeidsfordelingService(
                     aktivArbeidsfordelingPåBehandling,
                 )
             } else {
-                val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
+                val arbeidsfordelingsenhet =
+                    if (unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)) {
+                        val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
+                        tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, NavIdent(SikkerhetContext.hentSaksbehandler()))
+                    } else {
+                        hentArbeidsfordelingsenhet(behandling)
+                    }
 
                 when (aktivArbeidsfordelingPåBehandling) {
                     null -> {
@@ -131,8 +136,8 @@ class ArbeidsfordelingService(
         behandling: Behandling,
         sisteBehandlingSomErIverksatt: Behandling?,
         aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?,
-    ): ArbeidsfordelingPåBehandling {
-        return aktivArbeidsfordelingPåBehandling
+    ): ArbeidsfordelingPåBehandling =
+        aktivArbeidsfordelingPåBehandling
             ?: if (sisteBehandlingSomErIverksatt != null) {
                 val forrigeIverksattesBehandlingArbeidsfordelingsenhet =
                     arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(
@@ -149,7 +154,6 @@ class ArbeidsfordelingService(
             } else {
                 throw Feil("Klarte ikke å fastsette arbeidsfordelingsenhet på satsendringsbehandling.")
             }
-    }
 
     private fun postFastsattBehandlendeEnhet(
         behandling: Behandling,
@@ -177,16 +181,16 @@ class ArbeidsfordelingService(
         }
     }
 
-    fun hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling {
-        return arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
+    fun hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling =
+        arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
             ?: error("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
-    }
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
         val søker: IdentMedAdressebeskyttelse = identMedAdressebeskyttelse(behandling.fagsak.aktør)
 
         val personinfoliste: List<IdentMedAdressebeskyttelse> =
-            personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            personopplysningGrunnlagRepository
+                .finnSøkerOgBarnAktørerTilAktiv(behandling.id)
                 .barn()
                 .mapNotNull {
                     try {
@@ -219,9 +223,10 @@ class ArbeidsfordelingService(
         IdentMedAdressebeskyttelse(
             ident = ident,
             adressebeskyttelsegradering =
-                personopplysningerService.hentPersoninfoEnkel(
-                    personidentService.hentAktør(ident),
-                ).adressebeskyttelseGradering,
+                personopplysningerService
+                    .hentPersoninfoEnkel(
+                        personidentService.hentAktør(ident),
+                    ).adressebeskyttelseGradering,
         )
 
     private fun identMedAdressebeskyttelse(aktør: Aktør) =

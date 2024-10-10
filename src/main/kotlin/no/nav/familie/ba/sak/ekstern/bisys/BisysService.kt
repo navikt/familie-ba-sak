@@ -35,13 +35,18 @@ class BisysService(
         samledeUtvidetBarnetrygdPerioder.addAll(perioderFraBasak)
 
         val sammenslåttePerioder =
-            samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.UTVIDET }
-                .groupBy { it.beløp }.values
-                .flatMap(::slåSammenSammenhengendePerioder).toMutableList()
+            samledeUtvidetBarnetrygdPerioder
+                .filter { it.stønadstype == BisysStønadstype.UTVIDET }
+                .groupBy { it.beløp }
+                .values
+                .flatMap(::slåSammenSammenhengendePerioder)
+                .toMutableList()
 
         sammenslåttePerioder.addAll(
-            samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.SMÅBARNSTILLEGG }
-                .groupBy { it.beløp }.values
+            samledeUtvidetBarnetrygdPerioder
+                .filter { it.stønadstype == BisysStønadstype.SMÅBARNSTILLEGG }
+                .groupBy { it.beløp }
+                .values
                 .flatMap(::slåSammenSammenhengendePerioder),
         )
 
@@ -73,12 +78,13 @@ class BisysService(
             return emptyList()
         }
         logger.info("Henter bisysperioder for siste iverksette behandlong for fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
-        return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
+        return tilkjentYtelseRepository
+            .findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)
+            ?.andelerTilkjentYtelse
             ?.filter { it.erSøkersAndel() }
             ?.filter {
                 it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
-            }
-            ?.map {
+            }?.map {
                 UtvidetBarnetrygdPeriode(
                     stønadstype = if (it.erUtvidet()) BisysStønadstype.UTVIDET else BisysStønadstype.SMÅBARNSTILLEGG,
                     fomMåned = it.stønadFom,
@@ -90,8 +96,9 @@ class BisysService(
             } ?: emptyList()
     }
 
-    private fun slåSammenSammenhengendePerioder(utbetalingerAvSammeBeløp: List<UtvidetBarnetrygdPeriode>): List<UtvidetBarnetrygdPeriode> {
-        return utbetalingerAvSammeBeløp.sortedBy { it.fomMåned }
+    private fun slåSammenSammenhengendePerioder(utbetalingerAvSammeBeløp: List<UtvidetBarnetrygdPeriode>): List<UtvidetBarnetrygdPeriode> =
+        utbetalingerAvSammeBeløp
+            .sortedBy { it.fomMåned }
             .fold(mutableListOf()) { sammenslåttePerioder, nesteUtbetaling ->
                 if (sammenslåttePerioder.lastOrNull()?.tomMåned?.isSameOrAfter(nesteUtbetaling.fomMåned.minusMonths(1)) != false &&
                     sammenslåttePerioder.lastOrNull()?.manueltBeregnet == nesteUtbetaling.manueltBeregnet &&
@@ -102,7 +109,6 @@ class BisysService(
                     sammenslåttePerioder.apply { add(nesteUtbetaling) }
                 }
             }
-    }
 
     companion object {
         private val logger = LoggerFactory.getLogger(BisysService::class.java)

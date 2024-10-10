@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -17,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -54,11 +54,13 @@ class SimuleringService(
          * Denne verdien brukes ikke til noe i simulering.
          */
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                vedtak = vedtak,
-                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
-                erSimulering = true,
-            ).utbetalingsoppdrag.tilRestUtbetalingsoppdrag()
+            utbetalingsoppdragGeneratorService
+                .genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                    vedtak = vedtak,
+                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    erSimulering = true,
+                ).utbetalingsoppdrag
+                .tilRestUtbetalingsoppdrag()
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
@@ -82,9 +84,7 @@ class SimuleringService(
     fun slettSimuleringPåBehandling(behandlingId: Long) =
         økonomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
-    fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
-        return økonomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
-    }
+    fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> = økonomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
 
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -140,17 +140,15 @@ class SimuleringService(
         return hentFeilutbetaling(vedtakSimuleringMottakere)
     }
 
-    fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
-        return vedtakSimuleringMottakereTilRestSimulering(
+    fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
+        vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
         ).etterbetaling
-    }
 
-    fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
-        return vedtakSimuleringMottakereTilRestSimulering(
+    fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal =
+        vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere,
         ).feilutbetaling
-    }
 
     fun harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling: Behandling): Boolean {
         if (!behandling.erManuellMigrering()) throw Feil("Avvik innenfor beløpsgrenser skal bare sjekkes for manuelle migreringsbehandlinger")

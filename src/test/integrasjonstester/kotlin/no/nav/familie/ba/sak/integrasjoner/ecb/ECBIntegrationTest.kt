@@ -69,7 +69,7 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
         } returns ecbExchangeRatesData.toExchangeRates()
 
         ecbService.hentValutakurs("EUR", valutakursDato)
-        val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato("EUR", valutakursDato)
+        val valutakurs = ecbValutakursCacheRepository.findByValutakodeAndValutakursdato("EUR", valutakursDato)?.firstOrNull()
         assertEquals(valutakurs!!.kurs, BigDecimal.valueOf(9.4567))
         ecbService.hentValutakurs("EUR", valutakursDato)
         verify(exactly = 1) {
@@ -85,8 +85,8 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
         frequency: Frequency,
         exchangeRates: List<Pair<String, BigDecimal>>,
         exchangeRateDate: String,
-    ): ECBExchangeRatesData {
-        return ECBExchangeRatesData(
+    ): ECBExchangeRatesData =
+        ECBExchangeRatesData(
             ECBExchangeRatesDataSet(
                 exchangeRates.map {
                     ECBExchangeRatesForCurrency(
@@ -104,5 +104,4 @@ class ECBIntegrationTest : AbstractSpringIntegrationTest() {
                 },
             ),
         )
-    }
 }

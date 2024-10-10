@@ -11,7 +11,5 @@ class InfotrygdFeedClientMock {
     @Bean
     @Profile("mock-infotrygd-feed")
     @Primary
-    fun mockInfotrygdFeed(): InfotrygdFeedClient {
-        return mockk(relaxed = true)
-    }
+    fun mockInfotrygdFeed(): InfotrygdFeedClient = mockk(relaxed = true)
 }

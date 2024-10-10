@@ -45,14 +45,13 @@ class FødselshendelsefiltreringResultat(
     @Column(name = "regel_input", columnDefinition = "TEXT")
     val regelInput: String? = null,
 ) : BaseEntitet() {
-    override fun toString(): String {
-        return "FødselshendelsefiltreringResultat(" +
+    override fun toString(): String =
+        "FødselshendelsefiltreringResultat(" +
             "id=$id, " +
             "filtreringsregel=$filtreringsregel, " +
             "resultat=$resultat, " +
             "evalueringÅrsaker=$evalueringsårsaker" +
             ")"
-    }
 }
 
 fun List<FødselshendelsefiltreringResultat>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }

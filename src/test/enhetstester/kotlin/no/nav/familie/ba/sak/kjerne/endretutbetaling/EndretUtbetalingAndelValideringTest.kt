@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -358,49 +359,50 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(
-            personType = PersonType.BARN,
-            fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        ).forEach {
-            if (it == Vilkår.BOR_MED_SØKER) {
-                vilkårResultaterForPerson.addAll(
-                    listOf(
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = fom,
-                            periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+        Vilkår
+            .hentVilkårFor(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            ).forEach {
+                if (it == Vilkår.BOR_MED_SØKER) {
+                    vilkårResultaterForPerson.addAll(
+                        listOf(
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = fom,
+                                periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
+                                periodeTom = tom,
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
                         ),
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
-                            periodeTom = tom,
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                        ),
-                    ),
-                )
-            } else {
-                VilkårResultat(
-                    personResultat = personResultatForPerson,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList(),
-                )
+                    )
+                } else {
+                    VilkårResultat(
+                        personResultat = personResultatForPerson,
+                        periodeFom = fom,
+                        periodeTom = tom,
+                        vilkårType = it,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                    )
+                }
             }
-        }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
         vilkårsvurdering.personResultater =
@@ -441,49 +443,50 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(
-            personType = PersonType.BARN,
-            fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        ).forEach {
-            if (it == Vilkår.BOR_MED_SØKER) {
-                vilkårResultaterForPerson.addAll(
-                    listOf(
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = fom1,
-                            periodeTom = tom1,
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+        Vilkår
+            .hentVilkårFor(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            ).forEach {
+                if (it == Vilkår.BOR_MED_SØKER) {
+                    vilkårResultaterForPerson.addAll(
+                        listOf(
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = fom1,
+                                periodeTom = tom1,
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = fom2,
+                                periodeTom = tom2,
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
                         ),
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = fom2,
-                            periodeTom = tom2,
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                        ),
-                    ),
-                )
-            } else {
-                VilkårResultat(
-                    personResultat = personResultatForPerson,
-                    periodeFom = fom1,
-                    periodeTom = tom2,
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList(),
-                )
+                    )
+                } else {
+                    VilkårResultat(
+                        personResultat = personResultatForPerson,
+                        periodeFom = fom1,
+                        periodeTom = tom2,
+                        vilkårType = it,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                    )
+                }
             }
-        }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
         vilkårsvurdering.personResultater =
@@ -531,49 +534,50 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(
-            personType = PersonType.BARN,
-            fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        ).forEach {
-            if (it == Vilkår.BOR_MED_SØKER) {
-                vilkårResultaterForPerson.addAll(
-                    listOf(
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = fomBarn1,
-                            periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+        Vilkår
+            .hentVilkårFor(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            ).forEach {
+                if (it == Vilkår.BOR_MED_SØKER) {
+                    vilkårResultaterForPerson.addAll(
+                        listOf(
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = fomBarn1,
+                                periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
+                                periodeTom = tomBarn1,
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
                         ),
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
-                            periodeTom = tomBarn1,
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                        ),
-                    ),
-                )
-            } else {
-                VilkårResultat(
-                    personResultat = personResultatForPerson,
-                    periodeFom = fomBarn1,
-                    periodeTom = tomBarn1,
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList(),
-                )
+                    )
+                } else {
+                    VilkårResultat(
+                        personResultat = personResultatForPerson,
+                        periodeFom = fomBarn1,
+                        periodeTom = tomBarn1,
+                        vilkårType = it,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                    )
+                }
             }
-        }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
         vilkårsvurdering.personResultater =
@@ -615,49 +619,50 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(
-            personType = PersonType.BARN,
-            fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        ).forEach {
-            if (it == Vilkår.BOR_MED_SØKER) {
-                vilkårResultaterForPerson.addAll(
-                    listOf(
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = fomBarn1,
-                            periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+        Vilkår
+            .hentVilkårFor(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            ).forEach {
+                if (it == Vilkår.BOR_MED_SØKER) {
+                    vilkårResultaterForPerson.addAll(
+                        listOf(
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = fomBarn1,
+                                periodeTom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
+                            VilkårResultat(
+                                personResultat = personResultatForPerson,
+                                periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
+                                periodeTom = tomBarn1,
+                                vilkårType = it,
+                                resultat = Resultat.OPPFYLT,
+                                begrunnelse = "",
+                                sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                            ),
                         ),
-                        VilkårResultat(
-                            personResultat = personResultatForPerson,
-                            periodeFom = LocalDate.now().førsteDagIInneværendeMåned(),
-                            periodeTom = tomBarn1,
-                            vilkårType = it,
-                            resultat = Resultat.OPPFYLT,
-                            begrunnelse = "",
-                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
-                        ),
-                    ),
-                )
-            } else {
-                VilkårResultat(
-                    personResultat = personResultatForPerson,
-                    periodeFom = fomBarn1,
-                    periodeTom = tomBarn1,
-                    vilkårType = it,
-                    resultat = Resultat.OPPFYLT,
-                    begrunnelse = "",
-                    sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
-                    utdypendeVilkårsvurderinger = emptyList(),
-                )
+                    )
+                } else {
+                    VilkårResultat(
+                        personResultat = personResultatForPerson,
+                        periodeFom = fomBarn1,
+                        periodeTom = tomBarn1,
+                        vilkårType = it,
+                        resultat = Resultat.OPPFYLT,
+                        begrunnelse = "",
+                        sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                        utdypendeVilkårsvurderinger = emptyList(),
+                    )
+                }
             }
-        }
         personResultatForPerson.setSortedVilkårResultater(vilkårResultaterForPerson)
 
         vilkårsvurdering.personResultater =
@@ -740,8 +745,8 @@ class EndretUtbetalingAndelValideringTest {
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
         tomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
-    ): EndretUtbetalingAndelMedAndelerTilkjentYtelse {
-        return lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    ): EndretUtbetalingAndelMedAndelerTilkjentYtelse =
+        lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
             id = Random.nextLong(),
             fom = fomUtvidet,
             tom = tomUtvidet,
@@ -757,7 +762,6 @@ class EndretUtbetalingAndelValideringTest {
                     ),
                 ),
         )
-    }
 
     @Test
     fun `Skal kaste feil hvis endringsårsak=allerede utbetalt og tom-dato er i fremtiden selv om tom er samme som gyldigTomIFremtiden`() {
@@ -851,6 +855,95 @@ class EndretUtbetalingAndelValideringTest {
             validerÅrsak(
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 vilkårsvurdering = mockk(),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og øker til hundre prosent utbetaling`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusYears(4),
+                tom = YearMonth.now().minusYears(3),
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                prosent = BigDecimal(100),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan ikke endre til full utbetaling når det er mer enn tre år siden søknadstidspunktet.")
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og perioden er mindre er 3 år siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusYears(2),
+                tom = YearMonth.now().minusYears(1),
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn tre år tilbake i tid.")
+    }
+
+    @Test
+    fun `Skal kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mindre er 3 måneder siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusMonths(5),
+                tom = YearMonth.now().minusMonths(3),
+                årsak = Årsak.ETTERBETALING_3MND,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        val feil =
+            assertThrows<FunksjonellFeil> {
+                validerÅrsak(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    vilkårsvurdering = null,
+                )
+            }
+
+        assertThat(feil.frontendFeilmelding).isEqualTo("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn tre måneder tilbake i tid.")
+    }
+
+    @Test
+    fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mellom 3 måneder og 3 år siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusMonths(10),
+                tom = YearMonth.now().minusMonths(4),
+                årsak = Årsak.ETTERBETALING_3MND,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        assertDoesNotThrow {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = null,
             )
         }
     }

@@ -19,10 +19,11 @@ fun bestemKategoriVedOpprettelse(
     behandlingÅrsak: BehandlingÅrsak,
     // siste iverksatt behandling som har løpende utbetaling. Hvis løpende utbetaling ikke finnes, settes det til NASJONAL
     kategoriFraLøpendeBehandling: BehandlingKategori,
-): BehandlingKategori {
-    return when {
+): BehandlingKategori =
+    when {
         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
-            behandlingType == BehandlingType.REVURDERING && behandlingÅrsak == BehandlingÅrsak.SØKNAD -> {
+            behandlingType == BehandlingType.REVURDERING &&
+            behandlingÅrsak == BehandlingÅrsak.SØKNAD -> {
             overstyrtKategori
                 ?: throw FunksjonellFeil(
                     "Behandling med type ${behandlingType.visningsnavn} " +
@@ -39,7 +40,6 @@ fun bestemKategoriVedOpprettelse(
             kategoriFraLøpendeBehandling
         }
     }
-}
 
 fun bestemKategori(
     overstyrtKategori: BehandlingKategori?,
@@ -72,9 +72,7 @@ fun bestemUnderkategori(
     return oppdatertUnderkategori ?: BehandlingUnderkategori.ORDINÆR
 }
 
-fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori {
-    return if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
-}
+fun utledLøpendeUnderkategori(andeler: List<AndelTilkjentYtelse>): BehandlingUnderkategori = if (andeler.any { it.erUtvidet() && it.erLøpende() }) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
 
 fun utledLøpendeKategori(
     barnasTidslinjer: Map<Aktør, VilkårsvurderingTidslinjer.BarnetsTidslinjer>?,

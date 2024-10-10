@@ -14,25 +14,22 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 
 @Service
-class BrevKlientMock : BrevKlient(
-    familieBrevUri = "brev_uri_mock",
-    restTemplate = RestTemplate(),
-    sanityDataset = "",
-    testVerktøyService = mockk(),
-) {
+class BrevKlientMock :
+    BrevKlient(
+        familieBrevUri = "brev_uri_mock",
+        restTemplate = RestTemplate(),
+        sanityDataset = "",
+        testVerktøyService = mockk(),
+    ) {
     override fun genererBrev(
         målform: String,
         brev: Brev,
-    ): ByteArray {
-        return TEST_PDF
-    }
+    ): ByteArray = TEST_PDF
 
     override fun hentBegrunnelsestekst(
         begrunnelseData: BegrunnelseMedData,
         vedtaksperiode: VedtaksperiodeMedBegrunnelser,
-    ): String {
-        return "Dummytekst for ${begrunnelseData.apiNavn}"
-    }
+    ): String = "Dummytekst for ${begrunnelseData.apiNavn}"
 }
 
 @TestConfiguration

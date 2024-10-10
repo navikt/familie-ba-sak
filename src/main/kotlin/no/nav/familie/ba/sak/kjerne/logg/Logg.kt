@@ -10,7 +10,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
@@ -52,7 +52,10 @@ data class Logg(
     )
 }
 
-enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn) {
+enum class LoggType(
+    val visningsnavn: String,
+    val tittel: String = visningsnavn,
+) {
     AUTOVEDTAK_TIL_MANUELL_BEHANDLING("Autovedtak til manuell behandling", "Automatisk behandling stoppet"),
     INSTITUSJON_REGISTRERT("Institusjon ble registrert"),
     FØDSELSHENDELSE("Fødselshendelse"), // Deprecated, bruk livshendelse
@@ -90,4 +93,7 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     REFUSJON_EØS_LAGT_TIL("Refusjon EØS lagt til"),
     REFUSJON_EØS_FJERNET("Refusjon EØS fjernet"),
     MANUELL_DØDSFALL_DATO_REGISTRERT("Manuell dødsfallsdato registrert"),
+    SAMMENSATT_KONTROLLSAK_LAGT_TIL("Sammensatt kontrollsak lagt til"),
+    SAMMENSATT_KONTROLLSAK_ENDRET("Sammensatt kontrollsak endret"),
+    SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
 }

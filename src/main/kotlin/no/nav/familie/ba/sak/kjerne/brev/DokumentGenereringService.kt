@@ -98,8 +98,8 @@ class DokumentGenereringService(
         }
     }
 
-    private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String {
-        return if (fagsak.type == FagsakType.INSTITUSJON) {
+    private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String =
+        if (fagsak.type == FagsakType.INSTITUSJON) {
             val orgnummer =
                 fagsak.institusjon?.orgNummer
                     ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
@@ -108,5 +108,4 @@ class DokumentGenereringService(
             personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn
                 ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
         }
-    }
 }

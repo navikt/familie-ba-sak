@@ -3,8 +3,11 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.EvalueringÅrsak
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
-enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrivelse: String? = null, val vilkår: Vilkår) :
-    EvalueringÅrsak {
+enum class VilkårIkkeOppfyltÅrsak(
+    val beskrivelse: String,
+    val metrikkBeskrivelse: String? = null,
+    val vilkår: Vilkår,
+) : EvalueringÅrsak {
     // Under 18 år
     ER_IKKE_UNDER_18_ÅR(beskrivelse = "Barn er ikke under 18 år", vilkår = Vilkår.UNDER_18_ÅR),
 
@@ -63,15 +66,9 @@ enum class VilkårIkkeOppfyltÅrsak(val beskrivelse: String, val metrikkBeskrive
     ),
     ;
 
-    override fun hentBeskrivelse(): String {
-        return beskrivelse
-    }
+    override fun hentBeskrivelse(): String = beskrivelse
 
-    override fun hentMetrikkBeskrivelse(): String {
-        return metrikkBeskrivelse ?: beskrivelse
-    }
+    override fun hentMetrikkBeskrivelse(): String = metrikkBeskrivelse ?: beskrivelse
 
-    override fun hentIdentifikator(): String {
-        return vilkår.name
-    }
+    override fun hentIdentifikator(): String = vilkår.name
 }

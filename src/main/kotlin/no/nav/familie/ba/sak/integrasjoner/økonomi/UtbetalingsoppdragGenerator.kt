@@ -28,8 +28,8 @@ class UtbetalingsoppdragGenerator {
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth? = null,
-    ): BeregnetUtbetalingsoppdragLongId {
-        return Utbetalingsgenerator().lagUtbetalingsoppdrag(
+    ): BeregnetUtbetalingsoppdragLongId =
+        Utbetalingsgenerator().lagUtbetalingsoppdrag(
             behandlingsinformasjon =
                 Behandlingsinformasjon(
                     saksbehandlerId = saksbehandlerId,
@@ -37,7 +37,9 @@ class UtbetalingsoppdragGenerator {
                     eksternBehandlingId = vedtak.behandling.id,
                     eksternFagsakId = vedtak.behandling.fagsak.id,
                     fagsystem = FagsystemBA.BARNETRYGD,
-                    personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+                    personIdent =
+                        vedtak.behandling.fagsak.aktør
+                            .aktivFødselsnummer(),
                     vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
                     opphørAlleKjederFra =
                         finnOpphørsdatoForAlleKjeder(
@@ -53,7 +55,6 @@ class UtbetalingsoppdragGenerator {
             nyeAndeler = nyTilkjentYtelse.tilAndelData(),
             sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
         )
-    }
 
     private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
         this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
@@ -81,8 +82,8 @@ class UtbetalingsoppdragGenerator {
         return null
     }
 
-    private fun hentUtebetalesTil(fagsak: Fagsak): String {
-        return when (fagsak.type) {
+    private fun hentUtebetalesTil(fagsak: Fagsak): String =
+        when (fagsak.type) {
             FagsakType.INSTITUSJON -> {
                 fagsak.institusjon?.tssEksternId
                     ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
@@ -92,7 +93,6 @@ class UtbetalingsoppdragGenerator {
                 fagsak.aktør.aktivFødselsnummer()
             }
         }
-    }
 }
 
 enum class YtelsetypeBA(

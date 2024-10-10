@@ -33,7 +33,9 @@ interface AutovedtakBehandlingService<Behandlingsdata : AutomatiskBehandlingData
     fun kjørBehandling(behandlingsdata: Behandlingsdata): String
 }
 
-enum class Autovedtaktype(val displayName: String) {
+enum class Autovedtaktype(
+    val displayName: String,
+) {
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     OMREGNING_BREV("Omregning"),
@@ -88,37 +90,34 @@ class AutovedtakStegService(
         mottakersAktør: Aktør,
         nyBehandlingHendelse: NyBehandlingHendelse,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String {
-        return kjørBehandling(
+    ): String =
+        kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = FødselshendelseData(nyBehandlingHendelse),
             førstegangKjørt = førstegangKjørt,
         )
-    }
 
     fun kjørBehandlingOmregning(
         mottakersAktør: Aktør,
         behandlingsdata: OmregningBrevData,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String {
-        return kjørBehandling(
+    ): String =
+        kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = behandlingsdata,
             førstegangKjørt = førstegangKjørt,
         )
-    }
 
     fun kjørBehandlingSmåbarnstillegg(
         mottakersAktør: Aktør,
         aktør: Aktør,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String {
-        return kjørBehandling(
+    ): String =
+        kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = SmåbarnstilleggData(aktør),
             førstegangKjørt = førstegangKjørt,
         )
-    }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,

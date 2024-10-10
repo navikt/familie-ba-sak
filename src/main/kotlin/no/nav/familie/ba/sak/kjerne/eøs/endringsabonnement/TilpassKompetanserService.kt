@@ -120,7 +120,8 @@ fun tilpassKompetanserTilRegelverk(
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer =
-        barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
+        barnaRegelverkTidslinjer
+            .tilBarnasEøsRegelverkTidslinjer()
             .leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, skalIkkeUtbetales ->
                 when (skalIkkeUtbetales) {
                     true -> null // ta bort regelverk dersom barnets utbetaling er endret til 0
@@ -130,27 +131,29 @@ fun tilpassKompetanserTilRegelverk(
                 tidslinjer.forlengFremtidTilUendelig(MånedTidspunkt.nå())
             }
 
-    return gjeldendeKompetanser.tilSeparateTidslinjerForBarna()
+    return gjeldendeKompetanser
+        .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, eøsRegelverk ->
             eøsRegelverk?.let { kompetanse ?: Kompetanse.NULL }
-        }
-        .mapValues { (_, value) ->
+        }.mapValues { (_, value) ->
             value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
-        }
-        .tilSkjemaer()
+        }.tilSkjemaer()
 }
 
 fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: BehandlingId) =
-    this.hentTidslinjerThrows(behandlingId).barnasTidslinjer()
+    this
+        .hentTidslinjerThrows(behandlingId)
+        .barnasTidslinjer()
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje
         }
 
 private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer(): Map<Aktør, Tidslinje<Regelverk, Måned>> =
     this.mapValues { (_, regelverkResultatTidslinje) ->
-        regelverkResultatTidslinje.map { it?.regelverk }
+        regelverkResultatTidslinje
+            .map { it?.regelverk }
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
     }
@@ -173,7 +176,8 @@ private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidsp
     } else {
         object : Tidslinje<I, T>() {
             override fun lagPerioder(): Collection<Periode<I, T>> =
-                tidslinje.perioder()
+                tidslinje
+                    .perioder()
                     .filter { it.fraOgMed <= tilTidspunkt }
                     .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
         }

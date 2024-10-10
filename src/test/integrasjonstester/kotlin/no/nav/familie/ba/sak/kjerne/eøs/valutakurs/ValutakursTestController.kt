@@ -49,11 +49,12 @@ class ValutakursTestController(
 private fun Map<LocalDate, String>.tilValutakurser(
     behandlingId: BehandlingId,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-): Collection<Valutakurs> {
-    return this.map { (dato, tidslinje) ->
-        val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
-        ValutakursBuilder(dato.tilMånedTidspunkt(), behandlingId)
-            .medKurs(tidslinje, "EUR", person)
-            .bygg()
-    }.flatten().slåSammen()
-}
+): Collection<Valutakurs> =
+    this
+        .map { (dato, tidslinje) ->
+            val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
+            ValutakursBuilder(dato.tilMånedTidspunkt(), behandlingId)
+                .medKurs(tidslinje, "EUR", person)
+                .bygg()
+        }.flatten()
+        .slåSammen()

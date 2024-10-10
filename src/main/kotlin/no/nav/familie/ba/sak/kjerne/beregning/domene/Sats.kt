@@ -10,7 +10,9 @@ data class Sats(
     val gyldigTom: LocalDate = LocalDate.MAX,
 )
 
-enum class SatsType(val beskrivelse: String) {
+enum class SatsType(
+    val beskrivelse: String,
+) {
     ORBA("Ordinær barnetrygd"),
     SMA("Småbarnstillegg"),
     TILLEGG_ORBA("Tillegg til barnetrygd for barn 0-6 år"),

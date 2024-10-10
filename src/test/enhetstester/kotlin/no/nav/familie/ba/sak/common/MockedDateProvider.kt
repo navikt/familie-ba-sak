@@ -2,6 +2,8 @@
 
 import java.time.LocalDate
 
-class MockedDateProvider(val mockedDate: LocalDate) : LocalDateProvider {
+class MockedDateProvider(
+    val mockedDate: LocalDate,
+) : LocalDateProvider {
     override fun now(): LocalDate = this.mockedDate
 }

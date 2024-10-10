@@ -22,12 +22,11 @@ object EndringIKompetanseUtil {
         return endringerTidslinje
     }
 
-    private fun Kompetanse.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse: Kompetanse): Boolean {
-        return this.søkersAktivitet != forrigeKompetanse.søkersAktivitet ||
+    private fun Kompetanse.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse: Kompetanse): Boolean =
+        this.søkersAktivitet != forrigeKompetanse.søkersAktivitet ||
             this.søkersAktivitetsland != forrigeKompetanse.søkersAktivitetsland ||
             this.annenForeldersAktivitet != forrigeKompetanse.annenForeldersAktivitet ||
             this.annenForeldersAktivitetsland != forrigeKompetanse.annenForeldersAktivitetsland ||
             this.barnetsBostedsland != forrigeKompetanse.barnetsBostedsland ||
             this.resultat != forrigeKompetanse.resultat
-    }
 }

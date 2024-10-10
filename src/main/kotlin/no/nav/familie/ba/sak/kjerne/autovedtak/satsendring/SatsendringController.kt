@@ -5,8 +5,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -67,9 +67,7 @@ class SatsendringController(
     @GetMapping(path = ["/{fagsakId}/kan-kjore-satsendring"])
     fun kanKjøreSatsendringPåFagsak(
         @PathVariable fagsakId: Long,
-    ): ResponseEntity<Ressurs<Boolean>> {
-        return ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
-    }
+    ): ResponseEntity<Ressurs<Boolean>> = ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
 
     @PostMapping(path = ["/kjorsatsendringForListeMedIdenter"])
     fun utførSatsendringPåListeIdenter(

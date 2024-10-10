@@ -50,7 +50,10 @@ class UtenlandskPeriodebeløpControllerTest {
         val forventedeFelterMedFeil = listOf("beløp")
         val faktiskeFelterMedFeil =
             exception.constraintViolations.map { constraintViolation ->
-                constraintViolation.propertyPath.toString().split(".").last()
+                constraintViolation.propertyPath
+                    .toString()
+                    .split(".")
+                    .last()
             }
 
         assertEqualsUnordered(forventedeFelterMedFeil, faktiskeFelterMedFeil)

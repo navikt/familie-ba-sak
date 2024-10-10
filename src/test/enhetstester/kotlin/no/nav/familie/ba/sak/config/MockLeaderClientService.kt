@@ -8,7 +8,5 @@ import org.springframework.stereotype.Service
 @Profile("mock-leader-client")
 @Primary
 class MockLeaderClientService : LeaderClientService {
-    override fun isLeader(): Boolean {
-        return true
-    }
+    override fun isLeader(): Boolean = true
 }

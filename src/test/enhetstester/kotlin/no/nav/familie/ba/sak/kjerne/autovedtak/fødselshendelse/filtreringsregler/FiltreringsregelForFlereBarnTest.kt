@@ -42,7 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -154,10 +154,9 @@ class FiltreringsregelForFlereBarnTest {
         val andelTilkjentytelse =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         every {
@@ -267,10 +266,9 @@ class FiltreringsregelForFlereBarnTest {
         val andelTilkjentytelse =
             listOf(
                 MånedPeriode(YearMonth.of(2018, 1), YearMonth.now().plusYears(1)),
-            )
-                .map {
-                    lagAndelTilkjentYtelse(it.fom, it.tom)
-                }
+            ).map {
+                lagAndelTilkjentYtelse(it.fom, it.tom)
+            }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
         val sisteVedtatteBehandling = lagBehandling()
@@ -318,10 +316,10 @@ class FiltreringsregelForFlereBarnTest {
         fødselsDato: LocalDate? = null,
         grBostedsadresse: GrBostedsadresse? = null,
         kjønn: Kjønn = Kjønn.KVINNE,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
+        sivilstand: SIVILSTANDTYPE = SIVILSTANDTYPE.UGIFT,
         dødsfallDato: String? = null,
-    ): Person {
-        return Person(
+    ): Person =
+        Person(
             aktør = aktør,
             type = type,
             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -329,24 +327,22 @@ class FiltreringsregelForFlereBarnTest {
             navn = "navn",
             kjønn = kjønn,
             bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
-        )
-            .apply {
-                this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
-                if (dødsfallDato != null) {
-                    this.dødsfall =
-                        lagDødsfallFraPdl(
-                            person = this,
-                            dødsfallDatoFraPdl = dødsfallDato,
-                            dødsfallAdresseFraPdl =
-                                PdlKontaktinformasjonForDødsboAdresse(
-                                    adresselinje1 = "Gate 1",
-                                    postnummer = "1234",
-                                    poststedsnavn = "Oslo",
-                                ),
-                        )
-                }
+        ).apply {
+            this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
+            if (dødsfallDato != null) {
+                this.dødsfall =
+                    lagDødsfallFraPdl(
+                        person = this,
+                        dødsfallDatoFraPdl = dødsfallDato,
+                        dødsfallAdresseFraPdl =
+                            PdlKontaktinformasjonForDødsboAdresse(
+                                adresselinje1 = "Gate 1",
+                                postnummer = "1234",
+                                poststedsnavn = "Oslo",
+                            ),
+                    )
             }
-    }
+        }
 
     private fun generePersonInfoMedBarn(
         barn: Set<Aktør>? = null,
@@ -354,24 +350,24 @@ class FiltreringsregelForFlereBarnTest {
         fødselsDato: LocalDate? = null,
         adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
         bostedsadresse: Bostedsadresse? = null,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
-    ): PersonInfo {
-        return PersonInfo(
+        sivilstand: SIVILSTANDTYPE = SIVILSTANDTYPE.UGIFT,
+    ): PersonInfo =
+        PersonInfo(
             fødselsdato = fødselsDato ?: LocalDate.now().minusYears(20),
             navn = navn,
             adressebeskyttelseGradering = adressebeskyttelsegradering,
             bostedsadresser = bostedsadresse?.let { mutableListOf(it) } ?: mutableListOf(Bostedsadresse()),
             sivilstander = listOf(Sivilstand(type = sivilstand)),
             forelderBarnRelasjon =
-                barn?.map {
-                    ForelderBarnRelasjon(
-                        aktør = it,
-                        relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                        navn = "navn $it",
-                    )
-                }?.toSet() ?: emptySet(),
+                barn
+                    ?.map {
+                        ForelderBarnRelasjon(
+                            aktør = it,
+                            relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                            navn = "navn $it",
+                        )
+                    }?.toSet() ?: emptySet(),
         )
-    }
 
     private fun genererFaktaMedTidligereBarn(
         manaderFodselEtt: Long,

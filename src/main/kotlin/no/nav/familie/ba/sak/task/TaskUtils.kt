@@ -46,8 +46,8 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
     return date
 }
 
-fun LocalDateTime.erHverdag(plusDays: Long): Boolean {
-    return when (this.plusDays(plusDays).dayOfWeek) {
+fun LocalDateTime.erHverdag(plusDays: Long): Boolean =
+    when (this.plusDays(plusDays).dayOfWeek) {
         DayOfWeek.MONDAY -> true
         DayOfWeek.TUESDAY -> true
         DayOfWeek.WEDNESDAY -> true
@@ -57,16 +57,12 @@ fun LocalDateTime.erHverdag(plusDays: Long): Boolean {
         DayOfWeek.SUNDAY -> false
         else -> error("Not implemented")
     }
-}
 
-fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean {
-    return localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
-}
+fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean = localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
 
-fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime {
-    return if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
+    if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
         date.withHour(6)
     } else {
         date.plusDays(1).withHour(6)
     }
-}

@@ -12,16 +12,12 @@ import org.springframework.context.annotation.Profile
 class TaskRepositoryTestConfig {
     @Bean
     @Profile("mock-task-repository")
-    fun mockTaskRepository(): TaskRepositoryWrapper {
-        return clearMockTaskRepository(mockk(relaxed = true))
-    }
+    fun mockTaskRepository(): TaskRepositoryWrapper = clearMockTaskRepository(mockk(relaxed = true))
 
     @Bean
     @Profile("mock-task-service")
     @Primary
-    fun mockTaskService(): OpprettTaskService {
-        return clearMockTaskService(mockk(relaxed = true))
-    }
+    fun mockTaskService(): OpprettTaskService = clearMockTaskService(mockk(relaxed = true))
 
     companion object {
         fun clearMockTaskRepository(mockTaskRepository: TaskRepositoryWrapper): TaskRepositoryWrapper {

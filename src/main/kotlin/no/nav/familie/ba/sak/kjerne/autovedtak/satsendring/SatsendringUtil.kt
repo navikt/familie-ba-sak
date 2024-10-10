@@ -26,13 +26,13 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertForSats(
     val sisteSatsForSatstype = SatsService.finnSisteSatsFor(satstype)
     val fomSisteSatsForSatstype = sisteSatsForSatstype.gyldigFom.toYearMonth()
 
-    return this.filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
+    return this
+        .filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { andel ->
             val person = personOpplysningGrunnlag.personer.single { it.aktør == andel.aktør }
             val andelSatsType = andel.type.tilSatsType(person, andel.stønadFom.førsteDagIInneværendeMåned())
 
             andelSatsType == satstype
-        }
-        .filter { it.prosent != BigDecimal.ZERO }
+        }.filter { it.prosent != BigDecimal.ZERO }
         .all { andelTilkjentYtelse -> andelTilkjentYtelse.sats == SatsService.finnSisteSatsFor(satstype).beløp }
 }

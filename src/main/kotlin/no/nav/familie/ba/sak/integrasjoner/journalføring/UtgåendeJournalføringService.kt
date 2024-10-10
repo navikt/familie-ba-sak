@@ -29,8 +29,8 @@ class UtgåendeJournalføringService(
         førsteside: Førsteside?,
         eksternReferanseId: String,
         avsenderMottaker: AvsenderMottaker? = null,
-    ): String {
-        return journalførDokument(
+    ): String =
+        journalførDokument(
             fnr = fnr,
             fagsakId = fagsakId,
             journalførendeEnhet = journalførendeEnhet,
@@ -46,7 +46,6 @@ class UtgåendeJournalføringService(
             avsenderMottaker = avsenderMottaker,
             eksternReferanseId = eksternReferanseId,
         )
-    }
 
     fun journalførDokument(
         fnr: String,
@@ -106,12 +105,14 @@ class UtgåendeJournalføringService(
         eksternReferanseId: String,
         fnr: String,
     ): String =
-        integrasjonClient.hentJournalposterForBruker(
-            JournalposterForBrukerRequest(
-                brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
-                antall = 50,
-            ),
-        ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
+        integrasjonClient
+            .hentJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
+                    antall = 50,
+                ),
+            ).single { it.eksternReferanseId == eksternReferanseId }
+            .journalpostId
 
     companion object {
         private val logger = LoggerFactory.getLogger(this::class.java)

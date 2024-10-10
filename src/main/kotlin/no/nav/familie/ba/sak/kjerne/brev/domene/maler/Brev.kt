@@ -18,7 +18,11 @@ interface Brev {
  * Se https://github.com/navikt/familie/blob/master/doc/ba-sak/legg-til-nytt-brev.md
  * for detaljer om alt som skal inn når du legger til en ny brevmal.
  ***/
-enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visningsTekst: String) {
+enum class Brevmal(
+    val erVedtaksbrev: Boolean,
+    val apiNavn: String,
+    val visningsTekst: String,
+) {
     INFORMASJONSBREV_DELT_BOSTED(false, "informasjonsbrevDeltBosted", "Informasjonsbrev delt bosted"),
     INNHENTE_OPPLYSNINGER(false, "innhenteOpplysninger", "Innhente opplysninger"),
     INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED(

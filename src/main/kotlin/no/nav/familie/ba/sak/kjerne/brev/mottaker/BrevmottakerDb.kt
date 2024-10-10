@@ -51,14 +51,15 @@ data class BrevmottakerDb(
     override fun hashCode(): Int = javaClass.hashCode()
 
     @Override
-    override fun toString(): String {
-        return this::class.simpleName + "(" +
+    override fun toString(): String =
+        this::class.simpleName + "(" +
             "id = $id, " +
             "behandlingId = $behandlingId)"
-    }
 }
 
-enum class MottakerType(val visningsnavn: String) {
+enum class MottakerType(
+    val visningsnavn: String,
+) {
     BRUKER_MED_UTENLANDSK_ADRESSE("Bruker med utenlandsk adresse"),
     FULLMEKTIG("Fullmektig"),
     VERGE("Verge"),

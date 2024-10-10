@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -31,11 +32,9 @@ data class ArbeidsfordelingPåBehandling(
     @Column(name = "manuelt_overstyrt", nullable = false)
     var manueltOverstyrt: Boolean = false,
 ) {
-    override fun toString(): String {
-        return "ArbeidsfordelingPåBehandling(id=$id, manueltOverstyrt=$manueltOverstyrt)"
-    }
+    override fun toString(): String = "ArbeidsfordelingPåBehandling(id=$id, manueltOverstyrt=$manueltOverstyrt)"
 
-    fun toSecureString(): String {
-        return "ArbeidsfordelingPåBehandling(id=$id, behandlendeEnhetId=$behandlendeEnhetId, behandlendeEnhetNavn=$behandlendeEnhetNavn, manueltOverstyrt=$manueltOverstyrt)"
-    }
+    fun toSecureString(): String = "ArbeidsfordelingPåBehandling(id=$id, behandlendeEnhetId=$behandlendeEnhetId, behandlendeEnhetNavn=$behandlendeEnhetNavn, manueltOverstyrt=$manueltOverstyrt)"
 }
+
+fun ArbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet(): Arbeidsfordelingsenhet = Arbeidsfordelingsenhet(enhetId = this.behandlendeEnhetId, enhetNavn = this.behandlendeEnhetNavn)

@@ -33,9 +33,11 @@ class VilkårsvurderingTidslinjer(
 
     private val vilkårsresultaterTidslinjeMap =
         aktørTilPersonResultater
-            .entries.associate { (aktør, personResultat) ->
+            .entries
+            .associate { (aktør, personResultat) ->
                 aktør to
-                    personResultat.vilkårResultater.groupBy { it.vilkårType }
+                    personResultat.vilkårResultater
+                        .groupBy { it.vilkårType }
                         .map { it.value.tilVilkårRegelverkResultatTidslinje() }
             }
 
@@ -50,15 +52,16 @@ class VilkårsvurderingTidslinjer(
     fun søkersTidslinjer(): SøkersTidslinjer = søkersTidslinje
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjer> =
-        barna.map {
-            it.aktør to
-                BarnetsTidslinjer(
-                    tidslinjer = this,
-                    aktør = it.aktør,
-                    fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                    behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-                )
-        }.toMap()
+        barna
+            .map {
+                it.aktør to
+                    BarnetsTidslinjer(
+                        tidslinjer = this,
+                        aktør = it.aktør,
+                        fagsakType = vilkårsvurdering.behandling.fagsak.type,
+                        behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
+                    )
+            }.toMap()
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør]!!
 
@@ -112,8 +115,7 @@ class VilkårsvurderingTidslinjer(
                         fagsakType = fagsakType,
                         behandlingUnderkategori = behandlingUnderkategori,
                     )
-                }
-                .beskjærEtter(erUnder18ÅrVilkårTidslinje)
+                }.beskjærEtter(erUnder18ÅrVilkårTidslinje)
 
         val regelverkResultatTidslinje =
             egetRegelverkResultatTidslinje
@@ -126,19 +128,18 @@ class VilkårsvurderingTidslinjer(
     }
 }
 
-fun VilkårsvurderingTidslinjer.harBlandetRegelverk(): Boolean {
-    return this.søkerHarNasjonalOgFinnesBarnMedEøs() ||
+fun VilkårsvurderingTidslinjer.harBlandetRegelverk(): Boolean =
+    this.søkerHarNasjonalOgFinnesBarnMedEøs() ||
         søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
         barnasTidslinjer().values.any { it.egetRegelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
-}
 
-private fun VilkårsvurderingTidslinjer.søkerHarNasjonalOgFinnesBarnMedEøs(): Boolean {
-    return barnasTidslinjer().values.any {
-        it.egetRegelverkResultatTidslinje.kombinerMed(søkersTidslinjer().regelverkResultatTidslinje) { barnRegelverk, søkerRegelverk ->
-            barnRegelverk == RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN && søkerRegelverk == RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-        }.inneholder(true)
+private fun VilkårsvurderingTidslinjer.søkerHarNasjonalOgFinnesBarnMedEøs(): Boolean =
+    barnasTidslinjer().values.any {
+        it.egetRegelverkResultatTidslinje
+            .kombinerMed(søkersTidslinjer().regelverkResultatTidslinje) { barnRegelverk, søkerRegelverk ->
+                barnRegelverk == RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN && søkerRegelverk == RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+            }.inneholder(true)
     }
-}
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean =
     this.perioder().any { it.innhold == innhold }

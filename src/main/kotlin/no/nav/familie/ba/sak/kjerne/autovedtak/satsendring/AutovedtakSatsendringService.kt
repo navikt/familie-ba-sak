@@ -62,7 +62,6 @@ class AutovedtakSatsendringService(
         } catch (e: VilkårFeil) {
             return utledSatsendringSvar(satskjøringForFagsak, SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_VILKÅR)
         } catch (e: SatsendringFeil) {
-            logger.error(e.message)
             return utledSatsendringSvar(satskjøringForFagsak, e.satsendringSvar)
         }
 
@@ -100,7 +99,9 @@ class AutovedtakSatsendringService(
     }
 }
 
-enum class SatsendringSvar(val melding: String) {
+enum class SatsendringSvar(
+    val melding: String,
+) {
     SATSENDRING_KJØRT_OK(melding = "Satsendring kjørt OK"),
     SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
     BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(

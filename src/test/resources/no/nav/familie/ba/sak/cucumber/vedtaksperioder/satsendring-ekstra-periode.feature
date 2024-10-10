@@ -8,7 +8,7 @@ Egenskap: Vedtaksperioder for Satsendring
       | FagsakId  | Fagsaktype |
       | 200053601 | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId  | ForrigeBehandlingId |
       | 100175851    | 200053601 |                     |
 
@@ -18,7 +18,7 @@ Egenskap: Vedtaksperioder for Satsendring
       | 100175851    | 2435441739050 | BARN       | 10.07.2012  |
 
   Scenario: Skal ikke lage splitt på satsendring
-    Og dagens dato er 2023-09-13
+    Og dagens dato er 13.09.2023
     Og lag personresultater for behandling 100175851
 
     Og legg til nye vilkårresultater for behandling 100175851
@@ -45,9 +45,9 @@ Egenskap: Vedtaksperioder for Satsendring
       | AktørId       | Fra dato   | Til dato | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | 2435441739050 | 01.08.2019 |          | NORGE_ER_SEKUNDÆRLAND | 100175851    | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 100175851
+    Når vedtaksperiodene genereres for behandling 100175851
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 100175851
       | Fra dato   | Til dato   | Vedtaksperiodetype |
       | 01.08.2019 | 30.06.2023 | UTBETALING         |
       | 01.07.2023 | 30.06.2030 | UTBETALING         |

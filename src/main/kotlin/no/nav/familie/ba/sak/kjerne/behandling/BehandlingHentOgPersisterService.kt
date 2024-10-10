@@ -17,45 +17,31 @@ class BehandlingHentOgPersisterService(
     fun lagreEllerOppdater(
         behandling: Behandling,
         sendTilDvh: Boolean = true,
-    ): Behandling {
-        return behandlingRepository.save(behandling).also {
+    ): Behandling =
+        behandlingRepository.save(behandling).also {
             if (sendTilDvh) {
                 saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.id)
             }
         }
-    }
 
-    fun lagreOgFlush(behandling: Behandling): Behandling {
-        return behandlingRepository.saveAndFlush(behandling)
-    }
+    fun lagreOgFlush(behandling: Behandling): Behandling = behandlingRepository.saveAndFlush(behandling)
 
-    fun finnAktivForFagsak(fagsakId: Long): Behandling? {
-        return behandlingRepository.findByFagsakAndAktiv(fagsakId)
-    }
+    fun finnAktivForFagsak(fagsakId: Long): Behandling? = behandlingRepository.findByFagsakAndAktiv(fagsakId)
 
-    fun finnAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
-        return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
-    }
+    fun finnAktivOgÅpenForFagsak(fagsakId: Long): Behandling? = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
 
-    fun erÅpenBehandlingPåFagsak(fagsakId: Long): Boolean {
-        return finnAktivOgÅpenForFagsak(fagsakId) != null
-    }
+    fun erÅpenBehandlingPåFagsak(fagsakId: Long): Boolean = finnAktivOgÅpenForFagsak(fagsakId) != null
 
-    fun hent(behandlingId: Long): Behandling {
-        return behandlingRepository.finnBehandlingNullable(behandlingId)
+    fun hent(behandlingId: Long): Behandling =
+        behandlingRepository.finnBehandlingNullable(behandlingId)
             ?: throw Feil("Finner ikke behandling med id $behandlingId")
-    }
 
-    fun hentStatus(behandlingId: Long): BehandlingStatus {
-        return behandlingRepository.finnStatus(behandlingId)
-    }
+    fun hentStatus(behandlingId: Long): BehandlingStatus = behandlingRepository.finnStatus(behandlingId)
 
     /**
      * Henter siste iverksatte behandling på fagsak
      */
-    fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
-    }
+    fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
 
     /**
      * Henter siste iverksatte behandling FØR en gitt behandling.
@@ -96,10 +82,11 @@ class BehandlingHentOgPersisterService(
         return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
     }
 
-    fun <T> partitionByIverksatteBehandlinger(funksjon: (iverksatteBehandlinger: List<Long>) -> List<T>): List<T> {
-        return behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker().chunked(10000)
+    fun <T> partitionByIverksatteBehandlinger(funksjon: (iverksatteBehandlinger: List<Long>) -> List<T>): List<T> =
+        behandlingRepository
+            .finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+            .chunked(10000)
             .flatMap { funksjon(it) }
-    }
 
     fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
@@ -107,16 +94,12 @@ class BehandlingHentOgPersisterService(
     fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> =
         behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
 
-    fun hentBehandlinger(fagsakId: Long): List<Behandling> {
-        return behandlingRepository.finnBehandlinger(fagsakId)
-    }
+    fun hentBehandlinger(fagsakId: Long): List<Behandling> = behandlingRepository.finnBehandlinger(fagsakId)
 
     fun hentBehandlinger(
         fagsakId: Long,
         status: BehandlingStatus,
-    ): List<Behandling> {
-        return behandlingRepository.finnBehandlinger(fagsakId, status)
-    }
+    ): List<Behandling> = behandlingRepository.finnBehandlinger(fagsakId, status)
 
     fun hentFerdigstilteBehandlinger(fagsakId: Long): List<Behandling> =
         hentBehandlinger(fagsakId).filter { it.erVedtatt() }
@@ -127,7 +110,5 @@ class BehandlingHentOgPersisterService(
     fun hentTssEksternIdForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
         behandlingRepository.finnTssEksternIdForBehandlinger(behandlingIder).associate { it.first to it.second }
 
-    fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
-        return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
-    }
+    fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
 }

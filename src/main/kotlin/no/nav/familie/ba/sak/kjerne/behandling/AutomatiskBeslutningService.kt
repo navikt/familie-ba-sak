@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import org.springframework.stereotype.Service
 
 @Service
-class AutomatiskBeslutningService(private val simuleringService: SimuleringService) {
+class AutomatiskBeslutningService(
+    private val simuleringService: SimuleringService,
+) {
     fun behandlingSkalAutomatiskBesluttes(behandling: Behandling): Boolean {
         val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)

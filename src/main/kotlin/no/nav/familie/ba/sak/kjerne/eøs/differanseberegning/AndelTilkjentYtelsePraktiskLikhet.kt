@@ -10,9 +10,7 @@ object AndelTilkjentYtelsePraktiskLikhet {
         return venstre == høyre
     }
 
-    internal fun Iterable<AndelTilkjentYtelse>.inneholderIPraksis(andelTilkjentYtelse: AndelTilkjentYtelse): Boolean {
-        return this.andelerSomKanSammenliknes().contains(andelTilkjentYtelse.andelSomKanSammenliknes())
-    }
+    internal fun Iterable<AndelTilkjentYtelse>.inneholderIPraksis(andelTilkjentYtelse: AndelTilkjentYtelse): Boolean = this.andelerSomKanSammenliknes().contains(andelTilkjentYtelse.andelSomKanSammenliknes())
 
     private fun Iterable<AndelTilkjentYtelse>.andelerSomKanSammenliknes() = this.map { it.andelSomKanSammenliknes() }
 

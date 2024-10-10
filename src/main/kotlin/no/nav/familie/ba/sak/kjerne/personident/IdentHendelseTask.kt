@@ -19,20 +19,20 @@ import java.util.Properties
     triggerTidVedFeilISekunder = (60 * 60 * 24).toLong(),
 )
 class IdentHendelseTask(
-    private val personidentService: PersonidentService,
+    private val håndterNyIdentService: HåndterNyIdentService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         logger.info("Kjører task for håntering av identhendelse.")
         val personIdent = objectMapper.readValue(task.payload, PersonIdent::class.java)
-        personidentService.håndterNyIdent(personIdent)
+        håndterNyIdentService.håndterNyIdent(personIdent)
     }
 
     companion object {
         const val TASK_STEP_TYPE = "IdentHendelseTask"
         private val logger: Logger = LoggerFactory.getLogger(IdentHendelseTask::class.java)
 
-        fun opprettTask(nyIdent: PersonIdent): Task {
-            return Task(
+        fun opprettTask(nyIdent: PersonIdent): Task =
+            Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(nyIdent),
                 properties =
@@ -42,6 +42,5 @@ class IdentHendelseTask(
             ).medTriggerTid(
                 triggerTid = LocalDateTime.now().plusMinutes(1),
             )
-        }
     }
 }

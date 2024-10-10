@@ -223,7 +223,8 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigeKompetanser = listOf(forrigeKompetanse),
                 nåværendeKompetanser =
                     listOf(
-                        forrigeKompetanse.copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                        forrigeKompetanse
+                            .copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
                 nåværendePersonResultat = emptySet(),
@@ -636,6 +637,45 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
+    fun `Endring i beløp - Skal returnere true når beløp i periode har gått fra null til 0kr og det ikke er søkt for person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 0,
+                    aktør = barn1Aktør,
+                ),
+            )
+
+        val erEndringIBeløp =
+            listOf(barn1Aktør).any { aktør ->
+
+                val opphørstidspunktForBehandling =
+                    nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                        forrigeAndelerIBehandling = emptyList(),
+                        nåværendeEndretAndelerIBehandling = emptyList(),
+                        endretAndelerForForrigeBehandling = emptyList(),
+                    )
+
+                val erEndringIBeløpForPerson =
+                    erEndringIBeløpForPerson(
+                        nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                        forrigeAndelerForPerson = emptyList(),
+                        opphørstidspunktForBehandling = opphørstidspunktForBehandling!!,
+                        erFremstiltKravForPerson = false,
+                        nåMåned = YearMonth.now(),
+                    )
+
+                erEndringIBeløpForPerson
+            }
+
+        assertEquals(true, erEndringIBeløp)
+    }
+
+    @Test
     fun `Endring i beløp - Skal returnere true hvis utvidet ikke er endret men småbarnstillegg kun er lagt på`() {
         val søker = lagPerson(type = PersonType.SØKER).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -1016,7 +1056,8 @@ class BehandlingsresultatEndringUtilsTest {
             erEndringIKompetanseForPerson(
                 nåværendeKompetanserForPerson =
                     listOf(
-                        forrigeKompetanse.copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                        forrigeKompetanse
+                            .copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
                 forrigeKompetanserForPerson = listOf(forrigeKompetanse),
@@ -1047,7 +1088,8 @@ class BehandlingsresultatEndringUtilsTest {
             erEndringIKompetanseForPerson(
                 nåværendeKompetanserForPerson =
                     listOf(
-                        forrigeKompetanse.copy(annenForeldersAktivitetsland = "DK")
+                        forrigeKompetanse
+                            .copy(annenForeldersAktivitetsland = "DK")
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
                 forrigeKompetanserForPerson = listOf(forrigeKompetanse),
@@ -1078,7 +1120,8 @@ class BehandlingsresultatEndringUtilsTest {
             erEndringIKompetanseForPerson(
                 nåværendeKompetanserForPerson =
                     listOf(
-                        forrigeKompetanse.copy(annenForeldersAktivitet = KompetanseAktivitet.FORSIKRET_I_BOSTEDSLAND)
+                        forrigeKompetanse
+                            .copy(annenForeldersAktivitet = KompetanseAktivitet.FORSIKRET_I_BOSTEDSLAND)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
                 forrigeKompetanserForPerson = listOf(forrigeKompetanse),
@@ -1139,7 +1182,8 @@ class BehandlingsresultatEndringUtilsTest {
             erEndringIKompetanseForPerson(
                 nåværendeKompetanserForPerson =
                     listOf(
-                        forrigeKompetanse.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
+                        forrigeKompetanse
+                            .copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
                 forrigeKompetanserForPerson = listOf(forrigeKompetanse),
@@ -1170,7 +1214,8 @@ class BehandlingsresultatEndringUtilsTest {
             erEndringIKompetanseForPerson(
                 nåværendeKompetanserForPerson =
                     listOf(
-                        forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
+                        forrigeKompetanse
+                            .copy(fom = YearMonth.now().minusMonths(10))
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
                 forrigeKompetanserForPerson = listOf(forrigeKompetanse),

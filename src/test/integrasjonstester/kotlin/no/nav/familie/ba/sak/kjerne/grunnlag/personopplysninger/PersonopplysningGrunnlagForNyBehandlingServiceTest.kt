@@ -200,61 +200,82 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
             personopplysningGrunnlagSatsendringBehandling: PersonopplysningGrunnlag,
             erEnhetstest: Boolean,
         ) {
-            personopplysningGrunnlagFørsteBehandling.personer.fold(mutableListOf<Pair<Person, Person>>()) { acc, person ->
-                acc.add(
-                    Pair(
-                        person,
-                        personopplysningGrunnlagSatsendringBehandling.personer.first { it.aktør.aktivFødselsnummer() == person.aktør.aktivFødselsnummer() },
-                    ),
-                )
-                acc
-            }.forEach {
-                validerAtSubEntiteterAvPersonErLike(
-                    it.first.bostedsadresser,
-                    it.second.bostedsadresser,
-                    it.first.bostedsadresser.firstOrNull()?.person,
-                    it.second.bostedsadresser.firstOrNull()?.person,
-                    erEnhetstest,
-                )
-                validerAtSubEntiteterAvPersonErLike(
-                    it.first.sivilstander,
-                    it.second.sivilstander,
-                    it.first.sivilstander.firstOrNull()?.person,
-                    it.second.sivilstander.firstOrNull()?.person,
-                )
-
-                assertThat(it.first.sivilstander).containsExactlyInAnyOrderElementsOf(it.second.sivilstander)
-
-                validerAtSubEntiteterAvPersonErLike(
-                    it.first.statsborgerskap,
-                    it.second.statsborgerskap,
-                    it.first.statsborgerskap.firstOrNull()?.person,
-                    it.second.statsborgerskap.firstOrNull()?.person,
-                )
-
-                validerAtSubEntiteterAvPersonErLike(
-                    it.first.opphold,
-                    it.second.opphold,
-                    it.first.opphold.firstOrNull()?.person,
-                    it.second.opphold.firstOrNull()?.person,
-                )
-
-                validerAtSubEntiteterAvPersonErLike(
-                    it.first.arbeidsforhold,
-                    it.second.arbeidsforhold,
-                    it.first.arbeidsforhold.firstOrNull()?.person,
-                    it.second.arbeidsforhold.firstOrNull()?.person,
-                )
-
-                if (it.first.dødsfall != null) {
-                    validerAtSubEntiteterAvPersonErLike(
-                        listOf(it.first.dødsfall),
-                        listOf(it.second.dødsfall),
-                        it.first.dødsfall?.person,
-                        it.second.dødsfall?.person,
+            personopplysningGrunnlagFørsteBehandling.personer
+                .fold(mutableListOf<Pair<Person, Person>>()) { acc, person ->
+                    acc.add(
+                        Pair(
+                            person,
+                            personopplysningGrunnlagSatsendringBehandling.personer.first { it.aktør.aktivFødselsnummer() == person.aktør.aktivFødselsnummer() },
+                        ),
                     )
+                    acc
+                }.forEach {
+                    validerAtSubEntiteterAvPersonErLike(
+                        it.first.bostedsadresser,
+                        it.second.bostedsadresser,
+                        it.first.bostedsadresser
+                            .firstOrNull()
+                            ?.person,
+                        it.second.bostedsadresser
+                            .firstOrNull()
+                            ?.person,
+                        erEnhetstest,
+                    )
+                    validerAtSubEntiteterAvPersonErLike(
+                        it.first.sivilstander,
+                        it.second.sivilstander,
+                        it.first.sivilstander
+                            .firstOrNull()
+                            ?.person,
+                        it.second.sivilstander
+                            .firstOrNull()
+                            ?.person,
+                    )
+
+                    assertThat(it.first.sivilstander).containsExactlyInAnyOrderElementsOf(it.second.sivilstander)
+
+                    validerAtSubEntiteterAvPersonErLike(
+                        it.first.statsborgerskap,
+                        it.second.statsborgerskap,
+                        it.first.statsborgerskap
+                            .firstOrNull()
+                            ?.person,
+                        it.second.statsborgerskap
+                            .firstOrNull()
+                            ?.person,
+                    )
+
+                    validerAtSubEntiteterAvPersonErLike(
+                        it.first.opphold,
+                        it.second.opphold,
+                        it.first.opphold
+                            .firstOrNull()
+                            ?.person,
+                        it.second.opphold
+                            .firstOrNull()
+                            ?.person,
+                    )
+
+                    validerAtSubEntiteterAvPersonErLike(
+                        it.first.arbeidsforhold,
+                        it.second.arbeidsforhold,
+                        it.first.arbeidsforhold
+                            .firstOrNull()
+                            ?.person,
+                        it.second.arbeidsforhold
+                            .firstOrNull()
+                            ?.person,
+                    )
+
+                    if (it.first.dødsfall != null) {
+                        validerAtSubEntiteterAvPersonErLike(
+                            listOf(it.first.dødsfall),
+                            listOf(it.second.dødsfall),
+                            it.first.dødsfall?.person,
+                            it.second.dødsfall?.person,
+                        )
+                    }
                 }
-            }
         }
 
         fun validerAtSubEntiteterAvPersonErLike(
@@ -268,11 +289,12 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                 BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
 
             // Sammenligner ikke id, person og BaseEntitet-felter. id skal være ulik, person sjekkes separat og likhet med BaseEntitet-felter bryr vi oss ikke om.
-            assertThat(kopiert).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
-                "id",
-                "person",
-                *baseEntitetFelter,
-            ).isEqualTo(forrige)
+            assertThat(kopiert)
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields(
+                    "id",
+                    "person",
+                    *baseEntitetFelter,
+                ).isEqualTo(forrige)
 
             // Id skal alltid være ulik. Har ikke mulighet til å sette id til bostedsadresser i enhetstester
             if (kopiert.isNotEmpty() && !erEnhetstestOgBostedsadresse) {
@@ -281,17 +303,19 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
             if (kopiertPerson != null) {
                 // Ignorerer sub-entiteter i sjekk da disse sjekkes hver for seg.
-                assertThat(kopiertPerson).usingRecursiveComparison().ignoringFields(
-                    "id",
-                    "personopplysningGrunnlag",
-                    "bostedsadresser",
-                    "statsborgerskap",
-                    "opphold",
-                    "arbeidsforhold",
-                    "sivilstander",
-                    "dødsfall",
-                    *baseEntitetFelter,
-                ).isEqualTo(forrigePerson)
+                assertThat(kopiertPerson)
+                    .usingRecursiveComparison()
+                    .ignoringFields(
+                        "id",
+                        "personopplysningGrunnlag",
+                        "bostedsadresser",
+                        "statsborgerskap",
+                        "opphold",
+                        "arbeidsforhold",
+                        "sivilstander",
+                        "dødsfall",
+                        *baseEntitetFelter,
+                    ).isEqualTo(forrigePerson)
                 assertThat(kopiertPerson.id).isNotEqualTo(forrigePerson?.id)
             }
         }

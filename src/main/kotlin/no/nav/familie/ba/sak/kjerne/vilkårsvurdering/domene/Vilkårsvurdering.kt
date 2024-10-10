@@ -42,9 +42,7 @@ data class Vilkårsvurdering(
     )
     var personResultater: Set<PersonResultat> = setOf(),
 ) : BaseEntitet() {
-    override fun toString(): String {
-        return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
-    }
+    override fun toString(): String = "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
 
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
         val nyVilkårsvurdering =
@@ -54,12 +52,13 @@ data class Vilkårsvurdering(
             )
 
         nyVilkårsvurdering.personResultater =
-            personResultater.map {
-                it.kopierMedParent(
-                    vilkårsvurdering = nyVilkårsvurdering,
-                    inkluderAndreVurderinger = inkluderAndreVurderinger,
-                )
-            }.toSet()
+            personResultater
+                .map {
+                    it.kopierMedParent(
+                        vilkårsvurdering = nyVilkårsvurdering,
+                        inkluderAndreVurderinger = inkluderAndreVurderinger,
+                    )
+                }.toSet()
         return nyVilkårsvurdering
     }
 
@@ -70,7 +69,8 @@ data class Vilkårsvurdering(
         val nyVilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
 
         nyVilkårsvurdering.personResultater =
-            personResultater.filter { personopplysningGrunnlag.personer.any { person -> person.aktør.aktørId == it.aktør.aktørId } }
+            personResultater
+                .filter { personopplysningGrunnlag.personer.any { person -> person.aktør.aktørId == it.aktør.aktørId } }
                 .map {
                     it.tilKopiForNyVilkårsvurdering(nyVilkårsvurdering = nyVilkårsvurdering)
                 }.toSet()
@@ -78,10 +78,11 @@ data class Vilkårsvurdering(
         return nyVilkårsvurdering
     }
 
-    fun finnOpplysningspliktVilkår(): AnnenVurdering? {
-        return personResultater.single { it.erSøkersResultater() }
-            .andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
-    }
+    fun finnOpplysningspliktVilkår(): AnnenVurdering? =
+        personResultater
+            .single { it.erSøkersResultater() }
+            .andreVurderinger
+            .singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
 
     fun hentPersonResultaterTil(aktørId: String): List<VilkårResultat> =
         personResultater.find { it.aktør.aktørId == aktørId }?.vilkårResultater?.toList()

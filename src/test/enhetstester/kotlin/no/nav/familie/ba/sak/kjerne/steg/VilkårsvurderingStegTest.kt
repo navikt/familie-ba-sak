@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
@@ -48,7 +49,7 @@ class VilkårsvurderingStegTest {
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
-    private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
+    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -62,8 +63,7 @@ class VilkårsvurderingStegTest {
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = mockk(),
             localDateProvider = RealDateProvider(),
-            automatiskOppdaterValutakursService = mockk(),
-            unleashNextMedContextService = unleashNextMedContextService,
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
         )
 
     val behandling =
@@ -89,7 +89,7 @@ class VilkårsvurderingStegTest {
             )
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
-        every { unleashNextMedContextService.isEnabled(any()) } returns true
+        justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
     }
 
     @Test

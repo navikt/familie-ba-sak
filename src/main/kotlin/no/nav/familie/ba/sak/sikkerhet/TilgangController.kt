@@ -42,7 +42,9 @@ class TilgangController(
     }
 }
 
-class TilgangRequestDTO(val brukerIdent: String) {
+class TilgangRequestDTO(
+    val brukerIdent: String,
+) {
     // Bruker init til å validere personidenten
     init {
         Fødselsnummer(brukerIdent)

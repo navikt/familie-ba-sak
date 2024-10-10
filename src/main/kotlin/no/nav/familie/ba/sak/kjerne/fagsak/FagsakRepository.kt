@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import io.micrometer.core.annotation.Timed
 import jakarta.persistence.LockModeType
-import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
 import no.nav.familie.ba.sak.internal.FagsakMedFlereMigreringer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.domain.Page
@@ -72,19 +70,26 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     ): Page<Long>
 
     @Query(
-        value = """WITH sisteiverksatte AS (
-                    SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
-                    FROM behandling b
-                             INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                             INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                    WHERE f.status = 'LØPENDE'
-                      AND f.arkivert = FALSE
-                      AND b.resultat != 'AVSLÅTT'
-                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
-                
-                SELECT silp.fk_fagsak_id
-                FROM sisteiverksatte silp
-                WHERE  silp.stonad_tom < DATE_TRUNC('month', NOW())""",
+        value = """
+WITH sisteiverksatte AS (SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
+                         FROM behandling b
+                                  INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                                  INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                         WHERE f.status = 'LØPENDE'
+                           AND f.arkivert = FALSE
+                           AND b.status = 'AVSLUTTET'
+                           AND b.resultat != 'AVSLÅTT'
+                         ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
+
+SELECT silp.fk_fagsak_id
+FROM sisteiverksatte silp
+WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
+   OR NOT EXISTS (SELECT 1
+                  FROM andel_tilkjent_ytelse aty
+                  WHERE aty.fk_behandling_id = silp.id
+                    AND aty.stonad_tom >= DATE_TRUNC('month', NOW())
+                    AND aty.prosent > 0);
+                """,
         nativeQuery = true,
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
@@ -132,29 +137,6 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE' and f.arkivert = false")
     fun finnAntallFagsakerLøpende(): Long
-
-    @Query(
-        value = """
-        SELECT p.foedselsnummer AS fnr,
-               MAX(ty.endret_dato) AS sistevedtaksdato
-        FROM andel_tilkjent_ytelse aty
-                 INNER JOIN
-             tilkjent_ytelse ty ON aty.tilkjent_ytelse_id = ty.id
-                 INNER JOIN personident p ON aty.fk_aktoer_id = p.fk_aktoer_id
-        WHERE ty.utbetalingsoppdrag IS NOT NULL
-          AND aty.type = 'UTVIDET_BARNETRYGD'
-          AND aty.stonad_fom <= :tom
-          AND aty.stonad_tom >= :fom
-          AND p.aktiv = TRUE
-        GROUP BY p.foedselsnummer
-    """,
-        nativeQuery = true,
-    )
-    @Timed
-    fun finnFagsakerMedUtvidetBarnetrygdInnenfor(
-        fom: LocalDateTime,
-        tom: LocalDateTime,
-    ): List<UtvidetSkatt>
 
     @Query(
         """

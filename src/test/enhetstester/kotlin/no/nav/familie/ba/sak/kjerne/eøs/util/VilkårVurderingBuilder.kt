@@ -37,18 +37,14 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     fun forPerson(
         person: Person,
         startTidspunkt: Tidspunkt<T>,
-    ): PersonResultatBuilder<T> {
-        return PersonResultatBuilder(this, startTidspunkt, person)
-    }
+    ): PersonResultatBuilder<T> = PersonResultatBuilder(this, startTidspunkt, person)
 
     fun byggVilkårsvurdering(): Vilkårsvurdering {
         vilkårsvurdering.personResultater = personresultater
         return vilkårsvurdering
     }
 
-    fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag {
-        return lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
-    }
+    fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
 
     data class PersonResultatBuilder<T : Tidsenhet>(
         val vilkårsvurderingBuilder: VilkårsvurderingBuilder<T>,
@@ -94,9 +90,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
         fun forPerson(
             person: Person,
             startTidspunkt: Tidspunkt<T>,
-        ): PersonResultatBuilder<T> {
-            return byggPerson().forPerson(person, startTidspunkt)
-        }
+        ): PersonResultatBuilder<T> = byggPerson().forPerson(person, startTidspunkt)
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
 
@@ -111,7 +105,8 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
             val vilkårresultater =
                 vilkårsresultatTidslinjer.flatMap {
-                    it.perioder()
+                    it
+                        .perioder()
                         .filter { it.innhold != null }
                         .flatMap { periode -> periode.tilVilkårResultater(personResultat) }
                 }
@@ -125,8 +120,8 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     }
 }
 
-internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> {
-    return listOf(
+internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> =
+    listOf(
         VilkårResultat(
             personResultat = personResultat,
             vilkårType = this.innhold?.vilkår!!,
@@ -139,7 +134,6 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
             utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList(),
         ),
     )
-}
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() =
     VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag().tilPersonEnkelSøkerOgBarn())

@@ -21,7 +21,9 @@ import java.time.LocalDateTime
     maxAntallFeil = 1,
     settTilManuellOppfølgning = true,
 )
-class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingService) : AsyncTaskStep {
+class KonsistensavstemMotOppdragStartTask(
+    val avstemmingService: AvstemmingService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)
@@ -50,7 +52,8 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
 
         var chunkNr = 1
         val startTid = LocalDateTime.now()
-        relevanteBehandlinger.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+        relevanteBehandlinger
+            .chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
             .forEachIndexed { index, oppstykketRelevanteBehandlinger ->
                 val triggerTidForChunk = startTid.plusSeconds(3 * index.toLong())
                 if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(

@@ -145,7 +145,8 @@ internal class TidTest {
         val currentPeriode = DatoIntervallEntitet(LocalDate.of(2018, 6, 1), null)
 
         val result = slåSammenOverlappendePerioder(listOf(periode2, periode3, periode1, currentPeriode))
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(3)
             .contains(periode1)
             .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2018, 5, 20)))
@@ -160,7 +161,8 @@ internal class TidTest {
         val currentPeriode = DatoIntervallEntitet(LocalDate.of(2018, 6, 1), null)
 
         val result = slåSammenOverlappendePerioder(listOf(periode2, periode3, periode1, currentPeriode))
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(3)
             .contains(periode1)
             .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2018, 5, 20)))
@@ -179,7 +181,8 @@ internal class TidTest {
                 ),
             )
 
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(2)
             .contains(DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 3, 1)))
             .contains(DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 3, 1)))
@@ -195,7 +198,8 @@ internal class TidTest {
                 ),
             )
 
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(2)
             .contains(DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 31)))
             .contains(DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28)))
@@ -209,7 +213,8 @@ internal class TidTest {
         val currentPeriode = DatoIntervallEntitet(LocalDate.of(2008, 6, 1), null)
 
         val result = slåSammenOverlappendePerioder(listOf(periode2, periode3, periode1, currentPeriode))
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(2)
             .contains(periode1)
             .contains(DatoIntervallEntitet(LocalDate.of(2005, 10, 1), null))
@@ -221,7 +226,8 @@ internal class TidTest {
         val periode2 = DatoIntervallEntitet(LocalDate.of(2005, 10, 1), LocalDate.of(2015, 5, 20))
 
         val result = slåSammenOverlappendePerioder(listOf(periode1, periode2))
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(1)
             .contains(periode1)
             .contains(DatoIntervallEntitet(LocalDate.of(2004, 1, 1), null))
@@ -233,7 +239,8 @@ internal class TidTest {
         val periode2 = DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 5))
 
         val result = slåSammenOverlappendePerioder(listOf(periode1, periode2))
-        Assertions.assertThat(result)
+        Assertions
+            .assertThat(result)
             .hasSize(1)
     }
 
@@ -309,7 +316,5 @@ internal class TidTest {
         assertFalse(sep2021.overlapperHeltEllerDelvisMed(jan2020Aug2020))
     }
 
-    private fun dato(s: String): LocalDate {
-        return LocalDate.parse(s)
-    }
+    private fun dato(s: String): LocalDate = LocalDate.parse(s)
 }

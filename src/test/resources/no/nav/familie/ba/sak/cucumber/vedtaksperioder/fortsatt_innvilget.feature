@@ -8,7 +8,7 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | FagsakId  | Fagsaktype |
       | 1        | NORMAL     |
 
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak |
       | 1            | 1        |                     | INNVILGET           | SØKNAD           |
       | 2            | 1        | 1                   | FORTSATT_INNVILGET  | ÅRLIG_KONTROLL   |
@@ -70,8 +70,8 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
       | 2       | 01.03.2022 | 30.11.2022 | NORGE_ER_SEKUNDÆRLAND | 2            | ARBEIDER         | I_ARBEID                  | NO                    | PL                             | PL                  |
       | 2       | 01.12.2022 |            | NORGE_ER_PRIMÆRLAND   | 2            | ARBEIDER         | INAKTIV                   | NO                    | PL                             | PL                  |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato | Til dato | Vedtaksperiodetype |
       |          |          | FORTSATT_INNVILGET |

@@ -90,7 +90,8 @@ internal class UtenlandskPeriodebeløpServiceTest {
         val lagretUtenlandskPeriodebeløp =
             UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
                 .medBeløp("44444444", "EUR", "SE", barn1)
-                .lagreTil(utenlandskPeriodebeløpRepository).single()
+                .lagreTil(utenlandskPeriodebeløpRepository)
+                .single()
 
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(behandlingId, lagretUtenlandskPeriodebeløp.id)
 
@@ -116,12 +117,16 @@ internal class UtenlandskPeriodebeløpServiceTest {
         UtenlandskPeriodebeløpBuilder(jan(2020), behandlingId)
             .medBeløp("4>", "EUR", "SE", barn1)
             .medIntervall(Intervall.UKENTLIG)
-            .lagreTil(utenlandskPeriodebeløpRepository).single()
+            .lagreTil(utenlandskPeriodebeløpRepository)
+            .single()
 
         // Oppdaterer UtenlandskPeriodeBeløp med identisk innhold, men med lukket tom for andre mnd.
         val oppdatertUtenlandskPeriodebeløp =
-            UtenlandskPeriodebeløpBuilder(jan(2020)).medBeløp("44", "EUR", "SE", barn1).medIntervall(Intervall.UKENTLIG)
-                .bygg().first()
+            UtenlandskPeriodebeløpBuilder(jan(2020))
+                .medBeløp("44", "EUR", "SE", barn1)
+                .medIntervall(Intervall.UKENTLIG)
+                .bygg()
+                .first()
         utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingId, oppdatertUtenlandskPeriodebeløp)
 
         // Forventer en liste på 2 elementer hvor det første dekker 2 mnd og det andre dekker fra mnd 3 og til uendelig (null). Det siste elementet skal ha beløp, valutakode og intervall satt til null, mens utbetalingsland skal være "SE".

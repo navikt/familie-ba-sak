@@ -58,7 +58,8 @@ internal class TidslinjerTest {
                 .byggPerson()
         val søkerResult = " EEEEEEENNEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
-        vilkårsvurderingBygger.forPerson(barn1, startMåned)
+        vilkårsvurderingBygger
+            .forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", UNDER_18_ÅR)
             .medVilkår("   EEE NNNN  EEEE+++ ", BOSATT_I_RIKET)
             .medVilkår("     EEENNEEEEEEEEE  ", LOVLIG_OPPHOLD)
@@ -67,7 +68,8 @@ internal class TidslinjerTest {
             .byggPerson()
         val barn1Result = " ???????NN!???EE?????".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
-        vilkårsvurderingBygger.forPerson(barn2, startMåned)
+        vilkårsvurderingBygger
+            .forPerson(barn2, startMåned)
             .medVilkår("+++++++++>", UNDER_18_ÅR)
             .medVilkår(" EEEE++EE>", BOSATT_I_RIKET)
             .medVilkår("EEEEEEEEE>", LOVLIG_OPPHOLD)
@@ -106,7 +108,8 @@ internal class TidslinjerTest {
                 .byggPerson()
         val søkerResult = " EEEEEEEEEEEENNNNNNNN".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
 
-        vilkårsvurderingBygger.forPerson(barn1, startMåned)
+        vilkårsvurderingBygger
+            .forPerson(barn1, startMåned)
             .medVilkår("++++++++++++++++     ", UNDER_18_ÅR)
             .medVilkår("   EEEENNNNEEEEEEEE ", BOSATT_I_RIKET)
             .medVilkår("     EEENNEEEEEEEEE  ", LOVLIG_OPPHOLD)
@@ -156,9 +159,16 @@ internal class TidslinjerTest {
             )
 
         assertEquals(
-            barn1.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(),
-            vilkårsvurderingTidslinjer.forBarn(barn1).egetRegelverkResultatTidslinje.filtrerIkkeNull()
-                .perioder().maxOf { it.tilOgMed.tilYearMonth() },
+            barn1.fødselsdato
+                .til18ÅrsVilkårsdato()
+                .minusMonths(1)
+                .toYearMonth(),
+            vilkårsvurderingTidslinjer
+                .forBarn(barn1)
+                .egetRegelverkResultatTidslinje
+                .filtrerIkkeNull()
+                .perioder()
+                .maxOf { it.tilOgMed.tilYearMonth() },
         )
     }
 
@@ -380,5 +390,6 @@ internal class TidslinjerTest {
 }
 
 fun VilkårsvurderingTidslinjer.barnasRegelverkResultatTidslinjer() =
-    this.barnasTidslinjer()
+    this
+        .barnasTidslinjer()
         .mapValues { (_, barnetsTidslinjer) -> barnetsTidslinjer.regelverkResultatTidslinje }

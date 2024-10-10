@@ -106,9 +106,15 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val barn1Id =
-            personopplysningGrunnlag.barna.find { it.aktør.aktivFødselsnummer() == barn1Fnr }!!.aktør.aktivFødselsnummer()
+            personopplysningGrunnlag.barna
+                .find { it.aktør.aktivFødselsnummer() == barn1Fnr }!!
+                .aktør
+                .aktivFødselsnummer()
         val barn2Id =
-            personopplysningGrunnlag.barna.find { it.aktør.aktivFødselsnummer() == barn2Fnr }!!.aktør.aktivFødselsnummer()
+            personopplysningGrunnlag.barna
+                .find { it.aktør.aktivFødselsnummer() == barn2Fnr }!!
+                .aktør
+                .aktivFødselsnummer()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         vilkårsvurdering.personResultater =

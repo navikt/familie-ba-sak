@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
@@ -11,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -35,8 +33,23 @@ class ValutakursController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val ecbService: ECBService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
+    @PutMapping(path = ["{behandlingId}/oppdater-valutakurser-og-simulering-automatisk"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun oppdaterValutakurserOgSimuleringAutomatisk(
+        @PathVariable behandlingId: Long,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.BESLUTTER,
+            handling = "Oppdaterer valutakurser og simulering automatisk",
+        )
+        tilgangService.validerErPåBeslutteVedtakSteg(behandlingId)
+
+        automatiskOppdaterValutakursService.oppdaterValutakurserOgSimulering(BehandlingId(behandlingId))
+
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+    }
+
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
         @PathVariable behandlingId: Long,
@@ -59,9 +72,7 @@ class ValutakursController(
             }
 
         valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
-        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
-        }
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
@@ -79,9 +90,7 @@ class ValutakursController(
 
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
-        if (unleashNextMedContextService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER)) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
-        }
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandlingId))
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -105,12 +114,12 @@ class ValutakursController(
     /**
      * Sjekker om valuta er Islandske Kroner og kursdato er før 01.02.2018
      */
-    private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
-        return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" &&
+    private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean =
+        restValutakurs.valutakursdato != null &&
+            restValutakurs.valutakode == "ISK" &&
             restValutakurs.valutakursdato.isBefore(
                 LocalDate.of(2018, 2, 1),
             )
-    }
 
     /**
      * Sjekker om *restValutakurs* inneholder nødvendige verdier og sammenligner disse med *eksisterendeValutakurs*
@@ -118,9 +127,7 @@ class ValutakursController(
     private fun valutakursErEndret(
         restValutakurs: RestValutakurs,
         eksisterendeValutakurs: Valutakurs,
-    ): Boolean {
-        return restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
-    }
+    ): Boolean = restValutakurs.valutakode != null && restValutakurs.valutakursdato != null && (eksisterendeValutakurs.valutakursdato != restValutakurs.valutakursdato || eksisterendeValutakurs.valutakode != restValutakurs.valutakode)
 
     @PutMapping(path = ["behandlinger/{behandlingId}/endre-vurderingsstrategi-til/{vurderingsstrategiForValutakurser}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     private fun endreVurderingsstrategiForValutakurser(

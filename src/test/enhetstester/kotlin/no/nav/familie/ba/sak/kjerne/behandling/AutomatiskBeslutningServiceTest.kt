@@ -90,18 +90,20 @@ class AutomatiskBeslutningServiceTest {
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling ikke er migrering uavhengig av avvik og manuelle posteringer`(
         behandlingÅrsak: BehandlingÅrsak,
     ) {
-        BehandlingType.values().filter {
-            !listOf(
-                BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-            ).contains(it)
-        }.forEach { behandlingType ->
-            val behandling =
-                lagBehandling(
-                    behandlingType = behandlingType,
-                    årsak = behandlingÅrsak,
-                )
-            assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
-        }
+        BehandlingType
+            .values()
+            .filter {
+                !listOf(
+                    BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+                ).contains(it)
+            }.forEach { behandlingType ->
+                val behandling =
+                    lagBehandling(
+                        behandlingType = behandlingType,
+                        årsak = behandlingÅrsak,
+                    )
+                assertThat(automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)).isFalse
+            }
     }
 }

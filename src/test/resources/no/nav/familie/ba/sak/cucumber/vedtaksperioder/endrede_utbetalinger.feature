@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperioder med endrede utbetalinger
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | ForrigeBehandlingId |
       | 1            |                     |
       | 2            | 1                   |
@@ -31,9 +31,9 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
       | 3456    | 01.05.2020 | 30.04.2021 | 1054  | 1            |
       | 3456    | 01.05.2021 | 31.03.2038 | 1354  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
       | 01.05.2020 | 30.04.2021 | Utbetaling         | Barn og søker |
       | 01.05.2021 | 31.03.2038 | Utbetaling         | Barn og søker |
@@ -84,9 +84,9 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
       | 3456    | 01.12.2021 | 31.12.2021 | 1354  | 2            |
       | 5678    | 01.12.2021 | 31.12.2021 | 1354  | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar |
       | 01.01.2022 |          | Opphør             | Kun søker |
 
@@ -126,9 +126,9 @@ Egenskap: Vedtaksperioder med endrede utbetalinger
       | 3456    | 01.06.2021 | 30.09.2033 | 1354  | 1            |
       | 3456    | 01.04.2023 | 30.09.2033 | 1354  | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                              |
       | 01.06.2021 | 31.03.2023 | Opphør             | Barnet bodde ikke hos søker i denne perioden allikevel |
       | 01.04.2023 | 30.09.2033 | Utbetaling         |                                                        |

@@ -74,7 +74,10 @@ data class GrOpphold(
         RestRegisteropplysning(
             fom = this.gyldigPeriode?.fom,
             tom = this.gyldigPeriode?.tom,
-            verdi = this.type.name.replace('_', ' ').storForbokstav(),
+            verdi =
+                this.type.name
+                    .replace('_', ' ')
+                    .storForbokstav(),
         )
 
     companion object {

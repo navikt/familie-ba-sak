@@ -108,7 +108,10 @@ class EndretUtbetalingAndelTest(
             )
 
         val endretUtbetalingAndelId =
-            restUtvidetBehandlingEtterEndretPeriode.data!!.endretUtbetalingAndeler.first().id
+            restUtvidetBehandlingEtterEndretPeriode.data!!
+                .endretUtbetalingAndeler
+                .first()
+                .id
 
         familieBaSakKlient().fjernEndretUtbetalingAndel(
             restUtvidetBehandling.data!!.behandlingId,

@@ -23,7 +23,8 @@ class AnnenVurderingService(
         )
 
     fun hent(annenVurderingId: Long): AnnenVurdering =
-        annenVurderingRepository.findById(annenVurderingId)
+        annenVurderingRepository
+            .findById(annenVurderingId)
             .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
 
     @Transactional

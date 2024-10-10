@@ -21,12 +21,11 @@ class FeatureToggleController(
     @PostMapping("/er-toggler-enabled", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun erTogglerEnabled(
         @RequestBody toggles: List<String>,
-    ): ResponseEntity<Ressurs<Map<String, Boolean>>> {
-        return RessursUtils.ok(
+    ): ResponseEntity<Ressurs<Map<String, Boolean>>> =
+        RessursUtils.ok(
             toggles.fold(mutableMapOf()) { acc, toggleId ->
                 acc[toggleId] = unleashNextMedContextService.isEnabled(toggleId)
                 acc
             },
         )
-    }
 }

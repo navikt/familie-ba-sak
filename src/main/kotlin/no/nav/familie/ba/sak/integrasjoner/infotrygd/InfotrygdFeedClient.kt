@@ -23,8 +23,8 @@ class InfotrygdFeedClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd_feed") {
-    fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
-        return try {
+    fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) =
+        try {
             sendFeedTilInfotrygd(
                 URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"),
                 infotrygdFødselhendelsesFeedDto,
@@ -32,7 +32,6 @@ class InfotrygdFeedClient(
         } catch (e: Exception) {
             loggOgKastException(e)
         }
-    }
 
     fun sendVedtakFeedTilInfotrygd(infotrygdVedtakFeedDto: InfotrygdVedtakFeedDto) {
         try {

@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | ForrigeBehandlingId |
       | 1            |                     |
       | 2            | 1                   |
@@ -64,9 +64,9 @@ Egenskap: Vedtaksperioder med reduksjon fra forrige periode eller behandling
       | 5678    | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 1083 |
       | 5678    | 2            | 01.07.2023 | 30.09.2025 | 1310  | ORDINÆR_BARNETRYGD | 1310 |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
       | 01.04.2023 | 30.06.2023 | UTBETALING         |           |
       | 01.07.2023 | 30.09.2025 | UTBETALING         |           |

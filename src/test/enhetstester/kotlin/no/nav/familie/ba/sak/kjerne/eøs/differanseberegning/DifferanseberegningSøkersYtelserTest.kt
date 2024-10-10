@@ -67,7 +67,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn3, des(2018))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -145,7 +146,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -181,7 +183,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -247,7 +250,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn3, des(2018))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -307,7 +311,8 @@ class DifferanseberegningSøkersYtelserTest {
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
                 .forPerson(barn1, des(2016))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -349,7 +354,8 @@ class DifferanseberegningSøkersYtelserTest {
             VilkårsvurderingBuilder<Måned>(behandling = behandling)
                 .forPerson(barn1, des(2016))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -398,7 +404,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn3, jun(2020))
                 .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -448,7 +455,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn3, jun(2020))
                 .medVilkår("eeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -502,7 +510,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .forPerson(barn2, des(2017))
                 //                                 |--- 2018---|
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -557,7 +566,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .forPerson(barn2, des(2017))
                 //                                |--- 2018---|
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -612,7 +622,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 .medVilkår("eeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -674,7 +685,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
                 .forPerson(barn3, des(2016))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -741,7 +753,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medUtdypendeVilkårsvurdering("$$$$$$$$$$$$$", Vilkår.BOR_MED_SØKER, UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER)
                 .forPerson(barn3, des(2016))
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
@@ -807,7 +820,8 @@ class DifferanseberegningSøkersYtelserTest {
                 .medVilkår("eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
                 .forPerson(barn2, des(2017))
                 .medVilkår("eeeeeeeeeeeee", Vilkår.BOR_MED_SØKER)
-                .byggVilkårsvurdering().personResultater
+                .byggVilkårsvurdering()
+                .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
             tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)

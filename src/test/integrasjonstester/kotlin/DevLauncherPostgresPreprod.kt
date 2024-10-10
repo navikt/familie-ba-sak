@@ -39,7 +39,9 @@ private fun settClientIdOgSecret() {
 
     val inputStream = BufferedReader(InputStreamReader(process.inputStream))
     inputStream.readLine() // "Switched to context dev-gcp"
-    inputStream.readLine().split(";")
+    inputStream
+        .readLine()
+        .split(";")
         .map { it.split("=") }
         .map { System.setProperty(it[0], it[1]) }
     inputStream.close()

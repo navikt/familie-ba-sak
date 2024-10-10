@@ -34,11 +34,7 @@ data class SøknadGrunnlag(
     @Column(name = "aktiv", nullable = false)
     var aktiv: Boolean = true,
 ) {
-    fun hentSøknadDto(): SøknadDTO {
-        return objectMapper.readValue(this.søknad, SøknadDTO::class.java)
-    }
+    fun hentSøknadDto(): SøknadDTO = objectMapper.readValue(this.søknad, SøknadDTO::class.java)
 
-    fun hentUregistrerteBarn(): List<BarnMedOpplysninger> {
-        return hentSøknadDto().barnaMedOpplysninger.filter { !it.erFolkeregistrert && it.inkludertISøknaden }
-    }
+    fun hentUregistrerteBarn(): List<BarnMedOpplysninger> = hentSøknadDto().barnaMedOpplysninger.filter { !it.erFolkeregistrert && it.inkludertISøknaden }
 }

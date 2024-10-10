@@ -7,7 +7,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
 
-enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering) {
+enum class Filtreringsregel(
+    val vurder: FiltreringsreglerFakta.() -> Evaluering,
+) {
     MOR_GYLDIG_FNR(vurder = { FiltreringsregelEvaluering.morHarGyldigFnr(this) }),
     BARN_GYLDIG_FNR(vurder = { FiltreringsregelEvaluering.barnHarGyldigFnr(this) }),
     MOR_LEVER(vurder = { FiltreringsregelEvaluering.morLever(this) }),
@@ -37,7 +39,8 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
 
 object FiltreringsregelEvaluering {
     fun evaluerFiltreringsregler(fakta: FiltreringsreglerFakta) =
-        Filtreringsregel.values()
+        Filtreringsregel
+            .values()
             .fold(mutableListOf<Evaluering>()) { acc, filtreringsregel ->
                 if (acc.any { it.resultat == Resultat.IKKE_OPPFYLT }) {
                     acc.add(
@@ -177,8 +180,8 @@ object FiltreringsregelEvaluering {
             Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MOR_HAR_OPPHØRT_BARNETRYGD)
         }
 
-    fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering {
-        return when (
+    fun merEnn5mndEllerMindreEnnFemDagerSidenForrigeBarn(fakta: FiltreringsreglerFakta): Evaluering =
+        when (
             fakta.barnaFraHendelse.all { barnFraHendelse ->
                 fakta.restenAvBarna.all {
                     abs(ChronoUnit.MONTHS.between(barnFraHendelse.fødselsdato, it.fødselsdato)) > 5 ||
@@ -189,12 +192,9 @@ object FiltreringsregelEvaluering {
             true -> Evaluering.oppfylt(FiltreringsregelOppfylt.MER_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
             false -> Evaluering.ikkeOppfylt(FiltreringsregelIkkeOppfylt.MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL)
         }
-    }
 }
 
-internal fun erFDatnummer(personIdent: String): Boolean {
-    return personIdent.substring(6).toInt() == 0
-}
+internal fun erFDatnummer(personIdent: String): Boolean = personIdent.substring(6).toInt() == 0
 
 /**
  * BOST-nr har måned mellom 21 og 32

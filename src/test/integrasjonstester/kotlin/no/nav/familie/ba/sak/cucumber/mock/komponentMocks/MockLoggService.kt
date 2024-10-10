@@ -4,10 +4,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.logg.Logg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import java.time.LocalDateTime
 
 fun mockLoggService(): LoggService {

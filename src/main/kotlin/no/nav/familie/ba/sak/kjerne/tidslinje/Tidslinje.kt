@@ -18,13 +18,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
 abstract class Tidslinje<I, T : Tidsenhet> {
     private var periodeCache: List<Periode<I, T>>? = null
 
-    fun perioder(): Collection<Periode<I, T>> {
-        return periodeCache ?: lagPerioder().sortedBy { it.fraOgMed }.toList()
+    fun perioder(): Collection<Periode<I, T>> =
+        periodeCache ?: lagPerioder()
+            .sortedBy { it.fraOgMed }
+            .toList()
             .also {
                 valider(it)
                 periodeCache = it
             }
-    }
 
     protected abstract fun lagPerioder(): Collection<Periode<I, T>>
 
@@ -76,17 +77,14 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        return if (other is Tidslinje<*, *>) {
+    override fun equals(other: Any?): Boolean =
+        if (other is Tidslinje<*, *>) {
             perioder() == other.perioder()
         } else {
             false
         }
-    }
 
-    override fun hashCode(): Int {
-        return perioder().hashCode()
-    }
+    override fun hashCode(): Int = perioder().hashCode()
 
     override fun toString(): String =
         lagPerioder().joinToString(" | ") { it.toString() }
@@ -105,8 +103,9 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             OVERLAPPER_ETTERFØLGENDE_PERIODE,
         }
 
-        data class TidslinjeFeilException(val tidslinjeFeil: Collection<TidslinjeFeil>) :
-            IllegalStateException(tidslinjeFeil.toString())
+        data class TidslinjeFeilException(
+            val tidslinjeFeil: Collection<TidslinjeFeil>,
+        ) : IllegalStateException(tidslinjeFeil.toString())
     }
 }
 

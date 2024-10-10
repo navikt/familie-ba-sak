@@ -6,10 +6,6 @@ import no.nav.familie.ba.sak.ekstern.bisys.BisysUtvidetBarnetrygdResponse
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonRequest
 import no.nav.familie.ba.sak.ekstern.pensjon.BarnetrygdTilPensjonResponse
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
-import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioder
-import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderRequest
-import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerioderResponse
-import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPersonerResponse
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -105,7 +101,10 @@ class InfotrygdBarnetrygdClient(
         }
     }
 
-    data class HentUtvidetBarnetrygdRequest(val personIdent: String, val fraDato: YearMonth)
+    data class HentUtvidetBarnetrygdRequest(
+        val personIdent: String,
+        val fraDato: YearMonth,
+    )
 
     @Retryable(
         value = [Exception::class],
@@ -152,31 +151,6 @@ class InfotrygdBarnetrygdClient(
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException("Henting av personer med barnetrygd feilet. Gav feil: ${ex.message}", ex)
-        }
-    }
-
-    fun hentPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet?aar=$år")
-        return try {
-            getForEntity(uri)
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw RuntimeException("Henting av personer med utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
-        }
-    }
-
-    fun hentPerioderMedUtvidetBarnetrygdForPersoner(
-        identer: List<String>,
-        år: String,
-    ): List<SkatteetatenPerioder> {
-        val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet/skatteetaten/perioder")
-
-        val request = SkatteetatenPerioderRequest(identer = identer, aar = år)
-        return try {
-            postForEntity<List<SkatteetatenPerioderResponse>>(uri, request).flatMap { it.brukere }
-        } catch (ex: Exception) {
-            loggFeil(ex, uri)
-            throw RuntimeException("Henting av perioder med utvidet barnetrygd feilet. Gav feil: ${ex.message}", ex)
         }
     }
 
@@ -242,13 +216,13 @@ class InfotrygdBarnetrygdClient(
     }
 }
 
-enum class InfotrygdBrevkode(val kode: String) {
+enum class InfotrygdBrevkode(
+    val kode: String,
+) {
     BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG("BA04"),
     BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG("BA05"),
     BREV_BATCH_OMREGNING_BARN_18_ÅR("BA37"),
-    BREV_BATCH_OMREGNING_BARN_6_ÅR("BA18"),
     BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG("B001"),
     BREV_MANUELL_INNVILGET_SMÅBARNSTILLEGG("B002"),
     BREV_MANUELL_OMREGNING_BARN_18_ÅR("B003"),
-    BREV_MANUELL_OMREGNING_BARN_6_ÅR("BA19"),
 }

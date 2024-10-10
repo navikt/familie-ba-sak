@@ -46,31 +46,30 @@ object VilkårsvurderingForskyvningUtils {
     ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
-        return tidslinjer.kombiner {
-            alleOrdinæreVilkårErOppfyltEllerNull(
-                vilkårResultater = it,
-                personType = person.type,
-                fagsakType = fagsakType,
-            )
-        }
-            .filtrerIkkeNull().slåSammenLike()
+        return tidslinjer
+            .kombiner {
+                alleOrdinæreVilkårErOppfyltEllerNull(
+                    vilkårResultater = it,
+                    personType = person.type,
+                    fagsakType = fagsakType,
+                )
+            }.filtrerIkkeNull()
+            .slåSammenLike()
     }
 
     /**
      * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
      * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
      * */
-    fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
-        return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> =
+        this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
             vilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, fødselsdato)
         }
-    }
 
-    fun Collection<VilkårResultat>.tilForskjøvedeVilkårTidslinjer(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
-        return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
+    fun Collection<VilkårResultat>.tilForskjøvedeVilkårTidslinjer(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> =
+        this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
             vilkårResultater.tilForskjøvetTidslinje(vilkår, fødselsdato)
         }
-    }
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(
         vilkår: Vilkår,
@@ -89,8 +88,8 @@ object VilkårsvurderingForskyvningUtils {
         return this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
     }
 
-    fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
-        return this
+    fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> =
+        this
             .filter { it.vilkårType == vilkår && it.erOppfylt() }
             .tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
@@ -100,7 +99,6 @@ object VilkårsvurderingForskyvningUtils {
                     else -> innholdFørsteDagDenneMåned
                 }
             }
-    }
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinje(
         vilkår: Vilkår,
@@ -111,8 +109,8 @@ object VilkårsvurderingForskyvningUtils {
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)
     }
 
-    private fun Collection<VilkårResultat>.lagForskjøvetTidslinje(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
-        return this
+    private fun Collection<VilkårResultat>.lagForskjøvetTidslinje(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> =
+        this
             .filter { it.vilkårType == vilkår }
             .tilTidslinje()
             .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
@@ -130,24 +128,21 @@ object VilkårsvurderingForskyvningUtils {
                     null
                 }
             }
-    }
 
-    private fun VilkårResultat?.erEksplisittAvslagInnenforSammeMåned(): Boolean {
-        return this?.erEksplisittAvslagPåSøknad == true &&
+    private fun VilkårResultat?.erEksplisittAvslagInnenforSammeMåned(): Boolean =
+        this?.erEksplisittAvslagPåSøknad == true &&
             this.periodeFom != null &&
             this.periodeFom!!.toYearMonth() == this.periodeTom?.toYearMonth()
-    }
 
     private fun Tidslinje<VilkårResultat, Måned>.beskjærPå18ÅrHvisUnder18ÅrVilkår(
         vilkår: Vilkår,
         fødselsdato: LocalDate?,
-    ): Tidslinje<VilkårResultat, Måned> {
-        return if (vilkår == Vilkår.UNDER_18_ÅR) {
+    ): Tidslinje<VilkårResultat, Måned> =
+        if (vilkår == Vilkår.UNDER_18_ÅR) {
             this.beskjærPå18År(fødselsdato = fødselsdato ?: throw Feil("Mangler fødselsdato, men prøver å beskjære på 18-år vilkåret"))
         } else {
             this
         }
-    }
 
     internal fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
         val erUnder18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
@@ -164,13 +159,12 @@ object VilkårsvurderingForskyvningUtils {
         vilkårResultater: Iterable<VilkårResultat>,
         personType: PersonType,
         fagsakType: FagsakType,
-    ): List<VilkårResultat>? {
-        return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
+    ): List<VilkårResultat>? =
+        if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
             vilkårResultater.filterNotNull()
         } else {
             null
         }
-    }
 
     fun Iterable<VilkårResultat>.alleOrdinæreVilkårErOppfylt(
         personType: PersonType,
@@ -182,7 +176,9 @@ object VilkårsvurderingForskyvningUtils {
                 fagsakType = fagsakType,
                 behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
-        return this.map { it.vilkårType }
-            .containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
+        return this
+            .map { it.vilkårType }
+            .containsAll(alleVilkårForPersonType) &&
+            this.all { it.resultat == Resultat.OPPFYLT }
     }
 }

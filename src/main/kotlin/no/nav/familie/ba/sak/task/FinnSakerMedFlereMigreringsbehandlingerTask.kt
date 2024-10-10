@@ -13,7 +13,9 @@ import java.time.YearMonth
     beskrivelse = "Finn fagsaker med flere migreringersbehandlinger",
     maxAntallFeil = 1,
 )
-class FinnSakerMedFlereMigreringsbehandlingerTask(val forvalterService: ForvalterService) : AsyncTaskStep {
+class FinnSakerMedFlereMigreringsbehandlingerTask(
+    val forvalterService: ForvalterService,
+) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val fraOgMedÅrMåned = YearMonth.parse(task.payload)
 

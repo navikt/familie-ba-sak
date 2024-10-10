@@ -4,7 +4,7 @@
 Egenskap: Vedtaksperiode for behandling som revurderer kompetanse eller endret utbetaling
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId | ForrigeBehandlingId |
       | 1            |                     |
       | 2            | 1                   |
@@ -42,9 +42,9 @@ Egenskap: Vedtaksperiode for behandling som revurderer kompetanse eller endret u
       | 3456    | 01.05.2020 | 30.06.2021 | NORGE_ER_PRIMÆRLAND   | 2            |
       | 3456    | 01.07.2021 | 31.03.2038 | NORGE_ER_SEKUNDÆRLAND | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar          |
       | 01.05.2020 | 30.06.2021 | Utbetaling         | Norge primærland   |
       | 01.07.2021 | 31.03.2038 | Utbetaling         | Norge sekundærland |
@@ -57,9 +57,9 @@ Egenskap: Vedtaksperiode for behandling som revurderer kompetanse eller endret u
       | 3456    | 01.05.2021 | 31.03.2038 | 1            |
       | 3456    | 01.07.2021 | 31.03.2038 | 2            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 2
+    Når vedtaksperiodene genereres for behandling 2
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar          |
       | 01.05.2020 | 30.06.2021 | Utbetaling         | Norge primærland   |
       | 01.07.2021 | 31.03.2038 | Utbetaling         | Norge sekundærland |

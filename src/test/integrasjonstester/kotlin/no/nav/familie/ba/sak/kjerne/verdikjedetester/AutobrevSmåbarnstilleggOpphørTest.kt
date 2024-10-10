@@ -84,9 +84,10 @@ class AutobrevSmåbarnstilleggOpphørTest(
         val førsteDagIStønadTomMåned = YearMonth.now().minusMonths(1)
         assertEquals(
             førsteDagIStønadTomMåned,
-            andelerForSmåbarnstilleggFagsak1Behandling2.maxByOrNull {
-                it.stønadTom == YearMonth.now().minusMonths(1) && it.erSmåbarnstillegg()
-            }?.stønadTom,
+            andelerForSmåbarnstilleggFagsak1Behandling2
+                .maxByOrNull {
+                    it.stønadTom == YearMonth.now().minusMonths(1) && it.erSmåbarnstillegg()
+                }?.stønadTom,
         )
 
         val fagsaker: List<Long> =
@@ -114,9 +115,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
             ),
         )
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
-        return familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
-    }
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
 
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,

@@ -124,8 +124,10 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         )
 
         val (basakPeriode, infotrygdperiode) =
-            pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
-                .single().barnetrygdPerioder
+            pensjonService
+                .hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+                .single()
+                .barnetrygdPerioder
                 .partition { it.kildesystem == "BA" }
                 .run { first.single() to second.single() }
 

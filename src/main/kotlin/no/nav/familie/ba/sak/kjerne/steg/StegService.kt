@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -169,7 +170,8 @@ class StegService(
 
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
         val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
-        return beregningService.finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id)
+        return beregningService
+            .finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id)
             .mapNotNull {
                 try {
                     personopplysningerService.hentPersoninfoEnkel(it)
@@ -500,7 +502,8 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() &&
-                behandlingSteg.stegType()
+                behandlingSteg
+                    .stegType()
                     .kommerEtter(behandling.steg)
             ) {
                 throw FunksjonellFeil(
@@ -516,7 +519,8 @@ class StegService(
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK && !erTekniskVedlikeholdHenleggelse) {
                 throw FunksjonellFeil(
                     "Behandlingen er på steg '${behandling.steg.displayName()}', " +
-                        "og er da låst for alle andre type endringer.",
+                        "og er da låst for alle andre type endringer." +
+                        "behandlingSteg er $behandlingSteg",
                 )
             }
 
@@ -596,22 +600,18 @@ class StegService(
         )
     }
 
-    fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? {
-        return steg.firstOrNull { it.stegType() == stegType }
-    }
+    fun hentBehandlingSteg(stegType: StegType): BehandlingSteg<*>? = steg.firstOrNull { it.stegType() == stegType }
 
-    private fun hentSisteAvsluttetBehandling(behandling: Behandling): Behandling {
-        return behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-            ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+    private fun hentSisteAvsluttetBehandling(behandling: Behandling): Behandling =
+        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
             ?: throw Feil(
                 "Forsøker å opprette en ${behandling.type.visningsnavn} " +
                     "med årsak ${behandling.opprettetÅrsak.visningsnavn}, " +
                     "men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}",
             )
-    }
 
-    private fun initStegMetrikker(type: String): Map<StegType, Counter> {
-        return steg.associate {
+    private fun initStegMetrikker(type: String): Map<StegType, Counter> =
+        steg.associate {
             it.stegType() to
                 Metrics.counter(
                     "behandling.steg.$type",
@@ -621,7 +621,6 @@ class StegService(
                     it.stegType().rekkefølge.toString() + " " + it.stegType().displayName(),
                 )
         }
-    }
 
     companion object {
         private val logger = LoggerFactory.getLogger(StegService::class.java)

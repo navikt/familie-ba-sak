@@ -53,16 +53,16 @@ object BehandlingsresultatOpphørUtils {
         forrigeAndelerIBehandling: List<AndelTilkjentYtelse>,
         nåværendeEndretAndelerIBehandling: List<EndretUtbetalingAndel>,
         endretAndelerForForrigeBehandling: List<EndretUtbetalingAndel>,
-    ): YearMonth? {
-        return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndelerIBehandling).finnOpphørsdato()
+    ): YearMonth? =
+        this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndelerIBehandling).finnOpphørsdato()
             ?: forrigeAndelerIBehandling.filtrerBortIrrelevanteAndeler(endretAndeler = endretAndelerForForrigeBehandling).minOfOrNull { it.stønadFom }
-    }
 
     /**
      * Hvis det ikke fantes noen andeler i forrige behandling defaulter vi til inneværende måned
      */
     private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(forrigeEndretAndeler: List<EndretUtbetalingAndel>): YearMonth =
-        this.filtrerBortIrrelevanteAndeler(endretAndeler = forrigeEndretAndeler).finnOpphørsdato() ?: YearMonth.now()
+        this.filtrerBortIrrelevanteAndeler(endretAndeler = forrigeEndretAndeler).finnOpphørsdato() ?: YearMonth
+            .now()
             .nesteMåned()
 
     /**

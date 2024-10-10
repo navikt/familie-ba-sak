@@ -52,13 +52,15 @@ object OrdinærBarnetrygdUtil {
     private fun kombinerProsentOgSatsTidslinjer(
         tidslinjeMedRettTilProsentForBarn: Tidslinje<BigDecimal, Måned>,
         satsTidslinje: Tidslinje<Int, Måned>,
-    ) = tidslinjeMedRettTilProsentForBarn.kombinerMed(satsTidslinje) { rettTilProsent, sats ->
-        when {
-            rettTilProsent == null -> null
-            sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
-            else -> SatsProsent(sats, rettTilProsent)
-        }
-    }.slåSammenLike().filtrerIkkeNull()
+    ) = tidslinjeMedRettTilProsentForBarn
+        .kombinerMed(satsTidslinje) { rettTilProsent, sats ->
+            when {
+                rettTilProsent == null -> null
+                sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
+                else -> SatsProsent(sats, rettTilProsent)
+            }
+        }.slåSammenLike()
+        .filtrerIkkeNull()
 
     private data class SatsProsent(
         val sats: Int,
@@ -83,12 +85,14 @@ object OrdinærBarnetrygdUtil {
         barnasTidslinjer: Map<Person, Tidslinje<BigDecimal, Måned>>,
         søkerTidslinje: Tidslinje<BigDecimal, Måned>,
     ) = barnasTidslinjer.mapValues { (_, barnTidslinje) ->
-        barnTidslinje.kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
-            when {
-                barnProsent == null || søkerProsent == null -> null
-                else -> barnProsent
-            }
-        }.slåSammenLike().filtrerIkkeNull()
+        barnTidslinje
+            .kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
+                when {
+                    barnProsent == null || søkerProsent == null -> null
+                    else -> barnProsent
+                }
+            }.slåSammenLike()
+            .filtrerIkkeNull()
     }
 
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerPerson(
@@ -117,8 +121,8 @@ object OrdinærBarnetrygdUtil {
     internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(
         personType: PersonType,
         fagsakType: FagsakType,
-    ): BigDecimal? {
-        return if (alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
+    ): BigDecimal? =
+        if (alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
             if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) {
                 BigDecimal(50)
             } else {
@@ -127,5 +131,4 @@ object OrdinærBarnetrygdUtil {
         } else {
             null
         }
-    }
 }

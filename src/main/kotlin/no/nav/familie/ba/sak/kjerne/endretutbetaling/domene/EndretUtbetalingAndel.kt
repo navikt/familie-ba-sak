@@ -106,16 +106,19 @@ data class EndretUtbetalingAndel(
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
 
-enum class Årsak(val visningsnavn: String) {
+enum class Årsak(
+    val visningsnavn: String,
+) {
     DELT_BOSTED("Delt bosted"),
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
+    ETTERBETALING_3MND("Etterbetaling 3 måneder"),
     ENDRE_MOTTAKER("Endre mottaker, begge foreldre rett"),
     ALLEREDE_UTBETALT("Allerede utbetalt"),
     ;
 
     fun førerTilOpphørVed0Prosent() =
         when (this) {
-            ALLEREDE_UTBETALT, ENDRE_MOTTAKER, ETTERBETALING_3ÅR -> true
+            ALLEREDE_UTBETALT, ENDRE_MOTTAKER, ETTERBETALING_3ÅR, ETTERBETALING_3MND -> true
             DELT_BOSTED -> false
         }
 }
@@ -196,8 +199,8 @@ data class UtfyltEndretUtbetalingAndelDeltBosted(
     val avtaletidspunktDeltBosted: LocalDate,
 ) : IUtfyltEndretUtbetalingAndel
 
-fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
-    return if (this.manglerObligatoriskFelt()) {
+fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
+    if (this.manglerObligatoriskFelt()) {
         TomEndretUtbetalingAndel(
             this.id,
             this.behandlingId,
@@ -230,13 +233,13 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
             )
         }
     }
-}
 
 fun List<IUtfyltEndretUtbetalingAndel>.tilTidslinje() =
-    this.map { betalingAndel ->
-        Periode(
-            fraOgMed = betalingAndel.fom.tilTidspunkt(),
-            tilOgMed = betalingAndel.tom.tilTidspunkt(),
-            innhold = betalingAndel,
-        )
-    }.tilTidslinje()
+    this
+        .map { betalingAndel ->
+            Periode(
+                fraOgMed = betalingAndel.fom.tilTidspunkt(),
+                tilOgMed = betalingAndel.tom.tilTidspunkt(),
+                innhold = betalingAndel,
+            )
+        }.tilTidslinje()

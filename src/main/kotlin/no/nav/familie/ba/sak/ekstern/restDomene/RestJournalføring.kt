@@ -44,8 +44,8 @@ data class RestJournalføring(
     val fagsakType: FagsakType,
     val institusjon: RestInstitusjon? = null,
 ) {
-    fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
-        return OppdaterJournalpostRequest(
+    fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest =
+        OppdaterJournalpostRequest(
             avsenderMottaker =
                 AvsenderMottaker(
                     id = this.avsender.id,
@@ -71,7 +71,6 @@ data class RestJournalføring(
                     )
                 },
         )
-    }
 
     fun hentUnderkategori(): BehandlingUnderkategori {
         if (underkategori is BehandlingUnderkategori) return underkategori

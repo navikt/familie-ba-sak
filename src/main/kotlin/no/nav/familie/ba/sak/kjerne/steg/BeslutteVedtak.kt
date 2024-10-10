@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
@@ -14,12 +13,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -32,7 +31,9 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Service
@@ -48,8 +49,9 @@ class BeslutteVedtak(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
-    private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val valutakursRepository: ValutakursRepository,
+    private val simuleringService: SimuleringService,
+    private val tilbakekrevingService: TilbakekrevingService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -77,6 +79,11 @@ class BeslutteVedtak(
             )
         }
 
+        val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandling.id) }
+        val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
+        val tilbakekrevingsvalg by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
+        val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
+
         val behandlingSkalAutomatiskBesluttes =
             automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)
 
@@ -100,13 +107,12 @@ class BeslutteVedtak(
             behandlingErAutomatiskBesluttet = behandlingSkalAutomatiskBesluttes,
         )
 
-        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
-        val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
-        if (unleashService.isEnabled(KAN_OPPRETTE_AUTOMATISKE_VALUTAKURSER_PÅ_MANUELLE_SAKER) && erAutomatiskeValutakurserPåBehandling) {
-            automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
-        }
-
         return if (data.beslutning.erGodkjent()) {
+            val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
+            if (erAutomatiskeValutakurserPåBehandling && !erÅpenTilbakekrevingPåFagsak) {
+                validerErTilbakekrevingHvisFeilutbetaling(feilutbetaling, tilbakekrevingsvalg)
+            }
+
             val vedtak =
                 vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                     ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
@@ -159,7 +165,17 @@ class BeslutteVedtak(
                     fristForFerdigstillelse = LocalDate.now(),
                 )
             taskRepository.save(behandleUnderkjentVedtakTask)
+
             StegType.SEND_TIL_BESLUTTER
+        }
+    }
+
+    private fun validerErTilbakekrevingHvisFeilutbetaling(
+        feilutbetaling: BigDecimal,
+        tilbakekrevingsvalg: Tilbakekrevingsvalg?,
+    ) {
+        if (feilutbetaling != BigDecimal.ZERO && tilbakekrevingsvalg == null) {
+            throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
         }
     }
 
@@ -167,9 +183,7 @@ class BeslutteVedtak(
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
     }
 
-    override fun stegType(): StegType {
-        return StegType.BESLUTTE_VEDTAK
-    }
+    override fun stegType(): StegType = StegType.BESLUTTE_VEDTAK
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val endringerIUtbetaling =

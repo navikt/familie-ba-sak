@@ -5,7 +5,7 @@
 Egenskap: Vedtaksperioder for opphørsperioder skal håndtere vilkårsendringer
 
   Bakgrunn:
-    Gitt følgende vedtak
+    Gitt følgende behandlinger
       | BehandlingId |
       | 1            |
 
@@ -32,9 +32,9 @@ Egenskap: Vedtaksperioder for opphørsperioder skal håndtere vilkårsendringer
       | 3456    | 01.01.2017 | 31.04.2019 | 1054  | 1            |
       | 3456    | 01.09.2022 | 31.01.2034 | 1354  | 1            |
 
-    Når vedtaksperioder med begrunnelser genereres for behandling 1
+    Når vedtaksperiodene genereres for behandling 1
 
-    Så forvent følgende vedtaksperioder med begrunnelser
+    Så forvent følgende vedtaksperioder for behandling 1
       | Fra dato   | Til dato   | Vedtaksperiodetype |
       | 01.01.2017 | 30.04.2019 | Utbetaling         |
       | 01.05.2019 | 31.08.2022 | Opphør             |

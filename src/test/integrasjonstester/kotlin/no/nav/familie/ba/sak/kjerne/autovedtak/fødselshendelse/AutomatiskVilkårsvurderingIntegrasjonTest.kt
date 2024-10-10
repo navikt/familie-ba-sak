@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Assertions
@@ -55,7 +55,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     fun `Barnet er gift, skal ikke passere vilkår`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
-        val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTAND.GIFT)))
+        val mockBarnGift = genererAutomatiskTestperson(sivilstander = listOf(Sivilstand(SIVILSTANDTYPE.GIFT)))
 
         leggTilPersonInfo(søkerFnr, mockSøkerAutomatiskBehandling)
         leggTilPersonInfo(barnFnr, mockBarnGift)

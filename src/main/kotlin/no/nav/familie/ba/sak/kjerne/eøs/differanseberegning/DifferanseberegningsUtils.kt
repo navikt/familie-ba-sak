@@ -48,7 +48,8 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
 ): AndelTilkjentYtelse {
     val avrundetUtenlandskPeriodebeløp =
         utenlandskPeriodebeløpINorskeKroner
-            .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
+            .toBigInteger()
+            .intValueExact() // Fjern desimaler for å gi fordel til søker
 
     val nyttDifferanseberegnetBeløp =
         (
@@ -63,13 +64,12 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
     )
 }
 
-private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
-    return copy(
+private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse =
+    copy(
         id = 0,
         kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp ?: this.kalkulertUtbetalingsbeløp,
         differanseberegnetPeriodebeløp = null,
     )
-}
 
 /**
  * Gjør et forsøk på fjerne differanseberegning på andelen, samtidig som tidligere, funksjonelle splitter bevares
@@ -91,11 +91,10 @@ fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() 
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
     utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal, Måned>,
-): Tidslinje<AndelTilkjentYtelse, Måned> {
-    return this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
+): Tidslinje<AndelTilkjentYtelse, Måned> =
+    this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
         andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
     }
-}
 
 /**
  * Konverterer negativt differanseberegnet periodebeløp på andelene til underskudd som positiv BigDecimal

@@ -45,7 +45,9 @@ class KonsistensavstemmingController(
         return ResponseEntity.ok(Ressurs.success("Kjører konsistensavstemming. transaksjonsId=$transaksjonsId callId=${task.callId}"))
     }
 
-    data class StartKonsistensavstemming(val triggerTid: LocalDateTime)
+    data class StartKonsistensavstemming(
+        val triggerTid: LocalDateTime,
+    )
 
     private fun opprettKonsistensavstemMotOppdragStartTask(
         sendTilØkonomi: Boolean,

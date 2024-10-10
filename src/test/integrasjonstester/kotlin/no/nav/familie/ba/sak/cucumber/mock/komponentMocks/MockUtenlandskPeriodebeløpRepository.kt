@@ -2,11 +2,11 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.cucumber.BegrunnelseTeksterStepDefinition
+import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 
-fun mockUtenlandskPeriodebeløpRepository(dataFraCucumber: BegrunnelseTeksterStepDefinition): UtenlandskPeriodebeløpRepository {
+fun mockUtenlandskPeriodebeløpRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): UtenlandskPeriodebeløpRepository {
     val utenlandskPeriodebeløpRepository = mockk<UtenlandskPeriodebeløpRepository>()
     every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } answers {
         val behandlingId = firstArg<Long>()

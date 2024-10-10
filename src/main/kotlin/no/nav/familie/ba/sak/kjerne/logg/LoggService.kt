@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilddMMyyyy
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -20,9 +21,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
+import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
@@ -419,8 +420,7 @@ class LoggService(
             Logg(
                 behandling.id,
                 type = LoggType.BEHANDLING_SATT_PÅ_MASKINELL_VENT,
-                // TODO FORVALTER_ROLLE
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.FORVALTER),
                 tekst = "Årsak: $årsak",
             )
         lagre(logg)
@@ -431,8 +431,7 @@ class LoggService(
             Logg(
                 behandling.id,
                 type = LoggType.BEHANDLING_TATT_AV_MASKINELL_VENT,
-                // TODO FORVALTER_ROLLE
-                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.FORVALTER),
             )
         lagre(logg)
     }
@@ -664,6 +663,45 @@ class LoggService(
             ),
         )
 
+    fun loggSammensattKontrollsakLagtTil(sammensattKontrollsak: SammensattKontrollsak) =
+        lagre(
+            Logg(
+                behandlingId = sammensattKontrollsak.behandlingId,
+                type = LoggType.SAMMENSATT_KONTROLLSAK_LAGT_TIL,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggSammensattKontrollsakEndret(sammensattKontrollsak: SammensattKontrollsak) =
+        lagre(
+            Logg(
+                behandlingId = sammensattKontrollsak.behandlingId,
+                type = LoggType.SAMMENSATT_KONTROLLSAK_ENDRET,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggSammensattKontrollsakFjernet(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.SAMMENSATT_KONTROLLSAK_FJERNET,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
     fun loggRefusjonEøsPeriodeFjernet(refusjonEøs: RefusjonEøs) =
         lagre(
             Logg(
@@ -707,16 +745,12 @@ class LoggService(
         return loggRepository.save(logg)
     }
 
-    fun hentLoggForBehandling(behandlingId: Long): List<Logg> {
-        return loggRepository.hentLoggForBehandling(behandlingId)
-    }
+    fun hentLoggForBehandling(behandlingId: Long): List<Logg> = loggRepository.hentLoggForBehandling(behandlingId)
 
     companion object {
         private fun tilBehandlingstema(
             underkategori: BehandlingUnderkategori,
             kategori: BehandlingKategori,
-        ): String {
-            return "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
-        }
+        ): String = "${kategori.visningsnavn}  ${underkategori.visningsnavn.lowercase()}"
     }
 }

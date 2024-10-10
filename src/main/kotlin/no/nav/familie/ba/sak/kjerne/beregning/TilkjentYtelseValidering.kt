@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
@@ -37,12 +37,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 
-// 3 år (krav i loven)
-fun hentGyldigEtterbetalingFom(kravDato: LocalDate) =
-    kravDato.minusYears(3)
+fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate) =
+    kravDato
+        .minusYears(3)
+        .toYearMonth()
+
+fun hentGyldigEtterbetaling3MndFom(kravDato: LocalDate) =
+    kravDato
+        .minusMonths(4)
         .toYearMonth()
 
 fun hentSøkersAndeler(
@@ -67,57 +71,57 @@ object TilkjentYtelseValidering {
         andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
-        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
-        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
+        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerAktørOgType()
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerAktørOgType()
 
-        andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
-            when {
-                forrigeAndel == null && nåværendeAndel != null ->
-                    throw SatsendringFeil(
-                        melding =
-                            "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
-                                "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
-                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
-                    ).also { secureLogger.info("forrigeAndel er null, nåværendeAndel=$nåværendeAndel") }
+        andelerGruppert
+            .outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
+                when {
+                    forrigeAndel == null && nåværendeAndel != null ->
+                        throw SatsendringFeil(
+                            melding =
+                                "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
+                                    "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
+                            satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
+                        ).also { secureLogger.info("forrigeAndel er null, nåværendeAndel=$nåværendeAndel") }
 
-                forrigeAndel != null && nåværendeAndel == null ->
-                    throw SatsendringFeil(
-                        melding =
-                            "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
-                                "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
-                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
-                    ).also { secureLogger.info("nåværendeAndel er null, forrigeAndel=$forrigeAndel") }
+                    forrigeAndel != null && nåværendeAndel == null ->
+                        throw SatsendringFeil(
+                            melding =
+                                "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
+                                    "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
+                            satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
+                        ).also { secureLogger.info("nåværendeAndel er null, forrigeAndel=$forrigeAndel") }
 
-                forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
-                    throw SatsendringFeil(
-                        melding =
-                            "Satsendring kan ikke endre på prosenten til en andel. " +
-                                "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
-                                "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
-                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
-                    ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
+                    forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
+                        throw SatsendringFeil(
+                            melding =
+                                "Satsendring kan ikke endre på prosenten til en andel. " +
+                                    "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                                    "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
+                            satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
+                        ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
 
-                forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
-                    throw SatsendringFeil(
-                        melding =
-                            "Satsendring kan ikke endre YtelseType til en andel. " +
-                                "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
-                                "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
-                        satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
-                    ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
+                    forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
+                        throw SatsendringFeil(
+                            melding =
+                                "Satsendring kan ikke endre YtelseType til en andel. " +
+                                    "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                                    "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
+                            satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
+                        ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
 
-                else -> false
-            }
-        }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
+                    else -> false
+                }
+            }.values
+            .map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
     }
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
-        kravDato: LocalDateTime,
+        gyldigEtterbetalingFom: YearMonth,
     ): List<Aktør> {
-        val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato.toLocalDate())
-
         val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val personerMedUgyldigEtterbetaling =
@@ -150,8 +154,8 @@ object TilkjentYtelseValidering {
         forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         andelerForPerson: List<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth,
-    ): Boolean {
-        return YtelseType.values().any { ytelseType ->
+    ): Boolean =
+        YtelseType.values().any { ytelseType ->
             val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
             val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 
@@ -165,7 +169,6 @@ object TilkjentYtelseValidering {
 
             førsteMånedMedEtterbetaling != null && førsteMånedMedEtterbetaling < gyldigEtterbetalingFom
         }
-    }
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
@@ -202,7 +205,8 @@ object TilkjentYtelseValidering {
         val barnMedUtbetalingsikkerhetFeil = mutableMapOf<PersonEnkel, List<MånedPeriode>>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
-                barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
+                barnMedAndreRelevanteTilkjentYtelser
+                    .filter { it.first.aktør == barn.aktør }
                     .flatMap { it.second }
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
@@ -260,20 +264,22 @@ object TilkjentYtelseValidering {
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): List<MånedPeriode> {
         val kombinertOverlappTidslinje =
-            YtelseType.values().map { ytelseType ->
-                lagErOver100ProsentUtbetalingPåYtelseTidslinje(
-                    andeler = andeler.filter { it.type == ytelseType },
-                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
-                )
-            }.kombiner { it.minstEnYtelseHarOverlapp() }
+            YtelseType
+                .values()
+                .map { ytelseType ->
+                    lagErOver100ProsentUtbetalingPåYtelseTidslinje(
+                        andeler = andeler.filter { it.type == ytelseType },
+                        barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
+                    )
+                }.kombiner { it.minstEnYtelseHarOverlapp() }
 
-        return kombinertOverlappTidslinje.perioder().filter { it.innhold == true }
+        return kombinertOverlappTidslinje
+            .perioder()
+            .filter { it.innhold == true }
             .map { MånedPeriode(it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth()) }
     }
 
-    internal fun Iterable<Boolean>.minstEnYtelseHarOverlapp(): Boolean {
-        return any { it }
-    }
+    internal fun Iterable<Boolean>.minstEnYtelseHarOverlapp(): Boolean = any { it }
 
     fun lagErOver100ProsentUtbetalingPåYtelseTidslinje(
         andeler: List<AndelTilkjentYtelse>,
@@ -283,28 +289,32 @@ object TilkjentYtelseValidering {
             return emptyList<Periode<Boolean, Måned>>().tilTidslinje()
         }
         val prosenttidslinjerPerBehandling =
-            (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }.values
+            (andeler + barnsAndelerFraAndreBehandlinger)
+                .groupBy { it.behandlingId }
+                .values
                 .map { it.tilProsentAvYtelseUtbetaltTidslinje() }
 
         val erOver100ProsentTidslinje =
-            prosenttidslinjerPerBehandling.fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { summertProsentTidslinje, prosentTidslinje ->
-                summertProsentTidslinje.kombinerMed(prosentTidslinje) { sumProsentForPeriode, prosentForAndel ->
-                    (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
-                }
-            }.map { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
+            prosenttidslinjerPerBehandling
+                .fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { summertProsentTidslinje, prosentTidslinje ->
+                    summertProsentTidslinje.kombinerMed(prosentTidslinje) { sumProsentForPeriode, prosentForAndel ->
+                        (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
+                    }
+                }.map { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
 
         return erOver100ProsentTidslinje
     }
 }
 
 private fun List<AndelTilkjentYtelse>.tilProsentAvYtelseUtbetaltTidslinje() =
-    this.map {
-        månedPeriodeAv(
-            fraOgMed = it.periode.fom,
-            tilOgMed = it.periode.tom,
-            innhold = it.prosent,
-        )
-    }.tilTidslinje()
+    this
+        .map {
+            månedPeriodeAv(
+                fraOgMed = it.periode.fom,
+                tilOgMed = it.periode.tom,
+                innhold = it.prosent,
+            )
+        }.tilTidslinje()
 
 private fun validerAtBeløpForPartStemmerMedSatser(
     person: PersonEnkel,
@@ -329,7 +339,8 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     }
 
     val totalbeløp =
-        andeler.map { it.kalkulertUtbetalingsbeløp }
+        andeler
+            .map { it.kalkulertUtbetalingsbeløp }
             .fold(0) { sum, beløp -> sum + beløp }
     if (totalbeløp > maksTotalBeløp) {
         throw UtbetalingsikkerhetFeil(
