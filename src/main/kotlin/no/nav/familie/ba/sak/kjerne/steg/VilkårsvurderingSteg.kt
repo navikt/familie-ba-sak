@@ -97,7 +97,7 @@ class VilkårsvurderingSteg(
             tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         }
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING) {
+        if (behandling.erMånedligValutajustering()) {
             månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
 

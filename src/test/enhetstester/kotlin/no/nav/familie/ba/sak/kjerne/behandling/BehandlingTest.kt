@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class BehandlingTest {
     @Test
@@ -66,32 +68,15 @@ class BehandlingTest {
         assertTrue { behandling.erBehandlingMedVedtaksbrevutsending() }
     }
 
-    @Test
-    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for migrering med endre migreringsdato`() {
+    @ParameterizedTest
+    @EnumSource(value = BehandlingÅrsak::class, names = ["ENDRE_MIGRERINGSDATO", "HELMANUELL_MIGRERING", "MIGRERING"])
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for behandlingstype MIGRERING_FRA_INFOTRYGD`(
+        årsak: BehandlingÅrsak,
+    ) {
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            )
-        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
-    }
-
-    @Test
-    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for helmanuell migrering`() {
-        val behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            )
-        assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
-    }
-
-    @Test
-    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for automatisk migrering`() {
-        val behandling =
-            lagBehandling(
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                årsak = BehandlingÅrsak.MIGRERING,
+                årsak = årsak,
             )
         assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
     }
@@ -105,12 +90,15 @@ class BehandlingTest {
         assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
     }
 
-    @Test
-    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for revurdering med satsendring`() {
+    @ParameterizedTest
+    @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
+    fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for revurdering med årsak satsendring eller månedlig valutajustering`(
+        årsak: BehandlingÅrsak,
+    ) {
         val behandling =
             lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
-                årsak = BehandlingÅrsak.SATSENDRING,
+                årsak = årsak,
             )
         assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
     }
