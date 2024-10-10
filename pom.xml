@@ -51,6 +51,11 @@
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
         <confluent.version>7.7.1</confluent.version>
+        <sonar.organization>navikt</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
+        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -597,7 +602,57 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin.version}</version>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jacoco</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>
+                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}/jacoco.exec
+                                    </destFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <dataFile>
+                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}/jacoco.exec
+                                    </dataFile>
+                                    <outputDirectory>
+                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}
+                                    </outputDirectory>
+                                    <formats>
+                                        <format>XML</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
