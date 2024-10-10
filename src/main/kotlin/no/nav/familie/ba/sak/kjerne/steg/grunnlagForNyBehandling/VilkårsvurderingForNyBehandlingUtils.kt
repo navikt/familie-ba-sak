@@ -28,7 +28,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
     fun genererInitiellVilkårsvurdering(
         behandling: Behandling,
         barnaAktørSomAlleredeErVurdert: List<Aktør>,
-    ): Vilkårsvurdering =
+        erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå: Boolean,
+        ): Vilkårsvurdering =
         Vilkårsvurdering(behandling = behandling).apply {
             when {
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
@@ -43,6 +44,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     personResultater =
                         lagPersonResultaterForManuellVilkårsvurdering(
                             vilkårsvurdering = this,
+                            erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå = erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå,
                         )
                 }
 
@@ -146,11 +148,12 @@ data class VilkårsvurderingForNyBehandlingUtils(
 
     private fun lagPersonResultaterForManuellVilkårsvurdering(
         vilkårsvurdering: Vilkårsvurdering,
-    ): Set<PersonResultat> =
-        personopplysningGrunnlag.søkerOgBarn
-            .map { person ->
-                genererPersonResultatForPerson(vilkårsvurdering, person)
-            }.toSet()
+        erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå: Boolean,
+    ): Set<PersonResultat> {
+        return personopplysningGrunnlag.søkerOgBarn.map { person ->
+            genererPersonResultatForPerson(vilkårsvurdering, person, erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå)
+        }.toSet()
+    }
 
     private fun lagPersonResultaterForTomVilkårsvurdering(
         vilkårsvurdering: Vilkårsvurdering,

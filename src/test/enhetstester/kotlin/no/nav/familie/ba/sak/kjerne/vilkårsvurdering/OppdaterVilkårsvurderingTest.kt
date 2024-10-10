@@ -687,6 +687,7 @@ class OppdaterVilkårsvurderingTest {
                     genererPersonResultatForPerson(
                         vilkårsvurdering = vilkårsvurdering,
                         person = person,
+                        erToggleForAutomatiskBehandlingAvBosattIRiketVikårPå = false,
                     )
                 }.toSet()
 
