@@ -48,6 +48,7 @@ fun lagTestJournalpost(
                 type = AvsenderMottakerIdType.FNR,
             ),
         journalforendeEnhet = DEFAULT_JOURNALFØRENDE_ENHET,
+        kanal = "NAV_NO",
         dokumenter =
             listOf(
                 DokumentInfo(
