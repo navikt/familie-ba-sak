@@ -9,8 +9,10 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -45,7 +47,7 @@ class OppgaveService(
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val oppgaveArbeidsfordelingService: OppgaveArbeidsfordelingService,
+    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val unleashService: UnleashService,
 ) {
@@ -74,24 +76,19 @@ class OppgaveService(
 
             eksisterendeOppgave.gsakId
         } else {
-            val arbeidsfordelingPåBehandling =
+            val arbeidsfordelingsenhet =
                 arbeidsfordelingPåBehandlingRepository
                     .hentArbeidsfordelingPåBehandling(behandlingId)
+                    .tilArbeidsfordelingsenhet()
 
             val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
 
-            val oppgaveArbeidsfordeling =
+            val navIdent = tilordnetNavIdent?.let { NavIdent(it) }
+            val tilordnetRessurs =
                 if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
-                    oppgaveArbeidsfordelingService.finnArbeidsfordelingForOppgave(
-                        arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandling,
-                        navIdent = tilordnetNavIdent?.let { NavIdent(it) },
-                    )
+                    tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
                 } else {
-                    OppgaveArbeidsfordeling(
-                        navIdent = tilordnetNavIdent?.let { NavIdent(it) },
-                        enhetsnummer = arbeidsfordelingPåBehandling.behandlendeEnhetId,
-                        enhetsnavn = arbeidsfordelingPåBehandling.behandlendeEnhetNavn,
-                    )
+                    navIdent
                 }
 
             val opprettOppgave =
@@ -102,10 +99,10 @@ class OppgaveService(
                     oppgavetype = oppgavetype,
                     fristFerdigstillelse = fristForFerdigstillelse,
                     beskrivelse = lagOppgaveTekst(fagsakId, beskrivelse),
-                    enhetsnummer = oppgaveArbeidsfordeling.enhetsnummer,
+                    enhetsnummer = arbeidsfordelingsenhet.enhetId,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = oppgaveArbeidsfordeling.navIdent?.ident,
+                    tilordnetRessurs = tilordnetRessurs?.ident,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
@@ -119,20 +116,6 @@ class OppgaveService(
             oppgaveRepository.save(oppgave)
 
             økTellerForAntallOppgaveTyper(oppgavetype)
-
-            if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
-                val erEnhetsnummerEndret = arbeidsfordelingPåBehandling.behandlendeEnhetId != oppgaveArbeidsfordeling.enhetsnummer
-
-                if (erEnhetsnummerEndret) {
-                    arbeidsfordelingPåBehandlingRepository.save(
-                        arbeidsfordelingPåBehandling.copy(
-                            behandlendeEnhetId = oppgaveArbeidsfordeling.enhetsnummer,
-                            behandlendeEnhetNavn = oppgaveArbeidsfordeling.enhetsnavn,
-                            manueltOverstyrt = false,
-                        ),
-                    )
-                }
-            }
 
             opprettetOppgaveId
         }

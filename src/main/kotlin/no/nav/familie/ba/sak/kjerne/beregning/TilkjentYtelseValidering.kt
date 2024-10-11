@@ -46,7 +46,7 @@ fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate) =
 
 fun hentGyldigEtterbetaling3MndFom(kravDato: LocalDate) =
     kravDato
-        .minusMonths(3)
+        .minusMonths(4)
         .toYearMonth()
 
 fun hentSøkersAndeler(

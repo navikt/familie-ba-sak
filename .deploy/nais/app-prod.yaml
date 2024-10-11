@@ -72,8 +72,6 @@ spec:
           cluster: prod-gcp
         - application: familie-prosessering
           cluster: prod-gcp
-        - application: familie-ba-skatteetaten-api
-          cluster: prod-gcp
         - application: familie-klage
           cluster: prod-gcp
         - application: bidrag-grunnlag-feature

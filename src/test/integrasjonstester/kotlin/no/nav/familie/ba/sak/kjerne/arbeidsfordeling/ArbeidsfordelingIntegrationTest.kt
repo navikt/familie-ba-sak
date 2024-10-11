@@ -344,9 +344,9 @@ class ArbeidsfordelingIntegrationTest(
     val søkerAktør = randomAktør()
 
     companion object {
-        const val MANUELT_OVERSTYRT_ENHET = "1234"
-        const val IKKE_FORTROLIG_ENHET = "4820"
-        const val FORTROLIG_ENHET = "1122"
+        val MANUELT_OVERSTYRT_ENHET = BarnetrygdEnhet.OSLO.enhetsnummer
+        val IKKE_FORTROLIG_ENHET = BarnetrygdEnhet.DRAMMEN.enhetsnummer
+        val FORTROLIG_ENHET = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer
         val SØKER_FNR = randomFnr()
         val BARN_UTEN_DISKRESJONSKODE = randomFnr()
         val BARN_MED_DISKRESJONSKODE = randomFnr()

@@ -122,9 +122,9 @@ class ValutakursTest {
     }
 
     @Nested
-    inner class `Valider at erAlleValutakurserOppdaterteIMåned` {
+    inner class `Valider at måValutakurserOppdateresForMåned` {
         @Test
-        fun `gir true når alle valutakurser er oppdatert for gitt måned`() {
+        fun `gir false når alle valutakurser er oppdatert for gitt måned`() {
             val måned = LocalDate.now().toYearMonth()
 
             val valutakurs1 =
@@ -143,11 +143,11 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
 
-            assertThat(valutakurser.erAlleValutakurserOppdaterteIMåned(måned)).isTrue()
+            assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isFalse()
         }
 
         @Test
-        fun `gir false når en valutakurs ikke er oppdatert for gitt måned`() {
+        fun `gir true når minst én valutakurs ikke er oppdatert for gitt måned`() {
             val måned = LocalDate.now().toYearMonth()
 
             val valutakurs1 =
@@ -166,7 +166,7 @@ class ValutakursTest {
 
             val valutakurser = listOf(valutakurs1, valutakurs2)
 
-            assertThat(valutakurser.erAlleValutakurserOppdaterteIMåned(måned)).isFalse()
+            assertThat(valutakurser.måValutakurserOppdateresForMåned(måned)).isTrue()
         }
     }
 }
