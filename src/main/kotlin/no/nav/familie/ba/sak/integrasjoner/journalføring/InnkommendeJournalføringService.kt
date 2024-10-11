@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.TilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.integrasjoner.mottak.MottakClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -41,6 +40,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
+import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -66,27 +66,13 @@ class InnkommendeJournalføringService(
 
     fun hentJournalposterForBruker(brukerId: String): List<TilgangsstyrtJournalpost> =
         integrasjonClient
-            .hentJournalposterForBruker(
+            .hentTilgangsstyrteJournalposterForBruker(
                 JournalposterForBrukerRequest(
                     antall = 1000,
                     brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
                     tema = listOf(Tema.BAR),
                 ),
-            ).map {
-                val (harTilgang, adressebeskyttelsegradering) =
-                    if (it.erDigitalSøknad()) {
-                        val strengesteAdressebeskyttelsegradering = mottakClient.hentStrengesteAdressebeskyttelsegraderingIDigitalSøknad(it.journalpostId)
-                        val harTilgang = saksbehandlerContext.harTilgang(adressebeskyttelsegradering = strengesteAdressebeskyttelsegradering)
-                        Pair(harTilgang, strengesteAdressebeskyttelsegradering)
-                    } else {
-                        Pair(true, null)
-                    }
-                TilgangsstyrtJournalpost(
-                    journalpost = it,
-                    harTilgang = harTilgang,
-                    adressebeskyttelsegradering = adressebeskyttelsegradering,
-                )
-            }
+            )
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->

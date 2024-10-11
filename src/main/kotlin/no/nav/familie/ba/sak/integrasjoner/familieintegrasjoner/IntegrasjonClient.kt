@@ -33,6 +33,7 @@ import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.enhet.HentEnheterNavIdentHarTilgangTilRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
+import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
@@ -381,13 +382,13 @@ class IntegrasjonClient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
-    fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
+    fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<TilgangsstyrtJournalpost> {
         val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt")
 
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Hent journalposter for bruker",
+            formål = "Hent tilgangsstyrte journalposter for bruker",
         ) {
             postForEntity(uri, journalposterForBrukerRequest)
         }
