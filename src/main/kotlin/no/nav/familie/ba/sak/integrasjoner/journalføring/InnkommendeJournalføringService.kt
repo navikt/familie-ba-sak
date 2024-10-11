@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.GENERELL_SAK
-import no.nav.familie.ba.sak.integrasjoner.mottak.MottakClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
@@ -31,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
@@ -54,8 +52,6 @@ class InnkommendeJournalføringService(
     private val stegService: StegService,
     private val journalføringMetrikk: JournalføringMetrikk,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-    private val mottakClient: MottakClient,
-    private val saksbehandlerContext: SaksbehandlerContext,
 ) {
     fun hentDokument(
         journalpostId: String,

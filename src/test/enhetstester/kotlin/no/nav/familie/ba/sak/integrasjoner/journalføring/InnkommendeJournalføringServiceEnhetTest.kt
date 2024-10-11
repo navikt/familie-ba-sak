@@ -5,13 +5,11 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
-import no.nav.familie.ba.sak.integrasjoner.mottak.MottakClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
@@ -29,8 +27,6 @@ class InnkommendeJournalføringServiceEnhetTest {
     private val mockedStegService: StegService = mockk()
     private val mockedJournalføringMetrikk: JournalføringMetrikk = mockk()
     private val mockedBehandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
-    private val mockedMottakClient: MottakClient = mockk()
-    private val mockedSaksbehandlerContext: SaksbehandlerContext = mockk()
     private val innkommendeJournalføringService: InnkommendeJournalføringService =
         InnkommendeJournalføringService(
             integrasjonClient = mockedIntegrasjonClient,
@@ -41,8 +37,6 @@ class InnkommendeJournalføringServiceEnhetTest {
             stegService = mockedStegService,
             journalføringMetrikk = mockedJournalføringMetrikk,
             behandlingSøknadsinfoService = mockedBehandlingSøknadsinfoService,
-            mottakClient = mockedMottakClient,
-            saksbehandlerContext = mockedSaksbehandlerContext,
         )
 
     @Test
