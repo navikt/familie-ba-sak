@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJourn
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService.Companion.BARNETRYGD_SØKNAD_BREVKODER
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService.Companion.NAV_NO
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
@@ -340,8 +339,5 @@ class InnkommendeJournalføringService(
 
     companion object {
         const val NAV_NO = "NAV_NO"
-        val BARNETRYGD_SØKNAD_BREVKODER = listOf("NAV 33-00.07", "NAV 33-00.09")
     }
 }
-
-fun Journalpost.erDigitalSøknad() = this.kanal == NAV_NO && this.dokumenter?.any { dokument -> BARNETRYGD_SØKNAD_BREVKODER.any { brevkode -> brevkode == dokument.brevkode } } ?: false

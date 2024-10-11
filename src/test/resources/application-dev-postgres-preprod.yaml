@@ -180,6 +180,7 @@ FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.intern.dev,nav.no
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd.feed/.default
 
+
 CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 
