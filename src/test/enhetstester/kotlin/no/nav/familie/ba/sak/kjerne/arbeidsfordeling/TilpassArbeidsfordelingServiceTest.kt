@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +22,7 @@ class TilpassArbeidsfordelingServiceTest {
     @Nested
     inner class TilpassArbeidsfordelingTilSaksbehandler {
         @Test
-        fun `skal kaste feil om arbeidsfordeling returnerer midlertidig enhet 4863 og NAV-ident er null`() {
+        fun `skal kaste feil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident er null`() {
             // Arrange
 
             val arbeidsfordelingPåBehandling =
@@ -42,7 +43,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal kaste feil om arbeidsfordeling returnerer midlertidig enhet 4863 og NAV-ident ikke har tilgang til noen andre enheter enn 4863 og 2103`() {
+        fun `skal kaste feil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident ikke har tilgang til noen andre enheter enn 4863 og 2103`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -78,7 +79,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal returnere NAV-ident og første enhetsnummer som NAV-identen har tilgang til når arbeidsfordeling returnerer midlertidig enhet 4863`() {
+        fun `skal returnere første enhetsnummer som NAV-identen har tilgang til når arbeidsfordeling er midlertidig enhet 4863`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -145,7 +146,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal returnere Vikafossen 2103 uten NAV-ident om arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident ikke har tilgang til Vikafossen 2103`() {
+        fun `skal returnere Vikafossen 2103 dersom arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident ikke har tilgang til Vikafossen 2103`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -187,7 +188,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal returnere Vikafossen 2103 med NAV-ident om arbeidsfordeling returnerer Vikafossen 2103 og NAV-ident har tilgang til Vikafossen 2103`() {
+        fun `skal returnere Vikafossen 2103 dersom arbeidsfordeling er Vikafossen 2103 og NAV-ident har tilgang til Vikafossen 2103`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -226,7 +227,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal returnere behandlendeEnhetId uten NAV-ident om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident er null`() {
+        fun `skal returnere behandlendeEnhetId dersom arbeidsfordeling ikke er 2103 eller 4863 og NAV-ident er null`() {
             // Arrange
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
@@ -247,7 +248,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal kaste feil om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident ikke har tilgang til noen enheter`() {
+        fun `skal kaste feil om arbeidsfordeling ikke er 2103 eller 4863 og NAV-ident ikke har tilgang til noen enheter`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -281,7 +282,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal returnere NAV-ident og første enhet NAV-ident har tilgang om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident ikke har tilgang arbeidsfordeling enheten`() {
+        fun `skal returnere første enhet NAV-ident har tilgang til dersom arbeidsfordeling ikke er 2103 eller 4863 og NAV-ident ikke har tilgang arbeidsfordelingsenheten`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -327,7 +328,7 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
-        fun `skal returnere NAV-ident og arbeidsfordeling enhetsnummer om arbeidsfordeling ikke returnere 2103 eller 4863 og NAV-ident har tilgang arbeidsfordeling enheten`() {
+        fun `skal returnere opprinnelig arbeidsfordeling dersom arbeidsfordeling ikke er 2103 eller 4863 og NAV-ident har tilgang til arbeidsfordelingsenheten`() {
             // Arrange
             val navIdent = NavIdent("1")
 
@@ -369,6 +370,27 @@ class TilpassArbeidsfordelingServiceTest {
             // Assert
             assertThat(tilpassetArbeidsfordelingsenhet.enhetId).isEqualTo(arbeidsfordelingEnhet.enhetsnummer)
             assertThat(tilpassetArbeidsfordelingsenhet.enhetNavn).isEqualTo(arbeidsfordelingEnhet.enhetsnavn)
+        }
+
+        @Test
+        fun `skal returnere behandlendeEnhetId og behandlendeEnhetNavn dersom arbeidsfordeling ikke er 2103 eller 4863 og NAV-ident er SYSTEM_FORKORTELSE`() {
+            // Arrange
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = "1234",
+                    enhetNavn = "Fiktiv enhet",
+                )
+
+            // Act
+            val tilpassetArbeidsfordelingsenhet =
+                tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                    arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                    navIdent = NavIdent(SYSTEM_FORKORTELSE),
+                )
+
+            // Assert
+            assertThat(tilpassetArbeidsfordelingsenhet.enhetId).isEqualTo(arbeidsfordelingsenhet.enhetId)
+            assertThat(tilpassetArbeidsfordelingsenhet.enhetNavn).isEqualTo(arbeidsfordelingsenhet.enhetNavn)
         }
     }
 
@@ -435,6 +457,24 @@ class TilpassArbeidsfordelingServiceTest {
                     enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                 )
             val navIdent = null
+
+            // Act
+            val tilordnetRessurs =
+                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
+
+            // Assert
+            assertThat(tilordnetRessurs).isNull()
+        }
+
+        @Test
+        fun `skal returnere null dersom vi er i systemkontekst`() {
+            // Arrange
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
+                )
+            val navIdent = NavIdent(SYSTEM_FORKORTELSE)
 
             // Act
             val tilordnetRessurs =
