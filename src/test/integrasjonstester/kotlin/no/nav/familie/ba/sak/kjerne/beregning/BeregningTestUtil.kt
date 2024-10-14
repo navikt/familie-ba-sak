@@ -8,6 +8,6 @@ object BeregningTestUtil {
     fun sisteAndelPerIdentNy(tilkjenteYtelser: List<TilkjentYtelse>): Map<IdentOgType, AndelTilkjentYtelse> =
         tilkjenteYtelser
             .flatMap { it.andelerTilkjentYtelse }
-            .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+            .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(true)) }
             .mapValues { it.value.maxBy { it.periodeOffset ?: 0 } }
 }

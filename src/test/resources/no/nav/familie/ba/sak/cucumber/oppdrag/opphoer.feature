@@ -161,3 +161,26 @@ Egenskap: Utbetalingsoppdrag: Opphør
       | 2            | 04.2021  | 08.2021  | 06.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
       | 3            | 04.2021  | 08.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
 
+
+  Scenario: Tar i bruk ny ytelsetype for utvidet barnetrygd. Kjede med gammel ytelsetype skal opphøre og ny kjede skal opprettes for ny ytelsetype
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             |
+      | 1            | 03.2021  | 03.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 1            | 04.2021  | 08.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 2            | 03.2021  | 03.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 2            | 04.2021  | 08.2021  | 700   | UTVIDET_BARNETRYGD |
+
+    Gitt følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse             |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD |
+      | 1            | 04.2021  | 08.2021  |             | 700   | NY           | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD |
+
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                |
+      | 2            | 04.2021  | 08.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  | UTVIDET_BARNETRYGD    |
+      | 2            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 2          |                    | UTVIDET_BARNETRYGD_NY |
+      | 2            | 04.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 3          | 2                  | UTVIDET_BARNETRYGD_NY |

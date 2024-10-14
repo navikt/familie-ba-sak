@@ -59,6 +59,7 @@ class UtbetalingsoppdragGeneratorService(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 erSimulering = erSimulering,
                 endretMigreringsDato = endretMigreringsDato,
+                skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler = false,
             )
 
         if (!erSimulering) {
@@ -94,7 +95,7 @@ class UtbetalingsoppdragGeneratorService(
     private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
         andelTilkjentYtelseRepository
             .hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
-            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(false)) }
 
     private fun beregnOmMigreringsDatoErEndret(
         behandling: Behandling,

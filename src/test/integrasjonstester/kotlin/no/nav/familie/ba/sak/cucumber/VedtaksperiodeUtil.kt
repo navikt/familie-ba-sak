@@ -549,8 +549,9 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
             vedtak = vedtak,
             forrigeTilkjentYtelse = null,
             nyTilkjentYtelse = this,
-            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) },
+            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(false)) },
             erSimulering = false,
+            skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler = false,
         )
     oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelse = this,

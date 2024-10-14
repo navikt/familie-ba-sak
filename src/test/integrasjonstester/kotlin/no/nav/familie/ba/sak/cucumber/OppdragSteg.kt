@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.cucumber
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
@@ -16,11 +17,15 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtelse
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterAndelerMedPeriodeOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -62,22 +67,49 @@ class OppdragSteg {
                 }.toMutableMap()
     }
 
+    @Gitt("følgende utbetalingsoppdrag")
+    fun `følgendeUtbetalingsoppdrag`(dataTable: DataTable) {
+        val eksisterendeUtbetalingsoppdrag = OppdragParser.mapUtbetalingsoppdrag(dataTable)
+        eksisterendeUtbetalingsoppdrag.forEach { key, utbetalingsoppdrag ->
+            val utbetalingsoppdrag =
+                BeregnetUtbetalingsoppdragLongId(
+                    utbetalingsoppdrag,
+                    utbetalingsoppdrag.utbetalingsperiode.mapIndexed { index, utbetalingsperiode ->
+                        AndelMedPeriodeIdLongId(
+                            id = "$index".toLong(),
+                            periodeId = utbetalingsperiode.periodeId,
+                            forrigePeriodeId = utbetalingsperiode.forrigePeriodeId,
+                            kildeBehandlingId = utbetalingsperiode.behandlingId,
+                        )
+                    },
+                )
+            val tilkjentYtelse = tilkjenteYtelserNy.single { it.behandling.id == key }
+            beregnetUtbetalingsoppdrag[tilkjentYtelse.behandling.id] = utbetalingsoppdrag
+            oppdaterTilkjentYtelseMedUtbetalingsoppdrag(utbetalingsoppdrag, tilkjentYtelse)
+            oppdaterAndelerMedPeriodeOffset(tilkjentYtelse, utbetalingsoppdrag.andeler)
+        }
+    }
+
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
         tilkjenteYtelserNy.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
             val behandlingId = tilkjentYtelse.behandling.id
-            try {
-                genererUtbetalingsoppdragForSimuleringNy(behandlingId, acc, tilkjentYtelse)
-                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
-                oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-                    beregnetUtbetalingsoppdrag[behandlingId]!!,
-                    tilkjentYtelse,
-                )
-            } catch (e: Exception) {
-                logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
-                kastedeFeil[behandlingId] = e
+            if (beregnetUtbetalingsoppdrag[behandlingId] == null) {
+                try {
+                    genererUtbetalingsoppdragForSimuleringNy(behandlingId, acc, tilkjentYtelse)
+                    beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
+                    oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+                        beregnetUtbetalingsoppdrag[behandlingId]!!,
+                        tilkjentYtelse,
+                    )
+                } catch (e: Exception) {
+                    logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
+                    kastedeFeil[behandlingId] = e
+                }
+                acc + tilkjentYtelse
+            } else {
+                acc + tilkjentYtelse
             }
-            acc + tilkjentYtelse
         }
     }
 
@@ -107,6 +139,7 @@ class OppdragSteg {
                 andel.kildeBehandlingId = andelMedOppdatertOffset.kildeBehandlingId
             }
         }
+        tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag)
     }
 
     private fun beregnUtbetalingsoppdragNy(
@@ -116,6 +149,7 @@ class OppdragSteg {
     ): BeregnetUtbetalingsoppdragLongId {
         val forrigeTilkjentYtelse = acc.lastOrNull()
 
+        val skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler = !finnesNyKlassifiseringITidligereTilkjenteYtelser(acc)
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
         val sisteAndelPerIdent = sisteAndelPerIdentNy(acc)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
@@ -126,8 +160,15 @@ class OppdragSteg {
             nyTilkjentYtelse = tilkjentYtelse,
             erSimulering = erSimulering,
             endretMigreringsDato = endretMigreringsdatoMap[tilkjentYtelse.behandling.id],
+            skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler = skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler,
         )
     }
+
+    private fun finnesNyKlassifiseringITidligereTilkjenteYtelser(tilkjenteYtelser: List<TilkjentYtelse>): Boolean =
+        tilkjenteYtelser.any { tilkjentYtelse ->
+            val utbetalingsoppdrag: Utbetalingsoppdrag? = tilkjentYtelse.utbetalingsoppdrag?.let { objectMapper.readValue(it) }
+            utbetalingsoppdrag?.let { it.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.klassifisering === YtelsetypeBA.UTVIDET_BARNETRYGD_NY.klassifisering } } ?: false
+        }
 
     @Så("forvent at en exception kastes for behandling {long}")
     fun `forvent at en exception kastes for behandling`(behandlingId: Long) {

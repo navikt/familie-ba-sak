@@ -3,13 +3,17 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
+import no.nav.familie.ba.sak.integrasjoner.økonomi.FagsystemBA
+import no.nav.familie.ba.sak.integrasjoner.økonomi.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
+import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
 
@@ -72,19 +76,59 @@ object OppdragParser {
             )
         }
 
-    private fun mapForventetUtbetalingsperiode(it: Map<String, String>) =
+    fun mapUtbetalingsoppdrag(
+        dataTable: DataTable,
+    ): Map<Long, no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag> =
+        dataTable.groupByBehandlingId().mapValues { (behandlingId, rader) ->
+            val rad = rader.first()
+            no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag(
+                kodeEndring = parseEnum(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, rad),
+                fagSystem = FagsystemBA.BARNETRYGD.name,
+                saksnummer = "1",
+                aktoer = "fnr",
+                saksbehandlerId = "navident",
+                utbetalingsperiode = rader.map { mapUtbetalingsperiode(it = it, behandlingId = behandlingId) },
+            )
+        }
+
+    fun mapForventetUtbetalingsperiode(it: Map<String, String>) =
         ForventetUtbetalingsperiode(
             erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
             periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it),
             forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
             sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
             ytelse =
-                parseValgfriEnum<YtelseType>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
-                    ?: YtelseType.ORDINÆR_BARNETRYGD,
+                parseValgfriEnum<YtelsetypeBA>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
+                    ?: YtelsetypeBA.ORDINÆR_BARNETRYGD,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
             opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
             kildebehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, it),
+        )
+
+    fun mapUtbetalingsperiode(
+        it: Map<String, String>,
+        behandlingId: Long,
+    ) =
+        no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode(
+            erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
+            periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it),
+            forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
+            sats = parseBigDecimal(DomenebegrepUtbetalingsoppdrag.BELØP, it),
+            satsType = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType.MND,
+            klassifisering =
+                parseValgfriEnum<YtelsetypeBA>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)?.klassifisering
+                    ?: YtelsetypeBA.ORDINÆR_BARNETRYGD.klassifisering,
+            vedtakdatoFom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
+            vedtakdatoTom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
+            opphør =
+                parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1)?.let {
+                    no.nav.familie.felles.utbetalingsgenerator.domain
+                        .Opphør(it)
+                },
+            behandlingId = behandlingId,
+            datoForVedtak = LocalDate.now(),
+            utbetalesTil = "fnr",
         )
 
     private fun validerAlleKodeEndringerLike(rader: List<Map<String, String>>) {
@@ -151,6 +195,7 @@ enum class DomenebegrepUtbetalingsoppdrag(
     BELØP("Beløp"),
     YTELSE_TYPE("Ytelse"),
     OPPHØRSDATO("Opphørsdato"),
+    KLASSIFISERING("Klassifisering"),
 }
 
 data class ForventetUtbetalingsoppdrag(
@@ -164,7 +209,7 @@ data class ForventetUtbetalingsperiode(
     val periodeId: Long,
     val forrigePeriodeId: Long?,
     val sats: Int,
-    val ytelse: YtelseType,
+    val ytelse: YtelsetypeBA,
     val fom: LocalDate,
     val tom: LocalDate,
     val opphør: LocalDate?,

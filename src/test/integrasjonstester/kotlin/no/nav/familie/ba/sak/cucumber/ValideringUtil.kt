@@ -18,7 +18,7 @@ object ValideringUtil {
         val forventedeBehandlingId = dataTable.asMaps().map { parseLong(Domenebegrep.BEHANDLING_ID, it) }.toSet()
         val ukontrollerteBehandlingId = eksisterendeBehandlingId.filterNot { forventedeBehandlingId.contains(it) }
         if (ukontrollerteBehandlingId.isNotEmpty() &&
-            erUkontrollerteUtbetalingsoppdragTomme(
+            !erUkontrollerteUtbetalingsoppdragTomme(
                 ukontrollerteBehandlingId,
                 utbetalingsoppdrag,
             )

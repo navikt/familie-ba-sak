@@ -27,6 +27,7 @@ class UtbetalingsoppdragGenerator {
         nyTilkjentYtelse: TilkjentYtelse,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
+        skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler: Boolean,
         endretMigreringsDato: YearMonth? = null,
     ): BeregnetUtbetalingsoppdragLongId =
         Utbetalingsgenerator().lagUtbetalingsoppdrag(
@@ -51,22 +52,22 @@ class UtbetalingsoppdragGenerator {
                     // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
                     opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering,
                 ),
-            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
-            nyeAndeler = nyTilkjentYtelse.tilAndelData(),
-            sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
+            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData(skalBrukeGammelYtelsestypeForUtvidetAndeler = skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler) ?: emptyList(),
+            nyeAndeler = nyTilkjentYtelse.tilAndelData(skalBrukeGammelYtelsestypeForUtvidetAndeler = false),
+            sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(skalBrukeGammelYtelsetypeForUtvidetAndel = skalBrukeGammelYtelsestypeForForrigeUtvidetAndeler) },
         )
 
-    private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
-        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
+    private fun TilkjentYtelse.tilAndelData(skalBrukeGammelYtelsestypeForUtvidetAndeler: Boolean): List<AndelDataLongId> =
+        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId(skalBrukeGammelYtelsetypeForUtvidetAndel = skalBrukeGammelYtelsestypeForUtvidetAndeler) }
 
-    private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
+    private fun AndelTilkjentYtelse.tilAndelDataLongId(skalBrukeGammelYtelsetypeForUtvidetAndel: Boolean): AndelDataLongId =
         AndelDataLongId(
             id = id,
             fom = periode.fom,
             tom = periode.tom,
             beløp = kalkulertUtbetalingsbeløp,
             personIdent = aktør.aktivFødselsnummer(),
-            type = type.tilYtelseType(),
+            type = type.tilYtelseType(skalBrukeGammelYtelsetype = skalBrukeGammelYtelsetypeForUtvidetAndel),
             periodeId = periodeOffset,
             forrigePeriodeId = forrigePeriodeOffset,
             kildeBehandlingId = kildeBehandlingId,
@@ -101,6 +102,7 @@ enum class YtelsetypeBA(
 ) : no.nav.familie.felles.utbetalingsgenerator.domain.Ytelsestype {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD_NY("BATRUT"),
     SMÅBARNSTILLEGG("BATRSMA"),
 }
 
@@ -110,7 +112,7 @@ enum class FagsystemBA(
 ) : Fagsystem {
     BARNETRYGD(
         "BA",
-        setOf(YtelsetypeBA.ORDINÆR_BARNETRYGD, YtelsetypeBA.UTVIDET_BARNETRYGD, YtelsetypeBA.SMÅBARNSTILLEGG),
+        setOf(YtelsetypeBA.ORDINÆR_BARNETRYGD, YtelsetypeBA.UTVIDET_BARNETRYGD, YtelsetypeBA.SMÅBARNSTILLEGG, YtelsetypeBA.UTVIDET_BARNETRYGD_NY),
     ),
 }
 
