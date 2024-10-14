@@ -54,7 +54,7 @@ class BehandleFødselshendelseTask(
             // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
             val dagerSidenBarnetBleFødt =
                 ChronoUnit.DAYS.between(
-                    Fødselsnummer(it).fødselsdato,
+                    @Suppress("DEPRECATION") Fødselsnummer(it).fødselsdato,
                     LocalDateTime.now(),
                 )
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())
