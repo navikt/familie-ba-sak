@@ -299,6 +299,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorSoekerBorIkkeIEosLand"
     },
+    OPPHØR_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorArbeiderMerEnn25ProsentIAnnetEosLand"
+    },
     OPPHØR_UTSENDT_ARBEIDSTAKER_FRA_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorUtsendtArbeidstakerFraEosLand"
@@ -390,6 +394,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_EØS_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosArbeiderMerEnn25ProsentIAnnetEosLand"
+    },
+    AVSLAG_ARBEIDER_I_ANNET_EOS_LAND_FÅR_PENSJON_FRA_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagArbeiderIAnnetEosLandFaarPensjonFraNorge"
     },
     AVSLAG_EØS_KUN_KORTE_USAMMENHENGENDE_ARBEIDSPERIODER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
