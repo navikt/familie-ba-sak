@@ -205,8 +205,7 @@ class OppgaveService(
             if (oppgave.status == FERDIGSTILT && oppgave.oppgavetype == Oppgavetype.VurderLivshendelse.value) {
                 dbOppgave.erFerdigstilt = true
             } else {
-                val oppgaveOppdatering = Oppgave(id = oppgave.id, tildeltEnhetsnr = nyEnhet, tilordnetRessurs = null, mappeId = null)
-                patchOppgave(oppgaveOppdatering)
+                integrasjonClient.tilordneEnhetOgRessursForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
             }
         }
     }
