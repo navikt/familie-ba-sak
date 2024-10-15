@@ -395,6 +395,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosArbeiderMerEnn25ProsentIAnnetEosLand"
     },
+    AVSLAG_ARBEIDER_I_ANNET_EOS_LAND_FÅR_PENSJON_FRA_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagArbeiderIAnnetEosLandFaarPensjonFraNorge"
+    },
     AVSLAG_EØS_KUN_KORTE_USAMMENHENGENDE_ARBEIDSPERIODER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosKunKorteUsammenhengendeArbeidsperioder"
