@@ -1534,7 +1534,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "etterEndretUtbetalingEtterbetalingTreMaanederTredjelandsborger"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
-    ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_ENSLIG_MINDREÅRIG{
+    ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_MÅNEDER_ENSLIG_MINDREÅRIG {
         override val sanityApiNavn = "etterEndretUtbetalingEtterbetallingTreMaanederEnsligMindreaarig"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
     },
