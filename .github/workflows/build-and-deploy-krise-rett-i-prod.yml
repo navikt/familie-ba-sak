@@ -2,10 +2,6 @@ name: KRISE-RETT-I-PROD
 on:
   workflow_dispatch:
 
-env:
-  GITHUB_BRANCH: ${{ github.ref_name }}
-  GITHUB_SHA: ${{ github.sha }}
-
 jobs:
   bygg:
     name: Bygg app/image, push til github, deploy til prod-gcp (MÅ KUN BRUKES VED KRISE)
@@ -61,7 +57,7 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-preprod.yaml
-          VAR: image=${{ needs.bygg.outputs.image }}
+          VAR: image=${{ needs.bygg.outputs.image }},GITHUB_BRANCH=${{ github.ref_name }},GITHUB_SHA:${{ github.sha }}
 
   deploy-to-prod:
     name: Deploy til prod-gcp
@@ -81,6 +77,7 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod.yaml
           IMAGE: ${{ needs.bygg.outputs.image }}
+          VAR: GITHUB_BRANCH=${{ github.ref_name }},GITHUB_SHA:${{ github.sha }}
 
   loggfeil:
     name: Send logg til slack ved feil
