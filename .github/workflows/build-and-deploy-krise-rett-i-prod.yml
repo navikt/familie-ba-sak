@@ -2,6 +2,10 @@ name: KRISE-RETT-I-PROD
 on:
   workflow_dispatch:
 
+env:
+  GITHUB_BRANCH: ${{ github.ref_name }}
+  GITHUB_SHA: ${{ github.sha }}
+
 jobs:
   bygg:
     name: Bygg app/image, push til github, deploy til prod-gcp (MÅ KUN BRUKES VED KRISE)

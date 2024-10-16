@@ -2,6 +2,10 @@ name: Build-Deploy-Preprod-GCP
 on:
   workflow_dispatch:
 
+env:
+  GITHUB_BRANCH: ${{ github.ref_name }}
+  GITHUB_SHA: ${{ github.sha }}
+
 jobs:
   deploy-to-dev:
     name: Bygg app/image, push til github, deploy til dev-gcp
