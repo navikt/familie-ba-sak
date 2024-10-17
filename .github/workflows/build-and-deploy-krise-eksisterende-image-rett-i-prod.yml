@@ -22,7 +22,7 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod.yaml
-          VAR: image=${{ env.IMAGE }}:${{ inputs.tag }},GITHUB_BRANCH=${{ github.ref_name }},GITHUB_SHA:${{ github.sha }}
+          VAR: image=${{ env.IMAGE }}:${{ inputs.tag }},GITHUB_BRANCH=${{ github.ref_name }},GITHUB_SHA=${{ github.sha }}
 
   loggfeil:
     name: Send logg til slack ved feil
