@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt
 
 import java.time.LocalDate
 
-data class DagTidspunkt internal constructor(
+data class DagTidspunkt(
     internal val dato: LocalDate,
     override val uendelighet: Uendelighet,
 ) : Tidspunkt<Dag>(uendelighet) {

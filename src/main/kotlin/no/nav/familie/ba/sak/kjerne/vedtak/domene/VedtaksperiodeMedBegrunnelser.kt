@@ -121,6 +121,7 @@ fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
         it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.standardbegrunnelse in standardbegrunnelser }
     }
 
+@Suppress("DEPRECATION")
 fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
@@ -206,6 +207,7 @@ fun hentBrevPeriodeType(
         erUtbetalingEllerDeltBostedIPeriode = erUtbetalingEllerDeltBostedIPeriode,
     )
 
+@Suppress("DEPRECATION")
 fun hentBrevPeriodeType(
     vedtaksperiodetype: Vedtaksperiodetype,
     fom: LocalDate?,
@@ -222,5 +224,6 @@ fun hentBrevPeriodeType(
         Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.INGEN_UTBETALING else BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE
         Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.INGEN_UTBETALING
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.UTBETALING
-        Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
+        Vedtaksperiodetype.ENDRET_UTBETALING,
+        -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
     }

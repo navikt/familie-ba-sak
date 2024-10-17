@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class MånedTidspunkt internal constructor(
+data class MånedTidspunkt(
     internal val måned: YearMonth,
     override val uendelighet: Uendelighet,
 ) : Tidspunkt<Måned>(uendelighet) {
