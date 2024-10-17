@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJourn
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService.Companion.NAV_NO
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
@@ -36,6 +37,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus.FERDIGSTILT
 import no.nav.familie.kontrakter.felles.journalpost.Sak
+import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -57,14 +59,15 @@ class InnkommendeJournalføringService(
 
     fun hentJournalpost(journalpostId: String): Journalpost = integrasjonClient.hentJournalpost(journalpostId)
 
-    fun hentJournalposterForBruker(brukerId: String): List<Journalpost> =
-        integrasjonClient.hentJournalposterForBruker(
-            JournalposterForBrukerRequest(
-                antall = 1000,
-                brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
-                tema = listOf(Tema.BAR),
-            ),
-        )
+    fun hentJournalposterForBruker(brukerId: String): List<TilgangsstyrtJournalpost> =
+        integrasjonClient
+            .hentTilgangsstyrteJournalposterForBruker(
+                JournalposterForBrukerRequest(
+                    antall = 1000,
+                    brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
+                    tema = listOf(Tema.BAR),
+                ),
+            )
 
     private fun oppdaterLogiskeVedlegg(request: RestJournalføring) {
         request.dokumenter.forEach { dokument ->
