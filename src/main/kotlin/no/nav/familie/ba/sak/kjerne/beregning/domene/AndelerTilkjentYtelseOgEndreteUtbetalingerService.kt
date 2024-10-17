@@ -104,7 +104,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             endretUtbetalingAndel.periode.overlapperHeltEllerDelvisMed(andelTilkjentYtelse.periode)
 }
 
-data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
+data class AndelTilkjentYtelseMedEndreteUtbetalinger(
     private val andelTilkjentYtelse: AndelTilkjentYtelse,
     private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
 ) {

@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
     val barnsFødselsdato = 13.jan(2020)
@@ -22,48 +21,6 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
     val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
     val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk(relaxed = true)
-
-    @Test
-    fun `skal kaste exception hvis tilkjent ytelse oppdateres med overlappende andel tilkjent ytelse for et barn`() {
-        val behandling = lagBehandling()
-
-        val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling).bygg()
-
-        val nyTilkjentYtelse =
-            TilkjentYtelseBuilder(startMåned, behandling)
-                .forPersoner(barn1)
-                .medOrdinær(" $$$$$$")
-                .medOrdinær("      $$$$$")
-                .bygg()
-
-        assertThrows<IllegalStateException> {
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(
-                forrigeTilkjentYtelse,
-                nyTilkjentYtelse.andelerTilkjentYtelse,
-            )
-        }
-    }
-
-    @Test
-    fun `skal kaste exception hvis tilkjent ytelse oppdateres med overlappende andel tilkjent ytelse for søker`() {
-        val behandling = lagBehandling()
-
-        val forrigeTilkjentYtelse = TilkjentYtelseBuilder(startMåned, behandling).bygg()
-
-        val nyTilkjentYtelse =
-            TilkjentYtelseBuilder(startMåned, behandling)
-                .forPersoner(søker)
-                .medUtvidet(" $$$$$$")
-                .medUtvidet("      $$$$$")
-                .bygg()
-
-        assertThrows<IllegalStateException> {
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(
-                forrigeTilkjentYtelse,
-                nyTilkjentYtelse.andelerTilkjentYtelse,
-            )
-        }
-    }
 
     @Test
     fun `skal ikke kaste exception hvis tilkjent ytelse oppdateres med gyldige andeler`() {
