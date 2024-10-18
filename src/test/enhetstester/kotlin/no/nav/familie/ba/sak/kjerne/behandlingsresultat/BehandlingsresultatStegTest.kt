@@ -98,7 +98,6 @@ class BehandlingsresultatStegTest {
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
             localDateProvider = RealDateProvider(),
-            valutakursService = valutakursService,
         )
 
     private val behandling =

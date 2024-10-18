@@ -25,6 +25,8 @@ import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 class SmåbarnstilleggServiceTest {
@@ -56,12 +58,15 @@ class SmåbarnstilleggServiceTest {
         every { localDateProvider.now() } returns LocalDate.now()
     }
 
-    @Test
-    fun `Ved satsendring skal gamle perioder kopieres`() {
+    @ParameterizedTest
+    @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
+    fun `Ved satsendring og månedlig valutajustering skal gamle perioder kopieres`(
+        årsak: BehandlingÅrsak,
+    ) {
         val søker = lagPerson(type = PersonType.SØKER)
         val fagsak = Fagsak(aktør = søker.aktør)
         val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING, fagsak = fagsak)
+        val behandling = lagBehandling(årsak = årsak, fagsak = fagsak)
 
         val perioderForrigeBehandling =
             listOf(
