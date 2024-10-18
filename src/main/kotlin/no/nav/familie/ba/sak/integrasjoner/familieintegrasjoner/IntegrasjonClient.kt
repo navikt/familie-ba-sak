@@ -384,7 +384,7 @@ class IntegrasjonClient(
         backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentTilgangsstyrteJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<TilgangsstyrtJournalpost> {
-        val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt")
+        val uri = URI.create("$integrasjonUri/journalpost/tilgangsstyrt/baks")
 
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
