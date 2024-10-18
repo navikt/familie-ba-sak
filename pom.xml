@@ -17,11 +17,13 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.0.20</kotlin.version>
+        <kotlin.version>2.0.21</kotlin.version>
+        <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
+        <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20240925091323_ea1bd3c</prosessering.version>
+        <prosessering.version>2.20241011144712_deb1f2c</prosessering.version>
         <felles.version>3.20240913110742_adb42f8</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20241009100044_c0fcd51</felles-kontrakter.version>
@@ -51,6 +53,13 @@
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
         <confluent.version>7.7.1</confluent.version>
+        <sonar.organization>navikt</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.sources>src/main</sonar.sources>
+        <sonar.tests>src/test</sonar.tests>
+        <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
+        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -597,7 +606,57 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin.version}</version>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jacoco</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <destFile>
+                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}/jacoco.exec
+                                    </destFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <dataFile>
+                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}/jacoco.exec
+                                    </dataFile>
+                                    <outputDirectory>
+                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}
+                                    </outputDirectory>
+                                    <formats>
+                                        <format>XML</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

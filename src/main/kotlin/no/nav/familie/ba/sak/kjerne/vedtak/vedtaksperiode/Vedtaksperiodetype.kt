@@ -70,10 +70,11 @@ enum class Vedtaksperiodetype(
         ),
     ),
 
-    @Deprecated("Legacy. Kan ikke fjernes uten at det ryddes opp i Vedtaksperioder-tabellen")
+    @Deprecated("Legacy. Kan ikke fjernes uten at det ryddes opp i Vedtaksperioder-tabellen og man kan ikke endre i tabellen fordi man ikke vet om det er en økning eller reduksjon")
     ENDRET_UTBETALING(emptySet()),
     ;
 
+    @Suppress("DEPRECATION")
     fun sorteringsRekkefølge(): Int =
         when (this) {
             UTBETALING -> 1

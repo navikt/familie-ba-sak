@@ -12,7 +12,7 @@ class Dag : Tidsenhet
 
 class Måned : Tidsenhet
 
-abstract class Tidspunkt<T : Tidsenhet> internal constructor(
+abstract class Tidspunkt<T : Tidsenhet>(
     internal open val uendelighet: Uendelighet,
 ) : Comparable<Tidspunkt<T>> {
     abstract fun flytt(tidsenheter: Long): Tidspunkt<T>

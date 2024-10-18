@@ -227,8 +227,11 @@ class LoggService(
                 .filter { Identkonverterer.er11Siffer(it) }
                 .distinct()
                 .map { Fødselsnummer(it) }
-                .map { it.fødselsdato }
-                .map { it.tilKortString() },
+                .map {
+                    // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
+                    @Suppress("DEPRECATION")
+                    it.fødselsdato
+                }.map { it.tilKortString() },
         )
 
     fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
