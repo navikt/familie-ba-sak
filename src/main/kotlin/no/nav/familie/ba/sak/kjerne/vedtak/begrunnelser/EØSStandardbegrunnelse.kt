@@ -207,6 +207,22 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimaerlandDenAndreForelderenUtsendtArbeidstaker"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_PRIMÆRLAND_UTSENDT_ARBEIDSTAKER_BARN_MEDLEM_FOLKETRYGDEN {
+        override val sanityApiNavn = "innvilgetPrimarlandUtsendtArbeidstakerBarnMedlemFolketrygden"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_PRIMÆRLAND_SØKER_NORSK_ARBEIDSGIVER_I_EØS_LAND {
+        override val sanityApiNavn = "innvilgetPrimarlandSokerNorskArbeidsgiverIEosLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_PRIMÆRLAND_ANNEN_FORELDER_NORSK_ARBEIDSGIVER_I_EØS_LAND {
+        override val sanityApiNavn = "innvilgetPrimarlandAnnenForelderNorskArbeidsgiverIEosLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SEKUNDÆRLAND_SELVSTENDIG_RETT_ANNEN_FORELDER_NORSK_ARBEIDSGIVER_EØS {
+        override val sanityApiNavn = "innvilgetSekundarlandSelvstendigRettAnnenForelderNorskArbeidsgiverEos"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "innvilgetSelvstendigRettPrimaerlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
