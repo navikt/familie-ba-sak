@@ -305,7 +305,7 @@ class ArbeidsfordelingIntegrationTest(
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
         assertEquals(IKKE_FORTROLIG_ENHET, arbeidsfordelingPåBehandling.behandlendeEnhetId)
 
-        oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())
+        val oppgaveId = oppgaveService.opprettOppgave(behandling.id, Oppgavetype.BehandleSak, now())
 
         stegService.håndterSøknad(
             behandling,
@@ -320,7 +320,7 @@ class ArbeidsfordelingIntegrationTest(
         )
 
         verify(exactly = 1) {
-            integrasjonClient.patchOppgave(any())
+            integrasjonClient.tilordneEnhetOgRessursForOppgave(any(), any())
         }
 
         val arbeidsfordelingPåBehandlingEtterSøknadsregistreringUtenDiskresjonskode =
