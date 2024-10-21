@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.internal
 
+import no.nav.familie.ba.sak.config.GithubConfig
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -11,11 +12,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(path = ["/api"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @ProtectedWithClaims(issuer = "azuread")
-class GithubController {
+class GithubController(
+    private val githubConfig: GithubConfig,
+) {
     @GetMapping("/hent-branch")
     fun hentBranch(): ResponseEntity<Ressurs<GithubBranchDto>> {
-        val branch: String? = System.getenv("GITHUB_BRANCH")
-        val sha: String? = System.getenv("GITHUB_SHA")
+        val branch: String? = githubConfig.githubBranch
+        val sha: String? = githubConfig.githubSha
         return ResponseEntity.ok().body(
             Ressurs.success(
                 data = GithubBranchDto(branch = branch, sha = sha),
