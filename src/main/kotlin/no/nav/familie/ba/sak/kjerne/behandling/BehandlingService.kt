@@ -18,13 +18,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VE
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -136,11 +134,6 @@ class BehandlingService(
             }
 
             lagretBehandling
-        } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
-            aktivBehandling.leggTilBehandlingStegTilstand(FØRSTE_STEG)
-            aktivBehandling.status = initStatus()
-
-            behandlingHentOgPersisterService.lagreEllerOppdater(aktivBehandling)
         } else {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage ny behandling. Fagsaken har en aktiv behandling som ikke er ferdigstilt.",
