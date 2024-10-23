@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
-import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
+import no.nav.familie.ba.sak.integrasjoner.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -14,7 +14,6 @@ import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
-import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -44,7 +43,14 @@ class InnkommendeJournalføringServiceEnhetTest {
         // Arrange
         val brukerId = "12345678910"
         val journalpostId = "123"
-        val journalposter = listOf(lagTestJournalpost(personIdent = brukerId, journalpostId = journalpostId)).map { TilgangsstyrtJournalpost(it, true) }
+        val journalposter =
+            listOf(
+                lagTilgangsstyrtJournalpost(
+                    personIdent = brukerId,
+                    journalpostId = journalpostId,
+                    harTilgang = true,
+                ),
+            )
 
         every {
             mockedIntegrasjonClient.hentTilgangsstyrteJournalposterForBruker(
