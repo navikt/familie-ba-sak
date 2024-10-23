@@ -1,0 +1,47 @@
+{
+  "data": [
+    {
+      "journalpost": {
+        "journalpostId": "453492634",
+        "journalposttype": "I",
+        "journalstatus": "JOURNALFOERT",
+        "tema": "BAR",
+        "kanal": "NAV_NO",
+        "dokumenter": [
+          {
+            "dokumentInfoId": "453871494",
+            "tittel": "Søknad om ordinær barnetrygd",
+            "brevkode": "NAV 33-00.07",
+            "dokumentstatus": null,
+            "dokumentvarianter": [
+              {
+                "variantformat": "ARKIV"
+              },
+              {
+                "variantformat": "ORIGINAL"
+              }
+            ],
+            "logiskeVedlegg": []
+          }
+        ],
+        "relevanteDatoer": [
+          {
+            "dato": "2020-01-31T08:00:17",
+            "datotype": "DATO_DOKUMENT"
+          },
+          {
+            "dato": "2020-03-11T09:09:15",
+            "datotype": "DATO_JOURNALFOERT"
+          },
+          {
+            "dato": "2020-01-31T08:00:17",
+            "datotype": "DATO_REGISTRERT"
+          }
+        ]
+      },
+      "harTilgang": true
+    }
+  ],
+  "status": "SUKSESS",
+  "melding": "Hentet journalposter"
+}
