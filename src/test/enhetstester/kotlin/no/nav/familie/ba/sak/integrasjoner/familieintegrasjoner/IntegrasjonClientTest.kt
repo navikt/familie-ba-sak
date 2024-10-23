@@ -73,7 +73,7 @@ class IntegrasjonClientTest {
         assertThat(tilgangsstyrteJournalposter).hasSize(1)
         val tilgangsstyrtJournalpost = tilgangsstyrteJournalposter.single()
         assertThat(tilgangsstyrtJournalpost.journalpost.journalpostId).isEqualTo("453492634")
-        assertThat(tilgangsstyrtJournalpost.journalpost.tema).isEqualTo(Tema.KON.name)
+        assertThat(tilgangsstyrtJournalpost.journalpost.tema).isEqualTo(Tema.BAR.name)
         assertThat(tilgangsstyrtJournalpost.journalpost.kanal).isEqualTo("NAV_NO")
         assertThat(tilgangsstyrtJournalpost.harTilgang).isTrue
     }
