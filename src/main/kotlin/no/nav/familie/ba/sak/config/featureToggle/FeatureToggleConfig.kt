@@ -19,9 +19,6 @@ class FeatureToggleConfig {
         // NAV-22311
         const val OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER = "familie-ba-ks-sak.opprett-sak-paa-riktig-enhet-og-saksbehandler"
 
-        // NAV-22361
-        const val BRUK_NYTT_RETUR_OBJEKT_FOR_JOURNALPOSTER = "familie-ba-ks-sak.bruk-nytt-retur-objekt-for-journalposter"
-
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
