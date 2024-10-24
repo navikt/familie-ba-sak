@@ -62,11 +62,13 @@ class VilkårsvurderingForNyBehandlingService(
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
 
-            BehandlingÅrsak.SATSENDRING -> {
+            BehandlingÅrsak.SATSENDRING,
+            BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+            -> {
                 genererVilkårsvurderingForSatsendring(
                     forrigeBehandlingSomErVedtatt =
                         forrigeBehandlingSomErVedtatt
-                            ?: throw Feil("Kan ikke opprette behandling med årsak 'Satsendring' hvis det ikke finnes en tidligere behandling"),
+                            ?: throw Feil("Kan ikke opprette behandling med årsak ${behandling.opprettetÅrsak} hvis det ikke finnes en tidligere behandling"),
                     inneværendeBehandling = behandling,
                 )
             }

@@ -35,7 +35,7 @@ class SmåbarnstilleggService(
         søkerAktør: Aktør,
         behandling: Behandling,
     ) {
-        if (behandling.erSatsendring()) {
+        if (behandling.erSatsendringEllerMånedligValutajustering()) {
             kopierPerioderMedOvergangsstønadFraForrigeBehandling(
                 behandling,
             )
