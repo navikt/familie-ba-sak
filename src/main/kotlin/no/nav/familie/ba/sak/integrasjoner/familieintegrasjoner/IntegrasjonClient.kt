@@ -476,7 +476,7 @@ class IntegrasjonClient(
         dokumentInfoId: String,
         journalpostId: String,
     ): ByteArray {
-        val uri = URI.create("$integrasjonUri/journalpost/hentdokument/$journalpostId/$dokumentInfoId")
+        val uri = URI.create("$integrasjonUri/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentInfoId")
 
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
