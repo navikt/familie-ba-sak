@@ -198,7 +198,6 @@ class BehandlingService(
 
         if (aktivBehandling != null) {
             behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
-            saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
                 "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
