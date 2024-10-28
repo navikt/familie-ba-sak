@@ -379,7 +379,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         val journalpostId = "1234"
         val fnr = randomFnr()
         wireMockServer.stubFor(
-            get("/api/journalpost?journalpostId=$journalpostId").willReturn(
+            get("/api/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId").willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
                         success(
@@ -395,7 +395,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         assertThat(oppgave.journalpostId).isEqualTo(journalpostId)
         assertThat(oppgave.bruker?.id).isEqualTo(fnr)
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId")))
     }
 
     @Test
