@@ -114,7 +114,8 @@ class HåndterNyIdentService(
         fagsak: Fagsak,
     ) {
         // Hvis søkers fødselsdato endrer seg kan vi alltid patche siden det ikke påvirker andeler. Med mindre søker er enslig mindreårig.
-        if (fagsak.type != FagsakType.BARN_ENSLIG_MINDREÅRIG && fagsak.aktør.aktørId in alleIdenterFraPdl.hentAktørIder()) return
+        val søkersAktørId = fagsak.aktør.aktørId
+        if (fagsak.type != FagsakType.BARN_ENSLIG_MINDREÅRIG && søkersAktørId in alleIdenterFraPdl.hentAktørIder()) return
 
         val aktivFødselsnummer = alleIdenterFraPdl.hentAktivFødselsnummer()
         val fødselsdatoFraPdl = pdlRestClient.hentPerson(aktivFødselsnummer, PersonInfoQuery.ENKEL).fødselsdato
