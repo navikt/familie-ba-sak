@@ -379,7 +379,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         val journalpostId = "1234"
         val fnr = randomFnr()
         wireMockServer.stubFor(
-            get("/api/journalpost?journalpostId=$journalpostId").willReturn(
+            get("/api/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId").willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
                         success(
@@ -390,12 +390,36 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val oppgave = integrasjonClient.hentJournalpost(journalpostId)
-        assertThat(oppgave).isNotNull
-        assertThat(oppgave.journalpostId).isEqualTo(journalpostId)
-        assertThat(oppgave.bruker?.id).isEqualTo(fnr)
+        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
+        assertThat(journalpost).isNotNull
+        assertThat(journalpost.journalpostId).isEqualTo(journalpostId)
+        assertThat(journalpost.bruker?.id).isEqualTo(fnr)
 
-        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost?journalpostId=$journalpostId")))
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId")))
+    }
+
+    @Test
+    fun `hentDokument returnerer OK`() {
+        val journalpostId = "1234"
+        val dokumentId = "5678"
+        val fnr = randomFnr()
+        wireMockServer.stubFor(
+            get("/api/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentId").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(
+                            "Test".toByteArray(),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val dokument = integrasjonClient.hentDokument(journalpostId = journalpostId, dokumentInfoId = dokumentId)
+        assertThat(dokument).isNotNull
+        assertThat(dokument.decodeToString()).isEqualTo("Test")
+
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentId")))
     }
 
     @Test
