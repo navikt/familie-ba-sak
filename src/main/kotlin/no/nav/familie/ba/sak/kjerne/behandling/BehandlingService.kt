@@ -136,7 +136,7 @@ class BehandlingService(
             }
 
             lagretBehandling
-        } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK) {
+        } else if (aktivBehandling.steg < StegType.BESLUTTE_VEDTAK && nyBehandling.skalBehandlesAutomatisk) {
             aktivBehandling.leggTilBehandlingStegTilstand(FØRSTE_STEG)
             aktivBehandling.status = initStatus()
 
