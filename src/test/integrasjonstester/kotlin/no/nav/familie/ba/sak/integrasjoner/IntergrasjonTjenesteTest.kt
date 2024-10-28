@@ -390,10 +390,10 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             ),
         )
 
-        val oppgave = integrasjonClient.hentJournalpost(journalpostId)
-        assertThat(oppgave).isNotNull
-        assertThat(oppgave.journalpostId).isEqualTo(journalpostId)
-        assertThat(oppgave.bruker?.id).isEqualTo(fnr)
+        val journalpost = integrasjonClient.hentJournalpost(journalpostId)
+        assertThat(journalpost).isNotNull
+        assertThat(journalpost.journalpostId).isEqualTo(journalpostId)
+        assertThat(journalpost.bruker?.id).isEqualTo(fnr)
 
         wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost/tilgangsstyrt/baks?journalpostId=$journalpostId")))
     }
