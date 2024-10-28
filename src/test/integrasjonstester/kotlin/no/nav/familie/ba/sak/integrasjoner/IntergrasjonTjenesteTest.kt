@@ -399,6 +399,30 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     }
 
     @Test
+    fun `hentDokument returnerer OK`() {
+        val journalpostId = "1234"
+        val dokumentId = "5678"
+        val fnr = randomFnr()
+        wireMockServer.stubFor(
+            get("/api/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentId").willReturn(
+                okJson(
+                    objectMapper.writeValueAsString(
+                        success(
+                            "Test".toByteArray(),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val dokument = integrasjonClient.hentDokument(journalpostId = journalpostId, dokumentInfoId = dokumentId)
+        assertThat(dokument).isNotNull
+        assertThat(dokument.decodeToString()).isEqualTo("Test")
+
+        wireMockServer.verify(getRequestedFor(urlEqualTo("/api/journalpost/hentdokument/tilgangsstyrt/baks/$journalpostId/$dokumentId")))
+    }
+
+    @Test
     @Tag("integration")
     fun `skal hente arbeidsforhold for person`() {
         val fnr = randomFnr()
