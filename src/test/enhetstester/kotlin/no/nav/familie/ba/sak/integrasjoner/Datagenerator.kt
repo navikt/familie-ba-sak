@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.journalpost.Sak
+import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -78,6 +79,19 @@ fun lagTestJournalpost(
             ),
         tittel = "Søknad om ordinær barnetrygd",
         relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
+    )
+
+fun lagTilgangsstyrtJournalpost(
+    personIdent: String,
+    journalpostId: String,
+    harTilgang: Boolean = true,
+): TilgangsstyrtJournalpost =
+    TilgangsstyrtJournalpost(
+        lagTestJournalpost(
+            personIdent = personIdent,
+            journalpostId = journalpostId,
+        ),
+        harTilgang = harTilgang,
     )
 
 fun lagTestOppgave(): OpprettOppgaveRequest =
