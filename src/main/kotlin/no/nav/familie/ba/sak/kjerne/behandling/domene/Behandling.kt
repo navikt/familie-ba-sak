@@ -115,9 +115,8 @@ data class Behandling(
     fun erBehandlingMedVedtaksbrevutsending(): Boolean =
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
-            opprettetÅrsak == BehandlingÅrsak.SATSENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
-            opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING -> false
+            erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
             else -> true
@@ -164,7 +163,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
-            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING -> true
+            skalBehandlesAutomatisk && erMånedligValutajustering() -> true
             else -> false
         }
 
@@ -220,7 +219,9 @@ data class Behandling(
 
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
-    fun erValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
+    fun erMånedligValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
+
+    fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&

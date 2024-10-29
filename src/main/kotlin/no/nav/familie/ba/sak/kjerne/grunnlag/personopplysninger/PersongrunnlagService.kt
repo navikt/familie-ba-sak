@@ -218,7 +218,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val enkelPersonInfo = behandling.erMigrering() || behandling.erSatsendring()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -229,7 +229,7 @@ class PersongrunnlagService(
                         NORMAL -> PersonType.SØKER
                         BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
                     },
-                enkelPersonInfo = enkelPersonInfo,
+                skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
             )
         personopplysningGrunnlag.personer.add(søker)
@@ -241,7 +241,7 @@ class PersongrunnlagService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     målform = målform,
                     personType = PersonType.BARN,
-                    enkelPersonInfo = enkelPersonInfo,
+                    skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 ),
             )
         }
@@ -254,7 +254,7 @@ class PersongrunnlagService(
                         personopplysningGrunnlag = personopplysningGrunnlag,
                         målform = målform,
                         personType = PersonType.ANNENPART,
-                        enkelPersonInfo = enkelPersonInfo,
+                        skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                         hentArbeidsforhold = true,
                     ),
                 )
@@ -276,11 +276,11 @@ class PersongrunnlagService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         målform: Målform,
         personType: PersonType,
-        enkelPersonInfo: Boolean = false,
+        skalHenteEnkelPersonInfo: Boolean = false,
         hentArbeidsforhold: Boolean = false,
     ): Person {
         val personinfo =
-            if (enkelPersonInfo) {
+            if (skalHenteEnkelPersonInfo) {
                 personopplysningerService.hentPersoninfoEnkel(aktør)
             } else {
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)

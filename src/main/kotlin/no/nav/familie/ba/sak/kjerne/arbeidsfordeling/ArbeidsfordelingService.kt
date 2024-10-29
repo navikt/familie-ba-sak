@@ -83,8 +83,8 @@ class ArbeidsfordelingService(
         val forrigeArbeidsfordelingsenhet = aktivArbeidsfordelingPåBehandling?.tilArbeidsfordelingsenhet()
 
         val oppdatertArbeidsfordelingPåBehandling =
-            if (behandling.erSatsendring()) {
-                fastsettArbeidsfordelingsenhetPåSatsendringsbehandling(
+            if (behandling.erSatsendringEllerMånedligValutajustering()) {
+                fastsettArbeidsfordelingsenhetUtIfraForrigeBehandling(
                     behandling,
                     sisteBehandlingSomErIverksatt,
                     aktivArbeidsfordelingPåBehandling,
@@ -132,7 +132,7 @@ class ArbeidsfordelingService(
         )
     }
 
-    private fun fastsettArbeidsfordelingsenhetPåSatsendringsbehandling(
+    private fun fastsettArbeidsfordelingsenhetUtIfraForrigeBehandling(
         behandling: Behandling,
         sisteBehandlingSomErIverksatt: Behandling?,
         aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?,
