@@ -57,6 +57,7 @@ jobs:
     name: Sonar
     runs-on: ubuntu-latest-8-cores
     needs: [ enhetstester, integrasjonstester ]
+    if: github.actor != 'dependabot[bot]'
     steps:
       - uses: actions/checkout@v4
         with:
