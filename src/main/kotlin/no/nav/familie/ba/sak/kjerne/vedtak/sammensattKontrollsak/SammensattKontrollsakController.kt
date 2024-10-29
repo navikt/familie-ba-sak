@@ -50,8 +50,6 @@ class SammensattKontrollsakController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Hent SammensattKontrollsak",
         )
-        tilgangService.validerKanRedigereBehandling(behandlingId = behandlingId)
-
         val sammensattKontrollsak = sammensattKontrollsakService.finnSammensattKontrollsak(behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(sammensattKontrollsak?.tilRestSammensattKontrollsak()))
