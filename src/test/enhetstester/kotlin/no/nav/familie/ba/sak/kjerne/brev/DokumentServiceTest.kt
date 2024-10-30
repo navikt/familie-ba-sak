@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -132,7 +133,7 @@ internal class DokumentServiceTest {
             )
         }
         assert(avsenderMottaker.isCaptured) { "AvsenderMottaker skal være satt for ikke å defaulte til Bruker" }
-        assertThat(avsenderMottaker.captured.idType).isEqualTo(BrukerIdType.ORGNR)
+        assertThat(avsenderMottaker.captured.idType).isEqualTo(AvsenderMottakerIdType.ORGNR)
         assertThat(avsenderMottaker.captured.id).isEqualTo(orgNummer)
         assertThat(avsenderMottaker.captured.navn).isEqualTo("Testinstitusjon")
     }

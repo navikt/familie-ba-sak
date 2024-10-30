@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
-import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 
