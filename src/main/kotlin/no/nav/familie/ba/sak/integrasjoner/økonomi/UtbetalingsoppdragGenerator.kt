@@ -19,7 +19,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
-class UtbetalingsoppdragGenerator {
+class UtbetalingsoppdragGenerator(
+    private val utbetalingsgenerator: Utbetalingsgenerator,
+    private val justerUtbetalingsoppdragService: JusterUtbetalingsoppdragService,
+) {
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
         vedtak: Vedtak,
@@ -28,33 +31,36 @@ class UtbetalingsoppdragGenerator {
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
         endretMigreringsDato: YearMonth? = null,
-    ): BeregnetUtbetalingsoppdragLongId =
-        Utbetalingsgenerator().lagUtbetalingsoppdrag(
-            behandlingsinformasjon =
-                Behandlingsinformasjon(
-                    saksbehandlerId = saksbehandlerId,
-                    behandlingId = vedtak.behandling.id.toString(),
-                    eksternBehandlingId = vedtak.behandling.id,
-                    eksternFagsakId = vedtak.behandling.fagsak.id,
-                    fagsystem = FagsystemBA.BARNETRYGD,
-                    personIdent =
-                        vedtak.behandling.fagsak.aktør
-                            .aktivFødselsnummer(),
-                    vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
-                    opphørAlleKjederFra =
-                        finnOpphørsdatoForAlleKjeder(
-                            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-                            sisteAndelPerKjede = sisteAndelPerKjede,
-                            endretMigreringsDato = endretMigreringsDato,
-                        ),
-                    utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-                    // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
-                    opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering,
-                ),
-            forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
-            nyeAndeler = nyTilkjentYtelse.tilAndelData(),
-            sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
-        )
+    ): BeregnetUtbetalingsoppdragLongId {
+        val beregnetUtbetalingsoppdrag =
+            utbetalingsgenerator.lagUtbetalingsoppdrag(
+                behandlingsinformasjon =
+                    Behandlingsinformasjon(
+                        saksbehandlerId = saksbehandlerId,
+                        behandlingId = vedtak.behandling.id.toString(),
+                        eksternBehandlingId = vedtak.behandling.id,
+                        eksternFagsakId = vedtak.behandling.fagsak.id,
+                        fagsystem = FagsystemBA.BARNETRYGD,
+                        personIdent =
+                            vedtak.behandling.fagsak.aktør
+                                .aktivFødselsnummer(),
+                        vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
+                        opphørAlleKjederFra =
+                            finnOpphørsdatoForAlleKjeder(
+                                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                                sisteAndelPerKjede = sisteAndelPerKjede,
+                                endretMigreringsDato = endretMigreringsDato,
+                            ),
+                        utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
+                        // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
+                        opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering,
+                    ),
+                forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
+                nyeAndeler = nyTilkjentYtelse.tilAndelData(),
+                sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
+            )
+        return justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(beregnetUtbetalingsoppdrag, vedtak.behandling.fagsak.id)
+    }
 
     private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
         this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
@@ -100,7 +106,8 @@ enum class YtelsetypeBA(
     override val satsType: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType = no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode.SatsType.MND,
 ) : no.nav.familie.felles.utbetalingsgenerator.domain.Ytelsestype {
     ORDINÆR_BARNETRYGD("BATR"),
-    UTVIDET_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BAUTV-OP"),
+    UTVIDET_BARNETRYGD_GAMMEL("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
 }
 
