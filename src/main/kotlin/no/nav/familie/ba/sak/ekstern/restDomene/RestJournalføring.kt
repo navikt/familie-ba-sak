@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
@@ -44,12 +44,22 @@ data class RestJournalføring(
     val fagsakType: FagsakType,
     val institusjon: RestInstitusjon? = null,
 ) {
-    fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest =
-        OppdaterJournalpostRequest(
+    fun oppdaterMedDokumentOgSak(
+        sak: Sak,
+        oppgavetype: String?,
+    ): OppdaterJournalpostRequest {
+        val avsenderMottakerIdType =
+            when {
+                oppgavetype == "BEH_SED" -> AvsenderMottakerIdType.UTL_ORG
+                this.avsender.id != "" -> AvsenderMottakerIdType.FNR
+                else -> null
+            }
+
+        return OppdaterJournalpostRequest(
             avsenderMottaker =
                 AvsenderMottaker(
                     id = this.avsender.id,
-                    idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
+                    idType = avsenderMottakerIdType,
                     navn = this.avsender.navn,
                 ),
             bruker =
@@ -71,6 +81,7 @@ data class RestJournalføring(
                     )
                 },
         )
+    }
 
     fun hentUnderkategori(): BehandlingUnderkategori {
         if (underkategori is BehandlingUnderkategori) return underkategori

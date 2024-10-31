@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
-import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 
 sealed interface MottakerInfo {
     val navn: String
@@ -41,7 +41,7 @@ fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? =
             )
         is Institusjon ->
             AvsenderMottaker(
-                idType = BrukerIdType.ORGNR,
+                idType = AvsenderMottakerIdType.ORGNR,
                 id = orgNummer,
                 navn = navn,
             )

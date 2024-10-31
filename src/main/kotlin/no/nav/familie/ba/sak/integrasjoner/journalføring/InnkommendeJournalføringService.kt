@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJourn
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService.Companion.NAV_NO
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
@@ -127,6 +126,7 @@ class InnkommendeJournalføringService(
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
+        val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId.toLong())
 
         if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
@@ -165,7 +165,7 @@ class InnkommendeJournalføringService(
         oppdaterLogiskeVedlegg(request)
 
         oppdaterOgFerdigstill(
-            request = request.oppdaterMedDokumentOgSak(sak),
+            request = request.oppdaterMedDokumentOgSak(sak, oppgave.oppgavetype),
             journalpostId = journalpostId,
             behandlendeEnhet = behandlendeEnhet,
             oppgaveId = oppgaveId,
