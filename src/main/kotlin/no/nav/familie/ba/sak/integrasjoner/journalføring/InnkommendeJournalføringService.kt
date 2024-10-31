@@ -126,7 +126,6 @@ class InnkommendeJournalføringService(
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
-        val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId.toLong())
 
         if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
@@ -165,7 +164,7 @@ class InnkommendeJournalføringService(
         oppdaterLogiskeVedlegg(request)
 
         oppdaterOgFerdigstill(
-            request = request.oppdaterMedDokumentOgSak(sak, oppgave.oppgavetype),
+            request = request.oppdaterMedDokumentOgSak(sak, journalpost),
             journalpostId = journalpostId,
             behandlendeEnhet = behandlendeEnhet,
             oppgaveId = oppgaveId,
