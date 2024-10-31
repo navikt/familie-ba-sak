@@ -372,7 +372,7 @@ class CucumberMock(
             behandlingService = behandlingService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
+            utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(), mockk(), mockk()),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             unleashNextMedContextService = unleashNextMedContextService,
         )

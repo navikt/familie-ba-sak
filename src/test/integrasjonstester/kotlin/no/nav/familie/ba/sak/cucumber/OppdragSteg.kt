@@ -4,6 +4,7 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -29,7 +30,7 @@ import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-    private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator()
+    private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(), mockk(), mockk())
     private var behandlinger = mapOf<Long, Behandling>()
     private var tilkjenteYtelser = listOf<TilkjentYtelse>()
     private var tilkjenteYtelserNy = listOf<TilkjentYtelse>()

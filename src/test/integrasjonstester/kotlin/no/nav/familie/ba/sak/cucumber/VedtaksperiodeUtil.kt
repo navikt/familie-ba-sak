@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -544,12 +545,12 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     vedtak: Vedtak,
 ) {
     val beregnetUtbetalingsoppdrag =
-        UtbetalingsoppdragGenerator().lagUtbetalingsoppdrag(
+        UtbetalingsoppdragGenerator(mockk(), mockk(), mockk()).lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
             forrigeTilkjentYtelse = null,
             nyTilkjentYtelse = this,
-            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) },
+            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(true)) },
             erSimulering = false,
         )
     oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
