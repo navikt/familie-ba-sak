@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Dokumentstatus
+import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import java.time.LocalDateTime
@@ -46,11 +47,11 @@ data class RestJournalføring(
 ) {
     fun oppdaterMedDokumentOgSak(
         sak: Sak,
-        oppgavetype: String?,
+        journalpost: Journalpost,
     ): OppdaterJournalpostRequest {
         val avsenderMottakerIdType =
             when {
-                oppgavetype == "BEH_SED" -> AvsenderMottakerIdType.UTL_ORG
+                journalpost.kanal == "EESSI" -> journalpost.avsenderMottaker?.type
                 this.avsender.id != "" -> AvsenderMottakerIdType.FNR
                 else -> null
             }
