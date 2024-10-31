@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import org.springframework.stereotype.Service
@@ -7,17 +10,21 @@ import org.springframework.stereotype.Service
 @Service
 class JusterUtbetalingsoppdragService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun justerBeregnetUtbetalingsoppdragVedBehov(
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
-        fagsakId: Long,
-        skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
+        behandling: Behandling,
     ): BeregnetUtbetalingsoppdragLongId {
         // For fagsaker vi ikke har skrudd på ny klassekode for, returnerer vi det originale utbetalingsoppdraget.
-        if (!skalBrukeNyKlassekodeForUtvidetBarnetrygd) {
+        if (!unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                behandlingId = behandling.id,
+            )
+        ) {
             return beregnetUtbetalingsoppdrag
         }
-        val erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd = tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)
+        val erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd = tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId = behandling.fagsak.id)
         // Fagsak er over på ny klassekode for utvidet barnetrygd. Trenger ikke gjøre noen justeringer.
         if (erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd) return beregnetUtbetalingsoppdrag
 

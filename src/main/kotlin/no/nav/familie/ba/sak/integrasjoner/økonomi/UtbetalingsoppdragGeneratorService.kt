@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -15,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelerTilkjentYtelseMed
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
@@ -49,7 +49,7 @@ class UtbetalingsoppdragGeneratorService(
                 vedtak.behandling,
                 forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
             )
-        val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling.fagsak)
+        val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling)
         val beregnetUtbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
@@ -91,10 +91,16 @@ class UtbetalingsoppdragGeneratorService(
             .hentForrigeBehandlingSomErIverksatt(behandling = behandling)
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
-    private fun hentSisteAndelTilkjentYtelse(fagsak: Fagsak) =
-        andelTilkjentYtelseRepository
-            .hentSisteAndelPerIdentOgType(fagsakId = fagsak.id)
-            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
+    private fun hentSisteAndelTilkjentYtelse(behandling: Behandling): Map<IdentOgType, AndelTilkjentYtelse> {
+        val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                behandlingId = behandling.id,
+            )
+        return andelTilkjentYtelseRepository
+            .hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
+            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd)) }
+    }
 
     private fun beregnOmMigreringsDatoErEndret(
         behandling: Behandling,
