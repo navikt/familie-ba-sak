@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
+import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Sak
@@ -12,7 +13,7 @@ class RestJournalføringTest {
     @Nested
     inner class OppdaterMedDokumentOgSak {
         @Test
-        fun `Skal sette AvsenderMottakerIdType i AvsenderMottaker til UTL_ORG dersom oppgavetype er BEH_SED`() {
+        fun `Skal beholde originalt avsender mottaker type dersom kanal er EESSI`() {
             // Arrange
             val sak =
                 Sak(
@@ -23,18 +24,18 @@ class RestJournalføringTest {
                     fagsaksystem = "BA",
                 )
 
-            val oppgaveType = "BEH_SED"
+            val journalpost = lagTestJournalpost("testIdent", "1", AvsenderMottakerIdType.UTL_ORG, "EESSI")
             val restJournalføring = lagMockRestJournalføring(NavnOgIdent("testbruker", "testIdent"))
 
             // Act
-            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, oppgaveType)
+            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, journalpost)
 
             // Assert
             assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isEqualTo(AvsenderMottakerIdType.UTL_ORG)
         }
 
         @Test
-        fun `Skal sette AvsenderMottakerIdType i AvsenderMottaker til FNR dersom ident er fylt ut og det ikke er BEH_SED`() {
+        fun `Skal sette AvsenderMottakerIdType i AvsenderMottaker til FNR dersom ident er fylt ut`() {
             // Arrange
             val sak =
                 Sak(
@@ -45,11 +46,11 @@ class RestJournalføringTest {
                     fagsaksystem = "BA",
                 )
 
-            val oppgaveType = "BEH_SAK"
             val restJournalføring = lagMockRestJournalføring(NavnOgIdent("testbruker", "testIdent"))
+            val journalpost = lagTestJournalpost("testIdent", "1", null, "NAV_NO")
 
             // Act
-            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, oppgaveType)
+            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, journalpost)
 
             // Assert
             assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isEqualTo(AvsenderMottakerIdType.FNR)
@@ -67,11 +68,11 @@ class RestJournalføringTest {
                     fagsaksystem = "BA",
                 )
 
-            val oppgaveType = "BEH_SAK"
+            val journalpost = lagTestJournalpost("", "1", AvsenderMottakerIdType.FNR, "NAV_NO")
             val restJournalføring = lagMockRestJournalføring(NavnOgIdent("testbruker", ""))
 
             // Act
-            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, oppgaveType)
+            val oppdaterJournalpostRequest = restJournalføring.oppdaterMedDokumentOgSak(sak, journalpost)
 
             // Assert
             assertThat(oppdaterJournalpostRequest.avsenderMottaker?.idType).isNull()
