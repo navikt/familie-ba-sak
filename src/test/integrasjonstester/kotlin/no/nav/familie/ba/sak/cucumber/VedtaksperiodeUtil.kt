@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
+import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.defaultFagsak
@@ -32,11 +33,15 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.tilSisteAndelPerAktørOgType
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.BehandlingsinformasjonUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.JusterUtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterAndelerMedPeriodeOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -45,8 +50,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.splittOgSlåSammen
@@ -83,7 +90,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
@@ -544,13 +551,40 @@ private fun skalIverksettesMotOppdrag(
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     vedtak: Vedtak,
 ) {
+    val behandlingService = mockk<BehandlingService>()
+    every { behandlingService.hentMigreringsdatoPåFagsak(any()) } returns null
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtak.behandling) } returns null
+    every { behandlingHentOgPersisterService.hentBehandlinger(vedtak.behandling.fagsak.id) } returns listOf(vedtak.behandling)
+    val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(vedtak.behandling.fagsak.id) } returns andelerTilkjentYtelse.toList()
+    val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(vedtak.behandling.fagsak.id) } returns true
+    val unleashNextMedContextService = mockUnleashNextMedContextService()
+    val utbetalingsoppdragGenerator =
+        UtbetalingsoppdragGenerator(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            unleashNextMedContextService = unleashNextMedContextService,
+            justerUtbetalingsoppdragService =
+                JusterUtbetalingsoppdragService(
+                    tilkjentYtelseRepository,
+                    unleashNextMedContextService,
+                ),
+            behandlingsinformasjonUtleder =
+                BehandlingsinformasjonUtleder(
+                    behandlingHentOgPersisterService,
+                    behandlingService,
+                ),
+            utbetalingsgenerator = Utbetalingsgenerator(),
+        )
+
     val beregnetUtbetalingsoppdrag =
-        UtbetalingsoppdragGenerator(mockk(), mockk(), mockk()).lagUtbetalingsoppdrag(
+        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            forrigeTilkjentYtelse = null,
             nyTilkjentYtelse = this,
-            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(true)) },
             erSimulering = false,
         )
     oppdaterTilkjentYtelseMedUtbetalingsoppdrag(

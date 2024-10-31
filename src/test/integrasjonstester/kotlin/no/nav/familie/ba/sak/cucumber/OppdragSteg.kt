@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -30,7 +29,16 @@ import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-    private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(), mockk(), mockk())
+    private val utbetalingsoppdragGenerator =
+        UtbetalingsoppdragGenerator(
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+            mockk(),
+        )
     private var behandlinger = mapOf<Long, Behandling>()
     private var tilkjenteYtelser = listOf<TilkjentYtelse>()
     private var tilkjenteYtelserNy = listOf<TilkjentYtelse>()
@@ -111,22 +119,16 @@ class OppdragSteg {
     }
 
     private fun beregnUtbetalingsoppdragNy(
-        acc: List<TilkjentYtelse>,
+        acc: List<TilkjentYtelse>, // TODO : Remove me ?
         tilkjentYtelse: TilkjentYtelse,
         erSimulering: Boolean = false,
     ): BeregnetUtbetalingsoppdragLongId {
-        val forrigeTilkjentYtelse = acc.lastOrNull()
-
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
-        val sisteAndelPerIdent = sisteAndelPerIdentNy(acc)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-            sisteAndelPerKjede = sisteAndelPerIdent,
             nyTilkjentYtelse = tilkjentYtelse,
             erSimulering = erSimulering,
-            endretMigreringsDato = endretMigreringsdatoMap[tilkjentYtelse.behandling.id],
         )
     }
 

@@ -8,6 +8,11 @@ enum class FagsystemBA(
 ) : Fagsystem {
     BARNETRYGD(
         "BA",
-        setOf(YtelsetypeBA.ORDINÆR_BARNETRYGD, YtelsetypeBA.UTVIDET_BARNETRYGD, YtelsetypeBA.SMÅBARNSTILLEGG),
+        setOf(
+            YtelsetypeBA.ORDINÆR_BARNETRYGD,
+            YtelsetypeBA.UTVIDET_BARNETRYGD,
+            YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL,
+            YtelsetypeBA.SMÅBARNSTILLEGG,
+        ),
     ),
 }

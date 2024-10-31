@@ -6,12 +6,14 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilPersonEnkel
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -40,7 +42,8 @@ internal class SimuleringServiceEnhetTest {
     private val vedtakRepository: VedtakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
 
     private val simuleringService: SimuleringService =
         SimuleringService(
@@ -49,9 +52,10 @@ internal class SimuleringServiceEnhetTest {
             økonomiSimuleringMottakerRepository = økonomiSimuleringMottakerRepository,
             tilgangService = tilgangService,
             vedtakRepository = vedtakRepository,
-            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository
         )
 
     val februar2023 = LocalDate.of(2023, 2, 1)

@@ -8,6 +8,7 @@ import no.nav.familie.unleash.UnleashService
 fun mockUnleashNextMedContextService(): UnleashNextMedContextService {
     val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
     every { unleashNextMedContextService.isEnabled(any()) } returns true
+    every { unleashNextMedContextService.isEnabled(any(), any()) } returns true
     return unleashNextMedContextService
 }
 

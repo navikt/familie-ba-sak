@@ -40,7 +40,9 @@ class HentStatusTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val oppdaterTilkjentYtelseService = mockk<OppdaterTilkjentYtelseService>()
+
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
 
     private val unleashService: UnleashService = mockk()
 
@@ -51,8 +53,9 @@ class HentStatusTest {
                 økonomiKlient = økonomiKlient,
                 tilkjentYtelseValideringService = mockk(),
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
-                utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+                utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
                 behandlingHentOgPersisterService = mockk(),
+                oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService
             )
         statusFraOppdrag =
             StatusFraOppdrag(

@@ -7,6 +7,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import kotlin.random.Random
 
 fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): TilkjentYtelseRepository {
@@ -35,6 +36,14 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
     every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any()) } answers {
         val behandlingId = firstArg<Long>()
         dataFraCucumber.tilkjenteYtelser[behandlingId]
+    }
+    every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers  {
+        val fagsakId = firstArg<Long>()
+        dataFraCucumber.tilkjenteYtelser
+            .map { it.value }
+            .filter { it.behandling.fagsak.id == fagsakId }
+            .mapNotNull { it.utbetalingsoppdrag }
+            .any { it.contains("\"klassifisering\":\"BAUTV-OP\"") }
     }
     return tilkjentYtelseRepository
 }
