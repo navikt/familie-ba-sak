@@ -12,8 +12,10 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategi
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.BehandlingsinformasjonUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.JusterUtbetalingsoppdragService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -69,6 +71,7 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -366,15 +369,29 @@ class CucumberMock(
             unleashNextMedContextService = unleashNextMedContextService,
         )
 
-    val utbetalingsoppdragGeneratorService =
-        UtbetalingsoppdragGeneratorService(
+    val utbetalingsoppdragGenerator =
+        UtbetalingsoppdragGenerator(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingService = behandlingService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(), mockk(), mockk()),
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             unleashNextMedContextService = unleashNextMedContextService,
+            justerUtbetalingsoppdragService =
+                JusterUtbetalingsoppdragService(
+                    tilkjentYtelseRepository,
+                    unleashNextMedContextService,
+                ),
+            behandlingsinformasjonUtleder =
+                BehandlingsinformasjonUtleder(
+                    behandlingHentOgPersisterService,
+                    behandlingService,
+                ),
+            utbetalingsgenerator = Utbetalingsgenerator(),
+        )
+
+    val oppdaterTilkjentYtelseService =
+        OppdaterTilkjentYtelseService(
+            endretUtbetalingAndelHentOgPersisterService,
+            tilkjentYtelseRepository,
         )
 
     val økonomiService =
@@ -382,8 +399,9 @@ class CucumberMock(
             økonomiKlient = mockØkonomiKlient(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
         )
 
     val håndterIverksettMotØkonomiSteg =

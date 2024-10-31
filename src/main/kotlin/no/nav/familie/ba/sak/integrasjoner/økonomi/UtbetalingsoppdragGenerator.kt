@@ -29,7 +29,7 @@ class UtbetalingsoppdragGenerator(
         saksbehandlerId: String,
         vedtak: Vedtak,
         nyTilkjentYtelse: TilkjentYtelse,
-        erSimulering: Boolean,
+        erSimulering: Boolean = false,
     ): BeregnetUtbetalingsoppdragLongId {
         val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling)

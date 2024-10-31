@@ -21,8 +21,9 @@ class ØkonomiService(
     private val økonomiKlient: ØkonomiKlient,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
+    private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
 
@@ -30,19 +31,31 @@ class ØkonomiService(
         vedtak: Vedtak,
         saksbehandlerId: String,
     ): Utbetalingsoppdrag {
-        val oppdatertBehandling = vedtak.behandling
+        val behandling = vedtak.behandling
+
+        val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+
+        val beregnetUtbetalingsoppdrag =
+            utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                nyTilkjentYtelse = nyTilkjentYtelse,
+            )
+
+        oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
+            tilkjentYtelse = nyTilkjentYtelse,
+            beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,
+        )
 
         val utbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService
-                .genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                    vedtak,
-                    saksbehandlerId,
-                ).utbetalingsoppdrag
+            beregnetUtbetalingsoppdrag
+                .utbetalingsoppdrag
                 .tilRestUtbetalingsoppdrag()
 
-        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = behandling.id)
 
-        iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
+        iverksettOppdrag(utbetalingsoppdrag, behandling.id)
+
         return utbetalingsoppdrag
     }
 
