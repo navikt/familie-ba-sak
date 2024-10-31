@@ -31,5 +31,7 @@ class FeatureToggleConfig {
 
         // Kjører satsendring lørdag
         const val SATSENDRING_LØRDAG: String = "familie-ba-sak.satsendring-lordag"
+
+        const val SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA: String = "familie-ba-sak.infotrygd-replika-sak-aktiv"
     }
 }
