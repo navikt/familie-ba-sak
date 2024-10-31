@@ -203,6 +203,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetTilleggestekstUkFullEtterbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_UK_MIDLERTIDIG_DIFFERANSEUTBETALING {
+        override val sanityApiNavn = "innvilgetUkMidlertidigDifferanseutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_PRIMÆRLAND_DEN_ANDRE_FORELDEREN_UTSENDT_ARBEIDSTAKER {
         override val sanityApiNavn = "innvilgetPrimaerlandDenAndreForelderenUtsendtArbeidstaker"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
