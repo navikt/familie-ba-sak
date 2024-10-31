@@ -1,5 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -12,16 +17,23 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
-class BehandlingsinformasjonUtleder {
+class BehandlingsinformasjonUtleder(
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingService: BehandlingService,
+) {
     fun utled(
         saksbehandlerId: String,
         vedtak: Vedtak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
-        endretMigreringsDato: YearMonth? = null,
-    ): Behandlingsinformasjon =
-        Behandlingsinformasjon(
+    ): Behandlingsinformasjon {
+        val endretMigreringsDato =
+            beregnOmMigreringsDatoErEndret(
+                vedtak.behandling,
+                forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
+            )
+        return Behandlingsinformasjon(
             saksbehandlerId = saksbehandlerId,
             behandlingId = vedtak.behandling.id.toString(),
             eksternBehandlingId = vedtak.behandling.id,
@@ -41,6 +53,36 @@ class BehandlingsinformasjonUtleder {
             // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
             opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering,
         )
+    }
+
+    private fun beregnOmMigreringsDatoErEndret(
+        behandling: Behandling,
+        forrigeTilstandFraDato: YearMonth?,
+    ): YearMonth? {
+        val erMigrertSak =
+            behandlingHentOgPersisterService
+                .hentBehandlinger(behandling.fagsak.id)
+                .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+
+        if (!erMigrertSak) {
+            return null
+        }
+
+        val nyttTilstandFraDato =
+            behandlingService
+                .hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
+                ?.toYearMonth()
+                ?.plusMonths(1)
+
+        return if (forrigeTilstandFraDato != null &&
+            nyttTilstandFraDato != null &&
+            forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)
+        ) {
+            nyttTilstandFraDato
+        } else {
+            null
+        }
+    }
 
     private fun finnOpphørsdatoForAlleKjeder(
         forrigeTilkjentYtelse: TilkjentYtelse?,

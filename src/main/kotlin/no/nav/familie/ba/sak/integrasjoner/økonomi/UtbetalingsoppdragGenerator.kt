@@ -2,15 +2,18 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.springframework.stereotype.Component
-import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
@@ -18,16 +21,18 @@ class UtbetalingsoppdragGenerator(
     private val justerUtbetalingsoppdragService: JusterUtbetalingsoppdragService,
     private val unleashNextMedContextService: UnleashNextMedContextService,
     private val behandlingsinformasjonUtleder: BehandlingsinformasjonUtleder,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
         vedtak: Vedtak,
-        forrigeTilkjentYtelse: TilkjentYtelse?,
         nyTilkjentYtelse: TilkjentYtelse,
-        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
-        endretMigreringsDato: YearMonth? = null,
     ): BeregnetUtbetalingsoppdragLongId {
+        val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
+        val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling)
         val beregnetUtbetalingsoppdrag =
             utbetalingsgenerator.lagUtbetalingsoppdrag(
                 behandlingsinformasjon =
@@ -37,7 +42,6 @@ class UtbetalingsoppdragGenerator(
                         forrigeTilkjentYtelse,
                         sisteAndelPerKjede,
                         erSimulering,
-                        endretMigreringsDato,
                     ),
                 forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
                 nyeAndeler = nyTilkjentYtelse.tilAndelData(),
@@ -48,6 +52,22 @@ class UtbetalingsoppdragGenerator(
             behandling = vedtak.behandling,
         )
     }
+
+    private fun hentSisteAndelTilkjentYtelse(behandling: Behandling): Map<IdentOgType, AndelTilkjentYtelse> {
+        val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                behandlingId = behandling.id,
+            )
+        return andelTilkjentYtelseRepository
+            .hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
+            .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd)) }
+    }
+
+    private fun hentForrigeTilkjentYtelse(behandling: Behandling): TilkjentYtelse? =
+        behandlingHentOgPersisterService
+            .hentForrigeBehandlingSomErIverksatt(behandling = behandling)
+            ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
     private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
         this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
