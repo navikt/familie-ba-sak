@@ -11,9 +11,14 @@ class JusterUtbetalingsoppdragService(
     fun justerBeregnetUtbetalingsoppdragVedBehov(
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
         fagsakId: Long,
+        skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): BeregnetUtbetalingsoppdragLongId {
+        // For fagsaker vi ikke har skrudd på ny klassekode for, returnerer vi det originale utbetalingsoppdraget.
+        if (!skalBrukeNyKlassekodeForUtvidetBarnetrygd) {
+            return beregnetUtbetalingsoppdrag
+        }
         val erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd = tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)
-        // Fagsak er over på ny klassekode for utvidet barnetrygd. Trenger ikke gjøre noen justeringer
+        // Fagsak er over på ny klassekode for utvidet barnetrygd. Trenger ikke gjøre noen justeringer.
         if (erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd) return beregnetUtbetalingsoppdrag
 
         val utvidetBarnetrygdErOpphørt = beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.any { it.opphør != null && it.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering }

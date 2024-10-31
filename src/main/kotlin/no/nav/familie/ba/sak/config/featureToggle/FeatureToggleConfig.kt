@@ -19,6 +19,9 @@ class FeatureToggleConfig {
         // NAV-22311
         const val OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER = "familie-ba-ks-sak.opprett-sak-paa-riktig-enhet-og-saksbehandler"
 
+        // NAV-22995
+        const val SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD = "familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd"
+
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
