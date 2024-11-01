@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
-import io.mockk.every
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -33,15 +31,10 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.BehandlingsinformasjonUtleder
-import no.nav.familie.ba.sak.integrasjoner.økonomi.JusterUtbetalingsoppdragService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterAndelerMedPeriodeOffset
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -50,10 +43,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.splittOgSlåSammen
@@ -90,7 +81,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
@@ -470,6 +460,7 @@ fun lagPersonGrunnlag(dataTable: DataTable): Map<Long, PersonopplysningGrunnlag>
         }.associateBy { it.behandlingId }
 
 fun lagTilkjentYtelse(
+    data: VedtaksperioderOgBegrunnelserStepDefinition,
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
@@ -532,7 +523,7 @@ fun lagTilkjentYtelse(
             (skalIverksettesMotOppdrag(nåværendeAndeler, forrigeAndeler) || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
         ) {
             val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.value.behandling.id && it.aktiv }
-            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(vedtak)
+            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(data, vedtak)
         }
     }
 
@@ -549,8 +540,11 @@ private fun skalIverksettesMotOppdrag(
         .any { it.innhold == true }
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
+    data: VedtaksperioderOgBegrunnelserStepDefinition,
     vedtak: Vedtak,
 ) {
+    val mock = CucumberMock(data, behandling.id)
+    /*
     val behandlingService = mockk<BehandlingService>()
     every { behandlingService.hentMigreringsdatoPåFagsak(any()) } returns null
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
@@ -579,9 +573,9 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
                 ),
             utbetalingsgenerator = Utbetalingsgenerator(),
         )
-
+    */
     val beregnetUtbetalingsoppdrag =
-        utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
+        mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
             nyTilkjentYtelse = this,
