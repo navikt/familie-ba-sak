@@ -81,6 +81,7 @@ jobs:
           overwrite: true
 
   sonar:
+    if: github.actor != 'dependabot[bot]'
     name: Sonar
     runs-on: ubuntu-latest-8-cores
     needs: [ enhetstester, integrasjonstester ]

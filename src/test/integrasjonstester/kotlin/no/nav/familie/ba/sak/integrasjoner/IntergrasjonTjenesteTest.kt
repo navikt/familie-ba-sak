@@ -46,6 +46,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -383,7 +384,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 okJson(
                     objectMapper.writeValueAsString(
                         success(
-                            lagTestJournalpost(fnr, journalpostId),
+                            lagTestJournalpost(fnr, journalpostId, AvsenderMottakerIdType.FNR, "NAV_NO"),
                         ),
                     ),
                 ),
