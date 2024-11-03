@@ -479,7 +479,7 @@ class RestartAvSmåbarnstilleggTest(
             vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
             restPutVedtaksperiodeMedStandardbegrunnelser =
                 RestPutVedtaksperiodeMedStandardbegrunnelser(
-                    standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty),
+                    standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty).take(5),
                 ),
         )
         if (skalBegrunneSmåbarnstillegg) {
