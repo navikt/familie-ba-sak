@@ -1015,7 +1015,7 @@ fun lagUtbetalingsperiode(
     periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
     periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.UTBETALING,
-    utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
+    utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
     ytelseTyper: List<YtelseType> = listOf(YtelseType.ORDINÆR_BARNETRYGD),
     antallBarn: Int = 1,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
