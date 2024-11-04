@@ -74,10 +74,19 @@ class BehandlingsinformasjonUtleder(
                 ?.toYearMonth()
                 ?.plusMonths(1)
 
-        return if (forrigeTilstandFraDato != null &&
-            nyttTilstandFraDato != null &&
-            forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)
-        ) {
+        if (forrigeTilstandFraDato == null) {
+            return null
+        }
+
+        if (nyttTilstandFraDato == null) {
+            return null
+        }
+
+        if (nyttTilstandFraDato.isAfter(forrigeTilstandFraDato)) {
+            throw IllegalStateException("Ny migreringsdato kan ikke være etter forrige migreringsdato")
+        }
+
+        return if (forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
             nyttTilstandFraDato
         } else {
             null
