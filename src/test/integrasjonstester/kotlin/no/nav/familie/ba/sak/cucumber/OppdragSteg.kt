@@ -262,16 +262,12 @@ class OppdragSteg {
             dataTable
                 .groupByBehandlingId()
                 .mapValues {
-                    var behandling: Behandling? = null
-                    it.value.forEach { rad ->
-                        behandling =
-                            lagBehandling(
-                                id = it.key,
-                                fagsak = fagsak,
-                                behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
-                            )
-                    }
-                    behandling ?: throw IllegalStateException("bla bla")
+                    val sisteRad = it.value.last()
+                    lagBehandling(
+                        id = it.key,
+                        fagsak = fagsak,
+                        behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, sisteRad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                    )
                 }.toMutableMap()
     }
 
