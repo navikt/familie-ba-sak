@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -25,7 +25,9 @@ class OppdaterTilkjentYtelseService(
         tilkjentYtelse: TilkjentYtelse,
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
     ) {
-        secureLogger.info("Oppdaterer TilkjentYtelse med utbetalingsoppdrag og offsets på andeler for behandling ${tilkjentYtelse.behandling.id}")
+        secureLogger.info(
+            "Oppdaterer TilkjentYtelse med utbetalingsoppdrag og offsets på andeler for behandling ${tilkjentYtelse.behandling.id}",
+        )
 
         oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
             tilkjentYtelse = tilkjentYtelse,
