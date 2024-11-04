@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth

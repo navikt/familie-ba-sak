@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.simulering.lagBehandling
