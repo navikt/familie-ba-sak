@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtbetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -58,7 +58,7 @@ class VilkårsvurderingTestController(
     private val behandlingRepository: BehandlingRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val aktørIdRepository: AktørIdRepository,
-    private val tilpassKompetanserTilEndretUtebetalingAndelerService: TilpassKompetanserTilEndretUtebetalingAndelerService,
+    private val tilpassKompetanserTilEndretUtbetalingAndelerService: TilpassKompetanserTilEndretUtbetalingAndelerService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 ) {
     @PostMapping()
@@ -107,7 +107,7 @@ class VilkårsvurderingTestController(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val endretUtbetalingAndel = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
-        tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(BehandlingId(behandling.id), endretUtbetalingAndel)
+        tilpassKompetanserTilEndretUtbetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(BehandlingId(behandling.id), endretUtbetalingAndel)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
@@ -130,7 +130,7 @@ class VilkårsvurderingTestController(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
         val endretUtbetalingAndel = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
-        tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(BehandlingId(behandling.id), endretUtbetalingAndel)
+        tilpassKompetanserTilEndretUtbetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(BehandlingId(behandling.id), endretUtbetalingAndel)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

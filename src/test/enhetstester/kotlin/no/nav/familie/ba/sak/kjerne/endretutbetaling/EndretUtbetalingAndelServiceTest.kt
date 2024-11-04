@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtbetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -38,7 +38,7 @@ class EndretUtbetalingAndelServiceTest {
     private val mockAndelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val mockVilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val mockEndretUtbetalingAndelHentOgPersisterService = mockk<EndretUtbetalingAndelHentOgPersisterService>()
-    private val mockTilpassKompetanserTilEndretUtebetalingAndelerService = mockk<TilpassKompetanserTilEndretUtebetalingAndelerService>()
+    private val mockTilpassKompetanserTilEndretUtbetalingAndelerService = mockk<TilpassKompetanserTilEndretUtbetalingAndelerService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
@@ -54,7 +54,7 @@ class EndretUtbetalingAndelServiceTest {
                 andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
                 vilkårsvurderingService = mockVilkårsvurderingService,
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
-                tilpassKompetanserTilEndretUtebetalingAndelerService = mockTilpassKompetanserTilEndretUtebetalingAndelerService,
+                tilpassKompetanserTilEndretUtbetalingAndelerService = mockTilpassKompetanserTilEndretUtbetalingAndelerService,
                 unleashMedContextService = mockk(),
             )
     }

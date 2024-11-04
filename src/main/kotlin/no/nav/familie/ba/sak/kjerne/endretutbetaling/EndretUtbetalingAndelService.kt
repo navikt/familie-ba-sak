@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtbetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -31,7 +31,7 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val tilpassKompetanserTilEndretUtebetalingAndelerService: TilpassKompetanserTilEndretUtebetalingAndelerService,
+    private val tilpassKompetanserTilEndretUtbetalingAndelerService: TilpassKompetanserTilEndretUtbetalingAndelerService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val unleashMedContextService: UnleashNextMedContextService,
 ) {
@@ -105,7 +105,7 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel,
         )
 
-        tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(
+        tilpassKompetanserTilEndretUtbetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(
             behandlingId = BehandlingId(behandling.id),
             endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel,
         )
@@ -124,7 +124,7 @@ class EndretUtbetalingAndelService(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(
+        tilpassKompetanserTilEndretUtbetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(
             behandlingId = BehandlingId(behandling.id),
             endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
         )

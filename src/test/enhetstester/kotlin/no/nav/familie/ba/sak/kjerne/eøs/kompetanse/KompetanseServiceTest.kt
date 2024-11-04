@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtbetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -49,7 +49,7 @@ internal class KompetanseServiceTest {
         )
 
     val tilpassKompetanserTilRegelverkService =
-        TilpassKompetanserTilEndretUtebetalingAndelerService(
+        TilpassKompetanserTilEndretUtbetalingAndelerService(
             vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
