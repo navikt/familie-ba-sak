@@ -185,6 +185,15 @@ class OppdragSteg {
         every {
             behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any())
         } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.toLocalDate()
+        every {
+            unleashNextMedContextService.isEnabled(
+                any(),
+                tilkjentYtelse.behandling.id,
+            )
+        } answers {
+            val featureToggleId = firstArg<String>()
+            toggles[tilkjentYtelse.behandling.id]?.get(featureToggleId) ?: true
+        }
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
