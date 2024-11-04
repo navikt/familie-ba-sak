@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
@@ -271,7 +271,7 @@ internal class TidslinjerTest {
                 .barnasRegelverkResultatTidslinjer()
 
         val kompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
@@ -322,7 +322,7 @@ internal class TidslinjerTest {
                 .barnasRegelverkResultatTidslinjer()
 
         val kompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
@@ -377,7 +377,7 @@ internal class TidslinjerTest {
                 .barnasRegelverkResultatTidslinjer()
 
         val kompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),

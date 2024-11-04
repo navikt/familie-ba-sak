@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -49,9 +49,8 @@ internal class KompetanseServiceTest {
         )
 
     val tilpassKompetanserTilRegelverkService =
-        TilpassKompetanserTilRegelverkService(
+        TilpassKompetanserTilEndretUtebetalingAndelerService(
             vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
-            endretUtbetalingAndelTidslinjeService = endretUtbetalingAndelTidslinjeService,
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
         )
@@ -295,7 +294,7 @@ internal class KompetanseServiceTest {
         every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
-        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilEndretUtbetalingAndeler(behandlingId, emptyList())
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -356,7 +355,7 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
-        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilEndretUtbetalingAndeler(behandlingId, emptyList())
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -412,7 +411,7 @@ internal class KompetanseServiceTest {
         every { endretUtbetalingAndelTidslinjeService.hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
-        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilEndretUtbetalingAndeler(behandlingId, emptyList())
 
         val faktiskeKompetanser = kompetanseService.hentKompetanser(behandlingId)
 

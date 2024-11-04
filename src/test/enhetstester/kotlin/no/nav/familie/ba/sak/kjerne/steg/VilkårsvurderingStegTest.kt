@@ -21,7 +21,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -47,9 +48,10 @@ class VilkårsvurderingStegTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk(relaxed = true)
     private val behandlingstemaService: BehandlingstemaService = mockk(relaxed = true)
     private val tilbakestillBehandlingService: TilbakestillBehandlingService = mockk()
-    private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
+    private val tilpassKompetanserTilEndretUtebetalingAndelerService: TilpassKompetanserTilEndretUtebetalingAndelerService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService = mockk()
+    private val endretUtbetalingAndelHentOgPeristerService: EndretUtbetalingAndelHentOgPersisterService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -59,11 +61,12 @@ class VilkårsvurderingStegTest {
             beregningService = beregningService,
             persongrunnlagService = persongrunnlagService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
-            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
+            tilpassKompetanserTilEndretUtebetalingAndelerService = tilpassKompetanserTilEndretUtebetalingAndelerService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = mockk(),
             localDateProvider = RealDateProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPeristerService,
         )
 
     val behandling =
@@ -88,7 +91,7 @@ class VilkårsvurderingStegTest {
                 behandling,
             )
 
-        every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
+        every { tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(BehandlingId(behandling.id), any()) } just Runs
         justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
     }
 

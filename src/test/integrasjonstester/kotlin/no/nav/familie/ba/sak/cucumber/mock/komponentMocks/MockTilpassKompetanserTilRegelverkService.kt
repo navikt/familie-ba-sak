@@ -4,10 +4,10 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
 
-fun mockTilpassKompetanserTilRegelverkService(): TilpassKompetanserTilRegelverkService {
-    val tilpassKompetanserTilRegelverkService = mockk<TilpassKompetanserTilRegelverkService>()
-    every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(any()) } just runs
-    return tilpassKompetanserTilRegelverkService
+fun mockTilpassKompetanserTilEndretUtebetalingAndelerService(): TilpassKompetanserTilEndretUtebetalingAndelerService {
+    val tilpassKompetanserTilEndretUtebetalingAndelerService = mockk<TilpassKompetanserTilEndretUtebetalingAndelerService>()
+    every { tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(any(), any()) } just runs
+    return tilpassKompetanserTilEndretUtebetalingAndelerService
 }

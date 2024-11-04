@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -30,7 +31,7 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
+    private val tilpassKompetanserTilEndretUtebetalingAndelerService: TilpassKompetanserTilEndretUtebetalingAndelerService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val unleashMedContextService: UnleashNextMedContextService,
 ) {
@@ -104,12 +105,10 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndel,
         )
 
-        endretUtbetalingAndelOppdatertAbonnementer.forEach {
-            it.endretUtbetalingAndelerOppdatert(
-                behandlingId = BehandlingId(behandling.id),
-                endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel,
-            )
-        }
+        tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(
+            behandlingId = BehandlingId(behandling.id),
+            endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel,
+        )
     }
 
     @Transactional
@@ -125,12 +124,10 @@ class EndretUtbetalingAndelService(
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
-            abonnent.endretUtbetalingAndelerOppdatert(
-                behandlingId = BehandlingId(behandling.id),
-                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
-            )
-        }
+        tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(
+            behandlingId = BehandlingId(behandling.id),
+            endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
+        )
     }
 
     @Transactional
@@ -157,11 +154,4 @@ class EndretUtbetalingAndelService(
             )
         }
     }
-}
-
-interface EndretUtbetalingAndelerOppdatertAbonnent {
-    fun endretUtbetalingAndelerOppdatert(
-        behandlingId: BehandlingId,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    )
 }

@@ -40,7 +40,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferansebe
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraKompetanseEndringService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilbakestillBehandlingFraValutakursEndringService
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -104,6 +104,7 @@ class CucumberMock(
     val periodeOvergangsstønadGrunnlagRepository = mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber)
     val søknadGrunnlagRepository = mockSøknadGrunnlagRepository(dataFraCucumber)
     val endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService(dataFraCucumber)
+    val tilpassKompetanserTilEndretUtebetalingAndelerService = mockk<TilpassKompetanserTilEndretUtebetalingAndelerService>()
     val vedtakRepository = mockVedtakRepository(dataFraCucumber)
     val dokumentGenereringService = mockDokumentGenereringService()
     val vedtaksperiodeHentOgPersisterService = mockVedtaksperiodeHentOgPersisterService(dataFraCucumber)
@@ -318,7 +319,7 @@ class CucumberMock(
 
     val endringsabonnenterForKompetanse = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService)
 
-    val tilpassKompetanserTilRegelverkService = TilpassKompetanserTilRegelverkService(vilkårsvurderingTidslinjeService, endretUtbetalingAndelTidslinjeService, kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
+    val tilpassKompetanserTilEndretUtbetalingAndelService = TilpassKompetanserTilEndretUtebetalingAndelerService(vilkårsvurderingTidslinjeService, kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
 
     val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
 
@@ -436,7 +437,7 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
+            tilpassKompetanserTilEndretUtebetalingAndelerService = tilpassKompetanserTilEndretUtebetalingAndelerService,
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             unleashMedContextService = unleashNextMedContextService,
         )
@@ -470,11 +471,12 @@ class CucumberMock(
             beregningService = beregningService,
             persongrunnlagService = persongrunnlagService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
-            tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringSevice = månedligValutajusteringSevice,
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            tilpassKompetanserTilEndretUtebetalingAndelerService = tilpassKompetanserTilEndretUtbetalingAndelService,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
         )
 
     val ferdigstillBehandlingSteg =

@@ -9,7 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtebetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -29,10 +30,11 @@ class VilkårsvurderingSteg(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
-    private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
+    private val tilpassKompetanserTilEndretUtebetalingAndelerService: TilpassKompetanserTilEndretUtebetalingAndelerService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val månedligValutajusteringSevice: MånedligValutajusteringSevice,
     private val localDateProvider: LocalDateProvider,
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
@@ -94,7 +96,8 @@ class VilkårsvurderingSteg(
         }
 
         if (!behandling.erSatsendring()) {
-            tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
+            val endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
+            tilpassKompetanserTilEndretUtebetalingAndelerService.tilpassKompetanserTilEndretUtbetalingAndeler(BehandlingId(behandling.id), endretUtbetalingAndeler)
         }
 
         if (behandling.erMånedligValutajustering()) {

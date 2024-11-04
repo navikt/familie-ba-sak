@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
-import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
+import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -48,7 +48,7 @@ class TilpassKompetanserTilRegelverkTest {
                 ).byggKompetanser()
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = eøsPerioder,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
@@ -70,7 +70,7 @@ class TilpassKompetanserTilRegelverkTest {
         val forventedeKompetanser = emptyList<Kompetanse>()
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = eøsPerioder,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
@@ -97,7 +97,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .byggKompetanser()
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
@@ -128,7 +128,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .sortedBy { it.fom }
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
@@ -173,7 +173,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .sortedBy { it.fom }
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
@@ -200,7 +200,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .sortedBy { it.fom }
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = emptyMap(),
@@ -242,7 +242,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .sortedBy { it.fom }
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 kompetanser,
                 barnasRegelverkResultatTidslinjer,
                 emptyMap(),
@@ -278,7 +278,7 @@ class TilpassKompetanserTilRegelverkTest {
                 .sortedBy { it.fom }
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = barnasHarEtterbetaling3År,
@@ -306,7 +306,7 @@ class TilpassKompetanserTilRegelverkTest {
             )
 
         val faktiskeKompetanser =
-            tilpassKompetanserTilRegelverk(
+            tilpassKompetanserTilRegelverkResultat(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer = barnasSkalIkkeUtbetalesTidslinjer,
