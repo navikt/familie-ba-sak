@@ -19,11 +19,9 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtelse
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.cucumber.mock.mockTilkjentYtelseRepository
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.JusterUtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
@@ -31,7 +29,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -47,7 +45,6 @@ import java.time.YearMonth
 class OppdragSteg {
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
-    private var tilkjenteYtelserNy = mapOf<Long, TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var endretMigreringsdatoMap = mutableMapOf<Long, YearMonth>()
@@ -57,13 +54,14 @@ class OppdragSteg {
     private val unleashNextMedContextService = mockUnleashNextMedContextService()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository(tilkjenteYtelser, behandlinger)
+    private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
 
     val behandlingService =
         BehandlingService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingstemaService = mockk(),
-            behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>(),
-            behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository(),
+            behandlingSøknadsinfoService = mockk(),
+            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
             behandlingMetrikker = mockk(),
             saksstatistikkEventPublisher = mockk(),
             fagsakRepository = mockk(),
@@ -71,7 +69,7 @@ class OppdragSteg {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = mockk(),
             arbeidsfordelingService = mockk(),
-            infotrygdService = mockk<InfotrygdService>(),
+            infotrygdService = mockk(),
             vedtaksperiodeService = mockk(),
             taskRepository = mockk(),
             vilkårsvurderingService = mockk(),
@@ -100,7 +98,6 @@ class OppdragSteg {
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
         genererBehandlinger(dataTable)
         tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger)
-        tilkjenteYtelserNy = mapTilkjentYtelse(dataTable, behandlinger, tilkjenteYtelser.size.toLong())
         if (tilkjenteYtelser.flatMap { (_, tilkjentYtelse) -> tilkjentYtelse.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
             error("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
         }
@@ -120,11 +117,11 @@ class OppdragSteg {
 
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
-        tilkjenteYtelserNy.values.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
+        tilkjenteYtelser.values.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
             val behandlingId = tilkjentYtelse.behandling.id
             try {
-                genererUtbetalingsoppdragForSimuleringNy(behandlingId, acc, tilkjentYtelse)
-                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
+                beregnetUtbetalingsoppdragSimulering[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse, true)
+                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse, false)
                 oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
                     beregnetUtbetalingsoppdrag[behandlingId]!!,
                     tilkjentYtelse,
@@ -135,20 +132,6 @@ class OppdragSteg {
                 kastedeFeil[behandlingId] = e
             }
             acc + tilkjentYtelse
-        }
-    }
-
-    private fun genererUtbetalingsoppdragForSimuleringNy(
-        behandlingId: Long,
-        tilkjenteYtelser: List<TilkjentYtelse>,
-        tilkjentYtelse: TilkjentYtelse,
-    ) {
-        try {
-            beregnetUtbetalingsoppdragSimulering[behandlingId] =
-                beregnUtbetalingsoppdragNy(tilkjenteYtelser, tilkjentYtelse, erSimulering = true)
-        } catch (e: Exception) {
-            logger.error("Feilet beregning av oppdrag ved simulering for behandling=$behandlingId")
-            kastedeFeil[behandlingId] = e
         }
     }
 
@@ -184,8 +167,8 @@ class OppdragSteg {
             andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any())
         } returns sisteAndelPerIdentNy(acc).values.toList()
         every {
-            behandlingService.hentMigreringsdatoPåFagsak(any())
-        } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.plusMonths(1)?.toLocalDate()
+            behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any())
+        } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.toLocalDate()
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
