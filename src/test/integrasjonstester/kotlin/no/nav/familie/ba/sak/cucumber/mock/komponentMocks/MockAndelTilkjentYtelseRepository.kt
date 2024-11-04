@@ -3,25 +3,34 @@
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 
 fun mockAndelTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): AndelTilkjentYtelseRepository {
+    return mockAndelTilkjentYtelseRepository(dataFraCucumber.tilkjenteYtelser, dataFraCucumber.behandlinger)
+}
+
+fun mockAndelTilkjentYtelseRepository(
+    tilkjenteYtelser: MutableMap<Long, TilkjentYtelse>,
+    behandlinger: MutableMap<Long, Behandling>,
+): AndelTilkjentYtelseRepository {
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers {
         val behandlingId = firstArg<Long>()
-        dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
+        tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse?.toList() ?: emptyList()
     }
     every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any()) } answers {
         val fagsakId = firstArg<Long>()
         val behandlingId =
-            dataFraCucumber.behandlinger
+            behandlinger
                 .filter { it.value.fagsak.id == fagsakId }
                 .filter { it.value.status == BehandlingStatus.AVSLUTTET }
                 .maxByOrNull { it.value.id }
                 ?.key
-        val andelerPåBehandling = dataFraCucumber.tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse ?: emptyList()
+        val andelerPåBehandling = tilkjenteYtelser[behandlingId]?.andelerTilkjentYtelse ?: emptyList()
         andelerPåBehandling.tilSisteAndelPerAktørOgType()
     }
     return andelTilkjentYtelseRepository

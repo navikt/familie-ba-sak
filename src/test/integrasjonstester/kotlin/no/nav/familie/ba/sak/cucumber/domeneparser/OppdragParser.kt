@@ -18,31 +18,33 @@ object OppdragParser {
         dataTable: DataTable,
         behandlinger: Map<Long, Behandling>,
         tilkjentYtelseId: Long = 0,
-    ): List<TilkjentYtelse> {
+    ): MutableMap<Long, TilkjentYtelse> {
         var index = 0
         var tilkjentYtelseIdIterator = tilkjentYtelseId
-        return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
+        return dataTable
+            .groupByBehandlingId()
+            .mapValues { (behandlingId, rader) ->
 
-            val behandling = behandlinger.getValue(behandlingId)
-            val andeler = parseAndelder(behandling, rader, index)
-            index += andeler.size
+                val behandling = behandlinger.getValue(behandlingId)
+                val andeler = parseAndelder(behandling, rader, index)
+                index += andeler.size
 
-            val tilkjentYtelse =
-                TilkjentYtelse(
-                    id = tilkjentYtelseIdIterator++,
-                    behandling = behandling,
-                    stønadFom = null,
-                    stønadTom = null,
-                    opphørFom = null,
-                    opprettetDato = LocalDate.now(),
-                    endretDato = LocalDate.now(),
-                    utbetalingsoppdrag = null,
-                    andelerTilkjentYtelse = andeler,
-                )
-            andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
+                val tilkjentYtelse =
+                    TilkjentYtelse(
+                        id = tilkjentYtelseIdIterator++,
+                        behandling = behandling,
+                        stønadFom = null,
+                        stønadTom = null,
+                        opphørFom = null,
+                        opprettetDato = LocalDate.now(),
+                        endretDato = LocalDate.now(),
+                        utbetalingsoppdrag = null,
+                        andelerTilkjentYtelse = andeler,
+                    )
+                andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
 
-            tilkjentYtelse
-        }
+                tilkjentYtelse
+            }.toMutableMap()
     }
 
     private fun parseAndelder(
