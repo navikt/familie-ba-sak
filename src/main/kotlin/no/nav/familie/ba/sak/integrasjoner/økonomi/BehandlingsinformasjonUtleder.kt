@@ -59,6 +59,10 @@ class BehandlingsinformasjonUtleder(
         behandling: Behandling,
         forrigeTilstandFraDato: YearMonth?,
     ): YearMonth? {
+        if (forrigeTilstandFraDato == null) {
+            return null
+        }
+
         val erMigrertSak =
             behandlingHentOgPersisterService
                 .hentBehandlinger(behandling.fagsak.id)
@@ -73,10 +77,6 @@ class BehandlingsinformasjonUtleder(
                 .hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
                 ?.toYearMonth()
                 ?.plusMonths(1)
-
-        if (forrigeTilstandFraDato == null) {
-            return null
-        }
 
         if (nyttTilstandFraDato == null) {
             return null
