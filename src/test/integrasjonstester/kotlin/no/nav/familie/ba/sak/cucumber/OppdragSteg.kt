@@ -266,9 +266,10 @@ class OppdragSteg {
                     it.value.forEach { rad ->
                         behandling =
                             lagBehandling(
+                                id = it.key,
                                 fagsak = fagsak,
                                 behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, rad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
-                            ).copy(id = it.key)
+                            )
                     }
                     behandling ?: throw IllegalStateException("bla bla")
                 }.toMutableMap()

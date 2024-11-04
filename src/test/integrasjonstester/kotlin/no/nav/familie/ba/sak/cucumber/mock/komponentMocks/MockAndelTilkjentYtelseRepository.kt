@@ -9,9 +9,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 
-fun mockAndelTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): AndelTilkjentYtelseRepository {
-    return mockAndelTilkjentYtelseRepository(dataFraCucumber.tilkjenteYtelser, dataFraCucumber.behandlinger)
-}
+fun mockAndelTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): AndelTilkjentYtelseRepository =
+    mockAndelTilkjentYtelseRepository(dataFraCucumber.tilkjenteYtelser, dataFraCucumber.behandlinger)
 
 fun mockAndelTilkjentYtelseRepository(
     tilkjenteYtelser: MutableMap<Long, TilkjentYtelse>,
