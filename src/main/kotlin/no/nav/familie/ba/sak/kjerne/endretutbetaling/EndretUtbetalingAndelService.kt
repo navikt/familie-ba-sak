@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ETTERBETALING_3_MND
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -13,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilEndretUtbetalingAndelerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -33,7 +30,6 @@ class EndretUtbetalingAndelService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val tilpassKompetanserTilEndretUtbetalingAndelerService: TilpassKompetanserTilEndretUtbetalingAndelerService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    private val unleashMedContextService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
@@ -54,10 +50,6 @@ class EndretUtbetalingAndelService(
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
-
-        if (endretUtbetalingAndel.årsak == Årsak.ETTERBETALING_3MND && !unleashMedContextService.isEnabled(ETTERBETALING_3_MND)) {
-            throw Feil("Feature toggle for å opprette endret utbetaling med årsak etterbetaling 3 mnd er ikke skrudd på")
-        }
 
         val andreEndredeAndelerPåBehandling =
             endretUtbetalingAndelHentOgPersisterService
