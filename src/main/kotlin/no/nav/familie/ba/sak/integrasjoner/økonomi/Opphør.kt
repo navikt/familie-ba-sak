@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import java.time.LocalDate
 
 data class Opphør(
@@ -10,7 +11,7 @@ data class Opphør(
 ) {
     companion object Factory {
         fun opprettFor(
-            utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+            utbetalingsoppdrag: Utbetalingsoppdrag,
             behandling: Behandling,
         ): Opphør {
             val erRentOpphør =
