@@ -33,20 +33,24 @@ class UtbetalingsoppdragGenerator(
     ): BeregnetUtbetalingsoppdragLongId {
         val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
         val sisteAndelPerKjede = hentSisteAndelTilkjentYtelse(vedtak.behandling)
+
+        val behandlingsinformasjon =
+            behandlingsinformasjonUtleder.utled(
+                saksbehandlerId,
+                vedtak,
+                forrigeTilkjentYtelse,
+                sisteAndelPerKjede,
+                erSimulering,
+            )
+
         val beregnetUtbetalingsoppdrag =
             utbetalingsgenerator.lagUtbetalingsoppdrag(
-                behandlingsinformasjon =
-                    behandlingsinformasjonUtleder.utled(
-                        saksbehandlerId,
-                        vedtak,
-                        forrigeTilkjentYtelse,
-                        sisteAndelPerKjede,
-                        erSimulering,
-                    ),
+                behandlingsinformasjon = behandlingsinformasjon,
                 forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
                 nyeAndeler = nyTilkjentYtelse.tilAndelData(),
                 sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
             )
+
         return justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
             beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,
             behandling = vedtak.behandling,

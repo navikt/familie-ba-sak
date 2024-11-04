@@ -1,10 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -18,8 +13,7 @@ import java.time.YearMonth
 
 @Component
 class BehandlingsinformasjonUtleder(
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val behandlingService: BehandlingService,
+    private val endretMigreringsdatoUtleder: EndretMigreringsdatoUtleder,
 ) {
     fun utled(
         saksbehandlerId: String,
@@ -29,7 +23,7 @@ class BehandlingsinformasjonUtleder(
         erSimulering: Boolean,
     ): Behandlingsinformasjon {
         val endretMigreringsDato =
-            beregnOmMigreringsDatoErEndret(
+            endretMigreringsdatoUtleder.utled(
                 vedtak.behandling,
                 forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
             )
@@ -55,63 +49,30 @@ class BehandlingsinformasjonUtleder(
         )
     }
 
-    private fun beregnOmMigreringsDatoErEndret(
-        behandling: Behandling,
-        forrigeTilstandFraDato: YearMonth?,
-    ): YearMonth? {
-        if (forrigeTilstandFraDato == null) {
-            return null
-        }
-
-        val erMigrertSak =
-            behandlingHentOgPersisterService
-                .hentBehandlinger(behandling.fagsak.id)
-                .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
-
-        if (!erMigrertSak) {
-            return null
-        }
-
-        val nyttTilstandFraDato =
-            behandlingService
-                .hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
-                ?.toYearMonth()
-                ?.plusMonths(1)
-
-        if (nyttTilstandFraDato == null) {
-            return null
-        }
-
-        if (nyttTilstandFraDato.isAfter(forrigeTilstandFraDato)) {
-            throw IllegalStateException("Ny migreringsdato kan ikke være etter forrige migreringsdato")
-        }
-
-        return if (forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
-            nyttTilstandFraDato
-        } else {
-            null
-        }
-    }
-
     private fun finnOpphørsdatoForAlleKjeder(
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         endretMigreringsDato: YearMonth?,
     ): YearMonth? {
-        if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) return null
-        if (endretMigreringsDato != null) return endretMigreringsDato
+        if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) {
+            return null
+        }
+        if (endretMigreringsDato != null) {
+            return endretMigreringsDato
+        }
         return null
     }
 
     private fun hentUtebetalesTil(fagsak: Fagsak): String =
         when (fagsak.type) {
-            FagsakType.INSTITUSJON -> {
+            FagsakType.INSTITUSJON,
+            -> {
                 fagsak.institusjon?.tssEksternId
                     ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
             }
 
-            else -> {
-                fagsak.aktør.aktivFødselsnummer()
-            }
+            FagsakType.NORMAL,
+            FagsakType.BARN_ENSLIG_MINDREÅRIG,
+            -> fagsak.aktør.aktivFødselsnummer()
         }
 }
