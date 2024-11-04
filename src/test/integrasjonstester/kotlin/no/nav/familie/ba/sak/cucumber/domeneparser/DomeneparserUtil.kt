@@ -30,6 +30,8 @@ enum class Domenebegrep(
     BEHANDLINGSTYPE("Behandlingstype"),
     BEHANDLINGSSTEG("Behandlingssteg"),
     UNDERKATEGORI("Underkategori"),
+    FEATURE_TOGGLE_ID("FeatureToggleId"),
+    ER_FEATURE_TOGGLE_TOGGLET_PÅ("Er togglet på"),
 }
 
 object DomeneparserUtil {

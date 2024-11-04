@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsoppdrag
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsperiode
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtelse
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
@@ -49,6 +51,7 @@ class OppdragSteg {
     private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var endretMigreringsdatoMap = mutableMapOf<Long, YearMonth>()
     private var kastedeFeil = mutableMapOf<Long, Exception>()
+    private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
 
     private val tilkjentYtelseRepository = mockTilkjentYtelseRepository(tilkjenteYtelser)
     private val unleashNextMedContextService = mockUnleashNextMedContextService()
@@ -93,6 +96,19 @@ class OppdragSteg {
         )
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    @Gitt("følgende feature toggles")
+    fun følgendeFeatureToggles(dataTable: DataTable) {
+        toggles =
+            dataTable
+                .groupByBehandlingId()
+                .mapValues {
+                    val sisteInnslagPåBehandling = it.value.last()
+                    val featureToggleId = parseString(Domenebegrep.FEATURE_TOGGLE_ID, sisteInnslagPåBehandling)
+                    val featureToggleVerdi = parseBoolean(Domenebegrep.ER_FEATURE_TOGGLE_TOGGLET_PÅ, sisteInnslagPåBehandling)
+                    mapOf(featureToggleId to featureToggleVerdi)
+                }.toMutableMap()
+    }
 
     @Gitt("følgende tilkjente ytelser")
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
