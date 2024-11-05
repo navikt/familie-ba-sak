@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedCont
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.cucumber.mock.mockTilkjentYtelseRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.JusterUtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
@@ -87,8 +88,10 @@ class OppdragSteg {
             ),
             unleashNextMedContextService,
             BehandlingsinformasjonUtleder(
-                behandlingHentOgPersisterService,
-                behandlingService,
+                EndretMigreringsdatoUtleder(
+                    behandlingHentOgPersisterService,
+                    behandlingService,
+                ),
             ),
             andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService,
@@ -103,10 +106,13 @@ class OppdragSteg {
             dataTable
                 .groupByBehandlingId()
                 .mapValues {
-                    val sisteInnslagPåBehandling = it.value.last()
-                    val featureToggleId = parseString(Domenebegrep.FEATURE_TOGGLE_ID, sisteInnslagPåBehandling)
-                    val featureToggleVerdi = parseBoolean(Domenebegrep.ER_FEATURE_TOGGLE_TOGGLET_PÅ, sisteInnslagPåBehandling)
-                    mapOf(featureToggleId to featureToggleVerdi)
+                    val map = mutableMapOf<String, Boolean>()
+                    it.value.forEach { rad ->
+                        val featureToggleId = parseString(Domenebegrep.FEATURE_TOGGLE_ID, rad)
+                        val featureToggleVerdi = parseBoolean(Domenebegrep.ER_FEATURE_TOGGLE_TOGGLET_PÅ, rad)
+                        map[featureToggleId] = featureToggleVerdi
+                    }
+                    map
                 }.toMutableMap()
     }
 
