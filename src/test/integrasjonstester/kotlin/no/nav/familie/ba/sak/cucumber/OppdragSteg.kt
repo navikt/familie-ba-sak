@@ -127,7 +127,7 @@ class OppdragSteg {
     }
 
     @Gitt("følgende behandlingsinformasjon")
-    fun `følgendeBehandlingsinformasjon`(dataTable: DataTable) {
+    fun følgendeBehandlingsinformasjon(dataTable: DataTable) {
         endretMigreringsdatoMap =
             dataTable
                 .groupByBehandlingId()
@@ -140,21 +140,20 @@ class OppdragSteg {
 
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
-        tilkjenteYtelser.values.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
+        tilkjenteYtelser.values.fold(emptyList<TilkjentYtelse>()) { tidligereTilkjenteYtelser, tilkjentYtelse ->
             val behandlingId = tilkjentYtelse.behandling.id
             try {
-                beregnetUtbetalingsoppdragSimulering[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse, true)
-                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse, false)
+                beregnetUtbetalingsoppdragSimulering[behandlingId] = beregnUtbetalingsoppdragNy(tidligereTilkjenteYtelser, tilkjentYtelse, true)
+                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(tidligereTilkjenteYtelser, tilkjentYtelse, false)
                 oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
                     beregnetUtbetalingsoppdrag[behandlingId]!!,
                     tilkjentYtelse,
                 )
-            } catch (e: Exception) {
-                logger.error("EXCEPTION 120391203910: ", e)
+            } catch (exception: Exception) {
                 logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
-                kastedeFeil[behandlingId] = e
+                kastedeFeil[behandlingId] = exception
             }
-            acc + tilkjentYtelse
+            tidligereTilkjenteYtelser + tilkjentYtelse
         }
     }
 
@@ -262,7 +261,6 @@ class OppdragSteg {
         dataTable: DataTable,
         beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>,
     ) {
-        val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
         val forventedeUtbetalingsoppdrag =
             OppdragParser.mapForventetUtbetalingsoppdrag(
                 dataTable,
@@ -273,7 +271,7 @@ class OppdragSteg {
                 beregnetUtbetalingsoppdrag[behandlingId]
                     ?: error("Mangler utbetalingsoppdrag for $behandlingId")
             try {
-                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, medUtbetalingsperiode)
+                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag)
             } catch (e: Throwable) {
                 logger.error("Feilet validering av behandling $behandlingId")
                 throw e
@@ -296,24 +294,19 @@ class OppdragSteg {
                 }.toMutableMap()
     }
 
-    // @Gitt("følgende tilkjente ytelser uten andel for {}")
-
     private fun assertUtbetalingsoppdrag(
         forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
         utbetalingsoppdrag: Utbetalingsoppdrag,
-        medUtbetalingsperiode: Boolean = true,
     ) {
         assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
         assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
-        if (medUtbetalingsperiode) {
-            forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
-                val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
-                try {
-                    assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
-                } catch (e: Throwable) {
-                    logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
-                    throw e
-                }
+        forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
+            val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
+            try {
+                assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
+            } catch (e: Throwable) {
+                logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
+                throw e
             }
         }
     }

@@ -367,7 +367,6 @@ class CucumberMock(
             totrinnskontrollService = totrinnskontrollService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utbetalingsoppdragGenerator =
@@ -459,7 +458,6 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            unleashMedContextService = unleashNextMedContextService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
