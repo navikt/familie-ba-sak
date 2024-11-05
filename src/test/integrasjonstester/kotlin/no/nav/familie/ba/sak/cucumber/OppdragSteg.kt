@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.cucumber.mock.mockTilkjentYtelseRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.JusterUtbetalingsoppdragService
@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -54,7 +55,7 @@ class OppdragSteg {
     private var kastedeFeil = mutableMapOf<Long, Exception>()
     private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
 
-    private val tilkjentYtelseRepository = mockTilkjentYtelseRepository(tilkjenteYtelser)
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val unleashNextMedContextService = mockUnleashNextMedContextService()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository(tilkjenteYtelser, behandlinger)
@@ -172,33 +173,43 @@ class OppdragSteg {
     }
 
     private fun beregnUtbetalingsoppdragNy(
-        acc: List<TilkjentYtelse>, // TODO : Remove me ?
+        tidligereTilkjenteYtelser: List<TilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
         erSimulering: Boolean = false,
     ): BeregnetUtbetalingsoppdragLongId {
         every {
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any())
-        } returns acc.lastOrNull()?.behandling
+        } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
         every {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
-        } returns acc.lastOrNull()
+        } returns tidligereTilkjenteYtelser.lastOrNull()
         every {
             behandlingHentOgPersisterService.hentBehandlinger(any())
         } returns behandlinger.filter { it.value.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.values.toList()
         every {
             andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any())
-        } returns sisteAndelPerIdentNy(acc).values.toList()
+        } answers {
+            val skalBrukeNyKlassekodeForUtvidetBarnetrygd = toggles[tilkjentYtelse.behandling.id]?.get(SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD) ?: false
+            sisteAndelPerIdentNy(tidligereTilkjenteYtelser, skalBrukeNyKlassekodeForUtvidetBarnetrygd).values.toList()
+        }
         every {
             behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any())
         } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.toLocalDate()
         every {
             unleashNextMedContextService.isEnabled(
                 any(),
-                tilkjentYtelse.behandling.id,
+                any(),
             )
         } answers {
             val featureToggleId = firstArg<String>()
             toggles[tilkjentYtelse.behandling.id]?.get(featureToggleId) ?: true
+        }
+        every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
+            beregnetUtbetalingsoppdrag.values.any { beregnetUtbetalingsoppdrag ->
+                beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode ->
+                    utbetalingsperiode.klassifisering == "BAUTV-OP"
+                }
+            }
         }
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(

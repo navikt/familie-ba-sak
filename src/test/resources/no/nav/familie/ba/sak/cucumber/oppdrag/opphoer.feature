@@ -161,23 +161,44 @@ Egenskap: Utbetalingsoppdrag: Opphør
       | 2            | 04.2021  | 08.2021  | 06.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
       | 3            | 04.2021  | 08.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
 
-  Scenario: asdf
+  Scenario: Ved opphør av utvidet barnetrygd i fagsak som ikke er over på ny klassekode skal opphøret gjøres på gammel klassekode
 
     Gitt følgende feature toggles
-      | BehandlingId | FeatureToggleId                                 | Er togglet på |
-      | 1            | SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD | Ja            |
-      | 2            | SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD | Nei           |
+      | BehandlingId | FeatureToggleId                                                | Er togglet på |
+      | 1            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Nei           |
+      | 2            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp |
-      | 1            | 03.2021  | 08.2021  | 700   |
-      | 2            | 03.2021  | 04.2021  | 700   |
-      | 2            | 07.2021  | 08.2021  | 700   |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             |
+      | 1            | 03.2021  | 08.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 2            | 03.2021  | 04.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 2            | 07.2021  | 08.2021  | 700   | UTVIDET_BARNETRYGD |
 
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 08.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    |
-      | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                    |
+      | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
+      | 2            | 03.2021  | 08.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
+      | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
+
+  Scenario: Ved opphør av utvidet barnetrygd i fagsak som er over på ny klassekode skal opphøret gjøres på ny klassekode
+
+    Gitt følgende feature toggles
+      | BehandlingId | FeatureToggleId                                                | Er togglet på |
+      | 1            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
+      | 2            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             |
+      | 1            | 03.2021  | 08.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 2            | 03.2021  | 04.2021  | 700   | UTVIDET_BARNETRYGD |
+      | 2            | 07.2021  | 08.2021  | 700   | UTVIDET_BARNETRYGD |
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse             |
+      | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD |
+      | 2            | 03.2021  | 08.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    | UTVIDET_BARNETRYGD |
+      | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD |
