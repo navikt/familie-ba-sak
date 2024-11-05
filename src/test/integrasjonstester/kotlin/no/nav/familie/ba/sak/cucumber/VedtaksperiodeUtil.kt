@@ -32,9 +32,9 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.tilSisteAndelPerAktørOgType
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterAndelerMedPeriodeOffset
-import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterAndelerMedPeriodeOffset
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori

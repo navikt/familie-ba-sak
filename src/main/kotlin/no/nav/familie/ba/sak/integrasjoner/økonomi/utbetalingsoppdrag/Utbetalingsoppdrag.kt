@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag

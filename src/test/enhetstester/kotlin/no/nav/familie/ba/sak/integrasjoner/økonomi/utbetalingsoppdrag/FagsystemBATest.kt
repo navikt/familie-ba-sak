@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
