@@ -656,6 +656,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "reduksjonIkkeAnsvarForBarn"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
     },
+    REDUKSJON_BOR_IKKE_FAST_MED_BARN {
+        override val sanityApiNavn = "reduksjonBorIkkeFastMedBarn"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
     REDUKSJON_TILLEGGSTEKST_VALUTAJUSTERING {
         override val sanityApiNavn = "reduksjonTilleggstekstValutajustering"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON

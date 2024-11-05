@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi
+package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -126,25 +126,6 @@ class UtbetalingsoppdragGeneratorService(
     }
 }
 
-private fun utledOpphør(
-    utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
-    behandling: Behandling,
-): Opphør {
-    val erRentOpphør =
-        utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }
-    var opphørsdato: LocalDate? = null
-    if (erRentOpphør) {
-        opphørsdato = utbetalingsoppdrag.utbetalingsperiode.minOf { it.opphør!!.opphørDatoFom }
-    }
-    if (behandling.type == BehandlingType.REVURDERING) {
-        val opphørPåRevurdering = utbetalingsoppdrag.utbetalingsperiode.filter { it.opphør != null }
-        if (opphørPåRevurdering.isNotEmpty()) {
-            opphørsdato = opphørPåRevurdering.maxOfOrNull { it.opphør!!.opphørDatoFom }
-        }
-    }
-    return Opphør(erRentOpphør = erRentOpphør, opphørsdato = opphørsdato)
-}
-
 fun utledStønadTom(
     andelerTilkjentYtelse: Set<AndelTilkjentYtelse>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
@@ -166,7 +147,7 @@ fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
     utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ) {
-    val opphør = utledOpphør(utbetalingsoppdrag, tilkjentYtelse.behandling)
+    val opphør = Opphør.opprettFor(utbetalingsoppdrag, tilkjentYtelse.behandling)
 
     tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
     tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
@@ -195,8 +176,3 @@ fun oppdaterAndelerMedPeriodeOffset(
         andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
     }
 }
-
-data class Opphør(
-    val erRentOpphør: Boolean,
-    val opphørsdato: LocalDate?,
-)

@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategi
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -363,7 +363,6 @@ class CucumberMock(
             totrinnskontrollService = totrinnskontrollService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utbetalingsoppdragGeneratorService =
@@ -438,7 +437,6 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            unleashMedContextService = unleashNextMedContextService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
