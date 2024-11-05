@@ -544,36 +544,6 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     vedtak: Vedtak,
 ) {
     val mock = CucumberMock(data, behandling.id)
-    /*
-    val behandlingService = mockk<BehandlingService>()
-    every { behandlingService.hentMigreringsdatoPåFagsak(any()) } returns null
-    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtak.behandling) } returns null
-    every { behandlingHentOgPersisterService.hentBehandlinger(vedtak.behandling.fagsak.id) } returns listOf(vedtak.behandling)
-    val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-    every { andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(vedtak.behandling.fagsak.id) } returns andelerTilkjentYtelse.toList()
-    val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(vedtak.behandling.fagsak.id) } returns true
-    val unleashNextMedContextService = mockUnleashNextMedContextService()
-    val utbetalingsoppdragGenerator =
-        UtbetalingsoppdragGenerator(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            tilkjentYtelseRepository = tilkjentYtelseRepository,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
-            justerUtbetalingsoppdragService =
-                JusterUtbetalingsoppdragService(
-                    tilkjentYtelseRepository,
-                    unleashNextMedContextService,
-                ),
-            behandlingsinformasjonUtleder =
-                BehandlingsinformasjonUtleder(
-                    behandlingHentOgPersisterService,
-                    behandlingService,
-                ),
-            utbetalingsgenerator = Utbetalingsgenerator(),
-        )
-    */
     val beregnetUtbetalingsoppdrag =
         mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
