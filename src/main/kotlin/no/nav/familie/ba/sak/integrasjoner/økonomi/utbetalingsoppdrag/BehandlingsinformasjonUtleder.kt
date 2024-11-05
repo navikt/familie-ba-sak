@@ -24,8 +24,8 @@ class BehandlingsinformasjonUtleder(
     ): Behandlingsinformasjon {
         val endretMigreringsDato =
             endretMigreringsdatoUtleder.utled(
-                vedtak.behandling,
-                forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom },
+                vedtak.behandling.fagsak,
+                forrigeTilkjentYtelse,
             )
         return Behandlingsinformasjon(
             saksbehandlerId = saksbehandlerId,
@@ -45,7 +45,7 @@ class BehandlingsinformasjonUtleder(
                 ),
             utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
-            opphørKjederFraFørsteUtbetaling = if (endretMigreringsDato != null) false else erSimulering,
+            opphørKjederFraFørsteUtbetaling = finnOpphørKjederFraFørsteUtbetaling(endretMigreringsDato, erSimulering),
         )
     }
 
@@ -74,5 +74,15 @@ class BehandlingsinformasjonUtleder(
             FagsakType.NORMAL,
             FagsakType.BARN_ENSLIG_MINDREÅRIG,
             -> fagsak.aktør.aktivFødselsnummer()
+        }
+
+    private fun finnOpphørKjederFraFørsteUtbetaling(
+        endretMigreringsDato: YearMonth?,
+        erSimulering: Boolean,
+    ) =
+        if (endretMigreringsDato != null) {
+            false
+        } else {
+            erSimulering
         }
 }

@@ -3,8 +3,9 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import org.springframework.stereotype.Component
 import java.time.YearMonth
 
@@ -14,38 +15,42 @@ class EndretMigreringsdatoUtleder(
     private val behandlingService: BehandlingService,
 ) {
     fun utled(
-        behandling: Behandling,
-        forrigeTilstandFraDato: YearMonth?,
+        fagsak: Fagsak,
+        forrigeTilkjentYtelse: TilkjentYtelse?,
     ): YearMonth? {
-        if (forrigeTilstandFraDato == null) {
+        if (forrigeTilkjentYtelse == null) {
             return null
         }
 
         val erMigrertSak =
             behandlingHentOgPersisterService
-                .hentBehandlinger(behandling.fagsak.id)
+                .hentBehandlinger(fagsak.id)
                 .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
             return null
         }
 
-        val nyttTilstandFraDato =
-            behandlingService
-                .hentMigreringsdatoPåFagsak(fagsakId = behandling.fagsak.id)
-                ?.toYearMonth()
-                ?.plusMonths(1)
+        val forrigeTilstandFraDato = forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
 
-        if (nyttTilstandFraDato == null) {
+        if (forrigeTilstandFraDato == null) {
             return null
         }
 
-        if (nyttTilstandFraDato.isAfter(forrigeTilstandFraDato)) {
+        val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = fagsak.id)
+
+        if (migreringsdatoPåFagsak == null) {
+            return null
+        }
+
+        val nyTilstandFraDato = migreringsdatoPåFagsak.toYearMonth().plusMonths(1)
+
+        if (nyTilstandFraDato.isAfter(forrigeTilstandFraDato)) {
             throw IllegalStateException("Ny migreringsdato kan ikke være etter forrige migreringsdato")
         }
 
-        return if (forrigeTilstandFraDato.isAfter(nyttTilstandFraDato)) {
-            nyttTilstandFraDato
+        return if (forrigeTilstandFraDato.isAfter(nyTilstandFraDato)) {
+            nyTilstandFraDato
         } else {
             null
         }

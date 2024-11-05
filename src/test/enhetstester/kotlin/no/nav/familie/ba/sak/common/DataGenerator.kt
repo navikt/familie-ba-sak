@@ -363,6 +363,34 @@ fun lagAndelTilkjentYtelseUtvidet(
         prosent = BigDecimal(100),
     )
 
+fun lagTilkjentYtelse(
+    behandling: Behandling = lagBehandling(),
+    stønadFom: YearMonth = YearMonth.now(),
+    stønadTom: YearMonth = YearMonth.now(),
+    opphørFom: YearMonth = YearMonth.now(),
+    opprettetDato: LocalDate = LocalDate.now(),
+    endretDato: LocalDate = LocalDate.now(),
+    utbetalingsoppdrag: String? = null,
+    lagAndelerTilkjentYtelse: (tilkjentYtelse: TilkjentYtelse) -> Set<AndelTilkjentYtelse> = {
+        emptySet()
+    },
+): TilkjentYtelse {
+    val andelerTilkjentYtelse = mutableSetOf<AndelTilkjentYtelse>()
+    val tilkjentYtelse =
+        TilkjentYtelse(
+            behandling = behandling,
+            stønadFom = stønadFom,
+            stønadTom = stønadTom,
+            opphørFom = opphørFom,
+            opprettetDato = opprettetDato,
+            endretDato = endretDato,
+            utbetalingsoppdrag = utbetalingsoppdrag,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+        )
+    tilkjentYtelse.andelerTilkjentYtelse.addAll(lagAndelerTilkjentYtelse(tilkjentYtelse))
+    return tilkjentYtelse
+}
+
 fun lagInitiellTilkjentYtelse(
     behandling: Behandling = lagBehandling(),
     utbetalingsoppdrag: String? = null,
