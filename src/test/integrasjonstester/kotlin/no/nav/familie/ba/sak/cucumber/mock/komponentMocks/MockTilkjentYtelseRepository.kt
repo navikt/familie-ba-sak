@@ -46,4 +46,3 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
     }
     return tilkjentYtelseRepository
 }
-
