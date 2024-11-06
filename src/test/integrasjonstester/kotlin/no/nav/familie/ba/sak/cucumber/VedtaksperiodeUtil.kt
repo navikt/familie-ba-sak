@@ -32,8 +32,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterAndelerMedPeriodeOffset
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -551,15 +549,7 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
             nyTilkjentYtelse = this,
             erSimulering = false,
         )
-    oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-        tilkjentYtelse = this,
-        utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
-        endretUtbetalingAndeler = emptyList(),
-    )
-    oppdaterAndelerMedPeriodeOffset(
-        tilkjentYtelse = this,
-        andelerMedPeriodeId = beregnetUtbetalingsoppdrag.andeler,
-    )
+    mock.oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(this, beregnetUtbetalingsoppdrag)
 }
 
 fun lagOvergangsstønad(
