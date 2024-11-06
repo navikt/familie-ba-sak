@@ -50,3 +50,16 @@ fun lagUtbetalingsperiode(
         utbetalesTil = "",
         behandlingId = behandlingId,
     )
+
+fun lagAndelMedPeriodeIdLong(
+    id: Long,
+    periodeId: Long,
+    forrigePeriodeId: Long?,
+    kildeBehandlingId: Long,
+): AndelMedPeriodeIdLongId =
+    AndelMedPeriodeIdLongId(
+        id = id,
+        periodeId = periodeId,
+        forrigePeriodeId = forrigePeriodeId,
+        kildeBehandlingId = kildeBehandlingId,
+    )

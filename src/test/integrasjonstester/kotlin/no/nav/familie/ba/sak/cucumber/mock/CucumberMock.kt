@@ -402,6 +402,10 @@ class CucumberMock(
         OppdaterTilkjentYtelseService(
             endretUtbetalingAndelHentOgPersisterService,
             tilkjentYtelseRepository,
+            Clock.fixed(
+                dataFraCucumber.dagensDato.atStartOfDay(zoneId).toInstant(),
+                zoneId,
+            ),
         )
 
     val økonomiService =

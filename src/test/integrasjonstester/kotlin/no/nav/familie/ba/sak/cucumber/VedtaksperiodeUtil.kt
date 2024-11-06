@@ -541,6 +541,9 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     data: VedtaksperioderOgBegrunnelserStepDefinition,
     vedtak: Vedtak,
 ) {
+    if (this.andelerTilkjentYtelse.none { it.erAndelSomSkalSendesTilOppdrag() }) {
+        return
+    }
     val mock = CucumberMock(data, behandling.id)
     val beregnetUtbetalingsoppdrag =
         mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(

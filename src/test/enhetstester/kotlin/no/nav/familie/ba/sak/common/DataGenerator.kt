@@ -385,9 +385,9 @@ fun lagAndelTilkjentYtelseUtvidet(
 
 fun lagTilkjentYtelse(
     behandling: Behandling = lagBehandling(),
-    stønadFom: YearMonth = YearMonth.now(),
-    stønadTom: YearMonth = YearMonth.now(),
-    opphørFom: YearMonth = YearMonth.now(),
+    stønadFom: YearMonth? = YearMonth.now(),
+    stønadTom: YearMonth? = YearMonth.now(),
+    opphørFom: YearMonth? = YearMonth.now(),
     opprettetDato: LocalDate = LocalDate.now(),
     endretDato: LocalDate = LocalDate.now(),
     utbetalingsoppdrag: String? = null,

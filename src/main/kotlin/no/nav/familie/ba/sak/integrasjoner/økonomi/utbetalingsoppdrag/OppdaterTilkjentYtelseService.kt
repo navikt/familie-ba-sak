@@ -11,8 +11,10 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.førerTilOpphør
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeIdLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -20,11 +22,15 @@ import java.time.YearMonth
 class OppdaterTilkjentYtelseService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val clock: Clock,
 ) {
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelse: TilkjentYtelse,
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
     ) {
+        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty() || beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
+            error("Kan ikke oppdatere tilkjent ytelse med utbetalingsoppdrag dersom det ikke finnes andeler eller utbetalingsoppdraget ikke inneholder noen perioder")
+        }
         secureLogger.info(
             "Oppdaterer TilkjentYtelse med utbetalingsoppdrag og offsets på andeler for behandling ${tilkjentYtelse.behandling.id}",
         )
@@ -45,7 +51,7 @@ class OppdaterTilkjentYtelseService(
 
     private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelse: TilkjentYtelse,
-        utbetalingsoppdrag: no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag,
+        utbetalingsoppdrag: Utbetalingsoppdrag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ) {
         val opphør = Opphør.opprettFor(utbetalingsoppdrag, tilkjentYtelse.behandling)
@@ -53,8 +59,8 @@ class OppdaterTilkjentYtelseService(
         tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
         tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
         tilkjentYtelse.stønadFom =
-            if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-        tilkjentYtelse.endretDato = LocalDate.now()
+            if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
+        tilkjentYtelse.endretDato = LocalDate.now(clock)
         tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
     }
 
@@ -87,7 +93,7 @@ class OppdaterTilkjentYtelseService(
         andelerSomSkalSendesTilOppdrag.forEach { andel ->
             val andelMedOffset =
                 andelerPåId[andel.id]
-                    ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [${andelerPåId.values.map { it.id }}]")
+                    ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider ${andelerPåId.values.map { it.id }}")
             andel.periodeOffset = andelMedOffset.periodeId
             andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
             andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
