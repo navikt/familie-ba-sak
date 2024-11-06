@@ -308,9 +308,9 @@ class OppdragSteg {
             val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
             try {
                 assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
-            } catch (e: Throwable) {
+            } catch (exception: Throwable) {
                 logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
-                throw e
+                throw exception
             }
         }
     }
