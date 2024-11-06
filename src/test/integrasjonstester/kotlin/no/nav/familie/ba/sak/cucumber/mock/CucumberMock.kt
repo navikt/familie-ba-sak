@@ -5,6 +5,7 @@ import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
@@ -24,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
@@ -232,7 +232,7 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingstemaService = behandlingstemaService,
             behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>(),
-            behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>(),
+            behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository(),
             behandlingMetrikker = behandlingMetrikker,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             fagsakRepository = fagsakRepository,
