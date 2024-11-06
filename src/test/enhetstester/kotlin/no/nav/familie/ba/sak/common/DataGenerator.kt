@@ -256,11 +256,12 @@ fun tilfeldigSøker(
 fun lagVedtak(
     behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
+    vedtaksdato: LocalDateTime? = LocalDateTime.now()
 ) =
     Vedtak(
         id = nesteVedtakId(),
         behandling = behandling,
-        vedtaksdato = LocalDateTime.now(),
+        vedtaksdato = vedtaksdato,
         stønadBrevPdF = stønadBrevPdF,
     )
 

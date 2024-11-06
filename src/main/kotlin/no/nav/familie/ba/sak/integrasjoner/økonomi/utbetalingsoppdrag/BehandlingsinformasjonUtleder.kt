@@ -8,12 +8,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.springframework.stereotype.Component
+import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
 class BehandlingsinformasjonUtleder(
     private val endretMigreringsdatoUtleder: EndretMigreringsdatoUtleder,
+    private val clock: Clock
 ) {
     fun utled(
         saksbehandlerId: String,
@@ -36,7 +38,7 @@ class BehandlingsinformasjonUtleder(
             personIdent =
                 vedtak.behandling.fagsak.aktør
                     .aktivFødselsnummer(),
-            vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(),
+            vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(clock),
             opphørAlleKjederFra =
                 finnOpphørsdatoForAlleKjeder(
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,

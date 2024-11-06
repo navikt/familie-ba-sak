@@ -75,8 +75,12 @@ import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Clock
+import java.time.ZoneId
 
 val logger: Logger = LoggerFactory.getLogger("CucumberMock")
+
+private val zoneId = ZoneId.of("Europe/Oslo")
 
 class CucumberMock(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
@@ -385,6 +389,10 @@ class CucumberMock(
                     EndretMigreringsdatoUtleder(
                         behandlingHentOgPersisterService,
                         behandlingService,
+                    ),
+                    Clock.fixed(
+                        dataFraCucumber.dagensDato.atStartOfDay(zoneId).toInstant(),
+                        zoneId,
                     ),
                 ),
             utbetalingsgenerator = Utbetalingsgenerator(),

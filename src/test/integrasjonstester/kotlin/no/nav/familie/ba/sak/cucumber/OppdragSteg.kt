@@ -43,10 +43,13 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
+    private val clock = Clock.systemDefaultZone()
+
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
@@ -93,6 +96,7 @@ class OppdragSteg {
                     behandlingHentOgPersisterService,
                     behandlingService,
                 ),
+                clock,
             ),
             andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService,

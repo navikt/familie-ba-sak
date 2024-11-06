@@ -19,7 +19,16 @@ class YtelsetypeBATest {
         val klassifisering = YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering
 
         // Assert
-        assertThat(klassifisering).isEqualTo("BATR")
+        assertThat(klassifisering).isEqualTo("BAUTV-OP")
+    }
+
+    @Test
+    fun `UTVIDET_BARNETRYGD_GAMMEL skal ha riktig klassifisering`() {
+        // Act
+        val klassifisering = YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL.klassifisering
+
+        // Assert
+        assertThat(klassifisering).isEqualTo("BAUTV")
     }
 
     @Test
