@@ -149,10 +149,7 @@ class OppdragSteg {
             try {
                 beregnetUtbetalingsoppdragSimulering[behandlingId] = beregnUtbetalingsoppdragNy(tidligereTilkjenteYtelser, tilkjentYtelse, true)
                 beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(tidligereTilkjenteYtelser, tilkjentYtelse, false)
-                oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-                    beregnetUtbetalingsoppdrag[behandlingId]!!,
-                    tilkjentYtelse,
-                )
+                oppdaterTilkjentYtelseMedUtbetalingsoppdrag(beregnetUtbetalingsoppdrag[behandlingId]!!, tilkjentYtelse)
             } catch (exception: Exception) {
                 logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
                 kastedeFeil[behandlingId] = exception
