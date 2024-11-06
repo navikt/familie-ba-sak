@@ -6,7 +6,7 @@ import java.time.Clock
 
 class ClockConfigTest {
     @Test
-    fun `skal returnere system default clock`() {
+    fun `skal returnere system default zone clock`() {
         // Arrange
         val clockConfig = ClockConfig()
 
