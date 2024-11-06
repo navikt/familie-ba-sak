@@ -28,7 +28,7 @@ class YtelsetypeBATest {
         val klassifisering = YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL.klassifisering
 
         // Assert
-        assertThat(klassifisering).isEqualTo("BAUTV")
+        assertThat(klassifisering).isEqualTo("BATR")
     }
 
     @Test
