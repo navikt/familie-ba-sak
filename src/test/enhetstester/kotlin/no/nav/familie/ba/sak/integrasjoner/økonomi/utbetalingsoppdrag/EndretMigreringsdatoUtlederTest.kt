@@ -259,7 +259,6 @@ class EndretMigreringsdatoUtlederTest {
         assertThat(endretMigreringsdato).isEqualTo(YearMonth.of(2024, 12))
     }
 
-
     @Test
     fun `skal returnere null om ny migreringsdato er lik forrige migreringsdato`() {
         // Arrange

@@ -57,7 +57,7 @@ class HentStatusTest {
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
                 utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
                 behandlingHentOgPersisterService = mockk(),
-                oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService
+                oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
             )
         statusFraOppdrag =
             StatusFraOppdrag(

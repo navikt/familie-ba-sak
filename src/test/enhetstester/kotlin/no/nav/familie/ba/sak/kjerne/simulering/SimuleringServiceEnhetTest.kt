@@ -55,7 +55,7 @@ internal class SimuleringServiceEnhetTest {
             utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
-            tilkjentYtelseRepository = tilkjentYtelseRepository
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
         )
 
     val februar2023 = LocalDate.of(2023, 2, 1)
