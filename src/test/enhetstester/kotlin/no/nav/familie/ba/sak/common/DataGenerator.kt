@@ -52,6 +52,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResul
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
@@ -67,6 +68,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
@@ -174,6 +176,23 @@ fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) =
         aktør = aktør,
     )
 
+fun lagFagsak(
+    id: Long = 1,
+    aktør: Aktør = tilAktør(randomFnr()),
+    institusjon: Institusjon? = null,
+    status: FagsakStatus = FagsakStatus.OPPRETTET,
+    type: FagsakType = FagsakType.NORMAL,
+    arkivert: Boolean = false,
+) =
+    Fagsak(
+        id = id,
+        aktør = aktør,
+        institusjon = institusjon,
+        status = status,
+        type = type,
+        arkivert = arkivert
+    )
+
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
@@ -256,7 +275,7 @@ fun tilfeldigSøker(
 fun lagVedtak(
     behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
-    vedtaksdato: LocalDateTime? = LocalDateTime.now()
+    vedtaksdato: LocalDateTime? = LocalDateTime.now(),
 ) =
     Vedtak(
         id = nesteVedtakId(),

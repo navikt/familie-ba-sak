@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagFagsak
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
@@ -27,10 +30,23 @@ class BehandlingsinformasjonUtlederTest {
     fun `skal utlede minimal behandlingsinformasjon`() {
         // Arrange
         val saksbehandlerId = "123"
+
+        val fagsak =
+            lagFagsak(
+                type = FagsakType.NORMAL,
+            )
+
+        val behandling =
+            lagBehandling(
+                fagsak = fagsak,
+            )
+
         val vedtak =
             lagVedtak(
+                behandling = behandling,
                 vedtaksdato = null,
             )
+
         val forrigeTilkjentYtelse = null
 
         every {
