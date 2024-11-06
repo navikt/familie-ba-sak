@@ -276,9 +276,9 @@ class OppdragSteg {
                     ?: error("Mangler utbetalingsoppdrag for $behandlingId")
             try {
                 assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag)
-            } catch (e: Throwable) {
+            } catch (exception: Throwable) {
                 logger.error("Feilet validering av behandling $behandlingId")
-                throw e
+                throw exception
             }
         }
     }
