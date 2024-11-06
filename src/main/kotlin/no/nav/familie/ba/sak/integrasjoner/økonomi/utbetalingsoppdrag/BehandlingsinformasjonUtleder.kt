@@ -15,7 +15,7 @@ import java.time.YearMonth
 @Component
 class BehandlingsinformasjonUtleder(
     private val endretMigreringsdatoUtleder: EndretMigreringsdatoUtleder,
-    private val clock: Clock
+    private val clock: Clock,
 ) {
     fun utled(
         saksbehandlerId: String,
@@ -69,8 +69,11 @@ class BehandlingsinformasjonUtleder(
         when (fagsak.type) {
             FagsakType.INSTITUSJON,
             -> {
-                fagsak.institusjon?.tssEksternId
-                    ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+                val tssEksternId = fagsak.institusjon?.tssEksternId
+                if (tssEksternId == null) {
+                    throw IllegalStateException("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+                }
+                tssEksternId
             }
 
             FagsakType.NORMAL,

@@ -190,8 +190,18 @@ fun lagFagsak(
         institusjon = institusjon,
         status = status,
         type = type,
-        arkivert = arkivert
+        arkivert = arkivert,
     )
+
+fun lagInstitusjon(
+    id: Long = 0L,
+    orgNummer: String = "123456789",
+    tssEksternId: String? = "tssEksternId",
+) = Institusjon(
+    id = id,
+    orgNummer = orgNummer,
+    tssEksternId = tssEksternId,
+)
 
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
