@@ -458,7 +458,7 @@ fun lagPersonGrunnlag(dataTable: DataTable): Map<Long, PersonopplysningGrunnlag>
         }.associateBy { it.behandlingId }
 
 fun lagTilkjentYtelse(
-    data: VedtaksperioderOgBegrunnelserStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
@@ -521,7 +521,7 @@ fun lagTilkjentYtelse(
             (skalIverksettesMotOppdrag(nåværendeAndeler, forrigeAndeler) || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
         ) {
             val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.value.behandling.id && it.aktiv }
-            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(data, vedtak)
+            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(dataFraCucumber, vedtak)
         }
     }
 
@@ -538,13 +538,13 @@ private fun skalIverksettesMotOppdrag(
         .any { it.innhold == true }
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
-    data: VedtaksperioderOgBegrunnelserStepDefinition,
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     vedtak: Vedtak,
 ) {
     if (this.andelerTilkjentYtelse.none { it.erAndelSomSkalSendesTilOppdrag() }) {
         return
     }
-    val mock = CucumberMock(data, behandling.id)
+    val mock = CucumberMock(dataFraCucumber, behandling.id)
     val beregnetUtbetalingsoppdrag =
         mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",

@@ -261,7 +261,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
         tilkjenteYtelser =
             lagTilkjentYtelse(
-                data = this,
+                dataFraCucumber = this,
                 dataTable = dataTable,
                 behandlinger = behandlinger,
                 personGrunnlag = persongrunnlag,
@@ -565,7 +565,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
 
         val forventedeAndeler =
             lagTilkjentYtelse(
-                data = this,
+                dataFraCucumber = this,
                 dataTable = dataTable,
                 behandlinger = behandlinger,
                 personGrunnlag = persongrunnlag,
