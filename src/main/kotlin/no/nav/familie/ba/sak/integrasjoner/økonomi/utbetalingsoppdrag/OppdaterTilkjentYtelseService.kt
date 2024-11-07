@@ -31,6 +31,7 @@ class OppdaterTilkjentYtelseService(
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty() || beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
             error("Kan ikke oppdatere tilkjent ytelse med utbetalingsoppdrag dersom det ikke finnes andeler eller utbetalingsoppdraget ikke inneholder noen perioder")
         }
+
         secureLogger.info(
             "Oppdaterer TilkjentYtelse med utbetalingsoppdrag og offsets på andeler for behandling ${tilkjentYtelse.behandling.id}",
         )
@@ -55,11 +56,9 @@ class OppdaterTilkjentYtelseService(
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ) {
         val opphør = Opphør.opprettFor(utbetalingsoppdrag, tilkjentYtelse.behandling)
-
         tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
         tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
-        tilkjentYtelse.stønadFom =
-            if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
+        tilkjentYtelse.stønadFom = if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
         tilkjentYtelse.endretDato = LocalDate.now(clock)
         tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
     }
