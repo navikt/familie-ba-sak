@@ -24,70 +24,63 @@ class BehandlingsinformasjonUtleder(
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         erSimulering: Boolean,
     ): Behandlingsinformasjon {
-        val endretMigreringsDato =
-            endretMigreringsdatoUtleder.utled(
-                vedtak.behandling.fagsak,
-                forrigeTilkjentYtelse,
-            )
+        val behandling = vedtak.behandling
+        val fagsak = behandling.fagsak
+        val endretMigreringsdato = endretMigreringsdatoUtleder.utled(fagsak, forrigeTilkjentYtelse)
         return Behandlingsinformasjon(
             saksbehandlerId = saksbehandlerId,
-            behandlingId = vedtak.behandling.id.toString(),
-            eksternBehandlingId = vedtak.behandling.id,
-            eksternFagsakId = vedtak.behandling.fagsak.id,
+            behandlingId = behandling.id.toString(),
+            eksternBehandlingId = behandling.id,
+            eksternFagsakId = fagsak.id,
             fagsystem = FagsystemBA.BARNETRYGD,
-            personIdent =
-                vedtak.behandling.fagsak.aktør
-                    .aktivFødselsnummer(),
+            personIdent = fagsak.aktør.aktivFødselsnummer(),
             vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(clock),
-            opphørAlleKjederFra =
-                finnOpphørsdatoForAlleKjeder(
-                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-                    sisteAndelPerKjede = sisteAndelPerKjede,
-                    endretMigreringsDato = endretMigreringsDato,
-                ),
-            utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-            // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
-            opphørKjederFraFørsteUtbetaling = finnOpphørKjederFraFørsteUtbetaling(endretMigreringsDato, erSimulering),
+            opphørAlleKjederFra = finnOpphørsdatoForAlleKjeder(forrigeTilkjentYtelse, sisteAndelPerKjede, endretMigreringsdato),
+            utbetalesTil = finnUtebetalesTil(fagsak),
+            opphørKjederFraFørsteUtbetaling = finnOpphørKjederFraFørsteUtbetaling(endretMigreringsdato, erSimulering),
         )
     }
 
     private fun finnOpphørsdatoForAlleKjeder(
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
-        endretMigreringsDato: YearMonth?,
+        endretMigreringsdato: YearMonth?,
     ): YearMonth? {
         if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) {
             return null
         }
-        if (endretMigreringsDato != null) {
-            return endretMigreringsDato
+        if (endretMigreringsdato != null) {
+            return endretMigreringsdato
         }
         return null
     }
 
-    private fun hentUtebetalesTil(fagsak: Fagsak): String =
+    private fun finnUtebetalesTil(fagsak: Fagsak): String =
         when (fagsak.type) {
+            FagsakType.NORMAL,
+            FagsakType.BARN_ENSLIG_MINDREÅRIG,
+            -> fagsak.aktør.aktivFødselsnummer()
+
             FagsakType.INSTITUSJON,
             -> {
                 val tssEksternId = fagsak.institusjon?.tssEksternId
                 if (tssEksternId == null) {
-                    throw IllegalStateException("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+                    throw IllegalStateException(
+                        "Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen",
+                    )
                 }
                 tssEksternId
             }
-
-            FagsakType.NORMAL,
-            FagsakType.BARN_ENSLIG_MINDREÅRIG,
-            -> fagsak.aktør.aktivFødselsnummer()
         }
 
     private fun finnOpphørKjederFraFørsteUtbetaling(
-        endretMigreringsDato: YearMonth?,
+        endretMigreringsdato: YearMonth?,
         erSimulering: Boolean,
     ) =
-        if (endretMigreringsDato != null) {
+        if (endretMigreringsdato != null) {
             false
         } else {
+            // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
             erSimulering
         }
 }
