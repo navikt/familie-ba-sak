@@ -29,7 +29,9 @@ class OppdaterTilkjentYtelseService(
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
     ) {
         if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty() || beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
-            error("Kan ikke oppdatere tilkjent ytelse med utbetalingsoppdrag dersom det ikke finnes andeler eller utbetalingsoppdraget ikke inneholder noen perioder")
+            throw IllegalStateException(
+                "Kan ikke oppdatere tilkjent ytelse med utbetalingsoppdrag dersom det ikke finnes andeler eller utbetalingsoppdraget ikke inneholder noen perioder",
+            )
         }
 
         secureLogger.info(
@@ -87,12 +89,17 @@ class OppdaterTilkjentYtelseService(
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
         if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size) {
-            error("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0")
+            throw IllegalStateException(
+                "Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0",
+            )
         }
         andelerSomSkalSendesTilOppdrag.forEach { andel ->
-            val andelMedOffset =
-                andelerPåId[andel.id]
-                    ?: error("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider ${andelerPåId.values.map { it.id }}")
+            val andelMedOffset = andelerPåId[andel.id]
+            if (andelMedOffset == null) {
+                throw IllegalStateException(
+                    "Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider ${andelerPåId.values.map { it.id }}",
+                )
+            }
             andel.periodeOffset = andelMedOffset.periodeId
             andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
             andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
