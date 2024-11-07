@@ -47,26 +47,44 @@ class OppdaterTilkjentYtelseServiceTest {
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 1,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                )
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 1,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                    )
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 listOf(
-                    lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, fom = fom.førsteDagIInneværendeMåned(), tom = tom.sisteDagIInneværendeMåned()),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling.id,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = fom.førsteDagIInneværendeMåned(),
+                        tom = tom.sisteDagIInneværendeMåned(),
+                    ),
                 ),
                 listOf(
-                    lagAndelMedPeriodeIdLong(id = 1, periodeId = 0, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 1,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
                 ),
             )
 
@@ -99,27 +117,45 @@ class OppdaterTilkjentYtelseServiceTest {
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val søker = lagPerson()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        person = søker,
-                        id = 1,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                )
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            person = søker,
+                            id = 1,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                    )
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 listOf(
-                    lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, fom = fom.førsteDagIInneværendeMåned(), tom = tom.sisteDagIInneværendeMåned()),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling.id,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = fom.førsteDagIInneværendeMåned(),
+                        tom = tom.sisteDagIInneværendeMåned(),
+                    ),
                 ),
                 listOf(
-                    lagAndelMedPeriodeIdLong(id = 1, periodeId = 0, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 1,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
                 ),
             )
 
@@ -160,19 +196,25 @@ class OppdaterTilkjentYtelseServiceTest {
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 1,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                )
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 1,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                    )
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 listOf(
@@ -187,7 +229,12 @@ class OppdaterTilkjentYtelseServiceTest {
                     ),
                 ),
                 listOf(
-                    lagAndelMedPeriodeIdLong(id = 1, periodeId = 0, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 1,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
                 ),
             )
 
@@ -219,28 +266,34 @@ class OppdaterTilkjentYtelseServiceTest {
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 1,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 2,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                )
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 1,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 2,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                    )
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 listOf(
@@ -263,8 +316,18 @@ class OppdaterTilkjentYtelseServiceTest {
                     ),
                 ),
                 listOf(
-                    lagAndelMedPeriodeIdLong(id = 1, periodeId = 0, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
-                    lagAndelMedPeriodeIdLong(id = 2, periodeId = 1, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 1,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
+                    lagAndelMedPeriodeIdLong(
+                        id = 2,
+                        periodeId = 1,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
                 ),
             )
 
@@ -298,9 +361,15 @@ class OppdaterTilkjentYtelseServiceTest {
         // Arrange
         val behandling = lagBehandling()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                emptySet()
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    emptySet()
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 emptyList(),
@@ -322,36 +391,54 @@ class OppdaterTilkjentYtelseServiceTest {
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 1,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 2,
-                        forrigeperiodeIdOffset = 1,
-                        fom = fom.plusMonths(1),
-                        tom = tom.plusMonths(4),
-                    ),
-                )
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 1,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 2,
+                            forrigeperiodeIdOffset = 1,
+                            fom = fom.plusMonths(1),
+                            tom = tom.plusMonths(4),
+                        ),
+                    )
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 listOf(
-                    lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, fom = fom.førsteDagIInneværendeMåned(), tom = tom.sisteDagIInneværendeMåned()),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling.id,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = fom.førsteDagIInneværendeMåned(),
+                        tom = tom.sisteDagIInneværendeMåned(),
+                    ),
                 ),
                 listOf(
-                    lagAndelMedPeriodeIdLong(id = 1, periodeId = 0, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 1,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
                 ),
             )
 
@@ -371,39 +458,69 @@ class OppdaterTilkjentYtelseServiceTest {
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
-            lagTilkjentYtelse(behandling = behandling, stønadFom = null, stønadTom = null, opphørFom = null, lagAndelerTilkjentYtelse = {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 1,
-                        fom = fom,
-                        tom = tom,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        tilkjentYtelse = it,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                        id = 2,
-                        forrigeperiodeIdOffset = 1,
-                        fom = fom.plusMonths(1),
-                        tom = tom.plusMonths(4),
-                    ),
-                )
-            })
+            lagTilkjentYtelse(
+                behandling = behandling,
+                stønadFom = null,
+                stønadTom = null,
+                opphørFom = null,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 1,
+                            fom = fom,
+                            tom = tom,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            kalkulertUtbetalingsbeløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
+                            id = 2,
+                            forrigeperiodeIdOffset = 1,
+                            fom = fom.plusMonths(1),
+                            tom = tom.plusMonths(4),
+                        ),
+                    )
+                },
+            )
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 listOf(
-                    lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, fom = fom.førsteDagIInneværendeMåned(), tom = tom.sisteDagIInneværendeMåned()),
-                    lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 1, forrigePeriodeId = 0, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, fom = fom.førsteDagIInneværendeMåned(), tom = tom.sisteDagIInneværendeMåned()),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling.id,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = fom.førsteDagIInneværendeMåned(),
+                        tom = tom.sisteDagIInneværendeMåned(),
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling.id,
+                        periodeId = 1,
+                        forrigePeriodeId = 0,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = fom.førsteDagIInneværendeMåned(),
+                        tom = tom.sisteDagIInneværendeMåned(),
+                    ),
                 ),
                 listOf(
-                    lagAndelMedPeriodeIdLong(id = 1, periodeId = 0, forrigePeriodeId = null, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 1,
+                        periodeId = 0,
+                        forrigePeriodeId = null,
+                        kildeBehandlingId = behandling.id,
+                    ),
                     // Følgende andel med periode id, har ulik id enn andelen den skal representere
-                    lagAndelMedPeriodeIdLong(id = 3, periodeId = 1, forrigePeriodeId = 0, kildeBehandlingId = behandling.id),
+                    lagAndelMedPeriodeIdLong(
+                        id = 3,
+                        periodeId = 1,
+                        forrigePeriodeId = 0,
+                        kildeBehandlingId = behandling.id,
+                    ),
                 ),
             )
 
