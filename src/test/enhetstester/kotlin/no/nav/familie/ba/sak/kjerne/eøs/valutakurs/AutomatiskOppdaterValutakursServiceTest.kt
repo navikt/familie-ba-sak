@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
+import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutomatiskOppdaterValutakursServiceTest {
@@ -101,9 +102,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
 
-        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId.id) } returns LocalDate.of(2023, 5, 15)
-
-        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
+        automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId, endringstidspunkt = YearMonth.of(2023, 5))
 
         val forventetUberørteValutakurser =
             ValutakursBuilder(jan(2023), behandlingId)
