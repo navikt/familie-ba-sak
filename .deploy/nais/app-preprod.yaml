@@ -122,9 +122,9 @@ spec:
     max: 2
   resources:
     limits:
-      memory: 1024Mi
+      memory: 2048Mi
     requests:
-      memory: 1024Mi
+      memory: 2048Mi
       cpu: 250m
   ingresses:
     - https://familie-ba-sak.intern.dev.nav.no
