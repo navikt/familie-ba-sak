@@ -6,14 +6,14 @@ import java.time.Clock
 
 class ClockProviderConfigTest {
     @Test
-    fun `skal returnere system default zone clock`() {
+    fun `skal returnere system default zone clock fra clock provider`() {
         // Arrange
-        val clockProviderConfig = ClockProviderConfig()
+        val clockProvider = ClockProviderConfig().clockProvider()
 
         // Act
-        val clockProvider = clockProviderConfig.clockProvider()
+        val clock = clockProvider.get()
 
         // Assert
-        assertThat(clockProvider.get()).isEqualTo(Clock.systemDefaultZone())
+        assertThat(clock).isEqualTo(Clock.systemDefaultZone())
     }
 }
