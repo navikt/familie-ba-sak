@@ -517,13 +517,13 @@ class ForvalterController(
 
     @GetMapping("/identer-barnetrygd-pensjon/{år}")
     fun hentAlleIdenterSomSendesTilPensjon(
-        @PathVariable år: Int,
+        @PathVariable år: Long,
     ): ResponseEntity<List<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "hente data til test",
         )
 
-        return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(år, UUID.randomUUID()))
+        return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(år.toInt(), UUID.randomUUID()))
     }
 }
