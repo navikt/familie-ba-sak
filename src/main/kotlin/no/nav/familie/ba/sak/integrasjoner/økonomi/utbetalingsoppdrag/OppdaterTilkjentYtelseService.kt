@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -14,7 +15,6 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppd
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
-import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -22,7 +22,7 @@ import java.time.YearMonth
 class OppdaterTilkjentYtelseService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val clock: Clock,
+    private val clockProvider: ClockProvider,
 ) {
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         tilkjentYtelse: TilkjentYtelse,
@@ -55,7 +55,7 @@ class OppdaterTilkjentYtelseService(
         tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
         tilkjentYtelse.stønadTom = utledStønadTom(tilkjentYtelse.andelerTilkjentYtelse, endretUtbetalingAndeler)
         tilkjentYtelse.stønadFom = if (opphør.erRentOpphør) null else tilkjentYtelse.andelerTilkjentYtelse.minOf { it.stønadFom }
-        tilkjentYtelse.endretDato = LocalDate.now(clock)
+        tilkjentYtelse.endretDato = LocalDate.now(clockProvider.get())
         tilkjentYtelse.opphørFom = opphør.opphørsdato?.toYearMonth()
     }
 

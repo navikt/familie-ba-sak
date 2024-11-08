@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -37,7 +38,7 @@ class OppdaterTilkjentYtelseServiceTest {
         OppdaterTilkjentYtelseService(
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            clock = clock,
+            clockProvider = TestClockProvider(clock),
         )
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -8,14 +9,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.springframework.stereotype.Component
-import java.time.Clock
 import java.time.LocalDate
 import java.time.YearMonth
 
 @Component
 class BehandlingsinformasjonUtleder(
     private val endretMigreringsdatoUtleder: EndretMigreringsdatoUtleder,
-    private val clock: Clock,
+    private val clockProvider: ClockProvider,
 ) {
     fun utled(
         saksbehandlerId: String,
@@ -34,7 +34,7 @@ class BehandlingsinformasjonUtleder(
             eksternFagsakId = fagsak.id,
             fagsystem = FagsystemBA.BARNETRYGD,
             personIdent = fagsak.aktør.aktivFødselsnummer(),
-            vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(clock),
+            vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(clockProvider.get()),
             opphørAlleKjederFra = finnOpphørsdatoForAlleKjeder(forrigeTilkjentYtelse, sisteAndelPerKjede, endretMigreringsdato),
             utbetalesTil = finnUtebetalesTil(fagsak),
             opphørKjederFraFørsteUtbetaling = finnOpphørKjederFraFørsteUtbetaling(endretMigreringsdato, erSimulering),

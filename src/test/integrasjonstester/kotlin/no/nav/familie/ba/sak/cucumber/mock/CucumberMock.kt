@@ -3,6 +3,7 @@
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
@@ -91,6 +92,7 @@ class CucumberMock(
     scope: CoroutineScope? = null,
 ) {
     val mockedDateProvider = MockedDateProvider(dataFraCucumber.dagensDato)
+    val clockProvider = TestClockProvider(Clock.fixed(dataFraCucumber.dagensDato.atStartOfDay(zoneId).toInstant(), zoneId))
     val persongrunnlagService = mockPersongrunnlagService(dataFraCucumber)
     val fagsakService = mockFagsakService(dataFraCucumber)
     val fagsakRepository = mockFagsakRepository(dataFraCucumber)
@@ -390,10 +392,7 @@ class CucumberMock(
                         behandlingHentOgPersisterService,
                         behandlingService,
                     ),
-                    Clock.fixed(
-                        dataFraCucumber.dagensDato.atStartOfDay(zoneId).toInstant(),
-                        zoneId,
-                    ),
+                    clockProvider,
                 ),
             utbetalingsgenerator = Utbetalingsgenerator(),
         )
@@ -402,10 +401,7 @@ class CucumberMock(
         OppdaterTilkjentYtelseService(
             endretUtbetalingAndelHentOgPersisterService,
             tilkjentYtelseRepository,
-            Clock.fixed(
-                dataFraCucumber.dagensDato.atStartOfDay(zoneId).toInstant(),
-                zoneId,
-            ),
+            clockProvider,
         )
 
     val økonomiService =

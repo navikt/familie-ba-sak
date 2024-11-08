@@ -6,6 +6,7 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -48,7 +49,7 @@ import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-    private val clock = Clock.systemDefaultZone()
+    private val clockProvider = TestClockProvider(Clock.systemDefaultZone())
 
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
@@ -96,7 +97,7 @@ class OppdragSteg {
                     behandlingHentOgPersisterService,
                     behandlingService,
                 ),
-                clock,
+                clockProvider,
             ),
             andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService,

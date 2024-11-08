@@ -4,16 +4,16 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
 
-class ClockConfigTest {
+class ClockProviderConfigTest {
     @Test
     fun `skal returnere system default zone clock`() {
         // Arrange
-        val clockConfig = ClockConfig()
+        val clockProviderConfig = ClockProviderConfig()
 
         // Act
-        val clock = clockConfig.clock()
+        val clockProvider = clockProviderConfig.clockProvider()
 
         // Assert
-        assertThat(clock).isEqualTo(Clock.systemDefaultZone())
+        assertThat(clockProvider.get()).isEqualTo(Clock.systemDefaultZone())
     }
 }
