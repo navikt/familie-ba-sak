@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class KlassifiseringKorrigerer(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val unleashNextMedContextService: UnleashNextMedContextService,
