@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -41,6 +42,7 @@ import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class DokumentServiceTest {
     val integrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
@@ -439,6 +441,75 @@ internal class DokumentServiceTest {
         }
         verify(exactly = 0) { journalføringRepository.save(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }
+    }
+
+    @Test
+    fun `sendManueltBrev skal feile hvis den manuelle brevmottakeren er ugyldig`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
+        val avsenderMottakere = mutableListOf<AvsenderMottaker>()
+
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Sverige",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Stockholm",
+                    landkode = "SE",
+                ),
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Norge",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
+        every {
+            utgåendeJournalføringService.journalførManueltBrev(
+                fnr = any(),
+                fagsakId = any(),
+                journalførendeEnhet = any(),
+                brev = any(),
+                dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
+                avsenderMottaker = capture(avsenderMottakere),
+            )
+        } returns "mockJournalPostId" andThen "mockJournalPostId1"
+
+        every { journalføringRepository.save(any()) } returns mockk()
+        every { taskRepository.save(any()) } returns mockk()
+        every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
+
+        // Act
+        val exception =
+            assertThrows<FunksjonellFeil> {
+                dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
+            }
+
+        assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere i utsending av manuelt brev")
+
+        verify(exactly = 0) {
+            utgåendeJournalføringService.journalførManueltBrev(
+                fnr = any(),
+                fagsakId = any(),
+                journalførendeEnhet = any(),
+                brev = any(),
+                dokumenttype = any(),
+                førsteside = any(),
+                eksternReferanseId = any(),
+                avsenderMottaker = any(),
+            )
+        }
+        verify(exactly = 0) { journalføringRepository.save(any()) }
+        verify(exactly = 0) { taskRepository.save(any()) }
     }
 
     private fun sendBrev(

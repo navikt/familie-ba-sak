@@ -109,6 +109,13 @@ class DokumentService(
         val brevmottakere =
             manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
 
+        if (!brevmottakerService.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
+                frontendFeilmelding = "Det finnes ugyldige brevmottakere i dette brevet som må oppdateres før brevet kan sendes.",
+            )
+        }
+
         val mottakere =
             lagMottakere(
                 fagsak = fagsak,

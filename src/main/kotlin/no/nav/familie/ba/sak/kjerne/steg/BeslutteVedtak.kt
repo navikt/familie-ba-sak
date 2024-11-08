@@ -13,8 +13,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
+import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -52,6 +55,7 @@ class BeslutteVedtak(
     private val valutakursRepository: ValutakursRepository,
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val brevmottakerService: BrevmottakerService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -76,6 +80,14 @@ class BeslutteVedtak(
         ) {
             throw FunksjonellFeil(
                 "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.",
+            )
+        }
+
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandling.id).map { ManuellBrevmottaker(it) }
+        if (data.beslutning == Beslutning.GODKJENT && !brevmottakerService.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
+                frontendFeilmelding = "Det finnes ugyldige brevmottakere i denne behandlingen, den må underkjennes og brevmottakerne oppdateres",
             )
         }
 

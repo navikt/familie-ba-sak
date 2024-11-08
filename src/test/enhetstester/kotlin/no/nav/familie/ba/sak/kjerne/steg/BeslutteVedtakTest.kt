@@ -20,6 +20,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
@@ -39,6 +42,7 @@ import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,6 +64,7 @@ class BeslutteVedtakTest {
     private val valutakursRepository = mockk<ValutakursRepository>()
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
+    private val brevmottakerService = mockk<BrevmottakerService>()
 
     val beslutteVedtak =
         BeslutteVedtak(
@@ -77,6 +82,7 @@ class BeslutteVedtakTest {
             valutakursRepository = valutakursRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
+            brevmottakerService = brevmottakerService,
         )
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
@@ -121,6 +127,19 @@ class BeslutteVedtakTest {
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Norge",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
+        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -150,6 +169,19 @@ class BeslutteVedtakTest {
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Norge",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
+        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -187,6 +219,19 @@ class BeslutteVedtakTest {
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Norge",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
+        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -220,6 +265,21 @@ class BeslutteVedtakTest {
             )
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Norge",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
+
+        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns false
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
@@ -268,5 +328,52 @@ class BeslutteVedtakTest {
             )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+    }
+
+    @Test
+    fun `Skal feile ferdigstilling av Godkjenne vedtak-oppgave ved Godkjent vedtak når brevmottakerne er ugyldige`() {
+        val behandling = lagBehandling()
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        mockkObject(FerdigstillOppgaver.Companion)
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Sverige",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Stockholm",
+                    landkode = "SE",
+                ),
+                BrevmottakerDb(
+                    behandlingId = behandling.id,
+                    type = MottakerType.FULLMEKTIG,
+                    navn = "Fullmektig navn i Norge",
+                    adresselinje1 = "Test adresse",
+                    postnummer = "0000",
+                    poststed = "Oslo",
+                    landkode = "NO",
+                ),
+            )
+
+        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns false
+
+        // Act
+        val exception =
+            assertThrows<FunksjonellFeil> {
+                beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            }
+
+        assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket")
     }
 }
