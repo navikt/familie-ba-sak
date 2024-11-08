@@ -38,19 +38,8 @@ class HentAlleIdenterTilPsysTask(
     override fun doTask(task: Task) {
         objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java).run {
             logger.info("Starter med å hente alle identer fra DB for request $requestId")
-            val identerFraDB = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(år)
-            logger.info("Ferdig med å hente alle identer fra DB for request $requestId")
 
-            logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
-            val identerFraInfotrygd =
-                when {
-                    envService.erPreprod() && !unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
-                    else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
-                }
-            logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
-
-            logger.info("Starter på å sende alle identer til kafka for request $requestId")
-            val identer = identerFraDB.plus(identerFraInfotrygd).distinct()
+            val identer = hentAlleIdenterMedBarnetrygd(år, requestId)
             logger.info("Totalt ${identer.size} identer for request $requestId")
 
             val dataMal =
@@ -63,6 +52,25 @@ class HentAlleIdenterTilPsysTask(
             kafkaProducer.sendIdentTilPSys(dataMal.copy(meldingstype = Meldingstype.SLUTT))
             logger.info("Ferdig med å sende alle identer til kafka for request $requestId")
         }
+    }
+
+    fun hentAlleIdenterMedBarnetrygd(
+        år: Int,
+        requestId: UUID,
+    ): List<String> {
+        val identerFraDB = andelTilkjentYtelseRepository.finnIdenterMedLøpendeBarnetrygdForGittÅr(år)
+        logger.info("Ferdig med å hente alle identer fra DB for request $requestId")
+
+        logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
+        val identerFraInfotrygd =
+            when {
+                envService.erPreprod() && !unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
+                else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+            }
+        logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")
+
+        logger.info("Starter på å sende alle identer til kafka for request $requestId")
+        return identerFraDB.plus(identerFraInfotrygd).distinct()
     }
 
     override fun onCompletion(task: Task) {
