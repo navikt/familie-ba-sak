@@ -37,6 +37,7 @@ class ForvalterControllerTest {
             behandlingHentOgPersisterService = mockk(),
             stønadsstatistikkService = mockk(),
             persongrunnlagService = mockk(),
+            hentAlleIdenterTilPsysTask = mockk(),
         )
 
     @BeforeEach
