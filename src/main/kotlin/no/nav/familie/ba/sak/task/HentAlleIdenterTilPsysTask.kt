@@ -51,6 +51,8 @@ class HentAlleIdenterTilPsysTask(
 
             logger.info("Starter på å sende alle identer til kafka for request $requestId")
             val identer = identerFraDB.plus(identerFraInfotrygd).distinct()
+            logger.info("Totalt ${identer.size} identer for request $requestId")
+
             val dataMal =
                 HentAlleIdenterTilPsysResponseDTO(DATA, requestId, personident = null, antallIdenterTotalt = identer.size)
 
