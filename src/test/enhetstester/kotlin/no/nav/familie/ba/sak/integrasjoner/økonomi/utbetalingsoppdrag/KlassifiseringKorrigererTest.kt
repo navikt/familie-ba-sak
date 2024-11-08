@@ -13,7 +13,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class JusterUtbetalingsoppdragServiceTest {
+class KlassifiseringKorrigererTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
     private val klassifiseringKorrigerer =
