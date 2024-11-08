@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedCont
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.JusterUtbetalingsoppdragService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -87,7 +87,7 @@ class OppdragSteg {
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             Utbetalingsgenerator(),
-            JusterUtbetalingsoppdragService(
+            KlassifiseringKorrigerer(
                 tilkjentYtelseRepository,
                 unleashNextMedContextService,
             ),

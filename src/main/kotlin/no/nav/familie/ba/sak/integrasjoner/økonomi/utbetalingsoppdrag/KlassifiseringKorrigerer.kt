@@ -8,11 +8,11 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppd
 import org.springframework.stereotype.Service
 
 @Service
-class JusterUtbetalingsoppdragService(
+class KlassifiseringKorrigerer(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
-    fun justerBeregnetUtbetalingsoppdragVedBehov(
+    fun korrigerKlassifiseringVedBehov(
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
         behandling: Behandling,
     ): BeregnetUtbetalingsoppdragLongId {

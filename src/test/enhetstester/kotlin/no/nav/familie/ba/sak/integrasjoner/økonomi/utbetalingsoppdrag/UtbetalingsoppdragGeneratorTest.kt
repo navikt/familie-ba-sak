@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 
 class UtbetalingsoppdragGeneratorTest {
-    private val justerUtbetalingsoppdragService: JusterUtbetalingsoppdragService = mockk()
+    private val klassifiseringKorrigerer: KlassifiseringKorrigerer = mockk()
     private val unleashNextMedContextService: UnleashNextMedContextService = mockk()
     private val behandlingsinformasjonUtleder: BehandlingsinformasjonUtleder = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
@@ -38,7 +38,7 @@ class UtbetalingsoppdragGeneratorTest {
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
-            justerUtbetalingsoppdragService = justerUtbetalingsoppdragService,
+            klassifiseringKorrigerer = klassifiseringKorrigerer,
             unleashNextMedContextService = unleashNextMedContextService,
             behandlingsinformasjonUtleder = behandlingsinformasjonUtleder,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -108,7 +108,7 @@ class UtbetalingsoppdragGeneratorTest {
         } returns true
 
         every {
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
             )
@@ -128,7 +128,7 @@ class UtbetalingsoppdragGeneratorTest {
         // Assert
         verify(exactly = 1) { behandlingsinformasjonUtleder.utled(any(), any(), any(), any(), any()) }
         verify(exactly = 1) {
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(any(), any())
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(any(), any())
         }
 
         assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.saksbehandlerId).isEqualTo(saksbehandlerId)
@@ -231,7 +231,7 @@ class UtbetalingsoppdragGeneratorTest {
         } returns true
 
         every {
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
             )
@@ -251,7 +251,7 @@ class UtbetalingsoppdragGeneratorTest {
         // Assert
         verify(exactly = 1) { behandlingsinformasjonUtleder.utled(any(), any(), any(), any(), any()) }
         verify(exactly = 1) {
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(any(), any())
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(any(), any())
         }
 
         assertThat(beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.saksbehandlerId).isEqualTo(saksbehandlerId)

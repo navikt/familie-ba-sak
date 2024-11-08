@@ -16,8 +16,8 @@ import java.time.LocalDate
 class JusterUtbetalingsoppdragServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
-    private val justerUtbetalingsoppdragService =
-        JusterUtbetalingsoppdragService(
+    private val klassifiseringKorrigerer =
+        KlassifiseringKorrigerer(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             unleashNextMedContextService = unleashNextMedContextService,
         )
@@ -46,7 +46,7 @@ class JusterUtbetalingsoppdragServiceTest {
 
         // Act
         val justertUtbetalingsoppdrag =
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdragLongId,
                 behandling = behandling,
             )
@@ -80,7 +80,7 @@ class JusterUtbetalingsoppdragServiceTest {
 
         // Act
         val justertUtbetalingsoppdrag =
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdragLongId,
                 behandling = behandling,
             )
@@ -114,7 +114,7 @@ class JusterUtbetalingsoppdragServiceTest {
 
         // Act
         val justertUtbetalingsoppdrag =
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdragLongId,
                 behandling = behandling,
             )
@@ -177,7 +177,7 @@ class JusterUtbetalingsoppdragServiceTest {
 
         // Act
         val justertUtbetalingsoppdrag =
-            justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdragLongId,
                 behandling = behandling,
             )

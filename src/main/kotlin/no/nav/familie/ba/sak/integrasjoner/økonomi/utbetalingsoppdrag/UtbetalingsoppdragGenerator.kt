@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 @Component
 class UtbetalingsoppdragGenerator(
     private val utbetalingsgenerator: Utbetalingsgenerator,
-    private val justerUtbetalingsoppdragService: JusterUtbetalingsoppdragService,
+    private val klassifiseringKorrigerer: KlassifiseringKorrigerer,
     private val unleashNextMedContextService: UnleashNextMedContextService,
     private val behandlingsinformasjonUtleder: BehandlingsinformasjonUtleder,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -51,7 +51,7 @@ class UtbetalingsoppdragGenerator(
                 sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
             )
 
-        return justerUtbetalingsoppdragService.justerBeregnetUtbetalingsoppdragVedBehov(
+        return klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
             beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,
             behandling = vedtak.behandling,
         )
