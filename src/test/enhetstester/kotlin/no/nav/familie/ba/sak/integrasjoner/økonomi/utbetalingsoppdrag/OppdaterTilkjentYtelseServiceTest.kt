@@ -357,34 +357,6 @@ class OppdaterTilkjentYtelseServiceTest {
     }
 
     @Test
-    fun `skal kaste feil dersom det ikke finnes andeler på tilkjent ytelse eller utbetalingsoppdraget ikke inneholder noen utbetalingsperioder`() {
-        // Arrange
-        val behandling = lagBehandling()
-        val tilkjentYtelse =
-            lagTilkjentYtelse(
-                behandling = behandling,
-                stønadFom = null,
-                stønadTom = null,
-                opphørFom = null,
-                lagAndelerTilkjentYtelse = {
-                    emptySet()
-                },
-            )
-        val beregnetUtbetalingsoppdragLongId =
-            lagBeregnetUtbetalingsoppdragLongId(
-                emptyList(),
-                emptyList(),
-            )
-
-        every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id) } returns emptyList()
-        every { tilkjentYtelseRepository.save(any()) } returns tilkjentYtelse
-
-        // Act & Assert
-        val exception = assertThrows<IllegalStateException> { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse, beregnetUtbetalingsoppdragLongId) }
-        assertThat(exception.message).isEqualTo("Kan ikke oppdatere tilkjent ytelse med utbetalingsoppdrag dersom det ikke finnes andeler eller utbetalingsoppdraget ikke inneholder noen perioder")
-    }
-
-    @Test
     fun `skal kaste feil dersom antall andeler med utbetaling ikke stemmer overens med antall andeler med periode id i beregnet utbetalingsoppdrag`() {
         // Arrange
         val behandling = lagBehandling()

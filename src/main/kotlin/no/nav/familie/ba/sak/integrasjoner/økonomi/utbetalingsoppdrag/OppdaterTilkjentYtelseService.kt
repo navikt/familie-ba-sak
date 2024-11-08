@@ -28,12 +28,6 @@ class OppdaterTilkjentYtelseService(
         tilkjentYtelse: TilkjentYtelse,
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
     ) {
-        if (tilkjentYtelse.andelerTilkjentYtelse.isEmpty() || beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
-            throw IllegalStateException(
-                "Kan ikke oppdatere tilkjent ytelse med utbetalingsoppdrag dersom det ikke finnes andeler eller utbetalingsoppdraget ikke inneholder noen perioder",
-            )
-        }
-
         secureLogger.info(
             "Oppdaterer TilkjentYtelse med utbetalingsoppdrag og offsets på andeler for behandling ${tilkjentYtelse.behandling.id}",
         )
