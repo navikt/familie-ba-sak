@@ -76,7 +76,7 @@ class JusterUtbetalingsoppdragServiceTest {
             )
 
         every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns true
-        every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns true
+        every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns true
 
         // Act
         val justertUtbetalingsoppdrag =
@@ -110,7 +110,7 @@ class JusterUtbetalingsoppdragServiceTest {
             )
 
         every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns true
-        every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
+        every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
 
         // Act
         val justertUtbetalingsoppdrag =
@@ -173,7 +173,7 @@ class JusterUtbetalingsoppdragServiceTest {
             )
 
         every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns true
-        every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
+        every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
 
         // Act
         val justertUtbetalingsoppdrag =

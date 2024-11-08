@@ -26,7 +26,7 @@ class KlassifiseringKorrigerer(
         }
 
         val erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd =
-            tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(
+            tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(
                 fagsakId = behandling.fagsak.id,
             )
 

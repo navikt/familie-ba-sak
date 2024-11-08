@@ -205,7 +205,7 @@ class OppdragSteg {
             val featureToggleId = firstArg<String>()
             toggles[tilkjentYtelse.behandling.id]?.get(featureToggleId) ?: true
         }
-        every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
+        every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
             beregnetUtbetalingsoppdrag.values.any { beregnetUtbetalingsoppdrag ->
                 beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode ->
                     utbetalingsperiode.klassifisering == "BAUTV-OP"

@@ -29,5 +29,5 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
             )
         """,
     )
-    fun fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId: Long): Boolean
+    fun harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId: Long): Boolean
 }

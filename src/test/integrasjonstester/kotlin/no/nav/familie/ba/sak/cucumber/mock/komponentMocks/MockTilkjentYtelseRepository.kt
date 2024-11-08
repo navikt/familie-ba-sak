@@ -36,7 +36,7 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
         val behandlingId = firstArg<Long>()
         dataFraCucumber.tilkjenteYtelser[behandlingId]
     }
-    every { tilkjentYtelseRepository.fagsakHarTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
+    every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
         val fagsakId = firstArg<Long>()
         dataFraCucumber.tilkjenteYtelser
             .map { it.value }
