@@ -216,7 +216,7 @@ class OppdragSteg {
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            nyTilkjentYtelse = tilkjentYtelse,
+            tilkjentYtelse = tilkjentYtelse,
             erSimulering = erSimulering,
         )
     }

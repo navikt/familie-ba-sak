@@ -28,7 +28,7 @@ class UtbetalingsoppdragGenerator(
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
         vedtak: Vedtak,
-        nyTilkjentYtelse: TilkjentYtelse,
+        tilkjentYtelse: TilkjentYtelse,
         erSimulering: Boolean = false,
     ): BeregnetUtbetalingsoppdragLongId {
         val forrigeTilkjentYtelse = hentForrigeTilkjentYtelse(vedtak.behandling)
@@ -47,7 +47,7 @@ class UtbetalingsoppdragGenerator(
             utbetalingsgenerator.lagUtbetalingsoppdrag(
                 behandlingsinformasjon = behandlingsinformasjon,
                 forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
-                nyeAndeler = nyTilkjentYtelse.tilAndelData(),
+                nyeAndeler = tilkjentYtelse.tilAndelData(),
                 sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
             )
 

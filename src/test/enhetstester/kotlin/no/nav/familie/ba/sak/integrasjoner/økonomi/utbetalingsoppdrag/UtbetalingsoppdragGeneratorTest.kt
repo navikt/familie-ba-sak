@@ -121,7 +121,7 @@ class UtbetalingsoppdragGeneratorTest {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                nyTilkjentYtelse = tilkjentYtelse,
+                tilkjentYtelse = tilkjentYtelse,
                 erSimulering = erSimulering,
             )
 
@@ -244,7 +244,7 @@ class UtbetalingsoppdragGeneratorTest {
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                nyTilkjentYtelse = tilkjentYtelse,
+                tilkjentYtelse = tilkjentYtelse,
                 erSimulering = erSimulering,
             )
 

@@ -549,7 +549,7 @@ private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
         mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            nyTilkjentYtelse = this,
+            tilkjentYtelse = this,
             erSimulering = false,
         )
     mock.oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(this, beregnetUtbetalingsoppdrag)

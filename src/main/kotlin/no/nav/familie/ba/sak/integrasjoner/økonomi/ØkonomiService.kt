@@ -36,17 +36,17 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val behandling = vedtak.behandling
 
-        val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
 
         val beregnetUtbetalingsoppdrag =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                nyTilkjentYtelse = nyTilkjentYtelse,
+                tilkjentYtelse = tilkjentYtelse,
             )
 
         oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-            tilkjentYtelse = nyTilkjentYtelse,
+            tilkjentYtelse = tilkjentYtelse,
             beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdrag,
         )
 

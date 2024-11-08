@@ -50,7 +50,7 @@ class SimuleringService(
             return null
         }
 
-        val nyTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
 
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
@@ -64,7 +64,7 @@ class SimuleringService(
                 .lagUtbetalingsoppdrag(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    nyTilkjentYtelse = nyTilkjentYtelse,
+                    tilkjentYtelse = tilkjentYtelse,
                     erSimulering = true,
                 ).utbetalingsoppdrag
                 .tilRestUtbetalingsoppdrag()
