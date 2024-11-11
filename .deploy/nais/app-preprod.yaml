@@ -27,6 +27,10 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   gcp: # Database
     sqlInstances:
       - type: POSTGRES_15 # IF This is changed, all data will be lost. Read on nais.io how to upgrade
