@@ -15,9 +15,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
-import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -83,13 +84,7 @@ class BeslutteVedtak(
             )
         }
 
-        val brevmottakere = brevmottakerService.hentBrevmottakere(behandling.id).map { ManuellBrevmottaker(it) }
-        if (data.beslutning == Beslutning.GODKJENT && !brevmottakerService.erBrevmottakereGyldige(brevmottakere)) {
-            throw FunksjonellFeil(
-                melding = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
-                frontendFeilmelding = "Det finnes ugyldige brevmottakere i denne behandlingen, den må underkjennes og brevmottakerne oppdateres",
-            )
-        }
+        validerBrevmottakere(BehandlingId(behandling.id), data.beslutning.erGodkjent())
 
         val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandling.id) }
         val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
@@ -251,5 +246,18 @@ class BeslutteVedtak(
                 behandlingId = behandling.id,
             )
         taskRepository.save(task)
+    }
+
+    private fun validerBrevmottakere(
+        behandlingId: BehandlingId,
+        toTrinnskontrollErGodkjent: Boolean,
+    ) {
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId.id).map { ManuellBrevmottaker(it) }
+        if (toTrinnskontrollErGodkjent && !BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
+                frontendFeilmelding = "Det finnes ugyldige brevmottakere i denne behandlingen, den må underkjennes og brevmottakerne oppdateres",
+            )
+        }
     }
 }

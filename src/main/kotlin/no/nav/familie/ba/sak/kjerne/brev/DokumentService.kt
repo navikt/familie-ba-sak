@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Institusjon
@@ -109,7 +110,7 @@ class DokumentService(
         val brevmottakere =
             manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
 
-        if (!brevmottakerService.erBrevmottakereGyldige(brevmottakere)) {
+        if (!BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
             throw FunksjonellFeil(
                 melding = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
                 frontendFeilmelding = "Det finnes ugyldige brevmottakere i dette brevet som må oppdateres før brevet kan sendes.",

@@ -139,7 +139,6 @@ class BeslutteVedtakTest {
                     landkode = "NO",
                 ),
             )
-        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -181,7 +180,6 @@ class BeslutteVedtakTest {
                     landkode = "NO",
                 ),
             )
-        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -231,7 +229,6 @@ class BeslutteVedtakTest {
                     landkode = "NO",
                 ),
             )
-        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -278,8 +275,6 @@ class BeslutteVedtakTest {
                     landkode = "NO",
                 ),
             )
-
-        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns false
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
@@ -365,8 +360,6 @@ class BeslutteVedtakTest {
                     landkode = "NO",
                 ),
             )
-
-        every { brevmottakerService.erBrevmottakereGyldige(any()) } returns false
 
         // Act
         val exception =
