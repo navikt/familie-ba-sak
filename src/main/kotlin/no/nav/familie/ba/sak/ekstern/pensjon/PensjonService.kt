@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -323,7 +322,7 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
         .map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
-                tilOgMed = if (it.stønadTom.equals(YearMonth.of(999999999, 12))) LocalDate.now().plusYears(9999).tilMånedTidspunkt() else it.stønadTom.tilTidspunkt(),
+                tilOgMed = if (it.stønadTom.equals(YearMonth.of(999999999, 12))) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
         }.tilTidslinje()
