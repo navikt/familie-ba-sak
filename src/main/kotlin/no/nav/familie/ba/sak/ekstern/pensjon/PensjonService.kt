@@ -204,7 +204,7 @@ class PensjonService(
                 logger.info("Henter tilfeldig uttrekk fra Infotrygd for år=$år")
                 val alleIdenter = infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
                 logger.info("Fant ${alleIdenter.size} identer")
-                return alleIdenter.random()
+                return alleIdenter.last()
             }
 
             else -> null
