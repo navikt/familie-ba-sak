@@ -80,6 +80,7 @@ class PensjonService(
                 ?.flatten()
                 ?: emptyList()
 
+        logger.info("Fant ${barnetrygdMedRelaterteSaker.size} perioder i relaterte saker")
         return barnetrygdMedRelaterteSaker
             .plus(barnetrygdFraRelaterteInfotrygdsaker)
             .plus(
@@ -244,39 +245,44 @@ class PensjonService(
     private fun List<BarnetrygdTilPensjon>.minusEventuelleInfotrygdperioderSomOverlapperBA(
         personIdent: String,
         fraDato: LocalDate,
-    ): List<BarnetrygdTilPensjon> =
-        distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
-            val perioderUtenOverlappMellomFagsystemene =
-                barnetrygdTilPensjon
-                    .flatMap { it.barnetrygdPerioder }
-                    .groupBy { it.personIdent }
-                    .values
-                    .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
-                        try {
-                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
-                        } catch (e: Exception) {
-                            logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
-                            secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
+    ): List<BarnetrygdTilPensjon> {
+        logger.info("Fjerner eventuelle overlappende perioder mellom BA og IT")
+        val periodeResultat =
+            distinct().groupBy { it.fagsakEiersIdent }.map { (fagsakEiersIdent, barnetrygdTilPensjon) ->
+                val perioderUtenOverlappMellomFagsystemene =
+                    barnetrygdTilPensjon
+                        .flatMap { it.barnetrygdPerioder }
+                        .groupBy { it.personIdent }
+                        .values
+                        .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
+                            try {
+                                acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
+                            } catch (e: Exception) {
+                                logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
+                                secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
 
-                            throw EksternTjenesteFeilException(
-                                eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
-                                melding = "Det oppstod feil ved kombinering av BA og IT-perioder for fjerning av evt. overlapp",
-                                request = BarnetrygdTilPensjonRequest(personIdent, fraDato),
-                                throwable = e,
-                            )
+                                throw EksternTjenesteFeilException(
+                                    eksternTjenesteFeil = EksternTjenesteFeil("/api/ekstern/pensjon/hent-barnetrygd"),
+                                    melding = "Det oppstod feil ved kombinering av BA og IT-perioder for fjerning av evt. overlapp",
+                                    request = BarnetrygdTilPensjonRequest(personIdent, fraDato),
+                                    throwable = e,
+                                )
+                            }
                         }
-                    }
 
-            BarnetrygdTilPensjon(
-                fagsakEiersIdent = fagsakEiersIdent,
-                barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
-            )
-        }
+                BarnetrygdTilPensjon(
+                    fagsakEiersIdent = fagsakEiersIdent,
+                    barnetrygdPerioder = perioderUtenOverlappMellomFagsystemene,
+                )
+            }
+        logger.info("Fjernet eventuelle overlappende perioder mellom BA og IT")
+        return periodeResultat
+    }
 
     private fun List<BarnetrygdPeriode>.fjernOverlappendeInfotrygdperioder(): List<BarnetrygdPeriode> {
         val (baSakPerioder, opprinneligeInfotrygdPerioder) =
             partition { it.kildesystem == "BA" }
-
+        logger.info("periode infotrygd: ${opprinneligeInfotrygdPerioder.get(0).stønadFom} - ${opprinneligeInfotrygdPerioder.get(0).let { it.stønadTom }}")
         val infotrygdperioderSomIkkeOverlapperBaPerioder =
             baSakPerioder
                 .tilTidslinje()
