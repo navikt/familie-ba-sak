@@ -57,7 +57,10 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> =
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> {
     val fraOgMed = fraOgMed() ?: return emptyList()
     val tilOgMed = tilOgMed() ?: return emptyList()
-    return (fraOgMed..tilOgMed).toList()
+    return generateSequence(fraOgMed) { it.neste() }
+        .takeWhile { it <= tilOgMed }
+        .toList()
+    // return (fraOgMed..tilOgMed).toList()
 }
 
 fun <T : Tidsenhet> tidsrom(vararg tidslinjer: Tidslinje<*, T>) = tidslinjer.toList().tidsrom()
