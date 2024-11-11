@@ -50,6 +50,7 @@ class PensjonService(
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
         secureLogger.info("Henter data til pensjon for personIdent=$personIdent fraDato=$fraDato")
+        logger.info("Henter data til pensjon")
         if (envService.erPreprod() && unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
             val barnetrygdTilPensjonFraInfotrygdQ = hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent, fraDato)
             if (barnetrygdTilPensjonFraInfotrygdQ.isNotEmpty()) {
@@ -58,11 +59,15 @@ class PensjonService(
         }
         val aktør = personidentService.hentAktør(personIdent)
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
+        logger.info("Henter barnetrygd for fagsak=${fagsak?.id}")
         val barnetrygdTilPensjon = fagsak?.let { hentBarnetrygdTilPensjon(fagsak, fraDato) }
+        logger.info("Hentet barnetrygd for fagsak=${fagsak?.id} fant ${barnetrygdTilPensjon?.barnetrygdPerioder?.size} perioder")
         val (barnetrygdTilPensjonFraInfotrygd, barnetrygdFraRelaterteInfotrygdsaker) =
             hentBarnetrygdTilPensjonFraInfotrygd(aktør, fraDato, barnetrygdTilPensjon?.barna)
 
         if (barnetrygdTilPensjon == null && barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.isEmpty()) return emptyList()
+
+        logger.info("Fant ${barnetrygdTilPensjon?.barnetrygdPerioder?.size} perioder i BA og ${barnetrygdTilPensjonFraInfotrygd.barnetrygdPerioder.size} perioder i IT")
 
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
         val barnetrygdMedRelaterteSaker =
@@ -196,7 +201,10 @@ class PensjonService(
         require(envService.erPreprod())
         return when {
             Random.nextBoolean() -> {
-                infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år).random()
+                logger.info("Henter tilfeldig uttrekk fra Infotrygd for år=$år")
+                val alleIdenter = infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
+                logger.info("Fant ${alleIdenter.size} identer")
+                return alleIdenter.random()
             }
 
             else -> null
