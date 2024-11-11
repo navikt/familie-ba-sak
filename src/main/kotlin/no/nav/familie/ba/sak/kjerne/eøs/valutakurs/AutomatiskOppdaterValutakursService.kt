@@ -86,13 +86,12 @@ class AutomatiskOppdaterValutakursService(
     fun oppdaterValutakurserEtterEndringstidspunkt(
         behandlingId: BehandlingId,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>? = null,
-        endringstidspunkt: YearMonth? = null,
     ) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
         oppdaterValutakurserEtterEndringstidspunkt(
             behandling = behandling,
             utenlandskePeriodebeløp = utenlandskePeriodebeløp ?: utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
-            endringstidspunkt = endringstidspunkt ?: finnEndringstidspunktForOppdateringAvValutakurs(behandling),
+            endringstidspunkt = finnEndringstidspunktForOppdateringAvValutakurs(behandling),
         )
     }
 
