@@ -45,15 +45,12 @@ class BehandlingsinformasjonUtleder(
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         endretMigreringsdato: YearMonth?,
-    ): YearMonth? {
-        if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) {
-            return null
+    ): YearMonth? =
+        when {
+            forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty() -> null
+            endretMigreringsdato != null -> endretMigreringsdato
+            else -> null
         }
-        if (endretMigreringsdato != null) {
-            return endretMigreringsdato
-        }
-        return null
-    }
 
     private fun finnUtebetalesTil(fagsak: Fagsak): String =
         when (fagsak.type) {
@@ -63,13 +60,9 @@ class BehandlingsinformasjonUtleder(
 
             FagsakType.INSTITUSJON,
             -> {
-                val tssEksternId = fagsak.institusjon?.tssEksternId
-                if (tssEksternId == null) {
-                    throw IllegalStateException(
-                        "Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen",
-                    )
-                }
-                tssEksternId
+                fagsak.institusjon?.tssEksternId ?: throw IllegalStateException(
+                    "Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen",
+                )
             }
         }
 
