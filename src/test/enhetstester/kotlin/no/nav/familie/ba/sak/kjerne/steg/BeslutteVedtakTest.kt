@@ -361,7 +361,7 @@ class BeslutteVedtakTest {
                 ),
             )
 
-        // Act
+        // Act & assert
         val exception =
             assertThrows<FunksjonellFeil> {
                 beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
