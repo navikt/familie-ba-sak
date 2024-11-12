@@ -183,9 +183,10 @@ enum class YtelseType(
         when (this) {
             ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
             UTVIDET_BARNETRYGD ->
-                when (skalBrukeNyKlassekodeForUtvidetBarnetrygd) {
-                    true -> YtelsetypeBA.UTVIDET_BARNETRYGD
-                    false -> YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL
+                if (skalBrukeNyKlassekodeForUtvidetBarnetrygd) {
+                    YtelsetypeBA.UTVIDET_BARNETRYGD
+                } else {
+                    YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL
                 }
 
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
