@@ -3,6 +3,7 @@
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -37,10 +38,11 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutomatiskOppdaterValutakursServiceTest {
     val dagensDato = LocalDate.of(2020, 9, 15)
+    val clockProvider = TestClockProvider()
 
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> = mockPeriodeBarnSkjemaRepository()
-    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(valutakursRepository = valutakursRepository, utenlandskPeriodebeløpRepository, emptyList())
+    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(valutakursRepository = valutakursRepository, utenlandskPeriodebeløpRepository, emptyList(), clockProvider)
     val tilpassDifferanseberegningEtterValutakursService = mockk<TilpassDifferanseberegningEtterValutakursService>()
 
     val valutakursService = ValutakursService(valutakursRepository, emptyList())

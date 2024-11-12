@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
@@ -21,6 +22,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: FinnPeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>,
+    private val clockProvider: ClockProvider,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     val skjemaService =
         PeriodeOgBarnSkjemaService(
@@ -53,6 +55,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
             tilpassValutakurserTilUtenlandskePeriodebeløp(
                 forrigeValutakurser,
                 gjeldendeUtenlandskePeriodebeløp,
+                clockProvider,
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, forrigeValutakurser, oppdaterteValutakurser)
@@ -62,12 +65,13 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
 internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
     forrigeValutakurser: Collection<Valutakurs>,
     gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
+    clockProvider: ClockProvider,
 ): Collection<Valutakurs> {
     val barnasUtenlandskePeriodebeløpTidslinjer =
         gjeldendeUtenlandskePeriodebeløp
             .tilSeparateTidslinjerForBarna()
 
-    val korrigerteValutakurser = korrigerValutakurserMedFremdtidigTom(forrigeValutakurser)
+    val korrigerteValutakurser = korrigerValutakurserMedFremdtidigTom(forrigeValutakurser, clockProvider)
     return korrigerteValutakurser
         .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
@@ -80,12 +84,16 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
         }.tilSkjemaer()
 }
 
-private fun korrigerValutakurserMedFremdtidigTom(gjeldendeValutakurser: Iterable<Valutakurs>): Iterable<Valutakurs> =
+private fun korrigerValutakurserMedFremdtidigTom(
+    gjeldendeValutakurser: Iterable<Valutakurs>,
+    clockProvider: ClockProvider,
+): Iterable<Valutakurs> =
     gjeldendeValutakurser
         .mapNotNull {
+            val inneværendeMåned = YearMonth.now(clockProvider.get())
             when {
-                it.fom != null && it.fom.isAfter(YearMonth.now()) -> null
-                it.tom != null && it.tom.isSameOrAfter(YearMonth.now()) -> it.copy(tom = null)
+                it.fom != null && it.fom.isAfter(inneværendeMåned) -> null
+                it.tom != null && it.tom.isSameOrAfter(inneværendeMåned) -> it.copy(tom = null)
                 else -> it
             }
         }
