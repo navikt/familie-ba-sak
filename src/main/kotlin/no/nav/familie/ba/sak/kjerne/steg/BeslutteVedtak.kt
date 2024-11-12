@@ -250,7 +250,7 @@ class BeslutteVedtak(
 
     private fun validerBrevmottakere(
         behandlingId: BehandlingId,
-        toTrinnskontrollErGodkjent: Boolean,
+        totrinnskontrollErGodkjent: Boolean,
     ) {
         val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId.id).map { ManuellBrevmottaker(it) }
         if (toTrinnskontrollErGodkjent && !BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
