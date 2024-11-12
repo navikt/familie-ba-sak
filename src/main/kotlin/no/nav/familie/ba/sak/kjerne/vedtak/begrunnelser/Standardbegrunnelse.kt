@@ -641,6 +641,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonFlyttetSammenMedEktefelle"
     },
+    REDUKSJON_BOR_IKKE_FAST_MED_BARN {
+        override val sanityApiNavn = "reduksjonBorIkkeFastMedBarn"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+    },
     REDUKSJON_IKKE_AVTALE_DELT_BOSTED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonIkkeAvtaleDeltBosted"

@@ -26,14 +26,14 @@
         <prosessering.version>2.20241011144712_deb1f2c</prosessering.version>
         <felles.version>3.20240913110742_adb42f8</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20241030085021_493c354</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20241102131210_d65efd1</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20241021103522_3adb9fa</utbetalingsgenerator.version>
         <cucumber.version>7.20.1</cucumber.version>
         <mockk.version>1.13.13</mockk.version>
         <wiremock.version>3.9.2</wiremock.version>
-        <token-validation-spring.version>5.0.5</token-validation-spring.version>
+        <token-validation-spring.version>5.0.10</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
         <sentry.version>7.16.0</sentry.version>
@@ -41,7 +41,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.1.9</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.10</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
@@ -58,7 +58,7 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
-        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.0.0.4389</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     </properties>
 
@@ -541,7 +541,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.5.2</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->

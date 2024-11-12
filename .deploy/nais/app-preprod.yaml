@@ -122,10 +122,10 @@ spec:
     max: 2
   resources:
     limits:
-      memory: 1024Mi
+      memory: 2048Mi
     requests:
-      memory: 1024Mi
-      cpu: 50m
+      memory: 2048Mi
+      cpu: 250m
   ingresses:
     - https://familie-ba-sak.intern.dev.nav.no
   secureLogs:
@@ -133,8 +133,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: preprod
-    - name: JAVA_OPTS
-      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError"
+    - name: JDK_JAVA_OPTIONS
+      value: "-XX:MinRAMPercentage=25.0 -XX:MaxRAMPercentage=75.0 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp"
   kafka:
     pool: nav-dev
   strategy:

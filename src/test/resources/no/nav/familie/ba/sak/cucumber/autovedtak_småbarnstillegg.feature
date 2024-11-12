@@ -105,4 +105,4 @@ Egenskap: Småbarnstillegg autovedtak
 
     Så forvent disse behandlingene
       | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak                   | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus | Behandlingstype | Behandlingssteg     | Underkategori |
-      | 3            | 1        | 2                   | OPPHØRT             | SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID | Nei                       | NASJONAL            | UTREDES           | Revurdering     | BEHANDLINGSRESULTAT | UTVIDET       |
+      | 3            | 1        | 2                   | OPPHØRT             | SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID | Nei                       | NASJONAL            | UTREDES           | Revurdering     | BEHANDLINGSRESULTAT | ORDINÆR       |
