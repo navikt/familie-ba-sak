@@ -113,7 +113,7 @@ class DokumentService(
         if (!BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
             throw FunksjonellFeil(
                 melding = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
-                frontendFeilmelding = "Det finnes ugyldige brevmottakere i dette brevet som må oppdateres før brevet kan sendes.",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og brevet kan ikke sendes. Du må legge til manuell adresse på nytt.",
             )
         }
 
