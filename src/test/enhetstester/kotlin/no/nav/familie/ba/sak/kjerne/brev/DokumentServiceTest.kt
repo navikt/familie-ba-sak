@@ -488,7 +488,7 @@ internal class DokumentServiceTest {
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
-        // Act
+        // Act & assert
         val exception =
             assertThrows<FunksjonellFeil> {
                 dokumentService.sendManueltBrev(manueltBrevRequest, behandling, behandling.fagsak.id)
