@@ -253,7 +253,7 @@ class BeslutteVedtak(
         totrinnskontrollErGodkjent: Boolean,
     ) {
         val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId.id).map { ManuellBrevmottaker(it) }
-        if (toTrinnskontrollErGodkjent && !BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
+        if (totrinnskontrollErGodkjent && !BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
             throw FunksjonellFeil(
                 melding = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
                 frontendFeilmelding = "Det finnes ugyldige brevmottakere i denne behandlingen, den må underkjennes og brevmottakerne oppdateres",
