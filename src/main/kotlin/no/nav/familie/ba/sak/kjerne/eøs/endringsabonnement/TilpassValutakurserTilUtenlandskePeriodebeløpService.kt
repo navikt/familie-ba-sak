@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class TilpassValutakurserTilUtenlandskePeriodebeløpService(
@@ -65,7 +67,8 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
         gjeldendeUtenlandskePeriodebeløp
             .tilSeparateTidslinjerForBarna()
 
-    return forrigeValutakurser
+    val korrigerteValutakurser = korrigerValutakurserMedFremdtidigTom(forrigeValutakurser)
+    return korrigerteValutakurser
         .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
             when {
@@ -76,3 +79,13 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
             }
         }.tilSkjemaer()
 }
+
+private fun korrigerValutakurserMedFremdtidigTom(gjeldendeValutakurser: Iterable<Valutakurs>): Iterable<Valutakurs> =
+    gjeldendeValutakurser
+        .mapNotNull {
+            when {
+                it.fom != null && it.fom.isAfter(YearMonth.now()) -> null
+                it.tom != null && it.tom.isSameOrAfter(YearMonth.now()) -> it.copy(tom = null)
+                else -> it
+            }
+        }

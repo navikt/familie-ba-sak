@@ -5,8 +5,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassValutakurserTilUtenlandskePeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 /**
  * Syntaks:
@@ -70,5 +73,30 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
             tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp)
 
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
+    }
+
+    @Test
+    fun `test at ikke fremtidige valutakurser genereres`() {
+        val toMånederSiden = MånedTidspunkt.med(YearMonth.now().minusMonths(2))
+
+        val gjeldendeValutakurser =
+            ValutakursBuilder(toMånederSiden)
+                .medKurs("1234", "PLN", barn1)
+                .bygg()
+
+        val utenlandskePeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(toMånederSiden)
+                .medBeløp("1234>", "PLN", "PL", barn1)
+                .bygg()
+
+        val forventedeValutakurser =
+            ValutakursBuilder(toMånederSiden)
+                .medKurs("123>", "PLN", barn1)
+                .bygg()
+
+        val faktiskeValutakurser =
+            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp)
+
+        assertThat(faktiskeValutakurser).isEqualTo(forventedeValutakurser)
     }
 }
