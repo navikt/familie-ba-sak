@@ -9,6 +9,7 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagBrevmottakerDb
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -20,9 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
@@ -129,15 +128,7 @@ class BeslutteVedtakTest {
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Norge",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id),
             )
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
@@ -170,15 +161,7 @@ class BeslutteVedtakTest {
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Norge",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id),
             )
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
@@ -219,15 +202,7 @@ class BeslutteVedtakTest {
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Norge",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id),
             )
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
@@ -265,15 +240,7 @@ class BeslutteVedtakTest {
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Norge",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id),
             )
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
@@ -342,24 +309,8 @@ class BeslutteVedtakTest {
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Sverige",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Stockholm",
-                    landkode = "SE",
-                ),
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Norge",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
+                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
             )
 
         // Act & assert

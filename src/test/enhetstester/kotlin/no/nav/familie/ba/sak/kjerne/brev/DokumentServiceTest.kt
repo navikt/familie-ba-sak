@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagBrevmottakerDb
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
@@ -297,15 +297,7 @@ internal class DokumentServiceTest {
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id, navn = "Fullmektig navn"),
             )
         every {
             utgåendeJournalføringService.journalførManueltBrev(
@@ -352,12 +344,7 @@ internal class DokumentServiceTest {
         val brevmottakere =
             listOf(
                 ManuellBrevmottaker(
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
+                    lagBrevmottakerDb(behandlingId = 1234, type = MottakerType.FULLMEKTIG, navn = "Fullmektig navn"),
                 ),
             )
         val manueltBrevRequest =
@@ -452,24 +439,8 @@ internal class DokumentServiceTest {
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
             listOf(
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Sverige",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Stockholm",
-                    landkode = "SE",
-                ),
-                BrevmottakerDb(
-                    behandlingId = behandling.id,
-                    type = MottakerType.FULLMEKTIG,
-                    navn = "Fullmektig navn i Norge",
-                    adresselinje1 = "Test adresse",
-                    postnummer = "0000",
-                    poststed = "Oslo",
-                    landkode = "NO",
-                ),
+                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
+                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
             )
         every {
             utgåendeJournalføringService.journalførManueltBrev(
