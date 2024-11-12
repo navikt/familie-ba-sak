@@ -18,7 +18,9 @@ class EndretMigreringsdatoUtleder(
         fagsak: Fagsak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
     ): YearMonth? {
-        if (forrigeTilkjentYtelse == null) {
+        val forrigeTilstandFraDato = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom }
+
+        if (forrigeTilstandFraDato == null) {
             return null
         }
 
@@ -28,12 +30,6 @@ class EndretMigreringsdatoUtleder(
                 .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
 
         if (!erMigrertSak) {
-            return null
-        }
-
-        val forrigeTilstandFraDato = forrigeTilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
-
-        if (forrigeTilstandFraDato == null) {
             return null
         }
 

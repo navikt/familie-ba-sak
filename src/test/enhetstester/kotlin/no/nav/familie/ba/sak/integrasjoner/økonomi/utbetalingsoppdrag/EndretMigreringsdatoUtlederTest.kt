@@ -43,8 +43,40 @@ class EndretMigreringsdatoUtlederTest {
     }
 
     @Test
+    fun `skal returnere null om tilkjent ytelser andeler er tom`() {
+        // Arrange
+        val fagsak = Fagsak(0L, randomAktør())
+
+        val behandling =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            )
+
+        val tilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = behandling,
+                lagAndelerTilkjentYtelse = {
+                    emptySet()
+                },
+            )
+
+        // Act
+        val endretMigreringsdato =
+            endretMigreringsdatoUtleder.utled(
+                fagsak = fagsak,
+                forrigeTilkjentYtelse = tilkjentYtelse,
+            )
+
+        // Assert
+        assertThat(endretMigreringsdato).isNull()
+    }
+
+    @Test
     fun `skal returnere null om det ikke er en migrert sak`() {
         // Arrange
+        val dagensDato = LocalDate.of(2024, 11, 1)
+
         val fagsak = Fagsak(0L, randomAktør())
 
         val behandling =
@@ -53,7 +85,19 @@ class EndretMigreringsdatoUtlederTest {
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
+        val tilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = behandling,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = dagensDato.plusMonths(1).toYearMonth(),
+                            tom = dagensDato.plusMonths(2).toYearMonth(),
+                        ),
+                    )
+                },
+            )
 
         every {
             behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
@@ -293,40 +337,6 @@ class EndretMigreringsdatoUtlederTest {
         every {
             behandlingService.hentMigreringsdatoPåFagsak(fagsak.id)
         } returns dagensDato
-
-        // Act
-        val endretMigreringsdato =
-            endretMigreringsdatoUtleder.utled(
-                fagsak = fagsak,
-                forrigeTilkjentYtelse = tilkjentYtelse,
-            )
-
-        // Assert
-        assertThat(endretMigreringsdato).isNull()
-    }
-
-    @Test
-    fun `skal returnere null om tilkjent ytelser andeler er tom`() {
-        // Arrange
-        val fagsak = Fagsak(0L, randomAktør())
-
-        val behandling =
-            lagBehandling(
-                fagsak = fagsak,
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            )
-
-        val tilkjentYtelse =
-            lagTilkjentYtelse(
-                behandling = behandling,
-                lagAndelerTilkjentYtelse = {
-                    emptySet()
-                },
-            )
-
-        every {
-            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
-        } returns listOf(behandling)
 
         // Act
         val endretMigreringsdato =
