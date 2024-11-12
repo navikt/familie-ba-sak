@@ -22,10 +22,9 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
     @Query(
         """
             SELECT EXISTS(
-                SELECT b.id FROM Fagsak f
-                JOIN Behandling b ON b.fagsak.id = f.id
+                SELECT 1 FROM Behandling b
                 JOIN TilkjentYtelse ty ON ty.behandling.id = b.id
-                WHERE ty.utbetalingsoppdrag IS NOT NULL AND ty.utbetalingsoppdrag like '%"klassifisering":"BAUTV-OP"%' and f.id = :fagsakId
+                WHERE ty.utbetalingsoppdrag IS NOT NULL AND ty.utbetalingsoppdrag like '%"klassifisering":"BAUTV-OP"%' and b.fagsak.id = :fagsakId
             )
         """,
     )
