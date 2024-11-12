@@ -309,7 +309,8 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
         .map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
-                tilOgMed = it.stønadTom.tilTidspunkt(),
+                // 999999999-12 er Infotrygds definisjon av uendelighet, klippes til 9999-12 for å kunne brukes i tidslinje. Kan fjernes når vi ikke lenger har løpende saker i infotrygd
+                tilOgMed = if (it.stønadTom == YearMonth.of(999999999, 12)) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
         }.tilTidslinje()

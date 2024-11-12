@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erEndelig
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somEndelig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
-import java.time.YearMonth
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.fraOgMed() =
     this.perioder().firstOrNull()?.let {
@@ -59,12 +57,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.tidsrom(): Collection<Tidspunkt<T>> =
 fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>> {
     val fraOgMed = fraOgMed() ?: return emptyList()
     val tilOgMed = tilOgMed() ?: return emptyList()
-    // 999999999-12 er løpende dato i infotrygd, skal ikke returnere tidsrom liste.
-    return if (tilOgMed == YearMonth.of(999999999, 12).tilTidspunkt()) {
-        emptyList()
-    } else {
-        (fraOgMed..tilOgMed).toList()
-    }
+    return (fraOgMed..tilOgMed).toList()
 }
 
 fun <T : Tidsenhet> tidsrom(vararg tidslinjer: Tidslinje<*, T>) = tidslinjer.toList().tidsrom()
