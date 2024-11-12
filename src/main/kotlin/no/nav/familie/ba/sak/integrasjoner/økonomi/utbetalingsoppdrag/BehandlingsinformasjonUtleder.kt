@@ -46,10 +46,10 @@ class BehandlingsinformasjonUtleder(
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         endretMigreringsdato: YearMonth?,
     ): YearMonth? =
-        when {
-            forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty() -> null
-            endretMigreringsdato != null -> endretMigreringsdato
-            else -> null
+        if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) {
+            null
+        } else {
+            endretMigreringsdato
         }
 
     private fun finnUtebetalesTil(fagsak: Fagsak): String =
