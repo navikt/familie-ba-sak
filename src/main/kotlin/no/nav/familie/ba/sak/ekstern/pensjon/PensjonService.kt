@@ -169,11 +169,11 @@ class PensjonService(
                     stønadFom = andel.stønadFom,
                     stønadTom = andel.stønadTom,
                     delingsprosentYtelse =
-                    when (andel.prosent) {
-                        BigDecimal.valueOf(100L) -> YtelseProsent.FULL
-                        BigDecimal.valueOf(50L) -> YtelseProsent.DELT
-                        else -> YtelseProsent.USIKKER
-                    },
+                        when (andel.prosent) {
+                            BigDecimal.valueOf(100L) -> YtelseProsent.FULL
+                            BigDecimal.valueOf(50L) -> YtelseProsent.DELT
+                            else -> YtelseProsent.USIKKER
+                        },
                     norgeErSekundærlandMedNullUtbetaling = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
                     sakstypeEkstern = behandling.kategori.tilPensjonSakstype(),
                 )
@@ -313,8 +313,7 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
                 tilOgMed = if (it.stønadTom > YearMonth.of(9999, 12)) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
-        }
-        .tilTidslinje()
+        }.tilTidslinje()
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
     when {
