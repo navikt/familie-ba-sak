@@ -245,7 +245,7 @@ class PensjonService(
                     .values
                     .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
-                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
+                            acc + perioderTilhørendePerson.distinct().fjernOverlappendeInfotrygdperioder()
                         } catch (e: Exception) {
                             logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
                             secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
