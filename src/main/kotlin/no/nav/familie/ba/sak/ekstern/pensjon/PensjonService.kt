@@ -313,7 +313,9 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
                 tilOgMed = if (it.stønadTom > YearMonth.of(9999, 12)) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
-        }.tilTidslinje()
+        }
+        .distinctBy { it.fraOgMed to it.tilOgMed }
+        .tilTidslinje()
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
     when {
