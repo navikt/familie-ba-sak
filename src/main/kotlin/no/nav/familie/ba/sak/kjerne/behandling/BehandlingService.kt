@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -34,6 +35,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -59,6 +61,7 @@ class BehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val unleashService: UnleashService,
 ) {
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -218,12 +221,16 @@ class BehandlingService(
     }
 
     fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
-        val søkerIdenter =
-            behandling.fagsak.aktør.personidenter
-                .map { it.fødselsnummer }
-        return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-            !behandling.erMigrering() &&
-            infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+        if (unleashService.isEnabled(FeatureToggleConfig.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true)) {
+            val søkerIdenter =
+                behandling.fagsak.aktør.personidenter
+                    .map { it.fødselsnummer }
+            return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
+                !behandling.erMigrering() &&
+                infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+        }
+        logger.warn("Infotrygd-sjekk er skrudd av")
+        return false
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {

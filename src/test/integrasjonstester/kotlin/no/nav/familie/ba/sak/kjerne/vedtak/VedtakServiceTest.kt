@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -83,6 +84,8 @@ class VedtakServiceTest(
     private val taskRepository: TaskRepositoryWrapper,
     @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+    @Autowired
+    private val unleashService: UnleashService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat
@@ -113,6 +116,7 @@ class VedtakServiceTest(
                 vedtaksperiodeService,
                 taskRepository,
                 vilkårsvurderingService,
+                unleashService,
             )
 
         val personAktørId = randomAktør()
