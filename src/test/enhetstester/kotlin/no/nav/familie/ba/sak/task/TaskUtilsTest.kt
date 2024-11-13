@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.clearAllMocks
 import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -41,5 +43,49 @@ class TaskUtilsTest {
         mockk<Environment>(relaxed = true)
 
         assertEquals(expected, nesteGyldigeTriggertidForBehandlingIHverdager(60, input))
+    }
+
+    @Test
+    fun `skal returnere samme dag kl 06 for triggertid som er rett etter midnatt på fredag `() {
+        // Arrange
+        val minutesToAdd: Long = 15
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 0, 0, 1).minusMinutes(minutesToAdd)
+        // Act
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        // Assert
+        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 1))
+    }
+
+    @Test
+    fun `skal returnere samme dag kl 06 for triggertid som er rett før kl 06 på fredag `() {
+        // Arrange
+        val minutesToAdd: Long = 15
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 5, 59, 59).minusMinutes(minutesToAdd)
+        // Act
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        // Assert
+        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 59, 59))
+    }
+
+    @Test
+    fun `skal returnere samme dag kl 06 for triggertid som er kl 03 på fredag `() {
+        // Arrange
+        val minutesToAdd: Long = 15
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 3, 0, 0).minusMinutes(minutesToAdd)
+        // Act
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        // Assert
+        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
+    }
+
+    @Test
+    fun `skal returnere mandag kl 06 for triggertid som er kl 0601 på fredag `() {
+        // Arrange
+        val minutesToAdd: Long = 15
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 6, 1, 0).minusMinutes(minutesToAdd)
+        // Act
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        // Assert
+        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 11, 6, 1, 0))
     }
 }

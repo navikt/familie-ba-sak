@@ -19,7 +19,10 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
     var date = triggerTid.plusMinutes(minutesToAdd)
 
     date =
-        if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
+        if (date.erFredag()) {
+            kl06IdagEllerKl06Mandag(date)
+        }
+        else if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
             kl06IdagEllerNesteDag(date)
         } else if (erKlokkenMellom21Og06(date.toLocalTime()) || !date.erHverdag(0)) {
             date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
@@ -58,6 +61,18 @@ fun LocalDateTime.erHverdag(plusDays: Long): Boolean =
         else -> error("Not implemented")
     }
 
+private fun LocalDateTime.erFredag(): Boolean =
+    when (this.dayOfWeek) {
+        DayOfWeek.MONDAY -> false
+        DayOfWeek.TUESDAY -> false
+        DayOfWeek.WEDNESDAY -> false
+        DayOfWeek.THURSDAY -> false
+        DayOfWeek.FRIDAY -> true
+        DayOfWeek.SATURDAY -> false
+        DayOfWeek.SUNDAY -> false
+        else -> error("Not implemented")
+    }
+
 fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean = localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
 
 fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
@@ -65,4 +80,11 @@ fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateT
         date.withHour(6)
     } else {
         date.plusDays(1).withHour(6)
+    }
+
+fun kl06IdagEllerKl06Mandag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
+    if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+        date.withHour(6)
+    } else {
+        date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
     }
