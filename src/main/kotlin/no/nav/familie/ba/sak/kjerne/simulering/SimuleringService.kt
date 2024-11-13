@@ -5,13 +5,14 @@ import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
@@ -37,9 +38,10 @@ class SimuleringService(
     private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
     private val vedtakRepository: VedtakRepository,
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService,
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -48,16 +50,21 @@ class SimuleringService(
             return null
         }
 
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = vedtak.behandling.id)
+
         /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
+        val saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8)
+
         val utbetalingsoppdrag: Utbetalingsoppdrag =
-            utbetalingsoppdragGeneratorService
-                .genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            utbetalingsoppdragGenerator
+                .lagUtbetalingsoppdrag(
+                    saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                    tilkjentYtelse = tilkjentYtelse,
                     erSimulering = true,
                 ).utbetalingsoppdrag
                 .tilRestUtbetalingsoppdrag()

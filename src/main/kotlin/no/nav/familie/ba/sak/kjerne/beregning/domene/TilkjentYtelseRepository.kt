@@ -18,4 +18,15 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
 
     @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId AND ty.utbetalingsoppdrag is not null")
     fun findByBehandlingAndHasUtbetalingsoppdrag(behandlingId: Long): TilkjentYtelse?
+
+    @Query(
+        """
+            SELECT EXISTS(
+                SELECT 1 FROM Behandling b
+                JOIN TilkjentYtelse ty ON ty.behandling.id = b.id
+                WHERE ty.utbetalingsoppdrag IS NOT NULL AND ty.utbetalingsoppdrag like '%"klassifisering":"BAUTV-OP"%' and b.fagsak.id = :fagsakId
+            )
+        """,
+    )
+    fun harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId: Long): Boolean
 }

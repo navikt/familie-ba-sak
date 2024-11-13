@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -18,31 +19,33 @@ object OppdragParser {
         dataTable: DataTable,
         behandlinger: Map<Long, Behandling>,
         tilkjentYtelseId: Long = 0,
-    ): List<TilkjentYtelse> {
+    ): MutableMap<Long, TilkjentYtelse> {
         var index = 0
         var tilkjentYtelseIdIterator = tilkjentYtelseId
-        return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
+        return dataTable
+            .groupByBehandlingId()
+            .mapValues { (behandlingId, rader) ->
 
-            val behandling = behandlinger.getValue(behandlingId)
-            val andeler = parseAndelder(behandling, rader, index)
-            index += andeler.size
+                val behandling = behandlinger.getValue(behandlingId)
+                val andeler = parseAndelder(behandling, rader, index)
+                index += andeler.size
 
-            val tilkjentYtelse =
-                TilkjentYtelse(
-                    id = tilkjentYtelseIdIterator++,
-                    behandling = behandling,
-                    stønadFom = null,
-                    stønadTom = null,
-                    opphørFom = null,
-                    opprettetDato = LocalDate.now(),
-                    endretDato = LocalDate.now(),
-                    utbetalingsoppdrag = null,
-                    andelerTilkjentYtelse = andeler,
-                )
-            andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
+                val tilkjentYtelse =
+                    TilkjentYtelse(
+                        id = tilkjentYtelseIdIterator++,
+                        behandling = behandling,
+                        stønadFom = null,
+                        stønadTom = null,
+                        opphørFom = null,
+                        opprettetDato = LocalDate.now(),
+                        endretDato = LocalDate.now(),
+                        utbetalingsoppdrag = null,
+                        andelerTilkjentYtelse = andeler,
+                    )
+                andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
 
-            tilkjentYtelse
-        }
+                tilkjentYtelse
+            }.toMutableMap()
     }
 
     private fun parseAndelder(
@@ -79,8 +82,8 @@ object OppdragParser {
             forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
             sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
             ytelse =
-                parseValgfriEnum<YtelseType>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
-                    ?: YtelseType.ORDINÆR_BARNETRYGD,
+                parseValgfriEnum<YtelsetypeBA>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
+                    ?: YtelsetypeBA.ORDINÆR_BARNETRYGD,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
             opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
@@ -164,7 +167,7 @@ data class ForventetUtbetalingsperiode(
     val periodeId: Long,
     val forrigePeriodeId: Long?,
     val sats: Int,
-    val ytelse: YtelseType,
+    val ytelse: YtelsetypeBA,
     val fom: LocalDate,
     val tom: LocalDate,
     val opphør: LocalDate?,
