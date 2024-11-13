@@ -21,8 +21,7 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
     date =
         if (date.erFredag()) {
             kl06IdagEllerKl06Mandag(date)
-        }
-        else if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
+        } else if (erKlokkenMellom21Og06(date.toLocalTime()) && date.erHverdag(1)) {
             kl06IdagEllerNesteDag(date)
         } else if (erKlokkenMellom21Og06(date.toLocalTime()) || !date.erHverdag(0)) {
             date.with(TemporalAdjusters.next(DayOfWeek.MONDAY)).withHour(6)
