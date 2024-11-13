@@ -123,7 +123,6 @@ abstract class AbstractMockkSpringRunner {
             EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)
         }
 
-
         if (isMockKMock(mockValutakursRestClient)) {
             ValutakursRestClientMock.clearValutakursRestClient(mockValutakursRestClient)
         }
