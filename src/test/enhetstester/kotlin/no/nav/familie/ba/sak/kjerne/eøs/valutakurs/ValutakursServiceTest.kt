@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
@@ -28,6 +29,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class ValutakursServiceTest {
+    val clockProvider = TestClockProvider()
     val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs> = mockPeriodeBarnSkjemaRepository()
     val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository = mockk()
 
@@ -42,6 +44,7 @@ internal class ValutakursServiceTest {
             valutakursRepository,
             utenlandskPeriodebeløpRepository,
             emptyList(),
+            clockProvider,
         )
 
     @BeforeEach
