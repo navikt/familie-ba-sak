@@ -169,11 +169,11 @@ class PensjonService(
                     stønadFom = andel.stønadFom,
                     stønadTom = andel.stønadTom,
                     delingsprosentYtelse =
-                        when (andel.prosent) {
-                            BigDecimal.valueOf(100L) -> YtelseProsent.FULL
-                            BigDecimal.valueOf(50L) -> YtelseProsent.DELT
-                            else -> YtelseProsent.USIKKER
-                        },
+                    when (andel.prosent) {
+                        BigDecimal.valueOf(100L) -> YtelseProsent.FULL
+                        BigDecimal.valueOf(50L) -> YtelseProsent.DELT
+                        else -> YtelseProsent.USIKKER
+                    },
                     norgeErSekundærlandMedNullUtbetaling = andel.differanseberegnetPeriodebeløp?.let { it < 0 } ?: false,
                     sakstypeEkstern = behandling.kategori.tilPensjonSakstype(),
                 )
@@ -245,7 +245,7 @@ class PensjonService(
                     .values
                     .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
-                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
+                            acc + perioderTilhørendePerson.distinct().fjernOverlappendeInfotrygdperioder()
                         } catch (e: Exception) {
                             logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
                             secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
@@ -314,7 +314,6 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
                 innhold = it,
             )
         }
-        .distinctBy { it.fraOgMed to it.tilOgMed }
         .tilTidslinje()
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
