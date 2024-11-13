@@ -19,32 +19,38 @@ class ValutakursRestClientMock {
     fun mockValutakursRestClientMock(): ValutakursRestClient {
         val valutakursRestClientMock = mockk<ValutakursRestClient>()
 
-        clearMocks(valutakursRestClientMock)
-
-        every {
-            valutakursRestClientMock.hentValutakurs(
-                frequency = any(),
-                currencies = any(),
-                exchangeRateDate = any(),
-            )
-        } answers {
-            val currencies = secondArg<List<String>>()
-            val dagensDato = thirdArg<LocalDate>()
-            val exchangeRates =
-                currencies.map {
-                    ExchangeRate(
-                        currency = it,
-                        exchangeRate = BigDecimal(10),
-                        date = dagensDato,
-                    )
-                }
-            if (ECBConstants.EUR in currencies) {
-                exchangeRates.filter { it.currency == ECBConstants.NOK }
-            } else {
-                exchangeRates
-            }
-        }
+        clearValutakursRestClient(valutakursRestClientMock)
 
         return valutakursRestClientMock
+    }
+
+    companion object {
+        fun clearValutakursRestClient(valutakursRestClientMock: ValutakursRestClient) {
+            clearMocks(valutakursRestClientMock)
+
+            every {
+                valutakursRestClientMock.hentValutakurs(
+                    frequency = any(),
+                    currencies = any(),
+                    exchangeRateDate = any(),
+                )
+            } answers {
+                val currencies = secondArg<List<String>>()
+                val dagensDato = thirdArg<LocalDate>()
+                val exchangeRates =
+                    currencies.map {
+                        ExchangeRate(
+                            currency = it,
+                            exchangeRate = BigDecimal(10),
+                            date = dagensDato,
+                        )
+                    }
+                if (ECBConstants.EUR in currencies) {
+                    exchangeRates.filter { it.currency == ECBConstants.NOK }
+                } else {
+                    exchangeRates
+                }
+            }
+        }
     }
 }

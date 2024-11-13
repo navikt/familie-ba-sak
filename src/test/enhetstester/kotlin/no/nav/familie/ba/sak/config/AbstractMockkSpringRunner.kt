@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaskRepositoryTestConfig
 import no.nav.familie.unleash.UnleashService
+import no.nav.familie.valutakurs.ValutakursRestClient
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,6 +43,9 @@ abstract class AbstractMockkSpringRunner {
 
     @Autowired
     private lateinit var mockEfSakRestClient: EfSakRestClient
+
+    @Autowired
+    private lateinit var mockValutakursRestClient: ValutakursRestClient
 
     @Autowired
     private lateinit var mockØkonomiKlient: ØkonomiKlient
@@ -117,6 +121,11 @@ abstract class AbstractMockkSpringRunner {
 
         if (isMockKMock(mockEfSakRestClient)) {
             EfSakRestClientMock.clearEfSakRestMocks(mockEfSakRestClient)
+        }
+
+
+        if (isMockKMock(mockValutakursRestClient)) {
+            ValutakursRestClientMock.clearValutakursRestClient(mockValutakursRestClient)
         }
 
         if (isMockKMock(mockØkonomiKlient)) {
