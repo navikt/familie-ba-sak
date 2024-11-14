@@ -21,9 +21,9 @@ class TaskUtilsTest {
 
     @ParameterizedTest
     @CsvSource(
-        "2020-06-09T13:37:00, 2020-06-09T14:37:00, Innenfor dagtid",
+        "2020-06-09T13:37:00, 2020-06-09T13:37:00, Innenfor dagtid",
         "2020-06-09T21:37:00, 2020-06-10T06:37:00, Utenfor dagtid, men på en hverdag. Venter til dagen etter klokken 6",
-        "2020-06-12T19:37:00, 2020-06-12T20:37:00, Innenfor dagtid på en fredag",
+        "2020-06-12T19:37:00, 2020-06-15T06:37:00, Innenfor dagtid på en fredag",
         "2020-06-12T21:37:00, 2020-06-15T06:37:00, Utenfor dagtid på en fredag. Venter til mandag morgen",
         "2020-06-13T09:37:00, 2020-06-15T06:37:00, Lørdag morgen. Venter til mandag morgen",
         "2020-06-13T19:37:00, 2020-06-15T06:37:00, Lørdag kveld. Venter til mandag morgen",
@@ -42,38 +42,35 @@ class TaskUtilsTest {
     ) {
         mockk<Environment>(relaxed = true)
 
-        assertEquals(expected, nesteGyldigeTriggertidForBehandlingIHverdager(60, input))
+        assertEquals(expected, nesteGyldigeTriggertidForBehandlingIHverdager(input))
     }
 
     @Test
     fun `skal returnere samme dag kl 06 for triggertid som er rett etter midnatt på fredag `() {
         // Arrange
-        val minutesToAdd: Long = 15
-        val triggerTid = LocalDateTime.of(2024, 11, 8, 0, 0, 1).minusMinutes(minutesToAdd)
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 0, 0, 1)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
         // Assert
-        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 1))
+        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
     }
 
     @Test
     fun `skal returnere samme dag kl 06 for triggertid som er rett før kl 06 på fredag `() {
         // Arrange
-        val minutesToAdd: Long = 15
-        val triggerTid = LocalDateTime.of(2024, 11, 8, 5, 59, 59).minusMinutes(minutesToAdd)
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 5, 59, 59)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
         // Assert
-        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 59, 59))
+        assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
     }
 
     @Test
     fun `skal returnere samme dag kl 06 for triggertid som er kl 03 på fredag `() {
         // Arrange
-        val minutesToAdd: Long = 15
-        val triggerTid = LocalDateTime.of(2024, 11, 8, 3, 0, 0).minusMinutes(minutesToAdd)
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 3, 0, 0)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
         // Assert
         assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
     }
@@ -81,10 +78,9 @@ class TaskUtilsTest {
     @Test
     fun `skal returnere mandag kl 06 for triggertid som er kl 0601 på fredag `() {
         // Arrange
-        val minutesToAdd: Long = 15
-        val triggerTid = LocalDateTime.of(2024, 11, 8, 6, 1, 0).minusMinutes(minutesToAdd)
+        val triggerTid = LocalDateTime.of(2024, 11, 8, 6, 1, 0)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd, triggerTid)
+        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
         // Assert
         assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 11, 6, 1, 0))
     }
