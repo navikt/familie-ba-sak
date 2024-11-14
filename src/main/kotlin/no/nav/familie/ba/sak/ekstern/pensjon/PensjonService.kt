@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
+import io.micrometer.core.annotation.Timed
 import io.micrometer.observation.annotation.Observed
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
@@ -47,6 +48,7 @@ class PensjonService(
     private val envService: EnvService,
     private val unleashNext: UnleashService,
 ) {
+    @Timed
     fun hentBarnetrygd(
         personIdent: String,
         fraDato: LocalDate,
