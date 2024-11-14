@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
+import io.micrometer.observation.annotation.Observed
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
@@ -35,6 +36,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 @Service
+@Observed
 class PensjonService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakRepository: FagsakRepository,
