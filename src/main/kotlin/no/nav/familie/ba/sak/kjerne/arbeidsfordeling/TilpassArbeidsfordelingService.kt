@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
@@ -50,6 +51,9 @@ class TilpassArbeidsfordelingService(
     ): Arbeidsfordelingsenhet {
         if (navIdent == null) {
             throw Feil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
+        }
+        if (navIdent.erSystemIdent()) {
+            throw MidlertidigEnhetIAutomatiskBehandlingFeil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger")
         }
         val enheterNavIdentHarTilgangTil =
             integrasjonClient

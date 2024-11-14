@@ -150,6 +150,7 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         fristForFerdigstillelse: LocalDate,
         beskrivelse: String,
+        enhetsnummer: String?,
     ): String {
         val opprettOppgave =
             OpprettOppgaveRequest(
@@ -160,7 +161,7 @@ class OppgaveService(
                 beskrivelse = beskrivelse,
                 saksId = null,
                 behandlingstema = null,
-                enhetsnummer = null,
+                enhetsnummer = enhetsnummer,
             )
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 

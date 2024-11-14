@@ -223,6 +223,8 @@ data class Behandling(
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
+    fun erAutomatiskOgHarTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning()
+
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
             opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO

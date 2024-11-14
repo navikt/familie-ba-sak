@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPersonEnkel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -21,8 +23,10 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class ArbeidsfordelingServiceTest {
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository = mockk()
@@ -104,6 +108,70 @@ class ArbeidsfordelingServiceTest {
             val arbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingSlot.captured
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetId).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnummer)
             assertThat(arbeidsfordelingPåBehandling.behandlendeEnhetNavn).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnavn)
+        }
+
+        @Test
+        fun `fastsettBehandlendeEnhet skal kaste Feil hvis forrige behandling er null`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
+            } returns null
+
+            // Act & Assert
+            val exception =
+                assertThrows<Feil> {
+                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, null)
+                }
+            assertEquals("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.", exception.message)
+        }
+
+        @Test
+        fun `fastsettBehandlendeEnhet skal kaste Feil hvis arbeidsfordeling på forrige behandling mangler`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
+            val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
+            } returns null
+
+            // Act & Assert
+            val exception =
+                assertThrows<Feil> {
+                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
+                }
+            assertEquals("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke arbeidsfordelingsenhet på forrige iverksatte behandling.", exception.message)
+        }
+
+        @Test
+        fun `fastsettBehandlendeEnhet skal kaste Feil hvis systembruker er satt som enhet i arbeidsfordeling på forrige behandling`() {
+            // Arrange
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
+            val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
+            val arbeidsfordelingPåForrigeBehandling =
+                ArbeidsfordelingPåBehandling(
+                    id = 0,
+                    behandlingId = forrigeBehandling.id,
+                    BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                )
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
+            } returns null
+
+            every {
+                arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(forrigeBehandling.id)
+            } returns arbeidsfordelingPåForrigeBehandling
+
+            // Act & Assert
+            val exception =
+                assertThrows<Feil> {
+                    arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
+                }
+            assertEquals("Kan ikke fastsette arbeidsfordelingsenhet. Forrige behandlende enhet er MIDLERTIDIG_ENHET", exception.message)
         }
     }
 }
