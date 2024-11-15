@@ -8,6 +8,7 @@ enum class YtelsetypeBA(
     override val satsType: Utbetalingsperiode.SatsType = Utbetalingsperiode.SatsType.MND,
 ) : Ytelsestype {
     ORDINÆR_BARNETRYGD("BATR"),
-    UTVIDET_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BAUTV-OP"),
+    UTVIDET_BARNETRYGD_GAMMEL("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
 }

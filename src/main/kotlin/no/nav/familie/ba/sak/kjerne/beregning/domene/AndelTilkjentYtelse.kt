@@ -179,10 +179,16 @@ enum class YtelseType(
     SMÅBARNSTILLEGG("BATRSMA"),
     ;
 
-    fun tilYtelseType(): YtelsetypeBA =
+    fun tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): YtelsetypeBA =
         when (this) {
             ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
-            UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
+            UTVIDET_BARNETRYGD ->
+                if (skalBrukeNyKlassekodeForUtvidetBarnetrygd) {
+                    YtelsetypeBA.UTVIDET_BARNETRYGD
+                } else {
+                    YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL
+                }
+
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
         }
 

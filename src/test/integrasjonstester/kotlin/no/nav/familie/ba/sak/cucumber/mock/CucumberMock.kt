@@ -14,8 +14,11 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategi
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -70,10 +73,14 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.ZoneId
 
 val logger: Logger = LoggerFactory.getLogger("CucumberMock")
+
+private val zoneId = ZoneId.of("Europe/Oslo")
 
 class CucumberMock(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
@@ -367,15 +374,33 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
-    val utbetalingsoppdragGeneratorService =
-        UtbetalingsoppdragGeneratorService(
+    val utbetalingsoppdragGenerator =
+        UtbetalingsoppdragGenerator(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingService = behandlingService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             unleashNextMedContextService = unleashNextMedContextService,
+            klassifiseringKorrigerer =
+                KlassifiseringKorrigerer(
+                    tilkjentYtelseRepository,
+                    unleashNextMedContextService,
+                ),
+            behandlingsinformasjonUtleder =
+                BehandlingsinformasjonUtleder(
+                    EndretMigreringsdatoUtleder(
+                        behandlingHentOgPersisterService,
+                        behandlingService,
+                    ),
+                    clockProvider,
+                ),
+            utbetalingsgenerator = Utbetalingsgenerator(),
+        )
+
+    val oppdaterTilkjentYtelseService =
+        OppdaterTilkjentYtelseService(
+            endretUtbetalingAndelHentOgPersisterService,
+            tilkjentYtelseRepository,
+            clockProvider,
         )
 
     val økonomiService =
@@ -383,8 +408,9 @@ class CucumberMock(
             økonomiKlient = mockØkonomiKlient(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
         )
 
     val håndterIverksettMotØkonomiSteg =

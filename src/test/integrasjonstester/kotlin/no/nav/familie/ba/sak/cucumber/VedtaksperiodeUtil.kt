@@ -31,10 +31,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.tilSisteAndelPerAktørOgType
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterAndelerMedPeriodeOffset
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
+import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -82,7 +79,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
@@ -462,6 +458,7 @@ fun lagPersonGrunnlag(dataTable: DataTable): Map<Long, PersonopplysningGrunnlag>
         }.associateBy { it.behandlingId }
 
 fun lagTilkjentYtelse(
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
@@ -524,7 +521,7 @@ fun lagTilkjentYtelse(
             (skalIverksettesMotOppdrag(nåværendeAndeler, forrigeAndeler) || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
         ) {
             val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.value.behandling.id && it.aktiv }
-            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(vedtak)
+            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(dataFraCucumber, vedtak)
         }
     }
 
@@ -541,26 +538,21 @@ private fun skalIverksettesMotOppdrag(
         .any { it.innhold == true }
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     vedtak: Vedtak,
 ) {
+    if (this.andelerTilkjentYtelse.none { it.erAndelSomSkalSendesTilOppdrag() }) {
+        return
+    }
+    val mock = CucumberMock(dataFraCucumber, behandling.id)
     val beregnetUtbetalingsoppdrag =
-        UtbetalingsoppdragGenerator().lagUtbetalingsoppdrag(
+        mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            forrigeTilkjentYtelse = null,
-            nyTilkjentYtelse = this,
-            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) },
+            tilkjentYtelse = this,
             erSimulering = false,
         )
-    oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-        tilkjentYtelse = this,
-        utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
-        endretUtbetalingAndeler = emptyList(),
-    )
-    oppdaterAndelerMedPeriodeOffset(
-        tilkjentYtelse = this,
-        andelerMedPeriodeId = beregnetUtbetalingsoppdrag.andeler,
-    )
+    mock.oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(this, beregnetUtbetalingsoppdrag)
 }
 
 fun lagOvergangsstønad(
