@@ -45,7 +45,7 @@ class TaskUtilsKtTest {
         "2020-06-08T06:00:00, 2020-06-08T06:00:00, Mandag kl. 06. Kjører med en gang.",
         "2020-06-08T06:00:01, 2020-06-08T06:00:01, Mandag rett etter kl. 06. Kjører med en gang.",
         "2020-06-08T20:59:59, 2020-06-08T20:59:59, Mandag rett før kl. 21. Kjører med en gang.",
-        "2020-06-08T21:00:00, 2020-06-09T06:00:00, Mandag kl. 21. Venter til morgenen neste virkedag kl. 06.",
+        "2020-06-08T21:00:00, 2020-06-08T21:00:00, Mandag kl. 21. Kjører med en gang",
         "2020-06-08T21:00:01, 2020-06-09T06:00:00, Mandag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06.",
         "2020-06-08T12:00:00, 2020-06-08T12:00:00, Mandag kl. 12. Kjører med en gang.",
         "2020-06-08T15:00:00, 2020-06-08T15:00:00, Mandag kl. 15. Kjører med en gang.",
@@ -60,9 +60,9 @@ class TaskUtilsKtTest {
         "2020-06-12T15:00:00, 2020-06-12T15:00:00, Fredag kl. 15. Kjører med en gang.",
         "2020-06-12T18:00:00, 2020-06-12T18:00:00, Fredag kl. 18. Kjører med en gang.",
         "2020-06-12T20:59:59, 2020-06-12T20:59:59, Fredag rett før kl. 21. Kjører med en gang",
-        "2020-06-12T21:00:00, 2020-06-15T06:00:00, Fredag kl. 21. Venter til morgenen neste virkedag kl. 06",
+        "2020-06-12T21:00:00, 2020-06-12T21:00:00, Fredag kl. 21. Kjører med en gang",
         "2020-06-12T21:00:01, 2020-06-15T06:00:00, Fredag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06",
-        "2021-05-14T21:00:00, 2021-05-18T06:00:00, Fredag Kl. 21 14. mai, mandag er 17. mai og fridag. Venter til 18. mai klokken 06",
+        "2021-05-14T21:00:01, 2021-05-18T06:00:00, Fredag rett etter kl. 21 14. mai, mandag er 17. mai og fridag. Venter til 18. mai klokken 06",
         // Lørdag
         "2020-06-13T00:00:00, 2020-06-15T06:00:00, Lørdag midnatt. Venter til morgenen neste virkedag kl 06.",
         "2020-06-13T03:00:00, 2020-06-15T06:00:00, Lørdag kl. 03. Venter til morgenen neste virkedag kl 06.",
@@ -88,7 +88,7 @@ class TaskUtilsKtTest {
         "2020-06-14T21:00:00, 2020-06-15T06:00:00, Søndag kl. 21. Venter til morgenen neste virkedag kl. 06",
         "2020-06-14T21:00:01, 2020-06-15T06:00:00, Søndag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06",
         // Mikset
-        "2020-04-08T21:00:00, 2020-04-14T06:00:00, Onsdag kl. 21 8. April. Venter til morgenen kl. 06.",
+        "2020-04-08T21:00:01, 2020-04-14T06:00:00, Onsdag rett etter kl. 21 8. April. Venter til morgenen kl. 06.",
         "2020-06-09T13:37:00, 2020-06-09T13:37:00, Innenfor dagtid",
         "2020-06-09T21:37:00, 2020-06-10T06:00:00, Hverdag utenfor dagtid. Venter til dagen etter kl. 06",
         "2020-06-12T19:37:00, 2020-06-12T19:37:00, Innenfor dagtid på en fredag",
@@ -141,17 +141,17 @@ class TaskUtilsKtTest {
         // Act
         val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, forsinkelse = forsinkelse)
         // Assert
-        assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 18), LocalTime.of(6, 0, 0)))
+        assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0)))
     }
 
     @Test
-    fun `skal returnere samme dag kl 20,59,59 når triggertid er 2 sek før kl 21 med forsinkelse på 1 sek`() {
+    fun `skal returnere neste virkedag kl 06 når triggertid er kl 21 med forsinkelse på 1 sek`() {
         // Arrange
-        val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(20, 59, 58))
+        val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0))
         val forsinkelse = Duration.ofSeconds(1)
         // Act
         val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, forsinkelse = forsinkelse)
         // Assert
-        assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(20, 59, 59)))
+        assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 18), LocalTime.of(6, 0, 0)))
     }
 }

@@ -29,13 +29,13 @@ fun finnNesteTriggerTidIHverdagerForTask(
         return LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
     }
 
-    val erFørTidligsteKjøretid = nyTid.isBefore(tidligsteKjøretid)
-    if (erFørTidligsteKjøretid) {
+    val erLikEllerFørTidligsteKjøretid = !nyTid.isAfter(tidligsteKjøretid)
+    if (erLikEllerFørTidligsteKjøretid) {
         return LocalDateTime.of(nyDato, tidligsteKjøretid)
     }
 
-    val erFørSenesteKjøretid = nyTid.isBefore(senesteKjøretid)
-    if (erFørSenesteKjøretid) {
+    val erLikEllerFørSenesteKjøretid = !nyTid.isAfter(senesteKjøretid)
+    if (erLikEllerFørSenesteKjøretid) {
         return nyTriggerTid
     }
 
