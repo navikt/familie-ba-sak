@@ -60,7 +60,7 @@ class DistribuerDokumentTask(
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
-                triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(),
+                triggerTid = finnNesteTriggerTidIHverdagerForTask(),
             )
 
         const val TASK_STEP_TYPE = "distribuerDokument"

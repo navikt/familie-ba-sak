@@ -42,7 +42,7 @@ class TaskUtilsTest {
     ) {
         mockk<Environment>(relaxed = true)
 
-        assertEquals(expected, nesteGyldigeTriggertidForBehandlingIHverdager(input))
+        assertEquals(expected, finnNesteTriggerTidIHverdagerForTask(input))
     }
 
     @Test
@@ -50,7 +50,7 @@ class TaskUtilsTest {
         // Arrange
         val triggerTid = LocalDateTime.of(2024, 11, 8, 0, 0, 1)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
+        val nesteGyldigeTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid)
         // Assert
         assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
     }
@@ -60,7 +60,7 @@ class TaskUtilsTest {
         // Arrange
         val triggerTid = LocalDateTime.of(2024, 11, 8, 5, 59, 59)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
+        val nesteGyldigeTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid)
         // Assert
         assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
     }
@@ -70,7 +70,7 @@ class TaskUtilsTest {
         // Arrange
         val triggerTid = LocalDateTime.of(2024, 11, 8, 3, 0, 0)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
+        val nesteGyldigeTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid)
         // Assert
         assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 8, 6, 0, 0))
     }
@@ -80,7 +80,7 @@ class TaskUtilsTest {
         // Arrange
         val triggerTid = LocalDateTime.of(2024, 11, 8, 6, 1, 0)
         // Act
-        val nesteGyldigeTriggertid = nesteGyldigeTriggertidForBehandlingIHverdager(triggerTid)
+        val nesteGyldigeTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid)
         // Assert
         assertThat(nesteGyldigeTriggertid).isEqualTo(LocalDateTime.of(2024, 11, 11, 6, 1, 0))
     }
