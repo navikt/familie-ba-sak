@@ -41,4 +41,3 @@ fun finnNesteTriggerTidIHverdagerForTask(
 
     return LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
 }
-
