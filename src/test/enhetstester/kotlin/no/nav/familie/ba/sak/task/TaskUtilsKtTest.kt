@@ -13,20 +13,27 @@ import java.time.LocalTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TaskUtilsKtTest {
-
     @ParameterizedTest
     @CsvSource(
         // Fridag
         "2020-05-17T00:00:00, 2020-05-18T06:00:00, Fridag 17. mai midnatt. Venter til morgenen neste virkedag kl. 06.",
+        "2020-05-17T05:59:59, 2020-05-18T06:00:00, Fridag 17. mai rett før kl. 06. Venter til morgenen neste virkedag kl. 06.",
+        "2020-05-17T06:00:00, 2020-05-18T06:00:00, Fridag 17. mai kl. 06. Venter til morgenen neste virkedag kl. 06.",
         "2020-05-17T06:00:01, 2020-05-18T06:00:00, Fridag 17. mai rett etter kl. 06. Venter til morgenen neste virkedag kl. 06.",
         "2020-05-17T20:59:59, 2020-05-18T06:00:00, Fridag 17. mai rett før kl. 21. Venter til morgenen neste virkedag kl. 06.",
+        "2020-05-17T21:00:00, 2020-05-18T06:00:00, Fridag 17. mai kl. 21. Venter til morgenen neste virkedag kl. 06.",
+        "2020-05-17T21:00:01, 2020-05-18T06:00:00, Fridag 17. mai rett etter kl. 21. Venter til morgenen neste virkedag kl. 06.",
         "2020-05-17T23:59:59, 2020-05-18T06:00:00, Fridag 17. mai rett før midnatt. Venter til morgenen neste virkedag kl. 06.",
         "2020-05-17T12:00:00, 2020-05-18T06:00:00, Fridag 17. mai kl 12. Venter til morgenen neste virkedag kl. 06.",
         "2020-05-17T15:00:00, 2020-05-18T06:00:00, Fridag 17. mai kl 15. Venter til morgenen neste virkedag kl. 06.",
         "2020-05-17T18:00:00, 2020-05-18T06:00:00, Fridag 17. mai kl 18. Venter til morgenen neste virkedag kl. 06.",
         "2020-12-25T00:00:00, 2020-12-28T06:00:00, Fridag 25. desember midnatt. Venter til morgenen neste virkedag kl. 06.",
+        "2020-12-25T05:59:59, 2020-12-28T06:00:00, Fridag 25. desember rett før kl. 06. Venter til morgenen neste virkedag kl. 06.",
+        "2020-12-25T06:00:00, 2020-12-28T06:00:00, Fridag 25. desember kl. 06. Venter til morgenen neste virkedag kl. 06.",
         "2020-12-25T06:00:01, 2020-12-28T06:00:00, Fridag 25. desember rett etter kl. 06. Venter til morgenen neste virkedag kl. 06.",
         "2020-12-25T20:59:59, 2020-12-28T06:00:00, Fridag 25. desember rett før kl. 21. Venter til morgenen neste virkedag kl. 06.",
+        "2020-12-25T21:00:00, 2020-12-28T06:00:00, Fridag 25. desember kl. 21. Venter til morgenen neste virkedag kl. 06.",
+        "2020-12-25T21:00:01, 2020-12-28T06:00:00, Fridag 25. desember rett etter kl. 21. Venter til morgenen neste virkedag kl. 06.",
         "2020-12-25T23:59:59, 2020-12-28T06:00:00, Fridag 25. desember rett før midnatt. Venter til morgenen neste virkedag kl. 06.",
         "2020-12-25T12:00:00, 2020-12-28T06:00:00, Fridag 25. desember kl 12. Venter til morgenen neste virkedag kl. 06.",
         "2020-12-25T15:00:00, 2020-12-28T06:00:00, Fridag 25. desember kl 15. Venter til morgenen neste virkedag kl. 06.",
@@ -39,11 +46,10 @@ class TaskUtilsKtTest {
         "2020-06-08T06:00:01, 2020-06-08T06:00:01, Mandag rett etter kl. 06. Kjører med en gang.",
         "2020-06-08T20:59:59, 2020-06-08T20:59:59, Mandag rett før kl. 21. Kjører med en gang.",
         "2020-06-08T21:00:00, 2020-06-09T06:00:00, Mandag kl. 21. Venter til morgenen neste virkedag kl. 06.",
+        "2020-06-08T21:00:01, 2020-06-09T06:00:00, Mandag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06.",
         "2020-06-08T12:00:00, 2020-06-08T12:00:00, Mandag kl. 12. Kjører med en gang.",
         "2020-06-08T15:00:00, 2020-06-08T15:00:00, Mandag kl. 15. Kjører med en gang.",
         "2020-06-08T18:00:00, 2020-06-08T18:00:00, Mandag kl. 18. Kjører med en gang.",
-        // Onsdag
-        "2020-04-08T21:00:00, 2020-04-14T06:00:00, Onsdag kl. 21 8. April. Venter til morgenen kl. 06.",
         // Fredag
         "2020-06-12T00:00:00, 2020-06-12T06:00:00, Fredag midnatt. Venter til morgenen kl 06.",
         "2020-06-12T03:00:00, 2020-06-12T06:00:00, Fredag kl. 03. Venter til morgenen kl 06.",
@@ -55,6 +61,7 @@ class TaskUtilsKtTest {
         "2020-06-12T18:00:00, 2020-06-12T18:00:00, Fredag kl. 18. Kjører med en gang.",
         "2020-06-12T20:59:59, 2020-06-12T20:59:59, Fredag rett før kl. 21. Kjører med en gang",
         "2020-06-12T21:00:00, 2020-06-15T06:00:00, Fredag kl. 21. Venter til morgenen neste virkedag kl. 06",
+        "2020-06-12T21:00:01, 2020-06-15T06:00:00, Fredag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06",
         "2021-05-14T21:00:00, 2021-05-18T06:00:00, Fredag Kl. 21 14. mai, mandag er 17. mai og fridag. Venter til 18. mai klokken 06",
         // Lørdag
         "2020-06-13T00:00:00, 2020-06-15T06:00:00, Lørdag midnatt. Venter til morgenen neste virkedag kl 06.",
@@ -67,6 +74,7 @@ class TaskUtilsKtTest {
         "2020-06-13T18:00:00, 2020-06-15T06:00:00, Lørdag kl. 18. Venter til morgenen neste virkedag kl 06.",
         "2020-06-13T20:59:59, 2020-06-15T06:00:00, Lørdag rett før kl. 21. Venter til morgenen neste virkedag kl 06.",
         "2020-06-13T21:00:00, 2020-06-15T06:00:00, Lørdag kl. 21. Venter til morgenen neste virkedag kl. 06",
+        "2020-06-13T21:00:01, 2020-06-15T06:00:00, Lørdag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06",
         // Søndag
         "2020-06-14T00:00:00, 2020-06-15T06:00:00, Søndag midnatt. Venter til morgenen neste virkedag kl 06.",
         "2020-06-14T03:00:00, 2020-06-15T06:00:00, Søndag kl. 03. Venter til morgenen neste virkedag kl 06.",
@@ -78,7 +86,9 @@ class TaskUtilsKtTest {
         "2020-06-14T18:00:00, 2020-06-15T06:00:00, Søndag kl. 18. Venter til morgenen neste virkedag kl 06.",
         "2020-06-14T20:59:59, 2020-06-15T06:00:00, Søndag rett før kl. 21. Venter til morgenen neste virkedag kl 06.",
         "2020-06-14T21:00:00, 2020-06-15T06:00:00, Søndag kl. 21. Venter til morgenen neste virkedag kl. 06",
-        //
+        "2020-06-14T21:00:01, 2020-06-15T06:00:00, Søndag rett etter kl. 21. Venter til morgenen neste virkedag kl. 06",
+        // Mikset
+        "2020-04-08T21:00:00, 2020-04-14T06:00:00, Onsdag kl. 21 8. April. Venter til morgenen kl. 06.",
         "2020-06-09T13:37:00, 2020-06-09T13:37:00, Innenfor dagtid",
         "2020-06-09T21:37:00, 2020-06-10T06:00:00, Hverdag utenfor dagtid. Venter til dagen etter kl. 06",
         "2020-06-12T19:37:00, 2020-06-12T19:37:00, Innenfor dagtid på en fredag",
