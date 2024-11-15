@@ -15,6 +15,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.util.Properties
 
 data class StatusFraOppdragMedTask(
@@ -40,7 +41,7 @@ class StatusFraOppdrag(
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
                 throw RekjørSenereException(
                     årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                    triggerTid = finnNesteTriggerTidIHverdagerForTask(forsinkelse = 15),
+                    triggerTid = finnNesteTriggerTidIHverdagerForTask(forsinkelse = Duration.ofMinutes(15)),
                 )
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))

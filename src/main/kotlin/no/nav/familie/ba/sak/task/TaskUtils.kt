@@ -15,8 +15,8 @@ val tidligsteKjøretid = LocalTime.of(6, 0)
  * er ikke kodet inn.
  */
 fun finnNesteTriggerTidIHverdagerForTask(
-    forsinkelse: Duration = Duration.ofSeconds(0),
     triggerTid: LocalDateTime = LocalDateTime.now(),
+    forsinkelse: Duration = Duration.ofSeconds(0),
 ): LocalDateTime {
     val nyTriggerTid = triggerTid.plus(forsinkelse)
     val nyTid = nyTriggerTid.toLocalTime()
