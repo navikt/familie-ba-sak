@@ -1,22 +1,18 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.clearAllMocks
-import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import org.springframework.core.env.Environment
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TaskUtilsTest {
+class TaskUtilsKtTest {
 
     @ParameterizedTest
     @CsvSource(
