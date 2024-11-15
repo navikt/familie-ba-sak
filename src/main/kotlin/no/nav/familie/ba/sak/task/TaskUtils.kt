@@ -42,11 +42,3 @@ fun finnNesteTriggerTidIHverdagerForTask(
     return LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
 }
 
-fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean = localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
-
-fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
-    if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
-        date.withHour(6)
-    } else {
-        date.plusDays(1).withHour(6)
-    }
