@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
@@ -28,11 +29,14 @@ import no.nav.familie.ba.sak.task.OpprettVurderFødselshendelseKonsekvensForYtel
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
+@ExtendWith(MockKExtension::class)
 class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
@@ -45,6 +49,20 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val integrasjonsClient: IntegrasjonClient,
 ) : AbstractVerdikjedetest() {
+    @AfterEach
+    fun cleanUp() {
+        // Gå tilbake til default mock.
+        every {
+            integrasjonsClient.hentBehandlendeEnhet(any())
+        } returns
+            listOf(
+                Arbeidsfordelingsenhet(
+                    BarnetrygdEnhet.OSLO.enhetsnummer,
+                    BarnetrygdEnhet.OSLO.enhetsnavn,
+                ),
+            )
+    }
+
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {
         // Behandler desember 2021 for å få med automatisk begrunnelse av satsendring januar 2022
@@ -187,7 +205,7 @@ class FødselshendelseFørstegangsbehandlingTest(
     }
 
     @Test
-    fun `Skal opprette VurderLivshendelse task hvis man ikke kan fastsette behandlende enhet`() {
+    fun `AAA Skal opprette VurderLivshendelse task hvis man ikke kan fastsette behandlende enhet`() {
         mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
         every { integrasjonsClient.hentBehandlendeEnhet(any()) } returns
             listOf(
