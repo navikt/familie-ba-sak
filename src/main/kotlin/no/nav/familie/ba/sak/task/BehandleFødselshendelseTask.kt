@@ -88,18 +88,19 @@ class BehandleFødselshendelseTask(
                 }
             }
         } catch (e: Exception) {
-            if (e::class !in setOf(FunksjonellFeil::class, MidlertidigEnhetIAutomatiskBehandlingFeil::class)) {
+            if (e::class in setOf(FunksjonellFeil::class, MidlertidigEnhetIAutomatiskBehandlingFeil::class)) {
+                val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
+                taskRepositoryWrapper.save(
+                    OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
+                        aktør = aktør,
+                        oppgavetype = Oppgavetype.VurderLivshendelse,
+                        beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
+                        enhetsnummer = if (e is MidlertidigEnhetIAutomatiskBehandlingFeil) BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer else null,
+                    ),
+                )
+            } else {
                 throw e
             }
-            val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
-            taskRepositoryWrapper.save(
-                OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
-                    aktør = aktør,
-                    oppgavetype = Oppgavetype.VurderLivshendelse,
-                    beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                    enhetsnummer = if (e is MidlertidigEnhetIAutomatiskBehandlingFeil) BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer else null,
-                ),
-            )
         }
     }
 
