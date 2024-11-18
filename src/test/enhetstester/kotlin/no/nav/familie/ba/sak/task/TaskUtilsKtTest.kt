@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.task
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -106,12 +105,16 @@ class TaskUtilsKtTest {
             "2020-05-17T22:37:00, 2020-05-18T06:00:00, Etter dagtid 17 mai. Venter til morgenen etter",
             "2021-05-14T21:30:00, 2021-05-18T06:00:00, 14 mai er fredag. 17 mai er mandag og fridag. Venter til 18 mai klokken 6",
         )
-        fun `skal returnere neste arbeidsdag `(
+        fun `skal returnere neste triggertid `(
             input: LocalDateTime,
             expected: LocalDateTime,
             kommentar: String,
         ) {
-            assertEquals(expected, finnNesteTriggerTidIHverdagerForTask(input))
+            // Act
+            val nesteTriggerTid = finnNesteTriggerTidIHverdagerForTask(input)
+
+            // Assert
+            assertThat(nesteTriggerTid).isEqualTo(expected)
         }
 
         @Test
@@ -119,8 +122,10 @@ class TaskUtilsKtTest {
             // Arrange
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(5, 59, 59))
             val forsinkelse = Duration.ofSeconds(1)
+
             // Act
             val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0)))
         }
@@ -130,8 +135,10 @@ class TaskUtilsKtTest {
             // Arrange
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0, 0))
             val forsinkelse = Duration.ofSeconds(1)
+
             // Act
             val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0, 1)))
         }
@@ -141,8 +148,10 @@ class TaskUtilsKtTest {
             // Arrange
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(20, 59, 59))
             val forsinkelse = Duration.ofSeconds(1)
+
             // Act
             val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0)))
         }
@@ -152,8 +161,10 @@ class TaskUtilsKtTest {
             // Arrange
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0))
             val forsinkelse = Duration.ofSeconds(1)
+
             // Act
             val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 18), LocalTime.of(6, 0, 0)))
         }
