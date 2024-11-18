@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -24,7 +25,6 @@ class TilpassArbeidsfordelingServiceTest {
         @Test
         fun `skal kaste feil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident er null`() {
             // Arrange
-
             val arbeidsfordelingPåBehandling =
                 Arbeidsfordelingsenhet(
                     enhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
@@ -40,6 +40,26 @@ class TilpassArbeidsfordelingServiceTest {
                     )
                 }
             assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
+        }
+
+        @Test
+        fun `skal kaste midlertidigEnhetIAutomatiskBehandlingFeil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident er systembruker`() {
+            // Arrange
+            val arbeidsfordelingPåBehandling =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                )
+
+            // Act & assert
+            val exception =
+                assertThrows<MidlertidigEnhetIAutomatiskBehandlingFeil> {
+                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                        arbeidsfordelingsenhet = arbeidsfordelingPåBehandling,
+                        navIdent = NavIdent(SYSTEM_FORKORTELSE),
+                    )
+                }
+            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger")
         }
 
         @Test
