@@ -13,7 +13,7 @@ private val senesteKjøretidIHverdag = LocalTime.of(21, 0)
  * definert som hverdager mellom kl. 06-21. Faste og flytende helligdager er tatt høyde for
  * og vil ikke bli valgt.
  */
-fun finnNesteTriggerTidIHverdagerForTask(
+fun utledNesteTriggerTidIHverdagerForTask(
     triggerTid: LocalDateTime = LocalDateTime.now(),
     minimumForsinkelse: Duration = Duration.ofSeconds(0),
 ): LocalDateTime {

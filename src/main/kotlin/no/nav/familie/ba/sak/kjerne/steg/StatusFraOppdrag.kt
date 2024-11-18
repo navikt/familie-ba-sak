@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.ba.sak.task.finnNesteTriggerTidIHverdagerForTask
+import no.nav.familie.ba.sak.task.utledNesteTriggerTidIHverdagerForTask
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
@@ -41,7 +41,7 @@ class StatusFraOppdrag(
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
                 throw RekjørSenereException(
                     årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                    triggerTid = finnNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofMinutes(15)),
+                    triggerTid = utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofMinutes(15)),
                 )
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))

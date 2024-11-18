@@ -36,7 +36,7 @@ class DistribuerVedtaksbrevTilFullmektigEllerVergeTask(
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 properties = properties,
             ).copy(
-                triggerTid = finnNesteTriggerTidIHverdagerForTask(),
+                triggerTid = utledNesteTriggerTidIHverdagerForTask(),
             )
 
         const val TASK_STEP_TYPE = "distribuerVedtaksbrevTilVergeEllerManuellBrevMottaker"

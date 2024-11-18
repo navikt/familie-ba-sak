@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class TaskUtilsKtTest {
+class TriggerTidUtlederKtTest {
     @Nested
     inner class FinnNesteTriggerTidIHverdagerForTaskTest {
         @ParameterizedTest
@@ -111,7 +111,7 @@ class TaskUtilsKtTest {
             kommentar: String,
         ) {
             // Act
-            val nesteTriggerTid = finnNesteTriggerTidIHverdagerForTask(input)
+            val nesteTriggerTid = utledNesteTriggerTidIHverdagerForTask(input)
 
             // Assert
             assertThat(nesteTriggerTid).isEqualTo(expected)
@@ -124,7 +124,7 @@ class TaskUtilsKtTest {
             val forsinkelse = Duration.ofSeconds(1)
 
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+            val nyTriggertid = utledNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
 
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0)))
@@ -137,7 +137,7 @@ class TaskUtilsKtTest {
             val forsinkelse = Duration.ofSeconds(1)
 
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+            val nyTriggertid = utledNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
 
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0, 1)))
@@ -150,7 +150,7 @@ class TaskUtilsKtTest {
             val forsinkelse = Duration.ofSeconds(1)
 
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+            val nyTriggertid = utledNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
 
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0)))
@@ -163,7 +163,7 @@ class TaskUtilsKtTest {
             val forsinkelse = Duration.ofSeconds(1)
 
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
+            val nyTriggertid = utledNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
 
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 18), LocalTime.of(6, 0, 0)))
