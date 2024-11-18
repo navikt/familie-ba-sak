@@ -103,7 +103,7 @@ class BehandleFødselshendelseTask(
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
-            val triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
+            val triggerTid = if (erKlokkenMellom21Og06()) utledKl06IdagEllerNesteDag() else LocalDateTime.now()
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
@@ -118,7 +118,7 @@ class BehandleFødselshendelseTask(
 
         private fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean = localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
 
-        private fun kl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
+        private fun utledKl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
             if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
                 date.withHour(6)
             } else {

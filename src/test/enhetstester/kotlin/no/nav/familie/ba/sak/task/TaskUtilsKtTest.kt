@@ -137,7 +137,7 @@ class TaskUtilsKtTest {
         }
 
         @Test
-        fun `skal returnere neste virkedag kl 06 når triggertid er 1 sek før kl 21 med forsinkelse på 1 sek `() {
+        fun `skal returnere samme dag kl 21 når triggertid er 1 sek før kl 21 med forsinkelse på 1 sek `() {
             // Arrange
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(20, 59, 59))
             val forsinkelse = Duration.ofSeconds(1)

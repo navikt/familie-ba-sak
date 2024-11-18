@@ -5,8 +5,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-val senesteKjøretid = LocalTime.of(21, 0)
-val tidligsteKjøretid = LocalTime.of(6, 0)
+private val tidligsteKjøretidIHverdag = LocalTime.of(6, 0)
+private val senesteKjøretidIHverdag = LocalTime.of(21, 0)
 
 /**
  * Finner neste gyldige kjøringstidspunkt for tasker som kun skal kjøre på "dagtid".
@@ -25,9 +25,9 @@ fun finnNesteTriggerTidIHverdagerForTask(
     val nesteVirkedag = VirkedagerProvider.nesteVirkedag(nyDato)
 
     return when {
-        VirkedagerProvider.erHelgEllerHelligdag(nyDato) -> LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
-        !nyTid.isAfter(tidligsteKjøretid) -> LocalDateTime.of(nyDato, tidligsteKjøretid)
-        !nyTid.isAfter(senesteKjøretid) -> nyTriggerTid
-        else -> LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
+        VirkedagerProvider.erHelgEllerHelligdag(nyDato) -> LocalDateTime.of(nesteVirkedag, tidligsteKjøretidIHverdag)
+        !nyTid.isAfter(tidligsteKjøretidIHverdag) -> LocalDateTime.of(nyDato, tidligsteKjøretidIHverdag)
+        !nyTid.isAfter(senesteKjøretidIHverdag) -> nyTriggerTid
+        else -> LocalDateTime.of(nesteVirkedag, tidligsteKjøretidIHverdag)
     }
 }
