@@ -65,6 +65,21 @@ data class ManuellBrevmottaker(
         poststed = brevmottakerDb.poststed,
         landkode = brevmottakerDb.landkode,
     )
+
+    fun harGyldigAdresse(): Boolean {
+        if (this.landkode == "NO") {
+            return this.navn.isNotEmpty() &&
+                this.adresselinje1.isNotEmpty() &&
+                this.postnummer.isNotEmpty() &&
+                this.poststed.isNotEmpty()
+        } else {
+            // Utenlandske manuelle brevmottakere skal ha postnummer og poststed satt i adresselinjene
+            return this.navn.isNotEmpty() &&
+                this.adresselinje1.isNotEmpty() &&
+                this.postnummer.isEmpty() &&
+                this.poststed.isEmpty()
+        }
+    }
 }
 
 data class ManueltBrevRequest(

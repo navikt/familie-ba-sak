@@ -13,6 +13,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -52,6 +56,7 @@ class BeslutteVedtak(
     private val valutakursRepository: ValutakursRepository,
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val brevmottakerService: BrevmottakerService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -78,6 +83,8 @@ class BeslutteVedtak(
                 "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
         }
+
+        validerBrevmottakere(BehandlingId(behandling.id), data.beslutning.erGodkjent())
 
         val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandling.id) }
         val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
@@ -239,5 +246,18 @@ class BeslutteVedtak(
                 behandlingId = behandling.id,
             )
         taskRepository.save(task)
+    }
+
+    private fun validerBrevmottakere(
+        behandlingId: BehandlingId,
+        totrinnskontrollErGodkjent: Boolean,
+    ) {
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId.id).map { ManuellBrevmottaker(it) }
+        if (totrinnskontrollErGodkjent && !BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og vedtaksbrevet kan ikke sendes. Behandlingen må underkjennes, og saksbehandler må legge til manuell adresse på nytt.",
+            )
+        }
     }
 }

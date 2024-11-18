@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService
@@ -134,6 +135,7 @@ class CucumberMock(
     val opprettTaskService = mockk<OpprettTaskService>()
     val endretUtbetalingAndelTidslinjeService = EndretUtbetalingAndelTidslinjeService(endretUtbetalingAndelHentOgPersisterService)
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
+    val brevmottakerService = mockk<BrevmottakerService>()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -532,6 +534,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
+            brevmottakerService = brevmottakerService,
         )
 
     val stegService =
