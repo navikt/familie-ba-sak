@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.Utbetalin
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -488,7 +488,7 @@ class CucumberMock(
             eøsSkjemaerForNyBehandlingService = eøsSkjemaerForNyBehandlingService,
         )
 
-    val månedligValutajusteringSevice = MånedligValutajusteringSevice(ecbService = ecbService, valutakursService = valutakursService)
+    val månedligValutajusteringService = MånedligValutajusteringService(ecbService = ecbService, valutakursService = valutakursService)
 
     val vilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -500,7 +500,7 @@ class CucumberMock(
             tilbakestillBehandlingService = tilbakestillBehandlingService,
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-            månedligValutajusteringSevice = månedligValutajusteringSevice,
+            månedligValutajusteringService = månedligValutajusteringService,
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
         )

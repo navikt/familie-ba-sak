@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
 @Service
-class MånedligValutajusteringSevice(
+class MånedligValutajusteringService(
     private val ecbService: ECBService,
     private val valutakursService: ValutakursService,
 ) {

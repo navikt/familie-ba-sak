@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -31,7 +31,7 @@ class VilkårsvurderingSteg(
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
-    private val månedligValutajusteringSevice: MånedligValutajusteringSevice,
+    private val månedligValutajusteringService: MånedligValutajusteringService,
     private val localDateProvider: LocalDateProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
 ) : BehandlingSteg<String> {
@@ -98,7 +98,7 @@ class VilkårsvurderingSteg(
         }
 
         if (behandling.erMånedligValutajustering()) {
-            månedligValutajusteringSevice.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
+            månedligValutajusteringService.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
         }
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))
