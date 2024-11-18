@@ -47,13 +47,13 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val integrasjonsClient: IntegrasjonClient,
+    @Autowired private val integrasjonClient: IntegrasjonClient,
 ) : AbstractVerdikjedetest() {
     @AfterEach
     fun cleanUp() {
         // Gå tilbake til default mock.
         every {
-            integrasjonsClient.hentBehandlendeEnhet(any())
+            integrasjonClient.hentBehandlendeEnhet(any())
         } returns
             listOf(
                 Arbeidsfordelingsenhet(
@@ -207,7 +207,7 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Test
     fun `AAA Skal opprette VurderLivshendelse task hvis man ikke kan fastsette behandlende enhet`() {
         mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
-        every { integrasjonsClient.hentBehandlendeEnhet(any()) } returns
+        every { integrasjonClient.hentBehandlendeEnhet(any()) } returns
             listOf(
                 Arbeidsfordelingsenhet(
                     BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
