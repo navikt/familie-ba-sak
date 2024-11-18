@@ -9,16 +9,15 @@ private val tidligsteKjøretidIHverdag = LocalTime.of(6, 0)
 private val senesteKjøretidIHverdag = LocalTime.of(21, 0)
 
 /**
- * Finner neste gyldige kjøringstidspunkt for tasker som kun skal kjøre på "dagtid".
- *
- * Dagtid er nå definert som hverdager mellom 06-21. Faste helligdager er tatt høyde for, men flytende
- * er ikke kodet inn.
+ * Finner neste trigger tid for tasker som kun skal kjøre på "dagtid" i hverdager. Dagtid er
+ * definert som hverdager mellom kl. 06-21. Faste og flytende helligdager er tatt høyde for
+ * og vil ikke bli valgt.
  */
 fun finnNesteTriggerTidIHverdagerForTask(
     triggerTid: LocalDateTime = LocalDateTime.now(),
-    forsinkelse: Duration = Duration.ofSeconds(0),
+    minimumForsinkelse: Duration = Duration.ofSeconds(0),
 ): LocalDateTime {
-    val nyTriggerTid = triggerTid.plus(forsinkelse)
+    val nyTriggerTid = triggerTid.plus(minimumForsinkelse)
     val nyTid = nyTriggerTid.toLocalTime()
     val nyDato = nyTriggerTid.toLocalDate()
 

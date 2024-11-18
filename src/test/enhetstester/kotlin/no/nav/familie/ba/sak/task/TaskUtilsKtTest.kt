@@ -120,7 +120,7 @@ class TaskUtilsKtTest {
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(5, 59, 59))
             val forsinkelse = Duration.ofSeconds(1)
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, forsinkelse = forsinkelse)
+            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0)))
         }
@@ -131,7 +131,7 @@ class TaskUtilsKtTest {
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0, 0))
             val forsinkelse = Duration.ofSeconds(1)
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, forsinkelse = forsinkelse)
+            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(6, 0, 1)))
         }
@@ -142,7 +142,7 @@ class TaskUtilsKtTest {
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(20, 59, 59))
             val forsinkelse = Duration.ofSeconds(1)
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, forsinkelse = forsinkelse)
+            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0)))
         }
@@ -153,7 +153,7 @@ class TaskUtilsKtTest {
             val triggerTid = LocalDateTime.of(LocalDate.of(2024, 11, 15), LocalTime.of(21, 0, 0))
             val forsinkelse = Duration.ofSeconds(1)
             // Act
-            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, forsinkelse = forsinkelse)
+            val nyTriggertid = finnNesteTriggerTidIHverdagerForTask(triggerTid = triggerTid, minimumForsinkelse = forsinkelse)
             // Assert
             assertThat(nyTriggertid).isEqualTo(LocalDateTime.of(LocalDate.of(2024, 11, 18), LocalTime.of(6, 0, 0)))
         }
