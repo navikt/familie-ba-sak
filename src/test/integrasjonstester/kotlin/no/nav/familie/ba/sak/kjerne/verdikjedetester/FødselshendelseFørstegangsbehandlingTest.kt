@@ -205,7 +205,7 @@ class FødselshendelseFørstegangsbehandlingTest(
     }
 
     @Test
-    fun `AAA Skal opprette VurderLivshendelse task hvis man ikke kan fastsette behandlende enhet`() {
+    fun `Skal opprette VurderLivshendelse task hvis man ikke kan fastsette behandlende enhet`() {
         mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
         every { integrasjonClient.hentBehandlendeEnhet(any()) } returns
             listOf(
