@@ -24,20 +24,10 @@ fun finnNesteTriggerTidIHverdagerForTask(
 
     val nesteVirkedag = VirkedagerProvider.nesteVirkedag(nyDato)
 
-    val erHelgEllerHelligdag = VirkedagerProvider.erHelgEllerHelligdag(nyDato)
-    if (erHelgEllerHelligdag) {
-        return LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
+    return when {
+        VirkedagerProvider.erHelgEllerHelligdag(nyDato) -> LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
+        !nyTid.isAfter(tidligsteKjøretid) -> LocalDateTime.of(nyDato, tidligsteKjøretid)
+        !nyTid.isAfter(senesteKjøretid) -> nyTriggerTid
+        else -> LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
     }
-
-    val erLikEllerFørTidligsteKjøretid = !nyTid.isAfter(tidligsteKjøretid)
-    if (erLikEllerFørTidligsteKjøretid) {
-        return LocalDateTime.of(nyDato, tidligsteKjøretid)
-    }
-
-    val erLikEllerFørSenesteKjøretid = !nyTid.isAfter(senesteKjøretid)
-    if (erLikEllerFørSenesteKjøretid) {
-        return nyTriggerTid
-    }
-
-    return LocalDateTime.of(nesteVirkedag, tidligsteKjøretid)
 }
