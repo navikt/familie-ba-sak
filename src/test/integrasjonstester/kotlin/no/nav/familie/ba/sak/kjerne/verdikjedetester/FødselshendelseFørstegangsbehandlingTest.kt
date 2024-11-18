@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
@@ -32,11 +31,9 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-@ExtendWith(MockKExtension::class)
 class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
