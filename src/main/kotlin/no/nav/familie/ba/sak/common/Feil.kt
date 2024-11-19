@@ -37,10 +37,6 @@ class SatsendringFeil(
     public val satsendringSvar: SatsendringSvar,
 ) : RuntimeException(melding)
 
-class MidlertidigEnhetIAutomatiskBehandlingFeil(
-    melding: String,
-) : RuntimeException(melding)
-
 class MånedligValutaJusteringFeil(
     val melding: String,
 ) : RuntimeException(melding)

@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
