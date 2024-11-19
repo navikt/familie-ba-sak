@@ -222,4 +222,37 @@ WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
         nativeQuery = true,
     )
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
+
+    @Query(
+        """
+        WITH sisteVedtatteBehandling AS (SELECT b.id, b.fk_fagsak_id
+                                         FROM behandling b
+                                                  JOIN fagsak f ON b.fk_fagsak_id = f.id
+                                         WHERE b.status = 'AVSLUTTET'
+                                           AND b.resultat NOT LIKE 'HENLAGT%'
+                                           AND f.status = 'LØPENDE'
+                                           AND f.arkivert = false
+                                           AND b.aktivert_tid = (SELECT MAX(b2.aktivert_tid)
+                                                                 FROM behandling b2
+                                                                 WHERE b2.fk_fagsak_id = f.id
+                                                                   AND b2.status = 'AVSLUTTET'
+                                                                   AND b2.resultat NOT LIKE 'HENLAGT%')),
+             fagsakMedLøpendeUtvidet AS (SELECT svb.fk_fagsak_id
+                                         FROM sisteVedtatteBehandling svb
+                                                  JOIN tilkjent_ytelse ty ON ty.fk_behandling_id = svb.id
+                                                  JOIN andel_tilkjent_ytelse aty ON aty.tilkjent_ytelse_id = ty.id
+                                         WHERE aty.type = 'UTVIDET_BARNETRYGD'
+                                           AND aty.stonad_tom >= DATE_TRUNC('month', NOW()))
+
+        SELECT fmle.fk_fagsak_id
+        FROM fagsakMedLøpendeUtvidet fmle
+          EXCEPT (SELECT f.id
+            FROM fagsak f
+            JOIN behandling b on f.id = b.fk_fagsak_id
+            JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE ty.utbetalingsoppdrag is not null and ty.utbetalingsoppdrag like '%"klassifisering":"BAUTV-OP"%')
+        """,
+        nativeQuery = true,
+    )
+    fun finnFagsakerMedLøpendeUtvidetBarnetrygdSomBrukerGammelKlassekode(): List<Long>
 }
