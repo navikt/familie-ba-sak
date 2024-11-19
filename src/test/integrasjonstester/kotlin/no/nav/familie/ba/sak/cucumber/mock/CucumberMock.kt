@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlasskodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -136,6 +137,7 @@ class CucumberMock(
     val endretUtbetalingAndelTidslinjeService = EndretUtbetalingAndelTidslinjeService(endretUtbetalingAndelHentOgPersisterService)
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
+    val nyUtvidetKlasskodeKjøringRepository = mockk<NyUtvidetKlasskodeKjøringRepository>()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -514,6 +516,7 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
+            nyUtvidetKlasskodeKjøringRepository = nyUtvidetKlasskodeKjøringRepository,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)

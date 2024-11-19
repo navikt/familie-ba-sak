@@ -193,6 +193,13 @@ class BehandlingsresultatSteg(
                     "Meld sak i Porten om du er uenig i resultatet.",
             )
         }
+
+        if (behandlingMedOppdatertBehandlingsresultat.opprettetÅrsak == BehandlingÅrsak.NY_UTVIDET_KLASSEKODE &&
+            // TODO: Er dette riktig?
+            behandlingMedOppdatertBehandlingsresultat.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)
+        ) {
+            throw Feil("Behandling med årsak ${BehandlingÅrsak.NY_UTVIDET_KLASSEKODE} må ha $FORTSATT_INNVILGET eller $FORTSATT_OPPHØRT som resultat")
+        }
     }
 
     private fun settBehandlingsresultat(

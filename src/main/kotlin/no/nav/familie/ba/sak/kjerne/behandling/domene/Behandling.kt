@@ -116,6 +116,7 @@ data class Behandling(
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
+            opprettetÅrsak == BehandlingÅrsak.NY_UTVIDET_KLASSEKODE -> false
             erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
@@ -164,6 +165,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
+            skalBehandlesAutomatisk && opprettetÅrsak == BehandlingÅrsak.NY_UTVIDET_KLASSEKODE -> true
             else -> false
         }
 
@@ -339,6 +341,7 @@ enum class BehandlingÅrsak(
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
+    NY_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     ;
 
     fun erOmregningsårsak(): Boolean =
