@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -90,32 +89,30 @@ class ArbeidsfordelingService(
                     aktivArbeidsfordelingPåBehandling,
                 )
             } else {
-                val arbeidsfordelingsenhet =
-                    if (unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)) {
-                        val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
-                        tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, NavIdent(SikkerhetContext.hentSaksbehandler()))
-                    } else {
-                        hentArbeidsfordelingsenhet(behandling)
-                    }
-
+                val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
+                val tilpassetArbeidsfordelingsenhet =
+                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                        arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                        navIdent = NavIdent(SikkerhetContext.hentSaksbehandler()),
+                    )
                 when (aktivArbeidsfordelingPåBehandling) {
                     null -> {
                         arbeidsfordelingPåBehandlingRepository.save(
                             ArbeidsfordelingPåBehandling(
                                 behandlingId = behandling.id,
-                                behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
-                                behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn,
+                                behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                                behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
                             ),
                         )
                     }
 
                     else -> {
                         if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
-                            (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
+                            (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != tilpassetArbeidsfordelingsenhet.enhetId)
                         ) {
                             aktivArbeidsfordelingPåBehandling.also {
-                                it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
-                                it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
+                                it.behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId
+                                it.behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn
                             }
                             arbeidsfordelingPåBehandlingRepository.save(aktivArbeidsfordelingPåBehandling)
                         }

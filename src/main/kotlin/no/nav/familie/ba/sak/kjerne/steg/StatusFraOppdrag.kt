@@ -8,13 +8,14 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.dto.StatusFraOppdragDTO
-import no.nav.familie.ba.sak.task.nesteGyldigeTriggertidForBehandlingIHverdager
+import no.nav.familie.ba.sak.task.utledNesteTriggerTidIHverdagerForTask
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.util.Properties
 
 data class StatusFraOppdragMedTask(
@@ -35,12 +36,12 @@ class StatusFraOppdrag(
         val task = data.task
 
         val oppdragStatus = økonomiService.hentStatus(statusFraOppdragDTO.oppdragId, statusFraOppdragDTO.behandlingsId)
-        logger.debug("Mottok status '$oppdragStatus' fra oppdrag")
+        logger.debug("Mottok status '{}' fra oppdrag", oppdragStatus)
         if (oppdragStatus != OppdragStatus.KVITTERT_OK) {
             if (oppdragStatus == OppdragStatus.LAGT_PÅ_KØ) {
                 throw RekjørSenereException(
                     årsak = "Mottok lagt på kø kvittering fra oppdrag.",
-                    triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(minutesToAdd = if (behandling.erMigrering()) 1 else 15),
+                    triggerTid = utledNesteTriggerTidIHverdagerForTask(minimumForsinkelse = Duration.ofMinutes(15)),
                 )
             } else {
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
