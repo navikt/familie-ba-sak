@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPersonEnkel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -151,11 +152,10 @@ class ArbeidsfordelingServiceTest {
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
             val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SMÅBARNSTILLEGG)
             val arbeidsfordelingPåForrigeBehandling =
-                ArbeidsfordelingPåBehandling(
-                    id = 0,
+                lagArbeidsfordelingPåBehandling(
                     behandlingId = forrigeBehandling.id,
-                    BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                    BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                 )
 
             every {
