@@ -38,7 +38,7 @@ class SatsendringFeil(
 ) : RuntimeException(melding)
 
 class MidlertidigEnhetIAutomatiskBehandlingFeil(
-    melding: String? = "",
+    melding: String,
 ) : RuntimeException(melding)
 
 class MånedligValutaJusteringFeil(
