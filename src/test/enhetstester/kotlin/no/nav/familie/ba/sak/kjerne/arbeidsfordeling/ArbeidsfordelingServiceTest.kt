@@ -171,7 +171,7 @@ class ArbeidsfordelingServiceTest {
                 assertThrows<Feil> {
                     arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, forrigeBehandling)
                 }
-            assertEquals("Kan ikke fastsette arbeidsfordelingsenhet. Forrige behandlende enhet er MIDLERTIDIG_ENHET", exception.message)
+            assertThat(exception.message).isEqualTo("Kan ikke fastsette arbeidsfordelingsenhet. Forrige behandlende enhet er MIDLERTIDIG_ENHET")
         }
     }
 }
