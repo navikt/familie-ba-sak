@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
