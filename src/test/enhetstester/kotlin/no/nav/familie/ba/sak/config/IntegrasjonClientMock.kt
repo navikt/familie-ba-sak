@@ -157,14 +157,6 @@ class IntegrasjonClientMock {
 
             every { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) } returns emptyList()
 
-            every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns
-                listOf(
-                    Arbeidsfordelingsenhet(
-                        BarnetrygdEnhet.OSLO.enhetsnummer,
-                        BarnetrygdEnhet.OSLO.enhetsnavn,
-                    ),
-                )
-
             every { mockIntegrasjonClient.hentEnhet(any()) } returns
                 NavKontorEnhet(
                     101,
