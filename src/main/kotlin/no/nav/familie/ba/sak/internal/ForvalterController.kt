@@ -530,6 +530,10 @@ class ForvalterController(
     }
 
     @PostMapping("/hent-fagsak-id-for-journalpost")
+    @Operation(
+        summary = "Henter fagsak id som er koblet til journalposten",
+        description = "Oppretter task for å logge fagsak id som er koblet til journalpost. Fagsak id'n logges til securelog.",
+    )
     fun hentFagsakIdForJournalpost(
         @RequestParam("journalpostId") journalpostId: String,
     ): ResponseEntity<Long> {
@@ -544,6 +548,10 @@ class ForvalterController(
     }
 
     @PostMapping("/hent-journalpost-id-for-fagsak")
+    @Operation(
+        summary = "Henter journalpost ider koblet til fagsaken",
+        description = "Oppretter task for å logge journalpost id som er koblet til en fagsak. Journalpost ider logges til securelog.",
+    )
     fun hentJournalpostIdForFagsak(
         @RequestParam("fagsakId") fagsakId: String,
     ): ResponseEntity<Long> {

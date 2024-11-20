@@ -12,7 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class LogJournalpostIdForFagsakTaskTask {
+internal class LogJournalpostIdForFagsakTaskTest {
     val mockIntegrasjonClient = mockk<IntegrasjonClient>()
     val mockFagsakRepository = mockk<FagsakRepository>()
 
