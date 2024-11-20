@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.brev
+package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
@@ -6,11 +6,12 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.hjemlerTilHjemmeltekst
+import no.nav.familie.ba.sak.kjerne.brev.slåSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -80,10 +81,7 @@ fun hentHjemmeltekst(
 
     val alleHjemlerForBegrunnelser =
         hentAlleTyperHjemler(
-            hjemlerSeparasjonsavtaleStorbritannia =
-                sanityEøsBegrunnelser
-                    .flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
-                    .distinct(),
+            hjemlerSeparasjonsavtaleStorbritannia = hentSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser),
             ordinæreHjemler = ordinæreHjemler.distinct(),
             hjemlerFraFolketrygdloven =
                 (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
@@ -196,20 +194,4 @@ private fun hentAlleTyperHjemler(
     return alleHjemlerForBegrunnelser
 }
 
-private fun hentOrdinæreHjemler(
-    hjemler: MutableSet<String>,
-    opplysningspliktHjemlerSkalMedIBrev: Boolean,
-    finnesVedtaksperiodeMedFritekst: Boolean,
-): List<String> {
-    if (opplysningspliktHjemlerSkalMedIBrev) {
-        val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
-        hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)
-    }
 
-    if (finnesVedtaksperiodeMedFritekst) {
-        hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
-    }
-
-    val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
-    return sorterteHjemler
-}

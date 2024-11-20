@@ -127,8 +127,6 @@ fun hentVirkningstidspunktForDødsfallbrev(
     return virkningstidspunkt.tilMånedÅr()
 }
 
-fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> = if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()
-
 fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,
     valutakurser: List<Valutakurs>,

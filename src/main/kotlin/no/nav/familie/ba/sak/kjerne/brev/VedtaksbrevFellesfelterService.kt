@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorrigertVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
+import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemlerService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
