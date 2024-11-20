@@ -22,6 +22,9 @@ class HjemlerService(
         vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
         sorterteVedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
     ): String {
+        val begrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser()
+        val eøsBegrunnelseTilSanityEøsBegrunnelse = sanityService.hentSanityEØSBegrunnelser()
+
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
                 ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -30,10 +33,10 @@ class HjemlerService(
             vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
 
         val sanitybegrunnelser =
-            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> sanityService.hentSanityBegrunnelser()[begrunnelse.standardbegrunnelse] } }
+            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> begrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse] } }
 
         val sanityEøsBegrunnelser =
-            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> sanityService.hentSanityEØSBegrunnelser()[eøsBegrunnelse.begrunnelse] } }
+            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> eøsBegrunnelseTilSanityEøsBegrunnelse[eøsBegrunnelse.begrunnelse] } }
 
         val alleHjemlerForBegrunnelser =
             kombinerHjemler(
