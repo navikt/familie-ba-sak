@@ -1,12 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 
 fun hentOrdinæreHjemler(
-    hjemler: MutableSet<String>,
+    sanityStandardbegrunnelser: List<SanityBegrunnelse>,
+    sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean,
     finnesVedtaksperiodeMedFritekst: Boolean,
 ): List<String> {
+    val hjemler = (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler }).toMutableSet()
+
     if (opplysningspliktHjemlerSkalMedIBrev) {
         val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
         hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)

@@ -1,25 +1,52 @@
 package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
+import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.hentVirkningstidspunktForDødsfallbrev
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class HjemlerServiceTest {
+    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    private val refusjonEøsService = mockk<RefusjonEøsService>()
+    private val sanityService = mockk<SanityService>()
+    private val hjemlerService: HjemlerService =
+        HjemlerService(
+            vilkårsvurderingService = vilkårsvurderingService,
+            sanityService = sanityService,
+            persongrunnlagService = persongrunnlagService,
+            refusjonEøsService = refusjonEøsService,
+        )
+
     @Test
     fun `hentHjemmeltekst skal returnere sorterte hjemler`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -42,33 +69,57 @@ class HjemlerServiceTest {
                 ),
             )
 
-        Assertions.assertEquals(
-            "barnetrygdloven §§ 2, 4, 10 og 11",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                                hjemler = listOf("11", "4", "2", "10"),
-                            ),
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
                     ),
-                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+                Standardbegrunnelse.INNVILGET_SATSENDRING to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    ),
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hentHjemmeltekst =
+            hjemlerService.hentHjemler(
+                behandling.id,
+                false,
+                vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat("barnetrygdloven §§ 2, 4, 10 og 11").isEqualTo(hentHjemmeltekst)
     }
 
     @Test
     fun `hentHjemmeltekst skal ikke inkludere hjemmel 17 og 18 hvis opplysningsplikt er oppfylt`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -89,34 +140,57 @@ class HjemlerServiceTest {
                 ),
             )
 
-        Assertions.assertEquals(
-            "barnetrygdloven §§ 2, 4, 10 og 11",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                                hjemler = listOf("11", "4", "2", "10"),
-                            ),
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
                     ),
-                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+                Standardbegrunnelse.INNVILGET_SATSENDRING to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    ),
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                false,
+                vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("barnetrygdloven §§ 2, 4, 10 og 11")
     }
 
     @Test
     fun `hentHjemmeltekst skal inkludere hjemmel for fritekst`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
                 begrunnelser =
@@ -134,29 +208,54 @@ class HjemlerServiceTest {
             ),
         )
 
-        Assertions.assertEquals(
-            "barnetrygdloven §§ 2, 4, 10 og 11",
-            hentHjemmeltekst(
-                vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
-                standardbegrunnelseTilSanityBegrunnelse =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
+        val vedtaksperioderMedBegrunnelser = listOf(vedtaksperiodeMedBegrunnelser)
+
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_SATSENDRING to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
                     ),
-                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = vedtaksperiodeMedBegrunnelser.fritekster.isNotEmpty(),
-            ),
-        )
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                false,
+                vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("barnetrygdloven §§ 2, 4, 10 og 11")
     }
 
     @Test
     fun `hentHjemmeltekst skal inkludere hjemmel 17 og 18 hvis opplysningsplikt ikke er oppfylt`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -177,50 +276,96 @@ class HjemlerServiceTest {
                 ),
             )
 
-        Assertions.assertEquals(
-            "barnetrygdloven §§ 2, 4, 10, 11, 17 og 18",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse =
-                    mapOf(
-                        Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                                hjemler = listOf("11", "4", "2", "10"),
-                            ),
-                        Standardbegrunnelse.INNVILGET_SATSENDRING to
-                            lagSanityBegrunnelse(
-                                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                                hjemler = listOf("10"),
-                            ),
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.IKKE_OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
                     ),
-                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                opplysningspliktHjemlerSkalMedIBrev = true,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+                Standardbegrunnelse.INNVILGET_SATSENDRING to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    ),
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("barnetrygdloven §§ 2, 4, 10, 11, 17 og 18")
     }
 
     @Test
     fun `hentHjemmeltekst skal inkludere EØS-forordning 987 artikkel 60 hvis det eksisterer eøs refusjon på behandlingen`() {
-        Assertions.assertEquals(
-            "EØS-forordning 987/2009 artikkel 60",
-            hentHjemmeltekst(
-                vedtaksperioder = emptyList(),
-                standardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = true,
-                erFritekstIBrev = false,
-            ),
-        )
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns true
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns emptyMap()
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = emptyList(),
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("EØS-forordning 987/2009 artikkel 60")
     }
 
     @Test
     fun `Skal gi riktig hjemmeltekst ved hjemler både fra barnetrygdloven og folketrygdloven`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -241,7 +386,21 @@ class HjemlerServiceTest {
                 ),
             )
 
-        val sanityBegrunnelser =
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
             mapOf(
                 Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM to
                     lagSanityBegrunnelse(
@@ -256,22 +415,29 @@ class HjemlerServiceTest {
                     ),
             )
 
-        Assertions.assertEquals(
-            "barnetrygdloven §§ 4, 10 og 11 og folketrygdloven §§ 2-5 og 2-8",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
-                eøsStandardbegrunnelseTilSanityBegrunnelse = emptyMap(),
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("barnetrygdloven §§ 4, 10 og 11 og folketrygdloven §§ 2-5 og 2-8")
     }
 
     @Test
     fun `Skal gi riktig formattering ved hjemler fra barnetrygdloven og 2 EØS-forordninger`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -306,7 +472,21 @@ class HjemlerServiceTest {
                 ),
             )
 
-        val sanityBegrunnelser =
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     lagSanityBegrunnelse(
@@ -320,7 +500,9 @@ class HjemlerServiceTest {
                     ),
             )
 
-        val sanityEøsBegrunnelser =
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
             mapOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to
                     lagSanityEøsBegrunnelse(
@@ -336,22 +518,25 @@ class HjemlerServiceTest {
                     ),
             )
 
-        Assertions.assertEquals(
-            "barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
-                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60")
     }
 
     @Test
     fun `Skal gi riktig formattering ved hjemler fra Separasjonsavtale og to EØS-forordninger`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -386,7 +571,21 @@ class HjemlerServiceTest {
                 ),
             )
 
-        val sanityBegrunnelser =
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     lagSanityBegrunnelse(
@@ -400,7 +599,9 @@ class HjemlerServiceTest {
                     ),
             )
 
-        val sanityEøsBegrunnelser =
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
             mapOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to
                     lagSanityEøsBegrunnelse(
@@ -417,22 +618,25 @@ class HjemlerServiceTest {
                     ),
             )
 
-        Assertions.assertEquals(
-            "Separasjonsavtalen mellom Storbritannia og Norge artikkel 29, barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
-                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Arrange
+        assertThat(hjemler).isEqualTo("Separasjonsavtalen mellom Storbritannia og Norge artikkel 29, barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60")
     }
 
     @Test
     fun `Skal gi riktig formattering ved nynorsk og hjemler fra Separasjonsavtale og to EØS-forordninger`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -467,7 +671,21 @@ class HjemlerServiceTest {
                 ),
             )
 
-        val sanityBegrunnelser =
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NN
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     lagSanityBegrunnelse(
@@ -481,7 +699,9 @@ class HjemlerServiceTest {
                     ),
             )
 
-        val sanityEøsBegrunnelser =
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
             mapOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to
                     lagSanityEøsBegrunnelse(
@@ -498,22 +718,25 @@ class HjemlerServiceTest {
                     ),
             )
 
-        Assertions.assertEquals(
-            "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
-                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NN,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60")
     }
 
     @Test
     fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på 'siste' hjemmeltype`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -548,7 +771,21 @@ class HjemlerServiceTest {
                 ),
             )
 
-        val sanityBegrunnelser =
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NN
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     lagSanityBegrunnelse(
@@ -562,7 +799,9 @@ class HjemlerServiceTest {
                     ),
             )
 
-        val sanityEøsBegrunnelser =
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
             mapOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to
                     lagSanityEøsBegrunnelse(
@@ -578,22 +817,25 @@ class HjemlerServiceTest {
                     ),
             )
 
-        Assertions.assertEquals(
-            "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11 og EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
-                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NN,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11 og EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68")
     }
 
     @Test
     fun `Skal kun ta med en hjemmel 1 gang hvis flere begrunnelser er knyttet til samme hjemmel`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
         val vedtaksperioderMedBegrunnelser =
             listOf(
                 lagVedtaksperiodeMedBegrunnelser(
@@ -628,7 +870,21 @@ class HjemlerServiceTest {
                 ),
             )
 
-        val sanityBegrunnelser =
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NN
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
             mapOf(
                 Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
                     lagSanityBegrunnelse(
@@ -642,7 +898,9 @@ class HjemlerServiceTest {
                     ),
             )
 
-        val sanityEøsBegrunnelser =
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
             mapOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to
                     lagSanityEøsBegrunnelse(
@@ -662,18 +920,16 @@ class HjemlerServiceTest {
                     ),
             )
 
-        Assertions.assertEquals(
-            "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68 og EØS-forordning 987/2009 artikkel 58",
-            hentHjemmeltekst(
-                vedtaksperioder = vedtaksperioderMedBegrunnelser,
-                standardbegrunnelseTilSanityBegrunnelse = sanityBegrunnelser,
-                eøsStandardbegrunnelseTilSanityBegrunnelse = sanityEøsBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false,
-                målform = Målform.NN,
-                refusjonEøsHjemmelSkalMedIBrev = false,
-                erFritekstIBrev = false,
-            ),
-        )
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemler(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68 og EØS-forordning 987/2009 artikkel 58")
     }
 
     @Test
