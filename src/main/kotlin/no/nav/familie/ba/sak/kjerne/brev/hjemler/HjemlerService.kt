@@ -39,12 +39,12 @@ class HjemlerService(
                     hentOrdinæreHjemler(
                         sanityBegrunnelser = sanitybegrunnelser,
                         sanityEøsBegrunnelser = sanityEøsBegrunnelser,
-                        opplysningspliktHjemlerSkalMedIBrev = vilkårsvurdering.erOpplysningspliktVilkårOppfylt(),
+                        opplysningspliktHjemlerSkalMedIBrev = !vilkårsvurdering.erOpplysningspliktVilkårOppfylt(),
                         finnesVedtaksperiodeMedFritekst = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
                     ),
                 hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanitybegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen883 = hentEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
-                hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
+                hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
                 målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),
                 hjemlerFraForvaltningsloven = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
             )
