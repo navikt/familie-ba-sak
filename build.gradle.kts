@@ -188,14 +188,16 @@ allprojects {
                 "test"(Test::class) {
                     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).takeIf { it > 0 } ?: 1
                     useJUnitPlatform {
-                        excludeTags("integrationTest")
+                        excludeTags("integration")
+                        excludeTags("verdikjedetest")
                     }
                     // finalizedBy(jacocoTestReport)
                 }
             val integrationTest =
                 register<Test>("integrationTest") {
                     useJUnitPlatform {
-                        includeTags("integrationTest")
+                        includeTags("integration")
+                        excludeTags("verdikjedetest")
                     }
                     shouldRunAfter(test)
                     // finalizedBy(":jacocoIntegrationTestReport")
@@ -203,6 +205,15 @@ allprojects {
             "check" {
                 dependsOn(integrationTest)
             }
+
+            val verdikjedetest =
+                register<Test>("verdikjedetest") {
+                    useJUnitPlatform {
+                        includeTags("verdikjedetest")
+                    }
+
+                    // finalizedBy(":jacocoIntegrationTestReport")
+                }
         }
     }
 }
