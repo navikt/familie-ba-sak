@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 fun hentFolketrygdlovenHjemler(
     sanityStandardbegrunnelser: List<SanityBegrunnelse>,
     sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>,
-) =
-    (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
-        .distinct()
+): List<String> {
+    val hjemlerFolketrygdloven = sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven }
+    val hjemlerFolketrygdlovenEøs = sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven }
+    return (hjemlerFolketrygdloven + hjemlerFolketrygdlovenEøs).distinct()
+}
