@@ -2,16 +2,12 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -47,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -56,10 +51,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.time.LocalDate
 
 @Service
 class BrevService(
@@ -77,6 +70,7 @@ class BrevService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val vedtaksbrevFellesfelterService: VedtaksbrevFellesfelterService,
     private val opprettGrunnlagOgSignaturDataService: OpprettGrunnlagOgSignaturDataService,
+    private val starttidspunktForUtbetalingstabellService: StarttidspunktForUtbetalingstabellService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -235,7 +229,7 @@ class BrevService(
         val behandlingId = vedtak.behandling.id
 
         return utbetalingerPerMndEøs?.let {
-            val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
+            val endringstidspunkt = starttidspunktForUtbetalingstabellService.finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
             val landkoder = integrasjonClient.hentLandkoderISO2()
             val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
             return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.tilMånedTidspunkt(), landkoder, kompetanser)
@@ -449,31 +443,11 @@ class BrevService(
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
         simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
 
-    fun finnStarttidspunktForUtbetalingstabell(behandling: Behandling): LocalDate {
-        val førsteJanuarIFjor = LocalDate.now().minusYears(1).withDayOfYear(1)
-        val endringstidspunkt = vedtaksperiodeService.finnEndringstidspunktForBehandling(behandling.id)
-
-        return when {
-            behandling.opprettetÅrsak != BehandlingÅrsak.ÅRLIG_KONTROLL || endringstidspunkt.isBefore(førsteJanuarIFjor) -> endringstidspunkt
-            else -> {
-                val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id)
-                val tidligsteUtbetaling =
-                    andelTilkjentYtelseRepository
-                        .finnAndelerTilkjentYtelseForBehandling(behandling.id)
-                        .filtrerBortIrrelevanteAndeler(endretutbetalingAndeler)
-                        .minOfOrNull { it.stønadFom }
-                        ?.toLocalDate() ?: return TIDENES_ENDE
-
-                tidligsteUtbetaling.coerceAtLeast(førsteJanuarIFjor)
-            }
-        }
-    }
-
     private fun hentUtbetalingerPerMndEøs(
         vedtak: Vedtak,
     ): Map<String, UtbetalingMndEøs>? {
         val behandlingId = vedtak.behandling.id
-        val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
+        val endringstidspunkt = starttidspunktForUtbetalingstabellService.finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId = behandlingId)
         val endretutbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandlingId)
 
