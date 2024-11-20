@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.slåSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -22,21 +21,16 @@ class HjemlerService(
         vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
         sorterteVedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
     ): String {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
+        if (vilkårsvurdering == null) {
+            throw IllegalStateException("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        }
+
         val begrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser()
         val eøsBegrunnelseTilSanityEøsBegrunnelse = sanityService.hentSanityEØSBegrunnelser()
 
-        val vilkårsvurdering =
-            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
-                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
-
-        val opplysningspliktHjemlerSkalMedIBrev =
-            vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
-
-        val sanitybegrunnelser =
-            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> begrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse] } }
-
-        val sanityEøsBegrunnelser =
-            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> eøsBegrunnelseTilSanityEøsBegrunnelse[eøsBegrunnelse.begrunnelse] } }
+        val sanitybegrunnelser = sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> begrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse] } }
+        val sanityEøsBegrunnelser = sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> eøsBegrunnelseTilSanityEøsBegrunnelse[eøsBegrunnelse.begrunnelse] } }
 
         val alleHjemlerForBegrunnelser =
             kombinerHjemler(
@@ -45,7 +39,7 @@ class HjemlerService(
                     hentOrdinæreHjemler(
                         sanityBegrunnelser = sanitybegrunnelser,
                         sanityEøsBegrunnelser = sanityEøsBegrunnelser,
-                        opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
+                        opplysningspliktHjemlerSkalMedIBrev = vilkårsvurdering.erOpplysningspliktVilkårOppfylt(),
                         finnesVedtaksperiodeMedFritekst = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
                     ),
                 hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanitybegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
