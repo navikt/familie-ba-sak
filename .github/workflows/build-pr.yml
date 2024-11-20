@@ -47,7 +47,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew test
+          ./gradlew -i test
 #      - name: Last opp Jacoco UT rapport
 #        uses: actions/upload-artifact@v4
 #        with:
@@ -71,7 +71,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew integrationTest
+          ./gradlew -i integrationTest
 #      - name: Last opp Jacoco IT rapport
 #        uses: actions/upload-artifact@v4
 #        with:
@@ -158,7 +158,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew verdikjedetest -DmockFeatureToggleAnswer=false -DbrukLokalMockserver=true
+          ./gradlew -i verdikjedetest -DmockFeatureToggleAnswer=false -DbrukLokalMockserver=true
 #
   verdikjedetesterFeatureToggleOn:
     name: Verdikjedetester m/ feature toggles slått på
