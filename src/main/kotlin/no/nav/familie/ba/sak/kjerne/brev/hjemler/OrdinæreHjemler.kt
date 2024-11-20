@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 
-
 fun hentOrdinæreHjemler(
     hjemler: MutableSet<String>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean,
@@ -17,6 +16,9 @@ fun hentOrdinæreHjemler(
         hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
     }
 
-    val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
-    return sorterteHjemler
+    return hjemler
+        .map { it.toInt() }
+        .sorted()
+        .map { it.toString() }
+        .distinct()
 }
