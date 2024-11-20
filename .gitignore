@@ -41,3 +41,5 @@ target/
 .DS_Store
 /.run/
 /.java-version
+build
+.gradle
