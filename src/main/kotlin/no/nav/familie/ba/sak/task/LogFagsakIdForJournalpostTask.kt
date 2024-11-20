@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = FerdigstillBehandlingTask.TASK_STEP_TYPE,
+    taskStepType = TASK_STEP_TYPE,
     beskrivelse = "Logger fagsak id for journalpost i secure logs",
     maxAntallFeil = 1,
 )

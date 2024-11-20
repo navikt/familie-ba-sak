@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.task.LogJournalpostIdForFagsakTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = FerdigstillBehandlingTask.TASK_STEP_TYPE,
+    taskStepType = TASK_STEP_TYPE,
     beskrivelse = "Logger journalpost id for fagsak i secure logs",
     maxAntallFeil = 1,
 )
