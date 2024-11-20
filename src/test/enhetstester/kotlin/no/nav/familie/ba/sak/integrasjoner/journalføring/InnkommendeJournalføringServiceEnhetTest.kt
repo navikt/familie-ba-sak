@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -21,7 +20,6 @@ class InnkommendeJournalføringServiceEnhetTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
     private val mockedFagsakService: FagsakService = mockk()
     private val mockedBehandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val mockedJournalføringRepository: JournalføringRepository = mockk()
     private val mockedLoggService: LoggService = mockk()
     private val mockedStegService: StegService = mockk()
     private val mockedJournalføringMetrikk: JournalføringMetrikk = mockk()
@@ -31,7 +29,6 @@ class InnkommendeJournalføringServiceEnhetTest {
             integrasjonClient = mockedIntegrasjonClient,
             fagsakService = mockedFagsakService,
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
-            journalføringRepository = mockedJournalføringRepository,
             loggService = mockedLoggService,
             stegService = mockedStegService,
             journalføringMetrikk = mockedJournalføringMetrikk,
