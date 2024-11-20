@@ -11,20 +11,16 @@ import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorrigertVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import org.springframework.stereotype.Service
 
 @Service
 class VedtaksbrevFellesfelterService(
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val refusjonEøsRepository: RefusjonEøsRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val testVerktøyService: TestVerktøyService,
-    private val persongrunnlagService: PersongrunnlagService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val organisasjonService: OrganisasjonService,
     private val opprettGrunnlagOgSignaturDataService: OpprettGrunnlagOgSignaturDataService,
@@ -43,7 +39,6 @@ class VedtaksbrevFellesfelterService(
         val grunnlagOgSignaturData = opprettGrunnlagOgSignaturDataService.opprett(vedtak)
 
         val behandlingId = vedtak.behandling.id
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
         val brevperioder =
@@ -67,16 +62,12 @@ class VedtaksbrevFellesfelterService(
         val utbetalingerPerMndEøs = utbetalingerPerMndEøsService.hentUtbetalingerPerMndEøs(vedtak)
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
-        val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
         val hjemler =
             hjemlerService.hentHjemler(
                 behandlingId = behandlingId,
-                erFritekstIBrev = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
-                vedtaksperioder = sorterteVedtaksperioderMedBegrunnelser,
-                målform = personopplysningGrunnlag.søker.målform,
+                sorterteVedtaksperioderMedBegrunnelser = sorterteVedtaksperioderMedBegrunnelser,
                 vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
-                refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
             )
 
         val organisasjonsnummer =
