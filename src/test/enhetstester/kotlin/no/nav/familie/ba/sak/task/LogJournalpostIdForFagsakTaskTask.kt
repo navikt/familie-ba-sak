@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-internal class LogJournalpostIdForFagsakTest {
+internal class LogJournalpostIdForFagsakTaskTask {
     val mockIntegrasjonClient = mockk<IntegrasjonClient>()
     val mockFagsakRepository = mockk<FagsakRepository>()
 
