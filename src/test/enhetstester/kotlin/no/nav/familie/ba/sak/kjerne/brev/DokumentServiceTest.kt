@@ -15,8 +15,6 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -49,7 +47,6 @@ internal class DokumentServiceTest {
     val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
     val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
     val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
-    val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
     val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
     val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
@@ -68,7 +65,6 @@ internal class DokumentServiceTest {
     private val dokumentService: DokumentService =
         spyk(
             DokumentService(
-                journalføringRepository = journalføringRepository,
                 taskRepository = taskRepository,
                 vilkårsvurderingService = vilkårsvurderingService,
                 vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
@@ -111,11 +107,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = capture(avsenderMottaker),
             )
         } returns "mockJournalpostId"
-        every { journalføringRepository.save(any()) } returns
-            DbJournalpost(
-                behandling = behandling,
-                journalpostId = "id",
-            )
         every { organisasjonService.hentOrganisasjon(any()) } returns
             Organisasjon(
                 organisasjonsnummer = orgNummer,
@@ -158,11 +149,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = capture(avsenderMottaker),
             )
         } returns "mockJournalpostId"
-        every { journalføringRepository.save(any()) } returns
-            DbJournalpost(
-                behandling = behandling,
-                journalpostId = "id",
-            )
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
@@ -201,8 +187,6 @@ internal class DokumentServiceTest {
             } returns
                 vilkårsvurdering
 
-            every { journalføringRepository.save(any()) } returns
-                DbJournalpost(behandling = behandling, journalpostId = "id")
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
@@ -241,8 +225,6 @@ internal class DokumentServiceTest {
             } returns
                 vilkårsvurdering
 
-            every { journalføringRepository.save(any()) } returns
-                DbJournalpost(behandling = behandling, journalpostId = "id")
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
@@ -274,8 +256,6 @@ internal class DokumentServiceTest {
 
             // Scenario med eksisterende vilkårsvurdering
             every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
-            every { journalføringRepository.save(any()) } returns
-                DbJournalpost(behandling = behandling, journalpostId = "id")
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
@@ -312,7 +292,6 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
@@ -330,7 +309,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = any(),
             )
         }
-        verify(exactly = 2) { journalføringRepository.save(any()) }
         verify(exactly = 2) { taskRepository.save(any()) }
 
         assertEquals(1, avsenderMottakere.size)
@@ -367,7 +345,6 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
@@ -426,7 +403,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = any(),
             )
         }
-        verify(exactly = 0) { journalføringRepository.save(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
@@ -455,7 +431,6 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
@@ -479,7 +454,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = any(),
             )
         }
-        verify(exactly = 0) { journalføringRepository.save(any()) }
         verify(exactly = 0) { taskRepository.save(any()) }
     }
 
