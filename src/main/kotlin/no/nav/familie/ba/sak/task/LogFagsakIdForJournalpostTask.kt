@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask.Companion.TASK_STEP_TYPE
@@ -27,7 +28,7 @@ class LogFagsakIdForJournalpostTask(
 
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
 
-        journalpost.sak?.let { secureLogger.info(it.convertDataClassToJson()) }
+        journalpost.sak?.let { secureLogger.info(it.convertDataClassToJson()) } ?: throw Feil("Fant ikke fagsak informasjon i journalpost $journalpostId")
     }
 
     companion object {
