@@ -29,7 +29,7 @@ class HjemlerService(
         val opplysningspliktHjemlerSkalMedIBrev =
             vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
 
-        val sanityStandardbegrunnelser =
+        val sanitybegrunnelser =
             sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> sanityService.hentSanityBegrunnelser()[begrunnelse.standardbegrunnelse] } }
 
         val sanityEøsBegrunnelser =
@@ -40,12 +40,12 @@ class HjemlerService(
                 hjemlerSeparasjonsavtaleStorbritannia = hentSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 ordinæreHjemler =
                     hentOrdinæreHjemler(
-                        sanityStandardbegrunnelser = sanityStandardbegrunnelser,
+                        sanityBegrunnelser = sanitybegrunnelser,
                         sanityEøsBegrunnelser = sanityEøsBegrunnelser,
                         opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
                         finnesVedtaksperiodeMedFritekst = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
                     ),
-                hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanityStandardbegrunnelser = sanityStandardbegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanitybegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen883 = hentEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
                 målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),

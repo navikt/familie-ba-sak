@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 
 fun hentOrdinæreHjemler(
-    sanityStandardbegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: List<SanityBegrunnelse>,
     sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean,
     finnesVedtaksperiodeMedFritekst: Boolean,
 ): List<String> {
-    val hjemler = (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler }).toMutableSet()
+    val hjemler = (sanityBegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler }).toMutableSet()
 
     if (opplysningspliktHjemlerSkalMedIBrev) {
         val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
