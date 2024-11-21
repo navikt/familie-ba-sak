@@ -2,7 +2,7 @@ DO
 $$
     BEGIN
         IF NOT EXISTS
-            (SELECT 1 FROM task WHERE type = 'startsatsendringforallebehandlinger')
+                (SELECT 1 FROM task WHERE type = 'startsatsendringforallebehandlinger')
         THEN
             INSERT INTO task(payload, type, status, metadata, versjon, opprettet_tid, trigger_tid)
             VALUES ('1654', 'startsatsendringforallebehandlinger', 'UBEHANDLET',

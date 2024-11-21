@@ -33,9 +33,9 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser         | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.03.2021 | UTBETALING         |                              |                          |
-      | 01.04.2021 | 31.04.2022 | UTBETALING         | REDUKSJON_AVTALE_FAST_BOSTED |                          |
-      | 01.05.2022 |            | OPPHØR             | OPPHØR_AVTALE_OM_FAST_BOSTED |                          |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         |                              |                       |
+      | 01.04.2021 | 31.04.2022 | UTBETALING         | REDUKSJON_AVTALE_FAST_BOSTED |                       |
+      | 01.05.2022 |            | OPPHØR             | OPPHØR_AVTALE_OM_FAST_BOSTED |                       |
 
   Scenario: Skal gi DELT_BOSTED_SKAL_IKKE_DELES reduksjonsbegrunnelse når BOR_MED_SØKER avsluttes med det utdypende vilkåret
     Og lag personresultater for behandling 1
@@ -55,8 +55,8 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser      | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.03.2021 | UTBETALING         |                           |                          |
-      | 01.04.2021 |            | OPPHØR             | OPPHØR_FAST_BOSTED_AVTALE |                          |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         |                           |                       |
+      | 01.04.2021 |            | OPPHØR             | OPPHØR_FAST_BOSTED_AVTALE |                       |
 
 
   Scenario: Skal gi VURDERING_ANNET_GRUNNLAG reduksjonsbegrunnelse når vilkår med det utdypende vilkåret avsluttes
@@ -77,8 +77,8 @@ Egenskap: Gyldige begrunnelser for utdypende vilkårsvurdering med reduksjon
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                              | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.03.2021 | UTBETALING         |                                                   |                          |
-      | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                          |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         |                                                   |                       |
+      | 01.04.2021 |            | OPPHØR             | OPPHØR_IKKE_OPPHOLDSTILLATELSE_MER_ENN_12_MÅNEDER |                       |
 
 
 

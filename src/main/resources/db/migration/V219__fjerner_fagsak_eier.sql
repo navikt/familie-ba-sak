@@ -1,3 +1,3 @@
 alter table fagsak
-drop column eier;
+    drop column eier;
 

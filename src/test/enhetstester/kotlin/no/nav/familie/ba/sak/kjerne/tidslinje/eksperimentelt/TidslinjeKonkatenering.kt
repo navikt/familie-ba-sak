@@ -10,5 +10,4 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
  */
 fun <I, T : Tidsenhet> konkatenerTidslinjer(vararg tidslinje: Tidslinje<I, T>): Tidslinje<I, T> = tidslinje.toList().kombinerUtenNullOgIkkeTom { it.single() }
 
-operator fun <I, T : Tidsenhet> Tidslinje<I, T>.plus(tidslinje: Tidslinje<I, T>): Tidslinje<I, T> =
-    konkatenerTidslinjer(this, tidslinje)
+operator fun <I, T : Tidsenhet> Tidslinje<I, T>.plus(tidslinje: Tidslinje<I, T>): Tidslinje<I, T> = konkatenerTidslinjer(this, tidslinje)

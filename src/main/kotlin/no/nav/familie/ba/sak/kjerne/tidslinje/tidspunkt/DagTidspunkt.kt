@@ -17,8 +17,7 @@ data class DagTidspunkt(
 
     override fun flytt(tidsenheter: Long): DagTidspunkt = this.copy(dato = dato.plusDays(tidsenheter), uendelighet)
 
-    override fun medUendelighet(uendelighet: Uendelighet): DagTidspunkt =
-        copy(uendelighet = uendelighet)
+    override fun medUendelighet(uendelighet: Uendelighet): DagTidspunkt = copy(uendelighet = uendelighet)
 
     override fun toString(): String =
         when (uendelighet) {
@@ -55,19 +54,16 @@ data class DagTidspunkt(
 
         fun med(dato: LocalDate) = DagTidspunkt(dato, Uendelighet.INGEN)
 
-        internal fun LocalDate?.tilTidspunktEllerUendeligTidlig(defaultUendelighetDato: LocalDate? = null) =
-            this.tilTidspunktEllerUendelig(defaultUendelighetDato, Uendelighet.FORTID)
+        internal fun LocalDate?.tilTidspunktEllerUendeligTidlig(defaultUendelighetDato: LocalDate? = null) = this.tilTidspunktEllerUendelig(defaultUendelighetDato, Uendelighet.FORTID)
 
-        internal fun LocalDate?.tilTidspunktEllerUendeligSent(defaultUendelighetDato: LocalDate? = null) =
-            this.tilTidspunktEllerUendelig(defaultUendelighetDato, Uendelighet.FREMTID)
+        internal fun LocalDate?.tilTidspunktEllerUendeligSent(defaultUendelighetDato: LocalDate? = null) = this.tilTidspunktEllerUendelig(defaultUendelighetDato, Uendelighet.FREMTID)
 
         private fun LocalDate?.tilTidspunktEllerUendelig(
             default: LocalDate?,
             uendelighet: Uendelighet,
-        ) =
-            this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
-                default ?: LocalDate.now(),
-                uendelighet,
-            )
+        ) = this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
+            default ?: LocalDate.now(),
+            uendelighet,
+        )
     }
 }

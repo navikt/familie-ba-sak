@@ -32,11 +32,9 @@ object VedtaksperiodeMedBegrunnelserParser {
             }
         }
 
-    fun parseAktørId(rad: MutableMap<String, String>) =
-        parseString(DomenebegrepPersongrunnlag.AKTØR_ID, rad).padEnd(13, '0')
+    fun parseAktørId(rad: MutableMap<String, String>) = parseString(DomenebegrepPersongrunnlag.AKTØR_ID, rad).padEnd(13, '0')
 
-    fun parseAktørIdListe(rad: MutableMap<String, String>) =
-        parseStringList(DomenebegrepPersongrunnlag.AKTØR_ID, rad).map { it.padEnd(13, '0') }
+    fun parseAktørIdListe(rad: MutableMap<String, String>) = parseStringList(DomenebegrepPersongrunnlag.AKTØR_ID, rad).map { it.padEnd(13, '0') }
 
     enum class DomenebegrepPersongrunnlag(
         override val nøkkel: String,

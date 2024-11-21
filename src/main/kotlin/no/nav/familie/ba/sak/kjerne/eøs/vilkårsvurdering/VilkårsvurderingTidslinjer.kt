@@ -141,5 +141,4 @@ private fun VilkårsvurderingTidslinjer.søkerHarNasjonalOgFinnesBarnMedEøs(): 
             }.inneholder(true)
     }
 
-fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean =
-    this.perioder().any { it.innhold == innhold }
+fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean = this.perioder().any { it.innhold == innhold }

@@ -1,1 +1,2 @@
-ALTER TABLE utenlandsk_periodebeloep ADD COLUMN utbetalingsland VARCHAR;
+ALTER TABLE utenlandsk_periodebeloep
+    ADD COLUMN utbetalingsland VARCHAR;

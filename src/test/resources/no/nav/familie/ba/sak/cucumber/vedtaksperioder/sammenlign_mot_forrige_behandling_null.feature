@@ -11,9 +11,9 @@ Egenskap: Vedtaksperiode for behandling med opphør fra start
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
-      | 1,2          | 1234     | SØKER      | 11.01.1970  |
-      | 1            | 3456     | BARN       | 13.04.2020  |
-      | 2            | 3456     | BARN       | 12.05.2020  |
+      | 1,2          | 1234    | SØKER      | 11.01.1970  |
+      | 1            | 3456    | BARN       | 13.04.2020  |
+      | 2            | 3456    | BARN       | 12.05.2020  |
 
   Scenario: Vedtaksperiode der barn får endret fødselsdato
     Og lag personresultater for behandling 1
@@ -33,8 +33,8 @@ Egenskap: Vedtaksperiode for behandling med opphør fra start
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
-      | 3456     | 01.06.2020 | 31.04.2038 | 1354  | 2            |
+      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.06.2020 | 31.04.2038 | 1354  | 2            |
 
     Når vedtaksperiodene genereres for behandling 2
 

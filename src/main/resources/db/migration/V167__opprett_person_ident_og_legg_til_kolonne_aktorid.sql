@@ -1,21 +1,21 @@
 create table PERSONIDENT
 (
-    ID                  BIGINT      PRIMARY KEY,
-    AKTOER_ID           VARCHAR                             NOT NULL,
-    FOEDSELSNUMMER      VARCHAR                             NOT NULL,
-    AKTIV               BOOLEAN     DEFAULT FALSE           NOT NULL,
-    GJELDER_TIL         TIMESTAMP(3),
-    VERSJON             BIGINT       DEFAULT 0              NOT NULL,
-    OPPRETTET_AV        VARCHAR      DEFAULT 'VL'           NOT NULL,
-    OPPRETTET_TID       TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
-    ENDRET_AV           VARCHAR,
-    ENDRET_TID          TIMESTAMP(3),
+    ID             BIGINT PRIMARY KEY,
+    AKTOER_ID      VARCHAR                             NOT NULL,
+    FOEDSELSNUMMER VARCHAR                             NOT NULL,
+    AKTIV          BOOLEAN      DEFAULT FALSE          NOT NULL,
+    GJELDER_TIL    TIMESTAMP(3),
+    VERSJON        BIGINT       DEFAULT 0              NOT NULL,
+    OPPRETTET_AV   VARCHAR      DEFAULT 'VL'           NOT NULL,
+    OPPRETTET_TID  TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
+    ENDRET_AV      VARCHAR,
+    ENDRET_TID     TIMESTAMP(3),
     UNIQUE (FOEDSELSNUMMER)
 );
 
 create sequence PERSONIDENT_SEQ increment by 50 start with 1000000 NO CYCLE;
 
-create unique index UIDX_PERSONIDENT_AKTOER_ID ON PERSONIDENT(AKTOER_ID)
+create unique index UIDX_PERSONIDENT_AKTOER_ID ON PERSONIDENT (AKTOER_ID)
     where AKTIV = true;
 
 alter table FAGSAK_PERSON

@@ -59,14 +59,11 @@ class BeregningService(
             .finnAndelerTilkjentYtelseForBehandling(behandlingId)
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
-    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+    fun hentAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse> = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
 
-    fun hentTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandling(behandlingId)
+    fun hentTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandling(behandlingId)
 
-    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
-        tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+    fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     /**
      * Denne metoden henter alle relaterte behandlinger på en person.
@@ -116,8 +113,7 @@ class BeregningService(
             }.map { it }
     }
 
-    fun erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): Boolean =
-        hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+    fun erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): Boolean = hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
     fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
         val endringerIUtbetaling =

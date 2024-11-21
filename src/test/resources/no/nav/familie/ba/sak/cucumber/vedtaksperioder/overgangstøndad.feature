@@ -67,7 +67,7 @@ Egenskap: Vedtaksperioder med overgangsstønad
       | 1234    | 01.08.2023 | 30.06.2029 | 2516  | 1            | UTVIDET_BARNETRYGD |
       | 1234    | 01.08.2023 | 30.06.2026 | 0     | 1            | SMÅBARNSTILLEGG    |
 
-      | 3456    | 01.08.2023 | 30.06.2029 | 0  | 1            | ORDINÆR_BARNETRYGD |
+      | 3456    | 01.08.2023 | 30.06.2029 | 0     | 1            | ORDINÆR_BARNETRYGD |
       | 3456    | 01.07.2029 | 30.06.2041 | 1310  | 1            | ORDINÆR_BARNETRYGD |
 
     Og med overgangsstønad

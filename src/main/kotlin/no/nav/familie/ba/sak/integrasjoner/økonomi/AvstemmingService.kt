@@ -126,8 +126,7 @@ class AvstemmingService(
         taskService.save(konsistensavstemmingAvsluttTask)
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker() =
-        behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker() = behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(

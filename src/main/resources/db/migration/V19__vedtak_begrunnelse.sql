@@ -1,1 +1,2 @@
-alter table vedtak add column begrunnelse TEXT;
+alter table vedtak
+    add column begrunnelse TEXT;

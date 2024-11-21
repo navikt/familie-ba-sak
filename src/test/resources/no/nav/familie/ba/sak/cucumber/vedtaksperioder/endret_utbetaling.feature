@@ -33,7 +33,7 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende vedtaksperioder for behandling 1
-      | Fra dato   | Til dato | Vedtaksperiodetype | Kommentar            |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
       | 01.01.2017 | 30.11.2034 | Opphør             | Endret utbetaling 0% |
       | 01.12.2034 |            | Opphør             | Opphør 18 år         |
 
@@ -132,7 +132,7 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
       | 1       | 1            | 01.03.2015 | 31.12.2018 | 0     | ORDINÆR_BARNETRYGD | 0       | 970  |
 
     Og med endrede utbetalinger
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent |
       | 1       | 1            | 01.03.2015 | 31.12.2018 | ETTERBETALING_3MND | 0       |
 
     Når vedtaksperiodene genereres for behandling 1

@@ -45,8 +45,7 @@ data class GrSivilstand(
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-    fun tilKopiForNyPerson(nyPerson: Person) =
-        copy(id = 0, person = nyPerson)
+    fun tilKopiForNyPerson(nyPerson: Person) = copy(id = 0, person = nyPerson)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -87,11 +86,10 @@ data class GrSivilstand(
         fun fraSivilstand(
             sivilstand: Sivilstand,
             person: Person,
-        ) =
-            GrSivilstand(
-                fom = sivilstand.gyldigFraOgMed,
-                type = sivilstand.type,
-                person = person,
-            )
+        ) = GrSivilstand(
+            fom = sivilstand.gyldigFraOgMed,
+            type = sivilstand.type,
+            person = person,
+        )
     }
 }

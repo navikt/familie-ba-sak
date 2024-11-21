@@ -171,16 +171,14 @@ class StatsborgerskapService(
                 )
         }
 
-    private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) =
-        dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
+    private fun erInnenforDatoerSomBetegnerUendelighetIKodeverk(dato: LocalDate) = dato.isAfter(TIDLIGSTE_DATO_I_KODEVERK) && dato.isBefore(SENESTE_DATO_I_KODEVERK)
 
     private fun erInnenforDatoerForStatsborgerskapet(
         dato: LocalDate,
         statsborgerFra: LocalDate?,
         statsborgerTil: LocalDate?,
-    ) =
-        (statsborgerFra == null || dato.isAfter(statsborgerFra)) &&
-            (statsborgerTil == null || dato.isBefore(statsborgerTil))
+    ) = (statsborgerFra == null || dato.isAfter(statsborgerFra)) &&
+        (statsborgerTil == null || dato.isBefore(statsborgerTil))
 
     private fun hentDatointervallerMedSluttdatoFørNesteStarter(intervaller: List<List<LocalDate?>>): List<DatoIntervallEntitet> =
         intervaller.mapIndexed { index, endringsdatoPar ->

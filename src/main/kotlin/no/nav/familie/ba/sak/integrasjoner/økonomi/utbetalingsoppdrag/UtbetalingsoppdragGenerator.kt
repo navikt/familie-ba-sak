@@ -73,8 +73,7 @@ class UtbetalingsoppdragGenerator(
             .hentForrigeBehandlingSomErIverksatt(behandling = behandling)
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 
-    private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
-        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
+    private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> = this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
 
     private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId {
         // Skrur på ny klassekode for enkelte fagsaker til å begynne med.

@@ -10,8 +10,8 @@ Egenskap: Vedtaksperioder med kompetanser
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
-      | 1            | 1234     | SØKER      | 11.01.1970  |
-      | 1            | 3456     | BARN       | 13.04.2020  |
+      | 1            | 1234    | SØKER      | 11.01.1970  |
+      | 1            | 3456    | BARN       | 13.04.2020  |
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med kompetanser
     Og lag personresultater for behandling 1
@@ -22,14 +22,14 @@ Egenskap: Vedtaksperioder med kompetanser
       | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
     Og med kompetanser
-      | AktørId | Fra dato   | Til dato   | Resultat              |BehandlingId |
-      | 3456     | 01.05.2020 | 30.04.2021 | NORGE_ER_PRIMÆRLAND   |1            |
-      | 3456     | 01.05.2021 | 31.03.2038 | NORGE_ER_SEKUNDÆRLAND |1            |
+      | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId |
+      | 3456    | 01.05.2020 | 30.04.2021 | NORGE_ER_PRIMÆRLAND   | 1            |
+      | 3456    | 01.05.2021 | 31.03.2038 | NORGE_ER_SEKUNDÆRLAND | 1            |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456     | 01.05.2020 | 30.04.2021 | 1054  | 1            |
-      | 3456     | 01.05.2021 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 30.04.2021 | 1054  | 1            |
+      | 3456    | 01.05.2021 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperiodene genereres for behandling 1
 
@@ -43,8 +43,8 @@ Egenskap: Vedtaksperioder med kompetanser
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
-      | 1            | 1234     | SØKER      | 11.01.1970  |
-      | 1            | 3456     | BARN       | 04.09.2020  |
+      | 1            | 1234    | SØKER      | 11.01.1970  |
+      | 1            | 3456    | BARN       | 04.09.2020  |
 
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1

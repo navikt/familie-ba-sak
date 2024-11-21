@@ -136,8 +136,7 @@ class StartSatsendring(
         satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, hentAktivSatsendringstidspunkt()) == null &&
             !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
 
-    fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean =
-        !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
+    fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean = !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
 
     @Transactional
     fun gjennomførSatsendringManuelt(fagsakId: Long) {

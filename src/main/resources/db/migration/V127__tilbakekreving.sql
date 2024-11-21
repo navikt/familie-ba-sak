@@ -1,4 +1,5 @@
-CREATE TABLE tilbakekreving (
+CREATE TABLE tilbakekreving
+(
     id                           BIGINT PRIMARY KEY,
     fk_vedtak_id                 BIGINT REFERENCES vedtak (id),
 

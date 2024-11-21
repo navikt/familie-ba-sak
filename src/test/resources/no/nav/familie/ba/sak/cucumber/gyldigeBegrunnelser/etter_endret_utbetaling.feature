@@ -67,9 +67,9 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                          | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.01.2021 | OPPHØR             |                                               |                          |
-      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                          |
-      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                          |
+      | 01.05.2020 | 31.01.2021 | OPPHØR             |                                               |                       |
+      | 01.02.2021 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_ETTERBETALING_TRE_AAR |                       |
+      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                            |                       |
 
 
 

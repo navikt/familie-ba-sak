@@ -78,6 +78,6 @@ Egenskap: Fast vs. delt bosted
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.02.2024 til 29.02.2024
       | Begrunnelse                           | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søkers rett til utvidet |
-      | INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED | STANDARD | Nei           | 11.06.12 og 11.06.12 | 2           | januar 2024                          | NB      | 0     | SØKER_FÅR_UTVIDET        |
+      | INNVILGET_RETTSAVGJØRELSE_DELT_BOSTED | STANDARD | Nei           | 11.06.12 og 11.06.12 | 2           | januar 2024                          | NB      | 0     | SØKER_FÅR_UTVIDET       |
       | INNVILGET_BOR_HOS_SØKER               | STANDARD | Nei           | 18.01.11             | 1           | januar 2024                          | NB      | 1 510 | SØKER_FÅR_UTVIDET       |
 

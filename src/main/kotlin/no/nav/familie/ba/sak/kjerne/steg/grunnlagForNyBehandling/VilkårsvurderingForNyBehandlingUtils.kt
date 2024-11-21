@@ -230,8 +230,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
             }.toSet()
 
     // Det kan hende UNDER_18 vilkåret ikke har fått endret fom og tom
-    private fun VilkårResultatMedNyPeriode.harNyPeriode() =
-        this.vilkårResultat.periodeFom != this.fom || this.vilkårResultat.periodeTom != this.tom
+    private fun VilkårResultatMedNyPeriode.harNyPeriode() = this.vilkårResultat.periodeFom != this.fom || this.vilkårResultat.periodeTom != this.tom
 
     fun lagPersonResultaterForHelmanuellMigrering(
         vilkårsvurdering: Vilkårsvurdering,

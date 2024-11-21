@@ -1,1 +1,3 @@
-UPDATE behandling SET resultat='HENLAGT_FEILAKTIG_OPPRETTET' WHERE resultat='HENLAGT';
+UPDATE behandling
+SET resultat='HENLAGT_FEILAKTIG_OPPRETTET'
+WHERE resultat = 'HENLAGT';

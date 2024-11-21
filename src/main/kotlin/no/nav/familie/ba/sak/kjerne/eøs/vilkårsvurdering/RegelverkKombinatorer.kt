@@ -55,12 +55,16 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
             when {
                 alleVilkårResultaterMedEøs.containsAll(regelverkVilkår) ->
                     OPPFYLT_EØS_FORORDNINGEN
+
                 alleVilkårResultaterMedNasjonalt.containsAll(regelverkVilkår) ->
                     OPPFYLT_NASJONALE_REGLER
+
                 (alleVilkårResultaterMedEøs + alleVilkårResultaterMedNasjonalt).isNotEmpty() ->
                     OPPFYLT_BLANDET_REGELVERK
+
                 else -> OPPFYLT_REGELVERK_IKKE_SATT
             }
+
         else -> IKKE_FULLT_VURDERT
     }
 }

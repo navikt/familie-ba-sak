@@ -101,4 +101,4 @@ Egenskap: Delt bosted
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.09.2024 til 30.09.2034
       | Begrunnelse                                          | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT | STANDARD |               | 31.10.16 og 01.10.18 | 2           | august 2024                          |         | 1 766 |                  | SØKER_FÅR_UTVIDET        |                             |
+      | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT | STANDARD |               | 31.10.16 og 01.10.18 | 2           | august 2024                          |         | 1 766 |                  | SØKER_FÅR_UTVIDET       |                             |

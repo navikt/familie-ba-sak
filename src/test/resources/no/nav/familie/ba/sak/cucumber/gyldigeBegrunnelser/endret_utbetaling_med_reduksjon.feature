@@ -54,10 +54,10 @@ Egenskap: Gyldige begrunnelser endret utbetaling med reduksjon
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                       | Ugyldige begrunnelser |
-      | 01.03.2022 | 31.12.2022 | UTBETALING         |           |                                            |                          |
-      | 01.01.2023 | 28.02.2023 | UTBETALING         |           |                                            |                          |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                            |                          |
-      | 01.07.2023 | 30.09.2023 | UTBETALING         |           |                                            |                          |
-      | 01.10.2023 | 31.01.2031 | UTBETALING         |           | ENDRET_UTBETALING_REDUKSJON_ENDRE_MOTTAKER |                          |
-      | 01.02.2031 | 31.12.2034 | OPPHØR             |           |                                            |                          |
-      | 01.01.2035 |            | OPPHØR             |           |                                            |                          |
+      | 01.03.2022 | 31.12.2022 | UTBETALING         |           |                                            |                       |
+      | 01.01.2023 | 28.02.2023 | UTBETALING         |           |                                            |                       |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                            |                       |
+      | 01.07.2023 | 30.09.2023 | UTBETALING         |           |                                            |                       |
+      | 01.10.2023 | 31.01.2031 | UTBETALING         |           | ENDRET_UTBETALING_REDUKSJON_ENDRE_MOTTAKER |                       |
+      | 01.02.2031 | 31.12.2034 | OPPHØR             |           |                                            |                       |
+      | 01.01.2035 |            | OPPHØR             |           |                                            |                       |

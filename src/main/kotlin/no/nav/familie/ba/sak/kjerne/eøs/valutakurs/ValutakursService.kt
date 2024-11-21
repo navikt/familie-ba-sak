@@ -20,34 +20,29 @@ class ValutakursService(
 
     fun hentValutakurs(valutakursId: Long): Valutakurs = skjemaService.hentMedId(valutakursId)
 
-    fun hentValutakurser(behandlingId: BehandlingId) =
-        skjemaService.hentMedBehandlingId(behandlingId)
+    fun hentValutakurser(behandlingId: BehandlingId) = skjemaService.hentMedBehandlingId(behandlingId)
 
     @Transactional
     fun oppdaterValutakurs(
         behandlingId: BehandlingId,
         valutakurs: Valutakurs,
-    ) =
-        skjemaService.endreSkjemaer(behandlingId, valutakurs)
+    ) = skjemaService.endreSkjemaer(behandlingId, valutakurs)
 
     @Transactional
     fun oppdaterValutakurser(
         behandlingId: BehandlingId,
         valutakurser: List<Valutakurs>,
-    ) =
-        skjemaService.endreSkjemaer(behandlingId = behandlingId, oppdateringer = valutakurser)
+    ) = skjemaService.endreSkjemaer(behandlingId = behandlingId, oppdateringer = valutakurser)
 
     @Transactional
     fun slettValutakurs(
         behandlingId: BehandlingId,
         valutakursId: Long,
-    ) =
-        skjemaService.slettSkjema(behandlingId, valutakursId)
+    ) = skjemaService.slettSkjema(behandlingId, valutakursId)
 
     @Transactional
     fun kopierOgErstattValutakurser(
         fraBehandlingId: BehandlingId,
         tilBehandlingId: BehandlingId,
-    ) =
-        skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
+    ) = skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

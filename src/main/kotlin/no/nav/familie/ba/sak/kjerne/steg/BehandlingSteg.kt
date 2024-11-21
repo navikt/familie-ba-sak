@@ -322,6 +322,7 @@ fun hentNesteSteg(
                     } else {
                         VURDER_TILBAKEKREVING
                     }
+
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)

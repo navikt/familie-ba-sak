@@ -305,8 +305,7 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioderForBehandling)
     }
 
-    fun finnVedtaksperioderForBehandling(behandlingId: Long): List<VedtaksperiodeMedBegrunnelser> =
-        finnVedtaksperioderForBehandling(vedtakRepository.findByBehandlingAndAktiv(behandlingId))
+    fun finnVedtaksperioderForBehandling(behandlingId: Long): List<VedtaksperiodeMedBegrunnelser> = finnVedtaksperioderForBehandling(vedtakRepository.findByBehandlingAndAktiv(behandlingId))
 
     fun finnVedtaksperioderForBehandling(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
@@ -487,8 +486,7 @@ class VedtaksperiodeService(
         }
     }
 
-    fun hentGrunnlagForBegrunnelse(behandlingId: Long): GrunnlagForBegrunnelse =
-        hentGrunnlagForBegrunnelse(behandlingHentOgPersisterService.hent(behandlingId))
+    fun hentGrunnlagForBegrunnelse(behandlingId: Long): GrunnlagForBegrunnelse = hentGrunnlagForBegrunnelse(behandlingHentOgPersisterService.hent(behandlingId))
 
     fun hentGrunnlagForBegrunnelse(behandling: Behandling): GrunnlagForBegrunnelse {
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)

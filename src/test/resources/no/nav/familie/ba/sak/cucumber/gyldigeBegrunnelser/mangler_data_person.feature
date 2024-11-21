@@ -49,12 +49,12 @@ Egenskap: Gyldige begrunnelser når ett barn fødes etter et annet
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
-      | 01.03.2022 | 31.08.2022 | UTBETALING         |           |                         |                          |
-      | 01.09.2022 | 30.11.2022 | UTBETALING         |           |                         |                          |
-      | 01.12.2022 | 28.02.2023 | UTBETALING         |           |                         |                          |
-      | 01.03.2023 | 31.05.2023 | UTBETALING         |           |                         |                          |
-      | 01.06.2023 | 30.06.2023 | UTBETALING         |           |                         |                          |
-      | 01.07.2023 | 31.07.2028 | UTBETALING         |           |                         |                          |
-      | 01.08.2028 | 31.01.2033 | UTBETALING         |           |                         |                          |
-      | 01.02.2033 | 31.07.2040 | UTBETALING         |           |                         |                          |
-      | 01.08.2040 |            | OPPHØR             |           |                         |                          |
+      | 01.03.2022 | 31.08.2022 | UTBETALING         |           |                      |                       |
+      | 01.09.2022 | 30.11.2022 | UTBETALING         |           |                      |                       |
+      | 01.12.2022 | 28.02.2023 | UTBETALING         |           |                      |                       |
+      | 01.03.2023 | 31.05.2023 | UTBETALING         |           |                      |                       |
+      | 01.06.2023 | 30.06.2023 | UTBETALING         |           |                      |                       |
+      | 01.07.2023 | 31.07.2028 | UTBETALING         |           |                      |                       |
+      | 01.08.2028 | 31.01.2033 | UTBETALING         |           |                      |                       |
+      | 01.02.2033 | 31.07.2040 | UTBETALING         |           |                      |                       |
+      | 01.08.2040 |            | OPPHØR             |           |                      |                       |

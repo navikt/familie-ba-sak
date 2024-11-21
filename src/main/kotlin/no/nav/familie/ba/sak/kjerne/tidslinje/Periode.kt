@@ -27,15 +27,13 @@ fun <I> periodeAv(
     fraOgMed: LocalDate?,
     tilOgMed: LocalDate?,
     innhold: I,
-): Periode<I, Dag> =
-    Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
+): Periode<I, Dag> = Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
 fun <I> månedPeriodeAv(
     fraOgMed: YearMonth?,
     tilOgMed: YearMonth?,
     innhold: I,
-): Periode<I, Måned> =
-    Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
+): Periode<I, Måned> = Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
 fun <I, T : Tidsenhet> periodeAv(
     fraOgMed: Tidspunkt<T>,
@@ -43,8 +41,7 @@ fun <I, T : Tidsenhet> periodeAv(
     innhold: I,
 ): Periode<I, T> = Periode(fraOgMed, tilOgMed, innhold)
 
-fun <I, T : Tidsenhet, R> Collection<Periode<I, T>>.mapInnhold(mapper: (I?) -> R?): Collection<Periode<R, T>> =
-    this.map { Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold)) }
+fun <I, T : Tidsenhet, R> Collection<Periode<I, T>>.mapInnhold(mapper: (I?) -> R?): Collection<Periode<R, T>> = this.map { Periode(it.fraOgMed, it.tilOgMed, mapper(it.innhold)) }
 
 fun <I, T : Tidsenhet> Periode<I, T>.splitPerTidsenhet(fremTilTidspunkt: Tidspunkt<T>): List<Periode<I, T>> =
     this.fraOgMed.rangeTo(minOf(this.tilOgMed, fremTilTidspunkt)).map {

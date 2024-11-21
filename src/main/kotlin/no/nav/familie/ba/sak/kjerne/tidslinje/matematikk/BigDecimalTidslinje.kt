@@ -18,8 +18,6 @@ fun <K, T : Tidsenhet> Map<K, Tidslinje<BigDecimal, T>>.minus(
     }
 }
 
-fun <T : Tidsenhet> Map<Aktør, Tidslinje<BigDecimal, T>>.sum() =
-    values.kombinerUtenNullOgIkkeTom { it.reduce { sum, verdi -> sum.plus(verdi) } }
+fun <T : Tidsenhet> Map<Aktør, Tidslinje<BigDecimal, T>>.sum() = values.kombinerUtenNullOgIkkeTom { it.reduce { sum, verdi -> sum.plus(verdi) } }
 
-fun <T : Tidsenhet> Tidslinje<BigDecimal, T>.rundAvTilHeltall() =
-    this.mapIkkeNull { it.setScale(0, RoundingMode.HALF_UP) }
+fun <T : Tidsenhet> Tidslinje<BigDecimal, T>.rundAvTilHeltall() = this.mapIkkeNull { it.setScale(0, RoundingMode.HALF_UP) }

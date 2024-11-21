@@ -1,1 +1,2 @@
-ALTER TABLE behandling DROP COLUMN steg;
+ALTER TABLE behandling
+    DROP COLUMN steg;

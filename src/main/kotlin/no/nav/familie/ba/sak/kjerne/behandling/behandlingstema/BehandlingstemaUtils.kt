@@ -30,12 +30,14 @@ fun bestemKategoriVedOpprettelse(
                         "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori",
                 )
         }
+
         behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD && behandlingÅrsak.erFørstegangMigreringsårsak() -> {
             overstyrtKategori ?: throw FunksjonellFeil(
                 "Behandling med type ${behandlingType.visningsnavn} " +
                     "og årsak ${behandlingÅrsak.visningsnavn} $ krever behandlingskategori",
             )
         }
+
         else -> {
             kategoriFraLøpendeBehandling
         }

@@ -1,1 +1,2 @@
-alter table PO_PERSON add column AKTOER_ID VARCHAR(50);
+alter table PO_PERSON
+    add column AKTOER_ID VARCHAR(50);

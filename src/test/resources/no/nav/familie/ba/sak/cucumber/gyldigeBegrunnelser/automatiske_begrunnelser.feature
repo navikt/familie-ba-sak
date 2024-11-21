@@ -46,9 +46,9 @@ Egenskap: Gyldige begrunnelser for manuell saksbehandling
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser         |
-      | 01.01.2023 | 28.02.2023 | UTBETALING         |           |                         |                                  |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                         |                                  |
-      | 01.07.2023 | 30.09.2023 | UTBETALING         |           |                         |                                  |
-      | 01.10.2023 | 31.05.2028 | UTBETALING         |           |                         | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |
-      | 01.06.2028 |            | OPPHØR             |           |                         |                                  |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser            |
+      | 01.01.2023 | 28.02.2023 | UTBETALING         |           |                      |                                  |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                      |                                  |
+      | 01.07.2023 | 30.09.2023 | UTBETALING         |           |                      |                                  |
+      | 01.10.2023 | 31.05.2028 | UTBETALING         |           |                      | REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK |
+      | 01.06.2028 |            | OPPHØR             |           |                      |                                  |

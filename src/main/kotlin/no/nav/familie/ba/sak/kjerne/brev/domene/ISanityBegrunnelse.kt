@@ -70,8 +70,7 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
 ) : ISanityBegrunnelse {
-    fun gjelderEtterEndretUtbetaling() =
-        this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
+    fun gjelderEtterEndretUtbetaling() = this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
 }
 
 enum class ØvrigTrigger {

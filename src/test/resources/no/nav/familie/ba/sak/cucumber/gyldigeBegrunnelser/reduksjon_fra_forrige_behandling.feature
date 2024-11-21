@@ -108,11 +108,11 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser    | Ugyldige begrunnelser |
-      | 01.02.2023 | 28.02.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
-      | 01.03.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
-      | 01.07.2023 | 31.07.2028 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
-      | 01.08.2028 | 31.07.2040 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                          |
-      | 01.08.2040 |            | OPPHØR                                                  |           |                         |                          |
+      | 01.02.2023 | 28.02.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                       |
+      | 01.03.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                       |
+      | 01.07.2023 | 31.07.2028 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                       |
+      | 01.08.2028 | 31.07.2040 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_SØKER_ER_GIFT |                       |
+      | 01.08.2040 |            | OPPHØR                                                  |           |                         |                       |
 
   Scenario: Skal få reduksjon fra forrige behandling-begrunnelse knyttet til småbarnstillegg når overgangsstønad forsvinner
     Gitt følgende fagsaker
@@ -179,8 +179,8 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser                            | Ugyldige begrunnelser |
-      | 01.04.2017 | 31.12.2018 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                          |
-      | 01.01.2019 |            | OPPHØR                                                  |           |                                                 |                          |
+      | 01.04.2017 | 31.12.2018 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | SMÅBARNSTILLEGG_HADDE_IKKE_FULL_OVERGANGSSTØNAD |                       |
+      | 01.01.2019 |            | OPPHØR                                                  |           |                                                 |                       |
 
   Scenario: Skal få reduksjon fra forrige behandling-begrunnelser knyttet til bor fast hos søker for det ene barnet
     Gitt følgende fagsaker
@@ -262,13 +262,13 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType                                      | Regelverk | Gyldige begrunnelser              | Ugyldige begrunnelser |
-      | 01.06.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                          |
-      | 01.07.2023 | 31.08.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                          |
-      | 01.09.2023 | 28.02.2025 | UTBETALING                                              |           |                                   |                          |
-      | 01.03.2025 | 31.01.2028 | UTBETALING                                              |           |                                   |                          |
-      | 01.02.2028 | 28.02.2037 | UTBETALING                                              |           |                                   |                          |
-      | 01.03.2037 | 31.01.2040 | UTBETALING                                              |           |                                   |                          |
-      | 01.02.2040 |            | OPPHØR                                                  |           |                                   |                          |
+      | 01.06.2023 | 30.06.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                       |
+      | 01.07.2023 | 31.08.2023 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING |           | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |                       |
+      | 01.09.2023 | 28.02.2025 | UTBETALING                                              |           |                                   |                       |
+      | 01.03.2025 | 31.01.2028 | UTBETALING                                              |           |                                   |                       |
+      | 01.02.2028 | 28.02.2037 | UTBETALING                                              |           |                                   |                       |
+      | 01.03.2037 | 31.01.2040 | UTBETALING                                              |           |                                   |                       |
+      | 01.02.2040 |            | OPPHØR                                                  |           |                                   |                       |
 
   Scenario: Skal ikke få reduksjon fra forrige behandling-begrunnelse, men vanlig reduksjon
     Gitt følgende fagsaker
@@ -330,5 +330,5 @@ Egenskap: Gyldige begrunnelser for reduksjon fra forrige behandling
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser   | Ugyldige begrunnelser             |
-      | 01.09.2018 | 31.12.2018 | UTBETALING         |           | REDUKSJON_FLYTTET_BARN  | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |
-      | 01.01.2019 |            | OPPHØR             |           |                         |                                   |
+      | 01.09.2018 | 31.12.2018 | UTBETALING         |           | REDUKSJON_FLYTTET_BARN | REDUKSJON_BARN_BOR_IKKE_MED_SØKER |
+      | 01.01.2019 |            | OPPHØR             |           |                        |                                   |

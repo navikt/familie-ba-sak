@@ -186,15 +186,14 @@ class SøknadGrunnlagTest(
     private fun lagNyBehandling(
         søkerIdent: String,
         fagsakId: Long,
-    ) =
-        NyBehandling(
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            søkersIdent = søkerIdent,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            søknadMottattDato = LocalDate.now(),
-            fagsakId = fagsakId,
-        )
+    ) = NyBehandling(
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        søkersIdent = søkerIdent,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        søknadMottattDato = LocalDate.now(),
+        fagsakId = fagsakId,
+    )
 
     @Test
     fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {

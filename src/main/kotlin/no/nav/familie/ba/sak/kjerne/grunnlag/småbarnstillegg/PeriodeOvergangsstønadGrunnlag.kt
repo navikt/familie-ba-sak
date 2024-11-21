@@ -69,11 +69,10 @@ data class PeriodeOvergangsstønadGrunnlag(
 fun EksternPeriode.tilPeriodeOvergangsstønadGrunnlag(
     behandlingId: Long,
     aktør: Aktør,
-) =
-    PeriodeOvergangsstønadGrunnlag(
-        behandlingId = behandlingId,
-        aktør = aktør,
-        fom = this.fomDato,
-        tom = this.tomDato,
-        datakilde = this.datakilde,
-    )
+) = PeriodeOvergangsstønadGrunnlag(
+    behandlingId = behandlingId,
+    aktør = aktør,
+    fom = this.fomDato,
+    tom = this.tomDato,
+    datakilde = this.datakilde,
+)

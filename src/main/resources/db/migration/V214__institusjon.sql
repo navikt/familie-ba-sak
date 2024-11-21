@@ -1,4 +1,5 @@
-CREATE TABLE institusjon (
+CREATE TABLE institusjon
+(
     id             BIGINT PRIMARY KEY,
     org_nummer     VARCHAR,
     tss_ekstern_id VARCHAR                             NOT NULL,

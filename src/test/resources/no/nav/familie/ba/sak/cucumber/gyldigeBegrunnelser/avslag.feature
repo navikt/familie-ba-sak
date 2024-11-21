@@ -40,4 +40,4 @@ Egenskap: Gyldige begrunnelser for avslag
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
-      |          |          | AVSLAG             |           |                         |                          |
+      |          |          | AVSLAG             |           |                      |                       |

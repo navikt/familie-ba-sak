@@ -128,12 +128,11 @@ class EndretUtbetalingAndelService(
     @Transactional
     fun opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
-    ) =
-        endretUtbetalingAndelRepository.save(
-            EndretUtbetalingAndel(
-                behandlingId = behandling.id,
-            ),
-        )
+    ) = endretUtbetalingAndelRepository.save(
+        EndretUtbetalingAndel(
+            behandlingId = behandling.id,
+        ),
+    )
 
     @Transactional
     fun kopierEndretUtbetalingAndelFraForrigeBehandling(

@@ -105,6 +105,7 @@ class FagsakService(
                     if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                     fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
                 }
+
                 else -> fagsakRepository.finnFagsakForAktør(aktør, type)
             }
 
@@ -182,8 +183,7 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
-    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
-        Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> = Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
 
     fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> = fagsaker.map { lagRestMinimalFagsak(it.id) }
 

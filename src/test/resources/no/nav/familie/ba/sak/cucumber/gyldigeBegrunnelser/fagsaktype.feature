@@ -35,8 +35,8 @@ Egenskap: Gyldige begrunnelser for fagsaktype
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser              |
-      | 01.08.2022 | 31.08.2022 | UTBETALING         |           |                         |                                    |
-      | 01.09.2022 |            | OPPHØR             |           | OPPHØR_UNDER_18_ÅR      | OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON |
+      | 01.08.2022 | 31.08.2022 | UTBETALING         |           |                      |                                    |
+      | 01.09.2022 |            | OPPHØR             |           | OPPHØR_UNDER_18_ÅR   | OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON |
 
   Scenario: Skal gi institusjonsbegrunnelser for institusjonssak
     Gitt følgende fagsaker
@@ -67,5 +67,5 @@ Egenskap: Gyldige begrunnelser for fagsaktype
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser               | Ugyldige begrunnelser |
-      | 01.08.2022 | 31.08.2022 | UTBETALING         |           |                                    |                          |
-      | 01.09.2022 |            | OPPHØR             |           | OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON |                          |
+      | 01.08.2022 | 31.08.2022 | UTBETALING         |           |                                    |                       |
+      | 01.09.2022 |            | OPPHØR             |           | OPPHØR_BARNET_ER_18_ÅR_INSTITUSJON |                       |

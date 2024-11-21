@@ -24,13 +24,14 @@ SET default_table_access_method = heap;
 -- Name: aktoer; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.aktoer (
-    aktoer_id character varying NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.aktoer
+(
+    aktoer_id     character varying                                              NOT NULL,
+    versjon       bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av  character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av     character varying,
+    endret_tid    timestamp(3) without time zone
 );
 
 
@@ -38,12 +39,13 @@ CREATE TABLE public.aktoer (
 -- Name: aktoer_merge_logg; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.aktoer_merge_logg (
-    id bigint NOT NULL,
-    fk_fagsak_id bigint NOT NULL,
+CREATE TABLE public.aktoer_merge_logg
+(
+    id                  bigint NOT NULL,
+    fk_fagsak_id        bigint NOT NULL,
     historisk_aktoer_id character varying(50),
-    ny_aktoer_id character varying(50),
-    merge_tid timestamp without time zone
+    ny_aktoer_id        character varying(50),
+    merge_tid           timestamp without time zone
 );
 
 
@@ -82,9 +84,10 @@ CREATE SEQUENCE public.aktoer_merge_logg_seq
 -- Name: aktoer_til_kompetanse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.aktoer_til_kompetanse (
-    fk_kompetanse_id bigint NOT NULL,
-    fk_aktoer_id character varying NOT NULL
+CREATE TABLE public.aktoer_til_kompetanse
+(
+    fk_kompetanse_id bigint            NOT NULL,
+    fk_aktoer_id     character varying NOT NULL
 );
 
 
@@ -92,9 +95,10 @@ CREATE TABLE public.aktoer_til_kompetanse (
 -- Name: aktoer_til_utenlandsk_periodebeloep; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.aktoer_til_utenlandsk_periodebeloep (
-    fk_utenlandsk_periodebeloep_id bigint NOT NULL,
-    fk_aktoer_id character varying NOT NULL
+CREATE TABLE public.aktoer_til_utenlandsk_periodebeloep
+(
+    fk_utenlandsk_periodebeloep_id bigint            NOT NULL,
+    fk_aktoer_id                   character varying NOT NULL
 );
 
 
@@ -102,9 +106,10 @@ CREATE TABLE public.aktoer_til_utenlandsk_periodebeloep (
 -- Name: aktoer_til_valutakurs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.aktoer_til_valutakurs (
-    fk_valutakurs_id bigint NOT NULL,
-    fk_aktoer_id character varying NOT NULL
+CREATE TABLE public.aktoer_til_valutakurs
+(
+    fk_valutakurs_id bigint            NOT NULL,
+    fk_aktoer_id     character varying NOT NULL
 );
 
 
@@ -112,26 +117,27 @@ CREATE TABLE public.aktoer_til_valutakurs (
 -- Name: andel_tilkjent_ytelse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.andel_tilkjent_ytelse (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    stonad_fom timestamp(3) without time zone NOT NULL,
-    stonad_tom timestamp(3) without time zone NOT NULL,
-    type character varying(50) NOT NULL,
-    kalkulert_utbetalingsbelop numeric,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    tilkjent_ytelse_id bigint,
-    periode_offset bigint,
-    forrige_periode_offset bigint,
-    kilde_behandling_id bigint,
-    prosent numeric NOT NULL,
-    sats bigint NOT NULL,
-    fk_aktoer_id character varying,
-    nasjonalt_periodebelop numeric,
+CREATE TABLE public.andel_tilkjent_ytelse
+(
+    id                              bigint                                                         NOT NULL,
+    fk_behandling_id                bigint                                                         NOT NULL,
+    versjon                         bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av                    character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid                   timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    stonad_fom                      timestamp(3) without time zone                                 NOT NULL,
+    stonad_tom                      timestamp(3) without time zone                                 NOT NULL,
+    type                            character varying(50)                                          NOT NULL,
+    kalkulert_utbetalingsbelop      numeric,
+    endret_av                       character varying(512),
+    endret_tid                      timestamp(3) without time zone,
+    tilkjent_ytelse_id              bigint,
+    periode_offset                  bigint,
+    forrige_periode_offset          bigint,
+    kilde_behandling_id             bigint,
+    prosent                         numeric                                                        NOT NULL,
+    sats                            bigint                                                         NOT NULL,
+    fk_aktoer_id                    character varying,
+    nasjonalt_periodebelop          numeric,
     differanseberegnet_periodebelop numeric
 );
 
@@ -152,17 +158,18 @@ CREATE SEQUENCE public.andel_tilkjent_ytelse_seq
 -- Name: annen_vurdering; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.annen_vurdering (
-    id bigint NOT NULL,
-    fk_person_resultat_id bigint NOT NULL,
-    resultat character varying NOT NULL,
-    type character varying NOT NULL,
-    begrunnelse text,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.annen_vurdering
+(
+    id                    bigint                                                         NOT NULL,
+    fk_person_resultat_id bigint                                                         NOT NULL,
+    resultat              character varying                                              NOT NULL,
+    type                  character varying                                              NOT NULL,
+    begrunnelse           text,
+    versjon               bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av          character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid         timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av             character varying,
+    endret_tid            timestamp(3) without time zone
 );
 
 
@@ -182,12 +189,13 @@ CREATE SEQUENCE public.annen_vurdering_seq
 -- Name: arbeidsfordeling_pa_behandling; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.arbeidsfordeling_pa_behandling (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    behandlende_enhet_id character varying NOT NULL,
+CREATE TABLE public.arbeidsfordeling_pa_behandling
+(
+    id                     bigint            NOT NULL,
+    fk_behandling_id       bigint            NOT NULL,
+    behandlende_enhet_id   character varying NOT NULL,
     behandlende_enhet_navn character varying NOT NULL,
-    manuelt_overstyrt boolean NOT NULL
+    manuelt_overstyrt      boolean           NOT NULL
 );
 
 
@@ -207,10 +215,11 @@ CREATE SEQUENCE public.arbeidsfordeling_pa_behandling_seq
 -- Name: batch; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.batch (
-    id bigint NOT NULL,
-    kjoredato timestamp(3) without time zone NOT NULL,
-    status character varying(50) DEFAULT 'LEDIG'::character varying NOT NULL
+CREATE TABLE public.batch
+(
+    id        bigint                                                   NOT NULL,
+    kjoredato timestamp(3) without time zone                           NOT NULL,
+    status    character varying(50) DEFAULT 'LEDIG'::character varying NOT NULL
 );
 
 
@@ -230,24 +239,25 @@ CREATE SEQUENCE public.batch_seq
 -- Name: behandling; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.behandling (
-    id bigint NOT NULL,
-    fk_fagsak_id bigint,
-    versjon bigint DEFAULT 0,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    behandling_type character varying(50),
-    aktiv boolean DEFAULT true,
-    status character varying(50) DEFAULT 'OPPRETTET'::character varying,
-    kategori character varying(50) DEFAULT 'NATIONAL'::character varying,
-    underkategori character varying(50) DEFAULT 'ORDINÆR'::character varying,
-    opprettet_aarsak character varying DEFAULT 'MANUELL'::character varying,
-    skal_behandles_automatisk boolean DEFAULT false,
-    resultat character varying DEFAULT 'IKKE_VURDERT'::character varying NOT NULL,
+CREATE TABLE public.behandling
+(
+    id                          bigint                                                                   NOT NULL,
+    fk_fagsak_id                bigint,
+    versjon                     bigint                         DEFAULT 0,
+    opprettet_av                character varying(512)         DEFAULT 'VL'::character varying,
+    opprettet_tid               timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    endret_av                   character varying(512),
+    endret_tid                  timestamp(3) without time zone,
+    behandling_type             character varying(50),
+    aktiv                       boolean                        DEFAULT true,
+    status                      character varying(50)          DEFAULT 'OPPRETTET'::character varying,
+    kategori                    character varying(50)          DEFAULT 'NATIONAL'::character varying,
+    underkategori               character varying(50)          DEFAULT 'ORDINÆR'::character varying,
+    opprettet_aarsak            character varying              DEFAULT 'MANUELL'::character varying,
+    skal_behandles_automatisk   boolean                        DEFAULT false,
+    resultat                    character varying              DEFAULT 'IKKE_VURDERT'::character varying NOT NULL,
     overstyrt_endringstidspunkt timestamp(3) without time zone,
-    aktivert_tid timestamp(3) without time zone NOT NULL
+    aktivert_tid                timestamp(3) without time zone                                           NOT NULL
 );
 
 
@@ -255,15 +265,16 @@ CREATE TABLE public.behandling (
 -- Name: behandling_migreringsinfo; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.behandling_migreringsinfo (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    migreringsdato date NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.behandling_migreringsinfo
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    migreringsdato   date                                                           NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone
 );
 
 
@@ -295,18 +306,19 @@ CREATE SEQUENCE public.behandling_seq
 -- Name: behandling_soknadsinfo; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.behandling_soknadsinfo (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    mottatt_dato timestamp(3) without time zone NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    er_digital boolean,
-    journalpost_id character varying,
-    brevkode character varying
+CREATE TABLE public.behandling_soknadsinfo
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    mottatt_dato     timestamp(3) without time zone                                 NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone,
+    er_digital       boolean,
+    journalpost_id   character varying,
+    brevkode         character varying
 );
 
 
@@ -326,16 +338,17 @@ CREATE SEQUENCE public.behandling_soknadsinfo_seq
 -- Name: behandling_steg_tilstand; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.behandling_steg_tilstand (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    behandling_steg character varying NOT NULL,
-    behandling_steg_status character varying DEFAULT 'IKKE_UTFØRT'::character varying NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.behandling_steg_tilstand
+(
+    id                     bigint                                                                  NOT NULL,
+    fk_behandling_id       bigint                                                                  NOT NULL,
+    behandling_steg        character varying                                                       NOT NULL,
+    behandling_steg_status character varying              DEFAULT 'IKKE_UTFØRT'::character varying NOT NULL,
+    versjon                bigint                         DEFAULT 0                                NOT NULL,
+    opprettet_av           character varying              DEFAULT 'VL'::character varying          NOT NULL,
+    opprettet_tid          timestamp(3) without time zone DEFAULT LOCALTIMESTAMP                   NOT NULL,
+    endret_av              character varying,
+    endret_tid             timestamp(3) without time zone
 );
 
 
@@ -355,21 +368,22 @@ CREATE SEQUENCE public.behandling_steg_tilstand_seq
 -- Name: brevmottaker; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.brevmottaker (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    type character varying(50) NOT NULL,
-    navn character varying NOT NULL,
-    adresselinje_1 character varying NOT NULL,
-    adresselinje_2 character varying,
-    postnummer character varying NOT NULL,
-    poststed character varying NOT NULL,
-    landkode character varying(2) NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.brevmottaker
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    type             character varying(50)                                          NOT NULL,
+    navn             character varying                                              NOT NULL,
+    adresselinje_1   character varying                                              NOT NULL,
+    adresselinje_2   character varying,
+    postnummer       character varying                                              NOT NULL,
+    poststed         character varying                                              NOT NULL,
+    landkode         character varying(2)                                           NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone
 );
 
 
@@ -389,17 +403,18 @@ CREATE SEQUENCE public.brevmottaker_seq
 -- Name: data_chunk; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.data_chunk (
-    id bigint NOT NULL,
-    fk_batch_id bigint NOT NULL,
-    transaksjons_id uuid NOT NULL,
-    chunk_nr bigint NOT NULL,
-    er_sendt boolean NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.data_chunk
+(
+    id              bigint                                                         NOT NULL,
+    fk_batch_id     bigint                                                         NOT NULL,
+    transaksjons_id uuid                                                           NOT NULL,
+    chunk_nr        bigint                                                         NOT NULL,
+    er_sendt        boolean                                                        NOT NULL,
+    versjon         bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av    character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid   timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av       character varying,
+    endret_tid      timestamp(3) without time zone
 );
 
 
@@ -419,16 +434,17 @@ CREATE SEQUENCE public.data_chunk_seq
 -- Name: ecbvalutakurscache; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.ecbvalutakurscache (
-    id bigint NOT NULL,
+CREATE TABLE public.ecbvalutakurscache
+(
+    id             bigint                                                         NOT NULL,
     valutakursdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-    valutakode character varying,
-    kurs numeric,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+    valutakode     character varying,
+    kurs           numeric,
+    versjon        bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av   character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid  timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av      character varying,
+    endret_tid     timestamp(3) without time zone
 );
 
 
@@ -448,22 +464,23 @@ CREATE SEQUENCE public.ecbvalutakurscache_seq
 -- Name: endret_utbetaling_andel; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.endret_utbetaling_andel (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fk_po_person_id bigint,
-    fom timestamp(3) without time zone,
-    tom timestamp(3) without time zone,
-    prosent numeric,
-    aarsak character varying,
-    begrunnelse text,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
+CREATE TABLE public.endret_utbetaling_andel
+(
+    id                          bigint                                                         NOT NULL,
+    fk_behandling_id            bigint                                                         NOT NULL,
+    fk_po_person_id             bigint,
+    fom                         timestamp(3) without time zone,
+    tom                         timestamp(3) without time zone,
+    prosent                     numeric,
+    aarsak                      character varying,
+    begrunnelse                 text,
+    versjon                     bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av                character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid               timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                   character varying,
+    endret_tid                  timestamp(3) without time zone,
     avtaletidspunkt_delt_bosted timestamp(3) without time zone,
-    soknadstidspunkt timestamp(3) without time zone
+    soknadstidspunkt            timestamp(3) without time zone
 );
 
 
@@ -483,10 +500,11 @@ CREATE SEQUENCE public.endret_utbetaling_andel_seq
 -- Name: eos_begrunnelse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.eos_begrunnelse (
-    id bigint NOT NULL,
+CREATE TABLE public.eos_begrunnelse
+(
+    id                   bigint            NOT NULL,
     fk_vedtaksperiode_id bigint,
-    begrunnelse character varying NOT NULL
+    begrunnelse          character varying NOT NULL
 );
 
 
@@ -506,17 +524,18 @@ CREATE SEQUENCE public.eos_begrunnelse_seq
 -- Name: fagsak; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.fagsak (
-    id bigint NOT NULL,
-    versjon bigint DEFAULT 0,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    status character varying(50) DEFAULT 'OPPRETTET'::character varying,
-    arkivert boolean DEFAULT false NOT NULL,
-    fk_aktoer_id character varying,
-    type character varying(50) DEFAULT 'NORMAL'::character varying NOT NULL,
+CREATE TABLE public.fagsak
+(
+    id                bigint                                                             NOT NULL,
+    versjon           bigint                         DEFAULT 0,
+    opprettet_av      character varying(512)         DEFAULT 'VL'::character varying,
+    opprettet_tid     timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    endret_av         character varying(512),
+    endret_tid        timestamp(3) without time zone,
+    status            character varying(50)          DEFAULT 'OPPRETTET'::character varying,
+    arkivert          boolean                        DEFAULT false                       NOT NULL,
+    fk_aktoer_id      character varying,
+    type              character varying(50)          DEFAULT 'NORMAL'::character varying NOT NULL,
     fk_institusjon_id bigint
 );
 
@@ -549,18 +568,19 @@ CREATE SEQUENCE public.fagsak_seq
 -- Name: feilutbetalt_valuta; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.feilutbetalt_valuta (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fom timestamp(3) without time zone NOT NULL,
-    tom timestamp(3) without time zone NOT NULL,
+CREATE TABLE public.feilutbetalt_valuta
+(
+    id                  bigint                                                         NOT NULL,
+    fk_behandling_id    bigint                                                         NOT NULL,
+    fom                 timestamp(3) without time zone                                 NOT NULL,
+    tom                 timestamp(3) without time zone                                 NOT NULL,
     feilutbetalt_beloep numeric,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    er_per_maaned boolean DEFAULT false NOT NULL
+    versjon             bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av        character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid       timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av           character varying,
+    endret_tid          timestamp(3) without time zone,
+    er_per_maaned       boolean                        DEFAULT false                   NOT NULL
 );
 
 
@@ -580,19 +600,20 @@ CREATE SEQUENCE public.feilutbetalt_valuta_seq
 -- Name: foedselshendelsefiltrering_resultat; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.foedselshendelsefiltrering_resultat (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    filtreringsregel character varying NOT NULL,
-    resultat character varying NOT NULL,
-    begrunnelse text NOT NULL,
-    evalueringsaarsaker text NOT NULL,
-    regel_input text,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.foedselshendelsefiltrering_resultat
+(
+    id                  bigint                                                         NOT NULL,
+    fk_behandling_id    bigint                                                         NOT NULL,
+    filtreringsregel    character varying                                              NOT NULL,
+    resultat            character varying                                              NOT NULL,
+    begrunnelse         text                                                           NOT NULL,
+    evalueringsaarsaker text                                                           NOT NULL,
+    regel_input         text,
+    versjon             bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av        character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid       timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av           character varying,
+    endret_tid          timestamp(3) without time zone
 );
 
 
@@ -612,18 +633,19 @@ CREATE SEQUENCE public.foedselshendelsefiltrering_resultat_seq
 -- Name: gr_periode_overgangsstonad; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.gr_periode_overgangsstonad (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fom timestamp(3) without time zone NOT NULL,
-    tom timestamp(3) without time zone NOT NULL,
-    datakilde character varying NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    fk_aktoer_id character varying
+CREATE TABLE public.gr_periode_overgangsstonad
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    fom              timestamp(3) without time zone                                 NOT NULL,
+    tom              timestamp(3) without time zone                                 NOT NULL,
+    datakilde        character varying                                              NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone,
+    fk_aktoer_id     character varying
 );
 
 
@@ -643,15 +665,16 @@ CREATE SEQUENCE public.gr_periode_overgangsstonad_seq
 -- Name: gr_personopplysninger; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.gr_personopplysninger (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    aktiv boolean DEFAULT true NOT NULL
+CREATE TABLE public.gr_personopplysninger
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying(512),
+    endret_tid       timestamp(3) without time zone,
+    aktiv            boolean                        DEFAULT true                    NOT NULL
 );
 
 
@@ -671,13 +694,14 @@ CREATE SEQUENCE public.gr_personopplysninger_seq
 -- Name: gr_soknad; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.gr_soknad (
-    id bigint NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    soknad text NOT NULL,
-    aktiv boolean DEFAULT true NOT NULL
+CREATE TABLE public.gr_soknad
+(
+    id               bigint                                                         NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    soknad           text                                                           NOT NULL,
+    aktiv            boolean                        DEFAULT true                    NOT NULL
 );
 
 
@@ -697,15 +721,16 @@ CREATE SEQUENCE public.gr_soknad_seq
 -- Name: institusjon; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.institusjon (
-    id bigint NOT NULL,
-    org_nummer character varying NOT NULL,
+CREATE TABLE public.institusjon
+(
+    id             bigint                                                         NOT NULL,
+    org_nummer     character varying                                              NOT NULL,
     tss_ekstern_id character varying,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(20),
-    endret_tid timestamp(3) without time zone
+    versjon        bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av   character varying(20)          DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid  timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av      character varying(20),
+    endret_tid     timestamp(3) without time zone
 );
 
 
@@ -725,13 +750,14 @@ CREATE SEQUENCE public.institusjon_seq
 -- Name: journalpost; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.journalpost (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    journalpost_id character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    type character varying
+CREATE TABLE public.journalpost
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    journalpost_id   character varying                                              NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    type             character varying
 );
 
 
@@ -751,23 +777,24 @@ CREATE SEQUENCE public.journalpost_seq
 -- Name: kompetanse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.kompetanse (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fom timestamp(3) without time zone,
-    tom timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    soekers_aktivitet character varying,
-    annen_forelderes_aktivitet character varying,
-    annen_forelderes_aktivitetsland character varying,
-    barnets_bostedsland character varying,
-    resultat character varying,
-    sokers_aktivitetsland text,
-    er_annen_forelder_omfattet_av_norsk_lovgivning boolean DEFAULT false
+CREATE TABLE public.kompetanse
+(
+    id                                             bigint                                                         NOT NULL,
+    fk_behandling_id                               bigint                                                         NOT NULL,
+    fom                                            timestamp(3) without time zone,
+    tom                                            timestamp(3) without time zone,
+    versjon                                        bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av                                   character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid                                  timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                                      character varying,
+    endret_tid                                     timestamp(3) without time zone,
+    soekers_aktivitet                              character varying,
+    annen_forelderes_aktivitet                     character varying,
+    annen_forelderes_aktivitetsland                character varying,
+    barnets_bostedsland                            character varying,
+    resultat                                       character varying,
+    sokers_aktivitetsland                          text,
+    er_annen_forelder_omfattet_av_norsk_lovgivning boolean                        DEFAULT false
 );
 
 
@@ -787,18 +814,19 @@ CREATE SEQUENCE public.kompetanse_seq
 -- Name: korrigert_etterbetaling; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.korrigert_etterbetaling (
-    id bigint NOT NULL,
-    aarsak character varying NOT NULL,
-    begrunnelse character varying,
-    belop bigint NOT NULL,
-    aktiv boolean NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.korrigert_etterbetaling
+(
+    id               bigint                                                         NOT NULL,
+    aarsak           character varying                                              NOT NULL,
+    begrunnelse      character varying,
+    belop            bigint                                                         NOT NULL,
+    aktiv            boolean                                                        NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone
 );
 
 
@@ -818,17 +846,18 @@ CREATE SEQUENCE public.korrigert_etterbetaling_seq
 -- Name: korrigert_vedtak; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.korrigert_vedtak (
-    id bigint NOT NULL,
-    begrunnelse character varying,
-    vedtaksdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-    aktiv boolean NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.korrigert_vedtak
+(
+    id               bigint                                                         NOT NULL,
+    begrunnelse      character varying,
+    vedtaksdato      timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    aktiv            boolean                                                        NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone
 );
 
 
@@ -848,15 +877,16 @@ CREATE SEQUENCE public.korrigert_vedtak_seq
 -- Name: logg; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.logg (
-    id bigint NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    type character varying NOT NULL,
-    tittel character varying NOT NULL,
-    rolle character varying NOT NULL,
-    tekst text NOT NULL
+CREATE TABLE public.logg
+(
+    id               bigint                                                         NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    type             character varying                                              NOT NULL,
+    tittel           character varying                                              NOT NULL,
+    rolle            character varying                                              NOT NULL,
+    tekst            text                                                           NOT NULL
 );
 
 
@@ -876,15 +906,16 @@ CREATE SEQUENCE public.logg_seq
 -- Name: okonomi_simulering_mottaker; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.okonomi_simulering_mottaker (
-    id bigint NOT NULL,
-    mottaker_nummer character varying(50),
-    mottaker_type character varying(50),
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0,
+CREATE TABLE public.okonomi_simulering_mottaker
+(
+    id               bigint                                                         NOT NULL,
+    mottaker_nummer  character varying(50),
+    mottaker_type    character varying(50),
+    opprettet_av     character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying(512),
+    endret_tid       timestamp(3) without time zone,
+    versjon          bigint                         DEFAULT 0,
     fk_behandling_id bigint
 );
 
@@ -905,23 +936,24 @@ CREATE SEQUENCE public.okonomi_simulering_mottaker_seq
 -- Name: okonomi_simulering_postering; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.okonomi_simulering_postering (
-    id bigint NOT NULL,
+CREATE TABLE public.okonomi_simulering_postering
+(
+    id                                bigint                                                         NOT NULL,
     fk_okonomi_simulering_mottaker_id bigint,
-    fag_omraade_kode character varying(50),
-    fom timestamp(3) without time zone,
-    tom timestamp(3) without time zone,
-    betaling_type character varying(50),
-    belop bigint,
-    postering_type character varying(50),
-    forfallsdato timestamp(3) without time zone,
-    uten_inntrekk boolean,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0,
-    er_feilkonto boolean
+    fag_omraade_kode                  character varying(50),
+    fom                               timestamp(3) without time zone,
+    tom                               timestamp(3) without time zone,
+    betaling_type                     character varying(50),
+    belop                             bigint,
+    postering_type                    character varying(50),
+    forfallsdato                      timestamp(3) without time zone,
+    uten_inntrekk                     boolean,
+    opprettet_av                      character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid                     timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                         character varying(512),
+    endret_tid                        timestamp(3) without time zone,
+    versjon                           bigint                         DEFAULT 0,
+    er_feilkonto                      boolean
 );
 
 
@@ -941,13 +973,14 @@ CREATE SEQUENCE public.okonomi_simulering_postering_seq
 -- Name: oppgave; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.oppgave (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    gsak_id character varying NOT NULL,
-    type character varying NOT NULL,
-    ferdigstilt boolean NOT NULL,
-    opprettet_tid timestamp without time zone NOT NULL
+CREATE TABLE public.oppgave
+(
+    id               bigint                      NOT NULL,
+    fk_behandling_id bigint                      NOT NULL,
+    gsak_id          character varying           NOT NULL,
+    type             character varying           NOT NULL,
+    ferdigstilt      boolean                     NOT NULL,
+    opprettet_tid    timestamp without time zone NOT NULL
 );
 
 
@@ -979,15 +1012,16 @@ CREATE SEQUENCE public.periode_resultat_seq
 -- Name: person_resultat; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.person_resultat (
-    id bigint NOT NULL,
-    fk_vilkaarsvurdering_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    fk_aktoer_id character varying
+CREATE TABLE public.person_resultat
+(
+    id                      bigint                                                         NOT NULL,
+    fk_vilkaarsvurdering_id bigint                                                         NOT NULL,
+    versjon                 bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av            character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid           timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av               character varying,
+    endret_tid              timestamp(3) without time zone,
+    fk_aktoer_id            character varying
 );
 
 
@@ -995,16 +1029,17 @@ CREATE TABLE public.person_resultat (
 -- Name: personident; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.personident (
-    fk_aktoer_id character varying NOT NULL,
-    foedselsnummer character varying NOT NULL,
-    aktiv boolean DEFAULT false NOT NULL,
-    gjelder_til timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.personident
+(
+    fk_aktoer_id   character varying                                              NOT NULL,
+    foedselsnummer character varying                                              NOT NULL,
+    aktiv          boolean                        DEFAULT false                   NOT NULL,
+    gjelder_til    timestamp(3) without time zone,
+    versjon        bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av   character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid  timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av      character varying,
+    endret_tid     timestamp(3) without time zone
 );
 
 
@@ -1012,18 +1047,19 @@ CREATE TABLE public.personident (
 -- Name: po_arbeidsforhold; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_arbeidsforhold (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    arbeidsgiver_id character varying,
+CREATE TABLE public.po_arbeidsforhold
+(
+    id                bigint                                                         NOT NULL,
+    fk_po_person_id   bigint                                                         NOT NULL,
+    arbeidsgiver_id   character varying,
     arbeidsgiver_type character varying,
-    fom date,
-    tom date,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL
+    fom               date,
+    tom               date,
+    opprettet_av      character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid     timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av         character varying,
+    endret_tid        timestamp(3) without time zone,
+    versjon           bigint                         DEFAULT 0                       NOT NULL
 );
 
 
@@ -1043,26 +1079,27 @@ CREATE SEQUENCE public.po_arbeidsforhold_seq
 -- Name: po_bostedsadresse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_bostedsadresse (
-    id bigint NOT NULL,
-    type character varying(20) NOT NULL,
-    bostedskommune character varying,
-    husnummer character varying,
-    husbokstav character varying,
+CREATE TABLE public.po_bostedsadresse
+(
+    id                bigint                                                         NOT NULL,
+    type              character varying(20)                                          NOT NULL,
+    bostedskommune    character varying,
+    husnummer         character varying,
+    husbokstav        character varying,
     bruksenhetsnummer character varying,
-    adressenavn character varying,
-    kommunenummer character varying,
-    tilleggsnavn character varying,
-    postnummer character varying,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    endret_av character varying,
-    versjon bigint DEFAULT 0 NOT NULL,
-    endret_tid timestamp(3) without time zone,
-    matrikkel_id bigint,
-    fom date,
-    tom date,
-    fk_po_person_id bigint
+    adressenavn       character varying,
+    kommunenummer     character varying,
+    tilleggsnavn      character varying,
+    postnummer        character varying,
+    opprettet_av      character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid     timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP       NOT NULL,
+    endret_av         character varying,
+    versjon           bigint                         DEFAULT 0                       NOT NULL,
+    endret_tid        timestamp(3) without time zone,
+    matrikkel_id      bigint,
+    fom               date,
+    tom               date,
+    fk_po_person_id   bigint
 );
 
 
@@ -1082,19 +1119,20 @@ CREATE SEQUENCE public.po_bostedsadresse_seq
 -- Name: po_doedsfall; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_doedsfall (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    doedsfall_dato timestamp(3) without time zone NOT NULL,
-    doedsfall_adresse character varying,
+CREATE TABLE public.po_doedsfall
+(
+    id                   bigint                                                         NOT NULL,
+    fk_po_person_id      bigint                                                         NOT NULL,
+    versjon              bigint                         DEFAULT 0                       NOT NULL,
+    doedsfall_dato       timestamp(3) without time zone                                 NOT NULL,
+    doedsfall_adresse    character varying,
     doedsfall_postnummer character varying,
-    doedsfall_poststed character varying,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    manuell_registrert boolean DEFAULT false NOT NULL
+    doedsfall_poststed   character varying,
+    opprettet_av         character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid        timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av            character varying,
+    endret_tid           timestamp(3) without time zone,
+    manuell_registrert   boolean                        DEFAULT false                   NOT NULL
 );
 
 
@@ -1114,17 +1152,18 @@ CREATE SEQUENCE public.po_doedsfall_seq
 -- Name: po_opphold; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_opphold (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    type character varying NOT NULL,
-    fom date,
-    tom date,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL
+CREATE TABLE public.po_opphold
+(
+    id              bigint                                                         NOT NULL,
+    fk_po_person_id bigint                                                         NOT NULL,
+    type            character varying                                              NOT NULL,
+    fom             date,
+    tom             date,
+    opprettet_av    character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid   timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av       character varying,
+    endret_tid      timestamp(3) without time zone,
+    versjon         bigint                         DEFAULT 0                       NOT NULL
 );
 
 
@@ -1144,20 +1183,21 @@ CREATE SEQUENCE public.po_opphold_seq
 -- Name: po_person; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_person (
-    id bigint NOT NULL,
-    fk_gr_personopplysninger_id bigint NOT NULL,
-    type character varying(10) NOT NULL,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    endret_av character varying(512),
-    versjon bigint DEFAULT 0 NOT NULL,
-    endret_tid timestamp(3) without time zone,
-    foedselsdato timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP,
-    fk_aktoer_id character varying(50),
-    navn character varying DEFAULT ''::character varying,
-    kjoenn character varying DEFAULT 'UKJENT'::character varying,
-    maalform character varying(2) DEFAULT 'NB'::character varying NOT NULL
+CREATE TABLE public.po_person
+(
+    id                          bigint                                                         NOT NULL,
+    fk_gr_personopplysninger_id bigint                                                         NOT NULL,
+    type                        character varying(10)                                          NOT NULL,
+    opprettet_av                character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid               timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP       NOT NULL,
+    endret_av                   character varying(512),
+    versjon                     bigint                         DEFAULT 0                       NOT NULL,
+    endret_tid                  timestamp(3) without time zone,
+    foedselsdato                timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP,
+    fk_aktoer_id                character varying(50),
+    navn                        character varying              DEFAULT ''::character varying,
+    kjoenn                      character varying              DEFAULT 'UKJENT'::character varying,
+    maalform                    character varying(2)           DEFAULT 'NB'::character varying NOT NULL
 );
 
 
@@ -1177,16 +1217,17 @@ CREATE SEQUENCE public.po_person_seq
 -- Name: po_sivilstand; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_sivilstand (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    fom date,
-    type character varying NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL
+CREATE TABLE public.po_sivilstand
+(
+    id              bigint                                                         NOT NULL,
+    fk_po_person_id bigint                                                         NOT NULL,
+    fom             date,
+    type            character varying                                              NOT NULL,
+    opprettet_av    character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid   timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av       character varying,
+    endret_tid      timestamp(3) without time zone,
+    versjon         bigint                         DEFAULT 0                       NOT NULL
 );
 
 
@@ -1206,18 +1247,19 @@ CREATE SEQUENCE public.po_sivilstand_seq
 -- Name: po_statsborgerskap; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.po_statsborgerskap (
-    id bigint NOT NULL,
-    fk_po_person_id bigint NOT NULL,
-    landkode character varying(3) DEFAULT 'XUK'::character varying NOT NULL,
-    fom date,
-    tom date,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0 NOT NULL,
-    medlemskap character varying DEFAULT 'UKJENT'::character varying NOT NULL
+CREATE TABLE public.po_statsborgerskap
+(
+    id              bigint                                                             NOT NULL,
+    fk_po_person_id bigint                                                             NOT NULL,
+    landkode        character varying(3)           DEFAULT 'XUK'::character varying    NOT NULL,
+    fom             date,
+    tom             date,
+    opprettet_av    character varying              DEFAULT 'VL'::character varying     NOT NULL,
+    opprettet_tid   timestamp(3) without time zone DEFAULT LOCALTIMESTAMP              NOT NULL,
+    endret_av       character varying,
+    endret_tid      timestamp(3) without time zone,
+    versjon         bigint                         DEFAULT 0                           NOT NULL,
+    medlemskap      character varying              DEFAULT 'UKJENT'::character varying NOT NULL
 );
 
 
@@ -1237,19 +1279,20 @@ CREATE SEQUENCE public.po_statsborgerskap_seq
 -- Name: refusjon_eos; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.refusjon_eos (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fom timestamp(3) without time zone NOT NULL,
-    tom timestamp(3) without time zone NOT NULL,
-    refusjonsbeloep numeric NOT NULL,
-    land character varying NOT NULL,
-    refusjon_avklart boolean NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.refusjon_eos
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    fom              timestamp(3) without time zone                                 NOT NULL,
+    tom              timestamp(3) without time zone                                 NOT NULL,
+    refusjonsbeloep  numeric                                                        NOT NULL,
+    land             character varying                                              NOT NULL,
+    refusjon_avklart boolean                                                        NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone
 );
 
 
@@ -1269,18 +1312,19 @@ CREATE SEQUENCE public.refusjon_eos_seq
 -- Name: saksstatistikk_mellomlagring; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.saksstatistikk_mellomlagring (
-    id bigint NOT NULL,
-    offset_verdi bigint,
-    funksjonell_id character varying NOT NULL,
-    type character varying NOT NULL,
-    kontrakt_versjon character varying NOT NULL,
-    json text NOT NULL,
-    konvertert_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    sendt_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    type_id bigint,
-    offset_aiven bigint
+CREATE TABLE public.saksstatistikk_mellomlagring
+(
+    id               bigint                                                NOT NULL,
+    offset_verdi     bigint,
+    funksjonell_id   character varying                                     NOT NULL,
+    type             character varying                                     NOT NULL,
+    kontrakt_versjon character varying                                     NOT NULL,
+    json             text                                                  NOT NULL,
+    konvertert_tid   timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    sendt_tid        timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    type_id          bigint,
+    offset_aiven     bigint
 );
 
 
@@ -1312,13 +1356,14 @@ CREATE SEQUENCE public.sats_seq
 -- Name: satskjoering; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.satskjoering (
-    id bigint NOT NULL,
-    fk_fagsak_id bigint NOT NULL,
-    start_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    ferdig_tid timestamp(3) without time zone,
-    feiltype character varying,
-    sats_tid timestamp(3) without time zone DEFAULT to_timestamp('01-03-2023'::text, 'DD-MM-YYYY SS:MS'::text) NOT NULL
+CREATE TABLE public.satskjoering
+(
+    id           bigint                                                                                            NOT NULL,
+    fk_fagsak_id bigint                                                                                            NOT NULL,
+    start_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP                                             NOT NULL,
+    ferdig_tid   timestamp(3) without time zone,
+    feiltype     character varying,
+    sats_tid     timestamp(3) without time zone DEFAULT to_timestamp('01-03-2023'::text, 'DD-MM-YYYY SS:MS'::text) NOT NULL
 );
 
 
@@ -1338,19 +1383,20 @@ CREATE SEQUENCE public.satskjoering_seq
 -- Name: sett_paa_vent; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.sett_paa_vent (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    frist timestamp(3) without time zone NOT NULL,
-    aktiv boolean DEFAULT false NOT NULL,
-    aarsak character varying NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    tid_tatt_av_vent timestamp(3) without time zone,
-    tid_satt_paa_vent timestamp(3) without time zone DEFAULT now() NOT NULL
+CREATE TABLE public.sett_paa_vent
+(
+    id                bigint                                                         NOT NULL,
+    fk_behandling_id  bigint                                                         NOT NULL,
+    versjon           bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av      character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid     timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    frist             timestamp(3) without time zone                                 NOT NULL,
+    aktiv             boolean                        DEFAULT false                   NOT NULL,
+    aarsak            character varying                                              NOT NULL,
+    endret_av         character varying,
+    endret_tid        timestamp(3) without time zone,
+    tid_tatt_av_vent  timestamp(3) without time zone,
+    tid_satt_paa_vent timestamp(3) without time zone DEFAULT now()                   NOT NULL
 );
 
 
@@ -1370,10 +1416,11 @@ CREATE SEQUENCE public.sett_paa_vent_seq
 -- Name: skyggesak; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.skyggesak (
-    id bigint NOT NULL,
+CREATE TABLE public.skyggesak
+(
+    id           bigint NOT NULL,
     fk_fagsak_id bigint NOT NULL,
-    sendt_tid timestamp(3) without time zone
+    sendt_tid    timestamp(3) without time zone
 );
 
 
@@ -1393,16 +1440,17 @@ CREATE SEQUENCE public.skyggesak_seq
 -- Name: task; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.task (
-    id bigint NOT NULL,
-    payload text NOT NULL,
-    status character varying(50) DEFAULT 'UBEHANDLET'::character varying NOT NULL,
-    versjon bigint DEFAULT 0,
+CREATE TABLE public.task
+(
+    id            bigint                                                                 NOT NULL,
+    payload       text                                                                   NOT NULL,
+    status        character varying(50)          DEFAULT 'UBEHANDLET'::character varying NOT NULL,
+    versjon       bigint                         DEFAULT 0,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    type character varying(100) NOT NULL,
-    metadata character varying(4000),
-    trigger_tid timestamp without time zone DEFAULT LOCALTIMESTAMP,
-    avvikstype character varying(50)
+    type          character varying(100)                                                 NOT NULL,
+    metadata      character varying(4000),
+    trigger_tid   timestamp without time zone    DEFAULT LOCALTIMESTAMP,
+    avvikstype    character varying(50)
 );
 
 
@@ -1410,14 +1458,15 @@ CREATE TABLE public.task (
 -- Name: task_logg; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.task_logg (
-    id bigint NOT NULL,
-    task_id bigint NOT NULL,
-    type character varying(50) NOT NULL,
-    node character varying(100) NOT NULL,
+CREATE TABLE public.task_logg
+(
+    id            bigint                 NOT NULL,
+    task_id       bigint                 NOT NULL,
+    type          character varying(50)  NOT NULL,
+    node          character varying(100) NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    melding text,
-    endret_av character varying(100) DEFAULT 'VL'::character varying
+    melding       text,
+    endret_av     character varying(100)         DEFAULT 'VL'::character varying
 );
 
 
@@ -1463,18 +1512,19 @@ ALTER SEQUENCE public.task_seq OWNED BY public.task.id;
 -- Name: tilbakekreving; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.tilbakekreving (
-    id bigint NOT NULL,
-    valg character varying NOT NULL,
-    varsel text,
-    begrunnelse text NOT NULL,
+CREATE TABLE public.tilbakekreving
+(
+    id                           bigint                                                      NOT NULL,
+    valg                         character varying                                           NOT NULL,
+    varsel                       text,
+    begrunnelse                  text                                                        NOT NULL,
     tilbakekrevingsbehandling_id text,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0,
-    fk_behandling_id bigint
+    opprettet_av                 character varying           DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid                timestamp without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                    character varying,
+    endret_tid                   timestamp(3) without time zone,
+    versjon                      bigint                      DEFAULT 0,
+    fk_behandling_id             bigint
 );
 
 
@@ -1494,15 +1544,16 @@ CREATE SEQUENCE public.tilbakekreving_seq
 -- Name: tilkjent_ytelse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.tilkjent_ytelse (
-    id bigint NOT NULL,
-    fk_behandling_id bigint,
-    stonad_fom timestamp without time zone,
-    stonad_tom timestamp without time zone,
-    opprettet_dato timestamp without time zone NOT NULL,
-    opphor_fom timestamp without time zone,
+CREATE TABLE public.tilkjent_ytelse
+(
+    id                 bigint                                                NOT NULL,
+    fk_behandling_id   bigint,
+    stonad_fom         timestamp without time zone,
+    stonad_tom         timestamp without time zone,
+    opprettet_dato     timestamp without time zone                           NOT NULL,
+    opphor_fom         timestamp without time zone,
     utbetalingsoppdrag text,
-    endret_dato timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    endret_dato        timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -1522,21 +1573,22 @@ CREATE SEQUENCE public.tilkjent_ytelse_seq
 -- Name: totrinnskontroll; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.totrinnskontroll (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    aktiv boolean DEFAULT true NOT NULL,
-    saksbehandler character varying NOT NULL,
-    beslutter character varying,
-    godkjent boolean DEFAULT true,
-    saksbehandler_id character varying DEFAULT 'ukjent'::character varying NOT NULL,
-    beslutter_id character varying,
-    kontrollerte_sider text DEFAULT ''::text
+CREATE TABLE public.totrinnskontroll
+(
+    id                 bigint                                                             NOT NULL,
+    fk_behandling_id   bigint                                                             NOT NULL,
+    versjon            bigint                         DEFAULT 0                           NOT NULL,
+    opprettet_av       character varying              DEFAULT 'VL'::character varying     NOT NULL,
+    opprettet_tid      timestamp(3) without time zone DEFAULT LOCALTIMESTAMP              NOT NULL,
+    endret_av          character varying,
+    endret_tid         timestamp(3) without time zone,
+    aktiv              boolean                        DEFAULT true                        NOT NULL,
+    saksbehandler      character varying                                                  NOT NULL,
+    beslutter          character varying,
+    godkjent           boolean                        DEFAULT true,
+    saksbehandler_id   character varying              DEFAULT 'ukjent'::character varying NOT NULL,
+    beslutter_id       character varying,
+    kontrollerte_sider text                           DEFAULT ''::text
 );
 
 
@@ -1556,20 +1608,21 @@ CREATE SEQUENCE public.totrinnskontroll_seq
 -- Name: utenlandsk_periodebeloep; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.utenlandsk_periodebeloep (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fom timestamp(3) without time zone,
-    tom timestamp(3) without time zone,
-    intervall character varying,
-    valutakode character varying,
-    beloep numeric,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    utbetalingsland character varying,
+CREATE TABLE public.utenlandsk_periodebeloep
+(
+    id                         bigint                                                         NOT NULL,
+    fk_behandling_id           bigint                                                         NOT NULL,
+    fom                        timestamp(3) without time zone,
+    tom                        timestamp(3) without time zone,
+    intervall                  character varying,
+    valutakode                 character varying,
+    beloep                     numeric,
+    versjon                    bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av               character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid              timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                  character varying,
+    endret_tid                 timestamp(3) without time zone,
+    utbetalingsland            character varying,
     kalkulert_maanedlig_beloep numeric
 );
 
@@ -1590,20 +1643,21 @@ CREATE SEQUENCE public.utenlandsk_periodebeloep_seq
 -- Name: valutakurs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.valutakurs (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    fom timestamp(3) without time zone,
-    tom timestamp(3) without time zone,
-    valutakursdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-    valutakode character varying,
-    kurs numeric,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    vurderingsform text
+CREATE TABLE public.valutakurs
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    fom              timestamp(3) without time zone,
+    tom              timestamp(3) without time zone,
+    valutakursdato   timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    valutakode       character varying,
+    kurs             numeric,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone,
+    vurderingsform   text
 );
 
 
@@ -1623,17 +1677,18 @@ CREATE SEQUENCE public.valutakurs_seq
 -- Name: vedtak; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vedtak (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    vedtaksdato timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    aktiv boolean DEFAULT true,
-    stonad_brev_pdf bytea
+CREATE TABLE public.vedtak
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    vedtaksdato      timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
+    endret_av        character varying(512),
+    endret_tid       timestamp(3) without time zone,
+    aktiv            boolean                        DEFAULT true,
+    stonad_brev_pdf  bytea
 );
 
 
@@ -1665,9 +1720,10 @@ CREATE SEQUENCE public.vedtak_seq
 -- Name: vedtaksbegrunnelse; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vedtaksbegrunnelse (
-    id bigint NOT NULL,
-    fk_vedtaksperiode_id bigint,
+CREATE TABLE public.vedtaksbegrunnelse
+(
+    id                               bigint            NOT NULL,
+    fk_vedtaksperiode_id             bigint,
     vedtak_begrunnelse_spesifikasjon character varying NOT NULL
 );
 
@@ -1676,10 +1732,11 @@ CREATE TABLE public.vedtaksbegrunnelse (
 -- Name: vedtaksbegrunnelse_fritekst; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vedtaksbegrunnelse_fritekst (
-    id bigint NOT NULL,
+CREATE TABLE public.vedtaksbegrunnelse_fritekst
+(
+    id                   bigint                NOT NULL,
     fk_vedtaksperiode_id bigint,
-    fritekst text DEFAULT ''::text NOT NULL
+    fritekst             text DEFAULT ''::text NOT NULL
 );
 
 
@@ -1711,17 +1768,18 @@ CREATE SEQUENCE public.vedtaksbegrunnelse_seq
 -- Name: vedtaksperiode; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vedtaksperiode (
-    id bigint NOT NULL,
-    fk_vedtak_id bigint,
-    fom timestamp without time zone,
-    tom timestamp without time zone,
-    type character varying NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0
+CREATE TABLE public.vedtaksperiode
+(
+    id            bigint                                                      NOT NULL,
+    fk_vedtak_id  bigint,
+    fom           timestamp without time zone,
+    tom           timestamp without time zone,
+    type          character varying                                           NOT NULL,
+    opprettet_av  character varying           DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av     character varying,
+    endret_tid    timestamp(3) without time zone,
+    versjon       bigint                      DEFAULT 0
 );
 
 
@@ -1753,15 +1811,16 @@ CREATE SEQUENCE public.verge_seq
 -- Name: vilkaarsvurdering; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vilkaarsvurdering (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    aktiv boolean DEFAULT true NOT NULL,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying,
-    endret_tid timestamp(3) without time zone
+CREATE TABLE public.vilkaarsvurdering
+(
+    id               bigint                                                         NOT NULL,
+    fk_behandling_id bigint                                                         NOT NULL,
+    aktiv            boolean                        DEFAULT true                    NOT NULL,
+    versjon          bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av     character varying              DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid    timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av        character varying,
+    endret_tid       timestamp(3) without time zone
 );
 
 
@@ -1781,29 +1840,30 @@ CREATE SEQUENCE public.vilkaarsvurdering_seq
 -- Name: vilkar_resultat; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vilkar_resultat (
-    id bigint NOT NULL,
-    vilkar character varying(50) NOT NULL,
-    resultat character varying(50) NOT NULL,
-    regel_input text,
-    regel_output text,
-    versjon bigint DEFAULT 0 NOT NULL,
-    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    endret_av character varying(512),
-    endret_tid timestamp(3) without time zone,
-    fk_person_resultat_id bigint,
-    begrunnelse text,
-    periode_fom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-    periode_tom timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
-    sist_endret_i_behandling_id bigint NOT NULL,
-    evaluering_aarsak text DEFAULT ''::text,
-    er_automatisk_vurdert boolean DEFAULT false NOT NULL,
-    er_eksplisitt_avslag_paa_soknad boolean,
-    vedtak_begrunnelse_spesifikasjoner text DEFAULT ''::text,
-    vurderes_etter character varying,
-    utdypende_vilkarsvurderinger character varying,
-    resultat_begrunnelse character varying
+CREATE TABLE public.vilkar_resultat
+(
+    id                                 bigint                                                         NOT NULL,
+    vilkar                             character varying(50)                                          NOT NULL,
+    resultat                           character varying(50)                                          NOT NULL,
+    regel_input                        text,
+    regel_output                       text,
+    versjon                            bigint                         DEFAULT 0                       NOT NULL,
+    opprettet_av                       character varying(512)         DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid                      timestamp(3) without time zone DEFAULT LOCALTIMESTAMP          NOT NULL,
+    endret_av                          character varying(512),
+    endret_tid                         timestamp(3) without time zone,
+    fk_person_resultat_id              bigint,
+    begrunnelse                        text,
+    periode_fom                        timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    periode_tom                        timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    sist_endret_i_behandling_id        bigint                                                         NOT NULL,
+    evaluering_aarsak                  text                           DEFAULT ''::text,
+    er_automatisk_vurdert              boolean                        DEFAULT false                   NOT NULL,
+    er_eksplisitt_avslag_paa_soknad    boolean,
+    vedtak_begrunnelse_spesifikasjoner text                           DEFAULT ''::text,
+    vurderes_etter                     character varying,
+    utdypende_vilkarsvurderinger       character varying,
+    resultat_begrunnelse               character varying
 );
 
 
@@ -1823,10 +1883,11 @@ CREATE SEQUENCE public.vilkar_resultat_seq
 -- Name: vurderingsstrategi_for_valutakurser; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.vurderingsstrategi_for_valutakurser (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    vurderingsstrategi_for_valutakurser text NOT NULL
+CREATE TABLE public.vurderingsstrategi_for_valutakurser
+(
+    id                                  bigint NOT NULL,
+    fk_behandling_id                    bigint NOT NULL,
+    vurderingsstrategi_for_valutakurser text   NOT NULL
 );
 
 
@@ -1846,21 +1907,24 @@ CREATE SEQUENCE public.vurderingsstrategi_for_valutakurser_seq
 -- Name: aktoer_merge_logg id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.aktoer_merge_logg ALTER COLUMN id SET DEFAULT nextval('public.aktoer_merge_logg_id_seq'::regclass);
+ALTER TABLE ONLY public.aktoer_merge_logg
+    ALTER COLUMN id SET DEFAULT nextval('public.aktoer_merge_logg_id_seq'::regclass);
 
 
 --
 -- Name: task id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.task ALTER COLUMN id SET DEFAULT nextval('public.task_seq'::regclass);
+ALTER TABLE ONLY public.task
+    ALTER COLUMN id SET DEFAULT nextval('public.task_seq'::regclass);
 
 
 --
 -- Name: task_logg id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.task_logg_seq'::regclass);
+ALTER TABLE ONLY public.task_logg
+    ALTER COLUMN id SET DEFAULT nextval('public.task_logg_seq'::regclass);
 
 
 --
@@ -1868,11 +1932,9 @@ ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.ta
 --
 
 
-
 --
 -- Data for Name: aktoer_merge_logg; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -1880,11 +1942,9 @@ ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.ta
 --
 
 
-
 --
 -- Data for Name: aktoer_til_utenlandsk_periodebeloep; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -1892,11 +1952,9 @@ ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.ta
 --
 
 
-
 --
 -- Data for Name: andel_tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -1904,65 +1962,111 @@ ALTER TABLE ONLY public.task_logg ALTER COLUMN id SET DEFAULT nextval('public.ta
 --
 
 
-
 --
 -- Data for Name: arbeidsfordeling_pa_behandling; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
 -- Data for Name: batch; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.batch VALUES (1000000, '2021-01-06 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000050, '2021-01-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000100, '2021-02-26 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000150, '2021-03-31 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000200, '2021-04-26 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000250, '2021-05-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000300, '2021-06-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000350, '2021-07-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000400, '2021-08-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000450, '2021-09-27 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000500, '2021-10-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000550, '2021-11-22 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000600, '2022-01-05 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000650, '2022-01-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000700, '2022-02-25 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000750, '2022-03-25 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000800, '2022-04-26 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000850, '2022-05-27 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000900, '2022-06-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1000950, '2022-07-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001000, '2022-08-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001050, '2022-09-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001100, '2022-10-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001150, '2022-11-21 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001200, '2023-01-05 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001250, '2023-01-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001300, '2023-02-27 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001350, '2023-03-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001400, '2023-04-25 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001450, '2023-05-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001500, '2023-06-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001550, '2023-07-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001600, '2023-08-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001650, '2023-09-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001700, '2023-10-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001750, '2023-11-22 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001800, '2024-01-04 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001850, '2024-01-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001900, '2024-02-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1001950, '2024-03-29 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002000, '2024-04-25 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002050, '2024-05-24 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002100, '2024-06-28 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002150, '2024-07-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002200, '2024-08-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002250, '2024-09-27 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002300, '2024-10-30 00:00:00', 'LEDIG');
-INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000000, '2021-01-06 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000050, '2021-01-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000100, '2021-02-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000150, '2021-03-31 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000200, '2021-04-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000250, '2021-05-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000300, '2021-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000350, '2021-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000400, '2021-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000450, '2021-09-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000500, '2021-10-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000550, '2021-11-22 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000600, '2022-01-05 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000650, '2022-01-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000700, '2022-02-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000750, '2022-03-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000800, '2022-04-26 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000850, '2022-05-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000900, '2022-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1000950, '2022-07-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001000, '2022-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001050, '2022-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001100, '2022-10-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001150, '2022-11-21 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001200, '2023-01-05 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001250, '2023-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001300, '2023-02-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001350, '2023-03-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001400, '2023-04-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001450, '2023-05-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001500, '2023-06-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001550, '2023-07-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001600, '2023-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001650, '2023-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001700, '2023-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001750, '2023-11-22 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001800, '2024-01-04 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001850, '2024-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001900, '2024-02-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1001950, '2024-03-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002000, '2024-04-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002050, '2024-05-24 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002100, '2024-06-28 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002150, '2024-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002200, '2024-08-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002250, '2024-09-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002300, '2024-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch
+VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 
 
 --
@@ -1970,11 +2074,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: behandling_migreringsinfo; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -1982,11 +2084,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: behandling_steg_tilstand; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -1994,11 +2094,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: data_chunk; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2006,11 +2104,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: endret_utbetaling_andel; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2018,11 +2114,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: fagsak; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2030,11 +2124,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: foedselshendelsefiltrering_resultat; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2042,11 +2134,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: gr_personopplysninger; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2054,11 +2144,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: institusjon; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2066,11 +2154,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2078,11 +2164,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: korrigert_vedtak; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2090,11 +2174,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: okonomi_simulering_mottaker; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2102,11 +2184,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: oppgave; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2114,11 +2194,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: personident; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2126,11 +2204,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: po_bostedsadresse; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2138,11 +2214,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: po_opphold; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2150,11 +2224,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: po_sivilstand; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2162,11 +2234,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: refusjon_eos; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2174,11 +2244,9 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: satskjoering; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2186,20 +2254,20 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 --
 
 
-
 --
 -- Data for Name: skyggesak; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.task VALUES (51, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.509', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022
+INSERT INTO public.task
+VALUES (51, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.509', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022
 ', '2024-05-29 15:31:17.508603', NULL);
-INSERT INTO public.task VALUES (1, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.471', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022
+INSERT INTO public.task
+VALUES (1, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.471', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022
 ', '2024-05-29 15:31:17.471229', NULL);
 
 
@@ -2207,8 +2275,10 @@ INSERT INTO public.task VALUES (1, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.47
 -- Data for Name: task_logg; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.task_logg VALUES (51, 1, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
-INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
+INSERT INTO public.task_logg
+VALUES (51, 1, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
+INSERT INTO public.task_logg
+VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
 
 
 --
@@ -2216,11 +2286,9 @@ INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:3
 --
 
 
-
 --
 -- Data for Name: tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2228,11 +2296,9 @@ INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:3
 --
 
 
-
 --
 -- Data for Name: utenlandsk_periodebeloep; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2240,11 +2306,9 @@ INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:3
 --
 
 
-
 --
 -- Data for Name: vedtak; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2252,11 +2316,9 @@ INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:3
 --
 
 
-
 --
 -- Data for Name: vedtaksbegrunnelse_fritekst; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2264,11 +2326,9 @@ INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:3
 --
 
 
-
 --
 -- Data for Name: vilkaarsvurdering; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -2276,11 +2336,9 @@ INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:3
 --
 
 
-
 --
 -- Data for Name: vurderingsstrategi_for_valutakurser; Type: TABLE DATA; Schema: public; Owner: -
 --
-
 
 
 --
@@ -3626,21 +3684,22 @@ CREATE INDEX totrinnskontroll_fk_behandling_id_idx ON public.totrinnskontroll US
 --
 
 CREATE UNIQUE INDEX uidx_behandling_01 ON public.behandling USING btree ((
-CASE
-    WHEN (aktiv = true) THEN fk_fagsak_id
-    ELSE NULL::bigint
-END), (
-CASE
-    WHEN (aktiv = true) THEN aktiv
-    ELSE NULL::boolean
-END));
+                                                                             CASE
+                                                                                 WHEN (aktiv = true) THEN fk_fagsak_id
+                                                                                 ELSE NULL::bigint
+                                                                                 END), (
+                                                                             CASE
+                                                                                 WHEN (aktiv = true) THEN aktiv
+                                                                                 ELSE NULL::boolean
+                                                                                 END));
 
 
 --
 -- Name: uidx_behandling_02; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX uidx_behandling_02 ON public.behandling USING btree (fk_fagsak_id) WHERE (((status)::text <> 'AVSLUTTET'::text) AND ((status)::text <> 'SATT_PÅ_MASKINELL_VENT'::text));
+CREATE UNIQUE INDEX uidx_behandling_02 ON public.behandling USING btree (fk_fagsak_id) WHERE (
+    ((status)::text <> 'AVSLUTTET'::text) AND ((status)::text <> 'SATT_PÅ_MASKINELL_VENT'::text));
 
 
 --
@@ -3655,14 +3714,15 @@ CREATE UNIQUE INDEX uidx_behandling_03 ON public.behandling USING btree (fk_fags
 --
 
 CREATE UNIQUE INDEX uidx_behandling_vedtak_01 ON public.vedtak USING btree ((
-CASE
-    WHEN (aktiv = true) THEN fk_behandling_id
-    ELSE NULL::bigint
-END), (
-CASE
-    WHEN (aktiv = true) THEN aktiv
-    ELSE NULL::boolean
-END));
+                                                                                CASE
+                                                                                    WHEN (aktiv = true)
+                                                                                        THEN fk_behandling_id
+                                                                                    ELSE NULL::bigint
+                                                                                    END), (
+                                                                                CASE
+                                                                                    WHEN (aktiv = true) THEN aktiv
+                                                                                    ELSE NULL::boolean
+                                                                                    END));
 
 
 --
@@ -3684,14 +3744,16 @@ CREATE UNIQUE INDEX uidx_fagsak_type_aktoer_institusjon_ikke_arkivert ON public.
 --
 
 CREATE UNIQUE INDEX uidx_gr_personopplysninger_01 ON public.gr_personopplysninger USING btree ((
-CASE
-    WHEN (aktiv = true) THEN fk_behandling_id
-    ELSE NULL::bigint
-END), (
-CASE
-    WHEN (aktiv = true) THEN aktiv
-    ELSE NULL::boolean
-END));
+                                                                                                   CASE
+                                                                                                       WHEN (aktiv = true)
+                                                                                                           THEN fk_behandling_id
+                                                                                                       ELSE NULL::bigint
+                                                                                                       END), (
+                                                                                                   CASE
+                                                                                                       WHEN (aktiv = true)
+                                                                                                           THEN aktiv
+                                                                                                       ELSE NULL::boolean
+                                                                                                       END));
 
 
 --
@@ -3699,14 +3761,14 @@ END));
 --
 
 CREATE UNIQUE INDEX uidx_gr_soknad_01 ON public.gr_soknad USING btree ((
-CASE
-    WHEN (aktiv = true) THEN fk_behandling_id
-    ELSE NULL::bigint
-END), (
-CASE
-    WHEN (aktiv = true) THEN aktiv
-    ELSE NULL::boolean
-END));
+                                                                           CASE
+                                                                               WHEN (aktiv = true) THEN fk_behandling_id
+                                                                               ELSE NULL::bigint
+                                                                               END), (
+                                                                           CASE
+                                                                               WHEN (aktiv = true) THEN aktiv
+                                                                               ELSE NULL::boolean
+                                                                               END));
 
 
 --
@@ -3763,14 +3825,16 @@ CREATE UNIQUE INDEX uidx_sett_paa_vent_aktiv ON public.sett_paa_vent USING btree
 --
 
 CREATE UNIQUE INDEX uidx_totrinnskontroll_01 ON public.totrinnskontroll USING btree ((
-CASE
-    WHEN (aktiv = true) THEN fk_behandling_id
-    ELSE NULL::bigint
-END), (
-CASE
-    WHEN (aktiv = true) THEN aktiv
-    ELSE NULL::boolean
-END));
+                                                                                         CASE
+                                                                                             WHEN (aktiv = true)
+                                                                                                 THEN fk_behandling_id
+                                                                                             ELSE NULL::bigint
+                                                                                             END), (
+                                                                                         CASE
+                                                                                             WHEN (aktiv = true)
+                                                                                                 THEN aktiv
+                                                                                             ELSE NULL::boolean
+                                                                                             END));
 
 
 --
@@ -3855,7 +3919,7 @@ CREATE UNIQUE INDEX vurderingsstrategi_for_valutakurser_fk_behandling_id_idx ON 
 --
 
 ALTER TABLE ONLY public.aktoer_til_kompetanse
-    ADD CONSTRAINT aktoer_til_kompetanse_fk_aktoer_id_fkey FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT aktoer_til_kompetanse_fk_aktoer_id_fkey FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -3863,7 +3927,7 @@ ALTER TABLE ONLY public.aktoer_til_kompetanse
 --
 
 ALTER TABLE ONLY public.aktoer_til_kompetanse
-    ADD CONSTRAINT aktoer_til_kompetanse_fk_kompetanse_id_fkey FOREIGN KEY (fk_kompetanse_id) REFERENCES public.kompetanse(id);
+    ADD CONSTRAINT aktoer_til_kompetanse_fk_kompetanse_id_fkey FOREIGN KEY (fk_kompetanse_id) REFERENCES public.kompetanse (id);
 
 
 --
@@ -3871,7 +3935,7 @@ ALTER TABLE ONLY public.aktoer_til_kompetanse
 --
 
 ALTER TABLE ONLY public.aktoer_til_utenlandsk_periodebeloep
-    ADD CONSTRAINT aktoer_til_utenlandsk_periode_fk_utenlandsk_periodebeloep__fkey FOREIGN KEY (fk_utenlandsk_periodebeloep_id) REFERENCES public.utenlandsk_periodebeloep(id);
+    ADD CONSTRAINT aktoer_til_utenlandsk_periode_fk_utenlandsk_periodebeloep__fkey FOREIGN KEY (fk_utenlandsk_periodebeloep_id) REFERENCES public.utenlandsk_periodebeloep (id);
 
 
 --
@@ -3879,7 +3943,7 @@ ALTER TABLE ONLY public.aktoer_til_utenlandsk_periodebeloep
 --
 
 ALTER TABLE ONLY public.aktoer_til_utenlandsk_periodebeloep
-    ADD CONSTRAINT aktoer_til_utenlandsk_periodebeloep_fk_aktoer_id_fkey FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT aktoer_til_utenlandsk_periodebeloep_fk_aktoer_id_fkey FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -3887,7 +3951,7 @@ ALTER TABLE ONLY public.aktoer_til_utenlandsk_periodebeloep
 --
 
 ALTER TABLE ONLY public.aktoer_til_valutakurs
-    ADD CONSTRAINT aktoer_til_valutakurs_fk_aktoer_id_fkey FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT aktoer_til_valutakurs_fk_aktoer_id_fkey FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -3895,7 +3959,7 @@ ALTER TABLE ONLY public.aktoer_til_valutakurs
 --
 
 ALTER TABLE ONLY public.aktoer_til_valutakurs
-    ADD CONSTRAINT aktoer_til_valutakurs_fk_valutakurs_id_fkey FOREIGN KEY (fk_valutakurs_id) REFERENCES public.valutakurs(id);
+    ADD CONSTRAINT aktoer_til_valutakurs_fk_valutakurs_id_fkey FOREIGN KEY (fk_valutakurs_id) REFERENCES public.valutakurs (id);
 
 
 --
@@ -3903,7 +3967,7 @@ ALTER TABLE ONLY public.aktoer_til_valutakurs
 --
 
 ALTER TABLE ONLY public.andel_tilkjent_ytelse
-    ADD CONSTRAINT andel_tilkjent_ytelse_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT andel_tilkjent_ytelse_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3911,7 +3975,7 @@ ALTER TABLE ONLY public.andel_tilkjent_ytelse
 --
 
 ALTER TABLE ONLY public.andel_tilkjent_ytelse
-    ADD CONSTRAINT andel_tilkjent_ytelse_kilde_behandling_id_fkey FOREIGN KEY (kilde_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT andel_tilkjent_ytelse_kilde_behandling_id_fkey FOREIGN KEY (kilde_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3919,7 +3983,7 @@ ALTER TABLE ONLY public.andel_tilkjent_ytelse
 --
 
 ALTER TABLE ONLY public.andel_tilkjent_ytelse
-    ADD CONSTRAINT andel_tilkjent_ytelse_tilkjent_ytelse_id_fkey FOREIGN KEY (tilkjent_ytelse_id) REFERENCES public.tilkjent_ytelse(id) ON DELETE CASCADE;
+    ADD CONSTRAINT andel_tilkjent_ytelse_tilkjent_ytelse_id_fkey FOREIGN KEY (tilkjent_ytelse_id) REFERENCES public.tilkjent_ytelse (id) ON DELETE CASCADE;
 
 
 --
@@ -3927,7 +3991,7 @@ ALTER TABLE ONLY public.andel_tilkjent_ytelse
 --
 
 ALTER TABLE ONLY public.annen_vurdering
-    ADD CONSTRAINT annen_vurdering_fk_person_resultat_id_fkey FOREIGN KEY (fk_person_resultat_id) REFERENCES public.person_resultat(id);
+    ADD CONSTRAINT annen_vurdering_fk_person_resultat_id_fkey FOREIGN KEY (fk_person_resultat_id) REFERENCES public.person_resultat (id);
 
 
 --
@@ -3935,7 +3999,7 @@ ALTER TABLE ONLY public.annen_vurdering
 --
 
 ALTER TABLE ONLY public.behandling
-    ADD CONSTRAINT behandling_fk_fagsak_id_fkey FOREIGN KEY (fk_fagsak_id) REFERENCES public.fagsak(id);
+    ADD CONSTRAINT behandling_fk_fagsak_id_fkey FOREIGN KEY (fk_fagsak_id) REFERENCES public.fagsak (id);
 
 
 --
@@ -3943,7 +4007,7 @@ ALTER TABLE ONLY public.behandling
 --
 
 ALTER TABLE ONLY public.behandling_migreringsinfo
-    ADD CONSTRAINT behandling_migreringsinfo_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT behandling_migreringsinfo_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3951,7 +4015,7 @@ ALTER TABLE ONLY public.behandling_migreringsinfo
 --
 
 ALTER TABLE ONLY public.vilkaarsvurdering
-    ADD CONSTRAINT behandling_resultat_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT behandling_resultat_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3959,7 +4023,7 @@ ALTER TABLE ONLY public.vilkaarsvurdering
 --
 
 ALTER TABLE ONLY public.behandling_soknadsinfo
-    ADD CONSTRAINT behandling_soknadsinfo_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT behandling_soknadsinfo_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3967,7 +4031,7 @@ ALTER TABLE ONLY public.behandling_soknadsinfo
 --
 
 ALTER TABLE ONLY public.behandling_steg_tilstand
-    ADD CONSTRAINT behandling_steg_tilstand_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT behandling_steg_tilstand_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3975,7 +4039,7 @@ ALTER TABLE ONLY public.behandling_steg_tilstand
 --
 
 ALTER TABLE ONLY public.vedtak
-    ADD CONSTRAINT behandling_vedtak_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT behandling_vedtak_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3983,7 +4047,7 @@ ALTER TABLE ONLY public.vedtak
 --
 
 ALTER TABLE ONLY public.tilkjent_ytelse
-    ADD CONSTRAINT beregning_resultat_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT beregning_resultat_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -3991,7 +4055,7 @@ ALTER TABLE ONLY public.tilkjent_ytelse
 --
 
 ALTER TABLE ONLY public.brevmottaker
-    ADD CONSTRAINT brevmottaker_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
+    ADD CONSTRAINT brevmottaker_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id) ON DELETE CASCADE;
 
 
 --
@@ -3999,7 +4063,7 @@ ALTER TABLE ONLY public.brevmottaker
 --
 
 ALTER TABLE ONLY public.data_chunk
-    ADD CONSTRAINT data_chunk_fk_batch_id_fkey FOREIGN KEY (fk_batch_id) REFERENCES public.batch(id);
+    ADD CONSTRAINT data_chunk_fk_batch_id_fkey FOREIGN KEY (fk_batch_id) REFERENCES public.batch (id);
 
 
 --
@@ -4007,7 +4071,7 @@ ALTER TABLE ONLY public.data_chunk
 --
 
 ALTER TABLE ONLY public.endret_utbetaling_andel
-    ADD CONSTRAINT endret_utbetaling_andel_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT endret_utbetaling_andel_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4015,7 +4079,7 @@ ALTER TABLE ONLY public.endret_utbetaling_andel
 --
 
 ALTER TABLE ONLY public.endret_utbetaling_andel
-    ADD CONSTRAINT endret_utbetaling_andel_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT endret_utbetaling_andel_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4023,7 +4087,7 @@ ALTER TABLE ONLY public.endret_utbetaling_andel
 --
 
 ALTER TABLE ONLY public.eos_begrunnelse
-    ADD CONSTRAINT eos_begrunnelse_fk_vedtaksperiode_id_fkey FOREIGN KEY (fk_vedtaksperiode_id) REFERENCES public.vedtaksperiode(id) ON DELETE CASCADE;
+    ADD CONSTRAINT eos_begrunnelse_fk_vedtaksperiode_id_fkey FOREIGN KEY (fk_vedtaksperiode_id) REFERENCES public.vedtaksperiode (id) ON DELETE CASCADE;
 
 
 --
@@ -4031,7 +4095,7 @@ ALTER TABLE ONLY public.eos_begrunnelse
 --
 
 ALTER TABLE ONLY public.fagsak
-    ADD CONSTRAINT fagsak FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT fagsak FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4039,7 +4103,7 @@ ALTER TABLE ONLY public.fagsak
 --
 
 ALTER TABLE ONLY public.fagsak
-    ADD CONSTRAINT fagsak_fk_institusjon_id_fkey FOREIGN KEY (fk_institusjon_id) REFERENCES public.institusjon(id);
+    ADD CONSTRAINT fagsak_fk_institusjon_id_fkey FOREIGN KEY (fk_institusjon_id) REFERENCES public.institusjon (id);
 
 
 --
@@ -4047,7 +4111,7 @@ ALTER TABLE ONLY public.fagsak
 --
 
 ALTER TABLE ONLY public.andel_tilkjent_ytelse
-    ADD CONSTRAINT fk_andel_tilkjent_ytelse FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_andel_tilkjent_ytelse FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4055,7 +4119,7 @@ ALTER TABLE ONLY public.andel_tilkjent_ytelse
 --
 
 ALTER TABLE ONLY public.gr_periode_overgangsstonad
-    ADD CONSTRAINT fk_gr_periode_overgangsstonad FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_gr_periode_overgangsstonad FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4063,7 +4127,7 @@ ALTER TABLE ONLY public.gr_periode_overgangsstonad
 --
 
 ALTER TABLE ONLY public.person_resultat
-    ADD CONSTRAINT fk_person_resultat FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_person_resultat FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4071,7 +4135,7 @@ ALTER TABLE ONLY public.person_resultat
 --
 
 ALTER TABLE ONLY public.personident
-    ADD CONSTRAINT fk_personident FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_personident FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4079,7 +4143,7 @@ ALTER TABLE ONLY public.personident
 --
 
 ALTER TABLE ONLY public.po_person
-    ADD CONSTRAINT fk_po_person FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer(aktoer_id) ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_po_person FOREIGN KEY (fk_aktoer_id) REFERENCES public.aktoer (aktoer_id) ON UPDATE CASCADE;
 
 
 --
@@ -4087,7 +4151,7 @@ ALTER TABLE ONLY public.po_person
 --
 
 ALTER TABLE ONLY public.foedselshendelsefiltrering_resultat
-    ADD CONSTRAINT foedselshendelsefiltrering_resultat_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT foedselshendelsefiltrering_resultat_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4095,7 +4159,7 @@ ALTER TABLE ONLY public.foedselshendelsefiltrering_resultat
 --
 
 ALTER TABLE ONLY public.gr_periode_overgangsstonad
-    ADD CONSTRAINT gr_periode_overgangsstonad_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT gr_periode_overgangsstonad_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4103,7 +4167,7 @@ ALTER TABLE ONLY public.gr_periode_overgangsstonad
 --
 
 ALTER TABLE ONLY public.gr_personopplysninger
-    ADD CONSTRAINT gr_personopplysninger_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT gr_personopplysninger_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4111,7 +4175,7 @@ ALTER TABLE ONLY public.gr_personopplysninger
 --
 
 ALTER TABLE ONLY public.gr_soknad
-    ADD CONSTRAINT gr_soknad_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT gr_soknad_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4119,7 +4183,7 @@ ALTER TABLE ONLY public.gr_soknad
 --
 
 ALTER TABLE ONLY public.task_logg
-    ADD CONSTRAINT henvendelse_logg_henvendelse_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(id);
+    ADD CONSTRAINT henvendelse_logg_henvendelse_id_fkey FOREIGN KEY (task_id) REFERENCES public.task (id);
 
 
 --
@@ -4127,7 +4191,7 @@ ALTER TABLE ONLY public.task_logg
 --
 
 ALTER TABLE ONLY public.journalpost
-    ADD CONSTRAINT journalpost_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT journalpost_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4135,7 +4199,7 @@ ALTER TABLE ONLY public.journalpost
 --
 
 ALTER TABLE ONLY public.kompetanse
-    ADD CONSTRAINT kompetanse_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT kompetanse_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4143,7 +4207,7 @@ ALTER TABLE ONLY public.kompetanse
 --
 
 ALTER TABLE ONLY public.korrigert_etterbetaling
-    ADD CONSTRAINT korrigert_etterbetaling_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT korrigert_etterbetaling_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4151,7 +4215,7 @@ ALTER TABLE ONLY public.korrigert_etterbetaling
 --
 
 ALTER TABLE ONLY public.korrigert_vedtak
-    ADD CONSTRAINT korrigert_vedtak_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT korrigert_vedtak_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4159,7 +4223,7 @@ ALTER TABLE ONLY public.korrigert_vedtak
 --
 
 ALTER TABLE ONLY public.logg
-    ADD CONSTRAINT logg_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT logg_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4167,7 +4231,7 @@ ALTER TABLE ONLY public.logg
 --
 
 ALTER TABLE ONLY public.okonomi_simulering_mottaker
-    ADD CONSTRAINT okonomi_simulering_mottaker_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT okonomi_simulering_mottaker_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4175,7 +4239,7 @@ ALTER TABLE ONLY public.okonomi_simulering_mottaker
 --
 
 ALTER TABLE ONLY public.oppgave
-    ADD CONSTRAINT oppgave_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT oppgave_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4183,7 +4247,7 @@ ALTER TABLE ONLY public.oppgave
 --
 
 ALTER TABLE ONLY public.person_resultat
-    ADD CONSTRAINT periode_resultat_fk_behandling_resultat_id_fkey FOREIGN KEY (fk_vilkaarsvurdering_id) REFERENCES public.vilkaarsvurdering(id);
+    ADD CONSTRAINT periode_resultat_fk_behandling_resultat_id_fkey FOREIGN KEY (fk_vilkaarsvurdering_id) REFERENCES public.vilkaarsvurdering (id);
 
 
 --
@@ -4191,7 +4255,7 @@ ALTER TABLE ONLY public.person_resultat
 --
 
 ALTER TABLE ONLY public.po_arbeidsforhold
-    ADD CONSTRAINT po_arbeidsforhold_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT po_arbeidsforhold_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4199,7 +4263,7 @@ ALTER TABLE ONLY public.po_arbeidsforhold
 --
 
 ALTER TABLE ONLY public.po_bostedsadresse
-    ADD CONSTRAINT po_bostedsadresse_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT po_bostedsadresse_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4207,7 +4271,7 @@ ALTER TABLE ONLY public.po_bostedsadresse
 --
 
 ALTER TABLE ONLY public.po_doedsfall
-    ADD CONSTRAINT po_doedsfall_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT po_doedsfall_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4215,7 +4279,7 @@ ALTER TABLE ONLY public.po_doedsfall
 --
 
 ALTER TABLE ONLY public.po_opphold
-    ADD CONSTRAINT po_opphold_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT po_opphold_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4223,7 +4287,7 @@ ALTER TABLE ONLY public.po_opphold
 --
 
 ALTER TABLE ONLY public.po_person
-    ADD CONSTRAINT po_person_fk_gr_personopplysninger_id_fkey FOREIGN KEY (fk_gr_personopplysninger_id) REFERENCES public.gr_personopplysninger(id);
+    ADD CONSTRAINT po_person_fk_gr_personopplysninger_id_fkey FOREIGN KEY (fk_gr_personopplysninger_id) REFERENCES public.gr_personopplysninger (id);
 
 
 --
@@ -4231,7 +4295,7 @@ ALTER TABLE ONLY public.po_person
 --
 
 ALTER TABLE ONLY public.po_sivilstand
-    ADD CONSTRAINT po_sivilstand_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT po_sivilstand_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4239,7 +4303,7 @@ ALTER TABLE ONLY public.po_sivilstand
 --
 
 ALTER TABLE ONLY public.po_statsborgerskap
-    ADD CONSTRAINT po_statsborgerskap_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person(id);
+    ADD CONSTRAINT po_statsborgerskap_fk_po_person_id_fkey FOREIGN KEY (fk_po_person_id) REFERENCES public.po_person (id);
 
 
 --
@@ -4247,7 +4311,7 @@ ALTER TABLE ONLY public.po_statsborgerskap
 --
 
 ALTER TABLE ONLY public.refusjon_eos
-    ADD CONSTRAINT refusjon_eos_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT refusjon_eos_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4255,7 +4319,7 @@ ALTER TABLE ONLY public.refusjon_eos
 --
 
 ALTER TABLE ONLY public.satskjoering
-    ADD CONSTRAINT satskjoering_fk_fagsak_id_fkey FOREIGN KEY (fk_fagsak_id) REFERENCES public.fagsak(id) ON DELETE CASCADE;
+    ADD CONSTRAINT satskjoering_fk_fagsak_id_fkey FOREIGN KEY (fk_fagsak_id) REFERENCES public.fagsak (id) ON DELETE CASCADE;
 
 
 --
@@ -4263,7 +4327,7 @@ ALTER TABLE ONLY public.satskjoering
 --
 
 ALTER TABLE ONLY public.sett_paa_vent
-    ADD CONSTRAINT sett_paa_vent_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT sett_paa_vent_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4271,7 +4335,7 @@ ALTER TABLE ONLY public.sett_paa_vent
 --
 
 ALTER TABLE ONLY public.vilkar_resultat
-    ADD CONSTRAINT sist_endret_i_behandling_id_vilkar_resultat FOREIGN KEY (sist_endret_i_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT sist_endret_i_behandling_id_vilkar_resultat FOREIGN KEY (sist_endret_i_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4279,7 +4343,7 @@ ALTER TABLE ONLY public.vilkar_resultat
 --
 
 ALTER TABLE ONLY public.tilbakekreving
-    ADD CONSTRAINT tilbakekreving_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT tilbakekreving_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4287,7 +4351,7 @@ ALTER TABLE ONLY public.tilbakekreving
 --
 
 ALTER TABLE ONLY public.totrinnskontroll
-    ADD CONSTRAINT totrinnskontroll_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT totrinnskontroll_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4295,7 +4359,7 @@ ALTER TABLE ONLY public.totrinnskontroll
 --
 
 ALTER TABLE ONLY public.feilutbetalt_valuta
-    ADD CONSTRAINT trekk_i_loepende_utbetaling_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT trekk_i_loepende_utbetaling_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4303,7 +4367,7 @@ ALTER TABLE ONLY public.feilutbetalt_valuta
 --
 
 ALTER TABLE ONLY public.utenlandsk_periodebeloep
-    ADD CONSTRAINT utenlandsk_periodebeloep_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT utenlandsk_periodebeloep_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4311,7 +4375,7 @@ ALTER TABLE ONLY public.utenlandsk_periodebeloep
 --
 
 ALTER TABLE ONLY public.valutakurs
-    ADD CONSTRAINT valutakurs_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+    ADD CONSTRAINT valutakurs_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id);
 
 
 --
@@ -4319,7 +4383,7 @@ ALTER TABLE ONLY public.valutakurs
 --
 
 ALTER TABLE ONLY public.okonomi_simulering_postering
-    ADD CONSTRAINT vedtak_simulering_postering_fk_vedtak_simulering_mottaker__fkey FOREIGN KEY (fk_okonomi_simulering_mottaker_id) REFERENCES public.okonomi_simulering_mottaker(id) ON DELETE CASCADE;
+    ADD CONSTRAINT vedtak_simulering_postering_fk_vedtak_simulering_mottaker__fkey FOREIGN KEY (fk_okonomi_simulering_mottaker_id) REFERENCES public.okonomi_simulering_mottaker (id) ON DELETE CASCADE;
 
 
 --
@@ -4327,7 +4391,7 @@ ALTER TABLE ONLY public.okonomi_simulering_postering
 --
 
 ALTER TABLE ONLY public.vedtaksbegrunnelse
-    ADD CONSTRAINT vedtaksbegrunnelse_fk_vedtaksperiode_id_fkey FOREIGN KEY (fk_vedtaksperiode_id) REFERENCES public.vedtaksperiode(id) ON DELETE CASCADE;
+    ADD CONSTRAINT vedtaksbegrunnelse_fk_vedtaksperiode_id_fkey FOREIGN KEY (fk_vedtaksperiode_id) REFERENCES public.vedtaksperiode (id) ON DELETE CASCADE;
 
 
 --
@@ -4335,7 +4399,7 @@ ALTER TABLE ONLY public.vedtaksbegrunnelse
 --
 
 ALTER TABLE ONLY public.vedtaksbegrunnelse_fritekst
-    ADD CONSTRAINT vedtaksbegrunnelse_fritekst_fk_vedtaksperiode_id_fkey FOREIGN KEY (fk_vedtaksperiode_id) REFERENCES public.vedtaksperiode(id) ON DELETE CASCADE;
+    ADD CONSTRAINT vedtaksbegrunnelse_fritekst_fk_vedtaksperiode_id_fkey FOREIGN KEY (fk_vedtaksperiode_id) REFERENCES public.vedtaksperiode (id) ON DELETE CASCADE;
 
 
 --
@@ -4343,7 +4407,7 @@ ALTER TABLE ONLY public.vedtaksbegrunnelse_fritekst
 --
 
 ALTER TABLE ONLY public.vedtaksperiode
-    ADD CONSTRAINT vedtaksperiode_fk_vedtak_id_fkey FOREIGN KEY (fk_vedtak_id) REFERENCES public.vedtak(id);
+    ADD CONSTRAINT vedtaksperiode_fk_vedtak_id_fkey FOREIGN KEY (fk_vedtak_id) REFERENCES public.vedtak (id);
 
 
 --
@@ -4351,7 +4415,7 @@ ALTER TABLE ONLY public.vedtaksperiode
 --
 
 ALTER TABLE ONLY public.vilkar_resultat
-    ADD CONSTRAINT vilkar_resultat_fk_person_resultat_id_fkey FOREIGN KEY (fk_person_resultat_id) REFERENCES public.person_resultat(id);
+    ADD CONSTRAINT vilkar_resultat_fk_person_resultat_id_fkey FOREIGN KEY (fk_person_resultat_id) REFERENCES public.person_resultat (id);
 
 
 --
@@ -4359,7 +4423,7 @@ ALTER TABLE ONLY public.vilkar_resultat
 --
 
 ALTER TABLE ONLY public.vurderingsstrategi_for_valutakurser
-    ADD CONSTRAINT vurderingsstrategi_for_valutakurser_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
+    ADD CONSTRAINT vurderingsstrategi_for_valutakurser_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling (id) ON DELETE CASCADE;
 
 
 --

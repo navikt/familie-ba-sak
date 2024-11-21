@@ -27,18 +27,17 @@ fun <T : Tidsenhet> String.tilRegelverkResultatTidslinje(start: Tidspunkt<T>) =
 fun <T : Tidsenhet> String.tilUtdypendeVilkårRegelverkResultatTidslinje(
     vilkår: Vilkår,
     start: Tidspunkt<T>,
-) =
-    this.tilCharTidslinje(start).map {
-        when (it?.lowercaseChar()) {
-            '+' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null)
-            'n' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, NASJONALE_REGLER)
-            'x' -> UtdypendeVilkårRegelverkResultat(vilkår, IKKE_OPPFYLT, null)
-            'e' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, EØS_FORORDNINGEN)
-            'é' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, EØS_FORORDNINGEN, DELT_BOSTED)
-            'd' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null, DELT_BOSTED)
-            else -> null
-        }
+) = this.tilCharTidslinje(start).map {
+    when (it?.lowercaseChar()) {
+        '+' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null)
+        'n' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, NASJONALE_REGLER)
+        'x' -> UtdypendeVilkårRegelverkResultat(vilkår, IKKE_OPPFYLT, null)
+        'e' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, EØS_FORORDNINGEN)
+        'é' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, EØS_FORORDNINGEN, DELT_BOSTED)
+        'd' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null, DELT_BOSTED)
+        else -> null
     }
+}
 
 fun <T : Tidsenhet> String.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(start: Tidspunkt<T>) =
     this.tilCharTidslinje(start).map {

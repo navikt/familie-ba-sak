@@ -49,5 +49,5 @@ Egenskap: Gyldige begrunnelser for revurdering med opphør
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser |
-      | 01.09.2023 |          | OPPHØR             |           | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
+      | Fra dato   | Til dato | VedtaksperiodeType | Regelverk | Gyldige begrunnelser          | Ugyldige begrunnelser |
+      | 01.09.2023 |          | OPPHØR             |           | OPPHØR_BARN_FLYTTET_FRA_SØKER |                       |

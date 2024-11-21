@@ -1,4 +1,5 @@
-alter table BEHANDLING add column aktiv boolean default true;
+alter table BEHANDLING
+    add column aktiv boolean default true;
 
 CREATE UNIQUE INDEX UIDX_BEHANDLING_01
     ON BEHANDLING

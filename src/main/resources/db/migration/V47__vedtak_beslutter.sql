@@ -1,1 +1,2 @@
-ALTER TABLE VEDTAK ADD COLUMN ansvarlig_beslutter varchar;
+ALTER TABLE VEDTAK
+    ADD COLUMN ansvarlig_beslutter varchar;

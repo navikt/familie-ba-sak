@@ -40,11 +40,11 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser | Ugyldige begrunnelser                                                             |
-      | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                         |                                                                                   |
-      | 01.06.2022 | 28.02.2023 | UTBETALING         |           |                         | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                         |                                                                                   |
-      | 01.07.2023 | 31.01.2033 | UTBETALING         |           |                         |                                                                                   |
-      | 01.02.2033 |            | OPPHØR             |           |                         |                                                                                   |
+      | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                      |                                                                                   |
+      | 01.06.2022 | 28.02.2023 | UTBETALING         |           |                      | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                      |                                                                                   |
+      | 01.07.2023 | 31.01.2033 | UTBETALING         |           |                      |                                                                                   |
+      | 01.02.2033 |            | OPPHØR             |           |                      |                                                                                   |
 
   Scenario: Begrunnelse skal vises dersom både utgjørende vilkår er oppfylt og endret utbetalingsårsak er oppfylt
     Og lag personresultater for behandling 1
@@ -78,8 +78,8 @@ Egenskap: Gyldige begrunnelser for kombinasjon av utgjørende vilkår og endret 
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                                              | Ugyldige begrunnelser |
-      | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                                                                                   |                          |
-      | 01.06.2022 | 28.02.2023 | UTBETALING         |           | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |                          |
-      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                                                                   |                          |
-      | 01.07.2023 | 31.01.2033 | UTBETALING         |           |                                                                                   |                          |
-      | 01.02.2033 |            | OPPHØR             |           |                                                                                   |                          |
+      | 01.03.2022 | 31.05.2022 | UTBETALING         |           |                                                                                   |                       |
+      | 01.06.2022 | 28.02.2023 | UTBETALING         |           | ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY |                       |
+      | 01.03.2023 | 30.06.2023 | UTBETALING         |           |                                                                                   |                       |
+      | 01.07.2023 | 31.01.2033 | UTBETALING         |           |                                                                                   |                       |
+      | 01.02.2033 |            | OPPHØR             |           |                                                                                   |                       |

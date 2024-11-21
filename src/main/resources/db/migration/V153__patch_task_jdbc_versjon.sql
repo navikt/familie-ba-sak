@@ -1,1 +1,3 @@
-UPDATE task SET versjon=1 WHERE versjon=0;
+UPDATE task
+SET versjon=1
+WHERE versjon = 0;

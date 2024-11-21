@@ -49,7 +49,7 @@ Egenskap: Gyldige begrunnelser for overgangsstønad og småbarnstillegg
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser   | Ugyldige begrunnelser  |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser      | Ugyldige begrunnelser     |
       | 01.09.2022 | 31.01.2023 | UTBETALING         |           |                           | INNVILGET_SMÅBARNSTILLEGG |
       | 01.02.2023 | 28.02.2023 | UTBETALING         |           | INNVILGET_SMÅBARNSTILLEGG |                           |
       | 01.03.2023 | 30.06.2023 | UTBETALING         |           | INNVILGET_SMÅBARNSTILLEGG |                           |
@@ -113,7 +113,7 @@ Egenskap: Gyldige begrunnelser for overgangsstønad og småbarnstillegg
     Når vedtaksperiodene genereres for behandling 2
 
     Så forvent at følgende begrunnelser er gyldige
-      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser   | Ugyldige begrunnelser  |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser      | Ugyldige begrunnelser     |
       | 01.11.2023 | 31.08.2024 | UTBETALING         |           | INNVILGET_SMÅBARNSTILLEGG |                           |
       | 01.09.2024 | 31.07.2028 | UTBETALING         |           |                           | INNVILGET_SMÅBARNSTILLEGG |
       | 01.08.2028 | 31.07.2040 | UTBETALING         |           |                           |                           |

@@ -25,7 +25,7 @@ Egenskap: Vedtaksperioder med kompetanser for flere barn
       | 7890    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 07.12.2022 |            | Oppfylt  |
 
     Og med kompetanser
-      | AktørId   | Fra dato   | Til dato   | Resultat              | BehandlingId |
+      | AktørId    | Fra dato   | Til dato   | Resultat              | BehandlingId |
       | 3456       | 01.05.2020 | 31.12.2022 | NORGE_ER_PRIMÆRLAND   | 1            |
       | 3456, 7890 | 01.01.2023 | 30.04.2023 | NORGE_ER_SEKUNDÆRLAND | 1            |
       | 3456, 7890 | 01.05.2023 | 31.03.2038 | NORGE_ER_PRIMÆRLAND   | 1            |
@@ -40,9 +40,9 @@ Egenskap: Vedtaksperioder med kompetanser for flere barn
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende vedtaksperioder for behandling 1
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
-      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn og søker        |
-      | 01.01.2023 | 30.04.2023 | Utbetaling         | Barna og søker       |
-      | 01.05.2023 | 31.03.2038 | Utbetaling         | Barna og søker       |
-      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn og søker        |
-      | 01.12.2040 |            | Opphør             | Kun søker            |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar      |
+      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn og søker  |
+      | 01.01.2023 | 30.04.2023 | Utbetaling         | Barna og søker |
+      | 01.05.2023 | 31.03.2038 | Utbetaling         | Barna og søker |
+      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn og søker  |
+      | 01.12.2040 |            | Opphør             | Kun søker      |

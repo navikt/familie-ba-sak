@@ -1,4 +1,5 @@
-CREATE TABLE vedtak_simulering_mottaker (
+CREATE TABLE vedtak_simulering_mottaker
+(
     id              BIGINT PRIMARY KEY,
     fk_vedtak_id    BIGINT REFERENCES vedtak (id),
     mottaker_nummer VARCHAR(50),
@@ -8,7 +9,8 @@ CREATE TABLE vedtak_simulering_mottaker (
 CREATE SEQUENCE vedtak_simulering_mottaker_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 CREATE INDEX ON vedtak_simulering_mottaker (fk_vedtak_id);
 
-CREATE TABLE vedtak_simulering_postering (
+CREATE TABLE vedtak_simulering_postering
+(
     id                               BIGINT PRIMARY KEY,
     fk_vedtak_simulering_mottaker_id BIGINT REFERENCES vedtak_simulering_mottaker (id),
     fag_omraade_kode                 VARCHAR(50),

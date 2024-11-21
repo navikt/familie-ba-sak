@@ -10,9 +10,9 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og to barn
 
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
-      | 1            | 1234     | SØKER      | 11.01.1970  |
-      | 1            | 3456     | BARN       | 13.04.2020  |
-      | 1            | 7890     | BARN       | 07.12.2022  |
+      | 1            | 1234    | SØKER      | 11.01.1970  |
+      | 1            | 3456    | BARN       | 13.04.2020  |
+      | 1            | 7890    | BARN       | 07.12.2022  |
 
   Scenario: Skal lage vedtaksperioder for mor, og to barn med vilkår - nytt barn kommer til
 
@@ -27,17 +27,17 @@ Egenskap: Vedtaksperioder ved endring av vilkår for mor og to barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456     | 01.05.2020 | 31.03.2038 | 1054  | 1            |
-      | 7890     | 01.01.2023 | 30.11.2040 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
+      | 7890    | 01.01.2023 | 30.11.2040 | 1354  | 1            |
 
     Når vedtaksperiodene genereres for behandling 1
 
     Så forvent følgende vedtaksperioder for behandling 1
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar               |
-      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn1 og søker          |
-      | 01.01.2023 | 31.03.2038 | Utbetaling         | Begge barn og søker     |
-      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn2 og søker          |
-      | 01.12.2040 |            | Opphør             | Kun søker               |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar           |
+      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn1 og søker      |
+      | 01.01.2023 | 31.03.2038 | Utbetaling         | Begge barn og søker |
+      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn2 og søker      |
+      | 01.12.2040 |            | Opphør             | Kun søker           |
 
 
 

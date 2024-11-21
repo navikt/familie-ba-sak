@@ -40,8 +40,8 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.05.2020 | UTBETALING         |                                          |                          |
-      | 01.06.2020 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
+      | 01.05.2020 | 31.05.2020 | UTBETALING         |                                          |                       |
+      | 01.06.2020 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                       |
 
 
   Scenario: Skal ikke få med begrunnelse som kun gjelder søker når barn sine vilkår endrer seg
@@ -63,9 +63,9 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser | Ugyldige begrunnelser                   |
-      | 01.05.2020 | 31.05.2020 | UTBETALING         |                         | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
-      | 01.06.2020 | 31.03.2038 | UTBETALING         |                         | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
-      | 01.04.2038 |            | OPPHØR             |                         |                                         |
+      | 01.05.2020 | 31.05.2020 | UTBETALING         |                      | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
+      | 01.06.2020 | 31.03.2038 | UTBETALING         |                      | FORTSATT_INNVILGET_SØKER_BOSATT_I_RIKET |
+      | 01.04.2038 |            | OPPHØR             |                      |                                         |
 
   Scenario: Skal få med begrunnelse som kun gjelder søker når barn sine vilkår endrer seg om barn er søker
     Og lag personresultater for behandling 2
@@ -84,5 +84,5 @@ Egenskap: Gyldige begrunnelser for rolle ved endring av vilkår
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Gyldige begrunnelser                     | Ugyldige begrunnelser |
-      | 01.05.2020 | 31.05.2022 | UTBETALING         |                                          |                          |
-      | 01.06.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                          |
+      | 01.05.2020 | 31.05.2022 | UTBETALING         |                                          |                       |
+      | 01.06.2022 |            | OPPHØR             | OPPHØR_UTENLANDSOPPHOLD_OVER_TRE_MÅNEDER |                       |

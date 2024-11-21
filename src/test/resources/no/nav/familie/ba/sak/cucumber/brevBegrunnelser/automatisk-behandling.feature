@@ -96,9 +96,9 @@ Egenskap: Brevbegrunnelser ved automatiske behandlinger
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk | Gyldige begrunnelser                                       | Ugyldige begrunnelser |
-      | 01.11.2023 | 30.09.2027 | UTBETALING         |           | REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD |                          |
-      | 01.10.2027 | 30.09.2039 | UTBETALING         |           |                                                            |                          |
-      | 01.10.2039 |            | OPPHØR             |           |                                                            |                          |
+      | 01.11.2023 | 30.09.2027 | UTBETALING         |           | REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD |                       |
+      | 01.10.2027 | 30.09.2039 | UTBETALING         |           |                                                            |                       |
+      | 01.10.2039 |            | OPPHØR             |           |                                                            |                       |
 
     Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser                                       | Eøsbegrunnelser | Fritekster |

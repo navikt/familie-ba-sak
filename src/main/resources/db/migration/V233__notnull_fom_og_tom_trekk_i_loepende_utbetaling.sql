@@ -1,8 +1,10 @@
 update TREKK_I_LOEPENDE_UTBETALING
-    set FOM = '1900-01-01' where FOM is null;
+set FOM = '1900-01-01'
+where FOM is null;
 
 update TREKK_I_LOEPENDE_UTBETALING
-    set TOM = '2900-01-01' where TOM is null;
+set TOM = '2900-01-01'
+where TOM is null;
 
 
 alter table TREKK_I_LOEPENDE_UTBETALING

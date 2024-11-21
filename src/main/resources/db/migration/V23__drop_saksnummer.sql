@@ -1,1 +1,2 @@
-alter table BEHANDLING drop column saksnummer;
+alter table BEHANDLING
+    drop column saksnummer;

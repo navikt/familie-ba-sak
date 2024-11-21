@@ -5,7 +5,7 @@ Egenskap: Vedtaksperioder for fortsatt innvilget
 
   Bakgrunn:
     Gitt følgende fagsaker
-      | FagsakId  | Fagsaktype |
+      | FagsakId | Fagsaktype |
       | 1        | NORMAL     |
 
     Gitt følgende behandlinger

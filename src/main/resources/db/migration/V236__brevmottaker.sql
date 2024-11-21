@@ -1,16 +1,17 @@
-CREATE TABLE IF NOT EXISTS brevmottaker (
-    id               BIGINT       PRIMARY KEY,
-    fk_behandling_id BIGINT       REFERENCES behandling (id) ON DELETE CASCADE NOT NULL,
-    type             VARCHAR(50)                             NOT NULL,
-    navn             VARCHAR                                 NOT NULL,
-    adresselinje_1   VARCHAR                                 NOT NULL,
+CREATE TABLE IF NOT EXISTS brevmottaker
+(
+    id               BIGINT PRIMARY KEY,
+    fk_behandling_id BIGINT REFERENCES behandling (id) ON DELETE CASCADE NOT NULL,
+    type             VARCHAR(50)                                         NOT NULL,
+    navn             VARCHAR                                             NOT NULL,
+    adresselinje_1   VARCHAR                                             NOT NULL,
     adresselinje_2   VARCHAR,
-    postnummer       VARCHAR                                 NOT NULL,
-    poststed         VARCHAR                                 NOT NULL,
-    landkode         VARCHAR(2)                              NOT NULL,
-    versjon          BIGINT       DEFAULT 0                  NOT NULL,
-    opprettet_av     VARCHAR      DEFAULT 'VL'               NOT NULL,
-    opprettet_tid    TIMESTAMP(3) DEFAULT LOCALTIMESTAMP     NOT NULL,
+    postnummer       VARCHAR                                             NOT NULL,
+    poststed         VARCHAR                                             NOT NULL,
+    landkode         VARCHAR(2)                                          NOT NULL,
+    versjon          BIGINT       DEFAULT 0                              NOT NULL,
+    opprettet_av     VARCHAR      DEFAULT 'VL'                           NOT NULL,
+    opprettet_tid    TIMESTAMP(3) DEFAULT LOCALTIMESTAMP                 NOT NULL,
     endret_av        VARCHAR,
     endret_tid       TIMESTAMP(3)
 );

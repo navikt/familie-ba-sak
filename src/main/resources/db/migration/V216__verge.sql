@@ -1,4 +1,5 @@
-CREATE TABLE verge (
+CREATE TABLE verge
+(
     id               BIGINT PRIMARY KEY,
     navn             VARCHAR                             NOT NULL,
     adresse          VARCHAR                             NOT NULL,
