@@ -7,9 +7,6 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
@@ -48,7 +45,6 @@ import java.util.Properties
 
 @Service
 class DokumentService(
-    private val journalføringRepository: JournalføringRepository,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
@@ -125,24 +121,17 @@ class DokumentService(
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
 
         mottakere.forEach { mottakerInfo ->
-            val journalpostId =
-                utgåendeJournalføringService
-                    .journalførManueltBrev(
-                        fnr = fagsak.aktør.aktivFødselsnummer(),
-                        fagsakId = fagsakId.toString(),
-                        journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                        brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
-                        dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-                        førsteside = førsteside,
-                        eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
-                        avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
-                    ).also { journalposterTilDistribusjon[it] = mottakerInfo }
-
-            behandling?.let {
-                journalføringRepository.save(
-                    DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.U),
-                )
-            }
+            utgåendeJournalføringService
+                .journalførManueltBrev(
+                    fnr = fagsak.aktør.aktivFødselsnummer(),
+                    fagsakId = fagsakId.toString(),
+                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
+                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
+                    dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                    førsteside = førsteside,
+                    eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
+                    avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
+                ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
         if (behandling != null && manueltBrevRequest.brevmal.førerTilOpplysningsplikt()) {
