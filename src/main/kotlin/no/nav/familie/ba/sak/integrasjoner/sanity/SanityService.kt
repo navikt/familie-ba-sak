@@ -18,6 +18,7 @@ class SanityService(
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<Standardbegrunnelse, SanityBegrunnelse> {
+        logger.info("Henter SanityBegrunnelser")
         val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
 
         val sanityBegrunnelser = sanityKlient.hentBegrunnelser()
@@ -44,6 +45,7 @@ class SanityService(
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")
     fun hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
+        logger.info("Henter SanityEØSBegrunnelser")
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
 
         val sanityEØSBegrunnelser = sanityKlient.hentEØSBegrunnelser()
