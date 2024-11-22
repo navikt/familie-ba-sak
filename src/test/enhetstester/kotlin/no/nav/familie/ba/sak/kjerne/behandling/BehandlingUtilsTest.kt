@@ -2,19 +2,14 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.utledLøpendeUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -22,8 +17,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 class BehandlingUtilsTest {
@@ -122,108 +115,6 @@ class BehandlingUtilsTest {
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
             ),
         )
-    }
-
-    @Test
-    fun `Skal returnere utvidet hvis det eksisterer en løpende utvidet-sak`() {
-        val søkerAktørId = randomAktør()
-
-        val behandling = lagBehandling()
-
-        val tilkjentYtelse =
-            TilkjentYtelse(
-                behandling = behandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-            )
-
-        val andelTilkjentYtelse =
-            listOf(
-                AndelTilkjentYtelse(
-                    behandlingId = behandling.id,
-                    type = YtelseType.UTVIDET_BARNETRYGD,
-                    tilkjentYtelse = tilkjentYtelse,
-                    aktør = søkerAktørId,
-                    kalkulertUtbetalingsbeløp = 1054,
-                    nasjonaltPeriodebeløp = 1054,
-                    sats = 123,
-                    stønadFom = YearMonth.of(2015, 6),
-                    stønadTom = YearMonth.now().plusYears(5),
-                    prosent = BigDecimal(2),
-                ),
-            )
-
-        val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
-
-        assertEquals(BehandlingUnderkategori.UTVIDET, løpendeUndekategori)
-    }
-
-    @Test
-    fun `Skal returnere ordinær hvis det eksisterer en utvidet-sak som er avsluttet`() {
-        val søkerAktørId = randomAktør()
-
-        val behandling = lagBehandling()
-
-        val tilkjentYtelse =
-            TilkjentYtelse(
-                behandling = behandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-            )
-
-        val andelTilkjentYtelse =
-            listOf(
-                AndelTilkjentYtelse(
-                    behandlingId = behandling.id,
-                    type = YtelseType.UTVIDET_BARNETRYGD,
-                    tilkjentYtelse = tilkjentYtelse,
-                    aktør = søkerAktørId,
-                    kalkulertUtbetalingsbeløp = 1054,
-                    nasjonaltPeriodebeløp = 1054,
-                    sats = 123,
-                    stønadFom = YearMonth.of(2015, 6),
-                    stønadTom = YearMonth.now().minusYears(1),
-                    prosent = BigDecimal(2),
-                ),
-            )
-
-        val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
-
-        assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
-    }
-
-    @Test
-    fun `Skal returnere ordinær hvis det eksisterer en løpende ordinær-sak`() {
-        val søkerAktørId = randomAktør()
-
-        val behandling = lagBehandling()
-
-        val tilkjentYtelse =
-            TilkjentYtelse(
-                behandling = behandling,
-                opprettetDato = LocalDate.now(),
-                endretDato = LocalDate.now(),
-            )
-
-        val andelTilkjentYtelse =
-            listOf(
-                AndelTilkjentYtelse(
-                    behandlingId = behandling.id,
-                    type = YtelseType.ORDINÆR_BARNETRYGD,
-                    tilkjentYtelse = tilkjentYtelse,
-                    aktør = søkerAktørId,
-                    kalkulertUtbetalingsbeløp = 1054,
-                    nasjonaltPeriodebeløp = 1054,
-                    sats = 123,
-                    stønadFom = YearMonth.of(2015, 6),
-                    stønadTom = YearMonth.now().plusYears(2),
-                    prosent = BigDecimal(2),
-                ),
-            )
-
-        val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
-
-        assertEquals(BehandlingUnderkategori.ORDINÆR, løpendeUndekategori)
     }
 
     @Test

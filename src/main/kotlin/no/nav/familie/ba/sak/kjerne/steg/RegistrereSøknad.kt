@@ -33,9 +33,9 @@ class RegistrereSøknad(
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
         if (behandling.underkategori != søknadDTO.underkategori.tilDomene()) {
-            behandlingstemaService.oppdaterBehandlingstema(
-                behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-                overstyrtUnderkategori = søknadDTO.underkategori.tilDomene(),
+            behandlingstemaService.oppdaterBehandlingstemaForRegistrerSøknad(
+                behandling = behandling,
+                nyUnderkategori = søknadDTO.underkategori.tilDomene(),
             )
         }
 
@@ -51,14 +51,14 @@ class RegistrereSøknad(
         val forrigeBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
         persongrunnlagService.registrerBarnFraSøknad(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             søknadDTO = søknadDTO,
         )
 
         // TODO: Fjern EndretUtbetalingAndel for personer som ikke lenger er relevant for behandlingen
         tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            behandling = behandling,
             bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
         )
 
@@ -66,7 +66,7 @@ class RegistrereSøknad(
 
         vedtakService.oppdater(vedtak)
 
-        return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
+        return hentNesteStegForNormalFlyt(behandling = behandling)
     }
 
     override fun stegType(): StegType = StegType.REGISTRERE_SØKNAD
