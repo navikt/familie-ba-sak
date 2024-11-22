@@ -16,12 +16,18 @@ class SanityService(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private var sanityBegrunnelseCache: List<SanityBegrunnelse> = emptyList()
+    private var sanityEØSBegrunnelseCache: List<SanityEØSBegrunnelse> = emptyList()
+
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<Standardbegrunnelse, SanityBegrunnelse> {
-        logger.info("Henter SanityBegrunnelser")
-        val enumPåApiNavn = Standardbegrunnelse.values().associateBy { it.sanityApiNavn }
+        val enumPåApiNavn = Standardbegrunnelse.entries.associateBy { it.sanityApiNavn }
 
-        val sanityBegrunnelser = sanityKlient.hentBegrunnelser()
+        val sanityBegrunnelser =
+            hentBegrunnelserMedCache(
+                hentBegrunnelser = { sanityKlient.hentBegrunnelser() },
+                cache = sanityBegrunnelseCache,
+            ) { oppdatertCache -> sanityBegrunnelseCache = oppdatertCache }
 
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityBegrunnelser, "SanityBegrunnelse")
 
@@ -45,10 +51,13 @@ class SanityService(
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")
     fun hentSanityEØSBegrunnelser(filtrerBortBegrunnelserSomIkkeErIBruk: Boolean = false): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
-        logger.info("Henter SanityEØSBegrunnelser")
         val enumPåApiNavn = EØSStandardbegrunnelse.entries.associateBy { it.sanityApiNavn }
 
-        val sanityEØSBegrunnelser = sanityKlient.hentEØSBegrunnelser()
+        val sanityEØSBegrunnelser =
+            hentBegrunnelserMedCache(
+                hentBegrunnelser = { sanityKlient.hentEØSBegrunnelser() },
+                cache = sanityEØSBegrunnelseCache,
+            ) { oppdatertCache -> sanityEØSBegrunnelseCache = oppdatertCache }
 
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityEØSBegrunnelser, "SanityEØSBegrunnelse")
 
@@ -82,4 +91,19 @@ class SanityService(
             }
         }
     }
+
+    private fun <T> hentBegrunnelserMedCache(
+        hentBegrunnelser: () -> List<T>,
+        cache: List<T>,
+        oppdaterCache: (List<T>) -> Unit,
+    ): List<T> =
+        try {
+            hentBegrunnelser().also { oppdaterCache(it) }
+        } catch (e: Exception) {
+            if (cache.isEmpty()) {
+                throw e
+            }
+            logger.warn("Kunne ikke hente begrunnelser fra Sanity, bruker siste cachet begrunnelser", e)
+            cache
+        }
 }
