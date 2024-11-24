@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEØSBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class HjemlerServiceTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
@@ -35,6 +37,25 @@ class HjemlerServiceTest {
             persongrunnlagService = persongrunnlagService,
             refusjonEøsService = refusjonEøsService,
         )
+
+    @Test
+    fun `skal kaste exception hvis vilkårsvurdering ikke blir funnet`() {
+        // Arrange
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(1L)
+        } returns null
+
+        // Act & assert
+        val exception =
+            assertThrows<IllegalStateException> {
+                hjemlerService.hentHjemmeltekst(
+                    behandlingId = 1L,
+                    vedtakKorrigertHjemmelSkalMedIBrev = false,
+                    sorterteVedtaksperioderMedBegrunnelser = emptyList(),
+                )
+            }
+        assertThat(exception.message).isEqualTo("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+    }
 
     @Test
     fun `skal returnere sorterte hjemler`() {
@@ -1093,6 +1114,42 @@ class HjemlerServiceTest {
                 "folketrygdlova §§ 644, 322, 1337 og 3154, " +
                 "EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68, " +
                 "EØS-forordning 987/2009 artikkel 58 og 60 og forvaltningslova § 35",
+        )
+    }
+
+    @Test
+    fun `skal kaste exception om ingen hjemmeltekst blir utledet`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every { sanityService.hentSanityBegrunnelser() } returns emptyMap()
+        every { sanityService.hentSanityEØSBegrunnelser() } returns emptyMap()
+
+        // Act & assert
+        val exception =
+            assertThrows<FunksjonellFeil> {
+                hjemlerService.hentHjemmeltekst(
+                    behandlingId = behandling.id,
+                    sorterteVedtaksperioderMedBegrunnelser = emptyList(),
+                )
+            }
+        assertThat(exception.message).isEqualTo(
+            "Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. " +
+                "Du må velge minst én begrunnelse som er knyttet til en hjemmel.",
         )
     }
 }
