@@ -48,7 +48,7 @@ class HjemlerService(
                 målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),
                 hjemlerSeparasjonsavtaleStorbritannia = hentSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 ordinæreHjemler =
-                    hentOrdinæreHjemler(
+                    utledOrdinæreHjemler(
                         sanityBegrunnelser = sanitybegrunnelser,
                         sanityEøsBegrunnelser = sanityEøsBegrunnelser,
                         opplysningspliktHjemlerSkalMedIBrev = !vilkårsvurdering.erOpplysningspliktVilkårOppfylt(),
