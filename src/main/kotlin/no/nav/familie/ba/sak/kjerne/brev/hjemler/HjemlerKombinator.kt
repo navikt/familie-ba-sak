@@ -6,17 +6,17 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 
 fun kombinerHjemler(
     målform: Målform,
-    hjemlerSeparasjonsavtaleStorbritannia: List<String>,
+    separasjonsavtaleStorbritanniaHjemler: List<String>,
     ordinæreHjemler: List<String>,
-    hjemlerFraFolketrygdloven: List<String>,
-    hjemlerEØSForordningen883: List<String>,
-    hjemlerEØSForordningen987: List<String>,
-    hjemlerFraForvaltningsloven: List<String>,
+    folketrygdlovenHjemler: List<String>,
+    eøsForordningen883Hjemler: List<String>,
+    eøsForordningen987Hjemler: List<String>,
+    forvaltningslovenHjemler: List<String>,
 ): List<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
 
     // Rekkefølgen her er viktig
-    if (hjemlerSeparasjonsavtaleStorbritannia.isNotEmpty()) {
+    if (separasjonsavtaleStorbritanniaHjemler.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
                 when (målform) {
@@ -25,7 +25,7 @@ fun kombinerHjemler(
                 }
             } ${
                 Utils.slåSammen(
-                    hjemlerSeparasjonsavtaleStorbritannia,
+                    separasjonsavtaleStorbritanniaHjemler,
                 )
             }",
         )
@@ -47,7 +47,7 @@ fun kombinerHjemler(
         )
     }
 
-    if (hjemlerFraFolketrygdloven.isNotEmpty()) {
+    if (folketrygdlovenHjemler.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
                 when (målform) {
@@ -56,22 +56,22 @@ fun kombinerHjemler(
                 }
             } ${
                 hjemlerTilHjemmeltekst(
-                    hjemler = hjemlerFraFolketrygdloven,
+                    hjemler = folketrygdlovenHjemler,
                     lovForHjemmel = "folketrygdloven",
                 )
             }",
         )
     }
 
-    if (hjemlerEØSForordningen883.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(hjemlerEØSForordningen883)}")
+    if (eøsForordningen883Hjemler.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(eøsForordningen883Hjemler)}")
     }
 
-    if (hjemlerEØSForordningen987.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(hjemlerEØSForordningen987)}")
+    if (eøsForordningen987Hjemler.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(eøsForordningen987Hjemler)}")
     }
 
-    if (hjemlerFraForvaltningsloven.isNotEmpty()) {
+    if (forvaltningslovenHjemler.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
                 when (målform) {
@@ -80,7 +80,7 @@ fun kombinerHjemler(
                 }
             } ${
                 hjemlerTilHjemmeltekst(
-                    hjemler = hjemlerFraForvaltningsloven,
+                    hjemler = forvaltningslovenHjemler,
                     lovForHjemmel = "forvaltningsloven",
                 )
             }",

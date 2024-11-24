@@ -46,7 +46,7 @@ class HjemlerService(
         val alleHjemlerForBegrunnelser =
             kombinerHjemler(
                 målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),
-                hjemlerSeparasjonsavtaleStorbritannia = utledSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                separasjonsavtaleStorbritanniaHjemler = utledSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 ordinæreHjemler =
                     utledOrdinæreHjemler(
                         sanityBegrunnelser = sanitybegrunnelser,
@@ -54,10 +54,10 @@ class HjemlerService(
                         opplysningspliktHjemlerSkalMedIBrev = !vilkårsvurdering.erOpplysningspliktVilkårOppfylt(),
                         finnesVedtaksperiodeMedFritekst = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
                     ),
-                hjemlerFraFolketrygdloven = utledFolketrygdlovenHjemler(sanityBegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
-                hjemlerEØSForordningen883 = utledEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
-                hjemlerEØSForordningen987 = utledEØSForordningen987Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
-                hjemlerFraForvaltningsloven = utledForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
+                folketrygdlovenHjemler = utledFolketrygdlovenHjemler(sanityBegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                eøsForordningen883Hjemler = utledEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                eøsForordningen987Hjemler = utledEØSForordningen987Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
+                forvaltningslovenHjemler = utledForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
             )
 
         return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
