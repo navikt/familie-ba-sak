@@ -16,7 +16,7 @@ class HjemlerService(
     private val persongrunnlagService: PersongrunnlagService,
     private val refusjonEøsService: RefusjonEøsService,
 ) {
-    fun hentHjemler(
+    fun hentHjemmeltekst(
         behandlingId: Long,
         vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
         sorterteVedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
@@ -34,6 +34,7 @@ class HjemlerService(
 
         val alleHjemlerForBegrunnelser =
             kombinerHjemler(
+                målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),
                 hjemlerSeparasjonsavtaleStorbritannia = hentSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 ordinæreHjemler =
                     hentOrdinæreHjemler(
@@ -45,7 +46,6 @@ class HjemlerService(
                 hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanitybegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen883 = hentEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
-                målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),
                 hjemlerFraForvaltningsloven = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
             )
 

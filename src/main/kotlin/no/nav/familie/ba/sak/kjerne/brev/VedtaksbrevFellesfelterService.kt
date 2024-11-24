@@ -64,8 +64,8 @@ class VedtaksbrevFellesfelterService(
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
 
-        val hjemler =
-            hjemlerService.hentHjemler(
+        val hjemmeltekst =
+            hjemlerService.hentHjemmeltekst(
                 behandlingId = behandlingId,
                 sorterteVedtaksperioderMedBegrunnelser = sorterteVedtaksperioderMedBegrunnelser,
                 vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
@@ -80,7 +80,7 @@ class VedtaksbrevFellesfelterService(
             enhet = grunnlagOgSignaturData.enhet,
             saksbehandler = grunnlagOgSignaturData.saksbehandler,
             beslutter = grunnlagOgSignaturData.beslutter,
-            hjemmeltekst = Hjemmeltekst(hjemler),
+            hjemmeltekst = Hjemmeltekst(hjemmeltekst),
             søkerNavn = organisasjonsnavn ?: grunnlagOgSignaturData.grunnlag.søker.navn,
             søkerFødselsnummer =
                 grunnlagOgSignaturData.grunnlag.søker.aktør

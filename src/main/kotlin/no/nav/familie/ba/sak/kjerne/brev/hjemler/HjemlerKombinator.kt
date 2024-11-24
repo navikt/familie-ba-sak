@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.kjerne.brev.hjemlerTilHjemmeltekst
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 
 fun kombinerHjemler(
+    målform: Målform,
     hjemlerSeparasjonsavtaleStorbritannia: List<String>,
     ordinæreHjemler: List<String>,
     hjemlerFraFolketrygdloven: List<String>,
     hjemlerEØSForordningen883: List<String>,
     hjemlerEØSForordningen987: List<String>,
-    målform: Målform,
     hjemlerFraForvaltningsloven: List<String>,
 ): List<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
