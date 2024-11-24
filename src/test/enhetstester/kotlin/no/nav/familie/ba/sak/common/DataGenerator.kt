@@ -958,6 +958,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     stegService: StegService,
     fagsakId: Long,
     brevmalService: BrevmalService,
+    vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val behandling =
         stegService.håndterNyBehandling(
@@ -993,6 +994,12 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             },
         )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
+
+    leggTilBegrunnelsePåVedtaksperiodeIBehandling(
+        behandling = behandlingEtterSimuleringSteg,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService,
+    )
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
@@ -1151,14 +1158,25 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     val perisisterteVedtaksperioder =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
 
-    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-        vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
-        standardbegrunnelserFraFrontend =
-            listOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-            ),
-        eøsStandardbegrunnelserFraFrontend = emptyList(),
-    )
+    if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
+            standardbegrunnelserFraFrontend =
+                listOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                ),
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
+        )
+    } else {
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
+            standardbegrunnelserFraFrontend =
+                listOf(
+                    Standardbegrunnelse.FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET,
+                ),
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
+        )
+    }
 }
 
 fun lagVilkårResultat(

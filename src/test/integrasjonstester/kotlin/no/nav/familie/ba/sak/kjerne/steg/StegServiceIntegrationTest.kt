@@ -171,6 +171,7 @@ class StegServiceIntegrationTest(
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 brevmalService = brevmalService,
+                vilkårInnvilgetFom = LocalDate.now().minusYears(1),
             )
 
         // Venter med å kjøre gjennom til avsluttet til brev er støttet for fortsatt innvilget.
@@ -182,6 +183,7 @@ class StegServiceIntegrationTest(
             stegService = stegService,
             fagsakId = behandling.fagsak.id,
             brevmalService = brevmalService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 
