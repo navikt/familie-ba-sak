@@ -46,7 +46,7 @@ class HjemlerService(
         val alleHjemlerForBegrunnelser =
             kombinerHjemler(
                 målform = persongrunnlagService.hentSøkersMålform(behandlingId = behandlingId),
-                hjemlerSeparasjonsavtaleStorbritannia = hentSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                hjemlerSeparasjonsavtaleStorbritannia = utledSeprasjonsavtaleStorbritanniaHjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 ordinæreHjemler =
                     utledOrdinæreHjemler(
                         sanityBegrunnelser = sanitybegrunnelser,
