@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 
-fun utledHjemlerForEøsForordningen987(
+fun utledEØSForordningen987Hjemler(
     sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>,
     refusjonEøsHjemmelSkalMedIBrev: Boolean,
 ): List<String> {

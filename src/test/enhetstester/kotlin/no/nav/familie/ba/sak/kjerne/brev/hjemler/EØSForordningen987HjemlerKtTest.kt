@@ -9,7 +9,7 @@ class EØSForordningen987HjemlerKtTest {
     fun `skal retunere en tom liste om sanity EØS begrunnelsene er en tom liste og refusjon EØS hjemmel ikke skal være med i brevet`() {
         // Act
         val hjemlerForEøsForordningen987 =
-            utledHjemlerForEøsForordningen987(
+            utledEØSForordningen987Hjemler(
                 sanityEøsBegrunnelser = emptyList(),
                 refusjonEøsHjemmelSkalMedIBrev = false,
             )
@@ -22,7 +22,7 @@ class EØSForordningen987HjemlerKtTest {
     fun `skal retunere liste med refusjon EØS hjemmel som eneste innslag da sanity EØS begrunnelser er en tom liste`() {
         // Act
         val hjemlerForEøsForordningen987 =
-            utledHjemlerForEøsForordningen987(
+            utledEØSForordningen987Hjemler(
                 sanityEøsBegrunnelser = emptyList(),
                 refusjonEøsHjemmelSkalMedIBrev = true,
             )
@@ -51,7 +51,7 @@ class EØSForordningen987HjemlerKtTest {
 
         // Act
         val hjemlerForEøsForordningen987 =
-            utledHjemlerForEøsForordningen987(
+            utledEØSForordningen987Hjemler(
                 sanityEøsBegrunnelser = sanityEøsBegrunnelser,
                 refusjonEøsHjemmelSkalMedIBrev = false,
             )
@@ -80,7 +80,7 @@ class EØSForordningen987HjemlerKtTest {
 
         // Act
         val hjemlerForEøsForordningen987 =
-            utledHjemlerForEøsForordningen987(
+            utledEØSForordningen987Hjemler(
                 sanityEøsBegrunnelser = sanityEøsBegrunnelser,
                 refusjonEøsHjemmelSkalMedIBrev = true,
             )

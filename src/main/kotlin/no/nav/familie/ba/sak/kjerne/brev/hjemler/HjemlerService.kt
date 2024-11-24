@@ -56,7 +56,7 @@ class HjemlerService(
                     ),
                 hjemlerFraFolketrygdloven = utledFolketrygdlovenHjemler(sanityBegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen883 = utledEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
-                hjemlerEØSForordningen987 = utledHjemlerForEøsForordningen987(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
+                hjemlerEØSForordningen987 = utledEØSForordningen987Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
                 hjemlerFraForvaltningsloven = utledForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
             )
 
