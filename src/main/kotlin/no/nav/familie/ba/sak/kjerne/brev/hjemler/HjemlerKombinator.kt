@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.kjerne.brev.hjemlerTilHjemmeltekst
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 
 fun kombinerHjemler(
@@ -79,10 +79,23 @@ fun kombinerHjemler(
                     Målform.NN -> "forvaltningslova"
                 }
             } ${
-                hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
+                hjemlerTilHjemmeltekst(
+                    hjemler = hjemlerFraForvaltningsloven,
+                    lovForHjemmel = "forvaltningsloven",
+                )
             }",
         )
     }
 
     return alleHjemlerForBegrunnelser
 }
+
+private fun hjemlerTilHjemmeltekst(
+    hjemler: List<String>,
+    lovForHjemmel: String,
+): String =
+    when (hjemler.size) {
+        0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
+        1 -> "§ ${hjemler[0]}"
+        else -> "§§ ${Utils.slåSammen(hjemler)}"
+    }

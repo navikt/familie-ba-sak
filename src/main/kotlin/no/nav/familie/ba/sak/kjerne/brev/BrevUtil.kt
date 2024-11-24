@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
@@ -91,16 +90,6 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? =
         }
     } else {
         null
-    }
-
-fun hjemlerTilHjemmeltekst(
-    hjemler: List<String>,
-    lovForHjemmel: String,
-): String =
-    when (hjemler.size) {
-        0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
-        1 -> "§ ${hjemler[0]}"
-        else -> "§§ ${Utils.slåSammen(hjemler)}"
     }
 
 fun Collection<String>.slåSammen(): String =
