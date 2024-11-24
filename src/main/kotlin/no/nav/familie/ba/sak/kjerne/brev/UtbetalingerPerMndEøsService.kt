@@ -14,7 +14,7 @@ class UtbetalingerPerMndEøsService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
-    private val starttidspunktForUtbetalingstabellService: StarttidspunktForUtbetalingstabellService
+    private val starttidspunktForUtbetalingstabellService: StarttidspunktForUtbetalingstabellService,
 ) {
     fun hentUtbetalingerPerMndEøs(
         vedtak: Vedtak,

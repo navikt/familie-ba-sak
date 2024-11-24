@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEØSBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
@@ -99,9 +100,9 @@ class HjemlerServiceTest {
         // Act
         val hentHjemmeltekst =
             hjemlerService.hentHjemmeltekst(
-                behandling.id,
-                false,
-                vedtaksperioderMedBegrunnelser,
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
             )
 
         // Assert
@@ -171,8 +172,8 @@ class HjemlerServiceTest {
         val hjemler =
             hjemlerService.hentHjemmeltekst(
                 behandlingId = behandling.id,
-                false,
-                vedtaksperioderMedBegrunnelser,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
             )
 
         // Assert
@@ -236,8 +237,8 @@ class HjemlerServiceTest {
         val hjemler =
             hjemlerService.hentHjemmeltekst(
                 behandlingId = behandling.id,
-                false,
-                vedtaksperioderMedBegrunnelser,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
             )
 
         // Assert
@@ -925,5 +926,173 @@ class HjemlerServiceTest {
 
         // Assert
         assertThat(hjemler).isEqualTo("Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68 og EØS-forordning 987/2009 artikkel 58")
+    }
+
+    @Test
+    fun `skal utlede hjemmeltekst for alle hjemler på bokmål`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
+        val vedtaksperioderMedBegrunnelser =
+            listOf(
+                lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser =
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN,
+                            ),
+                        ),
+                ),
+                lagVedtaksperiodeMedBegrunnelser(
+                    eøsBegrunnelser =
+                        mutableSetOf(
+                            lagEØSBegrunnelse(
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
+                            ),
+                        ),
+                ),
+            )
+
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns true
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                        hjemlerFolketrygdloven = listOf("644", "322"),
+                    ),
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
+            mapOf(
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD to
+                    lagSanityEøsBegrunnelse(
+                        apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
+                        hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
+                        hjemler = listOf("1"),
+                        hjemlerFolketrygdloven = listOf("1337", "3154"),
+                        hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
+                        hjemlerEØSForordningen987 = listOf("58"),
+                    ),
+            )
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemmeltekst(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = true,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo(
+            "Separasjonsavtalen mellom Storbritannia og Norge artikkel 29, " +
+                "barnetrygdloven §§ 1, 2, 4, 10 og 11, " +
+                "folketrygdloven §§ 644, 322, 1337 og 3154, " +
+                "EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68, " +
+                "EØS-forordning 987/2009 artikkel 58 og 60 og forvaltningsloven § 35",
+        )
+    }
+
+    @Test
+    fun `skal utlede hjemmeltekst for alle hjemler på nynorsk`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
+        val vedtaksperioderMedBegrunnelser =
+            listOf(
+                lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser =
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN,
+                            ),
+                        ),
+                ),
+                lagVedtaksperiodeMedBegrunnelser(
+                    eøsBegrunnelser =
+                        mutableSetOf(
+                            lagEØSBegrunnelse(
+                                begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
+                            ),
+                        ),
+                ),
+            )
+
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns true
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NN
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_MEDLEM_I_FOLKETRYGDEN to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                        hjemlerFolketrygdloven = listOf("644", "322"),
+                    ),
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns
+            mapOf(
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD to
+                    lagSanityEøsBegrunnelse(
+                        apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
+                        hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
+                        hjemler = listOf("1"),
+                        hjemlerFolketrygdloven = listOf("1337", "3154"),
+                        hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
+                        hjemlerEØSForordningen987 = listOf("58"),
+                    ),
+            )
+
+        // Act
+        val hjemler =
+            hjemlerService.hentHjemmeltekst(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = true,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo(
+            "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, " +
+                "barnetrygdlova §§ 1, 2, 4, 10 og 11, " +
+                "folketrygdlova §§ 644, 322, 1337 og 3154, " +
+                "EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68, " +
+                "EØS-forordning 987/2009 artikkel 58 og 60 og forvaltningslova § 35",
+        )
     }
 }

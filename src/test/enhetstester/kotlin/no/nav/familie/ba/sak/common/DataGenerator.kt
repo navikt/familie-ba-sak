@@ -81,6 +81,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -1492,3 +1493,14 @@ fun lagBrevmottakerDb(
 )
 
 val Number.årSiden: LocalDate get() = LocalDate.now().minusYears(this.toLong())
+
+fun lagEØSBegrunnelse(
+    id: Long = 0L,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+    begrunnelse: EØSStandardbegrunnelse,
+): EØSBegrunnelse =
+    EØSBegrunnelse(
+        id = id,
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        begrunnelse = begrunnelse,
+    )
