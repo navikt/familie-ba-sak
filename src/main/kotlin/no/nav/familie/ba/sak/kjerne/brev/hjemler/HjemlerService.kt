@@ -29,8 +29,19 @@ class HjemlerService(
         val begrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser()
         val eøsBegrunnelseTilSanityEøsBegrunnelse = sanityService.hentSanityEØSBegrunnelser()
 
-        val sanitybegrunnelser = sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> begrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse] } }
-        val sanityEøsBegrunnelser = sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> eøsBegrunnelseTilSanityEøsBegrunnelse[eøsBegrunnelse.begrunnelse] } }
+        val sanitybegrunnelser =
+            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode ->
+                vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
+                    begrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse]
+                }
+            }
+
+        val sanityEøsBegrunnelser =
+            sorterteVedtaksperioderMedBegrunnelser.flatMap { vedtaksperiode ->
+                vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse ->
+                    eøsBegrunnelseTilSanityEøsBegrunnelse[eøsBegrunnelse.begrunnelse]
+                }
+            }
 
         val alleHjemlerForBegrunnelser =
             kombinerHjemler(
@@ -44,8 +55,8 @@ class HjemlerService(
                         finnesVedtaksperiodeMedFritekst = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
                     ),
                 hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanitybegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
-                hjemlerEØSForordningen883 = hentEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
-                hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
+                hjemlerEØSForordningen883 = utledEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                hjemlerEØSForordningen987 = utledHjemlerForEøsForordningen987(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
                 hjemlerFraForvaltningsloven = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
             )
 
