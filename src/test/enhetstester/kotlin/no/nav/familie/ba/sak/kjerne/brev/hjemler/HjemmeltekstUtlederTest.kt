@@ -25,13 +25,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class HjemlerServiceTest {
+class HjemmeltekstUtlederTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val persongrunnlagService = mockk<PersongrunnlagService>()
     private val refusjonEøsService = mockk<RefusjonEøsService>()
     private val sanityService = mockk<SanityService>()
-    private val hjemlerService: HjemlerService =
-        HjemlerService(
+    private val hjemmeltekstUtleder: HjemmeltekstUtleder =
+        HjemmeltekstUtleder(
             vilkårsvurderingService = vilkårsvurderingService,
             sanityService = sanityService,
             persongrunnlagService = persongrunnlagService,
@@ -48,7 +48,7 @@ class HjemlerServiceTest {
         // Act & assert
         val exception =
             assertThrows<IllegalStateException> {
-                hjemlerService.hentHjemmeltekst(
+                hjemmeltekstUtleder.utledHjemmeltekst(
                     behandlingId = 1L,
                     vedtakKorrigertHjemmelSkalMedIBrev = false,
                     sorterteVedtaksperioderMedBegrunnelser = emptyList(),
@@ -120,7 +120,7 @@ class HjemlerServiceTest {
 
         // Act
         val hentHjemmeltekst =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -191,7 +191,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -256,7 +256,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -327,7 +327,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -366,7 +366,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = emptyList(),
@@ -438,7 +438,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -537,7 +537,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -637,7 +637,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -737,7 +737,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -836,7 +836,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -939,7 +939,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = false,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -1017,7 +1017,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = true,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -1101,7 +1101,7 @@ class HjemlerServiceTest {
 
         // Act
         val hjemler =
-            hjemlerService.hentHjemmeltekst(
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandling.id,
                 vedtakKorrigertHjemmelSkalMedIBrev = true,
                 sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
@@ -1142,7 +1142,7 @@ class HjemlerServiceTest {
         // Act & assert
         val exception =
             assertThrows<FunksjonellFeil> {
-                hjemlerService.hentHjemmeltekst(
+                hjemmeltekstUtleder.utledHjemmeltekst(
                     behandlingId = behandling.id,
                     sorterteVedtaksperioderMedBegrunnelser = emptyList(),
                 )

@@ -7,16 +7,16 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class HjemlerService(
+@Component
+class HjemmeltekstUtleder(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val sanityService: SanityService,
     private val persongrunnlagService: PersongrunnlagService,
     private val refusjonEøsService: RefusjonEøsService,
 ) {
-    fun hentHjemmeltekst(
+    fun utledHjemmeltekst(
         behandlingId: Long,
         vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
         sorterteVedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
