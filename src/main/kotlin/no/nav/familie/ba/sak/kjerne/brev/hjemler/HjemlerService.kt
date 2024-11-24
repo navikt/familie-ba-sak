@@ -54,7 +54,7 @@ class HjemlerService(
                         opplysningspliktHjemlerSkalMedIBrev = !vilkårsvurdering.erOpplysningspliktVilkårOppfylt(),
                         finnesVedtaksperiodeMedFritekst = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
                     ),
-                hjemlerFraFolketrygdloven = hentFolketrygdlovenHjemler(sanitybegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
+                hjemlerFraFolketrygdloven = utledFolketrygdlovenHjemler(sanityBegrunnelser = sanitybegrunnelser, sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen883 = utledEØSForordningen883Hjemler(sanityEøsBegrunnelser = sanityEøsBegrunnelser),
                 hjemlerEØSForordningen987 = utledHjemlerForEøsForordningen987(sanityEøsBegrunnelser = sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev = refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId)),
                 hjemlerFraForvaltningsloven = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev),
