@@ -87,8 +87,10 @@ class SendTilBeslutter(
 
         taskRepository.save(FerdigstillLagVedtakOppgaver.opprettTask(behandling.id))
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-        vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
+        if (!behandling.skalBehandlesAutomatisk) {
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
+        }
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
 
