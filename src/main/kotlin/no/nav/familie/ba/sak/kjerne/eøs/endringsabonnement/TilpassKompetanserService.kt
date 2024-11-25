@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -40,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TilpassKompetanserTilRegelverkService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
-    private val endretUtbetalingAndelTidslinjeService: EndretUtbetalingAndelTidslinjeService,
     private val utbetalingTidslinjeService: UtbetalingTidslinjeService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
