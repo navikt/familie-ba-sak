@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelerOppdatertAbonnent
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -40,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassKompetanserTilRegelverkService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val endretUtbetalingAndelTidslinjeService: EndretUtbetalingAndelTidslinjeService,
+    private val beregningService: BeregningService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
@@ -61,12 +66,16 @@ class TilpassKompetanserTilRegelverkService(
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
+        val utvidetTidslinje =
+            beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId.id).tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+
         val oppdaterteKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser,
                 barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer,
                 annenForelderOmfattetAvNorskLovgivningTidslinje,
+                utvidetTidslinje,
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -76,6 +85,7 @@ class TilpassKompetanserTilRegelverkService(
 @Service
 class TilpassKompetanserTilEndretUtebetalingAndelerService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
+    private val beregningService: BeregningService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) : EndretUtbetalingAndelerOppdatertAbonnent {
@@ -101,12 +111,16 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
+        val utvidetTidslinje =
+            beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId.id).tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+
         val oppdaterteKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser,
                 barnasRegelverkResultatTidslinjer,
                 barnasSkalIkkeUtbetalesTidslinjer,
                 annenForelderOmfattetAvNorskLovgivningTidslinje,
+                utvidetTidslinje,
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -118,13 +132,20 @@ fun tilpassKompetanserTilRegelverk(
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
     barnasSkalIkkeUtbetalesTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
+    utvidetTidslinje: Tidslinje<AndelTilkjentYtelse, Måned>,
 ): Collection<Kompetanse> {
+    val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
+        barnasSkalIkkeUtbetalesTidslinjer.mapValues { (_, ordinærSkalIkkeUtbetalesTidslinje) ->
+            ordinærSkalIkkeUtbetalesTidslinje.kombinerMed(utvidetTidslinje) { ordinærSkalIkkeUtbetales, utvidetAndel ->
+                ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
+            }
+        }
     val barnasEøsRegelverkTidslinjer =
         barnaRegelverkTidslinjer
             .tilBarnasEøsRegelverkTidslinjer()
-            .leftJoin(barnasSkalIkkeUtbetalesTidslinjer) { regelverk, skalIkkeUtbetales ->
-                when (skalIkkeUtbetales) {
-                    true -> null // ta bort regelverk dersom barnets utbetaling er endret til 0
+            .leftJoin(utbetalesIkkeOrdinærEllerUtvidetTidslinjer) { regelverk, utbetalesIkkeOrdinærEllerUtvidet ->
+                when (utbetalesIkkeOrdinærEllerUtvidet) {
+                    true -> null // ta bort regelverk dersom barnets utbetaling er endret til 0 og det ikke utbetales utvidet
                     else -> regelverk
                 }
             }.mapValues { (_, tidslinjer) ->
