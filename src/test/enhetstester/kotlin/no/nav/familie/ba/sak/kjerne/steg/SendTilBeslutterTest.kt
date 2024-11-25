@@ -88,6 +88,35 @@ class SendTilBeslutterTest {
             verify(exactly = 1) { mockVedtakService.oppdaterVedtakMedStønadsbrev(vedtak) }
             verify(exactly = 1) { mockBehandlingService.sendBehandlingTilBeslutter(behandling) }
         }
+
+        @Test
+        fun `Skal ikke oppdatere vedtaksbrev dersom det er automatisk behandling`() {
+            // Arrange
+            val behandling = lagBehandling(skalBehandlesAutomatisk = true)
+            val vedtak = lagVedtak(behandling = behandling)
+
+            every { mockTotrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id) } returns null
+            every { mockTotrinnskontrollRepository.save(any()) } returns mockk()
+            every { mockAutomatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling) } returns true
+            every { mockSaksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "signatur"
+            every { mockLoggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true) } just runs
+            every { mockTaskRepository.save(any()) } returnsArgument 0
+            every { mockBehandlingService.sendBehandlingTilBeslutter(behandling) } just runs
+
+            // Act
+            sendTilBeslutter.utførStegOgAngiNeste(behandling, "")
+
+            // Assert
+            verify(exactly = 1) { mockTotrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id) }
+            verify(exactly = 1) { mockTotrinnskontrollRepository.save(any()) }
+            verify(exactly = 1) { mockAutomatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling) }
+            verify(exactly = 1) { mockSaksbehandlerContext.hentSaksbehandlerSignaturTilBrev() }
+            verify(exactly = 1) { mockLoggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true) }
+            verify(exactly = 1) { mockTaskRepository.save(any()) }
+            verify(exactly = 0) { mockVedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) }
+            verify(exactly = 0) { mockVedtakService.oppdaterVedtakMedStønadsbrev(vedtak) }
+            verify(exactly = 1) { mockBehandlingService.sendBehandlingTilBeslutter(behandling) }
+        }
     }
 
     @Test
