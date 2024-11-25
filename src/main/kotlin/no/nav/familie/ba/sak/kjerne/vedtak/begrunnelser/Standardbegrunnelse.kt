@@ -1680,6 +1680,5 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     override val kanDelesOpp: Boolean = false
 
     @JsonValue
-    override fun enumnavnTilString(): String =
-        Standardbegrunnelse::class.simpleName + "$" + this.name
+    override fun enumnavnTilString(): String = Standardbegrunnelse::class.simpleName + "$" + this.name
 }

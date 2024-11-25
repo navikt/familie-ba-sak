@@ -79,8 +79,7 @@ class TilbakekrevingService(
 
     fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg? = tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg
 
-    fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
-        tilbakekrevingRepository.findByBehandlingId(behandlingId)?.let { tilbakekrevingRepository.delete(it) }
+    fun slettTilbakekrevingPåBehandling(behandlingId: Long) = tilbakekrevingRepository.findByBehandlingId(behandlingId)?.let { tilbakekrevingRepository.delete(it) }
 
     fun hentForhåndsvisningVarselbrev(
         behandlingId: Long,
@@ -124,11 +123,9 @@ class TilbakekrevingService(
         )
     }
 
-    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean =
-        tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(fagsakId)
+    fun søkerHarÅpenTilbakekreving(fagsakId: Long): Boolean = tilbakekrevingKlient.harÅpenTilbakekrevingsbehandling(fagsakId)
 
-    fun opprettTilbakekreving(behandling: Behandling): TilbakekrevingId =
-        tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
+    fun opprettTilbakekreving(behandling: Behandling): TilbakekrevingId = tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
 
     fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)

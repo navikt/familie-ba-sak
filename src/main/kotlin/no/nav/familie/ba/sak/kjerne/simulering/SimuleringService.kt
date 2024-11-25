@@ -88,8 +88,7 @@ class SimuleringService(
     }
 
     @Transactional
-    fun slettSimuleringPåBehandling(behandlingId: Long) =
-        økonomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+    fun slettSimuleringPåBehandling(behandlingId: Long) = økonomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> = økonomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
 
@@ -222,8 +221,7 @@ class SimuleringService(
         }
     }
 
-    private fun hentTotalEtterbetalingFørMars2023(behandlingId: Long) =
-        hentTotalEtterbetaling(hentSimuleringsperioderFørMars2023(behandlingId), null)
+    private fun hentTotalEtterbetalingFørMars2023(behandlingId: Long) = hentTotalEtterbetaling(hentSimuleringsperioderFørMars2023(behandlingId), null)
 
     private fun List<SimuleringsPeriode>.harKunPositiveResultater() = all { it.resultat >= BigDecimal.ZERO }
 
@@ -234,8 +232,7 @@ class SimuleringService(
             it.resultat.abs() <= BigDecimal(antallBarn)
         }
 
-    private fun List<SimuleringsPeriode>.harTotaltAvvikUnderBeløpsgrense() =
-        sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
+    private fun List<SimuleringsPeriode>.harTotaltAvvikUnderBeløpsgrense() = sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
 
     companion object {
         const val MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK = 100

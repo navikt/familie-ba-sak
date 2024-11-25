@@ -373,8 +373,7 @@ class SatsendringUtilTest {
         ),
     )
 
-    private fun datoForSisteSatsendringForSatsType(satsType: SatsType) =
-        SatsService.finnSisteSatsFor(satsType).gyldigFom.toYearMonth()
+    private fun datoForSisteSatsendringForSatsType(satsType: SatsType) = SatsService.finnSisteSatsFor(satsType).gyldigFom.toYearMonth()
 
     private fun lagPersonopplysningsgrunnlag(
         personer: MutableSet<Person>,

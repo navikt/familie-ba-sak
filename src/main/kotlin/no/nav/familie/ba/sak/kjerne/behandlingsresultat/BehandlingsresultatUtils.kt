@@ -26,8 +26,7 @@ object BehandlingsresultatUtils {
             ønsketSøknadsresultat: Søknadsresultat?,
             ønsketEndringsresultat: Endringsresultat,
             ønsketOpphørsresultat: Opphørsresultat,
-        ): Boolean =
-            søknadsresultat == ønsketSøknadsresultat && endringsresultat == ønsketEndringsresultat && opphørsresultat == ønsketOpphørsresultat
+        ): Boolean = søknadsresultat == ønsketSøknadsresultat && endringsresultat == ønsketEndringsresultat && opphørsresultat == ønsketOpphørsresultat
 
         fun ugyldigBehandlingsresultatFeil(behandlingsresultatString: String) =
             FunksjonellFeil(

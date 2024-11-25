@@ -172,10 +172,12 @@ class DokumentService(
                     ),
                 )
             }
+
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,
                 )
+
             else -> listOf(Bruker)
         }
 

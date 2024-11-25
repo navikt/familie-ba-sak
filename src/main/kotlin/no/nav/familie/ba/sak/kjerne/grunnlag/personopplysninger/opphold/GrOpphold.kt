@@ -44,8 +44,7 @@ data class GrOpphold(
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-    fun tilKopiForNyPerson(nyPerson: Person): GrOpphold =
-        copy(id = 0, person = nyPerson)
+    fun tilKopiForNyPerson(nyPerson: Person): GrOpphold = copy(id = 0, person = nyPerson)
 
     fun gjeldendeNå(): Boolean {
         if (gyldigPeriode == null) return true
@@ -84,18 +83,16 @@ data class GrOpphold(
         fun fraOpphold(
             opphold: Opphold,
             person: Person,
-        ) =
-            GrOpphold(
-                gyldigPeriode =
-                    DatoIntervallEntitet(
-                        fom = opphold.oppholdFra,
-                        tom = opphold.oppholdTil,
-                    ),
-                type = opphold.type,
-                person = person,
-            )
+        ) = GrOpphold(
+            gyldigPeriode =
+                DatoIntervallEntitet(
+                    fom = opphold.oppholdFra,
+                    tom = opphold.oppholdTil,
+                ),
+            type = opphold.type,
+            person = person,
+        )
     }
 }
 
-fun List<GrOpphold>.gyldigGjeldendeOppholdstillatelseFødselshendelse() =
-    this.any { it.gjeldendeNå() && it.type != OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER }
+fun List<GrOpphold>.gyldigGjeldendeOppholdstillatelseFødselshendelse() = this.any { it.gjeldendeNå() && it.type != OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER }

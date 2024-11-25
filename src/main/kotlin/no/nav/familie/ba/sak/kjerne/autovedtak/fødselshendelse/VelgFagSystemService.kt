@@ -119,6 +119,7 @@ class VelgFagSystemService(
                         IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                         SEND_TIL_BA,
                     )
+
                 morEllerBarnHarLøpendeSakIInfotrygd(
                     nyBehandlingHendelse.morsIdent,
                     nyBehandlingHendelse.barnasIdenter,
@@ -127,16 +128,19 @@ class VelgFagSystemService(
                         LØPENDE_SAK_I_INFOTRYGD,
                         SEND_TIL_INFOTRYGD,
                     )
+
                 fagsak != null ->
                     Pair(
                         FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                         SEND_TIL_BA,
                     )
+
                 morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) ->
                     Pair(
                         SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
                         SEND_TIL_INFOTRYGD,
                     )
+
                 !harMorGyldigStatsborgerskapForAutomatiskVurdering(
                     morsAktør,
                 ) ->
@@ -144,6 +148,7 @@ class VelgFagSystemService(
                         MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
                         SEND_TIL_INFOTRYGD,
                     )
+
                 else ->
                     Pair(
                         STØTTET_I_BA_SAK,

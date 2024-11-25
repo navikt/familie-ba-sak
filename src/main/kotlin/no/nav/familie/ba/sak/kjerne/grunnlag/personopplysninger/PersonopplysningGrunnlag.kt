@@ -91,5 +91,4 @@ data class PersonopplysningGrunnlag(
     }
 }
 
-fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? =
-    personopplysningGrunnlag.personer.find { it.aktør == this }
+fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? = personopplysningGrunnlag.personer.find { it.aktør == this }

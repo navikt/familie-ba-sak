@@ -124,8 +124,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
     }
 }
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() =
-    this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() = this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
     this

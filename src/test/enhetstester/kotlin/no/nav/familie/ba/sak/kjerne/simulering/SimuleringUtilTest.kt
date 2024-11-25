@@ -667,17 +667,16 @@ fun lagBehandling(
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
-) =
-    Behandling(
-        id = nesteBehandlingId(),
-        fagsak = fagsak,
-        skalBehandlesAutomatisk = skalBehandlesAutomatisk,
-        type = behandlingType,
-        kategori = behandlingKategori,
-        underkategori = underkategori,
-        opprettetÅrsak = årsak,
-        resultat = resultat,
-        status = status,
-    ).also {
-        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
-    }
+) = Behandling(
+    id = nesteBehandlingId(),
+    fagsak = fagsak,
+    skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+    type = behandlingType,
+    kategori = behandlingKategori,
+    underkategori = underkategori,
+    opprettetÅrsak = årsak,
+    resultat = resultat,
+    status = status,
+).also {
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+}

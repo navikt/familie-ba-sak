@@ -88,11 +88,9 @@ class BehandlingHentOgPersisterService(
             .chunked(10000)
             .flatMap { funksjon(it) }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
-        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
 
-    fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> =
-        behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
+    fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> = behandlingRepository.finnBehandlinger(fagsakId)
 
@@ -101,14 +99,11 @@ class BehandlingHentOgPersisterService(
         status: BehandlingStatus,
     ): List<Behandling> = behandlingRepository.finnBehandlinger(fagsakId, status)
 
-    fun hentFerdigstilteBehandlinger(fagsakId: Long): List<Behandling> =
-        hentBehandlinger(fagsakId).filter { it.erVedtatt() }
+    fun hentFerdigstilteBehandlinger(fagsakId: Long): List<Behandling> = hentBehandlinger(fagsakId).filter { it.erVedtatt() }
 
-    fun hentAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
-        behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
+    fun hentAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): Map<Long, String> = behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
 
-    fun hentTssEksternIdForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
-        behandlingRepository.finnTssEksternIdForBehandlinger(behandlingIder).associate { it.first to it.second }
+    fun hentTssEksternIdForBehandlinger(behandlingIder: List<Long>): Map<Long, String> = behandlingRepository.finnTssEksternIdForBehandlinger(behandlingIder).associate { it.first to it.second }
 
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
 }

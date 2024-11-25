@@ -87,13 +87,12 @@ data class UtenlandskPeriodebeløp(
         fom: YearMonth?,
         tom: YearMonth?,
         barnAktører: Set<Aktør>,
-    ) =
-        copy(
-            fom = fom,
-            tom = tom,
-            // .toSet() brukes for at det skal bli et nytt sett (to objekter kan ikke ha referanse til samme sett)
-            barnAktører = barnAktører.toSet(),
-        )
+    ) = copy(
+        fom = fom,
+        tom = tom,
+        // .toSet() brukes for at det skal bli et nytt sett (to objekter kan ikke ha referanse til samme sett)
+        barnAktører = barnAktører.toSet(),
+    )
 
     fun erObligatoriskeFelterSatt() =
         fom != null &&

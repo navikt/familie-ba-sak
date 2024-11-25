@@ -254,5 +254,4 @@ class AutomatiskOppdaterValutakursService(
     }
 }
 
-private fun List<ØkonomiSimuleringMottaker>.finnDatoSisteManuellePostering() =
-    this.flatMap { it.økonomiSimuleringPostering }.filter { it.erManuellPostering }.maxOfOrNull { it.tom }
+private fun List<ØkonomiSimuleringMottaker>.finnDatoSisteManuellePostering() = this.flatMap { it.økonomiSimuleringPostering }.filter { it.erManuellPostering }.maxOfOrNull { it.tom }

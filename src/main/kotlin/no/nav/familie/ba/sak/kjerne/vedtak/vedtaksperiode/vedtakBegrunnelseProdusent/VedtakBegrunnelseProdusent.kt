@@ -384,18 +384,17 @@ fun ISanityBegrunnelse.erSatsendring(
 
 internal fun hentResultaterForForrigePeriode(
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-) =
-    if (begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true && begrunnelseGrunnlagForrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
-        listOf(
-            SanityPeriodeResultat.REDUKSJON,
-            SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
-        )
-    } else {
-        listOf(
-            SanityPeriodeResultat.REDUKSJON,
-            SanityPeriodeResultat.IKKE_INNVILGET,
-        )
-    }
+) = if (begrunnelseGrunnlagForrigePeriode?.erOrdinæreVilkårInnvilget() == true && begrunnelseGrunnlagForrigePeriode.erInnvilgetEtterEndretUtbetaling()) {
+    listOf(
+        SanityPeriodeResultat.REDUKSJON,
+        SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
+    )
+} else {
+    listOf(
+        SanityPeriodeResultat.REDUKSJON,
+        SanityPeriodeResultat.IKKE_INNVILGET,
+    )
+}
 
 private fun hentResultaterForPeriode(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
@@ -519,8 +518,7 @@ private fun erSatsøkningMellomPerioder(
     }
 }
 
-internal fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) =
-    begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget() }
+internal fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget() }
 
 fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     grunnlag: GrunnlagForBegrunnelse,

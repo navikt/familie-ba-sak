@@ -122,9 +122,8 @@ class AutobrevOmregningPgaAlderService(
     private fun barnetrygdOpphører(
         autobrevPgaAlderDTO: AutobrevPgaAlderDTO,
         behandling: Behandling,
-    ) =
-        autobrevPgaAlderDTO.alder == Alder.ATTEN.år &&
-            !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
+    ) = autobrevPgaAlderDTO.alder == Alder.ATTEN.år &&
+        !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
 
     private fun finnBehandlingÅrsakForAlder(alder: Int): BehandlingÅrsak =
         when (alder) {
@@ -135,8 +134,7 @@ class AutobrevOmregningPgaAlderService(
     private fun barnMedAngittAlderInneværendeMånedEksisterer(
         behandlingId: Long,
         alder: Int,
-    ): Boolean =
-        barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
+    ): Boolean = barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
 
     private fun barnMedAngittAlderInneværendeMåned(
         behandlingId: Long,

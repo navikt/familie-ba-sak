@@ -52,16 +52,15 @@ class MånedligValutajusteringFinnFagsakerTask(
         fun lagTask(
             inneværendeMåned: YearMonth,
             triggerTid: LocalDateTime,
-        ) =
-            Task(
-                type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
-                mapOf(
-                    "måned" to inneværendeMåned.toString(),
-                    "callId" to (MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()),
-                ).toProperties(),
-            ).medTriggerTid(
-                triggerTid = triggerTid,
-            )
+        ) = Task(
+            type = TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(MånedligValutajusteringFinnFagsakerTaskDto(inneværendeMåned)),
+            mapOf(
+                "måned" to inneværendeMåned.toString(),
+                "callId" to (MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()),
+            ).toProperties(),
+        ).medTriggerTid(
+            triggerTid = triggerTid,
+        )
     }
 }

@@ -6,12 +6,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 fun hentTekstForVedtaksperioder(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
     behandlingId: Long?,
-) =
-    """
+) = """
         
     Så forvent følgende vedtaksperioder for behandling $behandlingId
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |""" +
-        hentVedtaksperiodeRader(vedtaksperioder)
+    hentVedtaksperiodeRader(vedtaksperioder)
 
 private fun hentVedtaksperiodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") {

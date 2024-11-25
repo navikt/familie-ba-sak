@@ -92,5 +92,4 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
         }.tilSkjemaer()
 }
 
-fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.filtrerSekundærland() =
-    this.mapValues { (_, tidslinje) -> tidslinje.filtrer { it?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND } }
+fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.filtrerSekundærland() = this.mapValues { (_, tidslinje) -> tidslinje.filtrer { it?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND } }

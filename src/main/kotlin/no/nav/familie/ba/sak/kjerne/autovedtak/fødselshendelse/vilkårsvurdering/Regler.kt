@@ -78,8 +78,7 @@ data class VurderPersonErBosattIRiket(
      * Bruker har kun adresser uten fom som betyr at vedkommende har bodd på samme
      * adresse hele livet eller flyttet før man innførte fom ved flytting.
      */
-    private fun harPersonKunAdresserUtenFom(adresser: List<GrBostedsadresse>): Boolean =
-        adresser.all { !it.harGyldigFom() }
+    private fun harPersonKunAdresserUtenFom(adresser: List<GrBostedsadresse>): Boolean = adresser.all { !it.harGyldigFom() }
 
     private fun harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(
         adresser: List<GrBostedsadresse>,
@@ -100,12 +99,11 @@ data class VurderPersonErBosattIRiket(
     private fun erPersonBosattFraVurderingstidspunktet(
         adresser: List<GrBostedsadresse>,
         vurderFra: LocalDate,
-    ) =
-        hentMaxAvstandAvDagerMellomPerioder(
-            adresser.mapNotNull { it.periode },
-            vurderFra,
-            LocalDate.now(),
-        ) == 0L
+    ) = hentMaxAvstandAvDagerMellomPerioder(
+        adresser.mapNotNull { it.periode },
+        vurderFra,
+        LocalDate.now(),
+    ) == 0L
 }
 
 data class VurderBarnErUnder18(
@@ -144,8 +142,10 @@ data class VurderBarnErUgift(
         return when {
             sivilstanderMedGyldigFom.singleOrNull { it.type == SIVILSTANDTYPE.UOPPGITT } != null ->
                 Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_MANGLER_SIVILSTAND)
+
             sivilstanderMedGyldigFom.any { it.type == SIVILSTANDTYPE.GIFT || it.type == SIVILSTANDTYPE.REGISTRERT_PARTNER } ->
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BARN_ER_GIFT_ELLER_HAR_PARTNERSKAP)
+
             else -> Evaluering.oppfylt(VilkårOppfyltÅrsak.BARN_ER_IKKE_GIFT_ELLER_HAR_PARTNERSKAP)
         }
     }
@@ -182,11 +182,13 @@ data class VurderPersonHarLovligOpphold(
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.TREDJELANDSBORGER_UTEN_LOVLIG_OPPHOLD)
                 }
             }
+
             Medlemskap.EØS ->
                 vurderLovligOppholdForEØSBorger(
                     morLovligOppholdFaktaEØS,
                     annenForelderLovligOppholdFaktaEØS,
                 )
+
             Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
                 if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
                     Evaluering.oppfylt(VilkårOppfyltÅrsak.UKJENT_STATSBORGERSKAP_MED_LOVLIG_OPPHOLD)
@@ -194,6 +196,7 @@ data class VurderPersonHarLovligOpphold(
                     Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.STATSLØS)
                 }
             }
+
             else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE)
         }
 }
@@ -227,6 +230,7 @@ private fun vurderLovligOppholdForEØSBorger(
                 Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD)
             }
         }
+
         Medlemskap.TREDJELANDSBORGER -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER)
         Medlemskap.STATSLØS, Medlemskap.UKJENT -> Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS)
         else -> Evaluering.ikkeVurdert(VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_ANNEN_FORELDER_IKKE_MULIG_Å_FASTSETTE)

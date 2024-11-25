@@ -50,8 +50,7 @@ private fun <T : PeriodeOgBarnSkjema<T>> T.leggSammenBarn(kompetanse: T) =
         barnAktører = this.barnAktører + kompetanse.barnAktører,
     )
 
-fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>?.settFomOgTom(periode: Periode<*, Måned>) =
-    this?.map { skjema -> skjema.settFomOgTom(periode) }
+fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>?.settFomOgTom(periode: Periode<*, Måned>) = this?.map { skjema -> skjema.settFomOgTom(periode) }
 
 fun <T : PeriodeOgBarnSkjema<T>> T.settFomOgTom(periode: Periode<*, Måned>) =
     this.kopier(
