@@ -296,6 +296,7 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
+        every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -357,6 +358,7 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
+        every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
@@ -413,6 +415,7 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
+        every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
