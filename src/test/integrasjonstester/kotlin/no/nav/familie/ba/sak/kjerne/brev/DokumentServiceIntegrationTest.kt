@@ -89,6 +89,8 @@ class DokumentServiceIntegrationTest(
     private val databaseCleanupService: DatabaseCleanupService,
     @Autowired
     private val brevmalService: BrevmalService,
+    @Autowired
+    private val vedtaksbrevFellesfelterService: VedtaksbrevFellesfelterService,
 ) : AbstractSpringIntegrationTest() {
     val barnFnr = leggTilPersonInfo(randomBarnFnr())
 
@@ -190,7 +192,7 @@ class DokumentServiceIntegrationTest(
             )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
-        val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
+        val vedtaksbrevFellesFelter = vedtaksbrevFellesfelterService.lagVedtaksbrevFellesfelter(vedtak)
 
         assertEquals("NAV Familie- og pensjonsytelser Oslo 1", vedtaksbrevFellesFelter.enhet)
         assertEquals("System", vedtaksbrevFellesFelter.saksbehandler)
@@ -209,7 +211,7 @@ class DokumentServiceIntegrationTest(
             vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
 
         val vedtaksbrevFellesFelterEtterSendTilBeslutter =
-            brevService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
+            vedtaksbrevFellesfelterService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterSendTilBeslutter.saksbehandler)
         assertEquals("System", vedtaksbrevFellesFelterEtterSendTilBeslutter.beslutter)
@@ -227,7 +229,7 @@ class DokumentServiceIntegrationTest(
             vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
 
         val vedtaksbrevFellesFelterEtterVedtakBesluttet =
-            brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
+            vedtaksbrevFellesfelterService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
 
         assertEquals(mockSaksbehandler, vedtaksbrevFellesFelterEtterVedtakBesluttet.saksbehandler)
         assertEquals(mockBeslutter, vedtaksbrevFellesFelterEtterVedtakBesluttet.beslutter)
