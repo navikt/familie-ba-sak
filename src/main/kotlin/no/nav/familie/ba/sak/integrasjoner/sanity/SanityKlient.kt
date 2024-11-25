@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.sanity
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
@@ -33,7 +32,6 @@ class SanityKlient(
         backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
     )
     fun hentBegrunnelser(): List<SanityBegrunnelse> {
-        logger.info("Henter begrunnelser fra sanity")
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentBegrunnelserQuery = java.net.URLEncoder.encode(HENT_BEGRUNNELSER, "utf-8")
 
@@ -59,7 +57,6 @@ class SanityKlient(
     )
     @CachePut("sisteSanityEøsBegrunnelser")
     fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
-        logger.info("Henter EØS-begrunnelser fra sanity")
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(HENT_EØS_BEGRUNNELSER, "utf-8")
 
@@ -70,13 +67,12 @@ class SanityKlient(
             uri = uri,
             formål = "Henter EØS-begrunnelser fra sanity",
         ) {
-            secureLogger.info("Henter begrunnelser fra sanity")
             restTemplate
                 .getForEntity<SanityEØSBegrunnelserRespons>(uri)
                 .body
                 ?.result
                 ?.mapNotNull { it.tilSanityEØSBegrunnelse() }
-                ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
+                ?: throw Feil("Klarer ikke å hente EØS-begrunnelser fra sanity")
         }
     }
 }
