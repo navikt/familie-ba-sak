@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -14,6 +15,7 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.springframework.stereotype.Component
+import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
@@ -43,11 +45,52 @@ class UtbetalingsoppdragGenerator(
                 erSimulering,
             )
 
+        val forrigeAndler =
+            if (forrigeTilkjentYtelse == null) {
+                emptyList()
+            } else if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
+                forrigeTilkjentYtelse.tilAndelData()
+            } else {
+                val utvidetAndeler =
+                    // Fjerner alle utvidet andeler som kommer etter YearMonth.now()
+                    forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { it.erUtvidet() }.mapNotNull {
+                        if (it.stønadFom <= YearMonth.now() && it.stønadTom > YearMonth.now()) {
+                            it.tilAndelDataLongId().copy(tom = YearMonth.now())
+                        } else if (it.stønadFom > YearMonth.now()) {
+                            null
+                        } else {
+                            it.tilAndelDataLongId()
+                        }
+                    }
+                val øvrigeAndeler = forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { !it.erUtvidet() }.map { it.tilAndelDataLongId() }
+                øvrigeAndeler.plus(utvidetAndeler)
+            }
+
+        val nyeAndeler =
+            if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
+                tilkjentYtelse.tilAndelData()
+            } else {
+                val utvidetAndeler =
+                    // Splitter andeler som treffer YearMonth.now()
+                    tilkjentYtelse.andelerTilkjentYtelse.filter { it.erUtvidet() }.flatMap {
+                        if (it.stønadFom <= YearMonth.now() && it.stønadTom > YearMonth.now()) {
+                            listOf(
+                                it.tilAndelDataLongId().copy(fom = it.stønadFom, tom = YearMonth.now()),
+                                it.tilAndelDataLongId().copy(fom = YearMonth.now().plusMonths(1), tom = it.stønadTom),
+                            )
+                        }
+                        listOf(it.tilAndelDataLongId())
+                    }
+
+                val øvrigeAndeler = tilkjentYtelse.andelerTilkjentYtelse.filter { !it.erUtvidet() }.map { it.tilAndelDataLongId() }
+                øvrigeAndeler.plus(utvidetAndeler)
+            }
+
         val beregnetUtbetalingsoppdrag =
             utbetalingsgenerator.lagUtbetalingsoppdrag(
                 behandlingsinformasjon = behandlingsinformasjon,
-                forrigeAndeler = forrigeTilkjentYtelse?.tilAndelData() ?: emptyList(),
-                nyeAndeler = tilkjentYtelse.tilAndelData(),
+                forrigeAndeler = forrigeAndler,
+                nyeAndeler = nyeAndeler,
                 sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
             )
 
