@@ -15,7 +15,6 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.springframework.stereotype.Component
-import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
@@ -45,45 +44,24 @@ class UtbetalingsoppdragGenerator(
                 erSimulering,
             )
 
+        val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                behandlingId = vedtak.behandling.id,
+            )
+
         val forrigeAndler =
-            if (forrigeTilkjentYtelse == null) {
-                emptyList()
-            } else if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
-                forrigeTilkjentYtelse.tilAndelData()
+            if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
+                forrigeTilkjentYtelse?.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd) ?: emptyList()
             } else {
-                val utvidetAndeler =
-                    // Fjerner alle utvidet andeler som kommer etter YearMonth.now()
-                    forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { it.erUtvidet() }.mapNotNull {
-                        if (it.stønadFom <= YearMonth.now() && it.stønadTom > YearMonth.now()) {
-                            it.tilAndelDataLongId().copy(tom = YearMonth.now())
-                        } else if (it.stønadFom > YearMonth.now()) {
-                            null
-                        } else {
-                            it.tilAndelDataLongId()
-                        }
-                    }
-                val øvrigeAndeler = forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { !it.erUtvidet() }.map { it.tilAndelDataLongId() }
-                øvrigeAndeler.plus(utvidetAndeler)
+                finnForrigeAndelerForNyUtvidetKlassekodeBehandling(forrigeTilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             }
 
         val nyeAndeler =
             if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
-                tilkjentYtelse.tilAndelData()
+                tilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             } else {
-                val utvidetAndeler =
-                    // Splitter andeler som treffer YearMonth.now()
-                    tilkjentYtelse.andelerTilkjentYtelse.filter { it.erUtvidet() }.flatMap {
-                        if (it.stønadFom <= YearMonth.now() && it.stønadTom > YearMonth.now()) {
-                            listOf(
-                                it.tilAndelDataLongId().copy(fom = it.stønadFom, tom = YearMonth.now()),
-                                it.tilAndelDataLongId().copy(fom = YearMonth.now().plusMonths(1), tom = it.stønadTom),
-                            )
-                        }
-                        listOf(it.tilAndelDataLongId())
-                    }
-
-                val øvrigeAndeler = tilkjentYtelse.andelerTilkjentYtelse.filter { !it.erUtvidet() }.map { it.tilAndelDataLongId() }
-                øvrigeAndeler.plus(utvidetAndeler)
+                finnNyeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             }
 
         val beregnetUtbetalingsoppdrag =
@@ -91,7 +69,7 @@ class UtbetalingsoppdragGenerator(
                 behandlingsinformasjon = behandlingsinformasjon,
                 forrigeAndeler = forrigeAndler,
                 nyeAndeler = nyeAndeler,
-                sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() },
+                sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) },
             )
 
         return klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
@@ -115,27 +93,22 @@ class UtbetalingsoppdragGenerator(
         behandlingHentOgPersisterService
             .hentForrigeBehandlingSomErIverksatt(behandling = behandling)
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
+}
 
-    private fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> =
-        this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
+fun TilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): List<AndelDataLongId> =
+    this.andelerTilkjentYtelse.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
 
-    private fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId {
-        // Skrur på ny klassekode for enkelte fagsaker til å begynne med.
-        val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
-            unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
-                behandlingId = this.behandlingId,
-            )
-        return AndelDataLongId(
-            id = id,
-            fom = periode.fom,
-            tom = periode.tom,
-            beløp = kalkulertUtbetalingsbeløp,
-            personIdent = aktør.aktivFødselsnummer(),
-            type = type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd),
-            periodeId = periodeOffset,
-            forrigePeriodeId = forrigePeriodeOffset,
-            kildeBehandlingId = kildeBehandlingId,
-        )
-    }
+fun AndelTilkjentYtelse.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): AndelDataLongId {
+    // Skrur på ny klassekode for enkelte fagsaker til å begynne med.
+    return AndelDataLongId(
+        id = id,
+        fom = periode.fom,
+        tom = periode.tom,
+        beløp = kalkulertUtbetalingsbeløp,
+        personIdent = aktør.aktivFødselsnummer(),
+        type = type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd),
+        periodeId = periodeOffset,
+        forrigePeriodeId = forrigePeriodeOffset,
+        kildeBehandlingId = kildeBehandlingId,
+    )
 }
