@@ -54,7 +54,7 @@ class SanityServiceTest {
     }
 
     @Test
-    fun `hentSanityBegrunnelser - skal kaste bruke cachet versjon hvis det feiler`() {
+    fun `hentSanityBegrunnelser - skal bruke cachet begrunnelser når sanityklient kaster feil`() {
         every { sanityKlient.hentBegrunnelser() } returns
             Standardbegrunnelse.entries.map {
                 SanityBegrunnelse(
@@ -69,7 +69,7 @@ class SanityServiceTest {
                     valgbarhet = null,
                     øvrigeTriggere = emptyList(),
                 )
-            } andThenThrows RuntimeException("Feil får å teste cachet versjon")
+            } andThenThrows RuntimeException("Feil for å teste cachet versjon")
 
         sanityService.hentSanityBegrunnelser().also { begrunnelser ->
             assertThat(begrunnelser.keys).isEqualTo(Standardbegrunnelse.entries.toSet())
@@ -119,7 +119,7 @@ class SanityServiceTest {
     }
 
     @Test
-    fun `hentSanityEØSBegrunnelser - skal kaste bruke cachet versjon hvis det feiler`() {
+    fun `hentSanityEØSBegrunnelser - skal bruke cachet begrunnelser når sanityklient kaster feil`() {
         every { sanityKlient.hentEØSBegrunnelser() } returns
             EØSStandardbegrunnelse.entries.map {
                 SanityEØSBegrunnelse(
@@ -140,7 +140,7 @@ class SanityServiceTest {
                     valgbarhet = null,
                     øvrigeTriggere = emptyList(),
                 )
-            } andThenThrows RuntimeException("Feil får å teste cachet versjon")
+            } andThenThrows RuntimeException("Feil for å teste cachet versjon")
 
         sanityService.hentSanityEØSBegrunnelser().also { eøsBegrunnelser ->
             assertThat(eøsBegrunnelser).isNotEmpty()
