@@ -22,42 +22,41 @@ class KompetanseBuilder(
         annenForeldersAktivitet: KompetanseAktivitet = KompetanseAktivitet.ARBEIDER,
         annenForeldersAktivitetsland: String? = null,
         erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
-    ) =
-        medSkjema(k, barn.toList()) {
-            when (it) {
-                '-' ->
-                    Kompetanse.NULL.copy(
+    ) = medSkjema(k, barn.toList()) {
+        when (it) {
+            '-' ->
+                Kompetanse.NULL.copy(
+                    annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                    erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
+                )
+
+            'S' ->
+                Kompetanse.NULL
+                    .copy(
+                        søkersAktivitet = søkersAktivitet,
+                        annenForeldersAktivitet = annenForeldersAktivitet,
+                        søkersAktivitetsland = søkersAktivitetsland,
+                        barnetsBostedsland = barnetsBostedsland,
+                        resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
                         annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                         erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
-                    )
+                    ).fyllUt()
 
-                'S' ->
-                    Kompetanse.NULL
-                        .copy(
-                            søkersAktivitet = søkersAktivitet,
-                            annenForeldersAktivitet = annenForeldersAktivitet,
-                            søkersAktivitetsland = søkersAktivitetsland,
-                            barnetsBostedsland = barnetsBostedsland,
-                            resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                            annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                            erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
-                        ).fyllUt()
+            'P' ->
+                Kompetanse.NULL
+                    .copy(
+                        søkersAktivitet = søkersAktivitet,
+                        annenForeldersAktivitet = annenForeldersAktivitet,
+                        søkersAktivitetsland = søkersAktivitetsland,
+                        barnetsBostedsland = barnetsBostedsland,
+                        resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                        annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                        erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
+                    ).fyllUt()
 
-                'P' ->
-                    Kompetanse.NULL
-                        .copy(
-                            søkersAktivitet = søkersAktivitet,
-                            annenForeldersAktivitet = annenForeldersAktivitet,
-                            søkersAktivitetsland = søkersAktivitetsland,
-                            barnetsBostedsland = barnetsBostedsland,
-                            resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                            annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                            erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
-                        ).fyllUt()
-
-                else -> null
-            }
+            else -> null
         }
+    }
 
     fun byggKompetanser(): Collection<Kompetanse> = bygg()
 }

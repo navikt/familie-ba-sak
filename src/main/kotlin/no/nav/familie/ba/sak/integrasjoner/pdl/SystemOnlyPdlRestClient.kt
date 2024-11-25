@@ -73,5 +73,4 @@ class SystemOnlyPdlRestClient(
     }
 }
 
-fun List<Adressebeskyttelse>.tilAdressebeskyttelse() =
-    this.firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
+fun List<Adressebeskyttelse>.tilAdressebeskyttelse() = this.firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT

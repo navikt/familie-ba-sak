@@ -48,8 +48,6 @@ class CharTidslinje<T : Tidsenhet>(
     }
 }
 
-fun String.tilCharTidslinje(fom: YearMonth): Tidslinje<Char, Måned> =
-    CharTidslinje(this, MånedTidspunkt.med(fom)).slåSammenLike()
+fun String.tilCharTidslinje(fom: YearMonth): Tidslinje<Char, Måned> = CharTidslinje(this, MånedTidspunkt.med(fom)).slåSammenLike()
 
-fun <T : Tidsenhet> String.tilCharTidslinje(fom: Tidspunkt<T>): Tidslinje<Char, T> =
-    CharTidslinje(this, fom).slåSammenLike()
+fun <T : Tidsenhet> String.tilCharTidslinje(fom: Tidspunkt<T>): Tidslinje<Char, T> = CharTidslinje(this, fom).slåSammenLike()

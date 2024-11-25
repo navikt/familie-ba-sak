@@ -19,27 +19,23 @@ class KompetanseService(
             endringsabonnenter,
         )
 
-    fun hentKompetanser(behandlingId: BehandlingId) =
-        skjemaService.hentMedBehandlingId(behandlingId)
+    fun hentKompetanser(behandlingId: BehandlingId) = skjemaService.hentMedBehandlingId(behandlingId)
 
     @Transactional
     fun oppdaterKompetanse(
         behandlingId: BehandlingId,
         oppdatering: Kompetanse,
-    ) =
-        skjemaService.endreSkjemaer(behandlingId, oppdatering)
+    ) = skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional
     fun slettKompetanse(
         behandlingId: BehandlingId,
         kompetanseId: Long,
-    ) =
-        skjemaService.slettSkjema(behandlingId, kompetanseId)
+    ) = skjemaService.slettSkjema(behandlingId, kompetanseId)
 
     @Transactional
     fun kopierOgErstattKompetanser(
         fraBehandlingId: BehandlingId,
         tilBehandlingId: BehandlingId,
-    ) =
-        skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
+    ) = skjemaService.kopierOgErstattSkjemaer(fraBehandlingId, tilBehandlingId)
 }

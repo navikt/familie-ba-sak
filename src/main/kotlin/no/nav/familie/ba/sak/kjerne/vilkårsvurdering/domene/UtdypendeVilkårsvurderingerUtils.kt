@@ -25,9 +25,7 @@ enum class UtdypendeVilkårsvurdering {
 
 @Converter
 class UtdypendeVilkårsvurderingerConverter : AttributeConverter<List<UtdypendeVilkårsvurdering>, String> {
-    override fun convertToDatabaseColumn(enumListe: List<UtdypendeVilkårsvurdering>) =
-        Utils.konverterEnumsTilString(enumListe)
+    override fun convertToDatabaseColumn(enumListe: List<UtdypendeVilkårsvurdering>) = Utils.konverterEnumsTilString(enumListe)
 
-    override fun convertToEntityAttribute(string: String?): List<UtdypendeVilkårsvurdering> =
-        Utils.konverterStringTilEnums(string)
+    override fun convertToEntityAttribute(string: String?): List<UtdypendeVilkårsvurdering> = Utils.konverterStringTilEnums(string)
 }

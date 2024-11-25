@@ -56,10 +56,13 @@ fun <T : PeriodeOgBarnSkjemaEntitet<T>> T.somInversOppdateringEllersNull(gjelden
             oppdatering
                 .medBarnaSomForsvinnerFra(skjemaetDerTilOgMedForkortesOgBarnFjernes)
                 .utenInnholdTilOgMed(skjemaetDerTilOgMedForkortesOgBarnFjernes.tom)
+
         skjemaetDerBarnFjernes != null ->
             oppdatering.medBarnaSomForsvinnerFra(skjemaetDerBarnFjernes).utenInnhold()
+
         skjemaetDerTilOgMedForkortes != null ->
             oppdatering.utenInnholdTilOgMed(skjemaetDerTilOgMedForkortes.tom)
+
         else -> null
     }
 }

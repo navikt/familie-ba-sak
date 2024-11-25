@@ -48,8 +48,7 @@ data class GrStatsborgerskap(
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-    fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap =
-        copy(id = 0, person = nyPerson)
+    fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap = copy(id = 0, person = nyPerson)
 
     fun gjeldendeNå(): Boolean {
         if (gyldigPeriode == null) return true
@@ -91,8 +90,7 @@ fun List<GrStatsborgerskap>.hentSterkesteMedlemskap(): Medlemskap? {
     return finnSterkesteMedlemskap(nåværendeMedlemskap)
 }
 
-fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> =
-    statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
+fun finnNåværendeMedlemskap(statsborgerskap: List<GrStatsborgerskap>?): List<Medlemskap> = statsborgerskap?.filtrerGjeldendeNå()?.map { it.medlemskap } ?: emptyList()
 
 fun finnSterkesteMedlemskap(medlemskap: List<Medlemskap>): Medlemskap? =
     with(medlemskap) {

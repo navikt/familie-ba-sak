@@ -123,8 +123,7 @@ fun MånedPeriode.overlapperHeltEllerDelvisMed(annenPeriode: MånedPeriode) =
         annenPeriode.inkluderer(this.fom) ||
         annenPeriode.inkluderer(this.tom)
 
-fun MånedPeriode.erMellom(annenPeriode: MånedPeriode) =
-    annenPeriode.inkluderer(this.fom) && annenPeriode.inkluderer(this.tom)
+fun MånedPeriode.erMellom(annenPeriode: MånedPeriode) = annenPeriode.inkluderer(this.fom) && annenPeriode.inkluderer(this.tom)
 
 fun Periode.kanErstatte(other: Periode): Boolean = this.fom.isSameOrBefore(other.fom) && this.tom.isSameOrAfter(other.tom)
 
@@ -270,8 +269,7 @@ class YearMonthProgression(
     val hoppMåneder: Long = 1,
 ) : Iterable<YearMonth>,
     ClosedRange<YearMonth> {
-    override fun iterator(): Iterator<YearMonth> =
-        YearMonthIterator(start, endInclusive, hoppMåneder)
+    override fun iterator(): Iterator<YearMonth> = YearMonthIterator(start, endInclusive, hoppMåneder)
 
     infix fun step(måneder: Long) = YearMonthProgression(start, endInclusive, måneder)
 }

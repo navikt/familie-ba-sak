@@ -24,8 +24,7 @@ data class MånedTidspunkt(
 
     override fun flytt(tidsenheter: Long) = copy(måned = måned.plusMonths(tidsenheter))
 
-    override fun medUendelighet(uendelighet: Uendelighet): MånedTidspunkt =
-        copy(uendelighet = uendelighet)
+    override fun medUendelighet(uendelighet: Uendelighet): MånedTidspunkt = copy(uendelighet = uendelighet)
 
     override fun toString(): String =
         when (uendelighet) {
@@ -69,20 +68,17 @@ data class MånedTidspunkt(
 
         internal fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)
 
-        internal fun YearMonth?.tilTidspunktEllerUendeligTidlig(defaultUendelighetMåned: YearMonth? = null) =
-            this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FORTID)
+        internal fun YearMonth?.tilTidspunktEllerUendeligTidlig(defaultUendelighetMåned: YearMonth? = null) = this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FORTID)
 
-        internal fun YearMonth?.tilTidspunktEllerUendeligSent(defaultUendelighetMåned: YearMonth? = null) =
-            this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FREMTID)
+        internal fun YearMonth?.tilTidspunktEllerUendeligSent(defaultUendelighetMåned: YearMonth? = null) = this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FREMTID)
 
         private fun YearMonth?.tilTidspunktEllerUendelig(
             default: YearMonth?,
             uendelighet: Uendelighet,
-        ) =
-            this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
-                default ?: YearMonth.now(),
-                uendelighet,
-            )
+        ) = this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
+            default ?: YearMonth.now(),
+            uendelighet,
+        )
 
         fun LocalDate.tilMånedTidspunkt() = MånedTidspunkt(this.toYearMonth(), Uendelighet.INGEN)
     }

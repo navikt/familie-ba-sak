@@ -177,5 +177,4 @@ fun valutakurs(
     s: String,
     valutakode: String,
     vararg barn: Person,
-) =
-    ValutakursBuilder(tidspunkt).medKurs(s, valutakode, *barn).bygg().first()
+) = ValutakursBuilder(tidspunkt).medKurs(s, valutakode, *barn).bygg().first()

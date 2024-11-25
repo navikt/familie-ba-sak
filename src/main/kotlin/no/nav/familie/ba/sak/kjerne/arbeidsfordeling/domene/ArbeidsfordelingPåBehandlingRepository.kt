@@ -10,5 +10,4 @@ interface ArbeidsfordelingPåBehandlingRepository : JpaRepository<Arbeidsfordeli
 }
 
 // Extension-function fordi default methods for JPA ikke er støttet uten @JvmDefaultWithCompatibility
-fun ArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling =
-    finnArbeidsfordelingPåBehandling(behandlingId) ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling $behandlingId")
+fun ArbeidsfordelingPåBehandlingRepository.hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling = finnArbeidsfordelingPåBehandling(behandlingId) ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling $behandlingId")

@@ -265,8 +265,7 @@ private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnla
                     .isNullOrEmpty()
         }.keys
 
-private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
-    personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
+private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) = personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
 fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     grunnlag: GrunnlagForBegrunnelse,

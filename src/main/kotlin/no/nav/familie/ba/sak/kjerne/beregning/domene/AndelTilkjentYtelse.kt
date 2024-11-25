@@ -195,18 +195,17 @@ enum class YtelseType(
     fun tilSatsType(
         person: Person,
         ytelseDato: LocalDate,
-    ) =
-        when (this) {
-            ORDINÆR_BARNETRYGD ->
-                if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
-                    SatsType.TILLEGG_ORBA
-                } else {
-                    SatsType.ORBA
-                }
+    ) = when (this) {
+        ORDINÆR_BARNETRYGD ->
+            if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
+                SatsType.TILLEGG_ORBA
+            } else {
+                SatsType.ORBA
+            }
 
-            UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
-            SMÅBARNSTILLEGG -> SatsType.SMA
-        }
+        UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
+        SMÅBARNSTILLEGG -> SatsType.SMA
+    }
 }
 
 private fun regelverkAvhengigeVilkår() =

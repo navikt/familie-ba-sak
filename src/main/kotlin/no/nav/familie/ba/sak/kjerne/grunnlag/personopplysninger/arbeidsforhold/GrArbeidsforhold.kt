@@ -41,8 +41,7 @@ data class GrArbeidsforhold(
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
 ) : BaseEntitet() {
-    fun tilKopiForNyPerson(nyPerson: Person) =
-        copy(id = 0, person = nyPerson)
+    fun tilKopiForNyPerson(nyPerson: Person) = copy(id = 0, person = nyPerson)
 }
 
 fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean =

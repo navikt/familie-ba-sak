@@ -57,10 +57,9 @@ fun hentSøkersAndeler(
 fun hentBarnasAndeler(
     andeler: Iterable<AndelTilkjentYtelse>,
     barna: List<PersonEnkel>,
-) =
-    barna.map { barn ->
-        barn to andeler.filter { it.aktør == barn.aktør }
-    }
+) = barna.map { barn ->
+    barn to andeler.filter { it.aktør == barn.aktør }
+}
 
 /**
  * Ekstra sikkerhet rundt hva som utbetales som på sikt vil legges inn i
@@ -232,8 +231,7 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() =
-        Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
+    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() = Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
 
     fun maksBeløp(
         personType: PersonType,

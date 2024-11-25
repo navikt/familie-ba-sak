@@ -15,6 +15,5 @@ class InternStatistikkService(
 
     fun finnAntallBehandlingerIkkeErAvsluttet() = behandlingRepository.finnAntallBehandlingerIkkeAvsluttet()
 
-    fun finnAntallBehandlingerPerÅrsak() =
-        behandlingRepository.finnAntallBehandlingerPerÅrsak().associate { it.first to it.second }
+    fun finnAntallBehandlingerPerÅrsak() = behandlingRepository.finnAntallBehandlingerPerÅrsak().associate { it.first to it.second }
 }

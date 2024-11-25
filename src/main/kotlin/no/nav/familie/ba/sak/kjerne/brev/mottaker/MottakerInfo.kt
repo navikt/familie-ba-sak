@@ -39,6 +39,7 @@ fun MottakerInfo.tilAvsenderMottaker(): AvsenderMottaker? =
                 id = null,
                 idType = null,
             )
+
         is Institusjon ->
             AvsenderMottaker(
                 idType = AvsenderMottakerIdType.ORGNR,

@@ -280,13 +280,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     private fun tilkjentYtelse(
         behandling: Behandling,
         erIverksatt: Boolean,
-    ) =
-        TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-            utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
-        )
+    ) = TilkjentYtelse(
+        behandling = behandling,
+        opprettetDato = LocalDate.now(),
+        endretDato = LocalDate.now(),
+        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
+    )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(

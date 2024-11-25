@@ -109,6 +109,7 @@ class FagsakService(
                         throw FunksjonellFeil("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
                     }
                 }
+
                 else -> fagsakRepository.finnFagsakForAktør(aktør, type)
             }
 
@@ -186,8 +187,7 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
-    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
-        Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> = Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
 
     fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> = fagsaker.map { lagRestMinimalFagsak(it.id) }
 

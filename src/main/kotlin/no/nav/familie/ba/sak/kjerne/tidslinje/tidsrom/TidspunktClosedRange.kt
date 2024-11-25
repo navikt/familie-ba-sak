@@ -47,8 +47,7 @@ data class TidspunktClosedRange<T : Tidsenhet>(
     override val endInclusive: Tidspunkt<T>,
 ) : Iterable<Tidspunkt<T>>,
     ClosedRange<Tidspunkt<T>> {
-    override fun toString(): String =
-        "$start - $endInclusive"
+    override fun toString(): String = "$start - $endInclusive"
 
     override fun iterator(): Iterator<Tidspunkt<T>> =
         object : Iterator<Tidspunkt<T>> {
@@ -59,6 +58,7 @@ data class TidspunktClosedRange<T : Tidsenhet>(
                     start.erUendeligLengeSiden() ->
                         minOf(start.somEndelig(), endInclusive.somEndelig())
                             .somUendeligLengeSiden()
+
                     else -> start
                 }
 
@@ -69,6 +69,7 @@ data class TidspunktClosedRange<T : Tidsenhet>(
                     endInclusive.erUendeligLengeTil() ->
                         maxOf(start.somEndelig(), endInclusive.somEndelig())
                             .somUendeligLengeTil()
+
                     else -> endInclusive
                 }
 
@@ -109,5 +110,4 @@ data class TidspunktClosedRange<T : Tidsenhet>(
         }
 }
 
-operator fun <T : Tidsenhet> Tidspunkt<T>.rangeTo(tilOgMed: Tidspunkt<T>): TidspunktClosedRange<T> =
-    TidspunktClosedRange(this, tilOgMed)
+operator fun <T : Tidsenhet> Tidspunkt<T>.rangeTo(tilOgMed: Tidspunkt<T>): TidspunktClosedRange<T> = TidspunktClosedRange(this, tilOgMed)

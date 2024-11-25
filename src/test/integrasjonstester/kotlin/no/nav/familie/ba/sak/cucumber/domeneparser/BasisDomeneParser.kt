@@ -196,8 +196,7 @@ fun parseValgfriBigDecimal(
 fun parseValgfriLong(
     domenebegrep: Domenenøkkel,
     rad: Map<String, String>,
-): Long? =
-    parseValgfriInt(domenebegrep, rad)?.toLong()
+): Long? = parseValgfriInt(domenebegrep, rad)?.toLong()
 
 fun parseValgfriInt(
     domenebegrep: Domenenøkkel,

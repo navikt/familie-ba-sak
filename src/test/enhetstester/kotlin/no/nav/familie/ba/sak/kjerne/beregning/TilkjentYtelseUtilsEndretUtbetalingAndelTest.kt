@@ -264,17 +264,16 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         barn: Person,
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        AndelTilkjentYtelse(
-            behandlingId = behandling.id,
-            tilkjentYtelse = tilkjentYtelse,
-            aktør = barn.aktør,
-            kalkulertUtbetalingsbeløp = beløp.toInt(),
-            nasjonaltPeriodebeløp = beløp.toInt(),
-            stønadFom = fom,
-            stønadTom = tom,
-            type = YtelseType.ORDINÆR_BARNETRYGD,
-            sats = beløp.toInt(),
-            prosent = BigDecimal(100),
-        )
+    ) = AndelTilkjentYtelse(
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse,
+        aktør = barn.aktør,
+        kalkulertUtbetalingsbeløp = beløp.toInt(),
+        nasjonaltPeriodebeløp = beløp.toInt(),
+        stønadFom = fom,
+        stønadTom = tom,
+        type = YtelseType.ORDINÆR_BARNETRYGD,
+        sats = beløp.toInt(),
+        prosent = BigDecimal(100),
+    )
 }
