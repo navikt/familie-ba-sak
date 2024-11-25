@@ -36,5 +36,13 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
         val behandlingId = firstArg<Long>()
         dataFraCucumber.tilkjenteYtelser[behandlingId]
     }
+    every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
+        val fagsakId = firstArg<Long>()
+        dataFraCucumber.tilkjenteYtelser
+            .map { it.value }
+            .filter { it.behandling.fagsak.id == fagsakId }
+            .mapNotNull { it.utbetalingsoppdrag }
+            .any { it.contains("\"klassifisering\":\"BAUTV-OP\"") }
+    }
     return tilkjentYtelseRepository
 }

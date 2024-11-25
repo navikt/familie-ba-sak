@@ -43,6 +43,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.BarnetsBostedsland
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -52,6 +54,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResul
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
@@ -67,6 +70,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
@@ -174,6 +178,33 @@ fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) =
         aktør = aktør,
     )
 
+fun lagFagsak(
+    id: Long = 1,
+    aktør: Aktør = tilAktør(randomFnr()),
+    institusjon: Institusjon? = null,
+    status: FagsakStatus = FagsakStatus.OPPRETTET,
+    type: FagsakType = FagsakType.NORMAL,
+    arkivert: Boolean = false,
+) =
+    Fagsak(
+        id = id,
+        aktør = aktør,
+        institusjon = institusjon,
+        status = status,
+        type = type,
+        arkivert = arkivert,
+    )
+
+fun lagInstitusjon(
+    id: Long = 0L,
+    orgNummer: String = "123456789",
+    tssEksternId: String? = "tssEksternId",
+) = Institusjon(
+    id = id,
+    orgNummer = orgNummer,
+    tssEksternId = tssEksternId,
+)
+
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
@@ -256,11 +287,12 @@ fun tilfeldigSøker(
 fun lagVedtak(
     behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
+    vedtaksdato: LocalDateTime? = LocalDateTime.now(),
 ) =
     Vedtak(
         id = nesteVedtakId(),
         behandling = behandling,
-        vedtaksdato = LocalDateTime.now(),
+        vedtaksdato = vedtaksdato,
         stønadBrevPdF = stønadBrevPdF,
     )
 
@@ -362,6 +394,34 @@ fun lagAndelTilkjentYtelseUtvidet(
         sats = beløp,
         prosent = BigDecimal(100),
     )
+
+fun lagTilkjentYtelse(
+    behandling: Behandling = lagBehandling(),
+    stønadFom: YearMonth? = YearMonth.now(),
+    stønadTom: YearMonth? = YearMonth.now(),
+    opphørFom: YearMonth? = YearMonth.now(),
+    opprettetDato: LocalDate = LocalDate.now(),
+    endretDato: LocalDate = LocalDate.now(),
+    utbetalingsoppdrag: String? = null,
+    lagAndelerTilkjentYtelse: (tilkjentYtelse: TilkjentYtelse) -> Set<AndelTilkjentYtelse> = {
+        emptySet()
+    },
+): TilkjentYtelse {
+    val andelerTilkjentYtelse = mutableSetOf<AndelTilkjentYtelse>()
+    val tilkjentYtelse =
+        TilkjentYtelse(
+            behandling = behandling,
+            stønadFom = stønadFom,
+            stønadTom = stønadTom,
+            opphørFom = opphørFom,
+            opprettetDato = opprettetDato,
+            endretDato = endretDato,
+            utbetalingsoppdrag = utbetalingsoppdrag,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+        )
+    tilkjentYtelse.andelerTilkjentYtelse.addAll(lagAndelerTilkjentYtelse(tilkjentYtelse))
+    return tilkjentYtelse
+}
 
 fun lagInitiellTilkjentYtelse(
     behandling: Behandling = lagBehandling(),
@@ -898,6 +958,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     stegService: StegService,
     fagsakId: Long,
     brevmalService: BrevmalService,
+    vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val behandling =
         stegService.håndterNyBehandling(
@@ -933,6 +994,12 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             },
         )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
+
+    leggTilBegrunnelsePåVedtaksperiodeIBehandling(
+        behandling = behandlingEtterSimuleringSteg,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService,
+    )
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
@@ -1091,14 +1158,25 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     val perisisterteVedtaksperioder =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
 
-    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-        vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
-        standardbegrunnelserFraFrontend =
-            listOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-            ),
-        eøsStandardbegrunnelserFraFrontend = emptyList(),
-    )
+    if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
+            standardbegrunnelserFraFrontend =
+                listOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                ),
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
+        )
+    } else {
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
+            standardbegrunnelserFraFrontend =
+                listOf(
+                    Standardbegrunnelse.FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET,
+                ),
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
+        )
+    }
 }
 
 fun lagVilkårResultat(
@@ -1410,5 +1488,25 @@ fun ikkeOppfyltVilkår(vilkår: Vilkår) =
         vilkår = vilkår,
         regelverkResultat = RegelverkResultat.IKKE_OPPFYLT,
     )
+
+fun lagBrevmottakerDb(
+    behandlingId: Long,
+    type: MottakerType = MottakerType.FULLMEKTIG,
+    navn: String = "Test Testesen",
+    adresselinje1: String = "En adresse her",
+    adresselinje2: String? = null,
+    postnummer: String = "0661",
+    poststed: String = "Oslo",
+    landkode: String = "NO",
+) = BrevmottakerDb(
+    behandlingId = behandlingId,
+    type = type,
+    navn = navn,
+    adresselinje1 = adresselinje1,
+    adresselinje2 = adresselinje2,
+    postnummer = postnummer,
+    poststed = poststed,
+    landkode = landkode,
+)
 
 val Number.årSiden: LocalDate get() = LocalDate.now().minusYears(this.toLong())

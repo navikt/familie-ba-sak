@@ -4,9 +4,14 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -14,44 +19,120 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsoppdrag
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsperiode
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtelse
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
+import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
 import org.slf4j.LoggerFactory
+import java.time.Clock
 import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-    private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator()
-    private var behandlinger = mapOf<Long, Behandling>()
-    private var tilkjenteYtelser = listOf<TilkjentYtelse>()
-    private var tilkjenteYtelserNy = listOf<TilkjentYtelse>()
+    private val clockProvider = TestClockProvider(Clock.systemDefaultZone())
+
+    private var behandlinger = mutableMapOf<Long, Behandling>()
+    private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var endretMigreringsdatoMap = mutableMapOf<Long, YearMonth>()
     private var kastedeFeil = mutableMapOf<Long, Exception>()
+    private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
+
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val unleashNextMedContextService = mockUnleashNextMedContextService()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository(tilkjenteYtelser, behandlinger)
+    private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
+
+    val behandlingService =
+        BehandlingService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingstemaService = mockk(),
+            behandlingSøknadsinfoService = mockk(),
+            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
+            behandlingMetrikker = mockk(),
+            saksstatistikkEventPublisher = mockk(),
+            fagsakRepository = mockk(),
+            vedtakRepository = mockk(),
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            loggService = mockk(),
+            arbeidsfordelingService = mockk(),
+            infotrygdService = mockk(),
+            vedtaksperiodeService = mockk(),
+            taskRepository = mockk(),
+            vilkårsvurderingService = mockk(),
+        )
+
+    private val utbetalingsoppdragGenerator =
+        UtbetalingsoppdragGenerator(
+            Utbetalingsgenerator(),
+            KlassifiseringKorrigerer(
+                tilkjentYtelseRepository,
+                unleashNextMedContextService,
+            ),
+            unleashNextMedContextService,
+            BehandlingsinformasjonUtleder(
+                EndretMigreringsdatoUtleder(
+                    behandlingHentOgPersisterService,
+                    behandlingService,
+                ),
+                clockProvider,
+            ),
+            andelTilkjentYtelseRepository,
+            behandlingHentOgPersisterService,
+            tilkjentYtelseRepository,
+        )
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    @Gitt("følgende feature toggles")
+    fun følgendeFeatureToggles(dataTable: DataTable) {
+        toggles =
+            dataTable
+                .groupByBehandlingId()
+                .mapValues {
+                    val map = mutableMapOf<String, Boolean>()
+                    it.value.forEach { rad ->
+                        val featureToggleId = parseString(Domenebegrep.FEATURE_TOGGLE_ID, rad)
+                        val featureToggleVerdi = parseBoolean(Domenebegrep.ER_FEATURE_TOGGLE_TOGGLET_PÅ, rad)
+                        map[featureToggleId] = featureToggleVerdi
+                    }
+                    map
+                }.toMutableMap()
+    }
 
     @Gitt("følgende tilkjente ytelser")
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
         genererBehandlinger(dataTable)
         tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger)
-        tilkjenteYtelserNy = mapTilkjentYtelse(dataTable, behandlinger, tilkjenteYtelser.size.toLong())
-        if (tilkjenteYtelser.flatMap { it.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
+        if (tilkjenteYtelser.flatMap { (_, tilkjentYtelse) -> tilkjentYtelse.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
             error("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
         }
     }
 
     @Gitt("følgende behandlingsinformasjon")
-    fun `følgendeBehandlingsinformasjon`(dataTable: DataTable) {
+    fun følgendeBehandlingsinformasjon(dataTable: DataTable) {
         endretMigreringsdatoMap =
             dataTable
                 .groupByBehandlingId()
@@ -64,34 +145,17 @@ class OppdragSteg {
 
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
-        tilkjenteYtelserNy.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
+        tilkjenteYtelser.values.fold(emptyList<TilkjentYtelse>()) { tidligereTilkjenteYtelser, tilkjentYtelse ->
             val behandlingId = tilkjentYtelse.behandling.id
             try {
-                genererUtbetalingsoppdragForSimuleringNy(behandlingId, acc, tilkjentYtelse)
-                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(acc, tilkjentYtelse)
-                oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-                    beregnetUtbetalingsoppdrag[behandlingId]!!,
-                    tilkjentYtelse,
-                )
-            } catch (e: Exception) {
+                beregnetUtbetalingsoppdragSimulering[behandlingId] = beregnUtbetalingsoppdragNy(tidligereTilkjenteYtelser, tilkjentYtelse, true)
+                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdragNy(tidligereTilkjenteYtelser, tilkjentYtelse, false)
+                oppdaterTilkjentYtelseMedUtbetalingsoppdrag(beregnetUtbetalingsoppdrag[behandlingId]!!, tilkjentYtelse)
+            } catch (exception: Exception) {
                 logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
-                kastedeFeil[behandlingId] = e
+                kastedeFeil[behandlingId] = exception
             }
-            acc + tilkjentYtelse
-        }
-    }
-
-    private fun genererUtbetalingsoppdragForSimuleringNy(
-        behandlingId: Long,
-        tilkjenteYtelser: List<TilkjentYtelse>,
-        tilkjentYtelse: TilkjentYtelse,
-    ) {
-        try {
-            beregnetUtbetalingsoppdragSimulering[behandlingId] =
-                beregnUtbetalingsoppdragNy(tilkjenteYtelser, tilkjentYtelse, erSimulering = true)
-        } catch (e: Exception) {
-            logger.error("Feilet beregning av oppdrag ved simulering for behandling=$behandlingId")
-            kastedeFeil[behandlingId] = e
+            tidligereTilkjenteYtelser + tilkjentYtelse
         }
     }
 
@@ -110,22 +174,50 @@ class OppdragSteg {
     }
 
     private fun beregnUtbetalingsoppdragNy(
-        acc: List<TilkjentYtelse>,
+        tidligereTilkjenteYtelser: List<TilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
         erSimulering: Boolean = false,
     ): BeregnetUtbetalingsoppdragLongId {
-        val forrigeTilkjentYtelse = acc.lastOrNull()
-
+        every {
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any())
+        } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
+        every {
+            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
+        } returns tidligereTilkjenteYtelser.lastOrNull()
+        every {
+            behandlingHentOgPersisterService.hentBehandlinger(any())
+        } returns behandlinger.filter { it.value.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.values.toList()
+        every {
+            andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any())
+        } answers {
+            val skalBrukeNyKlassekodeForUtvidetBarnetrygd = toggles[tilkjentYtelse.behandling.id]?.get(SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD) ?: false
+            sisteAndelPerIdentNy(tidligereTilkjenteYtelser, skalBrukeNyKlassekodeForUtvidetBarnetrygd).values.toList()
+        }
+        every {
+            behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any())
+        } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.toLocalDate()
+        every {
+            unleashNextMedContextService.isEnabled(
+                any(),
+                any(),
+            )
+        } answers {
+            val featureToggleId = firstArg<String>()
+            toggles[tilkjentYtelse.behandling.id]?.get(featureToggleId) ?: true
+        }
+        every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
+            beregnetUtbetalingsoppdrag.values.any { beregnetUtbetalingsoppdrag ->
+                beregnetUtbetalingsoppdrag.utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode ->
+                    utbetalingsperiode.klassifisering == "BAUTV-OP"
+                }
+            }
+        }
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
-        val sisteAndelPerIdent = sisteAndelPerIdentNy(acc)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            forrigeTilkjentYtelse = forrigeTilkjentYtelse,
-            sisteAndelPerKjede = sisteAndelPerIdent,
-            nyTilkjentYtelse = tilkjentYtelse,
+            tilkjentYtelse = tilkjentYtelse,
             erSimulering = erSimulering,
-            endretMigreringsDato = endretMigreringsdatoMap[tilkjentYtelse.behandling.id],
         )
     }
 
@@ -171,7 +263,6 @@ class OppdragSteg {
         dataTable: DataTable,
         beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>,
     ) {
-        val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
         val forventedeUtbetalingsoppdrag =
             OppdragParser.mapForventetUtbetalingsoppdrag(
                 dataTable,
@@ -182,10 +273,10 @@ class OppdragSteg {
                 beregnetUtbetalingsoppdrag[behandlingId]
                     ?: error("Mangler utbetalingsoppdrag for $behandlingId")
             try {
-                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, medUtbetalingsperiode)
-            } catch (e: Throwable) {
+                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag)
+            } catch (exception: Throwable) {
                 logger.error("Feilet validering av behandling $behandlingId")
-                throw e
+                throw exception
             }
         }
     }
@@ -195,28 +286,29 @@ class OppdragSteg {
         behandlinger =
             dataTable
                 .groupByBehandlingId()
-                .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
-                .associateBy { it.id }
+                .mapValues {
+                    val sisteRad = it.value.last()
+                    lagBehandling(
+                        id = it.key,
+                        fagsak = fagsak,
+                        behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, sisteRad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                    )
+                }.toMutableMap()
     }
-
-    // @Gitt("følgende tilkjente ytelser uten andel for {}")
 
     private fun assertUtbetalingsoppdrag(
         forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
         utbetalingsoppdrag: Utbetalingsoppdrag,
-        medUtbetalingsperiode: Boolean = true,
     ) {
         assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
         assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
-        if (medUtbetalingsperiode) {
-            forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
-                val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
-                try {
-                    assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
-                } catch (e: Throwable) {
-                    logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
-                    throw e
-                }
+        forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
+            val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
+            try {
+                assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
+            } catch (exception: Throwable) {
+                logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
+                throw exception
             }
         }
     }

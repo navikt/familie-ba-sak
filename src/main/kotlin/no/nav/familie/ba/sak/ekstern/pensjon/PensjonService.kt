@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -48,6 +49,7 @@ class PensjonService(
         personIdent: String,
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
+        secureLogger.info("Henter data til pensjon for personIdent=$personIdent fraDato=$fraDato")
         if (envService.erPreprod() && unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
             val barnetrygdTilPensjonFraInfotrygdQ = hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent, fraDato)
             if (barnetrygdTilPensjonFraInfotrygdQ.isNotEmpty()) {
@@ -243,7 +245,7 @@ class PensjonService(
                     .values
                     .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
-                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
+                            acc + perioderTilhørendePerson.distinct().fjernOverlappendeInfotrygdperioder()
                         } catch (e: Exception) {
                             logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
                             secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
@@ -299,7 +301,6 @@ class PensjonService(
 
     companion object {
         private val logger = LoggerFactory.getLogger(PensjonService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }
 
@@ -308,12 +309,11 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
         .map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
-                tilOgMed = it.stønadTom.tilTidspunkt(),
+                // 999999999-12 er Infotrygds definisjon av uendelighet, klippes til 9999-12 for å kunne brukes i tidslinje. Kan fjernes når vi ikke lenger har løpende saker i infotrygd
+                tilOgMed = if (it.stønadTom > YearMonth.of(9999, 12)) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
         }.tilTidslinje()
-
-private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
     when {

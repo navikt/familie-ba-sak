@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
@@ -22,6 +24,7 @@ import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import java.util.Properties
 
@@ -85,15 +88,20 @@ class BehandleFødselshendelseTask(
                     infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
                 }
             }
-        } catch (e: FunksjonellFeil) {
-            val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
-            taskRepositoryWrapper.save(
-                OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
-                    aktør = aktør,
-                    oppgavetype = Oppgavetype.VurderLivshendelse,
-                    beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                ),
-            )
+        } catch (e: Exception) {
+            if (e::class in setOf(FunksjonellFeil::class, MidlertidigEnhetIAutomatiskBehandlingFeil::class)) {
+                val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
+                taskRepositoryWrapper.save(
+                    OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
+                        aktør = aktør,
+                        oppgavetype = Oppgavetype.VurderLivshendelse,
+                        beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
+                        enhetsnummer = if (e is MidlertidigEnhetIAutomatiskBehandlingFeil) BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer else null,
+                    ),
+                )
+            } else {
+                throw e
+            }
         }
     }
 
@@ -102,7 +110,7 @@ class BehandleFødselshendelseTask(
         private val logger = LoggerFactory.getLogger(BehandleFødselshendelseTask::class.java)
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
-            val triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
+            val triggerTid = if (erKlokkenMellom21Og06()) utledKl06IdagEllerNesteDag() else LocalDateTime.now()
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
@@ -114,5 +122,14 @@ class BehandleFødselshendelseTask(
                 triggerTid = triggerTid.plusDays(7),
             )
         }
+
+        private fun erKlokkenMellom21Og06(localTime: LocalTime = LocalTime.now()): Boolean = localTime.isAfter(LocalTime.of(21, 0)) || localTime.isBefore(LocalTime.of(6, 0))
+
+        private fun utledKl06IdagEllerNesteDag(date: LocalDateTime = LocalDateTime.now()): LocalDateTime =
+            if (date.toLocalTime().isBefore(LocalTime.of(6, 0))) {
+                date.withHour(6)
+            } else {
+                date.plusDays(1).withHour(6)
+            }
     }
 }

@@ -61,7 +61,7 @@ class VilkårsvurderingStegTest {
             tilbakestillBehandlingService = tilbakestillBehandlingService,
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-            månedligValutajusteringSevice = mockk(),
+            månedligValutajusteringService = mockk(),
             localDateProvider = RealDateProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
         )

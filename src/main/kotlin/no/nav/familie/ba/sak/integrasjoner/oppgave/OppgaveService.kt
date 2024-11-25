@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -81,15 +80,8 @@ class OppgaveService(
                     .hentArbeidsfordelingPåBehandling(behandlingId)
                     .tilArbeidsfordelingsenhet()
 
-            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
-
             val navIdent = tilordnetNavIdent?.let { NavIdent(it) }
-            val tilordnetRessurs =
-                if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
-                    tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-                } else {
-                    navIdent
-                }
+            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
 
             val opprettOppgave =
                 OpprettOppgaveRequest(
@@ -150,6 +142,7 @@ class OppgaveService(
         oppgavetype: Oppgavetype,
         fristForFerdigstillelse: LocalDate,
         beskrivelse: String,
+        enhetsnummer: String?,
     ): String {
         val opprettOppgave =
             OpprettOppgaveRequest(
@@ -160,7 +153,7 @@ class OppgaveService(
                 beskrivelse = beskrivelse,
                 saksId = null,
                 behandlingstema = null,
-                enhetsnummer = null,
+                enhetsnummer = enhetsnummer,
             )
         val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 

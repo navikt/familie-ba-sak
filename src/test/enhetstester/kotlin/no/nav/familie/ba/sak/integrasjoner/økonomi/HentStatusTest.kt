@@ -9,7 +9,8 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -41,7 +42,9 @@ class HentStatusTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val oppdaterTilkjentYtelseService = mockk<OppdaterTilkjentYtelseService>()
+
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
 
     private val unleashService: UnleashService = mockk()
 
@@ -52,8 +55,9 @@ class HentStatusTest {
                 økonomiKlient = økonomiKlient,
                 tilkjentYtelseValideringService = mockk(),
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
-                utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+                utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
                 behandlingHentOgPersisterService = mockk(),
+                oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
             )
         statusFraOppdrag =
             StatusFraOppdrag(

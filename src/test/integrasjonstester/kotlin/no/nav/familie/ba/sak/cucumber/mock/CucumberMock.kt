@@ -3,8 +3,10 @@
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
+import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
@@ -12,19 +14,21 @@ import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategi
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringSevice
+import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
@@ -32,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterTilkjentYtelseService
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService
@@ -69,10 +74,14 @@ import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.ZoneId
 
 val logger: Logger = LoggerFactory.getLogger("CucumberMock")
+
+private val zoneId = ZoneId.of("Europe/Oslo")
 
 class CucumberMock(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
@@ -82,6 +91,7 @@ class CucumberMock(
     ecbService: ECBService = mockEcbService(dataFraCucumber),
     scope: CoroutineScope? = null,
 ) {
+    val clockProvider = lagClockProviderMedFastTidspunkt(dataFraCucumber.dagensDato)
     val mockedDateProvider = MockedDateProvider(dataFraCucumber.dagensDato)
     val persongrunnlagService = mockPersongrunnlagService(dataFraCucumber)
     val fagsakService = mockFagsakService(dataFraCucumber)
@@ -125,6 +135,7 @@ class CucumberMock(
     val opprettTaskService = mockk<OpprettTaskService>()
     val endretUtbetalingAndelTidslinjeService = EndretUtbetalingAndelTidslinjeService(endretUtbetalingAndelHentOgPersisterService)
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
+    val brevmottakerService = mockk<BrevmottakerService>()
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -232,7 +243,7 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             behandlingstemaService = behandlingstemaService,
             behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>(),
-            behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>(),
+            behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository(),
             behandlingMetrikker = behandlingMetrikker,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             fagsakRepository = fagsakRepository,
@@ -264,7 +275,7 @@ class CucumberMock(
 
     val valutakursAbonnenter = listOf(tilpassDifferanseberegningEtterValutakursService, tilbakestillBehandlingFraValutakursEndringService)
 
-    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(valutakursRepository = valutakursRepository, utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository, endringsabonnenter = valutakursAbonnenter)
+    val tilpassValutakurserTilUtenlandskePeriodebeløpService = TilpassValutakurserTilUtenlandskePeriodebeløpService(valutakursRepository = valutakursRepository, utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository, endringsabonnenter = valutakursAbonnenter, clockProvider = clockProvider)
 
     val tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService = TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
 
@@ -365,15 +376,33 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
-    val utbetalingsoppdragGeneratorService =
-        UtbetalingsoppdragGeneratorService(
+    val utbetalingsoppdragGenerator =
+        UtbetalingsoppdragGenerator(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            behandlingService = behandlingService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(),
-            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             unleashNextMedContextService = unleashNextMedContextService,
+            klassifiseringKorrigerer =
+                KlassifiseringKorrigerer(
+                    tilkjentYtelseRepository,
+                    unleashNextMedContextService,
+                ),
+            behandlingsinformasjonUtleder =
+                BehandlingsinformasjonUtleder(
+                    EndretMigreringsdatoUtleder(
+                        behandlingHentOgPersisterService,
+                        behandlingService,
+                    ),
+                    clockProvider,
+                ),
+            utbetalingsgenerator = Utbetalingsgenerator(),
+        )
+
+    val oppdaterTilkjentYtelseService =
+        OppdaterTilkjentYtelseService(
+            endretUtbetalingAndelHentOgPersisterService,
+            tilkjentYtelseRepository,
+            clockProvider,
         )
 
     val økonomiService =
@@ -381,8 +410,9 @@ class CucumberMock(
             økonomiKlient = mockØkonomiKlient(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
-            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
+            oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
         )
 
     val håndterIverksettMotØkonomiSteg =
@@ -458,7 +488,7 @@ class CucumberMock(
             eøsSkjemaerForNyBehandlingService = eøsSkjemaerForNyBehandlingService,
         )
 
-    val månedligValutajusteringSevice = MånedligValutajusteringSevice(ecbService = ecbService, valutakursService = valutakursService)
+    val månedligValutajusteringService = MånedligValutajusteringService(ecbService = ecbService, valutakursService = valutakursService)
 
     val vilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -470,7 +500,7 @@ class CucumberMock(
             tilbakestillBehandlingService = tilbakestillBehandlingService,
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-            månedligValutajusteringSevice = månedligValutajusteringSevice,
+            månedligValutajusteringService = månedligValutajusteringService,
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
         )
@@ -504,6 +534,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
+            brevmottakerService = brevmottakerService,
         )
 
     val stegService =
