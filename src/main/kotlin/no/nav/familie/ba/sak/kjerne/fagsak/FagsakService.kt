@@ -103,7 +103,11 @@ class FagsakService(
             when (type) {
                 FagsakType.INSTITUSJON -> {
                     if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
-                    fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
+                    val eksisterendeFagsakPåPersonMedSammeOrgnummer = fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
+
+                    eksisterendeFagsakPåPersonMedSammeOrgnummer?.let {
+                        throw FunksjonellFeil("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
+                    }
                 }
                 else -> fagsakRepository.finnFagsakForAktør(aktør, type)
             }
