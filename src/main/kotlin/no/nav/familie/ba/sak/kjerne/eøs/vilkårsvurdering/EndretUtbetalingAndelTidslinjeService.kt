@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -12,18 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
-import org.springframework.stereotype.Service
 import java.math.BigDecimal
-
-@Service
-class EndretUtbetalingAndelTidslinjeService(
-    val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-) {
-    fun hentBarnasSkalIkkeUtbetalesTidslinjer(behandlingId: BehandlingId) =
-        endretUtbetalingAndelHentOgPersisterService
-            .hentForBehandling(behandlingId.id)
-            .tilBarnasSkalIkkeUtbetalesTidslinjer()
-}
 
 internal fun Iterable<EndretUtbetalingAndel>.tilBarnasSkalIkkeUtbetalesTidslinjer(): Map<Aktør, Tidslinje<Boolean, Måned>> =
     this
