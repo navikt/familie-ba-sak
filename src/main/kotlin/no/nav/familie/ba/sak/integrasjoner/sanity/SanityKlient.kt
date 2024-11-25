@@ -7,9 +7,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.task.OpprettTaskService
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.CachePut
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
@@ -24,8 +22,6 @@ class SanityKlient(
     @Value("\${SANITY_DATASET}") private val datasett: String,
     private val restTemplate: RestTemplate,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
-
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
@@ -55,7 +51,6 @@ class SanityKlient(
         maxAttempts = 3,
         backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
     )
-    @CachePut("sisteSanityEøsBegrunnelser")
     fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
         val sanityUrl = "$SANITY_BASE_URL/$datasett"
         val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(HENT_EØS_BEGRUNNELSER, "utf-8")
