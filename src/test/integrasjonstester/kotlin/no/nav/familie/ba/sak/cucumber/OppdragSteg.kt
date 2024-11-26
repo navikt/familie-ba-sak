@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
+import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
@@ -36,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -50,7 +52,9 @@ import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-    private val clockProvider = TestClockProvider(Clock.systemDefaultZone())
+    var clockProvider = TestClockProvider(Clock.systemDefaultZone())
+
+    var inneværendeMåned: YearMonth = YearMonth.now()
 
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
@@ -159,6 +163,12 @@ class OppdragSteg {
             }
             tidligereTilkjenteYtelser + tilkjentYtelse
         }
+    }
+
+    @Og("inneværende måned er {}")
+    fun `dagens dato er`(inneværendeMånedString: String) {
+        inneværendeMåned = parseÅrMåned(inneværendeMånedString)
+        clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(inneværendeMåned)
     }
 
     private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
@@ -294,6 +304,7 @@ class OppdragSteg {
                         id = it.key,
                         fagsak = fagsak,
                         behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, sisteRad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                        årsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, sisteRad) ?: BehandlingÅrsak.SØKNAD,
                     )
                 }.toMutableMap()
     }
