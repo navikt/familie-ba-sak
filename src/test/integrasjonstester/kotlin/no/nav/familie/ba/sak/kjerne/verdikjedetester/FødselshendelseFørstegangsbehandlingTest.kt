@@ -247,7 +247,6 @@ class FødselshendelseFørstegangsbehandlingTest(
                 aktør = Aktør(scenario.søker.aktørId!!),
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
             )
         }
     }
