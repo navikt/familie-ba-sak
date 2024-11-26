@@ -7,6 +7,28 @@ import org.springframework.data.jpa.repository.Query
 interface ArbeidsfordelingPåBehandlingRepository : JpaRepository<ArbeidsfordelingPåBehandling, Long> {
     @Query(value = "SELECT apb FROM ArbeidsfordelingPåBehandling apb WHERE apb.behandlingId = :behandlingId")
     fun finnArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling?
+
+    @Query(
+        """
+        SELECT apb
+        FROM ArbeidsfordelingPåBehandling apb
+        JOIN Behandling b ON apb.behandlingId = b.id
+        WHERE b.fagsak.id = :fagsakId
+          AND apb.behandlendeEnhetId != '4863'
+          AND b.endretTidspunkt NOT IN (
+                 'HENLAGT_FEILAKTIG_OPPRETTET',
+                 'HENLAGT_SØKNAD_TRUKKET',
+                 'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+                 'HENLAGT_TEKNISK_VEDLIKEHOLD'
+            )
+        ORDER BY b.endretTidspunkt DESC
+        LIMIT 1
+        """,
+        nativeQuery = true,
+    )
+    fun finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(
+        fagsakId: Long,
+    ): ArbeidsfordelingPåBehandling?
 }
 
 // Extension-function fordi default methods for JPA ikke er støttet uten @JvmDefaultWithCompatibility
