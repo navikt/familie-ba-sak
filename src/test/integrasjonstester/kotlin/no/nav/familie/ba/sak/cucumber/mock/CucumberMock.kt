@@ -1,5 +1,6 @@
 ﻿package no.nav.familie.ba.sak.cucumber.mock
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
@@ -139,6 +140,14 @@ class CucumberMock(
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
     val nyUtvidetKlassekodeKjøringRepository = mockk<NyUtvidetKlassekodeKjøringRepository>()
+
+    init {
+        dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
+            togglesForBehandling.forEach { (toggleId, isEnabled) ->
+                every { unleashNextMedContextService.isEnabled(toggleId, behandlingId) } returns isEnabled
+            }
+        }
+    }
 
     val behandlingstemaService =
         BehandlingstemaService(
