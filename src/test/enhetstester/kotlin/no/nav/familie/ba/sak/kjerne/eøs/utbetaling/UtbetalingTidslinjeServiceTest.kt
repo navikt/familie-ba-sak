@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -25,33 +26,50 @@ class UtbetalingTidslinjeServiceTest {
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
 
     @Test
-    fun `Skal returnere emptyMap hvis det ikke finnes noen endringer eller utbetaling utvidet`() {
+    fun `Skal returnere emptyMap hvis det ikke finnes noen endringer eller utbetaling av utvidet`() {
+        // Arrange
         val behandling = lagBehandling()
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
-        val resultat = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(BehandlingId(behandling.id), emptyList())
-        assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultat)
+
+        // Act
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList())
+
+        // Assert
+        assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
     }
 
     @Test
-    fun `Test blabla`() {
+    fun `Skal returnere false-periode hvis det finnes utbetaling av utvidet når ordinær er endret til 0kr`() {
+        // Arrange
         val behandling = lagBehandling()
-        val fom = YearMonth.now().minusYears(2)
+        val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
+        val tomUtvidet = YearMonth.now().plusYears(1)
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
             listOf(
                 lagAndelTilkjentYtelse(
-                    fom = fom,
-                    tom = YearMonth.now().plusYears(1),
+                    fom = fomUtvidetOgEndring,
+                    tom = tomUtvidet,
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ),
             )
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingsAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, person= barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT, fom= fom, tom= YearMonth.now())
-        val resultat = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(BehandlingId(behandling.id), listOf(endretUtbetalingsAndel))
-        assertEquals(1, resultat.size)
-        val tidslinje = resultat[barn.aktør]
-        val perioder = tidslinje?.perioder() ?: emptyList()
-        assertEquals(1, perioder.size)
-        val periode = perioder.first()
-        assertEquals(fom, periode.fraOgMed.tilYearMonth())
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT, fom = fomUtvidetOgEndring, tom = YearMonth.now())
+
+        // Act
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = listOf(endretUtbetalingAndel))
+
+        // Assert
+        assertEquals(1, resultatMap.size)
+
+        val tidslinjeForBarn = resultatMap[barn.aktør]
+        val perioderForBarn = tidslinjeForBarn?.perioder() ?: emptyList()
+
+        assertEquals(1, perioderForBarn.size)
+
+        val periode = perioderForBarn.first()
+
+        assertEquals(fomUtvidetOgEndring, periode.fraOgMed.tilYearMonth())
+        assertEquals(tomUtvidet, periode.tilOgMed.tilYearMonth())
+        assertFalse(periode.innhold!!)
     }
 }
