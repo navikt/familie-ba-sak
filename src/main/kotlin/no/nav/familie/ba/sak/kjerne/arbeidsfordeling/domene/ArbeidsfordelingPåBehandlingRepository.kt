@@ -15,13 +15,13 @@ interface ArbeidsfordelingPåBehandlingRepository : JpaRepository<Arbeidsfordeli
         JOIN Behandling b ON apb.behandlingId = b.id
         WHERE b.fagsak.id = :fagsakId
           AND apb.behandlendeEnhetId != '4863'
-          AND b.endretTidspunkt NOT IN (
+          AND b.resultat NOT IN (
                  'HENLAGT_FEILAKTIG_OPPRETTET',
                  'HENLAGT_SØKNAD_TRUKKET',
                  'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
                  'HENLAGT_TEKNISK_VEDLIKEHOLD'
             )
-        ORDER BY b.endretTidspunkt DESC
+        ORDER BY b.aktivertTidspunkt DESC
         LIMIT 1
         """,
         nativeQuery = true,
