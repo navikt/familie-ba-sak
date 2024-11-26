@@ -139,7 +139,7 @@ internal class HåndterNyIdentServiceTest {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
-            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt.")
+            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling.")
         }
 
         @Test
@@ -183,7 +183,7 @@ internal class HåndterNyIdentServiceTest {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
-            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt.")
+            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling.")
         }
 
         @Test

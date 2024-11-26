@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpServerErrorException
@@ -677,6 +679,30 @@ class FagsakServiceTest(
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.first())
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.last())
+    }
+
+    @Test
+    fun `Skal kaste feil ved forsøk på å opprette institusjon fagsak med org nummer som allerede finnes for person`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+        val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
+
+        opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.INSTITUSJON)
+
+        // Act && Assert
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                fagsakService.hentEllerOpprettFagsak(
+                    fagsakRequest =
+                        FagsakRequest(
+                            personIdent = barn.aktør.aktivFødselsnummer(),
+                            fagsakType = FagsakType.INSTITUSJON,
+                            institusjon = institusjon,
+                        ),
+                )
+            }.melding
+
+        assertThat(feilmelding).isEqualTo("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
     }
 
     private data class PeriodeForAktør(

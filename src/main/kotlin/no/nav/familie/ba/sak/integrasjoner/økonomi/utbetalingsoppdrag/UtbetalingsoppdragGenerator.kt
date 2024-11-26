@@ -101,9 +101,8 @@ class UtbetalingsoppdragGenerator(
 fun TilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): List<AndelDataLongId> =
     this.andelerTilkjentYtelse.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
 
-fun AndelTilkjentYtelse.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): AndelDataLongId {
-    // Skrur på ny klassekode for enkelte fagsaker til å begynne med.
-    return AndelDataLongId(
+fun AndelTilkjentYtelse.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): AndelDataLongId =
+    AndelDataLongId(
         id = id,
         fom = periode.fom,
         tom = periode.tom,
@@ -114,4 +113,3 @@ fun AndelTilkjentYtelse.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnet
         forrigePeriodeId = forrigePeriodeOffset,
         kildeBehandlingId = kildeBehandlingId,
     )
-}

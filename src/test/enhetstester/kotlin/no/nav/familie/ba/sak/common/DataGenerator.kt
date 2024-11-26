@@ -136,8 +136,7 @@ fun randomBarnFnr(alder: Int? = null): String =
 fun randomPersonident(
     aktør: Aktør,
     fnr: String = randomFnr(),
-): Personident =
-    Personident(fødselsnummer = fnr, aktør = aktør)
+): Personident = Personident(fødselsnummer = fnr, aktør = aktør)
 
 fun randomAktør(fnr: String = randomFnr()): Aktør =
     Aktør(Random.nextLong(1000_000_000_000, 31_121_299_99999).toString()).also {
@@ -185,15 +184,14 @@ fun lagFagsak(
     status: FagsakStatus = FagsakStatus.OPPRETTET,
     type: FagsakType = FagsakType.NORMAL,
     arkivert: Boolean = false,
-) =
-    Fagsak(
-        id = id,
-        aktør = aktør,
-        institusjon = institusjon,
-        status = status,
-        type = type,
-        arkivert = arkivert,
-    )
+) = Fagsak(
+    id = id,
+    aktør = aktør,
+    institusjon = institusjon,
+    status = status,
+    type = type,
+    arkivert = arkivert,
+)
 
 fun lagInstitusjon(
     id: Long = 0L,
@@ -218,31 +216,30 @@ fun lagBehandling(
     aktivertTid: LocalDateTime = LocalDateTime.now(),
     id: Long = nesteBehandlingId(),
     endretTidspunkt: LocalDateTime = LocalDateTime.now(),
-) =
-    Behandling(
-        id = id,
-        fagsak = fagsak,
-        skalBehandlesAutomatisk = skalBehandlesAutomatisk,
-        type = behandlingType,
-        kategori = behandlingKategori,
-        underkategori = underkategori,
-        opprettetÅrsak = årsak,
-        resultat = resultat,
-        status = status,
-        aktivertTidspunkt = aktivertTid,
-    ).also {
-        it.endretTidspunkt = endretTidspunkt
-        val tidligereSteg =
-            StegType.entries
-                .filter { it.rekkefølge < førsteSteg.rekkefølge }
-                .filter { it != StegType.HENLEGG_BEHANDLING }
+) = Behandling(
+    id = id,
+    fagsak = fagsak,
+    skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+    type = behandlingType,
+    kategori = behandlingKategori,
+    underkategori = underkategori,
+    opprettetÅrsak = årsak,
+    resultat = resultat,
+    status = status,
+    aktivertTidspunkt = aktivertTid,
+).also {
+    it.endretTidspunkt = endretTidspunkt
+    val tidligereSteg =
+        StegType.entries
+            .filter { it.rekkefølge < førsteSteg.rekkefølge }
+            .filter { it != StegType.HENLEGG_BEHANDLING }
 
-        tidligereSteg.forEach { steg ->
-            it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, steg, behandlingStegStatus = BehandlingStegStatus.UTFØRT))
-        }
-
-        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+    tidligereSteg.forEach { steg ->
+        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, steg, behandlingStegStatus = BehandlingStegStatus.UTFØRT))
     }
+
+    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+}
 
 fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
@@ -251,50 +248,46 @@ fun tilfeldigPerson(
     aktør: Aktør = randomAktør(),
     personId: Long = nestePersonId(),
     dødsfall: Dødsfall? = null,
-) =
-    Person(
-        id = personId,
-        aktør = aktør,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB,
-        dødsfall = dødsfall,
-    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
+) = Person(
+    id = personId,
+    aktør = aktør,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB,
+    dødsfall = dødsfall,
+).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
 
-fun Person.tilPersonEnkel() =
-    PersonEnkel(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
+fun Person.tilPersonEnkel() = PersonEnkel(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
     kjønn: Kjønn = Kjønn.MANN,
     aktør: Aktør = randomAktør(),
-) =
-    Person(
-        id = nestePersonId(),
-        aktør = aktør,
-        fødselsdato = fødselsdato,
-        type = personType,
-        personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-        navn = "",
-        kjønn = kjønn,
-        målform = Målform.NB,
-    ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
+) = Person(
+    id = nestePersonId(),
+    aktør = aktør,
+    fødselsdato = fødselsdato,
+    type = personType,
+    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    navn = "",
+    kjønn = kjønn,
+    målform = Målform.NB,
+).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
 
 fun lagVedtak(
     behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
     vedtaksdato: LocalDateTime? = LocalDateTime.now(),
-) =
-    Vedtak(
-        id = nesteVedtakId(),
-        behandling = behandling,
-        vedtaksdato = vedtaksdato,
-        stønadBrevPdF = stønadBrevPdF,
-    )
+) = Vedtak(
+    id = nesteVedtakId(),
+    behandling = behandling,
+    vedtaksdato = vedtaksdato,
+    stønadBrevPdF = stønadBrevPdF,
+)
 
 fun lagAndelTilkjentYtelse(
     fom: YearMonth,
@@ -533,8 +526,7 @@ fun lagTestPersonopplysningGrunnlag(
     return personopplysningGrunnlag
 }
 
-fun PersonopplysningGrunnlag.tilPersonEnkelSøkerOgBarn() =
-    this.søkerOgBarn.map { it.tilPersonEnkel() }
+fun PersonopplysningGrunnlag.tilPersonEnkelSøkerOgBarn() = this.søkerOgBarn.map { it.tilPersonEnkel() }
 
 fun dato(s: String) = LocalDate.parse(s)
 
@@ -958,6 +950,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     stegService: StegService,
     fagsakId: Long,
     brevmalService: BrevmalService,
+    vedtaksperiodeService: VedtaksperiodeService,
 ): Behandling {
     val behandling =
         stegService.håndterNyBehandling(
@@ -993,6 +986,12 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
             },
         )
     if (tilSteg == StegType.VURDER_TILBAKEKREVING) return behandlingEtterSimuleringSteg
+
+    leggTilBegrunnelsePåVedtaksperiodeIBehandling(
+        behandling = behandlingEtterSimuleringSteg,
+        vedtakService = vedtakService,
+        vedtaksperiodeService = vedtaksperiodeService,
+    )
 
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
@@ -1151,14 +1150,25 @@ fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
     val perisisterteVedtaksperioder =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
 
-    vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-        vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
-        standardbegrunnelserFraFrontend =
-            listOf(
-                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-            ),
-        eøsStandardbegrunnelserFraFrontend = emptyList(),
-    )
+    if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
+            standardbegrunnelserFraFrontend =
+                listOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                ),
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
+        )
+    } else {
+        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
+            vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
+            standardbegrunnelserFraFrontend =
+                listOf(
+                    Standardbegrunnelse.FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET,
+                ),
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
+        )
+    }
 }
 
 fun lagVilkårResultat(
@@ -1210,14 +1220,13 @@ fun lagEndretUtbetalingAndel(
     fom: YearMonth,
     tom: YearMonth,
     prosent: Int,
-) =
-    lagEndretUtbetalingAndel(
-        behandlingId = behandlingId,
-        person = barn,
-        fom = fom,
-        tom = tom,
-        prosent = BigDecimal(prosent),
-    )
+) = lagEndretUtbetalingAndel(
+    behandlingId = behandlingId,
+    person = barn,
+    fom = fom,
+    tom = tom,
+    prosent = BigDecimal(prosent),
+)
 
 fun lagEndretUtbetalingAndel(
     id: Long = 0,
@@ -1229,19 +1238,18 @@ fun lagEndretUtbetalingAndel(
     årsak: Årsak = Årsak.DELT_BOSTED,
     avtaletidspunktDeltBosted: LocalDate = LocalDate.now().minusMonths(1),
     søknadstidspunkt: LocalDate = LocalDate.now().minusMonths(1),
-) =
-    EndretUtbetalingAndel(
-        id = id,
-        behandlingId = behandlingId,
-        person = person,
-        prosent = prosent,
-        fom = fom,
-        tom = tom,
-        årsak = årsak,
-        avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
-        søknadstidspunkt = søknadstidspunkt,
-        begrunnelse = "Test",
-    )
+) = EndretUtbetalingAndel(
+    id = id,
+    behandlingId = behandlingId,
+    person = person,
+    prosent = prosent,
+    fom = fom,
+    tom = tom,
+    årsak = årsak,
+    avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
+    søknadstidspunkt = søknadstidspunkt,
+    begrunnelse = "Test",
+)
 
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId: Long,
@@ -1249,14 +1257,13 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     fom: YearMonth,
     tom: YearMonth,
     prosent: Int,
-) =
-    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-        behandlingId = behandlingId,
-        person = barn,
-        fom = fom,
-        tom = tom,
-        prosent = BigDecimal(prosent),
-    )
+) = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+    behandlingId = behandlingId,
+    person = barn,
+    fom = fom,
+    tom = tom,
+    prosent = BigDecimal(prosent),
+)
 
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     id: Long = 0,
@@ -1454,16 +1461,15 @@ fun lagSanityEøsBegrunnelse(
 fun oppfyltVilkår(
     vilkår: Vilkår,
     regelverk: Regelverk? = null,
-) =
-    VilkårRegelverkResultat(
-        vilkår = vilkår,
-        regelverkResultat =
-            when (regelverk) {
-                Regelverk.NASJONALE_REGLER -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-                Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
-                else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
-            },
-    )
+) = VilkårRegelverkResultat(
+    vilkår = vilkår,
+    regelverkResultat =
+        when (regelverk) {
+            Regelverk.NASJONALE_REGLER -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
+            Regelverk.EØS_FORORDNINGEN -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
+            else -> RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
+        },
+)
 
 fun ikkeOppfyltVilkår(vilkår: Vilkår) =
     VilkårRegelverkResultat(

@@ -138,6 +138,7 @@ class TilkjentYtelseBuilder(
                                 andelTilkjentYtelseTidslinje.beskjærEtter(
                                     erUnder18ÅrVilkårTidslinje(person.fødselsdato),
                                 )
+
                             else -> andelTilkjentYtelseTidslinje
                         }
 

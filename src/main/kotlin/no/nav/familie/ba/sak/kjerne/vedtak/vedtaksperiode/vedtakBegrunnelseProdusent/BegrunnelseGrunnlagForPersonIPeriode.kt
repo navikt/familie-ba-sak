@@ -62,8 +62,7 @@ data class BegrunnelseGrunnlagForPersonIPeriode(
     }
 
     companion object {
-        fun tomPeriode(person: Person) =
-            BegrunnelseGrunnlagForPersonIPeriode(person = person, vilkårResultater = emptyList(), andeler = emptyList())
+        fun tomPeriode(person: Person) = BegrunnelseGrunnlagForPersonIPeriode(person = person, vilkårResultater = emptyList(), andeler = emptyList())
     }
 }
 

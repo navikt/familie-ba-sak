@@ -41,12 +41,14 @@ class PensjonConfig(
                             "Pensjon applikasjon kan ikke kalle andre tjenester",
                         )
                     }
+
                     erPensjonRequest && (!harForvalterRolle && !erKallerPensjon) -> {
                         response.sendError(
                             HttpServletResponse.SC_UNAUTHORIZED,
                             "Pensjon tjeneste kan kun kalles av pensjon eller innlogget bruker med FORVALTER rolle",
                         )
                     }
+
                     erPensjonRequest && (harForvalterRolle || erKallerPensjon) -> filterChain.doFilter(request, response)
                     !erPensjonRequest && !erKallerPensjon -> filterChain.doFilter(request, response)
                 }

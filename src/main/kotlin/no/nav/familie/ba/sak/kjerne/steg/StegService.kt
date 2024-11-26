@@ -225,8 +225,7 @@ class StegService(
     fun håndterSøknad(
         behandling: Behandling,
         restRegistrerSøknad: RestRegistrerSøknad,
-    ): Behandling =
-        fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
+    ): Behandling = fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
     private fun fullførSøknadsHåndtering(
         behandling: Behandling,

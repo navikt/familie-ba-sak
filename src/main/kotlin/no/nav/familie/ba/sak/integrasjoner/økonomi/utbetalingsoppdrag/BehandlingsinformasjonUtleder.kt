@@ -69,11 +69,10 @@ class BehandlingsinformasjonUtleder(
     private fun finnOpphørKjederFraFørsteUtbetaling(
         endretMigreringsdato: YearMonth?,
         erSimulering: Boolean,
-    ) =
-        if (endretMigreringsdato != null) {
-            false
-        } else {
-            // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
-            erSimulering
-        }
+    ) = if (endretMigreringsdato != null) {
+        false
+    } else {
+        // Ved simulering når migreringsdato er endret, skal vi opphøre fra den nye datoen og ikke fra første utbetaling per kjede.
+        erSimulering
+    }
 }

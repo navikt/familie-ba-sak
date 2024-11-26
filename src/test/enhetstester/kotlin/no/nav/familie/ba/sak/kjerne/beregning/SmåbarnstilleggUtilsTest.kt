@@ -830,6 +830,5 @@ class SmåbarnstilleggUtilsTest {
         )
     }
 
-    private fun lagBarnSomGirRettTilSmåbarnstilleggTidslinje(perioder: List<Periode<BarnSinRettTilSmåbarnstillegg, Måned>>): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> =
-        tidslinje { perioder }
+    private fun lagBarnSomGirRettTilSmåbarnstilleggTidslinje(perioder: List<Periode<BarnSinRettTilSmåbarnstillegg, Måned>>): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> = tidslinje { perioder }
 }

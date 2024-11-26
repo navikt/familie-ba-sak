@@ -148,9 +148,8 @@ class DokumentDistribueringService(
     fun alleredeDistribuertMelding(
         journalpostId: String,
         behandlingId: Long?,
-    ) =
-        "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
-            if (behandlingId != null) " BehandlingId=$behandlingId." else ""
+    ) = "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
+        if (behandlingId != null) " BehandlingId=$behandlingId." else ""
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(this::class.java)

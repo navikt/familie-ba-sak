@@ -265,8 +265,7 @@ private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnla
                     .isNullOrEmpty()
         }.keys
 
-private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) =
-    personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
+private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) = personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
 fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     grunnlag: GrunnlagForBegrunnelse,
@@ -321,6 +320,9 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                 else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
             }
         }
+
+        gjelderSøker && this.gjelderEtterEndretUtbetaling ->
+            barnMedUtbetaling.map { it.fødselsdato }
 
         erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(this) -> {
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }

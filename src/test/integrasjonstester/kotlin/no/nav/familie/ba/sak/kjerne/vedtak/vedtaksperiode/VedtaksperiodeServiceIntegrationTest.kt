@@ -89,6 +89,7 @@ class VedtaksperiodeServiceIntegrationTest(
             stegService = stegService,
             fagsakId = førstegangsbehandling.fagsak.id,
             brevmalService = brevmalService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
     }
 

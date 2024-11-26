@@ -89,12 +89,11 @@ data class Kompetanse(
         fom: YearMonth?,
         tom: YearMonth?,
         barnAktører: Set<Aktør>,
-    ) =
-        copy(
-            fom = fom,
-            tom = tom,
-            barnAktører = barnAktører.toSet(),
-        )
+    ) = copy(
+        fom = fom,
+        tom = tom,
+        barnAktører = barnAktører.toSet(),
+    )
 
     fun erObligatoriskeFelterSatt() =
         fom != null &&

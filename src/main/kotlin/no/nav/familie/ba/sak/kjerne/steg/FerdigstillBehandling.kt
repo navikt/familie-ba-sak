@@ -86,8 +86,7 @@ class FerdigstillBehandling(
         }
     }
 
-    private fun skalOppdatereStønadFomOgTomForIverksatteBehandlingerIkkeSendtTilOppdrag(tilkjentYtelse: TilkjentYtelse) =
-        tilkjentYtelse.stønadFom == null && tilkjentYtelse.stønadTom == null && tilkjentYtelse.utbetalingsoppdrag == null
+    private fun skalOppdatereStønadFomOgTomForIverksatteBehandlingerIkkeSendtTilOppdrag(tilkjentYtelse: TilkjentYtelse) = tilkjentYtelse.stønadFom == null && tilkjentYtelse.stønadTom == null && tilkjentYtelse.utbetalingsoppdrag == null
 
     override fun stegType(): StegType = StegType.FERDIGSTILLE_BEHANDLING
 

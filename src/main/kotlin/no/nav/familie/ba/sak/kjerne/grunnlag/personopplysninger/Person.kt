@@ -140,11 +140,9 @@ data class Person(
 
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 
-    fun fyllerAntallÅrInneværendeMåned(år: Int): Boolean =
-        this.fødselsdato.toYearMonth() == now().minusYears(år.toLong()).toYearMonth()
+    fun fyllerAntallÅrInneværendeMåned(år: Int): Boolean = this.fødselsdato.toYearMonth() == now().minusYears(år.toLong()).toYearMonth()
 
-    fun erYngreEnnInneværendeMåned(år: Int): Boolean =
-        this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
+    fun erYngreEnnInneværendeMåned(år: Int): Boolean = this.fødselsdato.isAfter(now().minusYears(år.toLong()).sisteDagIMåned())
 
     fun erDød(): Boolean = dødsfall != null
 

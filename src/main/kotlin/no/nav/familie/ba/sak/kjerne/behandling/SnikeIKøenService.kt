@@ -143,8 +143,7 @@ class SnikeIKøenService(
             ?: BehandlingStatus.UTREDES
 }
 
-private fun Behandling.harVærtPåVilkårsvurderingSteg() =
-    behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
+private fun Behandling.harVærtPåVilkårsvurderingSteg() = behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
 
 enum class SettPåMaskinellVentÅrsak(
     val årsak: String,

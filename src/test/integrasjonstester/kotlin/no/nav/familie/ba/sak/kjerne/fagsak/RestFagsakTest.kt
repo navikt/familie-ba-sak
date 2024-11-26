@@ -69,6 +69,7 @@ class RestFagsakTest(
             stegService = stegService,
             fagsakId = førstegangsbehandling.fagsak.id,
             brevmalService = brevmalService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 
         val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)

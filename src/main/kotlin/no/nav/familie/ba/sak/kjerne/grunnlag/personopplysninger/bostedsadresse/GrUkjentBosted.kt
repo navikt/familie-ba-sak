@@ -14,8 +14,7 @@ data class GrUkjentBosted(
     @Column(name = "bostedskommune")
     val bostedskommune: String,
 ) : GrBostedsadresse() {
-    override fun tilKopiForNyPerson(): GrBostedsadresse =
-        GrUkjentBosted(bostedskommune)
+    override fun tilKopiForNyPerson(): GrBostedsadresse = GrUkjentBosted(bostedskommune)
 
     override fun toSecureString(): String = """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
 
@@ -24,7 +23,6 @@ data class GrUkjentBosted(
     override fun toString(): String = "UkjentBostedAdresse(detaljer skjult)"
 
     companion object {
-        fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBosted =
-            GrUkjentBosted(bostedskommune = ukjentBosted.bostedskommune)
+        fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBosted = GrUkjentBosted(bostedskommune = ukjentBosted.bostedskommune)
     }
 }

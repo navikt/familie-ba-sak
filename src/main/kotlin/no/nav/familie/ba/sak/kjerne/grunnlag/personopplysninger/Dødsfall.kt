@@ -40,8 +40,7 @@ data class Dødsfall(
     @Column(name = "manuell_registrert", nullable = false)
     val manuellRegistrert: Boolean = false,
 ) : BaseEntitet() {
-    fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
-        copy(id = 0, person = nyPerson)
+    fun tilKopiForNyPerson(nyPerson: Person): Dødsfall = copy(id = 0, person = nyPerson)
 
     fun hentAdresseToString(): String = """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
 

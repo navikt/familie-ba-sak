@@ -43,5 +43,4 @@ data class KorrigerVedtakRequest(
     val begrunnelse: String?,
 )
 
-fun KorrigerVedtakRequest.tilKorrigerVedtak(behandling: Behandling) =
-    KorrigertVedtak(vedtaksdato = vedtaksdato, begrunnelse = begrunnelse, behandling = behandling, aktiv = true)
+fun KorrigerVedtakRequest.tilKorrigerVedtak(behandling: Behandling) = KorrigertVedtak(vedtaksdato = vedtaksdato, begrunnelse = begrunnelse, behandling = behandling, aktiv = true)

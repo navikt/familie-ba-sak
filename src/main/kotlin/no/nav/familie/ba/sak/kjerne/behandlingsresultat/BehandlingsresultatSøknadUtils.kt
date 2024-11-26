@@ -121,6 +121,7 @@ object BehandlingsresultatSøknadUtils {
                                         frontendFeilmelding = "Du må fylle ut en endret utbetalingsperiode for alle personene det gjelder",
                                     )
                                 }
+
                             Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
                             Årsak.ALLEREDE_UTBETALT,
                             Årsak.ENDRE_MOTTAKER,
@@ -129,6 +130,7 @@ object BehandlingsresultatSøknadUtils {
                             -> Søknadsresultat.AVSLÅTT
                         }
                     }
+
                     forrigeBeløp != nåværendeBeløp && nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige
                     else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
                 }

@@ -117,5 +117,4 @@ class ØkonomiService(
 
 fun Utbetalingsoppdrag.skalIverksettesMotOppdrag(): Boolean = utbetalingsperiode.isNotEmpty()
 
-private fun TilkjentYtelse.skalIverksettesMotOppdrag(): Boolean =
-    this.utbetalingsoppdrag()?.skalIverksettesMotOppdrag() ?: false
+private fun TilkjentYtelse.skalIverksettesMotOppdrag(): Boolean = this.utbetalingsoppdrag()?.skalIverksettesMotOppdrag() ?: false

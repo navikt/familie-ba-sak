@@ -97,8 +97,7 @@ object EndretUtbetalingAndelValidering {
     fun validerÅrsak(
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
         vilkårsvurdering: Vilkårsvurdering?,
-    ) =
-        endretUtbetalingAndeler.forEach { validerÅrsak(it, vilkårsvurdering) }
+    ) = endretUtbetalingAndeler.forEach { validerÅrsak(it, vilkårsvurdering) }
 
     fun validerÅrsak(
         endretUtbetalingAndel: EndretUtbetalingAndel,
@@ -130,7 +129,7 @@ object EndretUtbetalingAndelValidering {
 
             Årsak.ALLEREDE_UTBETALT -> validerAlleredeUtbetalt(endretUtbetalingAndel = endretUtbetalingAndel)
 
-            Årsak.ENDRE_MOTTAKER -> { }
+            Årsak.ENDRE_MOTTAKER -> {}
         }
     }
 

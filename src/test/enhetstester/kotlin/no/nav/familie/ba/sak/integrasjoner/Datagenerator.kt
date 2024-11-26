@@ -34,6 +34,7 @@ fun lagTestJournalpost(
     journalpostId: String,
     avsenderMottakerIdType: AvsenderMottakerIdType?,
     kanal: String,
+    sak: Sak? = lagSak(),
 ): Journalpost =
     Journalpost(
         journalpostId = journalpostId,
@@ -71,16 +72,18 @@ fun lagTestJournalpost(
                     logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
                 ),
             ),
-        sak =
-            Sak(
-                arkivsaksnummer = "",
-                arkivsaksystem = "GSAK",
-                sakstype = Sakstype.FAGSAK.name,
-                fagsakId = "10695768",
-                fagsaksystem = FAGSYSTEM,
-            ),
+        sak = sak,
         tittel = "Søknad om ordinær barnetrygd",
         relevanteDatoer = listOf(RelevantDato(LocalDateTime.now(), "DATO_REGISTRERT")),
+    )
+
+private fun lagSak() =
+    Sak(
+        arkivsaksnummer = "",
+        arkivsaksystem = "GSAK",
+        sakstype = Sakstype.FAGSAK.name,
+        fagsakId = "10695768",
+        fagsaksystem = FAGSYSTEM,
     )
 
 fun lagTilgangsstyrtJournalpost(

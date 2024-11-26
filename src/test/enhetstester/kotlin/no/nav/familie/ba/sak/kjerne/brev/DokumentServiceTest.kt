@@ -2,21 +2,23 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.spyk
+import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagBrevmottakerDb
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -31,32 +33,34 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 internal class DokumentServiceTest {
-    val integrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
-    val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
-    val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
-    val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
-    val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
-    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
-    val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
-    val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
-    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
-    val personidentService = mockk<PersonidentService>()
-    val brevmottakerRepository = mockk<BrevmottakerRepository>()
-    val brevmottakerService =
+    private val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
+    private val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
+    private val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
+    private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
+    private val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
+    private val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
+    private val brevmottakerRepository = mockk<BrevmottakerRepository>()
+    private val brevmottakerService =
         spyk<BrevmottakerService>(
             BrevmottakerService(
                 brevmottakerRepository = brevmottakerRepository,
@@ -68,7 +72,6 @@ internal class DokumentServiceTest {
     private val dokumentService: DokumentService =
         spyk(
             DokumentService(
-                journalføringRepository = journalføringRepository,
                 taskRepository = taskRepository,
                 vilkårsvurderingService = vilkårsvurderingService,
                 vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
@@ -111,11 +114,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = capture(avsenderMottaker),
             )
         } returns "mockJournalpostId"
-        every { journalføringRepository.save(any()) } returns
-            DbJournalpost(
-                behandling = behandling,
-                journalpostId = "id",
-            )
         every { organisasjonService.hentOrganisasjon(any()) } returns
             Organisasjon(
                 organisasjonsnummer = orgNummer,
@@ -158,11 +156,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = capture(avsenderMottaker),
             )
         } returns "mockJournalpostId"
-        every { journalføringRepository.save(any()) } returns
-            DbJournalpost(
-                behandling = behandling,
-                journalpostId = "id",
-            )
 
         every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
@@ -198,18 +191,13 @@ internal class DokumentServiceTest {
                     any(),
                     null,
                 )
-            } returns
-                vilkårsvurdering
+            } returns vilkårsvurdering
 
-            every { journalføringRepository.save(any()) } returns
-                DbJournalpost(behandling = behandling, journalpostId = "id")
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
 
-            assertThat(personResultat.andreVurderinger)
-                .extracting("type")
-                .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+            assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 1) {
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             }
@@ -238,18 +226,13 @@ internal class DokumentServiceTest {
                     any(),
                     forrigeVedtatteBehandling,
                 )
-            } returns
-                vilkårsvurdering
+            } returns vilkårsvurdering
 
-            every { journalføringRepository.save(any()) } returns
-                DbJournalpost(behandling = behandling, journalpostId = "id")
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
 
-            assertThat(personResultat.andreVurderinger)
-                .extracting("type")
-                .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+            assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 1) {
                 behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             }
@@ -274,15 +257,11 @@ internal class DokumentServiceTest {
 
             // Scenario med eksisterende vilkårsvurdering
             every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns vilkårsvurdering
-            every { journalføringRepository.save(any()) } returns
-                DbJournalpost(behandling = behandling, journalpostId = "id")
             every { brevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
             sendBrev(brevmal, behandling)
 
-            assertThat(personResultat.andreVurderinger)
-                .extracting("type")
-                .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+            assertThat(personResultat.andreVurderinger).extracting("type").containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 0) {
                 vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
             }
@@ -312,7 +291,6 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
@@ -330,7 +308,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = any(),
             )
         }
-        verify(exactly = 2) { journalføringRepository.save(any()) }
         verify(exactly = 2) { taskRepository.save(any()) }
 
         assertEquals(1, avsenderMottakere.size)
@@ -367,7 +344,6 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(fagsak.id) } returns fagsak
 
@@ -394,8 +370,7 @@ internal class DokumentServiceTest {
     @Test
     fun `sendManueltBrev skal sende informasjonsbrev manuelt på fagsak`() {
         val fagsak = defaultFagsak()
-        val manueltBrevRequest =
-            ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
+        val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_KAN_SØKE)
 
         every {
             utgåendeJournalføringService.journalførManueltBrev(
@@ -426,7 +401,6 @@ internal class DokumentServiceTest {
                 avsenderMottaker = any(),
             )
         }
-        verify(exactly = 0) { journalføringRepository.save(any()) }
         verify(exactly = 1) { taskRepository.save(any()) }
     }
 
@@ -455,7 +429,6 @@ internal class DokumentServiceTest {
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
-        every { journalføringRepository.save(any()) } returns mockk()
         every { taskRepository.save(any()) } returns mockk()
         every { fagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
 
@@ -479,8 +452,69 @@ internal class DokumentServiceTest {
                 avsenderMottaker = any(),
             )
         }
-        verify(exactly = 0) { journalføringRepository.save(any()) }
         verify(exactly = 0) { taskRepository.save(any()) }
+    }
+
+    @Nested
+    inner class HentBrevForVedtak {
+        @BeforeEach
+        fun beforeEach() {
+            mockkObject(SikkerhetContext)
+        }
+
+        @AfterEach
+        fun afterEach() {
+            unmockkObject(SikkerhetContext)
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = BehandlerRolle::class, names = ["FORVALTER", "VEILEDER"])
+        fun `Skal kaste Funksjonell feil dersom vedtaksbrev ikke finnes og man er VEILEDER eller FORVALTER`(rolle: BehandlerRolle) {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(any()) } returns rolle
+
+            val vedtakUtenStønadBrev = lagVedtak(stønadBrevPdF = null)
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    dokumentService.hentBrevForVedtak(vedtakUtenStønadBrev)
+                }.melding
+
+            assertThat(feilmelding).isEqualTo("Det finnes ikke noe vedtaksbrev.")
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = BehandlerRolle::class, names = ["SAKSBEHANDLER", "BESLUTTER"])
+        fun `Skal kaste Feil dersom vedtaksbrev ikke finnes og man er SAKSBEHANDLER eller BESLUTTER`(rolle: BehandlerRolle) {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(any()) } returns rolle
+
+            val vedtakUtenStønadBrev = lagVedtak(stønadBrevPdF = null)
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<Feil> {
+                    dokumentService.hentBrevForVedtak(vedtakUtenStønadBrev)
+                }.message
+
+            assertThat(feilmelding).isEqualTo("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtakUtenStønadBrev.id}")
+        }
+
+        @Test
+        fun `Skal returnere bytearray med pdf innhold dersom det finnes på vedtak`() {
+            // Arrange
+            every { SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(any()) } returns BehandlerRolle.BESLUTTER
+
+            val byteArray = ByteArray(0)
+            val vedtakMedStønadBrev = lagVedtak(stønadBrevPdF = byteArray)
+
+            // Act
+            val vedtaksbrevPdf = dokumentService.hentBrevForVedtak(vedtakMedStønadBrev)
+
+            // Assert
+            assertThat(vedtaksbrevPdf.data).isEqualTo(byteArray)
+        }
     }
 
     private fun sendBrev(

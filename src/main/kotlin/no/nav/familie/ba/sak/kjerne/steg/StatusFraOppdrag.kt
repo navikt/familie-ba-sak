@@ -60,11 +60,13 @@ class StatusFraOppdrag(
                         statusFraOppdragDTO.vedtaksId,
                         task,
                     )
+
                 StegType.IVERKSETT_MOT_FAMILIE_TILBAKE ->
                     opprettTaskIverksettMotTilbake(
                         statusFraOppdragDTO.behandlingsId,
                         task.metadata,
                     )
+
                 StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                 else -> error("Neste task er ikke implementert.")
             }

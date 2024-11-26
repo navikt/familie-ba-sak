@@ -131,11 +131,10 @@ fun lagKorrigertEtterbetaling(
     begrunnelse: String? = null,
     beløp: Int = 2000,
     aktiv: Boolean = true,
-) =
-    KorrigertEtterbetaling(
-        behandling = behandling,
-        årsak = årsak,
-        begrunnelse = begrunnelse,
-        aktiv = aktiv,
-        beløp = beløp,
-    )
+) = KorrigertEtterbetaling(
+    behandling = behandling,
+    årsak = årsak,
+    begrunnelse = begrunnelse,
+    aktiv = aktiv,
+    beløp = beløp,
+)

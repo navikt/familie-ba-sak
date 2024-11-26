@@ -126,6 +126,7 @@ class VilkårsvurderingMetrics(
                             vilkårResultatSøker.second!!,
                         )
                     }
+
                     vilkårResultatBarn != null -> {
                         økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
                             vilkårResultatBarn.second!!,

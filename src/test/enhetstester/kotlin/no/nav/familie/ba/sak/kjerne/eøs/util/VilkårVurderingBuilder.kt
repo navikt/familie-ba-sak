@@ -135,11 +135,9 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
         ),
     )
 
-fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() =
-    VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag().tilPersonEnkelSøkerOgBarn())
+fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() = VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag().tilPersonEnkelSøkerOgBarn())
 
-fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() =
-    this.byggPerson().byggVilkårsvurderingTidslinjer()
+fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
     TilkjentYtelseUtils.beregnTilkjentYtelse(
