@@ -300,7 +300,7 @@ class TilpassKompetanserTilRegelverkTest {
                 barn2.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
             )
 
-        val barnasSkalIkkeUtbetalesTidslinjer =
+        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
             mapOf(
                 Pair(barn1.aktør, "     tttt".somBoolskTidslinje(jan2020)),
             )
@@ -309,7 +309,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = barnasSkalIkkeUtbetalesTidslinjer,
+                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
             ).sortedBy { it.fom }
 
         val forventedeKompetanser =
