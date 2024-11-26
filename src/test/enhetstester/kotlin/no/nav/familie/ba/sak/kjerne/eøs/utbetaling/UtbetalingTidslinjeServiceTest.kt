@@ -54,7 +54,7 @@ class UtbetalingTidslinjeServiceTest {
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ),
             )
-        
+
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT, fom = fomUtvidetOgEndring, tom = YearMonth.now())
 
@@ -86,19 +86,22 @@ class UtbetalingTidslinjeServiceTest {
         val fomEndretUtbetaling = YearMonth.now().minusYears(2)
         val tomEndretUtbetaling = YearMonth.now()
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            prosent = BigDecimal.ZERO,
-            årsak = Årsak.ALLEREDE_UTBETALT,
-            fom = fomEndretUtbetaling,
-            tom = tomEndretUtbetaling
-        )
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                person = barn,
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                fom = fomEndretUtbetaling,
+                tom = tomEndretUtbetaling,
+            )
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
-            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
-        )
+        val resultatMap =
+            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+            )
 
         // Assert
         assertEquals(1, resultatMap.size)
