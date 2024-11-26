@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -33,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,6 +45,7 @@ internal class KompetanseServiceTest {
     val utbetalingTidslinjeService: UtbetalingTidslinjeService = mockk()
     val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
+    val unleashService = mockk<UnleashService>()
 
     val kompetanseService =
         KompetanseService(
@@ -57,11 +60,13 @@ internal class KompetanseServiceTest {
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
+            unleashService = unleashService
         )
 
     @BeforeEach
     fun init() {
         mockKompetanseRepository.deleteAll()
+        every { unleashService.isEnabled(FeatureToggleConfig.SKAL_LAGE_KOMPETANSE_HVIS_UTBETALES_UTVIDET) } returns true
     }
 
     @Test
