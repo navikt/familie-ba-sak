@@ -23,11 +23,17 @@ class UtbetalingTidslinjeService(
         val barnasSkalIkkeUtbetalesTidslinjer =
             endretUtbetalingAndeler
                 .tilBarnasSkalIkkeUtbetalesTidslinjer()
-        val utvidetTidslinje = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId.id).tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
-        return barnasSkalIkkeUtbetalesTidslinjer.mapValues { (_, ordinærSkalIkkeUtbetalesTidslinje) ->
-            ordinærSkalIkkeUtbetalesTidslinje.kombinerMed(utvidetTidslinje) { ordinærSkalIkkeUtbetales, utvidetAndel ->
-                ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
+
+        val utvidetTidslinje =
+            beregningService
+                .hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
+                .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+
+        return barnasSkalIkkeUtbetalesTidslinjer
+            .mapValues { (_, ordinærSkalIkkeUtbetalesTidslinje) ->
+                ordinærSkalIkkeUtbetalesTidslinje.kombinerMed(utvidetTidslinje) { ordinærSkalIkkeUtbetales, utvidetAndel ->
+                    ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
+                }
             }
-        }
     }
 }
