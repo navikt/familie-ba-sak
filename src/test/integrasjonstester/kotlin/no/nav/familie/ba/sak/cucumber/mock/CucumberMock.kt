@@ -337,7 +337,6 @@ class CucumberMock(
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             kompetanseRepository = kompetanseRepository,
             endringsabonnenter = endringsabonnenterForKompetanse,
-            unleashService = unleashService,
         )
 
     val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
