@@ -84,9 +84,13 @@ class ArbeidsfordelingService(
 
         val oppdatertArbeidsfordelingPåBehandling =
             if (behandling.erAutomatiskOgHarTidligereBehandling()) {
-                sisteBehandlingSomErIverksatt ?: throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
+                if (aktivArbeidsfordelingPåBehandling != null) {
+                    aktivArbeidsfordelingPåBehandling
+                } else {
+                    sisteBehandlingSomErIverksatt ?: throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
 
-                fastsettArbeidsfordelingsenhetUtIfraTidligereBehandlingerPåFagsak(behandling.id, behandling.fagsak.id)
+                    fastsettArbeidsfordelingsenhetUtIfraTidligereBehandlingerPåFagsak(behandling.id, behandling.fagsak.id)
+                }
             } else {
                 val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
                 val tilpassetArbeidsfordelingsenhet =
