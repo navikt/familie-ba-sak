@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NyUtvidetKlassekodeFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlasskodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AutovedtakNyUtvidetKlassekodeService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val nyUtvidetKlasskodeKjøringRepository: NyUtvidetKlasskodeKjøringRepository,
+    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
     private val snikeIKøenService: SnikeIKøenService,
     private val autovedtakService: AutovedtakService,
     private val taskRepository: TaskRepositoryWrapper,
@@ -36,7 +36,7 @@ class AutovedtakNyUtvidetKlassekodeService(
 
         if (tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)) {
             logger.info("Hopper ut av behandling fordi fagsak $fagsakId allerede bruker ny klassekode for utvidet barnetrygd.")
-            nyUtvidetKlasskodeKjøringRepository.settBrukerNyKlassekodeTilTrue(fagsakId)
+            nyUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(fagsakId)
             return
         }
 
@@ -46,7 +46,7 @@ class AutovedtakNyUtvidetKlassekodeService(
 
         if (!sisteVedtatteBehandling.harLøpendeUtvidetBarnetrygd()) {
             logger.info("Hopper ut av behandling fordi fagsak $fagsakId ikke har løpende utvidet barnetrygd.")
-            nyUtvidetKlasskodeKjøringRepository.deleteByFagsakId(fagsakId)
+            nyUtvidetKlassekodeKjøringRepository.deleteByFagsakId(fagsakId)
             return
         }
 

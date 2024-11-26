@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KJØR_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlasskodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringScheduler.Companion.CRON_HVERT_10_MIN_UKEDAG
 import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class NyUtvidetKlassekodeScheduler(
-    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlasskodeKjøringRepository,
+    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
     private val taskRepository: TaskRepositoryWrapper,
     private val leaderClientService: LeaderClientService,
     private val unleashunleashService: UnleashService,

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlasskodeKjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlasskodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -22,10 +22,10 @@ import kotlin.time.measureTimedValue
 )
 class PopulerNyUtvidetKlassekodeKjøringTask(
     private val fagsakRepository: FagsakRepository,
-    private val nyUtvidetKlasskodeKjøringRepository: NyUtvidetKlasskodeKjøringRepository,
+    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val fagsakerSomErLagret = nyUtvidetKlasskodeKjøringRepository.findAll().map { it.fagsakId }.toSet()
+        val fagsakerSomErLagret = nyUtvidetKlassekodeKjøringRepository.findAll().map { it.fagsakId }.toSet()
 
         logger.info("Fant ${fagsakerSomErLagret.size} fagsaker som allerede er lagret")
 
@@ -34,12 +34,12 @@ class PopulerNyUtvidetKlassekodeKjøringTask(
                 fagsakRepository
                     .finnFagsakerMedLøpendeUtvidetBarnetrygdSomBrukerGammelKlassekode()
                     .minus(fagsakerSomErLagret)
-                    .map { NyUtvidetKlasskodeKjøring(fagsakId = it) }
+                    .map { NyUtvidetKlassekodeKjøring(fagsakId = it) }
             }
 
         logger.info("Fant ${fagsakerSomSkalLagres.size} fagsaker som skal lagres på ${time.inWholeSeconds} sekunder")
 
-        nyUtvidetKlasskodeKjøringRepository.saveAll(fagsakerSomSkalLagres)
+        nyUtvidetKlassekodeKjøringRepository.saveAll(fagsakerSomSkalLagres)
     }
 
     companion object {

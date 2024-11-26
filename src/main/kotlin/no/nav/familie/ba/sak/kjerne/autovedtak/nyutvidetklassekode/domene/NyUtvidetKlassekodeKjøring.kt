@@ -8,9 +8,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 
-@Entity(name = "NyUtvidetKlasskodeKjøring")
+@Entity(name = "NyUtvidetKlassekodeKjøring")
 @Table(name = "ny_utvidet_klassekode_kjoring")
-data class NyUtvidetKlasskodeKjøring(
+data class NyUtvidetKlassekodeKjøring(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ny_utvidet_klassekode_kjoring_seq_generator")
     @SequenceGenerator(

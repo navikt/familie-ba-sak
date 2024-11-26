@@ -7,11 +7,11 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
-interface NyUtvidetKlasskodeKjøringRepository : JpaRepository<NyUtvidetKlasskodeKjøring, Long> {
-    fun findByBrukerNyKlassekodeIsFalse(limit: Limit = Limit.unlimited()): List<NyUtvidetKlasskodeKjøring>
+interface NyUtvidetKlassekodeKjøringRepository : JpaRepository<NyUtvidetKlassekodeKjøring, Long> {
+    fun findByBrukerNyKlassekodeIsFalse(limit: Limit = Limit.unlimited()): List<NyUtvidetKlassekodeKjøring>
 
     @Modifying
-    @Query("UPDATE NyUtvidetKlasskodeKjøring SET brukerNyKlassekode = true WHERE fagsakId = :fagsakId")
+    @Query("UPDATE NyUtvidetKlassekodeKjøring SET brukerNyKlassekode = true WHERE fagsakId = :fagsakId")
     fun settBrukerNyKlassekodeTilTrue(fagsakId: Long)
 
     fun deleteByFagsakId(fagsakId: Long)

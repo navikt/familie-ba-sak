@@ -51,7 +51,7 @@ class UtbetalingsoppdragGenerator(
                 behandlingId = vedtak.behandling.id,
             )
 
-        val forrigeAndler =
+        val forrigeAndeler =
             if (forrigeTilkjentYtelse == null) {
                 emptyList()
             } else if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
@@ -70,7 +70,7 @@ class UtbetalingsoppdragGenerator(
         val beregnetUtbetalingsoppdrag =
             utbetalingsgenerator.lagUtbetalingsoppdrag(
                 behandlingsinformasjon = behandlingsinformasjon,
-                forrigeAndeler = forrigeAndler,
+                forrigeAndeler = forrigeAndeler,
                 nyeAndeler = nyeAndeler,
                 sisteAndelPerKjede = sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) },
             )
