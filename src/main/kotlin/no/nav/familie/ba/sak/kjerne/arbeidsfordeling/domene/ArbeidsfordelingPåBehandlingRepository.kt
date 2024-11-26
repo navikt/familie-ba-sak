@@ -10,18 +10,19 @@ interface ArbeidsfordelingPåBehandlingRepository : JpaRepository<Arbeidsfordeli
 
     @Query(
         """
-        SELECT apb
-        FROM ArbeidsfordelingPåBehandling apb
-        JOIN Behandling b ON apb.behandlingId = b.id
-        WHERE b.fagsak.id = :fagsakId
-          AND apb.behandlendeEnhetId != '4863'
+        SELECT apb.*
+        FROM arbeidsfordeling_pa_behandling apb
+            JOIN behandling b ON apb.fk_behandling_id = b.id
+        WHERE b.fk_fagsak_id = :fagsakId
+          AND apb.behandlende_enhet_id != '4863'
+          AND b.status = 'AVSLUTTET'
           AND b.resultat NOT IN (
-                 'HENLAGT_FEILAKTIG_OPPRETTET',
-                 'HENLAGT_SØKNAD_TRUKKET',
-                 'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
-                 'HENLAGT_TEKNISK_VEDLIKEHOLD'
-            )
-        ORDER BY b.aktivertTidspunkt DESC
+             'HENLAGT_FEILAKTIG_OPPRETTET',
+             'HENLAGT_SØKNAD_TRUKKET',
+             'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+             'HENLAGT_TEKNISK_VEDLIKEHOLD'
+            )   
+        ORDER BY b.aktivert_tid DESC
         LIMIT 1
         """,
         nativeQuery = true,
