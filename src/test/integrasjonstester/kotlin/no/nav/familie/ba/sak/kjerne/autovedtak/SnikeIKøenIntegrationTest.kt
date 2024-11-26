@@ -223,5 +223,6 @@ class SnikeIKøenIntegrationTest(
             stegService = stegService,
             fagsakId = fagsakId,
             brevmalService = brevmalService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 }

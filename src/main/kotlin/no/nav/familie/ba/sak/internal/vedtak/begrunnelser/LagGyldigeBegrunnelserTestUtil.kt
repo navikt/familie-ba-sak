@@ -16,12 +16,11 @@ fun lagTeksterForGyldigeBegrunnelser(
 
 private fun hentTekstForGyligeBegrunnelserForVedtaksperiodene(
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-) =
-    """
+) = """
 
     Så forvent at følgende begrunnelser er gyldige
     | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser | Ugyldige begrunnelser |""" +
-        hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
+    hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder)
 
 private fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
@@ -39,12 +38,11 @@ private fun hentVedtaksperiodeRaderForGyldigeBegrunnelser(vedtaksperioder: List<
 private fun hentTekstValgteBegrunnelser(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-) =
-    """
+) = """
 
     Og når disse begrunnelsene er valgt for behandling $behandlingId
     | Fra dato | Til dato | Standardbegrunnelser | Eøsbegrunnelser | Fritekster |""" +
-        hentValgteBegrunnelserRader(vedtaksperioder)
+    hentValgteBegrunnelserRader(vedtaksperioder)
 
 private fun hentValgteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->
@@ -55,12 +53,11 @@ private fun hentValgteBegrunnelserRader(vedtaksperioder: List<VedtaksperiodeMedB
 private fun hentTekstBrevPerioder(
     behandlingId: Long?,
     vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-) =
-    """
+) = """
 
     Så forvent følgende brevperioder for behandling $behandlingId
     | Brevperiodetype  | Fra dato   | Til dato | Beløp | Antall barn med utbetaling | Barnas fødselsdager | Du eller institusjonen |""" +
-        hentBrevPeriodeRader(vedtaksperioder)
+    hentBrevPeriodeRader(vedtaksperioder)
 
 private fun hentBrevPeriodeRader(vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>) =
     vedtaksperioder.joinToString("") { vedtaksperiode ->

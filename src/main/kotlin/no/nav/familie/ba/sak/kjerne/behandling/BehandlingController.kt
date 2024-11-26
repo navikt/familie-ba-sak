@@ -160,6 +160,7 @@ data class NyBehandling(
                 message = "Søkers ident kan ikke være blank",
                 frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.",
             )
+
             BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
                 behandlingÅrsak.erManuellMigreringsårsak() &&
                 nyMigreringsdato == null -> {
@@ -168,6 +169,7 @@ data class NyBehandling(
                     frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre",
                 )
             }
+
             behandlingType in listOf(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING) &&
                 behandlingÅrsak == BehandlingÅrsak.SØKNAD &&
                 søknadMottattDato == null -> {

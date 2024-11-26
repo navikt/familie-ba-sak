@@ -16,22 +16,21 @@ class ValutakursBuilder(
         k: String,
         valutakode: String?,
         vararg barn: Person,
-    ) =
-        medSkjema(k, barn.toList()) {
-            when {
-                it == '-' -> Valutakurs.NULL
-                it == '$' -> Valutakurs.NULL.copy(valutakode = valutakode)
-                it?.isDigit() ?: false -> {
-                    Valutakurs.NULL.copy(
-                        kurs = it?.digitToInt()?.toBigDecimal(),
-                        valutakode = valutakode,
-                        valutakursdato = null,
-                    )
-                }
-                else -> null
+    ) = medSkjema(k, barn.toList()) {
+        when {
+            it == '-' -> Valutakurs.NULL
+            it == '$' -> Valutakurs.NULL.copy(valutakode = valutakode)
+            it?.isDigit() ?: false -> {
+                Valutakurs.NULL.copy(
+                    kurs = it?.digitToInt()?.toBigDecimal(),
+                    valutakode = valutakode,
+                    valutakursdato = null,
+                )
             }
-        }
 
-    fun medVurderingsform(vurderingsform: Vurderingsform) =
-        medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(vurderingsform = vurderingsform) }
+            else -> null
+        }
+    }
+
+    fun medVurderingsform(vurderingsform: Vurderingsform) = medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(vurderingsform = vurderingsform) }
 }

@@ -557,14 +557,11 @@ class BrevService(
         )
     }
 
-    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
-        persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
+    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
-    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
-        hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
+    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? = hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
-    private fun hentEtterbetalingInstitusjon(vedtak: Vedtak): EtterbetalingInstitusjon? =
-        hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
+    private fun hentEtterbetalingInstitusjon(vedtak: Vedtak): EtterbetalingInstitusjon? = hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
         val etterbetalingsBeløp =
@@ -574,8 +571,7 @@ class BrevService(
         return etterbetalingsBeløp.takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
-    private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
-        simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
+    private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean = simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
 
     private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
         val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)

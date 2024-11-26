@@ -55,13 +55,12 @@ fun erTilogMed3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean, Måned>
 fun opprettBooleanTidslinje(
     fraÅrMåned: YearMonth,
     tilÅrMåned: YearMonth,
-) =
-    tidslinje {
-        listOf(
-            Periode(
-                fraÅrMåned.tilTidspunkt(),
-                tilÅrMåned.tilTidspunkt(),
-                true,
-            ),
-        )
-    }
+) = tidslinje {
+    listOf(
+        Periode(
+            fraÅrMåned.tilTidspunkt(),
+            tilÅrMåned.tilTidspunkt(),
+            true,
+        ),
+    )
+}

@@ -61,11 +61,12 @@ class DokumentService(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
-        if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
+        val høyesteRolletilgangForInnloggetBruker = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+
+        if (høyesteRolletilgangForInnloggetBruker in listOf(BehandlerRolle.VEILEDER, BehandlerRolle.FORVALTER) && vedtak.stønadBrevPdF == null) {
             throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
         } else {
-            val pdf =
-                vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}")
+            val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}")
             return Ressurs.success(pdf)
         }
     }
@@ -171,10 +172,12 @@ class DokumentService(
                     ),
                 )
             }
+
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,
                 )
+
             else -> listOf(Bruker)
         }
 

@@ -353,8 +353,7 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    fun hentSøkersMålform(behandlingId: Long) =
-        hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
+    fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
     @Transactional
     fun registrerManuellDødsfallPåPerson(

@@ -15,12 +15,9 @@ TaskRepository in familie-prosessering is @Primary, which is not able to mock so
 class TaskRepositoryWrapper(
     private val taskService: TaskService,
 ) {
-    fun save(task: Task) =
-        taskService.save(task)
+    fun save(task: Task) = taskService.save(task)
 
-    fun findAll(): Iterable<Task> =
-        taskService.findAll()
+    fun findAll(): Iterable<Task> = taskService.findAll()
 
-    fun findByStatus(status: Status): List<Task> =
-        taskService.finnTasksMedStatus(listOf(status), type = null, page = Pageable.unpaged())
+    fun findByStatus(status: Status): List<Task> = taskService.finnTasksMedStatus(listOf(status), type = null, page = Pageable.unpaged())
 }

@@ -48,8 +48,7 @@ private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntite
         skjemaer.values
             .filter { it.behandlingId == behandlingId }
 
-    fun hentSkjema(skjemaId: Long): S =
-        skjemaer[skjemaId] ?: throw IllegalArgumentException("Finner ikke skjema for id $skjemaId")
+    fun hentSkjema(skjemaId: Long): S = skjemaer[skjemaId] ?: throw IllegalArgumentException("Finner ikke skjema for id $skjemaId")
 
     fun save(skjemaer: Iterable<S>) = skjemaer.map { save(it) }
 

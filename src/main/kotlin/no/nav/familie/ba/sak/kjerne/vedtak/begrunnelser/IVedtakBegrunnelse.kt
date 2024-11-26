@@ -30,8 +30,7 @@ sealed interface IVedtakBegrunnelse {
     }
 }
 
-fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
-    this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
+fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() = this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
 
 fun IVedtakBegrunnelse.støtterFritekst(sanityBegrunnelser: List<ISanityBegrunnelse>): Boolean {
     val begrunnelseTyperSomAlltidSkalStøtteFritekst =
@@ -61,8 +60,7 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
 
 @Converter
 class IVedtakBegrunnelseListConverter : AttributeConverter<List<IVedtakBegrunnelse>, String> {
-    override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) =
-        vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
+    override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) = vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
 
     override fun convertToEntityAttribute(string: String?): List<IVedtakBegrunnelse> =
         if (string.isNullOrBlank()) {

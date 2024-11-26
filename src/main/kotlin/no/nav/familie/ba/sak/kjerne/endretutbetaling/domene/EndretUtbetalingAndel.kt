@@ -123,8 +123,7 @@ enum class Årsak(
         }
 }
 
-fun EndretUtbetalingAndel.førerTilOpphør() =
-    this.prosent == BigDecimal.ZERO && this.årsak != null && this.årsak!!.førerTilOpphørVed0Prosent()
+fun EndretUtbetalingAndel.førerTilOpphør() = this.prosent == BigDecimal.ZERO && this.årsak != null && this.årsak!!.førerTilOpphørVed0Prosent()
 
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(

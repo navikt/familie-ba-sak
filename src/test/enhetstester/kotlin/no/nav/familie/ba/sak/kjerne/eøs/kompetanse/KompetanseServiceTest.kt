@@ -523,15 +523,13 @@ fun kompetanse(
     behandlingId: BehandlingId,
     s: String,
     vararg barn: Person,
-) =
-    KompetanseBuilder(tidspunkt, behandlingId).medKompetanse(s, *barn).byggKompetanser().first()
+) = KompetanseBuilder(tidspunkt, behandlingId).medKompetanse(s, *barn).byggKompetanser().first()
 
 fun kompetanse(
     tidspunkt: Tidspunkt<Måned>,
     s: String,
     vararg barn: Person,
-) =
-    KompetanseBuilder(tidspunkt).medKompetanse(s, *barn).byggKompetanser().first()
+) = KompetanseBuilder(tidspunkt).medKompetanse(s, *barn).byggKompetanser().first()
 
 private fun KompetanseService.finnKompetanse(
     behandlingId: BehandlingId,

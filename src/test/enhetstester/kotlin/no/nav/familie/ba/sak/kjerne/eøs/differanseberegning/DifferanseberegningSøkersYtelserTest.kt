@@ -842,5 +842,4 @@ class DifferanseberegningSøkersYtelserTest {
     }
 }
 
-private fun Collection<AndelTilkjentYtelse>.sortert() =
-    this.sortedWith(compareBy({ it.aktør.aktørId }, { it.type }, { it.stønadFom }))
+private fun Collection<AndelTilkjentYtelse>.sortert() = this.sortedWith(compareBy({ it.aktør.aktørId }, { it.type }, { it.stønadFom }))

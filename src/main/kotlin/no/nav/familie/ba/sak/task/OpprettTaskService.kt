@@ -179,19 +179,18 @@ class OpprettTaskService(
     @Transactional
     fun opprettTaskForÅPatcheMergetIdent(
         dto: PatchMergetIdentDto,
-    ) =
-        taskRepository.save(
-            Task(
-                type = PatchMergetIdentTask.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(dto),
-                properties =
-                    Properties().apply {
-                        this["fagsakId"] = dto.fagsakId.toString()
-                        this["gammelIdent"] = dto.gammelIdent.ident
-                        this["nyIdent"] = dto.nyIdent.ident
-                    },
-            ),
-        )
+    ) = taskRepository.save(
+        Task(
+            type = PatchMergetIdentTask.TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(dto),
+            properties =
+                Properties().apply {
+                    this["fagsakId"] = dto.fagsakId.toString()
+                    this["gammelIdent"] = dto.gammelIdent.ident
+                    this["nyIdent"] = dto.nyIdent.ident
+                },
+        ),
+    )
 
     @Transactional
     fun opprettTaskForÅPatcheVilkårFom(

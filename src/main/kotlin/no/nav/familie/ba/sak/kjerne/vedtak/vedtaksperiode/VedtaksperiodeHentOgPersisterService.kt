@@ -17,8 +17,7 @@ class VedtaksperiodeHentOgPersisterService(
                 frontendFeilmelding = "Fant ikke vedtaksperiode",
             )
 
-    fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) =
-        lagre(listOf(vedtaksperiodeMedBegrunnelser)).first()
+    fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) = lagre(listOf(vedtaksperiodeMedBegrunnelser)).first()
 
     fun lagre(vedtaksperiodeMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): List<VedtaksperiodeMedBegrunnelser> {
         vedtaksperiodeMedBegrunnelser.forEach { validerVedtaksperiodeMedBegrunnelser(it) }
@@ -29,12 +28,9 @@ class VedtaksperiodeHentOgPersisterService(
         vedtaksperiodeRepository.slettVedtaksperioderFor(vedtak)
     }
 
-    fun finnVedtaksperioderFor(vedtakId: Long): List<VedtaksperiodeMedBegrunnelser> =
-        vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId)
+    fun finnVedtaksperioderFor(vedtakId: Long): List<VedtaksperiodeMedBegrunnelser> = vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId)
 
-    fun finnBehandlingIdFor(vedtaksperiodeId: Long): Long? =
-        vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiodeId)
+    fun finnBehandlingIdFor(vedtaksperiodeId: Long): Long? = vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiodeId)
 
-    fun hentBehandlingIdFor(vedtaksperiodeId: Long): Long =
-        finnBehandlingIdFor(vedtaksperiodeId) ?: throw Feil("Fant ingen behandling tilhørende vedtaksperiode med id $vedtaksperiodeId")
+    fun hentBehandlingIdFor(vedtaksperiodeId: Long): Long = finnBehandlingIdFor(vedtaksperiodeId) ?: throw Feil("Fant ingen behandling tilhørende vedtaksperiode med id $vedtaksperiodeId")
 }

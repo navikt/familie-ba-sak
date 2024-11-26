@@ -20,15 +20,14 @@ class DeltBostedBuilder(
     fun medDeltBosted(
         k: String,
         vararg barn: Person,
-    ) =
-        medSkjema(k, barn.toList()) {
-            when (it) {
-                '0' -> DeltBosted(prosent = 0, barnPersoner = barn.toList())
-                '/' -> DeltBosted(prosent = 50, barnPersoner = barn.toList())
-                '1' -> DeltBosted(prosent = 100, barnPersoner = barn.toList())
-                else -> null
-            }
+    ) = medSkjema(k, barn.toList()) {
+        when (it) {
+            '0' -> DeltBosted(prosent = 0, barnPersoner = barn.toList())
+            '/' -> DeltBosted(prosent = 50, barnPersoner = barn.toList())
+            '1' -> DeltBosted(prosent = 100, barnPersoner = barn.toList())
+            else -> null
         }
+    }
 }
 
 data class DeltBosted(
@@ -44,17 +43,16 @@ data class DeltBosted(
         fom: YearMonth?,
         tom: YearMonth?,
         barnAktører: Set<Aktør>,
-    ) =
-        copy(
-            fom = fom,
-            tom = tom,
-            barnAktører = barnAktører.map { it.copy() }.toSet(),
-            barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) },
-        ).also {
-            if (barnAktører.size != barnPersoner.size) {
-                throw Error("Ikke samsvar mellom antall aktører og barn lenger")
-            }
+    ) = copy(
+        fom = fom,
+        tom = tom,
+        barnAktører = barnAktører.map { it.copy() }.toSet(),
+        barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) },
+    ).also {
+        if (barnAktører.size != barnPersoner.size) {
+            throw Error("Ikke samsvar mellom antall aktører og barn lenger")
         }
+    }
 
     override var id: Long = 0
     override var behandlingId: Long = 0

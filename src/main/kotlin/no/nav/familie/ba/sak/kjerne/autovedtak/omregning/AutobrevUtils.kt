@@ -11,6 +11,7 @@ object AutobrevUtils {
                     Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK,
                     Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR,
                 )
+
             else -> throw Feil("Alder må være oppgitt til 18 år.")
         }
 

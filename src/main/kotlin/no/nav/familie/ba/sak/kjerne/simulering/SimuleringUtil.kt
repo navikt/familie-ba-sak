@@ -120,11 +120,10 @@ fun hentNegativFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>
 fun hentFeilutbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
     inkluderManuellePosteringer: Boolean,
-) =
-    periode
-        .filter { it.posteringType == PosteringType.FEILUTBETALING }
-        .filter { inkluderManuellePosteringer || !it.erManuellPostering }
-        .sumOf { it.beløp }
+) = periode
+    .filter { it.posteringType == PosteringType.FEILUTBETALING }
+    .filter { inkluderManuellePosteringer || !it.erManuellPostering }
+    .sumOf { it.beløp }
 
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser =

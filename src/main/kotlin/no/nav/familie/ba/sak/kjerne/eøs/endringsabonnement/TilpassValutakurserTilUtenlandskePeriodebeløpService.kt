@@ -79,6 +79,7 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
                 utenlandskPeriodebeløp == null -> null
                 valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode ->
                     Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
+
                 else -> valutakurs
             }
         }.tilSkjemaer()

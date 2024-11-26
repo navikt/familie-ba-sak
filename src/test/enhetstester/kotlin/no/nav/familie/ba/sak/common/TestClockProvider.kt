@@ -16,13 +16,10 @@ class TestClockProvider(
     companion object {
         private val zoneId = ZoneId.of("Europe/Oslo")
 
-        fun lagClockProviderMedFastTidspunkt(localDateTime: ZonedDateTime): TestClockProvider =
-            TestClockProvider(Clock.fixed(localDateTime.toInstant(), zoneId))
+        fun lagClockProviderMedFastTidspunkt(localDateTime: ZonedDateTime): TestClockProvider = TestClockProvider(Clock.fixed(localDateTime.toInstant(), zoneId))
 
-        fun lagClockProviderMedFastTidspunkt(localDate: LocalDate): TestClockProvider =
-            lagClockProviderMedFastTidspunkt(localDate.atStartOfDay(zoneId))
+        fun lagClockProviderMedFastTidspunkt(localDate: LocalDate): TestClockProvider = lagClockProviderMedFastTidspunkt(localDate.atStartOfDay(zoneId))
 
-        fun lagClockProviderMedFastTidspunkt(yearMonth: YearMonth): TestClockProvider =
-            lagClockProviderMedFastTidspunkt(yearMonth.toLocalDate())
+        fun lagClockProviderMedFastTidspunkt(yearMonth: YearMonth): TestClockProvider = lagClockProviderMedFastTidspunkt(yearMonth.toLocalDate())
     }
 }

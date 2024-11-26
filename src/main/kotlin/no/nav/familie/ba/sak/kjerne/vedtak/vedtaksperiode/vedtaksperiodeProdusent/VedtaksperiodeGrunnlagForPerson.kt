@@ -28,8 +28,7 @@ sealed interface VedtaksperiodeGrunnlagForPerson {
     val person: Person
     val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
 
-    fun erEksplisittAvslag(personerFremstiltKravFor: List<Aktør>): Boolean =
-        this is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && this.vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag(personerFremstiltKravFor)
+    fun erEksplisittAvslag(personerFremstiltKravFor: List<Aktør>): Boolean = this is VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget && this.vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag(personerFremstiltKravFor)
 
     fun erInnvilget() = this is VedtaksperiodeGrunnlagForPersonVilkårInnvilget && this.erInnvilgetEndretUtbetaling()
 
@@ -68,16 +67,14 @@ data class VedtaksperiodeGrunnlagForPersonVilkårInnvilget(
     val valutakurs: ValutakursForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : VedtaksperiodeGrunnlagForPerson {
-    fun erInnvilgetEndretUtbetaling() =
-        endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
+    fun erInnvilgetEndretUtbetaling() = endretUtbetalingAndel?.prosent != BigDecimal.ZERO || endretUtbetalingAndel?.årsak == Årsak.DELT_BOSTED
 }
 
 data class VedtaksperiodeGrunnlagForPersonVilkårIkkeInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
 ) : VedtaksperiodeGrunnlagForPerson {
-    fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag(personerFremstiltKravFor: List<Aktør>) =
-        this.any { it.erEksplisittAvslagPåSøknad } && (personerFremstiltKravFor.contains(person.aktør) || person.type == PersonType.SØKER)
+    fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag(personerFremstiltKravFor: List<Aktør>) = this.any { it.erEksplisittAvslagPåSøknad } && (personerFremstiltKravFor.contains(person.aktør) || person.type == PersonType.SØKER)
 }
 
 data class VilkårResultatForVedtaksperiode(

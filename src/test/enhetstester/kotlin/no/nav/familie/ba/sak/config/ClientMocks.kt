@@ -252,9 +252,8 @@ class ClientMocks {
 fun tilAktør(
     fnr: String,
     toSisteSiffrer: String = "00",
-) =
-    Aktør(fnr + toSisteSiffrer).also {
-        it.personidenter.add(Personident(fnr, aktør = it))
-    }
+) = Aktør(fnr + toSisteSiffrer).also {
+    it.personidenter.add(Personident(fnr, aktør = it))
+}
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

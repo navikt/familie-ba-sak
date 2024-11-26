@@ -191,8 +191,7 @@ class SaksstatistikkService(
         }
     }
 
-    private fun erRevurderingEllerTekniskBehandling(behandling: Behandling) =
-        behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_ENDRING
+    private fun erRevurderingEllerTekniskBehandling(behandling: Behandling) = behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_ENDRING
 
     private fun Behandling.resultatBegrunnelser(vedtak: Vedtak?): List<ResultatBegrunnelseDVH> =
         when (resultat) {

@@ -126,8 +126,7 @@ fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
  * Innhold (I) og tidsenhet (T) må være av samme type
  * Resultatet er en tidslinje med tidsenhet T og innhold Iterable<I>
  */
-fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner() =
-    this.kombiner { if (it.toList().isNotEmpty()) it else null }
+fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner() = this.kombiner { if (it.toList().isNotEmpty()) it else null }
 
 /**
  * Extension-metode for å kombinere tre tidslinjer
@@ -169,11 +168,9 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
         }
     }
 
-fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H, T>) =
-    this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H, T>) = this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
 
-fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinje<H, T>) =
-    !this.harOverlappMed(tidslinje)
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinje<H, T>) = !this.harOverlappMed(tidslinje)
 
 fun <V, H, T : Tidsenhet> Tidslinje<V, T>.kombinerMedNullable(
     høyreTidslinje: Tidslinje<H, T>?,

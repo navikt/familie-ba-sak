@@ -509,20 +509,19 @@ class LoggService(
     fun opprettSmåbarnstilleggLogg(
         behandling: Behandling,
         tittel: String,
-    ) =
-        lagre(
-            Logg(
-                behandlingId = behandling.id,
-                type = LoggType.MANUELT_SMÅBARNSTILLEGG_JUSTERING,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-                tittel = tittel,
-                tekst = "",
-            ),
-        )
+    ) = lagre(
+        Logg(
+            behandlingId = behandling.id,
+            type = LoggType.MANUELT_SMÅBARNSTILLEGG_JUSTERING,
+            rolle =
+                SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER,
+                ),
+            tittel = tittel,
+            tekst = "",
+        ),
+    )
 
     fun gjenopptaBehandlingLogg(behandling: Behandling) {
         lagre(
@@ -609,44 +608,42 @@ class LoggService(
     fun loggFeilutbetaltValutaPeriodeLagtTil(
         behandlingId: Long,
         feilutbetaltValuta: FeilutbetaltValuta,
-    ) =
-        lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.FEILUTBETALT_VALUTA_LAGT_TIL,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-                tekst =
-                    """
-                    Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
-                    Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} ${if (feilutbetaltValuta.erPerMåned) "kr/mnd" else "kr"}
-                    """.trimIndent(),
-            ),
-        )
+    ) = lagre(
+        Logg(
+            behandlingId = behandlingId,
+            type = LoggType.FEILUTBETALT_VALUTA_LAGT_TIL,
+            rolle =
+                SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER,
+                ),
+            tekst =
+                """
+                Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
+                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} ${if (feilutbetaltValuta.erPerMåned) "kr/mnd" else "kr"}
+                """.trimIndent(),
+        ),
+    )
 
     fun loggFeilutbetaltValutaPeriodeFjernet(
         behandlingId: Long,
         feilutbetaltValuta: FeilutbetaltValuta,
-    ) =
-        lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.FEILUTBETALT_VALUTA_FJERNET,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-                tekst =
-                    """
-                    Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
-                    Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} ${if (feilutbetaltValuta.erPerMåned) "kr/mnd" else "kr"}
-                    """.trimIndent(),
-            ),
-        )
+    ) = lagre(
+        Logg(
+            behandlingId = behandlingId,
+            type = LoggType.FEILUTBETALT_VALUTA_FJERNET,
+            rolle =
+                SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER,
+                ),
+            tekst =
+                """
+                Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
+                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} ${if (feilutbetaltValuta.erPerMåned) "kr/mnd" else "kr"}
+                """.trimIndent(),
+        ),
+    )
 
     fun loggRefusjonEøsPeriodeLagtTil(refusjonEøs: RefusjonEøs) =
         lagre(
@@ -727,20 +724,19 @@ class LoggService(
         behandlingId: BehandlingId,
         person: Person,
         begrunnelse: String,
-    ) =
-        lagre(
-            Logg(
-                behandlingId = behandlingId.id,
-                type = LoggType.MANUELL_DØDSFALL_DATO_REGISTRERT,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-                tekst = "Begrunnelse: $begrunnelse",
-                tittel = "Dødsfall dato er manuelt registrert for barn født ${person.fødselsdato}",
-            ),
-        )
+    ) = lagre(
+        Logg(
+            behandlingId = behandlingId.id,
+            type = LoggType.MANUELL_DØDSFALL_DATO_REGISTRERT,
+            rolle =
+                SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER,
+                ),
+            tekst = "Begrunnelse: $begrunnelse",
+            tittel = "Dødsfall dato er manuelt registrert for barn født ${person.fødselsdato}",
+        ),
+    )
 
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()

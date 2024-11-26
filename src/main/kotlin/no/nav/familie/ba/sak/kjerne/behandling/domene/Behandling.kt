@@ -214,8 +214,7 @@ data class Behandling(
 
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
-    fun erMigrering() =
-        type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+    fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
@@ -237,11 +236,9 @@ data class Behandling(
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
-    fun kanLeggeTilOgFjerneUtvidetVilkår() =
-        erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage()
+    fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage()
 
-    private fun erOmregning() =
-        this.opprettetÅrsak.erOmregningsårsak()
+    private fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
@@ -341,8 +338,7 @@ enum class BehandlingÅrsak(
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     ;
 
-    fun erOmregningsårsak(): Boolean =
-        this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
+    fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
 
     fun hentOverstyrtDokumenttittelForOmregningsbehandling(): String? =
         when (this) {

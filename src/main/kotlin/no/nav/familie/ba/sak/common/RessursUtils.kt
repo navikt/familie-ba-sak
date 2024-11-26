@@ -9,23 +9,19 @@ import org.springframework.http.ResponseEntity
 object RessursUtils {
     private val logger = LoggerFactory.getLogger(RessursUtils::class.java)
 
-    fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> =
-        ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
+    fun <T> unauthorized(errorMessage: String): ResponseEntity<Ressurs<T>> = ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Ressurs.failure(errorMessage))
 
     fun <T> badRequest(
         errorMessage: String,
         throwable: Throwable,
-    ): ResponseEntity<Ressurs<T>> =
-        errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
+    ): ResponseEntity<Ressurs<T>> = errorResponse(HttpStatus.BAD_REQUEST, errorMessage, throwable)
 
-    fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> =
-        ikkeTilgangResponse(errorMessage)
+    fun <T> forbidden(errorMessage: String): ResponseEntity<Ressurs<T>> = ikkeTilgangResponse(errorMessage)
 
     fun <T> illegalState(
         errorMessage: String,
         throwable: Throwable,
-    ): ResponseEntity<Ressurs<T>> =
-        errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
+    ): ResponseEntity<Ressurs<T>> = errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, throwable)
 
     fun <T> funksjonellFeil(funksjonellFeil: FunksjonellFeil): ResponseEntity<Ressurs<T>> =
         funksjonellErrorResponse(
@@ -35,8 +31,7 @@ object RessursUtils {
     fun <T> frontendFeil(
         feil: Feil,
         throwable: Throwable?,
-    ): ResponseEntity<Ressurs<T>> =
-        frontendErrorResponse(feil, throwable)
+    ): ResponseEntity<Ressurs<T>> = frontendErrorResponse(feil, throwable)
 
     fun <T> ok(data: T): ResponseEntity<Ressurs<T>> = ResponseEntity.ok(Ressurs.success(data))
 
