@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -44,6 +45,7 @@ class UtbetalingTidslinjeServiceTest {
         val behandling = lagBehandling()
         val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
         val tomUtvidet = YearMonth.now().plusYears(1)
+
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
             listOf(
                 lagAndelTilkjentYtelse(
@@ -52,6 +54,7 @@ class UtbetalingTidslinjeServiceTest {
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ),
             )
+        
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT, fom = fomUtvidetOgEndring, tom = YearMonth.now())
 
@@ -71,5 +74,44 @@ class UtbetalingTidslinjeServiceTest {
         assertEquals(fomUtvidetOgEndring, periode.fraOgMed.tilYearMonth())
         assertEquals(tomUtvidet, periode.tilOgMed.tilYearMonth())
         assertFalse(periode.innhold!!)
+    }
+
+    @Test
+    fun `Skal returnere true-periode hvis det finnes endring hvor ordinær er satt til 0kr og det ikke betales ut utvidet`() {
+        // Arrange
+        val behandling = lagBehandling()
+
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
+
+        val fomEndretUtbetaling = YearMonth.now().minusYears(2)
+        val tomEndretUtbetaling = YearMonth.now()
+        val barn = lagPerson(type = PersonType.BARN)
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+            behandlingId = behandling.id,
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            årsak = Årsak.ALLEREDE_UTBETALT,
+            fom = fomEndretUtbetaling,
+            tom = tomEndretUtbetaling
+        )
+
+        // Act
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+        )
+
+        // Assert
+        assertEquals(1, resultatMap.size)
+
+        val tidslinjeForBarn = resultatMap[barn.aktør]
+        val perioderForBarn = tidslinjeForBarn?.perioder() ?: emptyList()
+
+        assertEquals(1, perioderForBarn.size)
+
+        val periode = perioderForBarn.first()
+
+        assertEquals(fomEndretUtbetaling, periode.fraOgMed.tilYearMonth())
+        assertEquals(tomEndretUtbetaling, periode.tilOgMed.tilYearMonth())
+        assertTrue(periode.innhold!!)
     }
 }
