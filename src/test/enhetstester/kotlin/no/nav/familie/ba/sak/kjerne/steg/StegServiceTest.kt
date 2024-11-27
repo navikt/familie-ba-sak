@@ -51,6 +51,7 @@ internal class StegServiceTest {
             automatiskBeslutningService = mockk(),
             opprettTaskService = opprettTaskService,
             satskjøringRepository = satskjøringRepository,
+            unleashService = mockk(),
         )
 
     @BeforeEach
