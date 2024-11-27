@@ -721,6 +721,89 @@ fun vurderVilkårsvurderingTilInnvilget(
 }
 
 fun lagVilkårsvurdering(
+    id: Long = 0L,
+    behandling: Behandling = lagBehandling(),
+    aktiv: Boolean = true,
+    lagPersonResultater: (vilkårsvurdering: Vilkårsvurdering) -> Set<PersonResultat> = {
+        setOf(
+            lagPersonResultat(
+                vilkårsvurdering = it,
+                aktør = behandling.fagsak.aktør,
+            ),
+        )
+    },
+): Vilkårsvurdering {
+    val vilkårsvurdering =
+        Vilkårsvurdering(
+            id = id,
+            behandling = behandling,
+            aktiv = aktiv,
+        )
+    vilkårsvurdering.personResultater = lagPersonResultater(vilkårsvurdering)
+    return vilkårsvurdering
+}
+
+fun lagPersonResultat(
+    id: Long = 0L,
+    vilkårsvurdering: Vilkårsvurdering,
+    aktør: Aktør = randomAktør(),
+    lagVilkårResultater: (personResultat: PersonResultat) -> Set<VilkårResultat> = {
+        setOf(
+            lagVilkårResultat(
+                behandlingId = vilkårsvurdering.behandling.id,
+                personResultat = it,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.now().minusMonths(1),
+                periodeTom = LocalDate.now().plusYears(2),
+                begrunnelse = "",
+            ),
+            lagVilkårResultat(
+                behandlingId = vilkårsvurdering.behandling.id,
+                personResultat = it,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.now().minusMonths(1),
+                periodeTom = LocalDate.now().plusYears(2),
+                begrunnelse = "",
+            ),
+        )
+    },
+    lagAnnenVurderinger: (personResultat: PersonResultat) -> Set<AnnenVurdering> = {
+        setOf(
+            lagAnnenVurdering(
+                personResultat = it,
+            ),
+        )
+    },
+): PersonResultat {
+    val personResultat =
+        PersonResultat(
+            id = id,
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = aktør,
+        )
+    personResultat.setSortedVilkårResultater(lagVilkårResultater(personResultat))
+    personResultat.andreVurderinger.addAll(lagAnnenVurderinger(personResultat))
+    return personResultat
+}
+
+fun lagAnnenVurdering(
+    id: Long = 0L,
+    personResultat: PersonResultat,
+    resultat: Resultat = Resultat.OPPFYLT,
+    type: AnnenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+    begrunnelse: String? = null,
+): AnnenVurdering =
+    AnnenVurdering(
+        id = id,
+        personResultat = personResultat,
+        resultat = resultat,
+        type = type,
+        begrunnelse = begrunnelse,
+    )
+
+fun lagVilkårsvurdering(
     søkerAktør: Aktør,
     behandling: Behandling,
     resultat: Resultat,
