@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -68,6 +70,7 @@ class StegService(
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -90,6 +93,7 @@ class StegService(
         when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(nyBehandling)
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> validerEndreMigreringsdato(nyBehandling)
+            BehandlingÅrsak.IVERKSETTE_KA_VEDTAK -> validerIverksettKAVedtak()
             else -> Unit
         }
 
@@ -147,6 +151,12 @@ class StegService(
             } else if (satskjøring.ferdigTidspunkt == null) {
                 throw FunksjonellFeil("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
             }
+        }
+    }
+
+    fun validerIverksettKAVedtak() {
+        if (!unleashService.isEnabled(KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK)) {
+            throw FunksjonellFeil("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
         }
     }
 
