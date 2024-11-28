@@ -128,7 +128,7 @@ fun tilpassKompetanserTilRegelverk(
             .tilBarnasEøsRegelverkTidslinjer()
             .leftJoin(utbetalesIkkeOrdinærEllerUtvidetTidslinjer) { regelverk, utbetalesIkkeOrdinærEllerUtvidet ->
                 when (utbetalesIkkeOrdinærEllerUtvidet) {
-                    true -> null // ta bort regelverk dersom barnets utbetaling er endret til 0 og det ikke utbetales utvidet
+                    true -> null // ta bort regelverk dersom det verken utbetales ordinær på barnet eller utvidet for søker
                     else -> regelverk
                 }
             }.mapValues { (_, tidslinjer) ->
