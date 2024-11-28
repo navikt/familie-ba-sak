@@ -52,6 +52,7 @@ class UtbetalingTidslinjeServiceTest {
                     fom = fomUtvidetOgEndring,
                     tom = tomUtvidet,
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    kalkulertUtbetalingsbeløp = 1000
                 ),
             )
 
