@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.Task
+import no.nav.person.pdl.aktor.v2.Type
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -103,7 +104,11 @@ class HåndterNyIdentService(
                 .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) }
 
         if (fagsaker.toSet().size > 1) {
-            throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktørerMedAktivPersonident.first()}. $LENKE_INFO_OM_MERGING")
+            secureLogger.warn(
+                "Det eksisterer flere fagsaker på identer som skal merges $fagsaker.\n" +
+                    "Identer: ${alleIdenterFraPdl.filter { it.gruppe == Type.FOLKEREGISTERIDENT.name }}",
+            )
+            throw Feil("Det eksisterer flere fagsaker på identer som skal merges. Patch manuelt. Info om fagsaker og identer ligger i securelog. $LENKE_INFO_OM_MERGING")
         }
 
         return fagsaker.firstOrNull()
@@ -131,7 +136,14 @@ class HåndterNyIdentService(
                 ?: return // Hvis aktør ikke er med i forrige behandling kan vi patche selv om fødselsdato er ulik
 
         if (fødselsdatoFraPdl.toYearMonth() != fødselsdatoForrigeBehandling.toYearMonth()) {
-            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt. $LENKE_INFO_OM_MERGING")
+            secureLogger.warn(
+                "Fødselsdato er forskjellig fra forrige behandling.\n" +
+                    "Ny fødselsdato $fødselsdatoFraPdl, forrige fødselsdato $fødselsdatoForrigeBehandling\n" +
+                    "Må saksbehandles manuelt. Send til fag: \n" +
+                    "Fagsak: ${forrigeBehandling.fagsak.id} \n" +
+                    "Identer: ${alleIdenterFraPdl.filter { it.gruppe == Type.FOLKEREGISTERIDENT.name }}",
+            )
+            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Kopier tekst fra securelog og send til en fagressurs")
         }
     }
 

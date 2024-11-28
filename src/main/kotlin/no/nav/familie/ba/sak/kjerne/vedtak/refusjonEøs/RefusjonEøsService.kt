@@ -76,4 +76,6 @@ class RefusjonEøsService(
         refusjonEøs.land = restRefusjonEøs.land
         refusjonEøs.refusjonAvklart = restRefusjonEøs.refusjonAvklart
     }
+
+    fun harRefusjonEøsPåBehandling(behandlingId: Long): Boolean = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId).isNotEmpty()
 }
