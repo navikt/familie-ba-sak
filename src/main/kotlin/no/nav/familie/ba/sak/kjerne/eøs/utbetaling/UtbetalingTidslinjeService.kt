@@ -31,9 +31,11 @@ class UtbetalingTidslinjeService(
 
         return barnasSkalIkkeUtbetalesTidslinjer
             .mapValues { (_, ordinærSkalIkkeUtbetalesTidslinje) ->
-                ordinærSkalIkkeUtbetalesTidslinje.kombinerMed(utvidetTidslinje) { ordinærSkalIkkeUtbetales, utvidetAndel ->
-                    ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
-                }
+                val utbetalesIkkeOrdinærEllerUtvidetTidslinje =
+                    ordinærSkalIkkeUtbetalesTidslinje.kombinerMed(utvidetTidslinje) { ordinærSkalIkkeUtbetales, utvidetAndel ->
+                        ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
+                    }
+                utbetalesIkkeOrdinærEllerUtvidetTidslinje
             }
     }
 }
