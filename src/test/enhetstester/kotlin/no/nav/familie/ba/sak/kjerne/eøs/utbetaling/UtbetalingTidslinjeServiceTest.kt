@@ -52,7 +52,7 @@ class UtbetalingTidslinjeServiceTest {
                     fom = fomUtvidetOgEndring,
                     tom = tomUtvidet,
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    kalkulertUtbetalingsbeløp = 1000
+                    kalkulertUtbetalingsbeløp = 1000,
                 ),
             )
 
@@ -76,7 +76,7 @@ class UtbetalingTidslinjeServiceTest {
                     fom = fomUtvidetOgEndring,
                     tom = tomUtvidet,
                     ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    kalkulertUtbetalingsbeløp = 1000
+                    kalkulertUtbetalingsbeløp = 1000,
                 ),
             )
 
