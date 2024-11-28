@@ -40,6 +40,30 @@ class UtbetalingTidslinjeServiceTest {
     }
 
     @Test
+    fun `Skal returnere emptyMap hvis det finnes utbetaling av utvidet når det ikke finnes endret utbetaling andeler`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
+        val tomUtvidet = YearMonth.now().plusYears(1)
+
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = fomUtvidetOgEndring,
+                    tom = tomUtvidet,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    kalkulertUtbetalingsbeløp = 1000
+                ),
+            )
+
+        // Act
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList())
+
+        // Assert
+        assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
+    }
+
+    @Test
     fun `Skal returnere false-periode hvis det finnes utbetaling av utvidet når ordinær er endret til 0kr`() {
         // Arrange
         val behandling = lagBehandling()
