@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -51,6 +52,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelterSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
+import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
@@ -73,6 +75,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
+import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -99,6 +102,8 @@ class BrevService(
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val hjemmeltekstUtleder: HjemmeltekstUtleder,
+    private val unleashService: UnleashService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -468,14 +473,22 @@ class BrevService(
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
         val hjemler =
-            hentHjemler(
-                behandlingId = behandlingId,
-                erFritekstIBrev = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
-                vedtaksperioder = sorterteVedtaksperioderMedBegrunnelser,
-                målform = personopplysningGrunnlag.søker.målform,
-                vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
-                refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
-            )
+            if (unleashService.isEnabled(FeatureToggleConfig.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV, false)) {
+                hjemmeltekstUtleder.utledHjemmeltekst(
+                    behandlingId = behandlingId,
+                    vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
+                    sorterteVedtaksperioderMedBegrunnelser = sorterteVedtaksperioderMedBegrunnelser,
+                )
+            } else {
+                hentHjemler(
+                    behandlingId = behandlingId,
+                    erFritekstIBrev = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
+                    vedtaksperioder = sorterteVedtaksperioderMedBegrunnelser,
+                    målform = personopplysningGrunnlag.søker.målform,
+                    vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
+                    refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
+                )
+            }
 
         val organisasjonsnummer =
             vedtak.behandling.fagsak.institusjon
