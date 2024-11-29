@@ -16,6 +16,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import java.time.LocalDateTime
@@ -97,8 +99,9 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
             assertThat(lagretArbeidsfordelingPåBehandling).isNull()
         }
 
-        @Test
-        fun `skal ikke hente arbeidsfordeling på behandling som har resultat HENLAGT`() {
+        @ParameterizedTest
+        @EnumSource(Behandlingsresultat::class, names = ["HENLAGT_FEILAKTIG_OPPRETTET", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_AUTOMATISK_FØDSELSHENDELSE", "HENLAGT_TEKNISK_VEDLIKEHOLD"], mode = EnumSource.Mode.INCLUDE)
+        fun `skal ikke hente arbeidsfordeling på behandling som har resultat HENLAGT`(behandlingsResultat: Behandlingsresultat) {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
@@ -107,7 +110,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
                     lagBehandling(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
-                        resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                        resultat = behandlingsResultat,
                         aktivertTid = LocalDateTime.now(),
                     ),
                 )
