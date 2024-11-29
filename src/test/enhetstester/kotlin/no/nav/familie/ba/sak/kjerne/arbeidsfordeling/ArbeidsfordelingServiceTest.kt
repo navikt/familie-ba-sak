@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -120,7 +119,7 @@ class ArbeidsfordelingServiceTest {
                 assertThrows<Feil> {
                     arbeidsfordelingService.fastsettBehandlendeEnhet(behandling, null)
                 }
-            assertEquals("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.", exception.message)
+            assertThat(exception.message).isEqualTo("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
         }
 
         @ParameterizedTest
