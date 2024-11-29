@@ -14,15 +14,12 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.DynamicTest.*
+import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import java.time.LocalDateTime
 
 class ArbeidsfordelingPåBehandlingRepositoryTest(
@@ -102,45 +99,14 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
             assertThat(lagretArbeidsfordelingPåBehandling).isNull()
         }
 
-        @ParameterizedTest
-        @EnumSource(Behandlingsresultat::class, names = ["HENLAGT_FEILAKTIG_OPPRETTET", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_AUTOMATISK_FØDSELSHENDELSE", "HENLAGT_TEKNISK_VEDLIKEHOLD"], mode = EnumSource.Mode.INCLUDE)
-        fun `skal ikke hente arbeidsfordeling på behandling som har resultat HENLAGT`(behandlingsResultat: Behandlingsresultat) {
-            // Arrange
-            val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
-            val behandling =
-                behandlingRepository.save(
-                    lagBehandling(
-                        fagsak = fagsak,
-                        status = BehandlingStatus.AVSLUTTET,
-                        resultat = behandlingsResultat,
-                        aktivertTid = LocalDateTime.now(),
-                    ),
-                )
-
-            arbeidsfordelingPåBehandlingRepository.save(lagArbeidsfordelingPåBehandling(behandlingId = behandling.id))
-
-            // Act
-            val lagretArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsak.id)
-
-            // Assert
-            assertThat(lagretArbeidsfordelingPåBehandling).isNull()
-        }
-
+        // En test som skal detektere hvis det er mismatch mellom Enum-en og query-en som blir brukt. Siden Enum-verdiene er hardkodet i query.
+        // Forutsetter at enum-en inneholder HENLAGT.
         @TestFactory
-        fun `skal hente arbeidsfordeling på behandling som har resultat som ikke er henlagt`(): Collection<DynamicTest> {
-            // Skal samsvare med SQL query WHERE clause
-            val henlagteBehandlingresultater =
-                listOf(
-                    Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
-                    Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
-                    Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
-                    Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                )
-            val resultaterSomIkkeErHenlagt = Behandlingsresultat.values().filterNot { it in henlagteBehandlingresultater }
+        fun `skal ikke hente arbeidsfordeling på behandling som har resultat HENLAGT`(): Collection<DynamicTest> {
+            val henlagteBehandlingresultater = Behandlingsresultat.entries.filter { it.name.contains("HENLAGT") } // Kan byttes til startsWith()
 
-            return resultaterSomIkkeErHenlagt.map { behandlingsResultat ->
-                dynamicTest("resultat: $behandlingsResultat skal ikke bli filtrert") {
+            return henlagteBehandlingresultater.map { behandlingsResultat ->
+                dynamicTest("resultat: $behandlingsResultat skal bli filtrert") {
                     // Arrange
                     val aktør = aktørIdRepository.save(randomAktør())
                     val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
@@ -154,13 +120,13 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
                             ),
                         )
 
-                    val arbeidsfordeling = arbeidsfordelingPåBehandlingRepository.save(lagArbeidsfordelingPåBehandling(behandlingId = behandling.id))
+                    arbeidsfordelingPåBehandlingRepository.save(lagArbeidsfordelingPåBehandling(behandlingId = behandling.id))
 
                     // Act
-                    val lagretArbeidsfordelingPåBehandling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsak.id)
+                    val sisteGyldigeArbeidsfordeling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsak.id)
 
                     // Assert
-                    assertThat(lagretArbeidsfordelingPåBehandling).isEqualTo(arbeidsfordeling)
+                    assertThat(sisteGyldigeArbeidsfordeling).isNull()
                 }
             }
         }
