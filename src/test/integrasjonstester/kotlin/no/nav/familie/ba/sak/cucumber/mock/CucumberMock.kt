@@ -49,10 +49,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTi
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.EndretUtbetalingAndelTidslinjeService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BeslutteVedtak
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
@@ -133,7 +133,6 @@ class CucumberMock(
     val unleashService = mockUnleashService()
     val mockPåVentService = mockk<SettPåVentService>()
     val opprettTaskService = mockk<OpprettTaskService>()
-    val endretUtbetalingAndelTidslinjeService = EndretUtbetalingAndelTidslinjeService(endretUtbetalingAndelHentOgPersisterService)
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
 
@@ -187,6 +186,8 @@ class CucumberMock(
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
+
+    val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
 
     val vedtakService =
         VedtakService(
@@ -329,7 +330,14 @@ class CucumberMock(
 
     val endringsabonnenterForKompetanse = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService)
 
-    val tilpassKompetanserTilRegelverkService = TilpassKompetanserTilRegelverkService(vilkårsvurderingTidslinjeService, endretUtbetalingAndelTidslinjeService, kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
+    val tilpassKompetanserTilRegelverkService =
+        TilpassKompetanserTilRegelverkService(
+            vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
+            utbetalingTidslinjeService = utbetalingTidslinjeService,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            kompetanseRepository = kompetanseRepository,
+            endringsabonnenter = endringsabonnenterForKompetanse,
+        )
 
     val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)
 
