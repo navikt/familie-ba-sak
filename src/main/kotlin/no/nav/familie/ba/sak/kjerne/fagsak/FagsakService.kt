@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -197,11 +198,15 @@ class FagsakService(
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger =
-            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId).map {
-                it.tilRestVisningBehandling(
-                    vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
-                )
-            }
+            behandlingHentOgPersisterService
+                .hentBehandlinger(fagsakId = fagsakId)
+                // Fjerner behandlinger med opprettetÅrsak = NY_UTVIDET_KLASSEKODE. Dette er kun en teknisk greie og ikke noe saksbehandler trenger å forholde seg til.
+                .filter { it.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE }
+                .map {
+                    it.tilRestVisningBehandling(
+                        vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
+                    )
+                }
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
         return restBaseFagsak.tilRestMinimalFagsak(
             restVisningBehandlinger = visningsbehandlinger,
