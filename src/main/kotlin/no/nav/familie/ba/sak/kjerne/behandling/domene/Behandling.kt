@@ -339,6 +339,7 @@ enum class BehandlingÅrsak(
     HELMANUELL_MIGRERING("Manuell migrering"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
     NY_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
+    IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
