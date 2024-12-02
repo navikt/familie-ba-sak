@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
@@ -88,20 +86,15 @@ class BehandleFødselshendelseTask(
                     infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
                 }
             }
-        } catch (e: Exception) {
-            if (e::class in setOf(FunksjonellFeil::class, MidlertidigEnhetIAutomatiskBehandlingFeil::class)) {
-                val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
-                taskRepositoryWrapper.save(
-                    OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
-                        aktør = aktør,
-                        oppgavetype = Oppgavetype.VurderLivshendelse,
-                        beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                        enhetsnummer = if (e is MidlertidigEnhetIAutomatiskBehandlingFeil) BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer else null,
-                    ),
-                )
-            } else {
-                throw e
-            }
+        } catch (e: FunksjonellFeil) {
+            val aktør = personidentService.hentAktør(nyBehandling.morsIdent)
+            taskRepositoryWrapper.save(
+                OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
+                    aktør = aktør,
+                    oppgavetype = Oppgavetype.VurderLivshendelse,
+                    beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
+                ),
+            )
         }
     }
 

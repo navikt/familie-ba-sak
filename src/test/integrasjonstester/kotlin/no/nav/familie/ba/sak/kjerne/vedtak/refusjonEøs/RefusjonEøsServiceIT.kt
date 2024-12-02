@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.Month
 
-class RefusjonEøsServiceTest(
+class RefusjonEøsServiceIT(
     @Autowired val refusjonEøsService: RefusjonEøsService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
