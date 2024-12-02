@@ -28,7 +28,6 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
                 oppgavetype = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.oppgavetype,
                 fristForFerdigstillelse = LocalDate.now(),
                 beskrivelse = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.beskrivelse,
-                enhetsnummer = opprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO.enhetsnummer,
             )
     }
 
@@ -39,7 +38,6 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
             aktør: Aktør,
             oppgavetype: Oppgavetype,
             beskrivelse: String,
-            enhetsnummer: String? = null,
         ): Task =
             Task(
                 type = TASK_STEP_TYPE,
@@ -49,7 +47,6 @@ class OpprettVurderFødselshendelseKonsekvensForYtelseOppgave(
                             aktør.aktørId,
                             oppgavetype,
                             beskrivelse,
-                            enhetsnummer,
                         ),
                     ),
             )

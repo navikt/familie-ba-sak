@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -37,7 +36,6 @@ class ArbeidsfordelingService(
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
-    private val unleashService: UnleashService,
 ) {
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(
@@ -83,11 +81,13 @@ class ArbeidsfordelingService(
 
         val oppdatertArbeidsfordelingPåBehandling =
             if (behandling.erAutomatiskOgHarTidligereBehandling()) {
-                fastsettArbeidsfordelingsenhetUtIfraForrigeBehandling(
-                    behandling,
-                    sisteBehandlingSomErIverksatt,
-                    aktivArbeidsfordelingPåBehandling,
-                )
+                if (aktivArbeidsfordelingPåBehandling != null) {
+                    aktivArbeidsfordelingPåBehandling
+                } else {
+                    sisteBehandlingSomErIverksatt ?: throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
+
+                    fastsettArbeidsfordelingsenhetUtIfraTidligereBehandlingerPåFagsak(behandling.id, behandling.fagsak.id)
+                }
             } else {
                 val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
                 val tilpassetArbeidsfordelingsenhet =
@@ -129,28 +129,26 @@ class ArbeidsfordelingService(
         )
     }
 
-    private fun fastsettArbeidsfordelingsenhetUtIfraForrigeBehandling(
-        behandling: Behandling,
-        sisteBehandlingSomErIverksatt: Behandling?,
-        aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?,
+    private fun fastsettArbeidsfordelingsenhetUtIfraTidligereBehandlingerPåFagsak(
+        behandlingId: Long,
+        fagsakId: Long,
     ): ArbeidsfordelingPåBehandling {
-        if (aktivArbeidsfordelingPåBehandling != null) return aktivArbeidsfordelingPåBehandling
+        val sisteGyldigeArbeidsfordeling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsakId)
 
-        sisteBehandlingSomErIverksatt ?: throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
-
-        val forrigeIverksattesBehandlingArbeidsfordelingsenhet =
-            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(
-                sisteBehandlingSomErIverksatt.id,
-            ) ?: throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke arbeidsfordelingsenhet på forrige iverksatte behandling.")
-
-        if (forrigeIverksattesBehandlingArbeidsfordelingsenhet.behandlendeEnhetId == BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer) {
-            throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Forrige behandlende enhet er MIDLERTIDIG_ENHET")
+        if (sisteGyldigeArbeidsfordeling == null) {
+            return arbeidsfordelingPåBehandlingRepository.save(
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = behandlingId,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                ),
+            )
         }
 
         return arbeidsfordelingPåBehandlingRepository.save(
-            forrigeIverksattesBehandlingArbeidsfordelingsenhet.copy(
+            sisteGyldigeArbeidsfordeling.copy(
                 id = 0,
-                behandlingId = behandling.id,
+                behandlingId = behandlingId,
             ),
         )
     }

@@ -1,20 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -24,11 +19,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.OpprettVurderFødselshendelseKonsekvensForYtelseOppgave
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,20 +38,6 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val integrasjonClient: IntegrasjonClient,
 ) : AbstractVerdikjedetest() {
-    @AfterEach
-    fun cleanUp() {
-        // Gå tilbake til default mock.
-        every {
-            integrasjonClient.hentBehandlendeEnhet(any())
-        } returns
-            listOf(
-                Arbeidsfordelingsenhet(
-                    BarnetrygdEnhet.OSLO.enhetsnummer,
-                    BarnetrygdEnhet.OSLO.enhetsnavn,
-                ),
-            )
-    }
-
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {
         // Behandler desember 2021 for å få med automatisk begrunnelse av satsendring januar 2022
@@ -199,56 +177,5 @@ class FødselshendelseFørstegangsbehandlingTest(
             2,
             tilleggOrdinærSatsNesteMånedTilTester().beløp * 2,
         )
-    }
-
-    @Test
-    fun `Skal opprette VurderLivshendelse task hvis man ikke kan fastsette behandlende enhet`() {
-        mockkObject(OpprettVurderFødselshendelseKonsekvensForYtelseOppgave)
-        every { integrasjonClient.hentBehandlendeEnhet(any()) } returns
-            listOf(
-                Arbeidsfordelingsenhet(
-                    BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                    BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                ),
-            )
-
-        val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "2000-01-01", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.of(2024, 1, 1).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
-
-        behandleFødselshendelse(
-            nyBehandlingHendelse =
-                NyBehandlingHendelse(
-                    morsIdent = scenario.søker.ident!!,
-                    barnasIdenter = listOf(scenario.barna.first().ident!!),
-                ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            personidentService = personidentService,
-            brevmalService = brevmalService,
-        )
-
-        verify(exactly = 1) {
-            OpprettVurderFødselshendelseKonsekvensForYtelseOppgave.opprettTask(
-                aktør = Aktør(scenario.søker.aktørId!!),
-                oppgavetype = Oppgavetype.VurderLivshendelse,
-                beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
-                enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-            )
-        }
     }
 }

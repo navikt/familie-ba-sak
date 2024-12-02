@@ -81,6 +81,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -88,6 +89,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -216,6 +218,7 @@ fun lagBehandling(
     aktivertTid: LocalDateTime = LocalDateTime.now(),
     id: Long = nesteBehandlingId(),
     endretTidspunkt: LocalDateTime = LocalDateTime.now(),
+    aktiv: Boolean = true,
 ) = Behandling(
     id = id,
     fagsak = fagsak,
@@ -227,6 +230,7 @@ fun lagBehandling(
     resultat = resultat,
     status = status,
     aktivertTidspunkt = aktivertTid,
+    aktiv = aktiv,
 ).also {
     it.endretTidspunkt = endretTidspunkt
     val tidligereSteg =
@@ -710,6 +714,108 @@ fun vurderVilkårsvurderingTilInnvilget(
         }
     }
 }
+
+fun lagVilkårsvurdering(
+    id: Long = 0L,
+    behandling: Behandling = lagBehandling(),
+    aktiv: Boolean = true,
+    lagPersonResultater: (vilkårsvurdering: Vilkårsvurdering) -> Set<PersonResultat> = {
+        setOf(
+            lagPersonResultat(
+                vilkårsvurdering = it,
+                aktør = behandling.fagsak.aktør,
+            ),
+        )
+    },
+): Vilkårsvurdering {
+    val vilkårsvurdering =
+        Vilkårsvurdering(
+            id = id,
+            behandling = behandling,
+            aktiv = aktiv,
+        )
+    vilkårsvurdering.personResultater = lagPersonResultater(vilkårsvurdering)
+    return vilkårsvurdering
+}
+
+fun lagPersonResultat(
+    id: Long = 0L,
+    vilkårsvurdering: Vilkårsvurdering,
+    aktør: Aktør = randomAktør(),
+    lagVilkårResultater: (personResultat: PersonResultat) -> Set<VilkårResultat> = {
+        setOf(
+            lagVilkårResultat(
+                behandlingId = vilkårsvurdering.behandling.id,
+                personResultat = it,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.now().minusMonths(1),
+                periodeTom = LocalDate.now().plusYears(2),
+                begrunnelse = "",
+            ),
+            lagVilkårResultat(
+                behandlingId = vilkårsvurdering.behandling.id,
+                personResultat = it,
+                vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.now().minusMonths(1),
+                periodeTom = LocalDate.now().plusYears(2),
+                begrunnelse = "",
+            ),
+        )
+    },
+    lagAnnenVurderinger: (personResultat: PersonResultat) -> Set<AnnenVurdering> = {
+        setOf(
+            lagAnnenVurdering(
+                personResultat = it,
+            ),
+        )
+    },
+): PersonResultat {
+    val personResultat =
+        PersonResultat(
+            id = id,
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = aktør,
+        )
+    personResultat.setSortedVilkårResultater(lagVilkårResultater(personResultat))
+    personResultat.andreVurderinger.addAll(lagAnnenVurderinger(personResultat))
+    return personResultat
+}
+
+fun lagAnnenVurdering(
+    id: Long = 0L,
+    personResultat: PersonResultat,
+    resultat: Resultat = Resultat.OPPFYLT,
+    type: AnnenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
+    begrunnelse: String? = null,
+): AnnenVurdering =
+    AnnenVurdering(
+        id = id,
+        personResultat = personResultat,
+        resultat = resultat,
+        type = type,
+        begrunnelse = begrunnelse,
+    )
+
+fun lagRefusjonEøs(
+    behandlingId: Long = 0L,
+    fom: LocalDate = LocalDate.now().minusMonths(1),
+    tom: LocalDate = LocalDate.now().plusMonths(1),
+    refusjonsbeløp: Int = 0,
+    land: String = "NO",
+    refusjonAvklart: Boolean = true,
+    id: Long = 0L,
+): RefusjonEøs =
+    RefusjonEøs(
+        behandlingId = behandlingId,
+        fom = fom,
+        tom = tom,
+        refusjonsbeløp = refusjonsbeløp,
+        land = land,
+        refusjonAvklart = refusjonAvklart,
+        id = id,
+    )
 
 fun lagVilkårsvurdering(
     søkerAktør: Aktør,
@@ -1498,3 +1604,14 @@ fun lagBrevmottakerDb(
 )
 
 val Number.årSiden: LocalDate get() = LocalDate.now().minusYears(this.toLong())
+
+fun lagEØSBegrunnelse(
+    id: Long = 0L,
+    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+    begrunnelse: EØSStandardbegrunnelse,
+): EØSBegrunnelse =
+    EØSBegrunnelse(
+        id = id,
+        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+        begrunnelse = begrunnelse,
+    )
