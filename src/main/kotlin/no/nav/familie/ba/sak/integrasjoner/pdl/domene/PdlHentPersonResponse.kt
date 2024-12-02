@@ -27,7 +27,7 @@ data class PdlPersonData(
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
     val doedsfall: List<PdlDødsfallResponse> = emptyList(),
-    val doedfoedtBarn: List<PdlDødtfødtBarnResponse> = emptyList(),
+    val doedfoedtBarn: List<PdlDødfødtBarnResponse> = emptyList(),
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
