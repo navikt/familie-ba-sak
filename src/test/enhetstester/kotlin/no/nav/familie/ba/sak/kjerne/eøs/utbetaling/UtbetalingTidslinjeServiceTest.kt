@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -13,11 +14,16 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.simulering.lagBehandling
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -33,7 +39,9 @@ class UtbetalingTidslinjeServiceTest {
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList())
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList()
+        )
 
         // Assert
         assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
@@ -57,7 +65,9 @@ class UtbetalingTidslinjeServiceTest {
             )
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList())
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList()
+        )
 
         // Assert
         assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
@@ -81,10 +91,19 @@ class UtbetalingTidslinjeServiceTest {
             )
 
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(behandlingId = behandling.id, person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT, fom = fomUtvidetOgEndring, tom = YearMonth.now())
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+            behandlingId = behandling.id,
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            årsak = Årsak.ALLEREDE_UTBETALT,
+            fom = fomUtvidetOgEndring,
+            tom = YearMonth.now()
+        )
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = listOf(endretUtbetalingAndel))
+        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+        )
 
         // Assert
         assertEquals(1, resultatMap.size)
@@ -141,5 +160,139 @@ class UtbetalingTidslinjeServiceTest {
         assertEquals(fomEndretUtbetaling, periode.fraOgMed.tilYearMonth())
         assertEquals(tomEndretUtbetaling, periode.tilOgMed.tilYearMonth())
         assertTrue(periode.innhold!!)
+    }
+
+    @Nested
+    inner class TilBarnasSkalIkkeUtbetalesTidslinjerTest {
+        @Test
+        fun `lager tidslinje for ett barn med én etterbetaling`() {
+            val person = tilfeldigPerson()
+            val endringer =
+                listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person,
+                        årsak = Årsak.ETTERBETALING_3ÅR,
+                        fom = YearMonth.of(2020, 3),
+                        tom = YearMonth.of(2020, 7),
+                        prosent = BigDecimal.ZERO,
+                    ),
+                )
+
+            val forventet =
+                mapOf(
+                    person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
+                )
+
+            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+
+            assertEquals(forventet, faktisk)
+        }
+
+        @Test
+        fun `lager tidslinje for to barn med flere etterbetalinger`() {
+            val person1 = tilfeldigPerson()
+            val person2 = tilfeldigPerson()
+
+            val endringer =
+                listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person1,
+                        årsak = Årsak.ETTERBETALING_3ÅR,
+                        fom = YearMonth.of(2020, 3),
+                        tom = YearMonth.of(2020, 7),
+                        prosent = BigDecimal.ZERO,
+                    ),
+                    lagEndretUtbetalingAndel(
+                        person = person2,
+                        årsak = Årsak.ETTERBETALING_3ÅR,
+                        fom = YearMonth.of(2019, 11),
+                        tom = YearMonth.of(2021, 3),
+                        prosent = BigDecimal.ZERO,
+                    ),
+                    lagEndretUtbetalingAndel(
+                        person = person1,
+                        årsak = Årsak.ETTERBETALING_3ÅR,
+                        fom = YearMonth.of(2021, 1),
+                        tom = YearMonth.of(2021, 5),
+                        prosent = BigDecimal.ZERO,
+                    ),
+                )
+
+            val forventet =
+                mapOf(
+                    person1.aktør to "TTTTT     TTTTT".somBoolskTidslinje(mar(2020)).filtrerIkkeNull(),
+                    person2.aktør to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull(),
+                )
+
+            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+
+            assertEquals(forventet, faktisk)
+        }
+
+        @Test
+        fun `lager tidslinje for ett barn med allerede utbetalt`() {
+            val person = tilfeldigPerson()
+            val endringer =
+                listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person,
+                        årsak = Årsak.ALLEREDE_UTBETALT,
+                        fom = YearMonth.of(2020, 3),
+                        tom = YearMonth.of(2020, 7),
+                        prosent = BigDecimal.ZERO,
+                    ),
+                )
+
+            val forventet =
+                mapOf(
+                    person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
+                )
+
+            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+
+            assertEquals(forventet, faktisk)
+        }
+
+        @Test
+        fun `lager tidslinje for ett barn med endre mottaker`() {
+            val person = tilfeldigPerson()
+            val endringer =
+                listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person,
+                        årsak = Årsak.ENDRE_MOTTAKER,
+                        fom = YearMonth.of(2020, 3),
+                        tom = YearMonth.of(2020, 7),
+                        prosent = BigDecimal.ZERO,
+                    ),
+                )
+
+            val forventet =
+                mapOf(
+                    person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
+                )
+
+            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+
+            assertEquals(forventet, faktisk)
+        }
+
+        @Test
+        fun `ikke lag tidslinje hvis årsaken ikke er etterbetaling 3 år, allerede utbetalt eller endre mottaker`() {
+            val person = tilfeldigPerson()
+            val endringer =
+                listOf(
+                    lagEndretUtbetalingAndel(
+                        person = person,
+                        årsak = Årsak.DELT_BOSTED,
+                        fom = YearMonth.of(2020, 3),
+                        tom = YearMonth.of(2020, 7),
+                    ),
+                )
+
+            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+
+            assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), faktisk)
+        }
     }
 }
