@@ -339,6 +339,7 @@ enum class BehandlingÅrsak(
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
+    NY_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
     IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     ;
 
