@@ -72,7 +72,6 @@ class BehandlingstemaService(
 
         val tidslinjer = vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeVedtatteBehandling.id))
         if (tidslinjer == null) {
-            // TODO : Burde dette være forrigeVedtatteBehandling.kategori ? Eller har det kanskje ikke så mye å si ?
             return BehandlingKategori.NASJONAL
         }
 
@@ -114,7 +113,6 @@ class BehandlingstemaService(
         }
     }
 
-    // TODO : Blir denne kalt flere plasser enn nødvendig? Se kallet fra VilkårsvurderingForNyBehandlingService klassen
     fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
         if (forrigeVedtatteBehandling == null) {
@@ -136,7 +134,6 @@ class BehandlingstemaService(
 
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
         if (vilkårsvurdering == null) {
-            // TODO : Burde dette egentlig vøre aktivBehandling.underkategori ? Eller har det kanskje ikke så mye å si ?
             return BehandlingUnderkategori.ORDINÆR
         }
 
