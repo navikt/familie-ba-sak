@@ -95,7 +95,8 @@ class PdlRestClient(
 
             pdlPerson.person.let {
                 PersonInfo(
-                    fødselsdato = LocalDate.parse(it.foedselsdato.first().foedselsdato),
+                    // Hvis det ikke finnes fødselsdato på person forsøker vi å bruke dato for barnets død fordi det var et dødfødt barn.
+                    fødselsdato = LocalDate.parse(it.foedselsdato.firstOrNull()?.foedselsdato ?: it.doedfoedtBarn.first().dato),
                     navn = it.navn.firstOrNull()?.fulltNavn(),
                     kjønn = it.kjoenn.firstOrNull()?.kjoenn,
                     forelderBarnRelasjon = forelderBarnRelasjon,
