@@ -39,9 +39,11 @@ class UtbetalingTidslinjeServiceTest {
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
-            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList()
-        )
+        val resultatMap =
+            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = emptyList(),
+            )
 
         // Assert
         assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
@@ -65,9 +67,11 @@ class UtbetalingTidslinjeServiceTest {
             )
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
-            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = emptyList()
-        )
+        val resultatMap =
+            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = emptyList(),
+            )
 
         // Assert
         assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
@@ -91,19 +95,22 @@ class UtbetalingTidslinjeServiceTest {
             )
 
         val barn = lagPerson(type = PersonType.BARN)
-        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
-            person = barn,
-            prosent = BigDecimal.ZERO,
-            årsak = Årsak.ALLEREDE_UTBETALT,
-            fom = fomUtvidetOgEndring,
-            tom = YearMonth.now()
-        )
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                person = barn,
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                fom = fomUtvidetOgEndring,
+                tom = YearMonth.now(),
+            )
 
         // Act
-        val resultatMap = utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
-            behandlingId = BehandlingId(behandling.id), endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
-        )
+        val resultatMap =
+            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+            )
 
         // Assert
         assertEquals(1, resultatMap.size)

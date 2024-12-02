@@ -61,4 +61,3 @@ private fun <I> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel)
         tilOgMed = this.tom.tilTidspunktEllerUendeligSent(fom),
         innhold = mapper(this),
     )
-
