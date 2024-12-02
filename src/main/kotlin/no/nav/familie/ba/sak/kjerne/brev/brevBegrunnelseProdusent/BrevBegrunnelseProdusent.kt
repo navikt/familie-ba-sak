@@ -322,7 +322,9 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         }
 
         gjelderSøker && this.gjelderEtterEndretUtbetaling ->
-            barnMedUtbetaling.map { it.fødselsdato }
+            barnPåBegrunnelse
+                .ifEmpty { barnMedUtbetaling }
+                .map { it.fødselsdato }
 
         erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(this) -> {
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
