@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
-    private val andelDataForNyUtvidetKlassekodeBehandlingUtleder = AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2024, 11)))
+    private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2024, 11))
+    private val andelDataForNyUtvidetKlassekodeBehandlingUtleder = AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider = clockProvider)
 
     @Nested
     inner class FinnForrigeAndelerForNyUtvidetKlassekodeBehandling {
@@ -18,8 +19,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal returnere alle utvidet andeler før nåtidspunkt dersom nåtidspunkt ikke treffer noen utvidet andel samt alle øvrige andeler`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndel,
@@ -44,8 +46,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal splitte utvidet andel dersom nåtidspunkt treffer andelen samt fjerne alle utvidet andeler etter nåtidspunkt`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndel,
@@ -60,7 +63,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
             assertThat(forrigeAndeler).hasSize(2)
             val utvidetAndelData = forrigeAndeler.single { it.type == YtelsetypeBA.UTVIDET_BARNETRYGD }
             assertThat(utvidetAndelData.fom).isEqualTo(utvidetAndel.stønadFom)
-            assertThat(utvidetAndelData.tom).isEqualTo(YearMonth.now())
+            assertThat(utvidetAndelData.tom).isEqualTo(denneMåned)
             assertThat(utvidetAndelData.id).isEqualTo(utvidetAndel.id)
             assertThat(utvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
             assertThat(utvidetAndelData.type).isEqualTo(YtelsetypeBA.UTVIDET_BARNETRYGD)
@@ -70,8 +73,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal fjerne utvidet andel dersom nåtidspunkt treffer andelen og andelen kun inneholder 1 mnd`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndel = lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now(), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned, tom = denneMåned, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndel,
@@ -91,9 +95,10 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal returnere tom liste dersom det ikke finnes noen forrige tilkjent ytelse`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val utvidetAndelEtterNåtidspunkt = lagAndelTilkjentYtelse(fom = YearMonth.now().plusMonths(4), tom = YearMonth.now().plusMonths(10), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val utvidetAndelEtterNåtidspunkt = lagAndelTilkjentYtelse(fom = denneMåned.plusMonths(4), tom = denneMåned.plusMonths(10), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndel,
@@ -109,7 +114,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
             assertThat(forrigeAndeler).hasSize(2)
             val utvidetAndelData = forrigeAndeler.single { it.type == YtelsetypeBA.UTVIDET_BARNETRYGD }
             assertThat(utvidetAndelData.fom).isEqualTo(utvidetAndel.stønadFom)
-            assertThat(utvidetAndelData.tom).isEqualTo(YearMonth.now())
+            assertThat(utvidetAndelData.tom).isEqualTo(denneMåned)
             assertThat(utvidetAndelData.id).isEqualTo(utvidetAndel.id)
             assertThat(utvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
             assertThat(utvidetAndelData.type).isEqualTo(YtelsetypeBA.UTVIDET_BARNETRYGD)
@@ -122,8 +127,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal splitte utvidet andel dersom nåtidspunkt treffer andelen`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndel,
@@ -140,14 +146,14 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
             assertThat(utvidetAndelData).hasSize(2)
             val førsteUtvidetAndelData = utvidetAndelData.first()
             assertThat(førsteUtvidetAndelData.fom).isEqualTo(utvidetAndel.stønadFom)
-            assertThat(førsteUtvidetAndelData.tom).isEqualTo(YearMonth.now())
+            assertThat(førsteUtvidetAndelData.tom).isEqualTo(denneMåned)
             // Id til første utvidet andel ved split gir vi en falsk id som er lik id + antall andeler.
             assertThat(førsteUtvidetAndelData.id).isEqualTo(utvidetAndel.id + tilkjentYtelse.andelerTilkjentYtelse.size)
             assertThat(førsteUtvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
             assertThat(førsteUtvidetAndelData.type).isEqualTo(YtelsetypeBA.UTVIDET_BARNETRYGD)
 
             val andreUtvidetAndelData = utvidetAndelData.last()
-            assertThat(andreUtvidetAndelData.fom).isEqualTo(YearMonth.now().plusMonths(1))
+            assertThat(andreUtvidetAndelData.fom).isEqualTo(denneMåned.plusMonths(1))
             assertThat(andreUtvidetAndelData.tom).isEqualTo(utvidetAndel.stønadTom)
             assertThat(andreUtvidetAndelData.id).isEqualTo(utvidetAndel.id)
             assertThat(andreUtvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
@@ -158,9 +164,10 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal returnere alle utvidet andeler uendret dersom nåtidspunkt ikke treffer noen utvidet andeler`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndelFørNåtidspunkt = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val utvidetAndelEtterNåtidspunkt = lagAndelTilkjentYtelse(fom = YearMonth.now().plusMonths(1), tom = YearMonth.now().plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndelFørNåtidspunkt = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val utvidetAndelEtterNåtidspunkt = lagAndelTilkjentYtelse(fom = denneMåned.plusMonths(1), tom = denneMåned.plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndelFørNåtidspunkt,
@@ -195,8 +202,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
         fun `skal ikke splitte utvidet andel dersom nåtidspunkt treffer andelen og andelen kun inneholder 1 mnd`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
-            val utvidetAndel = lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now(), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-            val ordinærAndel = lagAndelTilkjentYtelse(fom = YearMonth.now().minusMonths(3), tom = YearMonth.now().minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+            val denneMåned = YearMonth.now(clockProvider.get())
+            val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned, tom = denneMåned, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+            val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
             tilkjentYtelse.andelerTilkjentYtelse.addAll(
                 listOf(
                     utvidetAndel,

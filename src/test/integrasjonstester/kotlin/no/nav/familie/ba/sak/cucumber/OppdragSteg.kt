@@ -89,26 +89,26 @@ class OppdragSteg {
             vilkårsvurderingService = mockk(),
         )
 
-    private val utbetalingsoppdragGenerator =
-        UtbetalingsoppdragGenerator(
-            Utbetalingsgenerator(),
-            KlassifiseringKorrigerer(
-                tilkjentYtelseRepository,
-                unleashNextMedContextService,
-            ),
-            unleashNextMedContextService,
-            BehandlingsinformasjonUtleder(
-                EndretMigreringsdatoUtleder(
-                    behandlingHentOgPersisterService,
-                    behandlingService,
-                ),
-                clockProvider,
-            ),
-            andelTilkjentYtelseRepository,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-            AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
-        )
+    // private val utbetalingsoppdragGenerator =
+    //     UtbetalingsoppdragGenerator(
+    //         Utbetalingsgenerator(),
+    //         KlassifiseringKorrigerer(
+    //             tilkjentYtelseRepository,
+    //             unleashNextMedContextService,
+    //         ),
+    //         unleashNextMedContextService,
+    //         BehandlingsinformasjonUtleder(
+    //             EndretMigreringsdatoUtleder(
+    //                 behandlingHentOgPersisterService,
+    //                 behandlingService,
+    //             ),
+    //             clockProvider,
+    //         ),
+    //         andelTilkjentYtelseRepository,
+    //         behandlingHentOgPersisterService,
+    //         tilkjentYtelseRepository,
+    //         AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
+    //     )
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -166,7 +166,7 @@ class OppdragSteg {
     }
 
     @Og("inneværende måned er {}")
-    fun `dagens dato er`(inneværendeMånedString: String) {
+    fun `inneværende måned er`(inneværendeMånedString: String) {
         inneværendeMåned = parseÅrMåned(inneværendeMånedString)
         clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(inneværendeMåned)
     }
@@ -225,6 +225,26 @@ class OppdragSteg {
             }
         }
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
+        val utbetalingsoppdragGenerator =
+            UtbetalingsoppdragGenerator(
+                Utbetalingsgenerator(),
+                KlassifiseringKorrigerer(
+                    tilkjentYtelseRepository,
+                    unleashNextMedContextService,
+                ),
+                unleashNextMedContextService,
+                BehandlingsinformasjonUtleder(
+                    EndretMigreringsdatoUtleder(
+                        behandlingHentOgPersisterService,
+                        behandlingService,
+                    ),
+                    clockProvider,
+                ),
+                andelTilkjentYtelseRepository,
+                behandlingHentOgPersisterService,
+                tilkjentYtelseRepository,
+                AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
+            )
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
