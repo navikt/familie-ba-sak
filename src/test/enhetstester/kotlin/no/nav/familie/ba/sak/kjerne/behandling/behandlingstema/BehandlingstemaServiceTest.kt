@@ -64,7 +64,7 @@ class BehandlingstemaServiceTest {
     private val dagensDato = LocalDate.of(2024, 8, 1)
 
     @Nested
-    inner class OppdaterBehandlingstemaForRegistrerSøknadTest {
+    inner class OppdaterBehandlingstemaForRegistrereSøknadTest {
         @Test
         fun `skal oppdatere behandlingstema for registrering av søknad når det er en endring`() {
             // Arrange
@@ -89,7 +89,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrerSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
                     behandling = behandling,
                     nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -114,7 +114,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrerSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
                     behandling = behandling,
                     nyUnderkategori = behandling.underkategori,
                 )
@@ -150,7 +150,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrerSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
                     behandling = behandling,
                     nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )

@@ -27,7 +27,7 @@ class BehandlingstemaService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
     @Transactional
-    fun oppdaterBehandlingstemaForRegistrerSøknad(
+    fun oppdaterBehandlingstemaForRegistrereSøknad(
         behandling: Behandling,
         nyUnderkategori: BehandlingUnderkategori,
     ): Behandling = oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, behandling.kategori, nyUnderkategori)
@@ -162,13 +162,13 @@ class BehandlingstemaService(
             behandling.kategori = nyKategori
             behandling.underkategori = nyUnderkategori
             val lagretBehandling = behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
-            patchOppgaveForBehandlingHvisNødvendig(lagretBehandling)
+            patchBehandlingstemaPåOppgaveForBehandlingHvisNødvendig(lagretBehandling)
             return lagretBehandling
         }
         return behandling
     }
 
-    private fun patchOppgaveForBehandlingHvisNødvendig(
+    private fun patchBehandlingstemaPåOppgaveForBehandlingHvisNødvendig(
         behandling: Behandling,
     ) {
         oppgaveService.patchOppgaverForBehandling(behandling) {

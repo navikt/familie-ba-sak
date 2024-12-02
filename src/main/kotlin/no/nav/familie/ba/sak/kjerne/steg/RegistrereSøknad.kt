@@ -33,7 +33,7 @@ class RegistrereSøknad(
         val innsendtSøknad = søknadDTO.writeValueAsString()
 
         if (behandling.underkategori != søknadDTO.underkategori.tilDomene()) {
-            behandlingstemaService.oppdaterBehandlingstemaForRegistrerSøknad(
+            behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
                 behandling = behandling,
                 nyUnderkategori = søknadDTO.underkategori.tilDomene(),
             )
