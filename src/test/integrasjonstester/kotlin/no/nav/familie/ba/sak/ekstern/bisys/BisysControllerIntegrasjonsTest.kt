@@ -50,14 +50,14 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     }
 
     @Test
-    fun `Skal kaste feil når fraDato er mer enn 5 år tilbake i tid`() {
+    fun `Skal kaste feil når fraDato er mer enn 10 år tilbake i tid`() {
         val fnr = randomFnr()
 
         val requestEntity =
             byggRequestEntity(
                 BisysUtvidetBarnetrygdRequest(
                     fnr,
-                    LocalDate.now().minusYears(5).minusDays(1),
+                    LocalDate.now().minusYears(10).minusDays(1),
                 ),
             )
 
@@ -71,7 +71,7 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
-        assertThat(errorObject.melding).isEqualTo("fraDato kan ikke være lenger enn 5 år tilbake i tid")
+        assertThat(errorObject.melding).isEqualTo("fraDato kan ikke være lenger enn 10 år tilbake i tid")
         assertThat(errorObject.path).isEqualTo("/api/bisys/hent-utvidet-barnetrygd")
         assertThat(errorObject.timestamp).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
     }
