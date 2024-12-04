@@ -179,7 +179,7 @@ class StegService(
                     it.aktivFødselsnummer()
                 } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
                     if (behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING && pdlPersonKanIkkeBehandlesIFagsystem.årsak == PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO) {
-                        logger.warn("Barn fra forrige behandling mangler fødselsdato. Inkluderes alikevel sidden det er en teknisk endring.${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                        logger.warn("Barn fra forrige behandling mangler fødselsdato. Inkluderes alikevel siden det er en teknisk endring")
                         it.aktivFødselsnummer()
                     } else {
                         logger.warn("Ignorerer barn fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
