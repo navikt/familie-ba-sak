@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.0.21</kotlin.version>
+        <kotlin.version>2.1.0</kotlin.version>
         <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
         <revision>1</revision>
@@ -26,7 +26,7 @@
         <prosessering.version>2.20241118095311_c66bd61</prosessering.version>
         <felles.version>3.20241121151626_836e7ca</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20241125092101_ae3c67e</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20241127135607_0f52105</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20240311083956_0558f2a</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20241125101646_0fefaff</utbetalingsgenerator.version>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>5.0.13</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.7.0</springdoc.version>
-        <sentry.version>7.18.0</sentry.version>
+        <sentry.version>7.18.1</sentry.version>
         <kotlinx.version>1.9.0</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -47,12 +47,12 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
-        <unleash.version>9.2.5</unleash.version>
+        <unleash.version>9.2.6</unleash.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
-        <confluent.version>7.7.1</confluent.version>
+        <confluent.version>7.8.0</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.sources>src/main</sonar.sources>
