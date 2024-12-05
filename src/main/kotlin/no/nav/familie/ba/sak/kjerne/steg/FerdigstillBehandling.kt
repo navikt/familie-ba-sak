@@ -53,7 +53,7 @@ class FerdigstillBehandling(
             behandlingHentOgPersisterService.finnAktivForFagsak(behandling.fagsak.id)?.aktiv = false
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)?.apply {
                 aktiv = true
-                behandlingHentOgPersisterService.lagreEllerOppdater(this)
+                behandlingHentOgPersisterService.lagreEllerOppdater(this, sendTilDvh = false)
             }
         }
 
