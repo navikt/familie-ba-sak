@@ -119,6 +119,7 @@ data class Behandling(
             erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
+            erIverksetteKAVedtak() -> false
             else -> true
         }
 
@@ -213,6 +214,8 @@ data class Behandling(
     fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
 
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
+
+    fun erIverksetteKAVedtak() = this.opprettetÅrsak == BehandlingÅrsak.IVERKSETTE_KA_VEDTAK
 
     fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
@@ -336,6 +339,8 @@ enum class BehandlingÅrsak(
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
+    NY_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
+    IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     ;
 
     fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG

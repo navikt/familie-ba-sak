@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -35,6 +36,7 @@ internal class StegServiceTest {
     private val satsendringService: SatsendringService = mockk()
     private val opprettTaskService: OpprettTaskService = mockk(relaxed = true)
     private val satskjøringRepository: SatskjøringRepository = mockk(relaxed = true)
+    private val unleashService: UnleashNextMedContextService = mockk()
 
     private val stegService =
         StegService(
@@ -51,6 +53,7 @@ internal class StegServiceTest {
             automatiskBeslutningService = mockk(),
             opprettTaskService = opprettTaskService,
             satskjøringRepository = satskjøringRepository,
+            unleashService = unleashService,
         )
 
     @BeforeEach
@@ -149,6 +152,25 @@ internal class StegServiceTest {
         val feil = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
         verify(exactly = 0) { opprettTaskService.opprettSatsendringTask(any(), any()) }
         assertThat(feil.melding).isEqualTo("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
+    }
+
+    @Test
+    fun `opprettBehandling - skal kaste feil dersom behandlingsårsak er IVERKSETTE_KA_VEDTAK og toggle ikke er skrudd på`() {
+        every { unleashService.isEnabled(any()) } returns false
+
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                stegService.håndterNyBehandling(
+                    NyBehandling(
+                        søkersIdent = randomFnr(),
+                        behandlingType = BehandlingType.REVURDERING,
+                        behandlingÅrsak = BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
+                        fagsakId = 1,
+                    ),
+                )
+            }
+
+        assertThat(funksjonellFeil.melding).isEqualTo("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
     }
 
     @Test

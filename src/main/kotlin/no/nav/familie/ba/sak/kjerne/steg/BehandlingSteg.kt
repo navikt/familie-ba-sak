@@ -249,7 +249,9 @@ fun hentNesteSteg(
             }
         }
 
-        BehandlingÅrsak.TEKNISK_ENDRING -> {
+        BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
+        BehandlingÅrsak.TEKNISK_ENDRING,
+        -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
