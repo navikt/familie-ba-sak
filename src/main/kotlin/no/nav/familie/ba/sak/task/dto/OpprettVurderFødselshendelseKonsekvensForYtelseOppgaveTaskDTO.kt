@@ -8,5 +8,4 @@ data class OpprettVurderFødselshendelseKonsekvensForYtelseOppgaveTaskDTO(
     val ident: AktørId, // Dette er aktørId (string) og ikke fnr
     val oppgavetype: Oppgavetype,
     val beskrivelse: String,
-    val enhetsnummer: String?,
 )

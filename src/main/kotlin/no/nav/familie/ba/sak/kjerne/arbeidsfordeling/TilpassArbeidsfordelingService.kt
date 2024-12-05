@@ -51,9 +51,6 @@ class TilpassArbeidsfordelingService(
         if (navIdent == null) {
             throw Feil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
         }
-        if (navIdent.erSystemIdent()) {
-            throw MidlertidigEnhetIAutomatiskBehandlingFeil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger")
-        }
         val enheterNavIdentHarTilgangTil =
             integrasjonClient
                 .hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)

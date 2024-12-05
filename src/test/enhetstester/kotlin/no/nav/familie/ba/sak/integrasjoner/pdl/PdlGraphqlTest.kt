@@ -159,6 +159,20 @@ class PdlGraphqlTest {
     }
 
     @Test
+    fun testDoedtfodtBarn() {
+        val resp =
+            mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
+                File(getFile("pdl/pdlDoedfoedtBarnOkResponse.json")),
+            )
+        assertThat(
+            resp.data.person!!
+                .doedfoedtBarn
+                .first()
+                .dato,
+        ).isEqualTo("2024-09-13")
+    }
+
+    @Test
     fun testAdressebeskyttelse() {
         val resp =
             mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
