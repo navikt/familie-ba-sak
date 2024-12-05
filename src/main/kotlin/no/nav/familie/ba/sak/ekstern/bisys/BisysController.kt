@@ -77,16 +77,6 @@ class BisysController(
         request: BisysUtvidetBarnetrygdRequest,
     ): ResponseEntity<BisysUtvidetBarnetrygdResponse> {
         val path = "/api/bisys/hent-utvidet-barnetrygd"
-        if (LocalDate.now().minusYears(10).isAfter(request.fraDato)) {
-            throw EksternTjenesteFeilException(
-                EksternTjenesteFeil(
-                    path,
-                    HttpStatus.BAD_REQUEST,
-                ),
-                "fraDato kan ikke være lenger enn 10 år tilbake i tid",
-                request,
-            )
-        }
 
         try {
             return ResponseEntity.ok(bisysService.hentUtvidetBarnetrygd(request.personIdent, request.fraDato))
