@@ -902,34 +902,150 @@ class BehandlingstemaServiceTest {
     }
 
     @Nested
-    inner class HentLøpendeKategoriTest {
+    inner class FinnKategoriTest {
         @Test
-        fun `skal returnere NASJONAL når ingen forrige vedtatt behandling blir funnet`() {
+        fun `skal returnere NASJONAL når hverken aktiv eller siste vedtatte behandling finnes`() {
             // Arrange
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
 
             // Act
-            val kategori = behandlingstemaService.hentLøpendeKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
         }
 
         @Test
-        fun `skal returnere NASJONAL når ingen tidslinje blir funnet for vilkårsvurdering`() {
+        fun `skal returnere siste vedtatt behandling sin kategori når det ikke finnes en aktiv behandling men en siste vedtatt behandling finnes`() {
             // Arrange
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
-            every { tidslinjeService.hentTidslinjer(BehandlingId(behandling.id)) } returns null
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
 
             // Act
-            val kategori = behandlingstemaService.hentLøpendeKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal returnere NASJONAL når ingen tidslinje blir funnet for vilkårsvurderingen til den aktive behandlingen og den siste vedtatte behandlingen finnes ikke`() {
+            // Arrange
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
+
+            // Act
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
         }
 
         @Test
-        fun `skal hente løpende kategori til NASJONAL når siste behandling er NASJONAL og har løpende utbetaling`() {
+        fun `skal returnere kategorien til den siste vedtatte behandlingen når ingen tidslinje blir funnet for vilkårsvurderingen til den aktive behandlingen men den siste vedtatte behandlingen finnes`() {
+            // Arrange
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
+
+            // Act
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal utlede kategori EØS et barn har en løpende EØS periode`() {
+            // Arrange
+            val stønadFom = LocalDate.now().minusMonths(1)
+            val stønadTom = LocalDate.now().plusYears(2)
+
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
+            val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+            val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.SØKER,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn1.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { Regelverk.EØS_FORORDNINGEN },
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn2.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn1, barn2),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal utlede kategori NASJONAL når et barn har en løpenede nasjonal periode`() {
             // Arrange
             val stønadFom = LocalDate.now().minusMonths(1)
             val stønadTom = LocalDate.now().plusYears(2)
@@ -938,11 +1054,11 @@ class BehandlingstemaServiceTest {
             val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val aktivBehandling = lagBehandling(fagsak = fagsak)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(
-                    behandling = behandling,
+                    behandling = aktivBehandling,
                     lagPersonResultater = { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -950,7 +1066,7 @@ class BehandlingstemaServiceTest {
                                 aktør = søker.aktør,
                                 lagVilkårResultater = { personResultat ->
                                     lagAlleVilkårResultater(
-                                        behandling = behandling,
+                                        behandling = aktivBehandling,
                                         personType = PersonType.SØKER,
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
@@ -963,11 +1079,12 @@ class BehandlingstemaServiceTest {
                                 aktør = barn.aktør,
                                 lagVilkårResultater = { personResultat ->
                                     lagAlleVilkårResultater(
-                                        behandling = behandling,
+                                        behandling = aktivBehandling,
                                         personType = PersonType.BARN,
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
+                                        vurderesEtterFn = { Regelverk.NASJONALE_REGLER  },
                                     )
                                 },
                             ),
@@ -981,95 +1098,19 @@ class BehandlingstemaServiceTest {
                     søkerOgBarn = listOf(søker, barn),
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
-            every { tidslinjeService.hentTidslinjer(BehandlingId(behandling.id)) } returns vilkårsvurderingTidslinjer
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
 
             // Act
-            val kategori = behandlingstemaService.hentLøpendeKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
         }
 
         @Test
-        fun `skal hente løpende kategori til EØS når siste behandling er EØS og har løpende utbetaling`() {
-            // Arrange
-            val stønadFom = LocalDate.now().minusMonths(1)
-            val stønadTom = LocalDate.now().plusYears(2)
-
-            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
-            val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
-            val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
-
-            val fagsak = lagFagsak(aktør = søker.aktør)
-            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
-
-            val vilkårsvurdering =
-                lagVilkårsvurdering(
-                    behandling = behandling,
-                    lagPersonResultater = { vilkårsvurdering ->
-                        setOf(
-                            lagPersonResultat(
-                                vilkårsvurdering = vilkårsvurdering,
-                                aktør = søker.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    lagAlleVilkårResultater(
-                                        behandling = behandling,
-                                        personType = PersonType.SØKER,
-                                        personResultat = personResultat,
-                                        stønadFom = stønadFom,
-                                        stønadTom = stønadTom,
-                                    )
-                                },
-                            ),
-                            lagPersonResultat(
-                                vilkårsvurdering = vilkårsvurdering,
-                                aktør = barn1.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    lagAlleVilkårResultater(
-                                        behandling = behandling,
-                                        personType = PersonType.BARN,
-                                        personResultat = personResultat,
-                                        stønadFom = stønadFom,
-                                        stønadTom = stønadTom,
-                                    )
-                                },
-                            ),
-                            lagPersonResultat(
-                                vilkårsvurdering = vilkårsvurdering,
-                                aktør = barn2.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    lagAlleVilkårResultater(
-                                        behandling = behandling,
-                                        personType = PersonType.BARN,
-                                        personResultat = personResultat,
-                                        stønadFom = stønadFom,
-                                        stønadTom = stønadTom,
-                                    )
-                                },
-                            ),
-                        )
-                    },
-                )
-
-            val vilkårsvurderingTidslinjer =
-                VilkårsvurderingTidslinjer(
-                    vilkårsvurdering = vilkårsvurdering,
-                    søkerOgBarn = listOf(søker, barn1, barn2),
-                )
-
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
-            every { tidslinjeService.hentTidslinjer(BehandlingId(behandling.id)) } returns vilkårsvurderingTidslinjer
-
-            // Act
-            val kategori = behandlingstemaService.hentLøpendeKategori(fagsak.id)
-
-            // Assert
-            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
-        }
-
-        @Test
-        fun `skal hente løpende kategori til NASJONAL når siste behandling er EØS opphørt`() {
+        fun `skal utlede kategorien til siste vedtatte behandling når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandling men den siste vedtatte behandling finnes`() {
             // Arrange
             val stønadFom = LocalDate.now().minusMonths(3)
             val stønadTom = LocalDate.now().minusMonths(2)
@@ -1079,11 +1120,12 @@ class BehandlingstemaServiceTest {
             val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(
-                    behandling = behandling,
+                    behandling = aktivBehandling,
                     lagPersonResultater = { vilkårsvurdering ->
                         setOf(
                             lagPersonResultat(
@@ -1091,7 +1133,7 @@ class BehandlingstemaServiceTest {
                                 aktør = søker.aktør,
                                 lagVilkårResultater = { personResultat ->
                                     lagAlleVilkårResultater(
-                                        behandling = behandling,
+                                        behandling = aktivBehandling,
                                         personType = PersonType.SØKER,
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
@@ -1104,11 +1146,12 @@ class BehandlingstemaServiceTest {
                                 aktør = barn1.aktør,
                                 lagVilkårResultater = { personResultat ->
                                     lagAlleVilkårResultater(
-                                        behandling = behandling,
+                                        behandling = aktivBehandling,
                                         personType = PersonType.BARN,
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
                                     )
                                 },
                             ),
@@ -1117,11 +1160,12 @@ class BehandlingstemaServiceTest {
                                 aktør = barn2.aktør,
                                 lagVilkårResultater = { personResultat ->
                                     lagAlleVilkårResultater(
-                                        behandling = behandling,
+                                        behandling = aktivBehandling,
                                         personType = PersonType.BARN,
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
                                     )
                                 },
                             ),
@@ -1135,11 +1179,92 @@ class BehandlingstemaServiceTest {
                     søkerOgBarn = listOf(søker, barn1, barn2),
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
-            every { tidslinjeService.hentTidslinjer(BehandlingId(behandling.id)) } returns vilkårsvurderingTidslinjer
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
 
             // Act
-            val kategori = behandlingstemaService.hentLøpendeKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+
+            // Act
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal utlede kategori NASJONAL når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling finnes ikke`() {
+            // Arrange
+            val stønadFom = LocalDate.now().minusMonths(3)
+            val stønadTom = LocalDate.now().minusMonths(2)
+
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
+            val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+            val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.SØKER,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn1.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn2.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn1, barn2),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnKategori(fagsak.id)
 
             // Act
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
@@ -1151,6 +1276,7 @@ class BehandlingstemaServiceTest {
             personResultat: PersonResultat,
             stønadFom: LocalDate,
             stønadTom: LocalDate,
+            vurderesEtterFn: (vilkår: Vilkår) -> Regelverk? = { vilkår -> personResultat.let { vilkår.defaultRegelverk(it.vilkårsvurdering.behandling.kategori) } },
         ) = Vilkår
             .hentVilkårFor(
                 personType = personType,
@@ -1164,187 +1290,20 @@ class BehandlingstemaServiceTest {
                     vilkårType = vilkår,
                     resultat = Resultat.OPPFYLT,
                     behandlingId = behandling.id,
-                    vurderesEtter = personResultat.let { vilkår.defaultRegelverk(it.vilkårsvurdering.behandling.kategori) },
+                    vurderesEtter = vurderesEtterFn(vilkår),
                 )
             }.toSet()
     }
 
     @Nested
-    inner class HentKategoriFraInneværendeBehandlingTest {
-        @Test
-        fun `skal returnere NASJONAL når ingen aktiv og åpen behandling blir funnet på fagsak`() {
-            // Arrange
-            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
-
-            // Act
-            val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(fagsak.id)
-
-            // Assert
-            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
-        }
-
-        @Test
-        fun `skal returnere behandlings kategori når ingen vilkårsvurdering blir funnet på fagsaken`() {
-            // Arrange
-            val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
-
-            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
-            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns null
-
-            // Act
-            val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(fagsak.id)
-
-            // Assert
-            assertThat(kategori).isEqualTo(behandling.kategori)
-        }
-
-        @Test
-        fun `Skal utlede EØS dersom minst ett vilkår vurderes etter EØS`() {
-            // Arrange
-            val vilkårsvurdering =
-                lagVilkårsvurdering(
-                    behandling = behandling,
-                    lagPersonResultater = { vilkårsvurdering ->
-                        setOf(
-                            lagPersonResultat(
-                                vilkårsvurdering = vilkårsvurdering,
-                                aktør = fagsak.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    setOf(
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            behandlingId = behandling.id,
-                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
-                                            periodeFom = dagensDato.minusMonths(1),
-                                            periodeTom = dagensDato,
-                                        ),
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            behandlingId = behandling.id,
-                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
-                                            periodeFom = dagensDato.plusDays(1),
-                                            periodeTom = dagensDato.plusMonths(2),
-                                        ),
-                                    )
-                                },
-                            ),
-                        )
-                    },
-                )
-
-            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
-            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
-
-            // Act
-            val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(fagsak.id)
-
-            // Assert
-            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
-        }
-
-        @Test
-        fun `Skal utlede NASJONAL dersom ingen vilkår ble vurdert etter EØS`() {
-            // Arrange
-            val vilkårsvurdering =
-                lagVilkårsvurdering(
-                    behandling = behandling,
-                    lagPersonResultater = { vilkårsvurdering ->
-                        setOf(
-                            lagPersonResultat(
-                                vilkårsvurdering = vilkårsvurdering,
-                                aktør = fagsak.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    setOf(
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            behandlingId = behandling.id,
-                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
-                                            periodeFom = dagensDato.minusMonths(1),
-                                            periodeTom = dagensDato,
-                                        ),
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            behandlingId = behandling.id,
-                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
-                                            periodeFom = dagensDato.plusDays(1),
-                                            periodeTom = dagensDato.plusMonths(2),
-                                        ),
-                                    )
-                                },
-                            ),
-                        )
-                    },
-                )
-            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
-            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
-
-            // Act
-            val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(fagsak.id)
-
-            // Assert
-            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
-        }
-
-        @Test
-        fun `Skal utlede NASJONAL dersom EØS vilkår ble vurdert etter EØS i en annen behandling`() {
-            // Arrange
-            val vilkårsvurdering =
-                lagVilkårsvurdering(
-                    behandling = behandling,
-                    lagPersonResultater = { vilkårsvurdering ->
-                        setOf(
-                            lagPersonResultat(
-                                vilkårsvurdering = vilkårsvurdering,
-                                aktør = fagsak.aktør,
-                                lagVilkårResultater = { personResultat ->
-                                    setOf(
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            behandlingId = behandling.id,
-                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
-                                            periodeFom = dagensDato.minusMonths(1),
-                                            periodeTom = dagensDato,
-                                        ),
-                                        lagVilkårResultat(
-                                            personResultat = personResultat,
-                                            behandlingId = 1337L,
-                                            vilkårType = Vilkår.BOSATT_I_RIKET,
-                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
-                                            periodeFom = dagensDato.plusDays(1),
-                                            periodeTom = dagensDato.plusMonths(2),
-                                        ),
-                                    )
-                                },
-                            ),
-                        )
-                    },
-                )
-
-            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
-            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
-
-            // Act
-            val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(fagsak.id)
-
-            // Assert
-            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
-        }
-    }
-
-    @Nested
-    inner class HentLøpendeUnderkategoriTest {
+    inner class FinnLøpendeUnderkategoriTest {
         @Test
         fun `skal returnere null om ingen vedtatt behandling for fagsaken blir funnet`() {
             // Arrange
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
 
             // Act
-            val underkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
 
             // Assert
             assertThat(underkategori).isNull()
@@ -1363,7 +1322,7 @@ class BehandlingstemaServiceTest {
                     ),
                 )
             // Act
-            val underkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
@@ -1382,7 +1341,7 @@ class BehandlingstemaServiceTest {
                     ),
                 )
             // Act
-            val underkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1401,7 +1360,7 @@ class BehandlingstemaServiceTest {
                     ),
                 )
             // Act
-            val underkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1409,14 +1368,14 @@ class BehandlingstemaServiceTest {
     }
 
     @Nested
-    inner class HentUnderkategoriFraInneværendeBehandlingTest {
+    inner class FinUnderkategoriFraInneværendeBehandlingTest {
         @Test
         fun `skal returnere ORDINÆR om ingen aktiv og åpen behandling blir funnet for fagsak`() {
             // Arrange
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
 
             // Act
-            val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1429,7 +1388,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns null
 
             // Act
-            val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1473,7 +1432,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
 
             // Act
-            val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
@@ -1510,7 +1469,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
 
             // Act
-            val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1548,7 +1507,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
 
             // Act
-            val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)

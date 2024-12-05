@@ -59,61 +59,46 @@ class BehandlingstemaService(
         if (behandling.skalBehandlesAutomatisk) {
             return behandling
         }
-        val nyKategori = hentKategoriFraInneværendeBehandling(behandling.fagsak.id)
-        val nyUnderkategori = overstyrtUnderkategori ?: hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
+        // TODO : Trenger man å oppdatere kategori og underkategori når man sletter og legger til vilkår?
+        val nyKategori = finnKategori(behandling.fagsak.id)
+        val nyUnderkategori = overstyrtUnderkategori ?: finnUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
         return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
     }
 
-    fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {
-        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
-        if (forrigeVedtatteBehandling == null) {
-            return BehandlingKategori.NASJONAL
+    fun finnKategori(fagsakId: Long): BehandlingKategori {
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
+
+        if (aktivBehandling == null) {
+            return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
         }
 
-        val tidslinjer = vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeVedtatteBehandling.id))
+        val tidslinjer = vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(aktivBehandling.id))
         if (tidslinjer == null) {
-            return BehandlingKategori.NASJONAL
+            return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
         }
 
-        val etBarnHarMinstEnLøpendeEØSPeriode =
+        // TODO : Kan dette forenkles, må vi bruke tidslinjer?
+        val alleBarnasTidslinjerSomHarLøpendePeriode =
             tidslinjer
                 .barnasTidslinjer()
                 .values
                 .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(MånedTidspunkt.nå()) }
-                .any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
 
-        return if (etBarnHarMinstEnLøpendeEØSPeriode) {
-            BehandlingKategori.EØS
-        } else {
-            BehandlingKategori.NASJONAL
+        val etBarnHarMinstEnLøpendeEØSPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
+        if (etBarnHarMinstEnLøpendeEØSPeriode) {
+            return BehandlingKategori.EØS
         }
-    }
 
-    fun hentKategoriFraInneværendeBehandling(fagsakId: Long): BehandlingKategori {
-        val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
-        if (aktivBehandling == null) {
+        val etBarnHarMinstEnLøpendeNasjonalPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it.innhold?.regelverk == Regelverk.NASJONALE_REGLER }
+        if (etBarnHarMinstEnLøpendeNasjonalPeriode) {
             return BehandlingKategori.NASJONAL
         }
 
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-        if (vilkårsvurdering == null) {
-            return aktivBehandling.kategori
-        }
-
-        val erVilkårMedEØSRegelverkBehandlet =
-            vilkårsvurdering.personResultater
-                .flatMap { it.vilkårResultater }
-                .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
-                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
-
-        return if (erVilkårMedEØSRegelverkBehandlet) {
-            BehandlingKategori.EØS
-        } else {
-            BehandlingKategori.NASJONAL
-        }
+        return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
     }
 
-    fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+    fun finnLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
         if (forrigeVedtatteBehandling == null) {
             return null
@@ -126,7 +111,7 @@ class BehandlingstemaService(
         }
     }
 
-    fun hentUnderkategoriFraInneværendeBehandling(fagsakId: Long): BehandlingUnderkategori {
+    fun finnUnderkategoriFraInneværendeBehandling(fagsakId: Long): BehandlingUnderkategori {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
         if (aktivBehandling == null) {
             return BehandlingUnderkategori.ORDINÆR
