@@ -14,7 +14,6 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -84,15 +83,6 @@ data class Vilkårsvurdering(
             .single { it.erSøkersResultater() }
             .andreVurderinger
             .singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
-
-    fun erOpplysningspliktVilkårOppfylt(): Boolean {
-        val opplysningspliktVilkår =
-            personResultater
-                .single { it.erSøkersResultater() }
-                .andreVurderinger
-                .singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
-        return opplysningspliktVilkår?.resultat == Resultat.OPPFYLT
-    }
 
     fun hentPersonResultaterTil(aktørId: String): List<VilkårResultat> =
         personResultater.find { it.aktør.aktørId == aktørId }?.vilkårResultater?.toList()

@@ -823,6 +823,7 @@ fun lagVilkårsvurdering(
     resultat: Resultat,
     søkerPeriodeFom: LocalDate? = LocalDate.now().minusMonths(1),
     søkerPeriodeTom: LocalDate? = LocalDate.now().plusYears(2),
+    medAndreVurderinger: Boolean = true,
 ): Vilkårsvurdering {
     val vilkårsvurdering =
         Vilkårsvurdering(
@@ -855,14 +856,16 @@ fun lagVilkårsvurdering(
             ),
         ),
     )
-    personResultat.andreVurderinger.add(
-        AnnenVurdering(
-            personResultat = personResultat,
-            resultat = resultat,
-            type = AnnenVurderingType.OPPLYSNINGSPLIKT,
-            begrunnelse = null,
-        ),
-    )
+    if (medAndreVurderinger) {
+        personResultat.andreVurderinger.add(
+            AnnenVurdering(
+                personResultat = personResultat,
+                resultat = resultat,
+                type = AnnenVurderingType.OPPLYSNINGSPLIKT,
+                begrunnelse = null,
+            ),
+        )
+    }
 
     vilkårsvurdering.personResultater = setOf(personResultat)
     return vilkårsvurdering
