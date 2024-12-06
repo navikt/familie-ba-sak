@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,11 +28,14 @@ class BehandlingstemaService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
+    private val logger = LoggerFactory.getLogger(BehandlingstemaService::class.java)
+
     @Transactional
     fun oppdaterBehandlingstemaForRegistrereSøknad(
         behandling: Behandling,
         nyUnderkategori: BehandlingUnderkategori,
     ): Behandling {
+        logger.debug("Oppdatere behandlingstema for RegistrereSøknad steget")
         if (behandling.skalBehandlesAutomatisk) {
             return behandling
         }
@@ -44,6 +48,7 @@ class BehandlingstemaService(
         nyKategori: BehandlingKategori,
         nyUnderkategori: BehandlingUnderkategori,
     ): Behandling {
+        logger.debug("Oppdaterer saksbehandlet behandlingstema")
         if (behandling.skalBehandlesAutomatisk) {
             throw FunksjonellFeil("Kan ikke oppdatere behandlingstema på behandlinger som skal behandles automatisk.")
         }
@@ -65,6 +70,7 @@ class BehandlingstemaService(
         behandling: Behandling,
         overstyrtUnderkategori: BehandlingUnderkategori? = null,
     ): Behandling {
+        logger.debug("Oppdaterer behandlingstema for vilkår")
         if (behandling.skalBehandlesAutomatisk) {
             return behandling
         }
@@ -74,6 +80,8 @@ class BehandlingstemaService(
     }
 
     fun finnKategori(fagsakId: Long): BehandlingKategori {
+        logger.debug("Finner kategori for fagsak med id $fagsakId")
+
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
@@ -106,6 +114,7 @@ class BehandlingstemaService(
     }
 
     fun finnLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+        logger.debug("Finner løpende underkategori fagsak med id $fagsakId")
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
         if (forrigeVedtatteBehandling == null) {
             return null
@@ -119,6 +128,8 @@ class BehandlingstemaService(
     }
 
     fun finnUnderkategoriFraInneværendeBehandling(fagsakId: Long): BehandlingUnderkategori {
+        logger.debug("Finner underkategori fra inneværende behandling for fagsak med id $fagsakId")
+
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
         if (aktivBehandling == null) {
             return BehandlingUnderkategori.ORDINÆR

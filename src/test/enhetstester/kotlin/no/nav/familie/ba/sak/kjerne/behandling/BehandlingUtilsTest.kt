@@ -200,7 +200,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+                defaultKategori = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -213,7 +213,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+                defaultKategori = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -227,7 +227,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = overstyrtKategori,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+                defaultKategori = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -240,7 +240,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.NASJONAL,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+                defaultKategori = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -253,7 +253,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+                defaultKategori = BehandlingKategori.NASJONAL,
             ),
         )
     }
@@ -266,7 +266,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = null,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                kategoriFraLøpendeBehandling = BehandlingKategori.EØS,
+                defaultKategori = BehandlingKategori.EØS,
             ),
         )
     }
@@ -279,7 +279,7 @@ class BehandlingUtilsTest {
                 overstyrtKategori = null,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+                defaultKategori = BehandlingKategori.NASJONAL,
             ),
         )
     }

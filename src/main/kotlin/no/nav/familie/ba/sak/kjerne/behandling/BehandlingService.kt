@@ -78,7 +78,7 @@ class BehandlingService(
                     overstyrtKategori = nyBehandling.kategori,
                     behandlingType = nyBehandling.behandlingType,
                     behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                    kategoriFraLøpendeBehandling = behandlingstemaService.finnKategori(fagsak.id),
+                    defaultKategori = behandlingstemaService.finnKategori(fagsak.id),
                 )
 
             val underkategori =
