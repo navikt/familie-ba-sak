@@ -66,6 +66,29 @@ class BehandlingstemaServiceTest {
     @Nested
     inner class OppdaterBehandlingstemaForRegistrereSøknadTest {
         @Test
+        fun `skal ikke oppdatere behandlingstema hvis behandling skal oppdates automatisk`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                    skalBehandlesAutomatisk = true
+                )
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
+                    behandling = behandling,
+                    nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            // Assert
+            assertThat(oppdatertBehandling).isEqualTo(behandling)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
         fun `skal oppdatere behandlingstema for registrering av søknad når det er en endring`() {
             // Arrange
             val behandling =

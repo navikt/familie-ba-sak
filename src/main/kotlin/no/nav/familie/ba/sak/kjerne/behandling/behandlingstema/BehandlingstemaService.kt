@@ -30,7 +30,12 @@ class BehandlingstemaService(
     fun oppdaterBehandlingstemaForRegistrereSøknad(
         behandling: Behandling,
         nyUnderkategori: BehandlingUnderkategori,
-    ): Behandling = oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, behandling.kategori, nyUnderkategori)
+    ): Behandling {
+        if (behandling.skalBehandlesAutomatisk) {
+            return behandling
+        }
+        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, behandling.kategori, nyUnderkategori)
+    }
 
     @Transactional
     fun oppdaterSaksbehandletBehandlingstema(
