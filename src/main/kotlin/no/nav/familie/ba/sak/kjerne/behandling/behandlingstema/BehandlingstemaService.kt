@@ -59,7 +59,6 @@ class BehandlingstemaService(
         if (behandling.skalBehandlesAutomatisk) {
             return behandling
         }
-        // TODO : Trenger man å oppdatere kategori og underkategori når man sletter og legger til vilkår?
         val nyKategori = finnKategori(behandling.fagsak.id)
         val nyUnderkategori = overstyrtUnderkategori ?: finnUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
         return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
@@ -78,7 +77,6 @@ class BehandlingstemaService(
             return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
         }
 
-        // TODO : Kan dette forenkles, må vi bruke tidslinjer?
         val alleBarnasTidslinjerSomHarLøpendePeriode =
             tidslinjer
                 .barnasTidslinjer()

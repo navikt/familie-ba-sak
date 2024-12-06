@@ -624,7 +624,7 @@ class BehandlingstemaServiceTest {
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
-                                        vurderesEtterFn = { Regelverk.EØS_FORORDNINGEN },
+                                        vurderesEtterFn = { if (it in listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)) Regelverk.EØS_FORORDNINGEN else null },
                                     )
                                 },
                             ),
@@ -638,7 +638,7 @@ class BehandlingstemaServiceTest {
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
-                                        vurderesEtterFn = { null },
+                                        vurderesEtterFn = { if (it in listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)) Regelverk.NASJONALE_REGLER else null },
                                     )
                                 },
                             ),
@@ -703,7 +703,7 @@ class BehandlingstemaServiceTest {
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
-                                        vurderesEtterFn = { Regelverk.NASJONALE_REGLER },
+                                        vurderesEtterFn = { if (it in listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)) Regelverk.NASJONALE_REGLER else null },
                                     )
                                 },
                             ),
