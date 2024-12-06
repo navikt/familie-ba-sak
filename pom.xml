@@ -23,7 +23,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20241118095311_c66bd61</prosessering.version>
+        <prosessering.version>2.20241205111631_afe703f</prosessering.version>
         <felles.version>3.20241121151626_836e7ca</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20241127135607_0f52105</felles-kontrakter.version>
