@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
 import jakarta.transaction.Transactional
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -43,6 +44,9 @@ class BehandlingstemaService(
         nyKategori: BehandlingKategori,
         nyUnderkategori: BehandlingUnderkategori,
     ): Behandling {
+        if (behandling.skalBehandlesAutomatisk) {
+            throw FunksjonellFeil("Kan ikke oppdatere behandlingstema på behandlinger som skal behandles automatisk.")
+        }
         val forrigeKategori = behandling.kategori
         val forrigeUnderkategori = behandling.underkategori
         val oppdatertBehanding = oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)

@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -38,6 +39,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -72,7 +74,7 @@ class BehandlingstemaServiceTest {
                 lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
-                    skalBehandlesAutomatisk = true
+                    skalBehandlesAutomatisk = true,
                 )
 
             // Act
@@ -189,6 +191,28 @@ class BehandlingstemaServiceTest {
 
     @Nested
     inner class OppdaterSaksbehandletBehandlingstemaTest {
+        @Test
+        fun `skal kaste exception om behandlingen skal behandles automatisk men saksbehandler prøver å oppdatere behandlingestema`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                    skalBehandlesAutomatisk = true,
+                )
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                        behandling,
+                        nyKategori = BehandlingKategori.EØS,
+                        nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    )
+                }
+            assertThat(exception.message).isEqualTo("Kan ikke oppdatere behandlingstema på behandlinger som skal behandles automatisk.")
+        }
+
         @Test
         fun `skal oppdatere både saksbehandlet kategori og underkategori på behandling`() {
             // Arrange
