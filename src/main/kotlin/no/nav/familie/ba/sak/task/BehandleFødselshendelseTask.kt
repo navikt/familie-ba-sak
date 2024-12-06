@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
@@ -95,6 +96,8 @@ class BehandleFødselshendelseTask(
                     beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
                 ),
             )
+        } catch (e: MidlertidigEnhetIAutomatiskBehandlingFeil) {
+            logger.info("Kan ikke behandle fødselshendelse hvis mor ikke har norsk adresse. De må sende søknad.")
         }
     }
 
