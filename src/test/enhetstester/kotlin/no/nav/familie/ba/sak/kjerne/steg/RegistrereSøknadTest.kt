@@ -81,7 +81,7 @@ class RegistrereSøknadTest {
                 )
 
             // Assert
-            verify(exactly = 0) { behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(any(), any()) }
+            verify(exactly = 0) { behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(any(), any()) }
             verify(exactly = 1) { loggService.opprettRegistrertSøknadLogg(behandling, false) }
             verify(exactly = 1) { søknadGrunnlagService.lagreOgDeaktiverGammel(any()) }
             verify(exactly = 1) { persongrunnlagService.registrerBarnFraSøknad(søknadDTO, behandling, null) }
@@ -111,7 +111,7 @@ class RegistrereSøknadTest {
 
             val vedtak = lagVedtak(behandling = behandling)
 
-            every { behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(behandling, søknadDTO.underkategori.tilDomene()) } answers {
+            every { behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(behandling, søknadDTO.underkategori.tilDomene()) } answers {
                 behandling.underkategori = søknadDTO.underkategori.tilDomene()
                 behandling
             }
@@ -132,7 +132,7 @@ class RegistrereSøknadTest {
                 )
 
             // Assert
-            verify(exactly = 1) { behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(behandling, søknadDTO.underkategori.tilDomene()) }
+            verify(exactly = 1) { behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(behandling, søknadDTO.underkategori.tilDomene()) }
             verify(exactly = 1) { loggService.opprettRegistrertSøknadLogg(behandling, false) }
             verify(exactly = 1) { søknadGrunnlagService.lagreOgDeaktiverGammel(any()) }
             verify(exactly = 1) { persongrunnlagService.registrerBarnFraSøknad(søknadDTO, behandling, null) }

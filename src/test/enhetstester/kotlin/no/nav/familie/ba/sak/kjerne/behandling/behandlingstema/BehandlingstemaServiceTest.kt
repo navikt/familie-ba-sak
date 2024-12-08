@@ -69,7 +69,7 @@ class BehandlingstemaServiceTest {
     private val behandling = lagBehandling(fagsak = fagsak, id = 0L)
 
     @Nested
-    inner class OppdaterBehandlingstemaForRegistrereSøknadTest {
+    inner class OppdaterBehandlingstemaFraRegistrereSøknadStegTest {
         @Test
         fun `skal ikke oppdatere behandlingstema hvis behandling skal oppdates automatisk`() {
             // Arrange
@@ -82,7 +82,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
                     behandling = behandling,
                     nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -117,7 +117,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
                     behandling = behandling,
                     nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -142,7 +142,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
                     behandling = behandling,
                     nyUnderkategori = behandling.underkategori,
                 )
@@ -178,7 +178,7 @@ class BehandlingstemaServiceTest {
 
             // Act
             val oppdatertBehandling =
-                behandlingstemaService.oppdaterBehandlingstemaForRegistrereSøknad(
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
                     behandling = behandling,
                     nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -571,7 +571,7 @@ class BehandlingstemaServiceTest {
     }
 
     @Nested
-    inner class FinnKategoriTest {
+    inner class FinnBehandlingKategoriTest {
         @Test
         fun `skal returnere NASJONAL når hverken aktiv eller siste vedtatte behandling finnes`() {
             // Arrange
@@ -579,7 +579,7 @@ class BehandlingstemaServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
@@ -594,7 +594,7 @@ class BehandlingstemaServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
@@ -610,7 +610,7 @@ class BehandlingstemaServiceTest {
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
@@ -627,7 +627,7 @@ class BehandlingstemaServiceTest {
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
@@ -707,7 +707,7 @@ class BehandlingstemaServiceTest {
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
@@ -772,7 +772,7 @@ class BehandlingstemaServiceTest {
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Assert
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
@@ -853,7 +853,7 @@ class BehandlingstemaServiceTest {
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Act
             assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
@@ -933,7 +933,7 @@ class BehandlingstemaServiceTest {
             every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
 
             // Act
-            val kategori = behandlingstemaService.finnKategori(fagsak.id)
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Act
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
@@ -965,14 +965,14 @@ class BehandlingstemaServiceTest {
     }
 
     @Nested
-    inner class FinnLøpendeUnderkategoriTest {
+    inner class FinnLøpendeUnderkategoriFraForrigeVedtatteBehandlingTest {
         @Test
         fun `skal returnere null om ingen vedtatt behandling for fagsaken blir funnet`() {
             // Arrange
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
 
             // Act
-            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isNull()
@@ -991,7 +991,7 @@ class BehandlingstemaServiceTest {
                     ),
                 )
             // Act
-            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
@@ -1010,7 +1010,7 @@ class BehandlingstemaServiceTest {
                     ),
                 )
             // Act
-            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1029,7 +1029,7 @@ class BehandlingstemaServiceTest {
                     ),
                 )
             // Act
-            val underkategori = behandlingstemaService.finnLøpendeUnderkategori(fagsak.id)
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1037,14 +1037,14 @@ class BehandlingstemaServiceTest {
     }
 
     @Nested
-    inner class FinUnderkategoriFraInneværendeBehandlingTest {
+    inner class FinnUnderkategoriFraAktivBehandlingTest {
         @Test
         fun `skal returnere ORDINÆR om ingen aktiv og åpen behandling blir funnet for fagsak`() {
             // Arrange
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
 
             // Act
-            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1057,7 +1057,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns null
 
             // Act
-            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1101,7 +1101,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
 
             // Act
-            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
@@ -1138,7 +1138,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
 
             // Act
-            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
@@ -1176,7 +1176,7 @@ class BehandlingstemaServiceTest {
             every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
 
             // Act
-            val underkategori = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsak.id)
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
             // Assert
             assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)

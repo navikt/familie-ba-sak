@@ -78,14 +78,14 @@ class BehandlingService(
                     overstyrtKategori = nyBehandling.kategori,
                     behandlingType = nyBehandling.behandlingType,
                     behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                    tilbakefallendeKategori = behandlingstemaService.finnKategori(fagsak.id),
+                    tilbakefallendeKategori = behandlingstemaService.finnBehandlingKategori(fagsak.id),
                 )
 
             val underkategori =
                 bestemUnderkategori(
                     overstyrtUnderkategori = nyBehandling.underkategori,
-                    underkategoriFraLøpendeBehandling = behandlingstemaService.finnLøpendeUnderkategori(fagsakId = fagsak.id),
-                    underkategoriFraInneværendeBehandling = behandlingstemaService.finnUnderkategoriFraInneværendeBehandling(fagsakId = fagsak.id),
+                    underkategoriFraLøpendeBehandling = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId = fagsak.id),
+                    underkategoriFraInneværendeBehandling = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsakId = fagsak.id),
                 )
 
             val behandling =

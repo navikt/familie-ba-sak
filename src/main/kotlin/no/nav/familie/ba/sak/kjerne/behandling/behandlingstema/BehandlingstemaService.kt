@@ -31,7 +31,7 @@ class BehandlingstemaService(
     private val clockProvider: ClockProvider,
 ) {
     @Transactional
-    fun oppdaterBehandlingstemaForRegistrereSøknad(
+    fun oppdaterBehandlingstemaFraRegistrereSøknadSteg(
         behandling: Behandling,
         nyUnderkategori: BehandlingUnderkategori,
     ): Behandling {
@@ -48,7 +48,7 @@ class BehandlingstemaService(
         nyUnderkategori: BehandlingUnderkategori,
     ): Behandling {
         if (behandling.skalBehandlesAutomatisk) {
-            throw FunksjonellFeil("Kan ikke oppdatere behandlingstema på behandlinger som skal behandles automatisk.")
+            throw FunksjonellFeil("Kan ikke oppdatere behandlingstema manuelt på behandlinger som skal behandles automatisk.")
         }
         val forrigeKategori = behandling.kategori
         val forrigeUnderkategori = behandling.underkategori
@@ -71,12 +71,12 @@ class BehandlingstemaService(
         if (behandling.skalBehandlesAutomatisk) {
             return behandling
         }
-        val nyKategori = finnKategori(behandling.fagsak.id)
-        val nyUnderkategori = overstyrtUnderkategori ?: finnUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
+        val nyKategori = finnBehandlingKategori(behandling.fagsak.id)
+        val nyUnderkategori = overstyrtUnderkategori ?: finnUnderkategoriFraAktivBehandling(fagsakId = behandling.fagsak.id)
         return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
     }
 
-    fun finnKategori(fagsakId: Long): BehandlingKategori {
+    fun finnBehandlingKategori(fagsakId: Long): BehandlingKategori {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
         val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
@@ -108,7 +108,7 @@ class BehandlingstemaService(
         return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
     }
 
-    fun finnLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
+    fun finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId: Long): BehandlingUnderkategori? {
         val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
         if (forrigeVedtatteBehandling == null) {
             return null
@@ -121,7 +121,7 @@ class BehandlingstemaService(
         }
     }
 
-    fun finnUnderkategoriFraInneværendeBehandling(fagsakId: Long): BehandlingUnderkategori {
+    fun finnUnderkategoriFraAktivBehandling(fagsakId: Long): BehandlingUnderkategori {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
         if (aktivBehandling == null) {
             return BehandlingUnderkategori.ORDINÆR
