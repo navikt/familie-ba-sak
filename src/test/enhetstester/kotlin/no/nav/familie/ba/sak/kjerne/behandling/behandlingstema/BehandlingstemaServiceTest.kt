@@ -6,6 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -51,6 +52,8 @@ class BehandlingstemaServiceTest {
     private val tidslinjeService = mockk<VilkårsvurderingTidslinjeService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
 
+    private val dagensDato = LocalDate.of(2024, 10, 1)
+
     private val behandlingstemaService =
         BehandlingstemaService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -59,11 +62,11 @@ class BehandlingstemaServiceTest {
             oppgaveService = oppgaveService,
             vilkårsvurderingTidslinjeService = tidslinjeService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
+            clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato),
         )
 
     private val fagsak = defaultFagsak()
     private val behandling = lagBehandling(fagsak = fagsak, id = 0L)
-    private val dagensDato = LocalDate.of(2024, 8, 1)
 
     @Nested
     inner class OppdaterBehandlingstemaForRegistrereSøknadTest {
@@ -633,8 +636,8 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal utlede kategori EØS et barn har en løpende EØS periode`() {
             // Arrange
-            val stønadFom = LocalDate.now().minusMonths(1)
-            val stønadTom = LocalDate.now().plusYears(2)
+            val stønadFom = dagensDato.minusMonths(1)
+            val stønadTom = dagensDato.plusYears(2)
 
             val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
             val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
@@ -713,8 +716,8 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal utlede kategori NASJONAL når et barn har en løpenede nasjonal periode`() {
             // Arrange
-            val stønadFom = LocalDate.now().minusMonths(1)
-            val stønadTom = LocalDate.now().plusYears(2)
+            val stønadFom = dagensDato.minusMonths(1)
+            val stønadTom = dagensDato.plusYears(2)
 
             val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
             val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
@@ -778,8 +781,8 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal utlede kategorien til siste vedtatte behandling når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandling men den siste vedtatte behandling finnes`() {
             // Arrange
-            val stønadFom = LocalDate.now().minusMonths(3)
-            val stønadTom = LocalDate.now().minusMonths(2)
+            val stønadFom = dagensDato.minusMonths(3)
+            val stønadTom = dagensDato.minusMonths(2)
 
             val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
             val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
@@ -859,8 +862,8 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal utlede kategori NASJONAL når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling finnes ikke`() {
             // Arrange
-            val stønadFom = LocalDate.now().minusMonths(3)
-            val stønadTom = LocalDate.now().minusMonths(2)
+            val stønadFom = dagensDato.minusMonths(3)
+            val stønadTom = dagensDato.minusMonths(2)
 
             val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
             val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)

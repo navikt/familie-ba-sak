@@ -144,6 +144,7 @@ class CucumberMock(
             oppgaveService = oppgaveService,
             vilkårsvurderingTidslinjeService = vilkårsvurderingTidslinjeService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
+            clockProvider = clockProvider
         )
 
     val småbarnstilleggService =
