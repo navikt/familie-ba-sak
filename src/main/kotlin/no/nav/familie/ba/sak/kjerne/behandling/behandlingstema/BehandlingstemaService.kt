@@ -28,7 +28,7 @@ class BehandlingstemaService(
     private val oppgaveService: OppgaveService,
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val clockProvider: ClockProvider
+    private val clockProvider: ClockProvider,
 ) {
     @Transactional
     fun oppdaterBehandlingstemaForRegistrereSøknad(
