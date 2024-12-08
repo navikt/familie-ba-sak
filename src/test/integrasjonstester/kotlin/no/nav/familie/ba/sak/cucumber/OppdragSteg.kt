@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber
 import io.cucumber.datatable.DataTable
 import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
+import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForNyUtvidetKlassekodeBehandlingUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIdentNy
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -49,7 +52,9 @@ import java.time.YearMonth
 
 @Suppress("ktlint:standard:function-naming")
 class OppdragSteg {
-    private val clockProvider = TestClockProvider(Clock.systemDefaultZone())
+    var clockProvider = TestClockProvider(Clock.systemDefaultZone())
+
+    var inneværendeMåned: YearMonth = YearMonth.now()
 
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
@@ -84,25 +89,26 @@ class OppdragSteg {
             vilkårsvurderingService = mockk(),
         )
 
-    private val utbetalingsoppdragGenerator =
-        UtbetalingsoppdragGenerator(
-            Utbetalingsgenerator(),
-            KlassifiseringKorrigerer(
-                tilkjentYtelseRepository,
-                unleashNextMedContextService,
-            ),
-            unleashNextMedContextService,
-            BehandlingsinformasjonUtleder(
-                EndretMigreringsdatoUtleder(
-                    behandlingHentOgPersisterService,
-                    behandlingService,
-                ),
-                clockProvider,
-            ),
-            andelTilkjentYtelseRepository,
-            behandlingHentOgPersisterService,
-            tilkjentYtelseRepository,
-        )
+    // private val utbetalingsoppdragGenerator =
+    //     UtbetalingsoppdragGenerator(
+    //         Utbetalingsgenerator(),
+    //         KlassifiseringKorrigerer(
+    //             tilkjentYtelseRepository,
+    //             unleashNextMedContextService,
+    //         ),
+    //         unleashNextMedContextService,
+    //         BehandlingsinformasjonUtleder(
+    //             EndretMigreringsdatoUtleder(
+    //                 behandlingHentOgPersisterService,
+    //                 behandlingService,
+    //             ),
+    //             clockProvider,
+    //         ),
+    //         andelTilkjentYtelseRepository,
+    //         behandlingHentOgPersisterService,
+    //         tilkjentYtelseRepository,
+    //         AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
+    //     )
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -159,6 +165,12 @@ class OppdragSteg {
         }
     }
 
+    @Og("inneværende måned er {}")
+    fun `inneværende måned er`(inneværendeMånedString: String) {
+        inneværendeMåned = parseÅrMåned(inneværendeMånedString)
+        clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(inneværendeMåned)
+    }
+
     private fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         beregnetUtbetalingsoppdragLongId: BeregnetUtbetalingsoppdragLongId,
         tilkjentYtelse: TilkjentYtelse,
@@ -213,6 +225,26 @@ class OppdragSteg {
             }
         }
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
+        val utbetalingsoppdragGenerator =
+            UtbetalingsoppdragGenerator(
+                Utbetalingsgenerator(),
+                KlassifiseringKorrigerer(
+                    tilkjentYtelseRepository,
+                    unleashNextMedContextService,
+                ),
+                unleashNextMedContextService,
+                BehandlingsinformasjonUtleder(
+                    EndretMigreringsdatoUtleder(
+                        behandlingHentOgPersisterService,
+                        behandlingService,
+                    ),
+                    clockProvider,
+                ),
+                andelTilkjentYtelseRepository,
+                behandlingHentOgPersisterService,
+                tilkjentYtelseRepository,
+                AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
+            )
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
@@ -292,6 +324,7 @@ class OppdragSteg {
                         id = it.key,
                         fagsak = fagsak,
                         behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, sisteRad) ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                        årsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, sisteRad) ?: BehandlingÅrsak.SØKNAD,
                     )
                 }.toMutableMap()
     }

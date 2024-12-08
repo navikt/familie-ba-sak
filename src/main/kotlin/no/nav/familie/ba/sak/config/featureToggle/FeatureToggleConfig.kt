@@ -15,6 +15,7 @@ class FeatureToggleConfig {
 
         // NAV-22995
         const val SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD = "familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd"
+        const val KJØR_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD = "familie-ba-sak.kjor-autovedtak-ny-klassekode-for-utvidet-barnetrygd"
 
         // NAV-23449 - Skrud av/på ny refaktorert logikk for hjemler i brev, skal i teorien produsere det samme resultatet
         const val BRUK_OMSKRIVING_AV_HJEMLER_I_BREV = "familie-ba-sak.bruk_omskriving_av_hjemler_i_brev"

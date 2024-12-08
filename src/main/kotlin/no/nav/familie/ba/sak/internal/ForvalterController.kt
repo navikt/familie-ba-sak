@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.NyUtvidetKlassekodeTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.PopulerNyUtvidetKlassekodeKjøringTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -527,6 +529,32 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
+    }
+
+    @PostMapping("/populer-tabell-for-ny-utvidet-klassekode")
+    fun populerTabellForNyUtvidetKlassekode(): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Populer tabell for kjøring av migrering til ny klassekode for utvidet barnetrygd",
+        )
+
+        val task = taskService.save(PopulerNyUtvidetKlassekodeKjøringTask.lagTask())
+
+        return ResponseEntity.ok(task.callId)
+    }
+
+    @PostMapping("/opprett-ny-utvidet-klassekode-task/{fagsakId}")
+    fun opprettNyUtvidetKlassekodeTask(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for å kjøre migrering av fagsak til ny klassekode for utvidet barnetrygd",
+        )
+
+        val task = taskService.save(NyUtvidetKlassekodeTask.lagTask(fagsakId))
+
+        return ResponseEntity.ok(task.callId)
     }
 
     @PostMapping("/hent-fagsak-id-for-journalpost")
