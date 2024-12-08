@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
@@ -31,10 +32,13 @@ data class PdlPersonData(
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
-        if (foedselsdato.isEmpty() && doedfoedtBarn.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
+        if (foedselsdato.isEmpty() && doedfoedtBarn.isEmpty()) {
+            throw PdlPersonKanIkkeBehandlesIFagsystem(PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+        }
+
         if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
-                "er opphørt",
+                PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT,
             )
         }
     }

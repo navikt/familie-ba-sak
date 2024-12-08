@@ -78,8 +78,13 @@ class PdlRequestException(
 class PdlNotFoundException : FunksjonellFeil("Fant ikke person")
 
 class PdlPersonKanIkkeBehandlesIFagsystem(
-    val årsak: String,
+    val årsak: PdlPersonKanIkkeBehandlesIFagSystemÅrsak,
 ) : FunksjonellFeil("Person kan ikke behandles i fagsystem: $årsak")
+
+enum class PdlPersonKanIkkeBehandlesIFagSystemÅrsak {
+    MANGLER_FØDSELSDATO,
+    OPPHØRT,
+}
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonPropertyOrder(value = ["melding", "path", "timestamp", "status", "exception", "stackTrace"])
