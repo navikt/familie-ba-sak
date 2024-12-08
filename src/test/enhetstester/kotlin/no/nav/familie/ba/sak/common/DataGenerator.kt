@@ -1298,6 +1298,7 @@ fun lagVilkårResultat(
 )
 
 fun lagVilkårResultat(
+    id: Long = 0L,
     personResultat: PersonResultat? = null,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
@@ -1308,7 +1309,9 @@ fun lagVilkårResultat(
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     erEksplisittAvslagPåSøknad: Boolean = false,
     standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
+    vurderesEtter: Regelverk? = null,
 ) = VilkårResultat(
+    id = id,
     personResultat = personResultat,
     vilkårType = vilkårType,
     resultat = resultat,
@@ -1319,6 +1322,7 @@ fun lagVilkårResultat(
     utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
     standardbegrunnelser = standardbegrunnelser,
+    vurderesEtter = vurderesEtter,
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
@@ -1426,20 +1430,21 @@ fun lagPerson(
 fun lagPersonEnkel(
     personType: PersonType,
     aktør: Aktør = randomAktør(),
+    dødsfallDato: LocalDate? = null,
+    fødselsdato: LocalDate =
+        if (personType == PersonType.SØKER) {
+            LocalDate.now().minusYears(34)
+        } else {
+            LocalDate.now().minusYears(4)
+        },
+    målform: Målform = Målform.NB,
 ): PersonEnkel =
     PersonEnkel(
         type = personType,
         aktør = aktør,
-        dødsfallDato = null,
-        fødselsdato =
-            if (personType == PersonType.SØKER) {
-                LocalDate.now().minusYears(34)
-            } else {
-                LocalDate
-                    .now()
-                    .minusYears(4)
-            },
-        målform = Målform.NB,
+        dødsfallDato = dødsfallDato,
+        fødselsdato = fødselsdato,
+        målform = målform,
     )
 
 fun lagRestSanityBegrunnelse(

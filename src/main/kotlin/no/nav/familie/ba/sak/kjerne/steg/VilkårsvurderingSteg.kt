@@ -103,7 +103,7 @@ class VilkårsvurderingSteg(
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))
 
-        behandlingstemaService.oppdaterBehandlingstema(
+        behandlingstemaService.oppdaterBehandlingstemaForVilkår(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
         )
 

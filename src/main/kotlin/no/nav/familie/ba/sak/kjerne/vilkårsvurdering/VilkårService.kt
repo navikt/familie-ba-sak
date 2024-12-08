@@ -127,7 +127,7 @@ class VilkårService(
             .forEach { personResultat.removeVilkårResultat(it.id) }
 
         if (restSlettVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
-            behandlingstemaService.oppdaterBehandlingstema(
+            behandlingstemaService.oppdaterBehandlingstemaForVilkår(
                 behandling = behandling,
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
@@ -148,7 +148,7 @@ class VilkårService(
         if (restNyttVilkår.vilkårType == Vilkår.UTVIDET_BARNETRYGD) {
             validerFørLeggeTilUtvidetBarnetrygd(behandling, restNyttVilkår, vilkårsvurdering)
 
-            behandlingstemaService.oppdaterBehandlingstema(
+            behandlingstemaService.oppdaterBehandlingstemaForVilkår(
                 behandling = behandling,
                 overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
