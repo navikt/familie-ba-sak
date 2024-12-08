@@ -37,12 +37,12 @@ fun bestemKategoriVedOpprettelse(
 
 fun bestemUnderkategori(
     overstyrtUnderkategori: BehandlingUnderkategori?,
-    underkategoriFraLøpendeBehandling: BehandlingUnderkategori?,
-    underkategoriFraInneværendeBehandling: BehandlingUnderkategori? = null,
+    løpendeUnderkategoriFraForrigeVedtatteBehandling: BehandlingUnderkategori?,
+    underkategoriFraAktivBehandling: BehandlingUnderkategori? = null,
 ): BehandlingUnderkategori {
-    if (underkategoriFraLøpendeBehandling == BehandlingUnderkategori.UTVIDET) return BehandlingUnderkategori.UTVIDET
-
-    val oppdatertUnderkategori = overstyrtUnderkategori ?: underkategoriFraInneværendeBehandling
-
+    if (løpendeUnderkategoriFraForrigeVedtatteBehandling == BehandlingUnderkategori.UTVIDET) {
+        return BehandlingUnderkategori.UTVIDET
+    }
+    val oppdatertUnderkategori = overstyrtUnderkategori ?: underkategoriFraAktivBehandling
     return oppdatertUnderkategori ?: BehandlingUnderkategori.ORDINÆR
 }

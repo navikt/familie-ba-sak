@@ -84,8 +84,8 @@ class BehandlingService(
             val underkategori =
                 bestemUnderkategori(
                     overstyrtUnderkategori = nyBehandling.underkategori,
-                    underkategoriFraLøpendeBehandling = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId = fagsak.id),
-                    underkategoriFraInneværendeBehandling = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsakId = fagsak.id),
+                    løpendeUnderkategoriFraForrigeVedtatteBehandling = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId = fagsak.id),
+                    underkategoriFraAktivBehandling = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsakId = fagsak.id),
                 )
 
             val behandling =

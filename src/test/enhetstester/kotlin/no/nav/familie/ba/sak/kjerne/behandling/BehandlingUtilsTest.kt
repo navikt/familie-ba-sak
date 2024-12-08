@@ -26,7 +26,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = null,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = null,
             ),
         )
     }
@@ -37,7 +37,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
-                underkategoriFraLøpendeBehandling = null,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = null,
             ),
         )
     }
@@ -48,8 +48,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = null,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.ORDINÆR,
+                underkategoriFraAktivBehandling = BehandlingUnderkategori.UTVIDET,
             ),
         )
     }
@@ -60,8 +60,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
-                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.UTVIDET,
+                underkategoriFraAktivBehandling = BehandlingUnderkategori.ORDINÆR,
             ),
         )
     }
@@ -72,7 +72,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.UTVIDET,
             ),
         )
     }
@@ -83,7 +83,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.ORDINÆR,
             ),
         )
     }
@@ -94,7 +94,7 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.ORDINÆR,
             ),
         )
     }
@@ -105,14 +105,14 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = null,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.UTVIDET,
             ),
         )
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = null,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+                løpendeUnderkategoriFraForrigeVedtatteBehandling = BehandlingUnderkategori.ORDINÆR,
             ),
         )
     }
