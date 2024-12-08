@@ -477,7 +477,7 @@ class FødselshendelseHenleggelseTest(
                 brevmalService = brevmalService,
             )
 
-        oppdaterRegelverkTilEøs(behandling)
+        oppdaterBehandlingOgRegelverkTilEøs(behandling)
 
         val revurdering =
             behandleFødselshendelse(
@@ -575,7 +575,7 @@ class FødselshendelseHenleggelseTest(
         }
     }
 
-    private fun oppdaterRegelverkTilEøs(behandling: Behandling) {
+    private fun oppdaterBehandlingOgRegelverkTilEøs(behandling: Behandling) {
         vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!.apply {
             personResultater.first { !it.erSøkersResultater() }.apply {
                 vilkårResultater.forEach {
@@ -585,5 +585,7 @@ class FødselshendelseHenleggelseTest(
             }
             vilkårsvurderingService.oppdater(this)
         }
+        behandling.kategori = BehandlingKategori.EØS
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 }
