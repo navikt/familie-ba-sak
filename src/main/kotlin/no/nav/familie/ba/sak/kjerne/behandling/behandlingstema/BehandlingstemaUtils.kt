@@ -10,7 +10,7 @@ fun bestemKategoriVedOpprettelse(
     overstyrtKategori: BehandlingKategori?,
     behandlingType: BehandlingType,
     behandlingÅrsak: BehandlingÅrsak,
-    defaultKategori: BehandlingKategori,
+    tilbakefallendeKategori: BehandlingKategori,
 ): BehandlingKategori =
     when {
         behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING ||
@@ -31,7 +31,7 @@ fun bestemKategoriVedOpprettelse(
         }
 
         else -> {
-            defaultKategori
+            tilbakefallendeKategori
         }
     }
 
