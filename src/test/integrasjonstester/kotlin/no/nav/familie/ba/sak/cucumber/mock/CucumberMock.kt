@@ -568,6 +568,7 @@ class CucumberMock(
                 automatiskBeslutningService = mockk(),
                 opprettTaskService = mockk(),
                 satskjøringRepository = mockk(),
+                unleashService = unleashNextMedContextService,
             ),
         )
 
