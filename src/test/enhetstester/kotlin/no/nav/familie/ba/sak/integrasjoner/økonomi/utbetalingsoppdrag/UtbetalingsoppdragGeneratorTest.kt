@@ -37,7 +37,7 @@ class UtbetalingsoppdragGeneratorTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
-    private val andelDataForNyUtvidetKlassekodeBehandlingUtleder: AndelDataForNyUtvidetKlassekodeBehandlingUtleder = mockk()
+    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder: AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = mockk()
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
@@ -47,7 +47,7 @@ class UtbetalingsoppdragGeneratorTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            andelDataForNyUtvidetKlassekodeBehandlingUtleder = andelDataForNyUtvidetKlassekodeBehandlingUtleder,
+            andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder,
         )
 
     @ParameterizedTest
@@ -277,7 +277,7 @@ class UtbetalingsoppdragGeneratorTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `skal lage utbetalingsoppdrag for behandling med årsak NY_UTVIDET_KLASSEKODE`(erSimulering: Boolean) {
+    fun `skal lage utbetalingsoppdrag for behandling med årsak OPPDATER_UTVIDET_KLASSEKODE`(erSimulering: Boolean) {
         // Arrange
         val saksbehandlerId = "123abc"
         val barn = lagPerson()
@@ -299,7 +299,7 @@ class UtbetalingsoppdragGeneratorTest {
                     ),
                 )
             })
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.NY_UTVIDET_KLASSEKODE)
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE)
         val vedtak = lagVedtak(behandling = behandling)
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelse(
@@ -368,8 +368,8 @@ class UtbetalingsoppdragGeneratorTest {
             firstArg()
         }
 
-        every { andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForNyUtvidetKlassekodeBehandling(any(), any()) } returns emptyList()
-        every { andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForNyUtvidetKlassekodeBehandling(any(), any()) } returns
+        every { andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(any(), any()) } returns emptyList()
+        every { andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(any(), any()) } returns
             listOf(
                 AndelDataLongId(
                     id = andelTilkjentYtelse.id,

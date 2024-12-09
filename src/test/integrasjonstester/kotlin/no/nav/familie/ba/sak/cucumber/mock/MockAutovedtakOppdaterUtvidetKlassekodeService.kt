@@ -2,14 +2,14 @@ package no.nav.familie.ba.sak.cucumber.mock
 
 import io.mockk.every
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.AutovedtakNyUtvidetKlassekodeService
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.AutovedtakOppdaterUtvidetKlassekodeService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 
-fun mockAutovedtakNyUtvidetKlassekodeService(
+fun mockAutovedtakOppdaterUtvidetKlassekodeService(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     fagsak: Fagsak,
-): AutovedtakNyUtvidetKlassekodeService {
+): AutovedtakOppdaterUtvidetKlassekodeService {
     val forrigeBehandling =
         dataFraCucumber.behandlinger.values
             .filter { it.fagsak.id == fagsak.id && it.status == BehandlingStatus.AVSLUTTET }
@@ -26,12 +26,12 @@ fun mockAutovedtakNyUtvidetKlassekodeService(
 
     every { cucumberMock.snikeIKøenService.kanSnikeForbi(any()) } returns true
 
-    return AutovedtakNyUtvidetKlassekodeService(
+    return AutovedtakOppdaterUtvidetKlassekodeService(
         behandlingHentOgPersisterService = cucumberMock.behandlingHentOgPersisterService,
         autovedtakService = cucumberMock.autovedtakService,
         taskRepository = cucumberMock.taskRepository,
         snikeIKøenService = cucumberMock.snikeIKøenService,
-        nyUtvidetKlassekodeKjøringRepository = cucumberMock.nyUtvidetKlassekodeKjøringRepository,
+        oppdaterUtvidetKlassekodeKjøringRepository = cucumberMock.oppdaterUtvidetKlassekodeKjøringRepository,
         tilkjentYtelseRepository = cucumberMock.tilkjentYtelseRepository,
     )
 }

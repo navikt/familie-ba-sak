@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene
+package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -8,14 +8,14 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 
-@Entity(name = "NyUtvidetKlassekodeKjøring")
-@Table(name = "ny_utvidet_klassekode_kjoring")
-data class NyUtvidetKlassekodeKjøring(
+@Entity(name = "OppdaterUtvidetKlassekodeKjøring")
+@Table(name = "oppdater_utvidet_klassekode_kjoring")
+data class OppdaterUtvidetKlassekodeKjøring(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ny_utvidet_klassekode_kjoring_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "oppdater_utvidet_klassekode_kjoring_seq_generator")
     @SequenceGenerator(
-        name = "ny_utvidet_klassekode_kjoring_seq_generator",
-        sequenceName = "ny_utvidet_klassekode_kjoring_seq",
+        name = "oppdater_utvidet_klassekode_kjoring_seq_generator",
+        sequenceName = "oppdater_utvidet_klassekode_kjoring_seq",
         allocationSize = 50,
     )
     val id: Long = 0,

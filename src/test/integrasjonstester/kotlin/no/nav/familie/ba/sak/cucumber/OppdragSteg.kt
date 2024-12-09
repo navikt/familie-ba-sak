@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForNyUtvidetKlassekodeBehandlingUtleder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -88,27 +88,6 @@ class OppdragSteg {
             taskRepository = mockk(),
             vilkårsvurderingService = mockk(),
         )
-
-    // private val utbetalingsoppdragGenerator =
-    //     UtbetalingsoppdragGenerator(
-    //         Utbetalingsgenerator(),
-    //         KlassifiseringKorrigerer(
-    //             tilkjentYtelseRepository,
-    //             unleashNextMedContextService,
-    //         ),
-    //         unleashNextMedContextService,
-    //         BehandlingsinformasjonUtleder(
-    //             EndretMigreringsdatoUtleder(
-    //                 behandlingHentOgPersisterService,
-    //                 behandlingService,
-    //             ),
-    //             clockProvider,
-    //         ),
-    //         andelTilkjentYtelseRepository,
-    //         behandlingHentOgPersisterService,
-    //         tilkjentYtelseRepository,
-    //         AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
-    //     )
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -243,7 +222,7 @@ class OppdragSteg {
                 andelTilkjentYtelseRepository,
                 behandlingHentOgPersisterService,
                 tilkjentYtelseRepository,
-                AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider),
+                AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(clockProvider),
             )
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",

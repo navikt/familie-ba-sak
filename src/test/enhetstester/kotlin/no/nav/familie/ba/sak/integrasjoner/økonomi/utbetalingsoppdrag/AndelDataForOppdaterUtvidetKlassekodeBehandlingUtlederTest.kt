@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
+class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtlederTest {
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2024, 11))
-    private val andelDataForNyUtvidetKlassekodeBehandlingUtleder = AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider = clockProvider)
+    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(clockProvider = clockProvider)
 
     @Nested
-    inner class FinnForrigeAndelerForNyUtvidetKlassekodeBehandling {
+    inner class FinnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling {
         @Test
         fun `skal returnere alle utvidet andeler før nåtidspunkt dersom nåtidspunkt ikke treffer noen utvidet andel samt alle øvrige andeler`() {
             // Arrange
@@ -30,7 +30,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(2)
@@ -57,7 +57,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(2)
@@ -84,7 +84,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(1)
@@ -108,7 +108,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(2)
@@ -122,7 +122,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
     }
 
     @Nested
-    inner class FinnNyeAndelerForNyUtvidetKlassekodeBehandling {
+    inner class FinnNyeAndelerForOppdaterUtvidetKlassekodeBehandling {
         @Test
         fun `skal splitte utvidet andel dersom nåtidspunkt treffer andelen`() {
             // Arrange
@@ -138,7 +138,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(3)
@@ -177,7 +177,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(3)
@@ -213,7 +213,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
             )
 
             // Act
-            val forrigeAndeler = andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, true)
+            val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
             assertThat(forrigeAndeler).hasSize(2)

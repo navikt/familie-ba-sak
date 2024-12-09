@@ -1,7 +1,7 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode
+package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -16,16 +16,16 @@ import kotlin.time.measureTimedValue
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = PopulerNyUtvidetKlassekodeKjøringTask.TASK_STEP_TYPE,
-    beskrivelse = "Opprett oppgaver for sending av autobrev",
+    taskStepType = PopulerOppdaterUtvidetKlassekodeKjøringTask.TASK_STEP_TYPE,
+    beskrivelse = "Populerer tabellen NyUtvidetKlassekodeKjøring med fagsaker som bruker gammel klassekode",
     maxAntallFeil = 1,
 )
-class PopulerNyUtvidetKlassekodeKjøringTask(
+class PopulerOppdaterUtvidetKlassekodeKjøringTask(
     private val fagsakRepository: FagsakRepository,
-    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
+    private val oppdaterUtvidetKlassekodeKjøringRepository: OppdaterUtvidetKlassekodeKjøringRepository,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val fagsakerSomErLagret = nyUtvidetKlassekodeKjøringRepository.findAll().map { it.fagsakId }.toSet()
+        val fagsakerSomErLagret = oppdaterUtvidetKlassekodeKjøringRepository.findAll().map { it.fagsakId }.toSet()
 
         logger.info("Fant ${fagsakerSomErLagret.size} fagsaker som allerede er lagret")
 
@@ -34,17 +34,17 @@ class PopulerNyUtvidetKlassekodeKjøringTask(
                 fagsakRepository
                     .finnFagsakerMedLøpendeUtvidetBarnetrygdSomBrukerGammelKlassekode()
                     .minus(fagsakerSomErLagret)
-                    .map { NyUtvidetKlassekodeKjøring(fagsakId = it) }
+                    .map { OppdaterUtvidetKlassekodeKjøring(fagsakId = it) }
             }
 
         logger.info("Fant ${fagsakerSomSkalLagres.size} fagsaker som skal lagres på ${time.inWholeSeconds} sekunder")
 
-        nyUtvidetKlassekodeKjøringRepository.saveAll(fagsakerSomSkalLagres)
+        oppdaterUtvidetKlassekodeKjøringRepository.saveAll(fagsakerSomSkalLagres)
     }
 
     companion object {
-        const val TASK_STEP_TYPE = "PopulerNyUtvidetKlassekodeKjøringTask"
-        private val logger: Logger = LoggerFactory.getLogger(PopulerNyUtvidetKlassekodeKjøringTask::class.java)
+        const val TASK_STEP_TYPE = "populerOppdaterUtvidetKlassekodeKjøringTask"
+        private val logger: Logger = LoggerFactory.getLogger(PopulerOppdaterUtvidetKlassekodeKjøringTask::class.java)
 
         fun lagTask(): Task =
             Task(

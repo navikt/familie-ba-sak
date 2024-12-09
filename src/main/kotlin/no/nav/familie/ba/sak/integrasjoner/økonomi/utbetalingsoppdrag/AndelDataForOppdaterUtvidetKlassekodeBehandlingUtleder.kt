@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component
 import java.time.YearMonth
 
 @Component
-class AndelDataForNyUtvidetKlassekodeBehandlingUtleder(
+class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(
     private val clockProvider: ClockProvider,
 ) {
-    fun finnForrigeAndelerForNyUtvidetKlassekodeBehandling(
+    fun finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(
         forrigeTilkjentYtelse: TilkjentYtelse,
         skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): List<AndelDataLongId> {
@@ -31,7 +31,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtleder(
         return øvrigeAndeler.plus(utvidetAndeler)
     }
 
-    fun finnNyeAndelerForNyUtvidetKlassekodeBehandling(
+    fun finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(
         tilkjentYtelse: TilkjentYtelse,
         skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): List<AndelDataLongId> {

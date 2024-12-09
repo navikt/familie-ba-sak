@@ -387,7 +387,7 @@ fun hentNesteSteg(
             }
         }
 
-        BehandlingÅrsak.NY_UTVIDET_KLASSEKODE -> {
+        BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT

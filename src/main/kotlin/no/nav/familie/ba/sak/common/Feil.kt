@@ -41,7 +41,7 @@ class MånedligValutaJusteringFeil(
     val melding: String,
 ) : RuntimeException(melding)
 
-class NyUtvidetKlassekodeFeil(
+class OppdaterUtvidetKlassekodeFeil(
     val melding: String,
 ) : RuntimeException(melding)
 

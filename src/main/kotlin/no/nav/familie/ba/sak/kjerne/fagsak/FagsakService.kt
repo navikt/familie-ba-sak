@@ -200,8 +200,8 @@ class FagsakService(
         val visningsbehandlinger =
             behandlingHentOgPersisterService
                 .hentBehandlinger(fagsakId = fagsakId)
-                // Fjerner behandlinger med opprettetÅrsak = NY_UTVIDET_KLASSEKODE. Dette er kun en teknisk greie og ikke noe saksbehandler trenger å forholde seg til.
-                .filter { it.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE }
+                // Fjerner behandlinger med opprettetÅrsak = OPPDATER_UTVIDET_KLASSEKODE. Dette er kun en teknisk greie og ikke noe saksbehandler trenger å forholde seg til.
+                .filter { it.opprettetÅrsak != BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE }
                 .map {
                     it.tilRestVisningBehandling(
                         vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),

@@ -25,7 +25,7 @@ class UtbetalingsoppdragGenerator(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val andelDataForNyUtvidetKlassekodeBehandlingUtleder: AndelDataForNyUtvidetKlassekodeBehandlingUtleder,
+    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder: AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder,
 ) {
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
@@ -54,17 +54,17 @@ class UtbetalingsoppdragGenerator(
         val forrigeAndeler =
             if (forrigeTilkjentYtelse == null) {
                 emptyList()
-            } else if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
+            } else if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
                 forrigeTilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             } else {
-                andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForNyUtvidetKlassekodeBehandling(forrigeTilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+                andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(forrigeTilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             }
 
         val nyeAndeler =
-            if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
+            if (vedtak.behandling.opprettetÅrsak != BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
                 tilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             } else {
-                andelDataForNyUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForNyUtvidetKlassekodeBehandling(tilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+                andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             }
 
         val beregnetUtbetalingsoppdrag =

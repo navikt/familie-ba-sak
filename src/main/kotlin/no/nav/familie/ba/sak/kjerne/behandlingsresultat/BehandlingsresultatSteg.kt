@@ -194,10 +194,10 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedOppdatertBehandlingsresultat.opprettetÅrsak == BehandlingÅrsak.NY_UTVIDET_KLASSEKODE &&
+        if (behandlingMedOppdatertBehandlingsresultat.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE &&
             behandlingMedOppdatertBehandlingsresultat.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)
         ) {
-            throw Feil("Behandling med årsak ${BehandlingÅrsak.NY_UTVIDET_KLASSEKODE} må ha $FORTSATT_INNVILGET eller $FORTSATT_OPPHØRT som resultat")
+            throw Feil("Behandling med årsak ${BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE} må ha $FORTSATT_INNVILGET eller $FORTSATT_OPPHØRT som resultat")
         }
     }
 

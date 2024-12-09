@@ -40,12 +40,12 @@ Egenskap: Automatisk behandling for ny klassekode for utvidet barnetrygd
       | 1       | 1            | 01.07.2023 | 31.05.2041 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
       | 2       | 1            | 01.07.2023 | 31.05.2041 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
-    Når vi lager automatisk behandling på fagsak 1 med årsak NY_UTVIDET_KLASSEKODE
+    Når vi lager automatisk behandling på fagsak 1 med årsak OPPDATER_UTVIDET_KLASSEKODE
 
     Så forvent disse behandlingene
-      | BehandlingId | FagsakId | Behandlingstype       | Behandlingsårsak      | Behandlingskategori | Underkategori | Skal behandles automatisk | Behandlingsresultat | Behandlingsstatus | Behandlingssteg      |
-      | 1            | 1        | FØRSTEGANGSBEHANDLING | SØKNAD                | NASJONAL            | UTVIDET       | Nei                       | INNVILGET           | AVSLUTTET         | BEHANDLING_AVSLUTTET |
-      | 2            | 1        | REVURDERING           | NY_UTVIDET_KLASSEKODE | NASJONAL            | UTVIDET       | Ja                        | FORTSATT_INNVILGET  | AVSLUTTET         | BEHANDLING_AVSLUTTET |
+      | BehandlingId | FagsakId | Behandlingstype       | Behandlingsårsak            | Behandlingskategori | Underkategori | Skal behandles automatisk | Behandlingsresultat | Behandlingsstatus | Behandlingssteg      |
+      | 1            | 1        | FØRSTEGANGSBEHANDLING | SØKNAD                      | NASJONAL            | UTVIDET       | Nei                       | INNVILGET           | AVSLUTTET         | BEHANDLING_AVSLUTTET |
+      | 2            | 1        | REVURDERING           | OPPDATER_UTVIDET_KLASSEKODE | NASJONAL            | UTVIDET       | Ja                        | FORTSATT_INNVILGET  | AVSLUTTET         | BEHANDLING_AVSLUTTET |
 
   Scenario: skal ikke oppdateres for fagsak som ikke har løpende barnetrygd
 
@@ -67,7 +67,7 @@ Egenskap: Automatisk behandling for ny klassekode for utvidet barnetrygd
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.07.2023 | 31.05.2041 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
-    Når vi lager automatisk behandling på fagsak 1 med årsak NY_UTVIDET_KLASSEKODE
+    Når vi lager automatisk behandling på fagsak 1 med årsak OPPDATER_UTVIDET_KLASSEKODE
 
     Så forvent nøyaktig disse behandlingene for fagsak 1
       | BehandlingId | FagsakId | Behandlingstype       | Behandlingsårsak | Behandlingskategori | Underkategori | Skal behandles automatisk | Behandlingsresultat | Behandlingsstatus | Behandlingssteg      |
@@ -91,7 +91,7 @@ Egenskap: Automatisk behandling for ny klassekode for utvidet barnetrygd
       | 1       | 1            | 01.07.2023 | 31.05.2041 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
       | 2       | 1            | 01.07.2023 | 31.05.2041 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
 
-    Når vi lager automatisk behandling på fagsak 1 med årsak NY_UTVIDET_KLASSEKODE
+    Når vi lager automatisk behandling på fagsak 1 med årsak OPPDATER_UTVIDET_KLASSEKODE
 
     Så forvent nøyaktig disse behandlingene for fagsak 1
       | BehandlingId | FagsakId | Behandlingstype       | Behandlingsårsak | Behandlingskategori | Underkategori | Skal behandles automatisk | Behandlingsresultat | Behandlingsstatus | Behandlingssteg      |

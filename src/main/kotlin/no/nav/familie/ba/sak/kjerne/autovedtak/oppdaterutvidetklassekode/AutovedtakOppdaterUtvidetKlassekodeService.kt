@@ -1,10 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode
+package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.NyUtvidetKlassekodeFeil
+import no.nav.familie.ba.sak.common.OppdaterUtvidetKlassekodeFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
@@ -20,9 +20,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class AutovedtakNyUtvidetKlassekodeService(
+class AutovedtakOppdaterUtvidetKlassekodeService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
+    private val oppdaterUtvidetKlassekodeKjøringRepository: OppdaterUtvidetKlassekodeKjøringRepository,
     private val snikeIKøenService: SnikeIKøenService,
     private val autovedtakService: AutovedtakService,
     private val taskRepository: TaskRepositoryWrapper,
@@ -31,12 +31,12 @@ class AutovedtakNyUtvidetKlassekodeService(
     val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    fun utførMigreringTilNyUtvidetKlassekode(fagsakId: Long) {
+    fun utførMigreringTilOppdatertUtvidetKlassekode(fagsakId: Long) {
         logger.info("Utfører migrering til ny klassekode for utvidet barnetrygd for fagsak=$fagsakId")
 
         if (tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)) {
             logger.info("Hopper ut av behandling fordi fagsak $fagsakId allerede bruker ny klassekode for utvidet barnetrygd.")
-            nyUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(fagsakId)
+            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(fagsakId)
             return
         }
 
@@ -46,7 +46,7 @@ class AutovedtakNyUtvidetKlassekodeService(
 
         if (!sisteVedtatteBehandling.harLøpendeUtvidetBarnetrygd()) {
             logger.info("Hopper ut av behandling fordi fagsak $fagsakId ikke har løpende utvidet barnetrygd.")
-            nyUtvidetKlassekodeKjøringRepository.deleteByFagsakId(fagsakId)
+            oppdaterUtvidetKlassekodeKjøringRepository.deleteByFagsakId(fagsakId)
             return
         }
 
@@ -56,10 +56,10 @@ class AutovedtakNyUtvidetKlassekodeService(
             if (snikeIKøenService.kanSnikeForbi(aktivOgÅpenBehandling)) {
                 snikeIKøenService.settAktivBehandlingPåMaskinellVent(
                     aktivOgÅpenBehandling.id,
-                    SettPåMaskinellVentÅrsak.NY_UTVIDET_KLASSEKODE,
+                    SettPåMaskinellVentÅrsak.OPPDATER_UTVIDET_KLASSEKODE,
                 )
             } else {
-                throw NyUtvidetKlassekodeFeil(
+                throw OppdaterUtvidetKlassekodeFeil(
                     melding =
                         "Kan ikke utføre migrering til ny klassekode for utvidet barnetrygd for fagsak=$fagsakId " +
                             "fordi det er en åpen behandling vi ikke klarer å snike forbi",
@@ -71,7 +71,7 @@ class AutovedtakNyUtvidetKlassekodeService(
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = sisteVedtatteBehandling.fagsak.aktør,
                 behandlingType = BehandlingType.REVURDERING,
-                behandlingÅrsak = BehandlingÅrsak.NY_UTVIDET_KLASSEKODE,
+                behandlingÅrsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE,
                 fagsakId = fagsakId,
             )
 

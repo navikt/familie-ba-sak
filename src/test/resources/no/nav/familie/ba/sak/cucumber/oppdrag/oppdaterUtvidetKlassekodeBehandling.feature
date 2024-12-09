@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak NY_UTVIDET_KLASSEKODE
+Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak OPPDATER_UTVIDET_KLASSEKODE
 
   Scenario: Skal sende kjedelementer for utvidet andel fra inneværende måned og fremover i tid når inneværende måned treffer midt i en andel
 
@@ -11,9 +11,9 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak NY_UTVIDET_KLASS
       | 2            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak      |
-      | 1            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                |
-      | 2            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | NY_UTVIDET_KLASSEKODE |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
+      | 1            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 2            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
 
@@ -32,9 +32,9 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak NY_UTVIDET_KLASS
       | 2            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak      |
-      | 1            | 08.2024  | 11.2024  | 700   | UTVIDET_BARNETRYGD | SØKNAD                |
-      | 2            | 08.2024  | 11.2024  | 700   | UTVIDET_BARNETRYGD | NY_UTVIDET_KLASSEKODE |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
+      | 1            | 08.2024  | 11.2024  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 2            | 08.2024  | 11.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
 
@@ -52,11 +52,11 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak NY_UTVIDET_KLASS
       | 2            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak      |
-      | 1            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                |
-      | 1            | 06.2025  | 12.2025  | 850   | UTVIDET_BARNETRYGD | SØKNAD                |
-      | 2            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | NY_UTVIDET_KLASSEKODE |
-      | 2            | 06.2025  | 12.2025  | 850   | UTVIDET_BARNETRYGD | NY_UTVIDET_KLASSEKODE |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
+      | 1            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 1            | 06.2025  | 12.2025  | 850   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 2            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 06.2025  | 12.2025  | 850   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
 
@@ -78,11 +78,11 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak NY_UTVIDET_KLASS
       | 2            | familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd | Ja            |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak      |
-      | 1            | 05.2024  | 10.2024  | 600   | UTVIDET_BARNETRYGD | SØKNAD                |
-      | 1            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                |
-      | 2            | 05.2024  | 10.2024  | 600   | UTVIDET_BARNETRYGD | NY_UTVIDET_KLASSEKODE |
-      | 2            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | NY_UTVIDET_KLASSEKODE |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
+      | 1            | 05.2024  | 10.2024  | 600   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 1            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 2            | 05.2024  | 10.2024  | 600   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
 

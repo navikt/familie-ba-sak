@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -27,7 +27,7 @@ class FerdigstillBehandling(
     private val behandlingMetrikker: BehandlingMetrikker,
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
-    private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
+    private val oppdaterUtvidetKlassekodeKjøringRepository: OppdaterUtvidetKlassekodeKjøringRepository,
 ) : BehandlingSteg<String> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -60,8 +60,8 @@ class FerdigstillBehandling(
             }
         }
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
-            nyUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(behandling.fagsak.id)
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
+            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(behandling.fagsak.id)
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)

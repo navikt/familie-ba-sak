@@ -153,7 +153,7 @@ enum class SettPåMaskinellVentÅrsak(
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     FØDSELSHENDELSE("Fødselshendelse"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
-    NY_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
+    OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
 }
 
 class BehandlingErIkkeAvsluttetException(

@@ -83,7 +83,7 @@ class OppdaterTilkjentYtelseService(
         val andelerPåId = andelerMedPeriodeId.associateBy { it.id }
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-        if (tilkjentYtelse.behandling.opprettetÅrsak == BehandlingÅrsak.NY_UTVIDET_KLASSEKODE) {
+        if (tilkjentYtelse.behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
             if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size && andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size + 1) {
                 throw IllegalStateException(
                     "Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt eller ha en andel mer enn andelene med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0",
