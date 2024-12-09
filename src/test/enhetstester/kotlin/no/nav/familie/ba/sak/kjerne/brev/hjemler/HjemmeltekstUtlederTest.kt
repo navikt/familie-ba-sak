@@ -202,6 +202,78 @@ class HjemmeltekstUtlederTest {
     }
 
     @Test
+    fun `skal ikke inkludere hjemmel 17 og 18 hvis andreVurderinger ikke inneholder opplysningsplikt-vilkår`() {
+        // Arrange
+        val søker = randomAktør()
+
+        val behandling = lagBehandling()
+
+        val vedtaksperioderMedBegrunnelser =
+            listOf(
+                lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser =
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                            ),
+                        ),
+                ),
+                lagVedtaksperiodeMedBegrunnelser(
+                    begrunnelser =
+                        mutableSetOf(
+                            lagVedtaksbegrunnelse(
+                                standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                            ),
+                        ),
+                ),
+            )
+
+        every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
+        every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
+
+        every {
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        } returns
+            lagVilkårsvurdering(
+                søkerAktør = søker,
+                behandling = behandling,
+                resultat = Resultat.OPPFYLT,
+                medAndreVurderinger = false,
+            )
+
+        every {
+            sanityService.hentSanityBegrunnelser()
+        } returns
+            mapOf(
+                Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                        hjemler = listOf("11", "4", "2", "10"),
+                    ),
+                Standardbegrunnelse.INNVILGET_SATSENDRING to
+                    lagSanityBegrunnelse(
+                        apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                        hjemler = listOf("10"),
+                    ),
+            )
+
+        every {
+            sanityService.hentSanityEØSBegrunnelser()
+        } returns emptyMap()
+
+        // Act
+        val hjemler =
+            hjemmeltekstUtleder.utledHjemmeltekst(
+                behandlingId = behandling.id,
+                vedtakKorrigertHjemmelSkalMedIBrev = false,
+                sorterteVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser,
+            )
+
+        // Assert
+        assertThat(hjemler).isEqualTo("barnetrygdloven §§ 2, 4, 10 og 11")
+    }
+
+    @Test
     fun `skal inkludere hjemmel for fritekst`() {
         // Arrange
         val søker = randomAktør()
