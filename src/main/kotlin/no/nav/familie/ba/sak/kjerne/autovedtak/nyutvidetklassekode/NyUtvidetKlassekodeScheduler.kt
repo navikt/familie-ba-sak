@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KJØR_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_HØYT_VOLUM
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.OPPRETT_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_AUTOMATISK
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.nyutvidetklassekode.domene.NyUtvidetKlassekodeKjøringRepository
@@ -20,8 +21,12 @@ class NyUtvidetKlassekodeScheduler(
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggAutovedtakNyUtvidetKlassekode() {
-        if (leaderClientService.isLeader() && unleashService.isEnabled(KJØR_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD)) {
-            startAutovedtakNyUtvidetKlassekode(1000)
+        if (leaderClientService.isLeader() && unleashService.isEnabled(OPPRETT_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_AUTOMATISK)) {
+            if (unleashService.isEnabled(AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_HØYT_VOLUM)) {
+                startAutovedtakNyUtvidetKlassekode(1200)
+            } else {
+                startAutovedtakNyUtvidetKlassekode(100)
+            }
         }
     }
 
