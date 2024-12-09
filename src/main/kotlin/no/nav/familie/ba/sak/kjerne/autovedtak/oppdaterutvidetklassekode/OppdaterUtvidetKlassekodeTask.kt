@@ -32,7 +32,7 @@ class OppdaterUtvidetKlassekodeTask(
 
     companion object {
         const val TASK_STEP_TYPE = "oppdaterUtvidetKlassekodeTask"
-        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val logger = LoggerFactory.getLogger(OppdaterUtvidetKlassekodeTask::class.java)
 
         fun lagTask(fagsakId: Long) =
             Task(
