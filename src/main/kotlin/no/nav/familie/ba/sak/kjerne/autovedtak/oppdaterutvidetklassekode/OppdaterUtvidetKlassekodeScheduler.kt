@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.OPPRETT_AUTOVE
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringScheduler.Companion.CRON_HVERT_10_MIN_UKEDAG
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
 import no.nav.familie.prosessering.util.IdUtils
 import no.nav.familie.unleash.UnleashService
@@ -44,5 +43,6 @@ class OppdaterUtvidetKlassekodeScheduler(
 
     companion object {
         private val logger = LoggerFactory.getLogger(OppdaterUtvidetKlassekodeScheduler::class.java)
+        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 7-18 * * MON-FRI"
     }
 }
