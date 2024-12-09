@@ -15,8 +15,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtleder(
         skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): List<AndelDataLongId> {
         val inneværendeMåned = YearMonth.now(clockProvider.get())
+        val (utvidetAndelerTilkjentYtelse, øvrigeAndelerTilkjentYtelse) = forrigeTilkjentYtelse.andelerTilkjentYtelse.partition { it.erUtvidet() }
         val utvidetAndeler =
-            forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { it.erUtvidet() }.mapNotNull {
+            utvidetAndelerTilkjentYtelse.mapNotNull {
                 // Splitter andel som treffer inneværende måned og fjerner alle andeler som kommer etter.
                 if (it.stønadFom <= inneværendeMåned && it.stønadTom > inneværendeMåned) {
                     it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd).copy(tom = inneværendeMåned)
@@ -26,7 +27,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtleder(
                     it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
                 }
             }
-        val øvrigeAndeler = forrigeTilkjentYtelse.andelerTilkjentYtelse.filter { !it.erUtvidet() }.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
+        val øvrigeAndeler = øvrigeAndelerTilkjentYtelse.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
         return øvrigeAndeler.plus(utvidetAndeler)
     }
 
@@ -35,8 +36,9 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtleder(
         skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): List<AndelDataLongId> {
         val inneværendeMåned = YearMonth.now(clockProvider.get())
+        val (utvidetAndelerTilkjentYtelse, øvrigeAndelerTilkjentYtelse) = tilkjentYtelse.andelerTilkjentYtelse.partition { it.erUtvidet() }
         val utvidetAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.filter { it.erUtvidet() }.flatMap {
+            utvidetAndelerTilkjentYtelse.flatMap {
                 val andelData = it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
                 // Splitter andeler som treffer YearMonth.now()
                 if (it.stønadFom <= inneværendeMåned && it.stønadTom > inneværendeMåned) {
@@ -52,7 +54,7 @@ class AndelDataForNyUtvidetKlassekodeBehandlingUtleder(
                 }
             }
 
-        val øvrigeAndeler = tilkjentYtelse.andelerTilkjentYtelse.filter { !it.erUtvidet() }.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
+        val øvrigeAndeler = øvrigeAndelerTilkjentYtelse.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
         return øvrigeAndeler.plus(utvidetAndeler)
     }
 }

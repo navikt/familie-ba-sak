@@ -16,11 +16,11 @@ class NyUtvidetKlassekodeScheduler(
     private val nyUtvidetKlassekodeKjøringRepository: NyUtvidetKlassekodeKjøringRepository,
     private val taskRepository: TaskRepositoryWrapper,
     private val leaderClientService: LeaderClientService,
-    private val unleashunleashService: UnleashService,
+    private val unleashService: UnleashService,
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggAutovedtakNyUtvidetKlassekode() {
-        if (leaderClientService.isLeader() && unleashunleashService.isEnabled(KJØR_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD)) {
+        if (leaderClientService.isLeader() && unleashService.isEnabled(KJØR_AUTOVEDTAK_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD)) {
             startAutovedtakNyUtvidetKlassekode(1000)
         }
     }

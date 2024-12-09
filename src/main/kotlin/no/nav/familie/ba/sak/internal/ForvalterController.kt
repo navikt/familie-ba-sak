@@ -531,8 +531,8 @@ class ForvalterController(
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
     }
 
-    @PostMapping("/populer-tabell-for-ny-utvidet-klassekode")
-    fun populerTabellForNyUtvidetKlassekode(): ResponseEntity<String> {
+    @PostMapping("/opprett-populer-tabell-for-ny-utvidet-klassekode-task")
+    fun opprettPopulerTabellForNyUtvidetKlassekodeTask(): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Populer tabell for kjøring av migrering til ny klassekode for utvidet barnetrygd",

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class AndelDataForNyUtvidetKlassekodeBehandlingKtTest {
+class AndelDataForNyUtvidetKlassekodeBehandlingUtlederTest {
     private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2024, 11))
     private val andelDataForNyUtvidetKlassekodeBehandlingUtleder = AndelDataForNyUtvidetKlassekodeBehandlingUtleder(clockProvider = clockProvider)
 
