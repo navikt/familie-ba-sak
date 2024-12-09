@@ -120,6 +120,7 @@ data class Behandling(
             erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
+            erIverksetteKAVedtak() -> false
             else -> true
         }
 
@@ -215,6 +216,8 @@ data class Behandling(
     fun erSmåbarnstillegg() = this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG
 
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
+
+    fun erIverksetteKAVedtak() = this.opprettetÅrsak == BehandlingÅrsak.IVERKSETTE_KA_VEDTAK
 
     fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 

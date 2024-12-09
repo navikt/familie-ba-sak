@@ -27,6 +27,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerOmBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Svartidsbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtak
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
@@ -253,6 +255,26 @@ fun ManueltBrevRequest.tilBrev(
                                 organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
                                 gjelder = this.vedrørende?.navn,
                                 dokumentliste = this.multiselectVerdier,
+                            ),
+                    ),
+            )
+
+        Brevmal.UTBETALING_ETTER_KA_VEDTAK ->
+            UtbetalingEtterKAVedtak(
+                mal = Brevmal.UTBETALING_ETTER_KA_VEDTAK,
+                data =
+                    UtbetalingEtterKAVedtakData(
+                        delmalData =
+                            UtbetalingEtterKAVedtakData.DelmalData(
+                                signatur = signaturDelmal,
+                                fritekstAvsnitt = fritekstAvsnitt,
+                            ),
+                        flettefelter =
+                            UtbetalingEtterKAVedtakData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                                gjelder = this.vedrørende?.navn,
                             ),
                     ),
             )
