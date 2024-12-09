@@ -155,6 +155,7 @@ internal class BehandleFødselshendelseTaskTest {
 
     @Test
     fun `skal fullføre task uten videre oppfølgning hvis det kastes MidlertidigEnhetIAutomatiskBehandlingFeil`() {
+        // Arrange
         val autovedtakStegService =
             mockk<AutovedtakStegService>().apply {
                 every {
@@ -162,6 +163,7 @@ internal class BehandleFødselshendelseTaskTest {
                 }.throws(MidlertidigEnhetIAutomatiskBehandlingFeil("MidlertidigEnhetIAutomatiskBehandlingFeil"))
             }
 
+        // Act
         val fødselshendelseTask =
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
@@ -173,6 +175,7 @@ internal class BehandleFødselshendelseTaskTest {
                 ),
             )
 
+        // Assert
         assertDoesNotThrow {
             settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
                 fødselshendelseTask,
