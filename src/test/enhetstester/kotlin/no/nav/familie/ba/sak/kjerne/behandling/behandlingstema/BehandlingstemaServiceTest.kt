@@ -213,7 +213,7 @@ class BehandlingstemaServiceTest {
                         nyUnderkategori = BehandlingUnderkategori.UTVIDET,
                     )
                 }
-            assertThat(exception.message).isEqualTo("Kan ikke oppdatere behandlingstema på behandlinger som skal behandles automatisk.")
+            assertThat(exception.message).isEqualTo("Kan ikke oppdatere behandlingstema manuelt på behandlinger som skal behandles automatisk.")
         }
 
         @Test
