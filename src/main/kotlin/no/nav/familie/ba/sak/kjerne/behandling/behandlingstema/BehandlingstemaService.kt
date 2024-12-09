@@ -1,21 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
 import jakarta.transaction.Transactional
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class BehandlingstemaService(
@@ -25,137 +28,169 @@ class BehandlingstemaService(
     private val oppgaveService: OppgaveService,
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val clockProvider: ClockProvider,
 ) {
     @Transactional
-    fun oppdaterBehandlingstema(
+    fun oppdaterBehandlingstemaFraRegistrereSøknadSteg(
         behandling: Behandling,
-        overstyrtKategori: BehandlingKategori? = null,
-        overstyrtUnderkategori: BehandlingUnderkategori? = null,
-        manueltOppdatert: Boolean = false,
+        nyUnderkategori: BehandlingUnderkategori,
     ): Behandling {
-        if (behandling.skalBehandlesAutomatisk) return behandling
-        if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) {
-            throw FunksjonellFeil("Du må velge behandlingstema.")
+        if (behandling.skalBehandlesAutomatisk) {
+            return behandling
         }
+        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, behandling.kategori, nyUnderkategori)
+    }
 
-        val utledetKategori =
-            bestemKategori(
-                overstyrtKategori = overstyrtKategori,
-                kategoriFraSisteIverksattBehandling = hentLøpendeKategori(behandling.fagsak.id),
-                kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
-            )
-
-        val utledetUnderkategori =
-            bestemUnderkategori(
-                overstyrtUnderkategori = overstyrtUnderkategori,
-                underkategoriFraLøpendeBehandling = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
-                underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id),
-            )
-
-        val forrigeUnderkategori = behandling.underkategori
+    @Transactional
+    fun oppdaterSaksbehandletBehandlingstema(
+        behandling: Behandling,
+        nyKategori: BehandlingKategori,
+        nyUnderkategori: BehandlingUnderkategori,
+    ): Behandling {
+        if (behandling.skalBehandlesAutomatisk) {
+            throw FunksjonellFeil("Kan ikke oppdatere behandlingstema manuelt på behandlinger som skal behandles automatisk.")
+        }
         val forrigeKategori = behandling.kategori
-        val skalOppdatereKategori = utledetKategori != forrigeKategori
-        val skalOppdatereUnderkategori = utledetUnderkategori != forrigeUnderkategori
-        val skalOppdatereKategoriEllerUnderkategori = skalOppdatereKategori || skalOppdatereUnderkategori
+        val forrigeUnderkategori = behandling.underkategori
+        val oppdatertBehanding = oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
+        lagLogginnslagHvisNødvendig(oppdatertBehanding, forrigeKategori, forrigeUnderkategori, nyKategori, nyUnderkategori)
+        return oppdatertBehanding
+    }
 
-        return if (skalOppdatereKategoriEllerUnderkategori) {
-            behandling.apply {
-                kategori = utledetKategori
-                underkategori = utledetUnderkategori
-            }
-
-            behandlingHentOgPersisterService.lagreEllerOppdater(behandling).also { lagretBehandling ->
-                oppgaveService.patchOppgaverForBehandling(lagretBehandling) {
-                    val lagretUnderkategori = lagretBehandling.underkategori
-                    if (it.behandlingstema != lagretBehandling.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
-                        it.copy(
-                            behandlingstema =
-                                when (lagretUnderkategori) {
-                                    BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
-                                        behandling.tilOppgaveBehandlingTema().value
-                                },
-                            behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value,
-                        )
-                    } else {
-                        null
-                    }
-                }
-
-                if (manueltOppdatert) {
-                    loggService.opprettEndretBehandlingstema(
-                        behandling = lagretBehandling,
-                        forrigeKategori = forrigeKategori,
-                        forrigeUnderkategori = forrigeUnderkategori,
-                        nyKategori = utledetKategori,
-                        nyUnderkategori = utledetUnderkategori,
-                    )
-                }
-            }
-        } else {
-            behandling
+    @Transactional
+    fun oppdaterBehandlingstemaForVilkår(
+        behandling: Behandling,
+        overstyrtUnderkategori: BehandlingUnderkategori? = null,
+    ): Behandling {
+        if (behandling.skalBehandlesAutomatisk) {
+            return behandling
         }
+        val nyKategori = finnBehandlingKategori(behandling.fagsak.id)
+        val nyUnderkategori = overstyrtUnderkategori ?: finnUnderkategoriFraAktivBehandling(fagsakId = behandling.fagsak.id)
+        return oppdaterBehandlingstemaPåBehandlingHvisNødvendig(behandling, nyKategori, nyUnderkategori)
     }
 
-    fun hentLøpendeKategori(fagsakId: Long): BehandlingKategori {
-        val forrigeVedtatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
-                ?: return BehandlingKategori.NASJONAL
+    fun finnBehandlingKategori(fagsakId: Long): BehandlingKategori {
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
-        val barnasTidslinjer =
-            vilkårsvurderingTidslinjeService
-                .hentTidslinjer(behandlingId = BehandlingId(forrigeVedtatteBehandling.id))
-                ?.barnasTidslinjer()
-        return utledLøpendeKategori(barnasTidslinjer)
-    }
-
-    fun hentKategoriFraInneværendeBehandling(fagsakId: Long): BehandlingKategori {
-        val aktivBehandling =
-            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
-                ?: return BehandlingKategori.NASJONAL
-        val vilkårsvurdering =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-                ?: return aktivBehandling.kategori
-        val erVilkårMedEØSRegelverkBehandlet =
-            vilkårsvurdering.personResultater
-                .flatMap { it.vilkårResultater }
-                .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
-                .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
-
-        return if (erVilkårMedEØSRegelverkBehandlet) {
-            BehandlingKategori.EØS
-        } else {
-            BehandlingKategori.NASJONAL
+        if (aktivBehandling == null) {
+            return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
         }
+
+        val tidslinjer = vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(aktivBehandling.id))
+        if (tidslinjer == null) {
+            return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
+        }
+
+        val alleBarnasTidslinjerSomHarLøpendePeriode =
+            tidslinjer
+                .barnasTidslinjer()
+                .values
+                .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(YearMonth.now(clockProvider.get()).tilTidspunkt()) }
+
+        val etBarnHarMinstEnLøpendeEØSPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
+        if (etBarnHarMinstEnLøpendeEØSPeriode) {
+            return BehandlingKategori.EØS
+        }
+
+        val etBarnHarMinstEnLøpendeNasjonalPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it.innhold?.regelverk == Regelverk.NASJONALE_REGLER }
+        if (etBarnHarMinstEnLøpendeNasjonalPeriode) {
+            return BehandlingKategori.NASJONAL
+        }
+
+        return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
     }
 
-    fun hentLøpendeUnderkategori(fagsakId: Long): BehandlingUnderkategori? {
-        val forrigeAndeler = hentForrigeAndeler(fagsakId)
-        return if (forrigeAndeler != null) utledLøpendeUnderkategori(forrigeAndeler) else null
-    }
-
-    fun hentUnderkategoriFraInneværendeBehandling(fagsakId: Long): BehandlingUnderkategori {
-        val aktivBehandling =
-            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
-                ?: return BehandlingUnderkategori.ORDINÆR
-
-        val erUtvidetVilkårBehandlet =
-            vilkårsvurderingRepository
-                .findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
-                ?.personResultater
-                ?.flatMap { it.vilkårResultater }
-                ?.filter { it.sistEndretIBehandlingId == aktivBehandling.id }
-                ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
-
-        return if (erUtvidetVilkårBehandlet == true) {
+    fun finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId: Long): BehandlingUnderkategori? {
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
+        if (forrigeVedtatteBehandling == null) {
+            return null
+        }
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeVedtatteBehandling.id)
+        return if (forrigeAndeler.any { it.erUtvidet() && it.erLøpende() }) {
             BehandlingUnderkategori.UTVIDET
         } else {
             BehandlingUnderkategori.ORDINÆR
         }
     }
 
-    private fun hentForrigeAndeler(fagsakId: Long): List<AndelTilkjentYtelse>? {
-        val forrigeVedtatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: return null
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeVedtatteBehandling.id)
+    fun finnUnderkategoriFraAktivBehandling(fagsakId: Long): BehandlingUnderkategori {
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
+        if (aktivBehandling == null) {
+            return BehandlingUnderkategori.ORDINÆR
+        }
+
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+        if (vilkårsvurdering == null) {
+            return BehandlingUnderkategori.ORDINÆR
+        }
+
+        val erUtvidetVilkårBehandlet =
+            vilkårsvurdering
+                .personResultater
+                .flatMap { it.vilkårResultater }
+                .filter { it.sistEndretIBehandlingId == aktivBehandling.id }
+                .any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+        return if (erUtvidetVilkårBehandlet) {
+            BehandlingUnderkategori.UTVIDET
+        } else {
+            BehandlingUnderkategori.ORDINÆR
+        }
+    }
+
+    private fun oppdaterBehandlingstemaPåBehandlingHvisNødvendig(
+        behandling: Behandling,
+        nyKategori: BehandlingKategori,
+        nyUnderkategori: BehandlingUnderkategori,
+    ): Behandling {
+        val skalOppdatereKategori = nyKategori != behandling.kategori
+        val skalOppdatereUnderkategori = nyUnderkategori != behandling.underkategori
+        if (skalOppdatereKategori || skalOppdatereUnderkategori) {
+            behandling.kategori = nyKategori
+            behandling.underkategori = nyUnderkategori
+            val lagretBehandling = behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
+            patchBehandlingstemaPåOppgaveForBehandlingHvisNødvendig(lagretBehandling)
+            return lagretBehandling
+        }
+        return behandling
+    }
+
+    private fun patchBehandlingstemaPåOppgaveForBehandlingHvisNødvendig(
+        behandling: Behandling,
+    ) {
+        oppgaveService.patchOppgaverForBehandling(behandling) {
+            val behandlingstemaErEndret = it.behandlingstema != behandling.tilOppgaveBehandlingTema().value
+            val behandlingstypeErEndret = it.behandlingstype != behandling.kategori.tilOppgavebehandlingType().value
+            if (behandlingstemaErEndret || behandlingstypeErEndret) {
+                it.copy(
+                    behandlingstema = behandling.tilOppgaveBehandlingTema().value,
+                    behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
+                )
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun lagLogginnslagHvisNødvendig(
+        behandling: Behandling,
+        forrigeKategori: BehandlingKategori,
+        forrigeUnderkategori: BehandlingUnderkategori,
+        nyKategori: BehandlingKategori,
+        nyUnderkategori: BehandlingUnderkategori,
+    ) {
+        val skalOppdatereKategori = nyKategori != forrigeKategori
+        val skalOppdatereUnderkategori = nyUnderkategori != forrigeUnderkategori
+        if (skalOppdatereKategori || skalOppdatereUnderkategori) {
+            loggService.opprettEndretBehandlingstema(
+                behandling = behandling,
+                forrigeKategori = forrigeKategori,
+                forrigeUnderkategori = forrigeUnderkategori,
+                nyKategori = nyKategori,
+                nyUnderkategori = nyUnderkategori,
+            )
+        }
     }
 }
