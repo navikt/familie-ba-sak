@@ -397,13 +397,13 @@ class BehandlingstemaServiceTest {
             // Assert
             verify(exactly = 0) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
             verify(exactly = 0) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
-            verify(exactly = 1) {
+            verify(exactly = 0) {
                 loggService.opprettEndretBehandlingstema(
-                    behandling = oppdatertBehandling,
-                    forrigeKategori = BehandlingKategori.NASJONAL,
-                    forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
-                    nyKategori = BehandlingKategori.NASJONAL,
-                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    behandling = any(),
+                    forrigeKategori = any(),
+                    forrigeUnderkategori = any(),
+                    nyKategori = any(),
+                    nyUnderkategori = any(),
                 )
             }
             assertThat(patchedOppgave).isNull()
