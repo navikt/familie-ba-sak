@@ -99,7 +99,7 @@ class ManueltBrevRequestTest {
     }
 
     @Test
-    fun `Utbetaling etter KA-vedtak`() {
+    fun `tilBrev genererer 'Utbetaling etter KA-vedtak'-brev som forventet`() {
         val fnr = "12345678910"
         val brevRequestTilPerson =
             baseRequest.copy(
