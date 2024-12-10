@@ -163,7 +163,6 @@ internal class BehandleFødselshendelseTaskTest {
                 }.throws(MidlertidigEnhetIAutomatiskBehandlingFeil("MidlertidigEnhetIAutomatiskBehandlingFeil"))
             }
 
-        // Act
         val fødselshendelseTask =
             BehandleFødselshendelseTask.opprettTask(
                 BehandleFødselshendelseTaskDTO(
@@ -175,7 +174,7 @@ internal class BehandleFødselshendelseTaskTest {
                 ),
             )
 
-        // Assert
+        // Act & assert
         assertDoesNotThrow {
             settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
                 fødselshendelseTask,
