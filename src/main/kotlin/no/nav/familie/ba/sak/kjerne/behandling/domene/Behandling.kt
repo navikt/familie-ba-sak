@@ -227,7 +227,7 @@ data class Behandling(
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
-    fun erAutomatiskOgHarTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&

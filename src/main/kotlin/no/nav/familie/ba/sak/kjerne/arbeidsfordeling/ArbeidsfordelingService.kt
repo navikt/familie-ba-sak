@@ -80,44 +80,18 @@ class ArbeidsfordelingService(
         val forrigeArbeidsfordelingsenhet = aktivArbeidsfordelingPåBehandling?.tilArbeidsfordelingsenhet()
 
         val oppdatertArbeidsfordelingPåBehandling =
-            if (behandling.erAutomatiskOgHarTidligereBehandling()) {
-                if (aktivArbeidsfordelingPåBehandling != null) {
+            when {
+                behandling.erAutomatiskOgSkalHaTidligereBehandling() && aktivArbeidsfordelingPåBehandling != null -> {
                     aktivArbeidsfordelingPåBehandling
-                } else {
-                    sisteBehandlingSomErIverksatt ?: throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
-
-                    fastsettArbeidsfordelingsenhetUtIfraTidligereBehandlingerPåFagsak(behandling.id, behandling.fagsak.id)
                 }
-            } else {
-                val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
-                val tilpassetArbeidsfordelingsenhet =
-                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
-                        arbeidsfordelingsenhet = arbeidsfordelingsenhet,
-                        navIdent = NavIdent(SikkerhetContext.hentSaksbehandler()),
-                    )
-                when (aktivArbeidsfordelingPåBehandling) {
-                    null -> {
-                        arbeidsfordelingPåBehandlingRepository.save(
-                            ArbeidsfordelingPåBehandling(
-                                behandlingId = behandling.id,
-                                behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
-                                behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
-                            ),
-                        )
-                    }
-
-                    else -> {
-                        if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
-                            (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != tilpassetArbeidsfordelingsenhet.enhetId)
-                        ) {
-                            aktivArbeidsfordelingPåBehandling.also {
-                                it.behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId
-                                it.behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn
-                            }
-                            arbeidsfordelingPåBehandlingRepository.save(aktivArbeidsfordelingPåBehandling)
-                        }
-                        aktivArbeidsfordelingPåBehandling
-                    }
+                behandling.erAutomatiskOgSkalHaTidligereBehandling() && sisteBehandlingSomErIverksatt == null -> {
+                    throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
+                }
+                behandling.erAutomatiskOgSkalHaTidligereBehandling() -> {
+                    fastsettArbeidsfordelingFraTidligereBehandlinger(behandling.id, behandling.fagsak.id)
+                }
+                else -> {
+                    fastsettArbeidsfordelingPåBehandling(behandling, aktivArbeidsfordelingPåBehandling)
                 }
             }
 
@@ -129,7 +103,46 @@ class ArbeidsfordelingService(
         )
     }
 
-    private fun fastsettArbeidsfordelingsenhetUtIfraTidligereBehandlingerPåFagsak(
+    private fun fastsettArbeidsfordelingPåBehandling(
+        behandling: Behandling,
+        aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?,
+    ): ArbeidsfordelingPåBehandling {
+        val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
+        val tilpassetArbeidsfordelingsenhet =
+            tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                navIdent = NavIdent(SikkerhetContext.hentSaksbehandler()),
+            )
+
+        return when {
+            aktivArbeidsfordelingPåBehandling == null -> {
+                arbeidsfordelingPåBehandlingRepository.save(
+                    ArbeidsfordelingPåBehandling(
+                        behandlingId = behandling.id,
+                        behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                        behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
+                    ),
+                )
+            }
+
+            aktivArbeidsfordelingPåBehandling.manueltOverstyrt -> {
+                aktivArbeidsfordelingPåBehandling
+            }
+
+            aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != tilpassetArbeidsfordelingsenhet.enhetId -> {
+                arbeidsfordelingPåBehandlingRepository.save(
+                    aktivArbeidsfordelingPåBehandling.copy(
+                        behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                        behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
+                    ),
+                )
+            }
+
+            else -> aktivArbeidsfordelingPåBehandling
+        }
+    }
+
+    private fun fastsettArbeidsfordelingFraTidligereBehandlinger(
         behandlingId: Long,
         fagsakId: Long,
     ): ArbeidsfordelingPåBehandling {

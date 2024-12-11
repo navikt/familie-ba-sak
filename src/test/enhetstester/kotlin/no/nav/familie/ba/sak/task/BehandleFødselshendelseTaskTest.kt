@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall
@@ -19,6 +20,7 @@ import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 internal class BehandleFødselshendelseTaskTest {
@@ -147,6 +149,35 @@ internal class BehandleFødselshendelseTaskTest {
                 aktør = randomAktør,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Saksbehandler må vurdere konsekvens for ytelse fordi fødselshendelsen ikke kunne håndteres automatisk",
+            )
+        }
+    }
+
+    @Test
+    fun `skal fullføre task uten videre oppfølgning hvis det kastes MidlertidigEnhetIAutomatiskBehandlingFeil`() {
+        // Arrange
+        val autovedtakStegService =
+            mockk<AutovedtakStegService>().apply {
+                every {
+                    kjørBehandlingFødselshendelse(any(), any(), any())
+                }.throws(MidlertidigEnhetIAutomatiskBehandlingFeil("MidlertidigEnhetIAutomatiskBehandlingFeil"))
+            }
+
+        val fødselshendelseTask =
+            BehandleFødselshendelseTask.opprettTask(
+                BehandleFødselshendelseTaskDTO(
+                    nyBehandling =
+                        NyBehandlingHendelse(
+                            morsIdent = randomFnr(),
+                            barnasIdenter = listOf(randomFnr()),
+                        ),
+                ),
+            )
+
+        // Act & assert
+        assertDoesNotThrow {
+            settOppBehandleFødselshendelseTask(autovedtakStegService).doTask(
+                fødselshendelseTask,
             )
         }
     }
