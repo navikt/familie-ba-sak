@@ -114,27 +114,32 @@ class ArbeidsfordelingService(
                 navIdent = NavIdent(SikkerhetContext.hentSaksbehandler()),
             )
 
-        if (aktivArbeidsfordelingPåBehandling == null) {
-            return arbeidsfordelingPåBehandlingRepository.save(
-                ArbeidsfordelingPåBehandling(
-                    behandlingId = behandling.id,
-                    behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
-                    behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
-                ),
-            )
-        }
+        return when {
+            aktivArbeidsfordelingPåBehandling == null -> {
+                arbeidsfordelingPåBehandlingRepository.save(
+                    ArbeidsfordelingPåBehandling(
+                        behandlingId = behandling.id,
+                        behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                        behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
+                    ),
+                )
+            }
 
-        if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
-            aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != tilpassetArbeidsfordelingsenhet.enhetId
-        ) {
-            return arbeidsfordelingPåBehandlingRepository.save(
-                aktivArbeidsfordelingPåBehandling.copy(
-                    behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
-                    behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
-                ),
-            )
+            aktivArbeidsfordelingPåBehandling.manueltOverstyrt -> {
+                aktivArbeidsfordelingPåBehandling
+            }
+
+            aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != tilpassetArbeidsfordelingsenhet.enhetId -> {
+                arbeidsfordelingPåBehandlingRepository.save(
+                    aktivArbeidsfordelingPåBehandling.copy(
+                        behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                        behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
+                    ),
+                )
+            }
+
+            else -> aktivArbeidsfordelingPåBehandling
         }
-        return aktivArbeidsfordelingPåBehandling
     }
 
     private fun fastsettArbeidsfordelingFraTidligereBehandlinger(
