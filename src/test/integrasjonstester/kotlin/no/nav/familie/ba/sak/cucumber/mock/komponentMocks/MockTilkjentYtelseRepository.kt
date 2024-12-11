@@ -22,7 +22,9 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
     every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just runs
     every { tilkjentYtelseRepository.save(any()) } answers {
         val tilkjentYtelse = firstArg<TilkjentYtelse>()
-        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelse
+
+        val tilkjentYtelseMedUnikIdPåAndeler = tilkjentYtelse.copy(andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.map { it.copy(id = Random.nextLong()) }.toMutableSet())
+        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelseMedUnikIdPåAndeler
         tilkjentYtelse
     }
     every { tilkjentYtelseRepository.saveAndFlush(any()) } answers {

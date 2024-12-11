@@ -12,14 +12,18 @@ import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
+import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
+import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakOppdaterUtvidetKlassekodeService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -85,6 +89,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var totrinnskontroller = mutableMapOf<Long, Totrinnskontroll>()
     var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
+    var toggles = mapOf<Long, Map<String, Boolean>>()
 
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
@@ -113,6 +118,20 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             vedtaksListe = vedtaksliste,
             fagsaker = fagsaker,
         )
+    }
+
+    @Og("med følgende feature toggles")
+    fun følgendeFeatureToggles(dataTable: DataTable) {
+        toggles =
+            dataTable
+                .groupByBehandlingId()
+                .mapValues {
+                    it.value.associate { rad ->
+                        val featureToggleId = parseString(Domenebegrep.FEATURE_TOGGLE_ID, rad)
+                        val featureToggleVerdi = parseBoolean(Domenebegrep.ER_FEATURE_TOGGLE_TOGGLET_PÅ, rad)
+                        featureToggleId to featureToggleVerdi
+                    }
+                }
     }
 
     /**
@@ -622,6 +641,16 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         }
     }
 
+    @Så("forvent nøyaktig disse behandlingene for fagsak {}")
+    fun `forvent nøyaktig disse behandlingene for fagsak`(
+        fagsakId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker).map { it.toString() }
+        val behandlingerPåFagsak = behandlinger.filter { it.value.fagsak.id == fagsakId }.map { it.value.toString() }
+        assertThat(behandlingerPåFagsak).containsExactlyInAnyOrder(*forventedeBehandlinger.toTypedArray())
+    }
+
     /**
      * | Valuta kode | Valutakursdato | Kurs |
      */
@@ -641,6 +670,16 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             nyBehanldingId = nyBehandling,
             svarFraEcbMock = svarFraEcbMock,
         ).utførMånedligValutajustering(fagsakId = fagsakId, måned = dagensDato.toYearMonth())
+    }
+
+    @Når("vi lager automatisk behandling på fagsak {} med årsak OPPDATER_UTVIDET_KLASSEKODE")
+    fun `kjør autovetak med årsak OPPDATER_UTVIDET_KLASSEKODE på fagsak `(fagsakId: Long) {
+        val fagsak = fagsaker[fagsakId]!!
+
+        mockAutovedtakOppdaterUtvidetKlassekodeService(
+            dataFraCucumber = this,
+            fagsak = fagsak,
+        ).utførMigreringTilOppdatertUtvidetKlassekode(fagsakId = fagsakId)
     }
 
     @Så("forvent følgende valutakurser for behandling {}")

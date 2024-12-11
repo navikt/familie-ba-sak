@@ -1,5 +1,6 @@
 ﻿package no.nav.familie.ba.sak.cucumber.mock
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
@@ -8,12 +9,14 @@ import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockOppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -132,6 +135,15 @@ class CucumberMock(
     val opprettTaskService = mockk<OpprettTaskService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
+    val oppdaterUtvidetKlassekodeKjøringRepository = mockOppdaterUtvidetKlassekodeKjøringRepository()
+
+    init {
+        dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
+            togglesForBehandling.forEach { (toggleId, isEnabled) ->
+                every { unleashNextMedContextService.isEnabled(toggleId, behandlingId) } returns isEnabled
+            }
+        }
+    }
 
     val behandlingstemaService =
         BehandlingstemaService(
@@ -402,6 +414,7 @@ class CucumberMock(
                     clockProvider,
                 ),
             utbetalingsgenerator = Utbetalingsgenerator(),
+            andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(clockProvider),
         )
 
     val oppdaterTilkjentYtelseService =
@@ -520,6 +533,7 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
+            oppdaterUtvidetKlassekodeKjøringRepository = oppdaterUtvidetKlassekodeKjøringRepository,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
