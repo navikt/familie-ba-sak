@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -51,7 +50,6 @@ class FagsakService(
     private val personRepository: PersonRepository,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
-    private val behandlingstemaService: BehandlingstemaService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val behandlingService: BehandlingService,
     private val vedtakRepository: VedtakRepository,
@@ -249,8 +247,8 @@ class FagsakService(
                 } else {
                     aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
                 },
-            løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
-            løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
+            løpendeKategori = (aktivBehandling ?: sistVedtatteBehandling)?.kategori,
+            løpendeUnderkategori = (aktivBehandling ?: sistVedtatteBehandling)?.underkategori,
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
             fagsakType = fagsak.type,
             institusjon =

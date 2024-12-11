@@ -185,7 +185,7 @@ class VilkårsvurderingForNyBehandlingService(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
         )
 
-        val løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(behandling.fagsak.id)
+        val løpendeUnderkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(behandling.fagsak.id)
 
         val finnesVilkårsvurderingPåInneværendeBehandling = aktivVilkårsvurdering != null
         val førsteVilkårsvurderingPåBehandlingOgFinnesTidligereVedtattBehandling =
