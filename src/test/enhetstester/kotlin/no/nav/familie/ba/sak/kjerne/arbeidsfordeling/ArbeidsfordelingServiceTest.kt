@@ -105,7 +105,7 @@ class ArbeidsfordelingServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG"], mode = EnumSource.Mode.INCLUDE)
+        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal kaste Feil hvis forrige behandling er null for automatiske behandlinger som skal ha tidligere behandlinger`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
             val behandling = lagBehandling(årsak = behandlingÅrsak)
@@ -123,7 +123,7 @@ class ArbeidsfordelingServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG"], mode = EnumSource.Mode.INCLUDE)
+        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal sette 4863 til behandlende enhet dersom ingen av de tidligere behandlingene har hatt en annen behandlende enhet enn 4863`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
             val forrigeBehandling = lagBehandling()
@@ -153,7 +153,7 @@ class ArbeidsfordelingServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG"], mode = EnumSource.Mode.INCLUDE)
+        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal sette behandlende enhet til en gyldig enhet dersom en av de tidligere behandlingene har hatt en annen behandlende enhet enn 4863`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
             val forrigeBehandling = lagBehandling()
@@ -183,7 +183,7 @@ class ArbeidsfordelingServiceTest {
         }
 
         @ParameterizedTest
-        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG"], mode = EnumSource.Mode.INCLUDE)
+        @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal ikke gjøre noe dersom aktiv behandlende enhet finnes`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
             val forrigeBehandling = lagBehandling()
