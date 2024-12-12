@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.prosessering.util.IdUtils
 import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 class OppdaterUtvidetKlassekodeScheduler(
     private val oppdaterUtvidetKlassekodeKjøringRepository: OppdaterUtvidetKlassekodeKjøringRepository,
     private val taskRepository: TaskRepositoryWrapper,
+    private val taskService: TaskService,
     private val leaderClientService: LeaderClientService,
     private val unleashService: UnleashService,
 ) {
@@ -34,7 +36,12 @@ class OppdaterUtvidetKlassekodeScheduler(
     private fun startAutovedtakOppdaterUtvidetKlassekode(antallFagsaker: Int) {
         oppdaterUtvidetKlassekodeKjøringRepository
             .findByBrukerNyKlassekodeIsFalse(limit = Limit.of(antallFagsaker))
-            .also {
+            .filter {
+                taskService.finnTaskMedPayloadOgType(
+                    payload = it.fagsakId.toString(),
+                    type = OppdaterUtvidetKlassekodeTask.TASK_STEP_TYPE,
+                ) == null
+            }.also {
                 logger.info("Oppretter tasker for å migrere fagsak til ny utvidet klassekode på ${it.size} fagsaker.")
             }.forEach { fagsak ->
                 taskRepository.save(overstyrTaskMedNyCallId(IdUtils.generateId()) { OppdaterUtvidetKlassekodeTask.lagTask(fagsak.fagsakId) })
