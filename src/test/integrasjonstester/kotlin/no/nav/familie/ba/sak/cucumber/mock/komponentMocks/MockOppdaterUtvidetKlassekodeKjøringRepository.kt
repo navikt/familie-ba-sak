@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.
 fun mockOppdaterUtvidetKlassekodeKjøringRepository(): OppdaterUtvidetKlassekodeKjøringRepository {
     val oppdaterUtvidetKlassekodeKjøringRepository = mockk<OppdaterUtvidetKlassekodeKjøringRepository>()
 
-    justRun { oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(any()) }
+    justRun { oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(any()) }
     justRun { oppdaterUtvidetKlassekodeKjøringRepository.deleteByFagsakId(any()) }
 
     return oppdaterUtvidetKlassekodeKjøringRepository

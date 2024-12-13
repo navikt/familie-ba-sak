@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.Status
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service
 class OppdaterUtvidetKlassekodeTask(
     private val autovedtakOppdaterUtvidetKlassekodeService: AutovedtakOppdaterUtvidetKlassekodeService,
     private val unleashService: UnleashService,
+    private val oppdaterUtvidetKlassekodeKjøringRepository: OppdaterUtvidetKlassekodeKjøringRepository,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         if (!unleashService.isEnabled(KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD)) {
@@ -27,6 +30,7 @@ class OppdaterUtvidetKlassekodeTask(
         }
 
         val fagsakId: Long = objectMapper.readValue(task.payload)
+        oppdaterUtvidetKlassekodeKjøringRepository.oppdaterStatus(fagsakId = fagsakId, status = Status.UTFØRES)
         autovedtakOppdaterUtvidetKlassekodeService.utførMigreringTilOppdatertUtvidetKlassekode(fagsakId = fagsakId)
     }
 

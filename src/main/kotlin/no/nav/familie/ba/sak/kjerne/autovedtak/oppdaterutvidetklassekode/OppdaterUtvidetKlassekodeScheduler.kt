@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNy
 import no.nav.familie.prosessering.util.IdUtils
 import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Limit
+import org.springframework.data.domain.PageRequest
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
@@ -33,7 +33,7 @@ class OppdaterUtvidetKlassekodeScheduler(
 
     private fun startAutovedtakOppdaterUtvidetKlassekode(antallFagsaker: Int) {
         oppdaterUtvidetKlassekodeKjøringRepository
-            .findByBrukerNyKlassekodeIsFalse(limit = Limit.of(antallFagsaker))
+            .finnRelevanteOppdaterUtvidetKlassekodeKjøringer(PageRequest.of(0, antallFagsaker))
             .also {
                 logger.info("Oppretter tasker for å migrere fagsak til ny utvidet klassekode på ${it.size} fagsaker.")
             }.forEach { fagsak ->
