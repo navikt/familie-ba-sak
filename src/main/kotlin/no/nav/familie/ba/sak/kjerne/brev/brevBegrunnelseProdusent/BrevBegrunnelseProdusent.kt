@@ -330,6 +330,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
         }
 
+        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) -> barnMedUtbetaling.map { it.fødselsdato }
+
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
         }
@@ -344,6 +346,11 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
             endretUtbetalingAndelIPeriode.prosent != BigDecimal.ZERO &&
             person.type == PersonType.BARN
     }
+
+private fun erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(sanityBegrunnelse: ISanityBegrunnelse) =
+    sanityBegrunnelse.gjelderEtterEndretUtbetaling &&
+        sanityBegrunnelse is SanityBegrunnelse &&
+        !sanityBegrunnelse.endringsaarsaker.contains(Årsak.ALLEREDE_UTBETALT)
 
 private fun erEndretUtbetalingOgDeltBostedOgInnvilgetEllerØkningOgSkalUtbetales(
     sanityBegrunnelse: ISanityBegrunnelse,
