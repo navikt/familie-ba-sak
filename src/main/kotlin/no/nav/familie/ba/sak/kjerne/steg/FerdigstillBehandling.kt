@@ -61,7 +61,7 @@ class FerdigstillBehandling(
         }
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
-            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(behandling.fagsak.id)
+            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(behandling.fagsak.id)
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)

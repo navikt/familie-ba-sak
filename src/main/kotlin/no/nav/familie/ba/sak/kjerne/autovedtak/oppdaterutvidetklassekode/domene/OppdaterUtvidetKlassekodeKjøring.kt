@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -23,4 +25,13 @@ data class OppdaterUtvidetKlassekodeKjøring(
     val fagsakId: Long,
     @Column(name = "bruker_ny_klassekode", nullable = false)
     val brukerNyKlassekode: Boolean = false,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    val status: Status = Status.IKKE_UTFØRT,
 )
+
+enum class Status {
+    IKKE_UTFØRT,
+    UTFØRES,
+    UTFØRT,
+}

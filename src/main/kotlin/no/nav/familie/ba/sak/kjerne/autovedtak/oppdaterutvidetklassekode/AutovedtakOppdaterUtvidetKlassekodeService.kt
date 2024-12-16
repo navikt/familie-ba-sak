@@ -36,7 +36,7 @@ class AutovedtakOppdaterUtvidetKlassekodeService(
 
         if (tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)) {
             logger.info("Hopper ut av behandling fordi fagsak $fagsakId allerede bruker ny klassekode for utvidet barnetrygd.")
-            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrue(fagsakId)
+            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(fagsakId)
             return
         }
 
