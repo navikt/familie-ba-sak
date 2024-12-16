@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.OPPRETT_AUTOVE
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.Status
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
 import no.nav.familie.prosessering.util.IdUtils
 import no.nav.familie.unleash.UnleashService
@@ -38,6 +39,7 @@ class OppdaterUtvidetKlassekodeScheduler(
                 logger.info("Oppretter tasker for å migrere fagsak til ny utvidet klassekode på ${it.size} fagsaker.")
             }.forEach { fagsak ->
                 taskRepository.save(overstyrTaskMedNyCallId(IdUtils.generateId()) { OppdaterUtvidetKlassekodeTask.lagTask(fagsak.fagsakId) })
+                oppdaterUtvidetKlassekodeKjøringRepository.oppdaterStatus(fagsakId = fagsak.fagsakId, status = Status.UTFØRES)
             }
     }
 
