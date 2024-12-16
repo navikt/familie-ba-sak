@@ -9,6 +9,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -38,6 +39,10 @@ class OppdaterUtvidetKlassekodeTask(
             Task(
                 type = TASK_STEP_TYPE,
                 payload = fagsakId.toString(),
+                properties =
+                    Properties().apply {
+                        this["fagsakId"] = fagsakId.toString()
+                    },
             )
     }
 }
