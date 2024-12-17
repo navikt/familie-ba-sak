@@ -47,7 +47,7 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
             .any { it.contains("\"klassifisering\":\"BAUTV-OP\"") }
     }
 
-    every { tilkjentYtelseRepository.finnUtbetalingsoppdragMedUtvidetBarnetrygd(any()) } answers {
+    every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(any()) } answers {
         val fagsakId = firstArg<Long>()
         dataFraCucumber.tilkjenteYtelser.map { it.value }.filter { it.utbetalingsoppdrag != null && it.utbetalingsoppdrag!!.contains("\"klassifisering\":\"BAUTV-OP\"") }
     }

@@ -99,10 +99,21 @@ class UtbetalingsoppdragGenerator(
                 .hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
                 .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd)) }
 
-        val tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd = tilkjentYtelseRepository.finnUtbetalingsoppdragMedUtvidetBarnetrygd(behandling.fagsak.id)
+        return if (unleashNextMedContextService.isEnabled(FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
+            overstyrSisteUtvidetBarnetrygdAndel(behandling, sisteAndelPerKjede, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+        } else {
+            sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
+        }
+    }
 
+    private fun overstyrSisteUtvidetBarnetrygdAndel(
+        behandling: Behandling,
+        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
+        skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
+    ): Map<IdentOgType, AndelDataLongId> {
+        val tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(behandling.fagsak.id)
         return sisteAndelPerKjede.mapValues {
-            if (tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd.isNotEmpty() && it.key.type == YtelsetypeBA.UTVIDET_BARNETRYGD && unleashNextMedContextService.isEnabled(FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
+            if (tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd.isNotEmpty() && it.key.type == YtelsetypeBA.UTVIDET_BARNETRYGD) {
                 // Finner siste utbetalingsoppdraget som innehold kjedelementer med oppdatert utvidet klassekode
                 val sistOversendteUtbetalingsoppdragMedUtvidetBarnetrygd = tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd.maxBy { tilkjentYtelse -> tilkjentYtelse.behandling.aktivertTidspunkt }.utbetalingsoppdrag
 

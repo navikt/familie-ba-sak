@@ -37,5 +37,5 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
         WHERE ty.utbetalingsoppdrag IS NOT NULL AND ty.utbetalingsoppdrag like '%"klassifisering":"BAUTV-OP"%' AND b.fagsak.id = :fagsakId 
     """,
     )
-    fun finnUtbetalingsoppdragMedUtvidetBarnetrygd(fagsakId: Long): List<TilkjentYtelse>
+    fun findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(fagsakId: Long): List<TilkjentYtelse>
 }
