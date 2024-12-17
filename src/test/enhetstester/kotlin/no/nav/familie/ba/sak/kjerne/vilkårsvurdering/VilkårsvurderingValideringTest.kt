@@ -188,7 +188,7 @@ class VilkårsvurderingValideringTest {
         }
 
         @ParameterizedTest
-        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING"])
+        @EnumSource(value = BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "OPPDATER_UTVIDET_KLASSEKODE"])
         fun `skal ikke kaste feil for satsendring og månedlig valutajustering selv om barn ikke har 18-års vilkår vurdert fra fødselsdato`(
             årsak: BehandlingÅrsak,
         ) {
