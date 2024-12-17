@@ -45,6 +45,6 @@ class OppdaterUtvidetKlassekodeScheduler(
 
     companion object {
         private val logger = LoggerFactory.getLogger(OppdaterUtvidetKlassekodeScheduler::class.java)
-        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 7-18 * * MON-FRI"
+        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 7-20 * * MON-FRI"
     }
 }
