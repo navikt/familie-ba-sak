@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.Behandlin
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUtbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -43,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -174,7 +176,10 @@ class OppdragSteg {
         } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
         every {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull()
+        } returns tidligereTilkjenteYtelser.lastOrNull()?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
+        every {
+            tilkjentYtelseRepository.finnUtbetalingsoppdragMedUtvidetBarnetrygd(any())
+        } returns tidligereTilkjenteYtelser.filter { beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag?.utbetalingsperiode?.any { it.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering } == true }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
             behandlingHentOgPersisterService.hentBehandlinger(any())
         } returns behandlinger.filter { it.value.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.values.toList()
