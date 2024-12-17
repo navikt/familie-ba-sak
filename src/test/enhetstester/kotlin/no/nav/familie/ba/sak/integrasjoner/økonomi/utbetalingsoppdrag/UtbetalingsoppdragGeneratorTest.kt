@@ -112,6 +112,12 @@ class UtbetalingsoppdragGeneratorTest {
         } returns true
 
         every {
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+            )
+        } returns true
+
+        every {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
@@ -233,6 +239,12 @@ class UtbetalingsoppdragGeneratorTest {
             unleashNextMedContextService.isEnabled(
                 toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = any(),
+            )
+        } returns true
+
+        every {
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
             )
         } returns true
 
@@ -360,6 +372,12 @@ class UtbetalingsoppdragGeneratorTest {
             unleashNextMedContextService.isEnabled(
                 toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = any(),
+            )
+        } returns true
+
+        every {
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
             )
         } returns true
 
