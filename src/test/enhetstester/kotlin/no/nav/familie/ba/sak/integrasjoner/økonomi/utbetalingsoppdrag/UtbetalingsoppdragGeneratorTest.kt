@@ -126,7 +126,7 @@ class UtbetalingsoppdragGeneratorTest {
             firstArg()
         }
 
-        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(any()) } returns emptyList()
+        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
 
         // Act
         val beregnetUtbetalingsoppdragLongId =
@@ -257,7 +257,7 @@ class UtbetalingsoppdragGeneratorTest {
             firstArg()
         }
 
-        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(any()) } returns emptyList()
+        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
 
         // Act
         val beregnetUtbetalingsoppdragLongId =
@@ -406,7 +406,7 @@ class UtbetalingsoppdragGeneratorTest {
                 ),
             )
 
-        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(any()) } returns emptyList()
+        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
         // Act
         val beregnetUtbetalingsoppdragLongId =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(

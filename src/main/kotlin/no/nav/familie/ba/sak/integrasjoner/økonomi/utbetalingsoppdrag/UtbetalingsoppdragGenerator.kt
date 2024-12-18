@@ -111,29 +111,28 @@ class UtbetalingsoppdragGenerator(
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): Map<IdentOgType, AndelDataLongId> {
-        val tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdIUtbetalingsoppdrag(behandling.fagsak.id)
-        return sisteAndelPerKjede.mapValues {
-            if (tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd.isNotEmpty() && it.key.type == YtelsetypeBA.UTVIDET_BARNETRYGD) {
+        val tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(behandling.fagsak.id)
+        return sisteAndelPerKjede.mapValues { (identOgType, sisteAndelIKjede) ->
+            if (tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.isNotEmpty() && identOgType.type == YtelsetypeBA.UTVIDET_BARNETRYGD) {
                 // Finner siste utbetalingsoppdraget som innehold kjedelementer med oppdatert utvidet klassekode
-                val sistOversendteUtbetalingsoppdragMedUtvidetBarnetrygd = tilkjenteYtelserHvorUtbetalingsoppdragInneholderOppdatertKlassekodeForUtvidetBarnetrygd.maxBy { tilkjentYtelse -> tilkjentYtelse.behandling.aktivertTidspunkt }.utbetalingsoppdrag
+                val sisteTilkjenteYtelseMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.maxBy { tilkjentYtelse -> tilkjentYtelse.behandling.aktivertTidspunkt }
 
                 // Finner det siste kjedelementet med oppdatert utvidet klassekode
                 val sistOversendteUtvidetBarnetrygdKjedeelement =
                     objectMapper
-                        .readValue(sistOversendteUtbetalingsoppdragMedUtvidetBarnetrygd, Utbetalingsoppdrag::class.java)
+                        .readValue(sisteTilkjenteYtelseMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
                         .utbetalingsperiode
-                        .filter { utbetalingsperiode -> utbetalingsperiode.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering }
-                        .maxByOrNull { utvidetPeriode -> utvidetPeriode.vedtakdatoFom }!!
+                        .single { utbetalingsperiode -> utbetalingsperiode.periodeId == sisteAndelIKjede.periodeOffset && utbetalingsperiode.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering }
 
-                if (it.value.stønadFom != sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth()) {
+                if (sisteAndelIKjede.stønadFom != sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth()) {
                     logger.warn("Overstyrer vedtakFom i andelDataLongId da fom til siste andel per kjede ikke stemmer overens med siste kjedelement oversendt til Oppdrag")
                     // Oppdaterer fom i AndelDataLongId til samme fom som sist oversendte, da det ikke er 1-1 mellom fom på siste andel og fom på siste kjedelement oversendt til Oppdrag.
-                    it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd).copy(fom = sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth())
+                    sisteAndelIKjede.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd).copy(fom = sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth())
                 } else {
-                    it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+                    sisteAndelIKjede.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
                 }
             } else {
-                it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+                sisteAndelIKjede.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
             }
         }
     }
