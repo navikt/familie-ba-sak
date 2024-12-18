@@ -103,7 +103,6 @@ class UtbetalingsoppdragGenerator(
 
         return if (tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.isNotEmpty() && unleashNextMedContextService.isEnabled(FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
-                behandling = behandling,
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag,
                 skalBrukeNyKlassekodeForUtvidetBarnetrygd = skalBrukeNyKlassekodeForUtvidetBarnetrygd,

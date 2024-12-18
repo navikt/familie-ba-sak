@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.pdl.logger
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
@@ -12,7 +11,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 
 object SisteUtvidetAndelOverstyrer {
     fun overstyrSisteUtvidetBarnetrygdAndel(
-        behandling: Behandling,
         sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
         tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag: List<TilkjentYtelse>,
         skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
