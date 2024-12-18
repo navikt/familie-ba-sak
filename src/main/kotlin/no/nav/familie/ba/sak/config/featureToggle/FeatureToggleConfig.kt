@@ -24,6 +24,9 @@ class FeatureToggleConfig {
         // NAV-23449 - Skrud av/på ny refaktorert logikk for hjemler i brev, skal i teorien produsere det samme resultatet
         const val BRUK_OMSKRIVING_AV_HJEMLER_I_BREV = "familie-ba-sak.bruk_omskriving_av_hjemler_i_brev"
 
+        // NAV-23733
+        const val BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET = "familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"
+
         // satsendring
         // Oppretter satsendring-tasker for de som ikke har fått ny task
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"

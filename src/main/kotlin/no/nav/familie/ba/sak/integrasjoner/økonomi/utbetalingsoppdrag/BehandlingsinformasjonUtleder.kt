@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.ClockProvider
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.springframework.stereotype.Component
@@ -21,7 +21,7 @@ class BehandlingsinformasjonUtleder(
         saksbehandlerId: String,
         vedtak: Vedtak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
-        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
+        sisteAndelPerKjede: Map<IdentOgType, AndelDataLongId>,
         erSimulering: Boolean,
     ): Behandlingsinformasjon {
         val behandling = vedtak.behandling
@@ -43,7 +43,7 @@ class BehandlingsinformasjonUtleder(
 
     private fun finnOpphørsdatoForAlleKjeder(
         forrigeTilkjentYtelse: TilkjentYtelse?,
-        sisteAndelPerKjede: Map<IdentOgType, AndelTilkjentYtelse>,
+        sisteAndelPerKjede: Map<IdentOgType, AndelDataLongId>,
         endretMigreringsdato: YearMonth?,
     ): YearMonth? =
         if (forrigeTilkjentYtelse == null || sisteAndelPerKjede.isEmpty()) {

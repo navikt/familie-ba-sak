@@ -112,6 +112,12 @@ class UtbetalingsoppdragGeneratorTest {
         } returns true
 
         every {
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+            )
+        } returns true
+
+        every {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
@@ -119,6 +125,8 @@ class UtbetalingsoppdragGeneratorTest {
         } answers {
             firstArg()
         }
+
+        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
 
         // Act
         val beregnetUtbetalingsoppdragLongId =
@@ -235,6 +243,12 @@ class UtbetalingsoppdragGeneratorTest {
         } returns true
 
         every {
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+            )
+        } returns true
+
+        every {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
@@ -242,6 +256,8 @@ class UtbetalingsoppdragGeneratorTest {
         } answers {
             firstArg()
         }
+
+        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
 
         // Act
         val beregnetUtbetalingsoppdragLongId =
@@ -360,6 +376,12 @@ class UtbetalingsoppdragGeneratorTest {
         } returns true
 
         every {
+            unleashNextMedContextService.isEnabled(
+                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+            )
+        } returns true
+
+        every {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
@@ -383,6 +405,8 @@ class UtbetalingsoppdragGeneratorTest {
                     kildeBehandlingId = null,
                 ),
             )
+
+        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
         // Act
         val beregnetUtbetalingsoppdragLongId =
             utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
