@@ -99,8 +99,15 @@ class UtbetalingsoppdragGenerator(
                 .hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
                 .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd)) }
 
-        return if (unleashNextMedContextService.isEnabled(FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
-            overstyrSisteUtvidetBarnetrygdAndel(behandling, sisteAndelPerKjede, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+        val tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(behandling.fagsak.id)
+
+        return if (tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.isNotEmpty() && unleashNextMedContextService.isEnabled(FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
+            SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
+                behandling = behandling,
+                sisteAndelPerKjede = sisteAndelPerKjede,
+                tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag,
+                skalBrukeNyKlassekodeForUtvidetBarnetrygd = skalBrukeNyKlassekodeForUtvidetBarnetrygd,
+            )
         } else {
             sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
         }
