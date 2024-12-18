@@ -45,7 +45,7 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(
                     listOf(
                         // Sørger for at første AndelData etter splitt får en unik id. Dette sørger for at utbetalingsgenerator ikke kaster feil.
                         // Andelen skal ikke trigge en endring som fører til nytt kjedeelement, og vil på sett og vis bli ignorert. (Fordrer at vi finner en tilsvarende AndelData blandt forrigeAndeler)
-                        andelData.copy(fom = it.stønadFom, tom = inneværendeMåned, id = it.id + tilkjentYtelse.andelerTilkjentYtelse.size),
+                        andelData.copy(fom = it.stønadFom, tom = inneværendeMåned, id = it.id + (tilkjentYtelse.andelerTilkjentYtelse.size * 1000)),
                         // Siste AndelData etter splitt får id som samsvarer med AndelTilkjentYtelse slik at periodeId og forrigePeriodeId skal oppdateres på riktig andel.
                         andelData.copy(fom = inneværendeMåned.plusMonths(1), tom = it.stønadTom),
                     )

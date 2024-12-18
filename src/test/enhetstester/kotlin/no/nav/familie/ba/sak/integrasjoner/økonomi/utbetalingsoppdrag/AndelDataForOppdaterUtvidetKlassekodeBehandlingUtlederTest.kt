@@ -148,7 +148,7 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtlederTest {
             assertThat(førsteUtvidetAndelData.fom).isEqualTo(utvidetAndel.stønadFom)
             assertThat(førsteUtvidetAndelData.tom).isEqualTo(denneMåned)
             // Id til første utvidet andel ved split gir vi en falsk id som er lik id + antall andeler.
-            assertThat(førsteUtvidetAndelData.id).isEqualTo(utvidetAndel.id + tilkjentYtelse.andelerTilkjentYtelse.size)
+            assertThat(førsteUtvidetAndelData.id).isEqualTo(utvidetAndel.id + (tilkjentYtelse.andelerTilkjentYtelse.size * 1000))
             assertThat(førsteUtvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
             assertThat(førsteUtvidetAndelData.type).isEqualTo(YtelsetypeBA.UTVIDET_BARNETRYGD)
 
