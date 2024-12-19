@@ -15,16 +15,19 @@ fun lagBeregnetUtbetalingsoppdragLongId(
     andeler: List<AndelMedPeriodeIdLongId>,
 ): BeregnetUtbetalingsoppdragLongId =
     BeregnetUtbetalingsoppdragLongId(
-        Utbetalingsoppdrag(
-            kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-            fagSystem = "BA",
-            saksnummer = "",
-            aktoer = UUID.randomUUID().toString(),
-            saksbehandlerId = "",
-            avstemmingTidspunkt = LocalDateTime.now(),
-            utbetalingsperiode = utbetalingsperioder,
-        ),
+        lagUtbetalingsoppdrag(utbetalingsperioder),
         andeler = andeler,
+    )
+
+fun lagUtbetalingsoppdrag(utbetalingsperioder: List<Utbetalingsperiode>): Utbetalingsoppdrag =
+    Utbetalingsoppdrag(
+        kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+        fagSystem = "BA",
+        saksnummer = "",
+        aktoer = UUID.randomUUID().toString(),
+        saksbehandlerId = "",
+        avstemmingTidspunkt = LocalDateTime.now(),
+        utbetalingsperiode = utbetalingsperioder,
     )
 
 fun lagUtbetalingsperiode(
