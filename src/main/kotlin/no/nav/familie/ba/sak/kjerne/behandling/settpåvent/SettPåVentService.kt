@@ -52,9 +52,9 @@ class SettPåVentService(
 
         behandling.status = BehandlingStatus.SATT_PÅ_VENT
         behandlingHentOgPersisterService.lagreOgFlush(behandling)
-        oppgaveService.forlengFristÅpneOppgaverPåBehandling(
+        oppgaveService.settNyFristPåOppgaver(
             behandlingId = behandling.id,
-            forlengelse = Period.between(LocalDate.now(), frist),
+            nyFrist = frist,
         )
 
         return settPåVent
@@ -81,14 +81,13 @@ class SettPåVentService(
         )
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
-        val gammelFrist = aktivSettPåVent.frist
         aktivSettPåVent.frist = frist
         aktivSettPåVent.årsak = årsak
         val settPåVent = lagreEllerOppdater(aktivSettPåVent)
 
-        oppgaveService.forlengFristÅpneOppgaverPåBehandling(
+        oppgaveService.settNyFristPåOppgaver(
             behandlingId = behandlingId,
-            forlengelse = Period.between(gammelFrist, frist),
+            nyFrist = frist,
         )
 
         return settPåVent

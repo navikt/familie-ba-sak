@@ -271,9 +271,9 @@ class OppgaveService(
         }
     }
 
-    fun forlengFristÅpneOppgaverPåBehandling(
+    fun settNyFristPåOppgaver(
         behandlingId: Long,
-        forlengelse: Period,
+        nyFrist: LocalDate,
     ) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
@@ -293,7 +293,6 @@ class OppgaveService(
                 }
 
                 else -> {
-                    val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                     logger.info("Oppgave ${dbOppgave.gsakId} endrer frist fra ${gammelOppgave.fristFerdigstillelse} til $nyFrist")
                     integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)
