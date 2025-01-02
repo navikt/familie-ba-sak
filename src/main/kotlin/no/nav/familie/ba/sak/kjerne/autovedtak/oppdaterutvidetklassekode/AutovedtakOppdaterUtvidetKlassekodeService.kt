@@ -34,11 +34,11 @@ class AutovedtakOppdaterUtvidetKlassekodeService(
     fun utførMigreringTilOppdatertUtvidetKlassekode(fagsakId: Long) {
         logger.info("Utfører migrering til ny klassekode for utvidet barnetrygd for fagsak=$fagsakId")
 
-        if (tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)) {
-            logger.info("Hopper ut av behandling fordi fagsak $fagsakId allerede bruker ny klassekode for utvidet barnetrygd.")
-            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(fagsakId)
-            return
-        }
+        // if (tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)) {
+        //     logger.info("Hopper ut av behandling fordi fagsak $fagsakId allerede bruker ny klassekode for utvidet barnetrygd.")
+        //     oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(fagsakId)
+        //     return
+        // }
 
         val sisteVedtatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
