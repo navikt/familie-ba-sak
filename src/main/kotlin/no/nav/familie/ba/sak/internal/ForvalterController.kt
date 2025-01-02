@@ -547,10 +547,10 @@ class ForvalterController(
     fun opprettOppdaterUtvidetKlassekodeTask(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for å kjøre migrering av fagsak til ny klassekode for utvidet barnetrygd",
-        )
+        // tilgangService.verifiserHarTilgangTilHandling(
+        //     minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+        //     handling = "Opprett task for å kjøre migrering av fagsak til ny klassekode for utvidet barnetrygd",
+        // )
 
         val task = taskService.save(OppdaterUtvidetKlassekodeTask.lagTask(fagsakId))
 
