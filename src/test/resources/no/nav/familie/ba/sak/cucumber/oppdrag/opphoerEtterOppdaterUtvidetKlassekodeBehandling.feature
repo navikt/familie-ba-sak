@@ -15,7 +15,8 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Gitt følgende tilkjente ytelser
       | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            | Behandlingstype |
       | 1            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD |                             |                 |
-      | 2            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 07.2023  | 12.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 01.2025  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
       | 3            | Ja           |          |          | 700   | UTVIDET_BARNETRYGD |                             | REVURDERING     |
 
     Og inneværende måned er 12.2024
@@ -41,7 +42,8 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Gitt følgende tilkjente ytelser
       | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            | Behandlingstype |
       | 1            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD |                             |                 |
-      | 2            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 07.2023  | 12.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 01.2025  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
       | 3            |              | 07.2023  | 05.2026  | 750   | UTVIDET_BARNETRYGD |                             | REVURDERING     |
 
     Og inneværende måned er 12.2024
@@ -67,7 +69,8 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Gitt følgende tilkjente ytelser
       | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            | Behandlingstype |
       | 1            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD |                             |                 |
-      | 2            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 07.2023  | 12.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 01.2025  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
       | 3            |              | 07.2023  | 05.2026  | 500   | ORDINÆR_BARNETRYGD |                             | REVURDERING     |
       | 3            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD |                             | REVURDERING     |
       | 4            |              | 07.2023  | 05.2026  | 400   | ORDINÆR_BARNETRYGD |                             | REVURDERING     |
@@ -98,7 +101,8 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Gitt følgende tilkjente ytelser
       | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            | Behandlingstype |
       | 1            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD |                             |                 |
-      | 2            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 07.2023  | 12.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
+      | 2            |              | 01.2025  | 05.2034  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE | REVURDERING     |
       | 3            |              | 07.2023  | 05.2026  | 500   | ORDINÆR_BARNETRYGD |                             | REVURDERING     |
       | 3            |              | 07.2023  | 05.2034  | 700   | UTVIDET_BARNETRYGD |                             | REVURDERING     |
       | 4            |              | 07.2023  | 05.2026  | 400   | ORDINÆR_BARNETRYGD |                             | REVURDERING     |

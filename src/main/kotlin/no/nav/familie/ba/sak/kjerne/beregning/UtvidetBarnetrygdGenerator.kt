@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
-import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.OppdaterUtvidetKlassekodeUtvidetAndelerSplitter
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -63,17 +63,7 @@ data class UtvidetBarnetrygdGenerator(
         }
 
         return if (tilkjentYtelse.behandling.erOppdaterUtvidetKlassekode()) {
-            val inneværendeMåned = inneværendeMåned()
-            utvidetAndeler.flatMap {
-                if (it.stønadFom <= inneværendeMåned && it.stønadTom > inneværendeMåned) {
-                    listOf(
-                        it.copy(stønadFom = it.stønadFom, stønadTom = inneværendeMåned),
-                        it.copy(stønadFom = inneværendeMåned.plusMonths(1), stønadTom = it.stønadTom),
-                    )
-                } else {
-                    listOf(it)
-                }
-            }
+            OppdaterUtvidetKlassekodeUtvidetAndelerSplitter.splittUtvidetAndelerIInneværendeMåned(utvidetAndeler)
         } else {
             utvidetAndeler
         }
