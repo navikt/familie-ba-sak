@@ -173,10 +173,10 @@ class OppdragSteg {
     ): BeregnetUtbetalingsoppdragLongId {
         every {
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
+        } returns tidligereTilkjenteYtelser.lastOrNull { !it.behandling.erOppdaterUtvidetKlassekode() }?.behandling
         every {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull()?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
+        } returns tidligereTilkjenteYtelser.lastOrNull { !it.behandling.erOppdaterUtvidetKlassekode() }?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
         every {
             tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any())
         } returns tidligereTilkjenteYtelser.filter { beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag?.utbetalingsperiode?.any { it.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering } == true }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }

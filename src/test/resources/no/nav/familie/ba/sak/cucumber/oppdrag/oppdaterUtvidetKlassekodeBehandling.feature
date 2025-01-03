@@ -13,7 +13,8 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak OPPDATER_UTVIDET
     Gitt følgende tilkjente ytelser
       | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
       | 1            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
-      | 2            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 08.2024  | 11.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
 
@@ -55,7 +56,8 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak OPPDATER_UTVIDET
       | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
       | 1            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
       | 1            | 06.2025  | 12.2025  | 850   | UTVIDET_BARNETRYGD | SØKNAD                      |
-      | 2            | 08.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 08.2024  | 11.2024  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
       | 2            | 06.2025  | 12.2025  | 850   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
@@ -80,9 +82,9 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak OPPDATER_UTVIDET
     Gitt følgende tilkjente ytelser
       | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Behandlingsårsak            |
       | 1            | 05.2024  | 10.2024  | 600   | UTVIDET_BARNETRYGD | SØKNAD                      |
-      | 1            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
+      | 1            | 02.2025  | 05.2025  | 700   | UTVIDET_BARNETRYGD | SØKNAD                      |
       | 2            | 05.2024  | 10.2024  | 600   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
-      | 2            | 12.2024  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
+      | 2            | 02.2025  | 05.2025  | 700   | UTVIDET_BARNETRYGD | OPPDATER_UTVIDET_KLASSEKODE |
 
     Og inneværende måned er 11.2024
 
@@ -91,5 +93,5 @@ Egenskap: Utbetalingsoppdrag: Automatisk revurdering med årsak OPPDATER_UTVIDET
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                    |
       | 1            | 05.2024  | 10.2024  |             | 600   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
-      | 1            | 12.2024  | 05.2025  |             | 700   | NY           | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD_GAMMEL |
-      | 2            | 12.2024  | 05.2025  |             | 700   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
+      | 1            | 02.2025  | 05.2025  |             | 700   | NY           | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD_GAMMEL |
+      | 2            | 02.2025  | 05.2025  |             | 700   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
