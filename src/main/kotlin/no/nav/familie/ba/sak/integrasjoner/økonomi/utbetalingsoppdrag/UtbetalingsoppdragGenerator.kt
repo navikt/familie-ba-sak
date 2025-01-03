@@ -40,6 +40,7 @@ class UtbetalingsoppdragGenerator(
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId,
                 vedtak,
+                tilkjentYtelse,
                 forrigeTilkjentYtelse,
                 sisteAndelPerKjede,
                 erSimulering,

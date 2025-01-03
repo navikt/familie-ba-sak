@@ -20,13 +20,14 @@ class BehandlingsinformasjonUtleder(
     fun utled(
         saksbehandlerId: String,
         vedtak: Vedtak,
+        tilkjentYtelse: TilkjentYtelse,
         forrigeTilkjentYtelse: TilkjentYtelse?,
         sisteAndelPerKjede: Map<IdentOgType, AndelDataLongId>,
         erSimulering: Boolean,
     ): Behandlingsinformasjon {
         val behandling = vedtak.behandling
         val fagsak = behandling.fagsak
-        val endretMigreringsdato = endretMigreringsdatoUtleder.utled(fagsak, forrigeTilkjentYtelse)
+        val endretMigreringsdato = endretMigreringsdatoUtleder.utled(fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
         return Behandlingsinformasjon(
             saksbehandlerId = saksbehandlerId,
             behandlingId = behandling.id.toString(),

@@ -16,13 +16,12 @@ class EndretMigreringsdatoUtleder(
 ) {
     fun utled(
         fagsak: Fagsak,
+        tilkjentYtelse: TilkjentYtelse,
         forrigeTilkjentYtelse: TilkjentYtelse?,
     ): YearMonth? {
-        val forrigeTilstandFraDato = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom }
+        val førsteAndelFomDatoForrigeBehandling = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom } ?: return null
 
-        if (forrigeTilstandFraDato == null) {
-            return null
-        }
+        val førsteAndelFomDato = tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
 
         val erMigrertSak =
             behandlingHentOgPersisterService
@@ -33,20 +32,21 @@ class EndretMigreringsdatoUtleder(
             return null
         }
 
-        val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = fagsak.id)
+        val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = fagsak.id) ?: return null
 
-        if (migreringsdatoPåFagsak == null) {
-            return null
+        // Plusser på 1 mnd på migreringsdato da barnetrygden kun skal løpe fra BA-sak tidligst mnd etter migrering.
+        val migreringsdatoPåFagsakPlussEnMnd = migreringsdatoPåFagsak.toYearMonth().plusMonths(1)
+
+        if (migreringsdatoPåFagsakPlussEnMnd.isAfter(førsteAndelFomDatoForrigeBehandling)) {
+            throw IllegalStateException("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
         }
 
-        val nyTilstandFraDato = migreringsdatoPåFagsak.toYearMonth().plusMonths(1)
-
-        if (nyTilstandFraDato.isAfter(forrigeTilstandFraDato)) {
-            throw IllegalStateException("Ny migreringsdato kan ikke være etter forrige migreringsdato")
-        }
-
-        return if (forrigeTilstandFraDato.isAfter(nyTilstandFraDato)) {
-            nyTilstandFraDato
+        // Dersom første fom i inneværende behandling er før første fom i forrige behandling og
+        // ny migreringsdato  pluss 1 mnd er før første fom i forrige behandling må vi opphøre fra ny migreringsdato pluss 1 mnd.
+        return if (førsteAndelFomDato?.isBefore(førsteAndelFomDatoForrigeBehandling) == true &&
+            migreringsdatoPåFagsakPlussEnMnd.isBefore(førsteAndelFomDatoForrigeBehandling)
+        ) {
+            migreringsdatoPåFagsakPlussEnMnd
         } else {
             null
         }

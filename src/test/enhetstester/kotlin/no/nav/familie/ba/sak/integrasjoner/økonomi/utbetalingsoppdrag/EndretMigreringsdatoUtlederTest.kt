@@ -31,10 +31,13 @@ class EndretMigreringsdatoUtlederTest {
         // Arrange
         val fagsak = Fagsak(0L, randomAktør())
 
+        val tilkjentYtelse = lagTilkjentYtelse()
+
         // Act
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
+                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = null,
             )
 
@@ -65,6 +68,7 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
+                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = tilkjentYtelse,
             )
 
@@ -107,6 +111,7 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
+                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = tilkjentYtelse,
             )
 
@@ -153,6 +158,7 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
+                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = tilkjentYtelse,
             )
 
@@ -200,14 +206,15 @@ class EndretMigreringsdatoUtlederTest {
             assertThrows<IllegalStateException> {
                 endretMigreringsdatoUtleder.utled(
                     fagsak = fagsak,
+                    tilkjentYtelse = tilkjentYtelse,
                     forrigeTilkjentYtelse = tilkjentYtelse,
                 )
             }
-        assertThat(exception.message).isEqualTo("Ny migreringsdato kan ikke være etter forrige migreringsdato")
+        assertThat(exception.message).isEqualTo("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
     }
 
     @Test
-    fun `skal returnere ny migreringsdato om ny migreringsdato er før forrige migreringsdato`() {
+    fun `skal returnere ny migreringsdato pluss 1 om ny migreringsdato pluss 1 mnd er før første andel i forrige behandling og første andel i inneværende behandling kommer før første andel i forrige behandling`() {
         // Arrange
         val dagensDato = LocalDate.of(2024, 11, 1)
 
@@ -220,6 +227,20 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         val tilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = behandling,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = dagensDato.plusMonths(1).toYearMonth(),
+                            tom = dagensDato.plusMonths(3).toYearMonth(),
+                        ),
+                    )
+                },
+            )
+
+        val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
                 behandling = behandling,
                 lagAndelerTilkjentYtelse = {
@@ -245,7 +266,8 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
-                forrigeTilkjentYtelse = tilkjentYtelse,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
             )
 
         // Assert
@@ -266,6 +288,25 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         val tilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = behandling,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = dagensDato.plusMonths(1).toYearMonth(),
+                            tom = dagensDato.plusMonths(3).toYearMonth(),
+                        ),
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = dagensDato.plusMonths(4).toYearMonth(),
+                            tom = dagensDato.plusMonths(5).toYearMonth(),
+                        ),
+                    )
+                },
+            )
+
+        val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
                 behandling = behandling,
                 lagAndelerTilkjentYtelse = {
@@ -296,7 +337,8 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
-                forrigeTilkjentYtelse = tilkjentYtelse,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
             )
 
         // Assert
@@ -342,6 +384,7 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
+                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = tilkjentYtelse,
             )
 
