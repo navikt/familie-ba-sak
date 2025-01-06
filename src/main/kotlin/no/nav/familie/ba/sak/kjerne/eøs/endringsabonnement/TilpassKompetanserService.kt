@@ -131,7 +131,7 @@ fun tilpassKompetanserTilRegelverk(
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
     utbetalesIkkeOrdinærEllerUtvidetTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
-    inneværendeMåned: YearMonth = YearMonth.now(),
+    inneværendeMåned: YearMonth,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer =
         barnaRegelverkTidslinjer

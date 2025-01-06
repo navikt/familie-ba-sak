@@ -275,6 +275,7 @@ internal class TidslinjerTest {
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             )
 
         assertEquals(1, kompetanser.size)
@@ -326,6 +327,7 @@ internal class TidslinjerTest {
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             )
 
         val forventetRegelverkResultat =
@@ -381,6 +383,7 @@ internal class TidslinjerTest {
                 emptyList(),
                 barnaRegelverkTidslinjer,
                 emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             )
 
         assertEquals(1, kompetanser.size)
