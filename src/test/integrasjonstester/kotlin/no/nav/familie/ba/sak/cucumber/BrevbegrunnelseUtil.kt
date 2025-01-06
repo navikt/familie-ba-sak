@@ -133,14 +133,13 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
 
     val målform = (parseValgfriEnum<Målform>(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.MÅLFORM, rad) ?: Målform.NB).tilSanityFormat()
 
-    return if (gjelderSoker == null) {
-        if (annenForeldersAktivitet == null ||
-            annenForeldersAktivitetsland == null ||
+    return if (annenForeldersAktivitet != null) {
+        if (annenForeldersAktivitetsland == null ||
             barnetsBostedsland == null ||
             søkersAktivitet == null ||
             søkersAktivitetsland == null
         ) {
-            error("For EØS-begrunnelser må enten 'Gjelder søker' eller kompetansefeltene settes")
+            error("Alle kompetanser felter må settes dersom en settes")
         }
 
         EØSBegrunnelseDataMedKompetanse(
@@ -154,7 +153,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             barnetsBostedsland = barnetsBostedsland,
             sokersAktivitet = søkersAktivitet,
             sokersAktivitetsland = søkersAktivitetsland,
-            gjelderSoker = gjelderSoker
+            gjelderSoker = gjelderSoker,
         )
     } else {
         EØSBegrunnelseDataUtenKompetanse(
@@ -163,7 +162,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             barnasFodselsdatoer = barnasFodselsdatoer,
             antallBarn = antallBarn,
             maalform = målform,
-            gjelderSoker = gjelderSoker,
+            gjelderSoker = gjelderSoker ?: false,
         )
     }
 }

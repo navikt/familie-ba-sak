@@ -70,5 +70,5 @@ Egenskap: Brevperioder: Selvstendig rett
       | UTBETALING      | september 2022 | til februar 2023 | 1054  | 1                          | 26.01.10            | du                     |
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.09.2022 til 28.02.2023
-      | Begrunnelse                                    | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet |
-      | INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD | EØS  | 26.01.10             | 1           | NB      | Norge                          | Latvia              | Latvia                | ARBEIDER                  | MOTTAR_PENSJON   |
+      | Begrunnelse                                    | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | Gjelder søker |
+      | INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD | EØS  | 26.01.10             | 1           | NB      | Norge                          | Latvia              | Latvia                | ARBEIDER                  | MOTTAR_PENSJON   | Nei           |
