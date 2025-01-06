@@ -99,6 +99,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                             .tilSanityFormat(),
                     sokersAktivitet = kompetanse.søkersAktivitet,
                     sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
+                    gjelderSoker = gjelderSøker
                 )
             } else {
                 null

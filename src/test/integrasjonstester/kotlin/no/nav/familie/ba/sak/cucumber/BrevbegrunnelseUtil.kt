@@ -154,6 +154,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             barnetsBostedsland = barnetsBostedsland,
             sokersAktivitet = søkersAktivitet,
             sokersAktivitetsland = søkersAktivitetsland,
+            gjelderSoker = gjelderSoker
         )
     } else {
         EØSBegrunnelseDataUtenKompetanse(
