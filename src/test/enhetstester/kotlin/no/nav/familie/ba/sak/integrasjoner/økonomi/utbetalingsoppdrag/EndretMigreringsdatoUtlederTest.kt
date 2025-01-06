@@ -318,7 +318,7 @@ class EndretMigreringsdatoUtlederTest {
                     behandling = behandling,
                     utbetalingsoppdrag =
                         objectMapper.writeValueAsString(
-                            lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, opphør = Opphør(dagensDato)))),
+                            lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, opphør = Opphør(dagensDato.plusMonths(1))))),
                         ),
                 ),
             )

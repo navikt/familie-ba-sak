@@ -45,7 +45,7 @@ class EndretMigreringsdatoUtleder(
             tilkjentYtelseRepository
                 .findByFagsak(fagsak.id)
                 .map { objectMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
-                .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom == migreringsdatoPåFagsak } }
+                .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom?.toYearMonth() == migreringsdatoPåFagsakPlussEnMnd } }
 
         return if (harOpphørtFraMigreringsdatoTidligere) {
             null
