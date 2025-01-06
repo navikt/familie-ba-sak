@@ -5,7 +5,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Component
 import java.time.YearMonth
 
@@ -13,15 +16,13 @@ import java.time.YearMonth
 class EndretMigreringsdatoUtleder(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun utled(
         fagsak: Fagsak,
-        tilkjentYtelse: TilkjentYtelse,
         forrigeTilkjentYtelse: TilkjentYtelse?,
     ): YearMonth? {
         val førsteAndelFomDatoForrigeBehandling = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom } ?: return null
-
-        val førsteAndelFomDato = tilkjentYtelse.andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
 
         val erMigrertSak =
             behandlingHentOgPersisterService
@@ -36,19 +37,20 @@ class EndretMigreringsdatoUtleder(
 
         // Plusser på 1 mnd på migreringsdato da barnetrygden kun skal løpe fra BA-sak tidligst mnd etter migrering.
         val migreringsdatoPåFagsakPlussEnMnd = migreringsdatoPåFagsak.toYearMonth().plusMonths(1)
-
         if (migreringsdatoPåFagsakPlussEnMnd.isAfter(førsteAndelFomDatoForrigeBehandling)) {
             throw IllegalStateException("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
         }
 
-        // Dersom første fom i inneværende behandling er før første fom i forrige behandling og
-        // ny migreringsdato  pluss 1 mnd er før første fom i forrige behandling må vi opphøre fra ny migreringsdato pluss 1 mnd.
-        return if (førsteAndelFomDato?.isBefore(førsteAndelFomDatoForrigeBehandling) == true &&
-            migreringsdatoPåFagsakPlussEnMnd.isBefore(førsteAndelFomDatoForrigeBehandling)
-        ) {
-            migreringsdatoPåFagsakPlussEnMnd
-        } else {
+        val harOpphørtFraMigreringsdatoTidligere =
+            tilkjentYtelseRepository
+                .findByFagsak(fagsak.id)
+                .map { objectMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
+                .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom == migreringsdatoPåFagsak } }
+
+        return if (harOpphørtFraMigreringsdatoTidligere) {
             null
+        } else {
+            migreringsdatoPåFagsakPlussEnMnd
         }
     }
 }

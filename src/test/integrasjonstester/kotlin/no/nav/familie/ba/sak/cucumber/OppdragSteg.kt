@@ -193,6 +193,9 @@ class OppdragSteg {
             behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any())
         } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.toLocalDate()
         every {
+            tilkjentYtelseRepository.findByFagsak(tilkjentYtelse.behandling.fagsak.id)
+        } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
+        every {
             unleashNextMedContextService.isEnabled(
                 any(),
                 any(),
@@ -221,6 +224,7 @@ class OppdragSteg {
                     EndretMigreringsdatoUtleder(
                         behandlingHentOgPersisterService,
                         behandlingService,
+                        tilkjentYtelseRepository,
                     ),
                     clockProvider,
                 ),

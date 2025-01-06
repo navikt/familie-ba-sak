@@ -91,7 +91,6 @@ class UtbetalingsoppdragGeneratorTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         } returns
             Behandlingsinformasjon(
@@ -141,7 +140,6 @@ class UtbetalingsoppdragGeneratorTest {
         // Assert
         verify(exactly = 1) {
             behandlingsinformasjonUtleder.utled(
-                any(),
                 any(),
                 any(),
                 any(),
@@ -232,7 +230,6 @@ class UtbetalingsoppdragGeneratorTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         } returns
             Behandlingsinformasjon(
@@ -282,7 +279,6 @@ class UtbetalingsoppdragGeneratorTest {
         // Assert
         verify(exactly = 1) {
             behandlingsinformasjonUtleder.utled(
-                any(),
                 any(),
                 any(),
                 any(),
@@ -375,7 +371,6 @@ class UtbetalingsoppdragGeneratorTest {
                 any(),
                 any(),
                 any(),
-                any(),
             )
         } returns
             Behandlingsinformasjon(
@@ -440,7 +435,6 @@ class UtbetalingsoppdragGeneratorTest {
         // Assert
         verify(exactly = 1) {
             behandlingsinformasjonUtleder.utled(
-                any(),
                 any(),
                 any(),
                 any(),

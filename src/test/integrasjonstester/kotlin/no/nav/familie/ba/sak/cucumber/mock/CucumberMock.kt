@@ -410,6 +410,7 @@ class CucumberMock(
                     EndretMigreringsdatoUtleder(
                         behandlingHentOgPersisterService,
                         behandlingService,
+                        tilkjentYtelseRepository,
                     ),
                     clockProvider,
                 ),

@@ -55,11 +55,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -67,7 +66,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -113,11 +111,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = LocalDateTime.now(clock),
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -125,7 +122,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -171,14 +167,13 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
                 behandling = behandling,
             )
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -186,7 +181,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -232,8 +226,6 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
-
         val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
                 behandling = behandling,
@@ -252,7 +244,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -260,7 +252,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 false,
@@ -306,8 +297,6 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
-
         val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
                 behandling = behandling,
@@ -326,7 +315,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns YearMonth.now(clock)
 
         // Act
@@ -334,7 +323,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 false,
@@ -380,11 +368,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -392,7 +379,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -438,11 +424,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -450,7 +435,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -502,11 +486,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -514,7 +497,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -558,11 +540,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act & assert
@@ -571,7 +552,6 @@ class BehandlingsinformasjonUtlederTest {
                 behandlingsinformasjonUtleder.utled(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    tilkjentYtelse = tilkjentYtelse,
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                     sisteAndelPerKjede = mapOf(),
                     false,
@@ -607,11 +587,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act & assert
@@ -620,7 +599,6 @@ class BehandlingsinformasjonUtlederTest {
                 behandlingsinformasjonUtleder.utled(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
-                    tilkjentYtelse = tilkjentYtelse,
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                     sisteAndelPerKjede = mapOf(),
                     false,
@@ -650,11 +628,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns YearMonth.now(clock)
 
         // Act
@@ -662,7 +639,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -708,11 +684,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -720,7 +695,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 false,
@@ -766,11 +740,10 @@ class BehandlingsinformasjonUtlederTest {
                 vedtaksdato = null,
             )
 
-        val tilkjentYtelse = lagTilkjentYtelse(behandling)
         val forrigeTilkjentYtelse = null
 
         every {
-            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, tilkjentYtelse, forrigeTilkjentYtelse)
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
         } returns null
 
         // Act
@@ -778,7 +751,6 @@ class BehandlingsinformasjonUtlederTest {
             behandlingsinformasjonUtleder.utled(
                 saksbehandlerId = saksbehandlerId,
                 vedtak = vedtak,
-                tilkjentYtelse = tilkjentYtelse,
                 forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 sisteAndelPerKjede = mapOf(),
                 true,
