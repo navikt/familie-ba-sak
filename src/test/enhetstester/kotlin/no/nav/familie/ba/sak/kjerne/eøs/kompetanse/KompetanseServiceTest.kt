@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -43,6 +44,7 @@ internal class KompetanseServiceTest {
     val utbetalingTidslinjeService: UtbetalingTidslinjeService = mockk()
     val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
+    val clockProvider = TestClockProvider()
 
     val kompetanseService =
         KompetanseService(
@@ -57,6 +59,7 @@ internal class KompetanseServiceTest {
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
+            clockProvider = clockProvider,
         )
 
     @BeforeEach
