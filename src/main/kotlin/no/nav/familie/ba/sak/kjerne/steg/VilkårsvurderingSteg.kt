@@ -86,15 +86,15 @@ class VilkårsvurderingSteg(
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
+        if (!behandling.erSatsendring()) {
+            tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
+        }
+
         if (
             behandling.type in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING) &&
             !behandling.skalBehandlesAutomatisk
         ) {
             automatiskOppdaterValutakursService.resettValutakurserOgLagValutakurserEtterEndringstidspunkt(BehandlingId(behandling.id))
-        }
-
-        if (!behandling.erSatsendring()) {
-            tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
         }
 
         if (behandling.erMånedligValutajustering()) {
