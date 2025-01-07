@@ -41,7 +41,7 @@ class HåndterNyIdentService(
 
         val aktørId = identerFraPdl.hentAktivAktørId()
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-        val aktuellFagsakVedMerging = hentAktuellFagsak(identerFraPdl)
+        val aktuellFagsakVedMerging = hentAktuellFagsakForIdenthendelse(identerFraPdl)
 
         return when {
             // Personen er ikke i noen fagsaker
@@ -92,7 +92,7 @@ class HåndterNyIdentService(
         return task
     }
 
-    private fun hentAktuellFagsak(alleIdenterFraPdl: List<IdentInformasjon>): Fagsak? {
+    private fun hentAktuellFagsakForIdenthendelse(alleIdenterFraPdl: List<IdentInformasjon>): Fagsak? {
         val aktørerMedAktivPersonident =
             alleIdenterFraPdl
                 .hentAktørIder()
@@ -101,7 +101,7 @@ class HåndterNyIdentService(
 
         val fagsaker =
             aktørerMedAktivPersonident
-                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) }
+                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) + fagsakService.hentAlleFagsakerForAktør(aktør) }
 
         if (fagsaker.toSet().size > 1) {
             secureLogger.warn(
