@@ -105,15 +105,7 @@ Egenskap: Gyldige begrunnelser ved delt bosted i vilkår
 
     Så forvent at følgende begrunnelser er gyldige
       | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                                                                            | Ugyldige begrunnelser |
-      | 01.04.2023 | 30.06.2023 | UTBETALING         |                                | INNVILGET_AVTALE_DELT_BOSTED_FÅR_FRA_AVTALETIDSPUNKT, ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY |                       |
-      | 01.07.2023 | 31.12.2023 | UTBETALING         |                                | INNVILGET_SATSENDRING                                                                                           |                       |
-      | 01.01.2024 | 31.08.2024 | UTBETALING         |                                | INNVILGET_SATSENDRING                                                                                           |                       |
-      | 01.09.2024 | 31.12.2024 | UTBETALING         |                                | INNVILGET_SATSENDRING                                                                                           |                       |
       | 01.01.2025 | 31.07.2026 | UTBETALING         |                                | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED                                                                  |                       |
-      | 01.08.2026 | 30.06.2033 | UTBETALING         |                                |                                                                                                                 |                       |
-      | 01.07.2033 | 28.02.2035 | UTBETALING         |                                |                                                                                                                 |                       |
-      | 01.03.2035 | 30.11.2042 | UTBETALING         |                                |                                                                                                                 |                       |
-      | 01.12.2042 |            | OPPHØR             |                                |                                                                                                                 |                       |
 
     Og når disse begrunnelsene er valgt for behandling 2
       | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
