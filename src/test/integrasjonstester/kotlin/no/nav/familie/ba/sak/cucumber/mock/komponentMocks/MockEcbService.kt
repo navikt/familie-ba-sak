@@ -13,6 +13,10 @@ fun mockEcbService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition)
         val valuta = firstArg<String>()
         val dato = secondArg<LocalDate>()
 
+        if (dato.isAfter(dataFraCucumber.dagensDato)) {
+            throw IllegalArgumentException("Kan ikke hente valutakurs for dato $dato etter dagens dato ${dataFraCucumber.dagensDato}")
+        }
+
         val valutakurs =
             dataFraCucumber.valutakurs.values
                 .flatten()
