@@ -46,10 +46,10 @@ Egenskap: Brevbegrunnelser ved endring av kompetanse
       | 01.05.2021 | 31.03.2038 |                      | INNVILGET_SEKUNDÆRLAND_STANDARD                    |            |
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.05.2020 til 30.04.2021
-      | Begrunnelse                                        | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet |
-      | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | EØS  | 13.04.20             | 1           | NB      | Norge                          | Norge               | Polen                 | IKKE_AKTUELT              | ARBEIDER         |
+      | Begrunnelse                                        | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | Gjelder søker |
+      | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE | EØS  | 13.04.20             | 1           | NB      | Norge                          | Norge               | Polen                 | IKKE_AKTUELT              | ARBEIDER         | Nei           |
 
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.05.2021 til 31.03.2038
-      | Begrunnelse                     | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet |
-      | INNVILGET_SEKUNDÆRLAND_STANDARD | EØS  | 13.04.20             | 1           | NB      | Norge                          | Polen               | Polen                 | I_ARBEID                  | ARBEIDER         |
+      | Begrunnelse                     | Type | Barnas fødselsdatoer | Antall barn | Målform | Annen forelders aktivitetsland | Barnets bostedsland | Søkers aktivitetsland | Annen forelders aktivitet | Søkers aktivitet | Gjelder søker |
+      | INNVILGET_SEKUNDÆRLAND_STANDARD | EØS  | 13.04.20             | 1           | NB      | Norge                          | Polen               | Polen                 | I_ARBEID                  | ARBEIDER         | Nei           |
 

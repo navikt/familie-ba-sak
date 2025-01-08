@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelerOppdatertAbonnent
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -27,20 +28,25 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilForrigeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class TilpassKompetanserTilRegelverkService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val utbetalingTidslinjeService: UtbetalingTidslinjeService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
+    private val clockProvider: ClockProvider,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
@@ -71,6 +77,7 @@ class TilpassKompetanserTilRegelverkService(
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
                 annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
+                inneværendeMåned = YearMonth.now(clockProvider.get()),
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -81,6 +88,7 @@ class TilpassKompetanserTilRegelverkService(
 class TilpassKompetanserTilEndretUtebetalingAndelerService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val utbetalingTidslinjeService: UtbetalingTidslinjeService,
+    private val clockProvider: ClockProvider,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) : EndretUtbetalingAndelerOppdatertAbonnent {
@@ -111,6 +119,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
                 annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
+                inneværendeMåned = YearMonth.now(clockProvider.get()),
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -122,6 +131,7 @@ fun tilpassKompetanserTilRegelverk(
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
     utbetalesIkkeOrdinærEllerUtvidetTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
     annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
+    inneværendeMåned: YearMonth,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer =
         barnaRegelverkTidslinjer
@@ -143,6 +153,11 @@ fun tilpassKompetanserTilRegelverk(
             value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
+        }.mapValues { (_, value) ->
+            val nåMåned = inneværendeMåned.tilTidspunkt()
+            value
+                .beskjærTilOgMed(nåMåned)
+                .forlengFremtidTilUendelig(nåMåned.tilForrigeMåned())
         }.tilSkjemaer()
 }
 

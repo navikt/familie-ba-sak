@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.Period
 
 @Service
 class SettPåVentService(
@@ -52,9 +51,9 @@ class SettPåVentService(
 
         behandling.status = BehandlingStatus.SATT_PÅ_VENT
         behandlingHentOgPersisterService.lagreOgFlush(behandling)
-        oppgaveService.forlengFristÅpneOppgaverPåBehandling(
+        oppgaveService.settNyFristPåOppgaver(
             behandlingId = behandling.id,
-            forlengelse = Period.between(LocalDate.now(), frist),
+            nyFrist = frist,
         )
 
         return settPåVent
@@ -81,14 +80,13 @@ class SettPåVentService(
         )
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
-        val gammelFrist = aktivSettPåVent.frist
         aktivSettPåVent.frist = frist
         aktivSettPåVent.årsak = årsak
         val settPåVent = lagreEllerOppdater(aktivSettPåVent)
 
-        oppgaveService.forlengFristÅpneOppgaverPåBehandling(
+        oppgaveService.settNyFristPåOppgaver(
             behandlingId = behandlingId,
-            forlengelse = Period.between(gammelFrist, frist),
+            nyFrist = frist,
         )
 
         return settPåVent
