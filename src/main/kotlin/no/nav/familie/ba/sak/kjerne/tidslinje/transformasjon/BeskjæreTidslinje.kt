@@ -114,7 +114,7 @@ fun <K, V, T : Tidsenhet> Map<K, Tidslinje<V, T>>.beskjærTilOgMed(
 ): Map<K, Tidslinje<V, T>> = this.mapValues { (_, tidslinje) -> tidslinje.beskjærTilOgMed(tilOgMed) }
 
 /**
- * Extension-metode for å sette tom dato på en tidslinje til uendelig fra et gitt tidspunkt
+ * Extension-metode for å forlenge fremtid til uendelig for en tidslinje, hvis tilOgMed er senere enn [senesteEndeligeTidspunkt]
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(senesteEndeligeTidspunkt: Tidspunkt<T>): Tidslinje<I, T> {
     val tilOgMed = this.tilOgMed()
