@@ -335,7 +335,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             endringsabonnenter = utenlandskPeriodebeløpEndretAbonnenter,
             kompetanseRepository = kompetanseRepository,
-            unleashService = unleashService,
+            clockProvider = clockProvider,
         )
 
     val endringsabonnenterForKompetanse = listOf(tilpassUtenlandskePeriodebeløpTilKompetanserService, tilbakestillBehandlingFraKompetanseEndringService)

@@ -6,7 +6,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassUtenlandskePe
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 /**
  * Syntaks:
@@ -16,7 +19,9 @@ import org.junit.jupiter.api.Test
  * '<siffer>': Skjema har oppgitt beløp og valutakode
  */
 class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
+    val inneværendeMåned = YearMonth.of(2021, 1)
     val jan2020 = jan(2020)
+    val nov2020 = nov(2020)
     val barn1 = tilfeldigPerson()
     val barn2 = tilfeldigPerson()
     val barn3 = tilfeldigPerson()
@@ -43,7 +48,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .bygg()
 
         val faktiskeUtenlandskePeriodebeløp =
-            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser)
+            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser, inneværendeMåned)
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeUtenlandskePeriodebeløp)
     }
@@ -61,7 +66,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .byggKompetanser()
 
         val faktiskeUtenlandskePeriodebeløp =
-            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser)
+            tilpassUtenlandskePeriodebeløpTilKompetanser(forrigeUtenlandskePeriodebeløp, gjeldendeKompetanser, inneværendeMåned)
 
         val forventedeUtenlandskePeriodebeløp =
             UtenlandskPeriodebeløpBuilder(jan2020)
@@ -69,5 +74,28 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserTest {
                 .bygg()
 
         assertEqualsUnordered(forventedeUtenlandskePeriodebeløp, faktiskeUtenlandskePeriodebeløp)
+    }
+
+    @Test
+    fun `test at ikke fremtidige utenlandske periodebeløp genereres`() {
+        val gjeldendeUtenlandskePeriodeBeløp =
+            UtenlandskPeriodebeløpBuilder(nov2020)
+                .medBeløp("12345", "PLN", "PL", barn1)
+                .bygg()
+
+        val kompetanser =
+            KompetanseBuilder(nov2020)
+                .medKompetanse("SSSSS>", barn1, annenForeldersAktivitetsland = "PL")
+                .bygg()
+
+        val forventedeUtenlandskePeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(nov2020)
+                .medBeløp("123>", "PLN", "PL", barn1)
+                .bygg()
+
+        val faktiskeUtenlandskPeriodebeløp =
+            tilpassUtenlandskePeriodebeløpTilKompetanser(gjeldendeUtenlandskePeriodeBeløp, kompetanser, inneværendeMåned)
+
+        assertThat(faktiskeUtenlandskPeriodebeløp).isEqualTo(forventedeUtenlandskePeriodebeløp)
     }
 }
