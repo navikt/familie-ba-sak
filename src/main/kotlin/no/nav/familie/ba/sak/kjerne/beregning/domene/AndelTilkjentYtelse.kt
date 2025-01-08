@@ -175,7 +175,7 @@ enum class YtelseType(
     val klassifisering: String,
 ) {
     ORDINÆR_BARNETRYGD("BATR"),
-    UTVIDET_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BAUTV-OP"),
     SMÅBARNSTILLEGG("BATRSMA"),
     ;
 

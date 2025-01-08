@@ -125,6 +125,7 @@ data class EØSBegrunnelseDataMedKompetanse(
     val sokersAktivitet: KompetanseAktivitet,
     val sokersAktivitetsland: String?,
     val barnasFodselsdatoer: String,
+    val gjelderSoker: Boolean?,
     val antallBarn: Int,
     val maalform: String,
 ) : EØSBegrunnelseData() {
