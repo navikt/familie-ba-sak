@@ -10,11 +10,13 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 class TilpassKompetanserTilRegelverkTest {
     val jan2020 = jan(2020)
@@ -53,6 +55,7 @@ class TilpassKompetanserTilRegelverkTest {
                 barnaRegelverkTidslinjer = eøsPerioder,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
                 annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetTidslinje,
+                inneværendeMåned = YearMonth.now(),
             )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -74,6 +77,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = eøsPerioder,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -101,6 +105,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             )
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -132,6 +137,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -177,6 +183,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -204,6 +211,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -246,6 +254,7 @@ class TilpassKompetanserTilRegelverkTest {
                 kompetanser,
                 barnasRegelverkResultatTidslinjer,
                 emptyMap(),
+                inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
         Assertions.assertEquals(forventedeKompetanser, faktiskeKompetanser)
@@ -282,6 +291,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = barnasHarEtterbetaling3År,
+                inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
@@ -310,6 +320,7 @@ class TilpassKompetanserTilRegelverkTest {
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
                 utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
+                inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
         val forventedeKompetanser =
@@ -318,6 +329,46 @@ class TilpassKompetanserTilRegelverkTest {
                 .medKompetanse("     ----", barn2)
                 .byggKompetanser()
                 .sortedBy { it.fom }
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal sette tom på kompetanse til uendelig dersom tom på tidslinje er lik eller senere nåværende måned`() {
+        val inneværendeMåned = YearMonth.of(2024, 12)
+        val sep2024 = sep(2024)
+
+        val kompetanser =
+            KompetanseBuilder(sep2024)
+                .medKompetanse("----", barn1, barn2)
+                .medKompetanse("    --", barn1)
+                .medKompetanse("      ->", barn1, barn2)
+                .byggKompetanser()
+
+        val barnasRegelverkResultatTidslinjer =
+            mapOf(
+                barn1.aktør to "EEEEEEEEEEE".tilRegelverkResultatTidslinje(sep2024),
+                barn2.aktør to "EEEE  EE".tilRegelverkResultatTidslinje(sep2024),
+            )
+
+        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
+            mapOf(
+                Pair(barn1.aktør, "FFFFFFFFFFF".somBoolskTidslinje(sep2024)),
+                Pair(barn2.aktør, "FFFFTTFF".somBoolskTidslinje(sep2024)),
+            )
+
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = kompetanser,
+                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
+                inneværendeMåned = inneværendeMåned,
+            )
+
+        val forventedeKompetanser =
+            KompetanseBuilder(sep2024)
+                .medKompetanse("->", barn1, barn2)
+                .byggKompetanser()
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

@@ -18,25 +18,25 @@
     <properties>
         <java.version>21</java.version>
         <kotlin.version>2.1.0</kotlin.version>
-        <kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
-        <kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
+        <kotlin.compiler.languageVersion>2.1</kotlin.compiler.languageVersion>
+        <kotlin.compiler.apiVersion>2.1</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20241212142143_6cd44ac</prosessering.version>
-        <felles.version>3.20241127123724_adfc561</felles.version>
+        <felles.version>3.20250106100611_6ae49d2</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20241206132953_18ef9da</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20241220141021_9e86ad8</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20241209130157_6873c2d</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20241125101646_0fefaff</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20250106092521_bcb342f</utbetalingsgenerator.version>
         <cucumber.version>7.20.1</cucumber.version>
-        <mockk.version>1.13.13</mockk.version>
+        <mockk.version>1.13.14</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.11</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <sentry.version>7.19.0</sentry.version>
+        <sentry.version>7.20.0</sentry.version>
         <kotlinx.version>1.10.0</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -483,7 +483,7 @@
                         <dependency>
                             <groupId>com.pinterest.ktlint</groupId>
                             <artifactId>ktlint-cli</artifactId>
-                            <version>1.4.1</version>
+                            <version>1.5.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
