@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -39,7 +40,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
             utenlandskPeriodebeløpRepository,
             emptyList(),
             kompetanseRepository,
-            unleashService,
+            TestClockProvider(),
         )
 
     @BeforeEach

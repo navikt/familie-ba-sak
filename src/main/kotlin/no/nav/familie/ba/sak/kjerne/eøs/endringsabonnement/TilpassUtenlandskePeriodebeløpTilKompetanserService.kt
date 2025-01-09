@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
@@ -17,16 +18,20 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilForrigeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forlengFremtidTilUendelig
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
     private val kompetanseRepository: FinnPeriodeOgBarnSkjemaRepository<Kompetanse>,
-    val unleashService: UnleashService,
+    private val clockProvider: ClockProvider,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     val skjemaService =
         PeriodeOgBarnSkjemaService(
@@ -57,8 +62,9 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
 
         val oppdaterteUtenlandskPeriodebeløp =
             tilpassUtenlandskePeriodebeløpTilKompetanser(
-                forrigeUtenlandskePeriodebeløp,
-                gjeldendeKompetanser,
+                forrigeUtenlandskePeriodebeløp = forrigeUtenlandskePeriodebeløp,
+                gjeldendeKompetanser = gjeldendeKompetanser,
+                inneværendeMåned = YearMonth.now(clockProvider.get()),
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(
@@ -72,6 +78,7 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
 internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
     forrigeUtenlandskePeriodebeløp: Iterable<UtenlandskPeriodebeløp>,
     gjeldendeKompetanser: Iterable<Kompetanse>,
+    inneværendeMåned: YearMonth,
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer =
         gjeldendeKompetanser
@@ -89,6 +96,11 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
                 else -> upb
             }
+        }.mapValues { (_, value) ->
+            val nåMåned = inneværendeMåned.tilTidspunkt()
+            value
+                .beskjærTilOgMed(nåMåned)
+                .forlengFremtidTilUendelig(senesteEndeligeTidspunkt = nåMåned.tilForrigeMåned())
         }.tilSkjemaer()
 }
 
