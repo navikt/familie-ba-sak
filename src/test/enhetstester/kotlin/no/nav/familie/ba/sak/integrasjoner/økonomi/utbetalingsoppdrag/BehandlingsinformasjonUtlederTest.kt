@@ -231,7 +231,7 @@ class BehandlingsinformasjonUtlederTest {
                 behandling = behandling,
             )
 
-        val lagAndelTilkjentYtelse =
+        val andelTilkjentYtelse =
             lagAndelTilkjentYtelse(
                 behandling = behandling,
                 fom = YearMonth.now(clock),
@@ -240,7 +240,7 @@ class BehandlingsinformasjonUtlederTest {
 
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("1", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse.tilAndelDataLongId(true),
+                IdentOgType("1", YtelsetypeBA.ORDINÆR_BARNETRYGD) to andelTilkjentYtelse.tilAndelDataLongId(true),
             )
 
         every {

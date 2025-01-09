@@ -2,51 +2,64 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Component
 import java.time.YearMonth
 
 @Component
 class EndretMigreringsdatoUtleder(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val behandlingService: BehandlingService,
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun utled(
         fagsak: Fagsak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
     ): YearMonth? {
-        val forrigeTilstandFraDato = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom }
+        val førsteAndelFomDatoForrigeBehandling = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom } ?: return null
 
-        if (forrigeTilstandFraDato == null) {
-            return null
-        }
-
-        val erMigrertSak =
+        val behandlingerIFagsak =
             behandlingHentOgPersisterService
                 .hentBehandlinger(fagsak.id)
-                .any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+                .filter { !it.erHenlagt() }
 
-        if (!erMigrertSak) {
+        val migreringsBehandlingerIFagsak = behandlingerIFagsak.filter { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD }
+
+        val førsteBehandlingErMigrering = behandlingerIFagsak.minBy { it.aktivertTidspunkt }.type == BehandlingType.MIGRERING_FRA_INFOTRYGD
+
+        // Dersom det det ikke finnes noen migreringsbehandlinger i fagsak eller det kun finnes 1, og dette er den første behandlingen, vil det ikke være behov for å opphøre fra migreringsdato.
+        if (migreringsBehandlingerIFagsak.isEmpty() || migreringsBehandlingerIFagsak.size <= 1 && førsteBehandlingErMigrering) {
             return null
         }
 
-        val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(fagsakId = fagsak.id)
+        // Dersom det ikke finnes noen lagret BehandlingMigreringsInfo tilknyttet fagsak har vi ingen dato å opphøre fra
+        val behandlingMigreringsinfo = behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsakId = fagsak.id) ?: return null
 
-        if (migreringsdatoPåFagsak == null) {
-            return null
+        // Plusser på 1 mnd på migreringsdato da barnetrygden kun skal løpe fra BA-sak tidligst mnd etter migrering.
+        val migreringsdatoPåFagsakPlussEnMnd = behandlingMigreringsinfo.migreringsdato.plusMonths(1)
+        if (migreringsdatoPåFagsakPlussEnMnd.toYearMonth().isAfter(førsteAndelFomDatoForrigeBehandling)) {
+            throw IllegalStateException("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
         }
 
-        val nyTilstandFraDato = migreringsdatoPåFagsak.toYearMonth().plusMonths(1)
+        // Sjekker om vi har opphørt fra migreringsdato pluss 1 mnd i en av behandlingene etter at migreringsdato sist ble endret.
+        // Har vi opphørt fra denne datoen tidligere trenger vi ikke å gjøre det igjen.
+        val fagsakOpphørtFraMigreringsdatoIEnAvBehandlingeneEtterMigreringsdatoBleEndret =
+            tilkjentYtelseRepository
+                .findByFagsak(fagsakId = fagsak.id)
+                .filter { it.behandling.aktivertTidspunkt > behandlingMigreringsinfo.endretTidspunkt && it.utbetalingsoppdrag != null }
+                .map { objectMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
+                .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom == migreringsdatoPåFagsakPlussEnMnd } }
 
-        if (nyTilstandFraDato.isAfter(forrigeTilstandFraDato)) {
-            throw IllegalStateException("Ny migreringsdato kan ikke være etter forrige migreringsdato")
-        }
-
-        return if (forrigeTilstandFraDato.isAfter(nyTilstandFraDato)) {
-            nyTilstandFraDato
+        return if (fagsakOpphørtFraMigreringsdatoIEnAvBehandlingeneEtterMigreringsdatoBleEndret) {
+            null
+        } else if (førsteAndelFomDatoForrigeBehandling.isAfter(migreringsdatoPåFagsakPlussEnMnd.toYearMonth())) {
+            migreringsdatoPåFagsakPlussEnMnd.toYearMonth()
         } else {
             null
         }
