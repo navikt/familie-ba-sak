@@ -107,16 +107,15 @@ class ManueltBrevRequestTest {
                 fritekstAvsnitt = "Fritekst avsnitt",
             )
         val mottakerNavn = "mottakerNavn"
-        brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data.apply {
-            assertThat(flettefelter.fodselsnummer).containsExactly(fnr)
-            assertThat(flettefelter.navn).containsExactly(mottakerNavn)
-            assertThat(flettefelter.organisasjonsnummer).isNull()
-            assertThat(flettefelter.gjelder).isNull()
-            (delmalData as UtbetalingEtterKAVedtakData.DelmalData).apply {
-                assertThat(signatur.saksbehandler).containsExactly("Saks Behandlersen")
-                assertThat(fritekstAvsnitt?.fritekstAvsnittTekst).containsExactly("Fritekst avsnitt")
-            }
+        val brev = brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as UtbetalingEtterKAVedtakData
+        with(brev.flettefelter) {
+            assertThat(fodselsnummer).containsExactly(fnr)
+            assertThat(navn).containsExactly(mottakerNavn)
+            assertThat(organisasjonsnummer).isNull()
+            assertThat(gjelder).isNull()
+            assertThat(fritekst).containsExactly("Fritekst avsnitt")
         }
+        assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
     }
 
     @Test
