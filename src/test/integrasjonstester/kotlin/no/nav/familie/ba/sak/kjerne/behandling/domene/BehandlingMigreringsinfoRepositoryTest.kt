@@ -47,7 +47,7 @@ class BehandlingMigreringsinfoRepositoryTest(
         }
 
         @Test
-        fun `Skal returnere tom liste dersom det ikke finnes noen BehandlingMigreringsinfo tilknyttet fagsak`() {
+        fun `Skal returnere null dersom det ikke finnes noen BehandlingMigreringsinfo tilknyttet fagsak`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))

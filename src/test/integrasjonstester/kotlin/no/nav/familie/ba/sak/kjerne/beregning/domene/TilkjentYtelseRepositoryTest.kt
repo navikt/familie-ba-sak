@@ -89,7 +89,20 @@ class TilkjentYtelseRepositoryTest(
             tilkjentYtelseRepository.save(
                 lagTilkjentYtelse(
                     behandling = behandling,
-                    utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 1, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, opphør = Opphør(migreringsdatoPluss1Mnd))))),
+                    utbetalingsoppdrag =
+                        objectMapper.writeValueAsString(
+                            lagUtbetalingsoppdrag(
+                                listOf(
+                                    lagUtbetalingsperiode(
+                                        behandlingId = behandling.id,
+                                        periodeId = 1,
+                                        forrigePeriodeId = null,
+                                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                                        opphør = Opphør(migreringsdatoPluss1Mnd),
+                                    ),
+                                ),
+                            ),
+                        ),
                 ),
             )
 
@@ -104,7 +117,7 @@ class TilkjentYtelseRepositoryTest(
         }
 
         @Test
-        fun `skal returnere false dersom det ikke er sendt opphør fra migreringsdato pluss 1 mnd tidligere`() {
+        fun `skal returnere tom liste dersom det ikke er sendt opphør fra migreringsdato pluss 1 mnd tidligere`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
@@ -116,7 +129,7 @@ class TilkjentYtelseRepositoryTest(
                 )
 
             // Assert
-            assertThat(tilkjenteYtelser).hasSize(0)
+            assertThat(tilkjenteYtelser).isEmpty()
         }
     }
 }
