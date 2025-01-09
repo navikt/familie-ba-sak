@@ -12,9 +12,9 @@ Egenskap: Utbetalingsoppdrag: Endring av migreringsdato
       | 2            | 12.2020               |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Behandlingstype         | Behandlingsårsak     |
-      | 1            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD |                      |
-      | 2            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD | ENDRE_MIGRERINGSDATO |
+      | BehandlingId | Fra dato | Til dato | Beløp | Behandlingstype         |
+      | 1            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD |
+      | 2            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD |
 
     Når beregner utbetalingsoppdrag
 
@@ -33,9 +33,9 @@ Egenskap: Utbetalingsoppdrag: Endring av migreringsdato
       | 2            | 03.2021               |
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Behandlingstype         | Behandlingsårsak     |
-      | 1            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD |                      |
-      | 2            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD | ENDRE_MIGRERINGSDATO |
+      | BehandlingId | Fra dato | Til dato | Beløp | Behandlingstype         |
+      | 1            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD |
+      | 2            | 03.2021  | 03.2021  | 700   | MIGRERING_FRA_INFOTRYGD |
 
     Når beregner utbetalingsoppdrag
 
