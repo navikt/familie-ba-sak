@@ -136,6 +136,7 @@ class CucumberMock(
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
     val oppdaterUtvidetKlassekodeKjøringRepository = mockOppdaterUtvidetKlassekodeKjøringRepository()
+    val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -409,7 +410,7 @@ class CucumberMock(
                 BehandlingsinformasjonUtleder(
                     EndretMigreringsdatoUtleder(
                         behandlingHentOgPersisterService,
-                        behandlingService,
+                        behandlingMigreringsinfoRepository,
                         tilkjentYtelseRepository,
                     ),
                     clockProvider,

@@ -8,8 +8,10 @@ import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
@@ -22,12 +24,12 @@ import java.time.YearMonth
 
 class EndretMigreringsdatoUtlederTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val behandlingService: BehandlingService = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository = mockk()
     private val endretMigreringsdatoUtleder: EndretMigreringsdatoUtleder =
         EndretMigreringsdatoUtleder(
             behandlingHentOgPersisterService,
-            behandlingService,
+            behandlingMigreringsinfoRepository,
             tilkjentYtelseRepository,
         )
 
@@ -35,8 +37,6 @@ class EndretMigreringsdatoUtlederTest {
     fun `skal returnere null hvis forrige tilkjente ytelse er null`() {
         // Arrange
         val fagsak = Fagsak(0L, randomAktør())
-
-        val tilkjentYtelse = lagTilkjentYtelse()
 
         // Act
         val endretMigreringsdato =
@@ -60,7 +60,7 @@ class EndretMigreringsdatoUtlederTest {
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             )
 
-        val tilkjentYtelse =
+        val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
                 behandling = behandling,
                 lagAndelerTilkjentYtelse = {
@@ -72,7 +72,7 @@ class EndretMigreringsdatoUtlederTest {
         val endretMigreringsdato =
             endretMigreringsdatoUtleder.utled(
                 fagsak = fagsak,
-                forrigeTilkjentYtelse = tilkjentYtelse,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
             )
 
         // Assert
@@ -153,7 +153,7 @@ class EndretMigreringsdatoUtlederTest {
         } returns listOf(behandling)
 
         every {
-            behandlingService.hentMigreringsdatoPåFagsak(fagsak.id)
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsak.id)
         } returns null
 
         // Act
@@ -170,94 +170,100 @@ class EndretMigreringsdatoUtlederTest {
     @Test
     fun `skal skal kaste exception om man prøver å sette ny migreringsdato etter forrige migreringsdato`() {
         // Arrange
-        val dagensDato = LocalDate.of(2024, 11, 1)
+        val migreringsdato = LocalDate.of(2024, 11, 1)
+        val migreringsdatoEndretDato = LocalDate.of(2024, 5, 1)
 
         val fagsak = Fagsak(0L, randomAktør())
 
-        val behandling =
+        val migreringsBehandling1 =
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
             )
 
-        val tilkjentYtelse =
+        val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
-                behandling = behandling,
+                behandling = migreringsBehandling1,
                 lagAndelerTilkjentYtelse = {
                     setOf(
                         lagAndelTilkjentYtelse(
                             tilkjentYtelse = it,
-                            fom = dagensDato.toYearMonth(),
-                            tom = dagensDato.plusMonths(1).toYearMonth(),
+                            fom = migreringsdato.toYearMonth(),
+                            tom = migreringsdato.plusMonths(1).toYearMonth(),
                         ),
                     )
                 },
             )
 
-        every {
-            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
-        } returns listOf(behandling)
+        val migreringsBehandling2 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            )
 
         every {
-            behandlingService.hentMigreringsdatoPåFagsak(fagsak.id)
-        } returns dagensDato
+            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
+        } returns listOf(migreringsBehandling1, migreringsBehandling2)
+
+        every {
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsak.id)
+        } returns
+            BehandlingMigreringsinfo(
+                behandling = migreringsBehandling1,
+                migreringsdato = migreringsdato,
+            ).also { it.endretTidspunkt = migreringsdatoEndretDato.atStartOfDay() }
 
         // Act & assert
         val exception =
             assertThrows<IllegalStateException> {
                 endretMigreringsdatoUtleder.utled(
                     fagsak = fagsak,
-                    forrigeTilkjentYtelse = tilkjentYtelse,
+                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
                 )
             }
         assertThat(exception.message).isEqualTo("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
     }
 
     @Test
-    fun `skal returnere ny migreringsdato pluss 1 mnd om man ikke har opphørt fra ny migreringsdato pluss 1 mnd i en tidligere behandling`() {
+    fun `skal returnere null dersom det kun finnes 1 behandling av typen MIGRERING_FRA_INFOTRYGD og dette er den første behandlingen i fagsaken`() {
         // Arrange
-        val dagensDato = LocalDate.of(2024, 11, 1)
+        val migreringsdato = LocalDate.of(2021, 11, 1)
 
         val fagsak = Fagsak(0L, randomAktør())
 
-        val behandling =
+        val migreringsBehandling1 =
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
             )
 
         val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
-                behandling = behandling,
+                behandling = migreringsBehandling1,
                 lagAndelerTilkjentYtelse = {
                     setOf(
                         lagAndelTilkjentYtelse(
                             tilkjentYtelse = it,
-                            fom = dagensDato.plusMonths(2).toYearMonth(),
-                            tom = dagensDato.plusMonths(3).toYearMonth(),
+                            fom = migreringsdato.plusMonths(2).toYearMonth(),
+                            tom = migreringsdato.plusMonths(3).toYearMonth(),
                         ),
                     )
                 },
             )
 
+        val behandling2 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+            )
+
         every {
             behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
-        } returns listOf(behandling)
-
-        every {
-            behandlingService.hentMigreringsdatoPåFagsak(fagsak.id)
-        } returns dagensDato
-
-        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
-            listOf(
-                lagTilkjentYtelse(
-                    behandling = behandling,
-                    utbetalingsoppdrag =
-                        objectMapper.writeValueAsString(
-                            lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD))),
-                        ),
-                ),
-            )
+        } returns listOf(migreringsBehandling1, behandling2)
 
         // Act
         val endretMigreringsdato =
@@ -267,61 +273,133 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         // Assert
-        assertThat(endretMigreringsdato).isEqualTo(YearMonth.of(2024, 12))
+        assertThat(endretMigreringsdato).isNull()
     }
 
     @Test
-    fun `skal returnere null dersom man allerede har opphørt fra migreringsdato pluss 1 mnd`() {
+    fun `skal returnere ny migreringsdato pluss 1 mnd om man ikke har opphørt fra ny migreringsdato pluss 1 mnd i en tidligere behandling`() {
         // Arrange
-        val dagensDato = LocalDate.of(2024, 11, 1)
+        val migreringsdato = LocalDate.of(2021, 11, 1)
+        val migreringsdatoEndretDato = LocalDate.of(2024, 5, 1)
 
         val fagsak = Fagsak(0L, randomAktør())
 
-        val behandling =
+        val migreringsBehandling1 =
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
             )
 
         val forrigeTilkjentYtelse =
             lagTilkjentYtelse(
-                behandling = behandling,
+                behandling = migreringsBehandling1,
                 lagAndelerTilkjentYtelse = {
                     setOf(
                         lagAndelTilkjentYtelse(
                             tilkjentYtelse = it,
-                            fom = dagensDato.plusMonths(2).toYearMonth(),
-                            tom = dagensDato.plusMonths(3).toYearMonth(),
+                            fom = migreringsdato.plusMonths(2).toYearMonth(),
+                            tom = migreringsdato.plusMonths(3).toYearMonth(),
                         ),
                     )
                 },
             )
 
+        val migreringsBehandling2 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
+
         every {
             behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
-        } returns listOf(behandling)
+        } returns listOf(migreringsBehandling1, migreringsBehandling2)
 
         every {
-            behandlingService.hentMigreringsdatoPåFagsak(fagsak.id)
-        } returns dagensDato
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsak.id)
+        } returns
+            BehandlingMigreringsinfo(
+                behandling = migreringsBehandling1,
+                migreringsdato = migreringsdato,
+            ).also { it.endretTidspunkt = migreringsdatoEndretDato.atStartOfDay() }
 
-        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
-            listOf(
-                lagTilkjentYtelse(
-                    behandling = behandling,
-                    utbetalingsoppdrag =
-                        objectMapper.writeValueAsString(
-                            lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD))),
-                        ),
-                ),
-                lagTilkjentYtelse(
-                    behandling = behandling,
-                    utbetalingsoppdrag =
-                        objectMapper.writeValueAsString(
-                            lagUtbetalingsoppdrag(listOf(lagUtbetalingsperiode(behandlingId = behandling.id, periodeId = 0, forrigePeriodeId = null, ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD, opphør = Opphør(dagensDato.plusMonths(1))))),
-                        ),
-                ),
+        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(forrigeTilkjentYtelse)
+
+        // Act
+        val endretMigreringsdato =
+            endretMigreringsdatoUtleder.utled(
+                fagsak = fagsak,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
             )
+
+        // Assert
+        assertThat(endretMigreringsdato).isEqualTo(YearMonth.of(2021, 12))
+    }
+
+    @Test
+    fun `skal returnere null dersom man allerede har opphørt fra migreringsdato pluss 1 mnd`() {
+        // Arrange
+        val migreringsdato = LocalDate.of(2024, 11, 1)
+        val migreringsdatoEndretDato = LocalDate.of(2024, 11, 1)
+
+        val fagsak = Fagsak(0L, randomAktør())
+
+        val migreringsBehandling1 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            )
+
+        val forrigeTilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = migreringsBehandling1,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = migreringsdato.plusMonths(2).toYearMonth(),
+                            tom = migreringsdato.plusMonths(3).toYearMonth(),
+                        ),
+                    )
+                },
+                utbetalingsoppdrag =
+                    objectMapper.writeValueAsString(
+                        lagUtbetalingsoppdrag(
+                            listOf(
+                                lagUtbetalingsperiode(
+                                    behandlingId = migreringsBehandling1.id,
+                                    periodeId = 0,
+                                    forrigePeriodeId = null,
+                                    ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                                    opphør = Opphør(migreringsdato.plusMonths(1)),
+                                ),
+                            ),
+                        ),
+                    ),
+            )
+
+        val migreringsBehandling2 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
+
+        every {
+            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
+        } returns listOf(migreringsBehandling1, migreringsBehandling2)
+
+        every {
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsak.id)
+        } returns
+            BehandlingMigreringsinfo(
+                behandling = migreringsBehandling1,
+                migreringsdato = migreringsdato,
+            ).also { it.endretTidspunkt = migreringsdatoEndretDato.atStartOfDay() }
+
+        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(forrigeTilkjentYtelse)
 
         // Act
         val endretMigreringsdato =
