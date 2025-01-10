@@ -113,8 +113,8 @@ class ManueltBrevRequestTest {
             assertThat(navn).containsExactly(mottakerNavn)
             assertThat(organisasjonsnummer).isNull()
             assertThat(gjelder).isNull()
-            assertThat(fritekst).containsExactly("Fritekst avsnitt")
         }
+        assertThat(brev.fritekst).containsExactly("Fritekst avsnitt")
         assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
     }
 
