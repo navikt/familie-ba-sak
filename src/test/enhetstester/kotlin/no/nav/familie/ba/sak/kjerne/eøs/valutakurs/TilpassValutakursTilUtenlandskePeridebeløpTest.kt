@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassValutakurserTilUtenlandskePeriodebeløp
@@ -20,7 +19,7 @@ import java.time.YearMonth
  * '<siffer>': Skjema har oppgitt kurs og valutakode
  */
 class TilpassValutakursTilUtenlandskePeridebeløpTest {
-    private val clockProvider = lagClockProviderMedFastTidspunkt(YearMonth.of(2021, 1))
+    private val inneværendeMåned = YearMonth.of(2021, 1)
     private val jan2020 = jan(2020)
     private val nov2020 = nov(2020)
     private val barn1 = tilfeldigPerson()
@@ -50,7 +49,7 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
                 .bygg()
 
         val faktiskeValutakurser =
-            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, clockProvider)
+            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, inneværendeMåned)
 
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
@@ -73,7 +72,7 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
                 .bygg()
 
         val faktiskeValutakurser =
-            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, clockProvider)
+            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, inneværendeMåned)
 
         assertEqualsUnordered(forventedeValutakurser, faktiskeValutakurser)
     }
@@ -96,7 +95,7 @@ class TilpassValutakursTilUtenlandskePeridebeløpTest {
                 .bygg()
 
         val faktiskeValutakurser =
-            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, clockProvider)
+            tilpassValutakurserTilUtenlandskePeriodebeløp(gjeldendeValutakurser, utenlandskePeriodebeløp, inneværendeMåned)
 
         assertThat(faktiskeValutakurser).isEqualTo(forventedeValutakurser)
     }

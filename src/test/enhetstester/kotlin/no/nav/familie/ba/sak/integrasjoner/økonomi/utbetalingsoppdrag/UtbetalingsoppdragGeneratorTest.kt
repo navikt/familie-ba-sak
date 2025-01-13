@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
-import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
 import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
@@ -138,7 +137,15 @@ class UtbetalingsoppdragGeneratorTest {
             )
 
         // Assert
-        verify(exactly = 1) { behandlingsinformasjonUtleder.utled(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            behandlingsinformasjonUtleder.utled(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
         verify(exactly = 1) {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(any(), any())
         }
@@ -269,7 +276,15 @@ class UtbetalingsoppdragGeneratorTest {
             )
 
         // Assert
-        verify(exactly = 1) { behandlingsinformasjonUtleder.utled(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            behandlingsinformasjonUtleder.utled(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
         verify(exactly = 1) {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(any(), any())
         }
@@ -391,20 +406,6 @@ class UtbetalingsoppdragGeneratorTest {
         }
 
         every { andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(any(), any()) } returns emptyList()
-        every { andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnNyeAndelerForOppdaterUtvidetKlassekodeBehandling(any(), any()) } returns
-            listOf(
-                AndelDataLongId(
-                    id = andelTilkjentYtelse.id,
-                    fom = andelTilkjentYtelse.stønadFom,
-                    tom = andelTilkjentYtelse.stønadTom,
-                    beløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
-                    personIdent = andelTilkjentYtelse.aktør.aktivFødselsnummer(),
-                    type = YtelsetypeBA.UTVIDET_BARNETRYGD,
-                    periodeId = null,
-                    forrigePeriodeId = null,
-                    kildeBehandlingId = null,
-                ),
-            )
 
         every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
         // Act
@@ -417,7 +418,15 @@ class UtbetalingsoppdragGeneratorTest {
             )
 
         // Assert
-        verify(exactly = 1) { behandlingsinformasjonUtleder.utled(any(), any(), any(), any(), any()) }
+        verify(exactly = 1) {
+            behandlingsinformasjonUtleder.utled(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        }
         verify(exactly = 1) {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(any(), any())
         }

@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeSiden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.erUendeligLengeTil
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
@@ -109,3 +112,32 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjærTilOgMed(
 fun <K, V, T : Tidsenhet> Map<K, Tidslinje<V, T>>.beskjærTilOgMed(
     tilOgMed: Tidspunkt<T>,
 ): Map<K, Tidslinje<V, T>> = this.mapValues { (_, tidslinje) -> tidslinje.beskjærTilOgMed(tilOgMed) }
+
+/**
+ * Extension-metode for å forlenge fremtid til uendelig for en tidslinje, hvis tilOgMed er senere enn [senesteEndeligeTidspunkt]
+ */
+fun <I, T : Tidsenhet> Tidslinje<I, T>.forlengFremtidTilUendelig(senesteEndeligeTidspunkt: Tidspunkt<T>): Tidslinje<I, T> {
+    val tilOgMed = this.tilOgMed()
+    return if (tilOgMed != null && tilOgMed > senesteEndeligeTidspunkt) {
+        this.flyttTilOgMed(tilOgMed.somUendeligLengeTil())
+    } else {
+        this
+    }
+}
+
+private fun <I, T : Tidsenhet> Tidslinje<I, T>.flyttTilOgMed(tilTidspunkt: Tidspunkt<T>): Tidslinje<I, T> {
+    val tidslinje = this
+    val fraOgMed = tidslinje.fraOgMed()
+
+    return if (fraOgMed == null || tilTidspunkt < fraOgMed) {
+        TomTidslinje()
+    } else {
+        object : Tidslinje<I, T>() {
+            override fun lagPerioder(): Collection<Periode<I, T>> =
+                tidslinje
+                    .perioder()
+                    .filter { it.fraOgMed <= tilTidspunkt }
+                    .replaceLast { Periode(it.fraOgMed, tilTidspunkt, it.innhold) }
+        }
+    }
+}

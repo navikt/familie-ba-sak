@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.tilRestUt
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -62,7 +63,7 @@ class OppdragSteg {
     private var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
     private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, BeregnetUtbetalingsoppdragLongId>()
-    private var endretMigreringsdatoMap = mutableMapOf<Long, YearMonth>()
+    private var endretMigreringsdatoMap = mutableMapOf<Long, BehandlingMigreringsinfo>()
     private var kastedeFeil = mutableMapOf<Long, Exception>()
     private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
 
@@ -125,7 +126,7 @@ class OppdragSteg {
                 .groupByBehandlingId()
                 .mapValues {
                     it.value
-                        .map { entry: Map<String, String> -> parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!) }
+                        .map { entry: Map<String, String> -> BehandlingMigreringsinfo(behandling = lagBehandling(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
                         .single()
                 }.toMutableMap()
     }
@@ -173,10 +174,10 @@ class OppdragSteg {
     ): BeregnetUtbetalingsoppdragLongId {
         every {
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
+        } returns tidligereTilkjenteYtelser.lastOrNull { !it.behandling.erOppdaterUtvidetKlassekode() }?.behandling
         every {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull()?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
+        } returns tidligereTilkjenteYtelser.lastOrNull { !it.behandling.erOppdaterUtvidetKlassekode() }?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
         every {
             tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any())
         } returns tidligereTilkjenteYtelser.filter { beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag?.utbetalingsperiode?.any { it.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering } == true }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
@@ -190,8 +191,11 @@ class OppdragSteg {
             sisteAndelPerIdentNy(tidligereTilkjenteYtelser, skalBrukeNyKlassekodeForUtvidetBarnetrygd).values.toList()
         }
         every {
-            behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any())
-        } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]?.toLocalDate()
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(any())
+        } returns endretMigreringsdatoMap[tilkjentYtelse.behandling.id]
+        every {
+            tilkjentYtelseRepository.findByFagsak(any())
+        } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
             unleashNextMedContextService.isEnabled(
                 any(),
@@ -220,7 +224,8 @@ class OppdragSteg {
                 BehandlingsinformasjonUtleder(
                     EndretMigreringsdatoUtleder(
                         behandlingHentOgPersisterService,
-                        behandlingService,
+                        behandlingMigreringsinfoRepository,
+                        tilkjentYtelseRepository,
                     ),
                     clockProvider,
                 ),

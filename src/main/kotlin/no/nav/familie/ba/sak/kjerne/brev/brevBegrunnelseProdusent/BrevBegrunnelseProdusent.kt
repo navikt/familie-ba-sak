@@ -344,8 +344,7 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
         val endretUtbetalingAndelIPeriode = begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel
         val deltBostedIVilkårsvurderingIPeriode =
             begrunnelseGrunnlag.dennePerioden.vilkårResultater.any {
-                UtdypendeVilkårsvurdering.DELT_BOSTED in it.utdypendeVilkårsvurderinger ||
-                    UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES in it.utdypendeVilkårsvurderinger
+                UtdypendeVilkårsvurdering.DELT_BOSTED in it.utdypendeVilkårsvurderinger
             }
         val andelerIPeriode = begrunnelseGrunnlag.dennePerioden.andeler
         val erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode = deltBostedIVilkårsvurderingIPeriode && andelerIPeriode.any { it.prosent != BigDecimal.ZERO }
