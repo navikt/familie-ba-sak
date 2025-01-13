@@ -267,7 +267,6 @@ fun ManueltBrevRequest.tilBrev(
                         delmalData =
                             UtbetalingEtterKAVedtakData.DelmalData(
                                 signatur = signaturDelmal,
-                                fritekstAvsnitt = fritekstAvsnitt,
                             ),
                         flettefelter =
                             UtbetalingEtterKAVedtakData.Flettefelter(
@@ -276,6 +275,7 @@ fun ManueltBrevRequest.tilBrev(
                                 organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
                                 gjelder = this.vedrørende?.navn,
                             ),
+                        fritekst = this.fritekstAvsnitt,
                     ),
             )
 
