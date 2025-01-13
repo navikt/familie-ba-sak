@@ -37,7 +37,7 @@ object SisteUtvidetAndelOverstyrer {
             if (sisteAndelIKjede.stønadFom != sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth()) {
                 logger.warn("Overstyrer vedtakFom i andelDataLongId da fom til siste andel per kjede ikke stemmer overens med siste kjedelement oversendt til Oppdrag")
                 // Oppdaterer fom i AndelDataLongId til samme fom som sist oversendte, da det ikke er 1-1 mellom fom på siste andel og fom på siste kjedelement oversendt til Oppdrag.
-                return@mapValues sisteAndelIKjede.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd).copy(fom = sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth())
+                return@mapValues sisteAndelIKjede.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd).copy(fom = sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoFom.toYearMonth(), tom = sistOversendteUtvidetBarnetrygdKjedeelement.vedtakdatoTom.toYearMonth())
             }
             return@mapValues sisteAndelIKjede.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
         }
