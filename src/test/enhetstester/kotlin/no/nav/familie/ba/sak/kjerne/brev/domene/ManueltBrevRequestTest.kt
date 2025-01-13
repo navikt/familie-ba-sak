@@ -114,7 +114,7 @@ class ManueltBrevRequestTest {
             assertThat(organisasjonsnummer).isNull()
             assertThat(gjelder).isNull()
         }
-        assertThat(brev.fritekst).containsExactly("Fritekst avsnitt")
+        assertThat(brev.fritekst).isEqualTo("Fritekst avsnitt")
         assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
     }
 

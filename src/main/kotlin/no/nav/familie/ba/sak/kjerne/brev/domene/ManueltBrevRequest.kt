@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboer
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -276,7 +275,7 @@ fun ManueltBrevRequest.tilBrev(
                                 organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
                                 gjelder = this.vedrørende?.navn,
                             ),
-                        fritekst = flettefelt(this.fritekstAvsnitt),
+                        fritekst = this.fritekstAvsnitt,
                     ),
             )
 

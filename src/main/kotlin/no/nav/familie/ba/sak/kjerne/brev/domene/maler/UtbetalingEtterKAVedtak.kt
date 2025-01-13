@@ -11,7 +11,7 @@ data class UtbetalingEtterKAVedtak(
 data class UtbetalingEtterKAVedtakData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
-    val fritekst: Flettefelt,
+    val fritekst: String? = null,
 ) : BrevData {
     data class Flettefelter(
         override val navn: Flettefelt,
