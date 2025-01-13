@@ -38,6 +38,6 @@ abstract class BaseEntitet : Serializable {
     protected fun onUpdate() {
         endretAv = SikkerhetContext.hentSaksbehandler()
         endretTidspunkt = LocalDateTime.now()
-        //versjon = versjon?.plus(1) ?: 0
+        // versjon = versjon?.plus(1) ?: 0
     }
 }

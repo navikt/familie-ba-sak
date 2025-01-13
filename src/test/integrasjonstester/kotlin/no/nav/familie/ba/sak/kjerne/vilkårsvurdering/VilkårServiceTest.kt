@@ -831,7 +831,7 @@ class VilkårServiceTest(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                     årsak = BehandlingÅrsak.SØKNAD,
-                ).also { setGjeldendeBehandlingID( it.id) },
+                ).also { setGjeldendeBehandlingID(it.id) },
             )
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(

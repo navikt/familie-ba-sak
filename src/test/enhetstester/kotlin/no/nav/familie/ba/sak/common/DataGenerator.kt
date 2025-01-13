@@ -157,7 +157,8 @@ fun nesteVedtakId(): Long {
     gjeldendeVedtakId += ID_INKREMENT
     return gjeldendeVedtakId
 }
-fun setGjeldendeBehandlingID(id: Long)  {
+
+fun setGjeldendeBehandlingID(id: Long) {
     gjeldendeBehandlingId = id
 }
 
