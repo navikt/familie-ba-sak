@@ -29,7 +29,6 @@ class KorrigertEtterbetalingRepositoryTest(
 
         val inaktivKorrigertEtterbetaling =
             KorrigertEtterbetaling(
-                id = 10000001,
                 årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
                 begrunnelse = "Test på inaktiv korrigering",
                 beløp = 1000,
@@ -51,7 +50,6 @@ class KorrigertEtterbetalingRepositoryTest(
 
         val aktivKorrigertEtterbetaling =
             KorrigertEtterbetaling(
-                id = 10000002,
                 årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
                 begrunnelse = "Test på aktiv korrigering",
                 beløp = 1000,
@@ -74,7 +72,6 @@ class KorrigertEtterbetalingRepositoryTest(
 
         val aktivKorrigertEtterbetaling =
             KorrigertEtterbetaling(
-                id = 10000007,
                 årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
                 begrunnelse = "Test på aktiv korrigering",
                 beløp = 1000,
@@ -84,7 +81,6 @@ class KorrigertEtterbetalingRepositoryTest(
 
         val aktivKorrigertEtterbetaling2 =
             KorrigertEtterbetaling(
-                id = 10000008,
                 årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
                 begrunnelse = "Test på aktiv korrigering",
                 beløp = 1000,
@@ -105,7 +101,6 @@ class KorrigertEtterbetalingRepositoryTest(
 
         val aktivKorrigertEtterbetaling =
             KorrigertEtterbetaling(
-                id = 10000003,
                 årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
                 begrunnelse = "1",
                 beløp = 1000,
@@ -115,7 +110,6 @@ class KorrigertEtterbetalingRepositoryTest(
 
         val inaktivKorrigertEtterbetaling =
             KorrigertEtterbetaling(
-                id = 10000004,
                 årsak = KorrigertEtterbetalingÅrsak.REFUSJON_FRA_ANDRE_MYNDIGHETER,
                 begrunnelse = "2",
                 beløp = 1000,

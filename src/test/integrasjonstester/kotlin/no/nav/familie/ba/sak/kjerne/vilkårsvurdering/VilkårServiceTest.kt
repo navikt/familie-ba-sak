@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.setGjeldendeBehandlingID
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -830,7 +831,7 @@ class VilkårServiceTest(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                     årsak = BehandlingÅrsak.SØKNAD,
-                ),
+                ).also { setGjeldendeBehandlingID( it.id) },
             )
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(

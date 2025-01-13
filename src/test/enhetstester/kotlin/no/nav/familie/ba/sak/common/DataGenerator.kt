@@ -157,6 +157,9 @@ fun nesteVedtakId(): Long {
     gjeldendeVedtakId += ID_INKREMENT
     return gjeldendeVedtakId
 }
+fun setGjeldendeBehandlingID(id: Long)  {
+    gjeldendeBehandlingId = id
+}
 
 fun nesteBehandlingId(): Long {
     gjeldendeBehandlingId += ID_INKREMENT
@@ -175,12 +178,12 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 
 fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) =
     Fagsak(
-        1,
+        0,
         aktør = aktør,
     )
 
 fun lagFagsak(
-    id: Long = 1,
+    id: Long = 0,
     aktør: Aktør = tilAktør(randomFnr()),
     institusjon: Institusjon? = null,
     status: FagsakStatus = FagsakStatus.OPPRETTET,
@@ -216,7 +219,7 @@ fun lagBehandling(
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
     aktivertTid: LocalDateTime = LocalDateTime.now(),
-    id: Long = nesteBehandlingId(),
+    id: Long = 0,
     endretTidspunkt: LocalDateTime = LocalDateTime.now(),
     aktiv: Boolean = true,
 ) = Behandling(
@@ -287,7 +290,7 @@ fun lagVedtak(
     stønadBrevPdF: ByteArray? = null,
     vedtaksdato: LocalDateTime? = LocalDateTime.now(),
 ) = Vedtak(
-    id = nesteVedtakId(),
+    id = 0,
     behandling = behandling,
     vedtaksdato = vedtaksdato,
     stønadBrevPdF = stønadBrevPdF,

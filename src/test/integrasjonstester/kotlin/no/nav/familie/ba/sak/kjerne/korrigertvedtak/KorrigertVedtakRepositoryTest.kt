@@ -27,7 +27,6 @@ class KorrigertVedtakRepositoryTest(
 
         val inaktivKorrigertVedtak =
             KorrigertVedtak(
-                id = 10000001,
                 vedtaksdato = LocalDate.now().minusDays(6),
                 begrunnelse = "Test på inaktiv korrigering",
                 behandling = behandling,
@@ -48,7 +47,6 @@ class KorrigertVedtakRepositoryTest(
 
         val aktivKorrigertVedtak =
             KorrigertVedtak(
-                id = 10000001,
                 vedtaksdato = LocalDate.now().minusDays(6),
                 begrunnelse = "Test på aktiv korrigering",
                 behandling = behandling,
@@ -72,7 +70,6 @@ class KorrigertVedtakRepositoryTest(
 
         val aktivKorrigertVedtak1 =
             KorrigertVedtak(
-                id = 10000007,
                 begrunnelse = "Test på aktiv korrigering",
                 vedtaksdato = LocalDate.now().minusDays(6),
                 behandling = behandling,
@@ -81,7 +78,6 @@ class KorrigertVedtakRepositoryTest(
 
         val aktivKorrigertVedtak2 =
             KorrigertVedtak(
-                id = 10000008,
                 begrunnelse = "Test på aktiv korrigering",
                 vedtaksdato = LocalDate.now().minusDays(3),
                 behandling = behandling,

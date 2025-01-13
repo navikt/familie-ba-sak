@@ -31,12 +31,13 @@ abstract class BaseEntitet : Serializable {
     open var endretTidspunkt: LocalDateTime = LocalDateTime.now()
 
     @Version
-    @Column(name = "versjon", nullable = false)
+    @Column(name = "versjon")
     open var versjon: Long = 0
 
     @PreUpdate
     protected fun onUpdate() {
         endretAv = SikkerhetContext.hentSaksbehandler()
         endretTidspunkt = LocalDateTime.now()
+        //versjon = versjon?.plus(1) ?: 0
     }
 }

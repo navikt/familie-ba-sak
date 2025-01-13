@@ -66,7 +66,7 @@ class BehandlingstemaServiceTest {
         )
 
     private val fagsak = defaultFagsak()
-    private val behandling = lagBehandling(fagsak = fagsak, id = 0L)
+    private val behandling = lagBehandling(fagsak = fagsak)
 
     @Nested
     inner class OppdaterBehandlingstemaFraRegistrereSøknadStegTest {
