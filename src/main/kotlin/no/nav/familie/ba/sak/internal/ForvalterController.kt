@@ -599,13 +599,24 @@ class ForvalterController(
         summary = "Korrigerer OPPDATER_UTVIDET_KLASSEKODE behandlinger som tilhører fagsak som er opphørt eller avsluttet før 02.2025",
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
-    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(
-        @RequestParam dryRun: Boolean,
-    ): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
         )
-        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(dryRun = dryRun))
+        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger())
+    }
+
+    @PostMapping("/korriger-utvidet-andeler-i-oppdater-utvidet-klassekode-behandlinger-dry-run")
+    @Operation(
+        summary = "Korrigerer OPPDATER_UTVIDET_KLASSEKODE behandlinger som tilhører fagsak som er opphørt eller avsluttet før 02.2025",
+        description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
+    )
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
+        )
+        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun())
     }
 }
