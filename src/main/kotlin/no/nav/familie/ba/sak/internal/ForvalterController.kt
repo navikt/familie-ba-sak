@@ -605,7 +605,7 @@ class ForvalterController(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
         )
-        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(LocalDate.of(2024, 12, 1).toYearMonth()))
+        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(dryRun = false))
     }
 
     @PostMapping("/korriger-utvidet-andeler-i-oppdater-utvidet-klassekode-behandlinger-dry-run")
@@ -618,6 +618,6 @@ class ForvalterController(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
         )
-        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(LocalDate.of(2024, 12, 1).toYearMonth()))
+        return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger()
     }
 }
