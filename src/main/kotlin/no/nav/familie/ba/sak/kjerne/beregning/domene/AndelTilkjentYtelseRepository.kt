@@ -53,7 +53,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         WITH andeler AS (
             SELECT
              aty.id,
-             row_number() OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC, b.aktivertTid ASC) rn
+             row_number() OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC, b.aktivert_tid ASC) rn
              FROM andel_tilkjent_ytelse aty
               JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
               JOIN Behandling b ON b.id = aty.fk_behandling_id
