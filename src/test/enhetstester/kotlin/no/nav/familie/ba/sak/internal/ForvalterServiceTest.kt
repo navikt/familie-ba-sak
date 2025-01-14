@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -94,6 +95,9 @@ class ForvalterServiceTest {
 
     @MockK
     lateinit var infotrygdService: InfotrygdService
+
+    @MockK
+    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @InjectMockKs
     lateinit var forvalterService: ForvalterService
