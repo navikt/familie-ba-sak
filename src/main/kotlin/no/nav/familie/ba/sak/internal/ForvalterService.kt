@@ -27,6 +27,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -67,6 +69,7 @@ class ForvalterService(
     private val infotrygdService: InfotrygdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -275,6 +278,106 @@ class ForvalterService(
         if (vilkårResultatAvSammeTypeFørFødselsdatoForPerson.size > 1) {
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
+    }
+
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(splittIMnd: YearMonth): List<Pair<Long, List<AndelTilkjentYtelse>>> {
+        val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling = behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
+        logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
+        val resultat = mutableListOf<Pair<Long, List<AndelTilkjentYtelse>>>()
+        oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
+            // Sørger for at behandlingen ble kjørt 17.desember
+            if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
+                resultat.add(Pair(behandling.id, emptyList()))
+                logger.info("Behandling ${behandling.id} som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak ble ikke opprettet 17. desember, men ${behandling.opprettetTidspunkt.toLocalDate()}")
+            }
+
+            // Finner alle utvidet andeler i behandlingen
+            val utvidetAndelSomOverlapperSplitt =
+                andelTilkjentYtelseRepository
+                    .finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                    .singleOrNull { andelTilkjentYtelse -> andelTilkjentYtelse.erUtvidet() && andelTilkjentYtelse.stønadFom <= splittIMnd && andelTilkjentYtelse.stønadTom > splittIMnd }
+
+            if (utvidetAndelSomOverlapperSplitt == null) {
+                resultat.add(Pair(behandling.id, emptyList()))
+                return@forEach
+            }
+
+            val behandlingFørOppdaterUtvidetKlassekodeBehandling =
+                behandlingRepository
+                    .finnBehandlinger(behandling.fagsak.id)
+                    .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt }
+                    .maxBy { it.aktivertTidspunkt }
+
+            // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
+            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id)
+
+            // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
+            // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
+            // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i forrige behandling.
+            val tilsvarendeAndelIForrigeBehandling = utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.single { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
+
+            resultat.add(
+                Pair(
+                    behandling.id,
+                    listOf(
+                        utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelIForrigeBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelIForrigeBehandling.forrigePeriodeOffset),
+                        utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1)),
+                    ),
+                ),
+            )
+        }
+        return resultat
+    }
+
+    @Transactional
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(splittIMnd: YearMonth): List<Pair<Long, List<AndelTilkjentYtelse>>> {
+        val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling = behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
+        logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
+        val resultat = mutableListOf<Pair<Long, List<AndelTilkjentYtelse>>>()
+        oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
+            // Sørger for at behandlingen ble kjørt 17.desember
+            if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
+                resultat.add(Pair(behandling.id, emptyList()))
+                logger.info("Behandling ${behandling.id} som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak ble ikke opprettet 17. desember, men ${behandling.opprettetTidspunkt.toLocalDate()}")
+            }
+
+            // Finner alle utvidet andeler i behandlingen
+            val utvidetAndelSomOverlapperSplitt =
+                andelTilkjentYtelseRepository
+                    .finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                    .singleOrNull { andelTilkjentYtelse -> andelTilkjentYtelse.erUtvidet() && andelTilkjentYtelse.stønadFom <= splittIMnd && andelTilkjentYtelse.stønadTom > splittIMnd }
+
+            if (utvidetAndelSomOverlapperSplitt == null) {
+                resultat.add(Pair(behandling.id, emptyList()))
+                logger.info("Behandling ${behandling.id} har ingen andeler som overlapper med splitt")
+                return@forEach
+            }
+
+            val behandlingFørOppdaterUtvidetKlassekodeBehandling =
+                behandlingRepository
+                    .finnBehandlinger(behandling.fagsak.id)
+                    .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt }
+                    .maxBy { it.aktivertTidspunkt }
+
+            // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
+            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id)
+
+            // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
+            // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
+            // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i forrige behandling.
+            val tilsvarendeAndelIForrigeBehandling = utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.single { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
+
+            resultat.add(
+                Pair(
+                    behandling.id,
+                    listOf(
+                        andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelIForrigeBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelIForrigeBehandling.forrigePeriodeOffset)),
+                        andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1))),
+                    ),
+                ),
+            )
+        }
+        return resultat
     }
 }
 
