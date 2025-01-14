@@ -601,10 +601,10 @@ class ForvalterController(
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
     fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
-        // tilgangService.verifiserHarTilgangTilHandling(
-        //     minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-        //     handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
-        // )
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
+        )
         return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(LocalDate.of(2024, 12, 1).toYearMonth()))
     }
 
@@ -614,10 +614,10 @@ class ForvalterController(
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
     fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
-        // tilgangService.verifiserHarTilgangTilHandling(
-        //     minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-        //     handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
-        // )
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
+        )
         return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(LocalDate.of(2024, 12, 1).toYearMonth()))
     }
 }
