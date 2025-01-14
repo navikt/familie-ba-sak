@@ -282,7 +282,7 @@ class ForvalterService(
 
     @Transactional
     fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(
-        dryRun: Boolean = true,
+        dryRun: Boolean,
     ): List<Pair<Long, List<AndelTilkjentYtelse>>> {
         val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling = behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
         logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
