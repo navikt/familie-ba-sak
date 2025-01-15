@@ -4,10 +4,10 @@ import defaultFagsak
 import io.cucumber.datatable.DataTable
 import lagAndelTilkjentYtelse
 import lagBehandling
+import lagPersonResultat
 import lagVedtak
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
@@ -172,7 +172,8 @@ fun lagVilkårsvurdering(
     persongrunnlagForBehandling: PersonopplysningGrunnlag,
     behandling: Behandling,
 ): Vilkårsvurdering {
-    val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+    val vilkårsvurdering =
+        lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
     val personResultater =
         persongrunnlagForBehandling.personer
             .map { person ->

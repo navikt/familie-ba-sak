@@ -7,8 +7,8 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import lagBehandling
+import lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper

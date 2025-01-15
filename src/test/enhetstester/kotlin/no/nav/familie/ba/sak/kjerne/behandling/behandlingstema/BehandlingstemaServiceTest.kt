@@ -10,12 +10,12 @@ import io.mockk.verify
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagFagsak
+import lagPersonResultat
+import lagVilkårResultat
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagPersonEnkel
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -674,7 +674,19 @@ class BehandlingstemaServiceTest {
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
-                                        vurderesEtterFn = { if (it in listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)) Regelverk.EØS_FORORDNINGEN else null },
+                                        vurderesEtterFn = {
+                                            if (it in
+                                                listOf(
+                                                    Vilkår.BOR_MED_SØKER,
+                                                    Vilkår.BOSATT_I_RIKET,
+                                                    Vilkår.LOVLIG_OPPHOLD,
+                                                )
+                                            ) {
+                                                Regelverk.EØS_FORORDNINGEN
+                                            } else {
+                                                null
+                                            }
+                                        },
                                     )
                                 },
                             ),
@@ -688,7 +700,19 @@ class BehandlingstemaServiceTest {
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
-                                        vurderesEtterFn = { if (it in listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)) Regelverk.NASJONALE_REGLER else null },
+                                        vurderesEtterFn = {
+                                            if (it in
+                                                listOf(
+                                                    Vilkår.BOR_MED_SØKER,
+                                                    Vilkår.BOSATT_I_RIKET,
+                                                    Vilkår.LOVLIG_OPPHOLD,
+                                                )
+                                            ) {
+                                                Regelverk.NASJONALE_REGLER
+                                            } else {
+                                                null
+                                            }
+                                        },
                                     )
                                 },
                             ),
@@ -753,7 +777,19 @@ class BehandlingstemaServiceTest {
                                         personResultat = personResultat,
                                         stønadFom = stønadFom,
                                         stønadTom = stønadTom,
-                                        vurderesEtterFn = { if (it in listOf(Vilkår.BOR_MED_SØKER, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)) Regelverk.NASJONALE_REGLER else null },
+                                        vurderesEtterFn = {
+                                            if (it in
+                                                listOf(
+                                                    Vilkår.BOR_MED_SØKER,
+                                                    Vilkår.BOSATT_I_RIKET,
+                                                    Vilkår.LOVLIG_OPPHOLD,
+                                                )
+                                            ) {
+                                                Regelverk.NASJONALE_REGLER
+                                            } else {
+                                                null
+                                            }
+                                        },
                                     )
                                 },
                             ),

@@ -4,9 +4,9 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import lagBehandling
+import lagPersonResultat
+import lagPersonResultaterForSøkerOgToBarn
 import lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

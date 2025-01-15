@@ -5,11 +5,11 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import lagBehandling
+import lagPersonResultat
+import lagPersonResultaterForSøkerOgToBarn
 import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
@@ -331,7 +331,12 @@ class BehandlingIntegrationTest(
                 ),
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurdering,
-                    person = lagPerson(type = PersonType.BARN, aktør = barn1AktørId, fødselsdato = januar2020.minusYears(2).førsteDagIInneværendeMåned()),
+                    person =
+                        lagPerson(
+                            type = PersonType.BARN,
+                            aktør = barn1AktørId,
+                            fødselsdato = januar2020.minusYears(2).førsteDagIInneværendeMåned(),
+                        ),
                     resultat = Resultat.OPPFYLT,
                     periodeFom = januar2020.minusMonths(1).toLocalDate(),
                     periodeTom = stønadTom.toLocalDate(),
@@ -340,7 +345,12 @@ class BehandlingIntegrationTest(
                 ),
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurdering,
-                    person = lagPerson(type = PersonType.BARN, aktør = barn2AktørId, fødselsdato = januar2020.førsteDagIInneværendeMåned()),
+                    person =
+                        lagPerson(
+                            type = PersonType.BARN,
+                            aktør = barn2AktørId,
+                            fødselsdato = januar2020.førsteDagIInneværendeMåned(),
+                        ),
                     resultat = Resultat.OPPFYLT,
                     periodeFom = oktober2020.minusMonths(1).toLocalDate(),
                     periodeTom = stønadTom.toLocalDate(),

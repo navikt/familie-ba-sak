@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagInitiellTilkjentYtelse
+import lagPersonResultat
+import lagVilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.validerUtvidetVilkårsresultat

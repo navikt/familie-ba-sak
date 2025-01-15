@@ -12,13 +12,13 @@ import io.mockk.verify
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagInitiellTilkjentYtelse
+import lagPersonResultat
 import lagSøknadDTO
 import lagTestPersonopplysningGrunnlag
+import lagVilkårResultat
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
@@ -495,7 +495,14 @@ class BeregningServiceTest {
                         periodeTom = periode2Tom,
                         resultat = Resultat.IKKE_OPPFYLT,
                     )
-                } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
+                } +
+                søkerVilkår.map {
+                    lagVilkårResultat(
+                        vilkårType = it,
+                        periodeFom = periode3Fom,
+                        periodeTom = periode3Tom,
+                    )
+                }
 
         val personResultatSøker =
             PersonResultat(

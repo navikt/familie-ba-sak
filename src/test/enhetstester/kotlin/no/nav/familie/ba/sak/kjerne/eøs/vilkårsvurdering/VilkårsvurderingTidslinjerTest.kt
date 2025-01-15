@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import defaultFagsak
 import lagBehandling
+import lagPersonResultaterForSøkerOgToBarn
 import lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje

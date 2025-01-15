@@ -5,9 +5,9 @@ import lagAndelTilkjentYtelse
 import lagBehandling
 import lagInitiellTilkjentYtelse
 import lagVedtak
+import lagVilkårResultat
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør

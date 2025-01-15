@@ -2,11 +2,10 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import lagBehandling
 import lagTestPersonopplysningGrunnlag
+import lagVilkårResultat
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
-import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -59,6 +58,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import randomBarnFnr
 import randomFnr
+import vurderVilkårsvurderingTilInnvilget
 import java.time.LocalDate
 import java.time.LocalDateTime
 

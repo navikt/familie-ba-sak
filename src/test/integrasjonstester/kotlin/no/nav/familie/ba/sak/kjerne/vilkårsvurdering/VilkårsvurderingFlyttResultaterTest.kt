@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import lagBehandling
+import lagPersonResultat
+import lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import randomBarnFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -28,6 +27,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomBarnFnr
 import java.time.LocalDate
 
 class VilkårsvurderingFlyttResultaterTest(
@@ -91,7 +91,12 @@ class VilkårsvurderingFlyttResultaterTest(
                 søkerPersonResultat,
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                    person = lagPerson(type = PersonType.BARN, aktør = barn1Aktør, fødselsdato = personInfo[barn1Fnr]!!.fødselsdato),
+                    person =
+                        lagPerson(
+                            type = PersonType.BARN,
+                            aktør = barn1Aktør,
+                            fødselsdato = personInfo[barn1Fnr]!!.fødselsdato,
+                        ),
                     periodeFom = LocalDate.now().minusMonths(8),
                     periodeTom = LocalDate.now().plusYears(2),
                     lagFullstendigVilkårResultat = true,
@@ -100,7 +105,12 @@ class VilkårsvurderingFlyttResultaterTest(
                 ),
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                    person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = personInfo[barn2Fnr]!!.fødselsdato),
+                    person =
+                        lagPerson(
+                            type = PersonType.BARN,
+                            aktør = barn2Aktør,
+                            fødselsdato = personInfo[barn2Fnr]!!.fødselsdato,
+                        ),
                     periodeFom = LocalDate.now().minusMonths(8),
                     periodeTom = LocalDate.now().plusYears(2),
                     lagFullstendigVilkårResultat = true,

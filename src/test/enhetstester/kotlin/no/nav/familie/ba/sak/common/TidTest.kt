@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
 import lagBehandling
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår

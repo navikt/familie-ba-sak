@@ -7,9 +7,9 @@ import io.mockk.runs
 import io.mockk.verify
 import lagBehandling
 import lagVedtak
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import lagBehandling
 import lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import lagVilkårsvurdering
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
