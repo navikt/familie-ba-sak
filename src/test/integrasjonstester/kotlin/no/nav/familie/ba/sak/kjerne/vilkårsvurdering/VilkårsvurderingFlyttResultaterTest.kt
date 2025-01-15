@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.personInfo
-import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat

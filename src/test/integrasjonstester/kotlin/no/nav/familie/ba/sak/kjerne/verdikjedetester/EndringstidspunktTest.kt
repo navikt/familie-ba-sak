@@ -4,7 +4,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
