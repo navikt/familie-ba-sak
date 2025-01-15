@@ -19,7 +19,6 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
             "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
         val brukLokalMockserver = System.getProperty("brukLokalMockserver")?.toBoolean() ?: false
@@ -54,6 +53,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     "mock-task-service",
     "mock-sanity-client",
     "mock-unleash",
+    "mock-infotrygd-barnetrygd",
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
