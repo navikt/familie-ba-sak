@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import lagBehandling
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomFnr
 
 class RegistrerPersongrunnlagTest(
     @Autowired

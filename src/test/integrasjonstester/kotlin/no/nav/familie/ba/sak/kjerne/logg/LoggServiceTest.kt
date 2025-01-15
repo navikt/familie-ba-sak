@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
-import randomAktør
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService
@@ -31,6 +29,8 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomAktør
+import randomFnr
 import java.time.LocalDate
 import java.time.LocalDateTime
 

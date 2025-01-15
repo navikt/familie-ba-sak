@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
-import nyOrdinærBehandling
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockLeaderClientService
@@ -21,6 +19,7 @@ import no.nav.familie.ba.sak.util.BrukerContextUtil
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.log.mdc.MDCConstants
+import nyOrdinærBehandling
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -32,6 +31,7 @@ import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.ActiveProfiles
+import randomFnr
 
 @ActiveProfiles("mock-leader-client")
 class SaksstatistikkTest(

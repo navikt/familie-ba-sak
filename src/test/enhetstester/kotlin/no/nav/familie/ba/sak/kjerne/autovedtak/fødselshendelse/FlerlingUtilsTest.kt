@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
-import randomAktør
-import randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
@@ -10,6 +8,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import randomAktør
+import randomFnr
 import java.time.LocalDate
 
 class FlerlingUtilsTest {

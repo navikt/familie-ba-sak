@@ -6,8 +6,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import randomBarnFnr
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -24,6 +22,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.core.env.Environment
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
+import randomBarnFnr
+import randomFnr
 import java.net.URI
 
 class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {

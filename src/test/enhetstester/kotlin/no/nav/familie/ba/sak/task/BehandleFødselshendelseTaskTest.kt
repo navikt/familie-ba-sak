@@ -5,8 +5,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import randomAktør
-import randomFnr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.MidlertidigEnhetIAutomatiskBehandlingFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -22,6 +20,8 @@ import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import randomAktør
+import randomFnr
 
 internal class BehandleFødselshendelseTaskTest {
     @Test

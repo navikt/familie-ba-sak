@@ -3,9 +3,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import lagBehandling
-import randomFnr
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import randomFnr
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

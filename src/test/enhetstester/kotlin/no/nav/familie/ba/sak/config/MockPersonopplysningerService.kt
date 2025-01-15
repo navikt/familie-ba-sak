@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.config
 
-import randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -33,6 +32,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
+import randomFnr
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ofPattern
 

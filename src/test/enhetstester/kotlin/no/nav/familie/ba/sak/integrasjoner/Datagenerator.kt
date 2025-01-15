@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner
 
-import randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
@@ -26,6 +25,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
+import randomAktør
 import java.time.LocalDate
 import java.time.LocalDateTime
 

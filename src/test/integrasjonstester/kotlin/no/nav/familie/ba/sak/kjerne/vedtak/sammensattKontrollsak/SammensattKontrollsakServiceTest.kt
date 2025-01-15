@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
 import lagBehandling
-import randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
@@ -14,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomAktør
 
 class SammensattKontrollsakServiceTest(
     @Autowired

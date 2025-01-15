@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.verify
-import nyOrdinærBehandling
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -24,10 +22,12 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import nyOrdinærBehandling
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomFnr
 import java.time.LocalDate
 
 class PersongrunnlagIntegrationTest(

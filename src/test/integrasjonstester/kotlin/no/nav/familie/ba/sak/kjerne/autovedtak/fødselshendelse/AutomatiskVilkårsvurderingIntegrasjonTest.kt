@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -21,6 +20,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomFnr
 import java.time.LocalDate
 
 class AutomatiskVilkårsvurderingIntegrasjonTest(

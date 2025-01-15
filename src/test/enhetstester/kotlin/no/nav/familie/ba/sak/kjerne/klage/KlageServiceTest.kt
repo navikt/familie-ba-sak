@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import lagBehandling
-import randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -20,6 +19,7 @@ import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import randomAktør
 
 class KlageServiceTest {
     val fagsakService = mockk<FagsakService>()

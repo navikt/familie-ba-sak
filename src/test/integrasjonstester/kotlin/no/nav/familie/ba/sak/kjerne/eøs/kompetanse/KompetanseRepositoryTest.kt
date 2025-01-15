@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import lagBehandling
-import randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -12,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomAktør
 import java.time.YearMonth
 
 class KompetanseRepositoryTest(

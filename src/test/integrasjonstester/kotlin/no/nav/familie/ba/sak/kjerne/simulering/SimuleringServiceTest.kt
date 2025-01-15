@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import randomBarnFnr
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -20,6 +18,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomBarnFnr
+import randomFnr
 
 @Tag("integration")
 class SimuleringServiceTest(

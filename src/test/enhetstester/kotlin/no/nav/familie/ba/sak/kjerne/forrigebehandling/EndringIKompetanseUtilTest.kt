@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import lagBehandling
-import randomAktør
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import randomAktør
 import java.time.YearMonth
 
 class EndringIKompetanseUtilTest {
