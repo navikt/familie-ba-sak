@@ -7,14 +7,7 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
@@ -23,6 +16,13 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -1331,8 +1331,22 @@ internal class TilkjentYtelseUtilsTest {
 
         val andeler =
             listOf(
-                lagAndelTilkjentYtelse(fom = årMnd("2020-03"), tom = årMnd("2020-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
-                lagAndelTilkjentYtelse(fom = årMnd("2021-01"), tom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
+                lagAndelTilkjentYtelse(
+                    fom = årMnd("2020-03"),
+                    tom = årMnd("2020-12"),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    beløp = 1234,
+                    prosent = BigDecimal.valueOf(100),
+                    aktør = aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = årMnd("2021-01"),
+                    tom = årMnd("2021-12"),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    beløp = 1234,
+                    prosent = BigDecimal.valueOf(100),
+                    aktør = aktør,
+                ),
             )
 
         val restYtelsePerioder = andeler.tilRestYtelsePerioder()
@@ -1346,10 +1360,38 @@ internal class TilkjentYtelseUtilsTest {
 
         val andeler =
             listOf(
-                lagAndelTilkjentYtelse(fom = årMnd("2020-03"), tom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
-                lagAndelTilkjentYtelse(fom = årMnd("2021-01"), tom = årMnd("2021-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, beløp = 1234, prosent = BigDecimal.valueOf(100), aktør = aktør),
-                lagAndelTilkjentYtelse(fom = årMnd("2022-01"), tom = årMnd("2022-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, beløp = 0, prosent = BigDecimal.valueOf(100), aktør = aktør),
-                lagAndelTilkjentYtelse(fom = årMnd("2023-01"), tom = årMnd("2023-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, beløp = 0, prosent = BigDecimal.valueOf(0), aktør = aktør),
+                lagAndelTilkjentYtelse(
+                    fom = årMnd("2020-03"),
+                    tom = årMnd("2020-12"),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    beløp = 1234,
+                    prosent = BigDecimal.valueOf(100),
+                    aktør = aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = årMnd("2021-01"),
+                    tom = årMnd("2021-12"),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    beløp = 1234,
+                    prosent = BigDecimal.valueOf(100),
+                    aktør = aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = årMnd("2022-01"),
+                    tom = årMnd("2022-12"),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    beløp = 0,
+                    prosent = BigDecimal.valueOf(100),
+                    aktør = aktør,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = årMnd("2023-01"),
+                    tom = årMnd("2023-12"),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    beløp = 0,
+                    prosent = BigDecimal.valueOf(0),
+                    aktør = aktør,
+                ),
             )
 
         val restYtelsePerioder = andeler.tilRestYtelsePerioder()

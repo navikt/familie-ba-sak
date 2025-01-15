@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.sikkerhet
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
