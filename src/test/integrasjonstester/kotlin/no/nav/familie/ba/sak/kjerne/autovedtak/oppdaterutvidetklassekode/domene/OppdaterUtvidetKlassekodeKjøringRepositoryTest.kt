@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene
 
 import no.nav.familie.ba.sak.common.lagFagsak
-import no.nav.familie.ba.sak.common.randomAktør
+import randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository

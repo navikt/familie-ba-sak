@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.common.randomFnr
+import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import org.assertj.core.api.Assertions.assertThat

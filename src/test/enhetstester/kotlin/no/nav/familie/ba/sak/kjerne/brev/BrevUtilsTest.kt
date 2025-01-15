@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.randomAktør
+import randomAktør
 import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
@@ -1082,8 +1082,12 @@ internal class BrevUtilsTest {
 
         val kompetanser =
             listOf(
-                lagKompetanse(fom = YearMonth.now().minusMonths(2), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "SE", barnetsBostedsland = "SE", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
-                lagKompetanse(fom = YearMonth.now().plusMonths(3), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "DK", barnetsBostedsland = "DK", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+                lagKompetanse(fom = YearMonth.now().minusMonths(2), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "SE", barnetsBostedsland = "SE", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(
+                    randomAktør()
+                )),
+                lagKompetanse(fom = YearMonth.now().plusMonths(3), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "DK", barnetsBostedsland = "DK", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(
+                    randomAktør()
+                )),
             )
 
         val landkoder =
@@ -1103,7 +1107,9 @@ internal class BrevUtilsTest {
 
         val kompetanser =
             listOf(
-                lagKompetanse(fom = YearMonth.now(), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN, søkersAktivitetsland = "SE", annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT, annenForeldersAktivitetsland = null, barnetsBostedsland = "NO", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+                lagKompetanse(fom = YearMonth.now(), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN, søkersAktivitetsland = "SE", annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT, annenForeldersAktivitetsland = null, barnetsBostedsland = "NO", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(
+                    randomAktør()
+                )),
             )
 
         val landkoder =

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.ba.sak.common.randomFnr
+import randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import org.springframework.context.annotation.Primary
