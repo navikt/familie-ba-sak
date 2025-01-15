@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassUtenlandskePeriodebeløpTilKompetanser
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
@@ -8,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import tilfeldigPerson
 import java.time.YearMonth
 
 /**

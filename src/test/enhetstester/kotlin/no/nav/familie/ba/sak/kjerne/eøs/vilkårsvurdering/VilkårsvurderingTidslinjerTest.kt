@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import defaultFagsak
-import lagBehandling
-import lagPersonResultaterForSøkerOgToBarn
-import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -15,8 +17,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import randomFnr
-import tilPersonEnkelSøkerOgBarn
 import java.time.LocalDate
 
 internal class VilkårsvurderingTidslinjerTest {

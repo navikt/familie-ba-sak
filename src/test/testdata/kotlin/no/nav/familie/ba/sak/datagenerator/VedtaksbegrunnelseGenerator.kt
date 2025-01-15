@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.datagenerator
+
 import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse

@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.datagenerator
+
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 
 fun lagInstitusjon(

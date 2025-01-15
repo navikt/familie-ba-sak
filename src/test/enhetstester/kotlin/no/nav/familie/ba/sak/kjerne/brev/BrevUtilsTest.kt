@@ -1,20 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.mockk
-import lagAndelTilkjentYtelse
-import lagBehandling
-import lagEndretUtbetalingAndel
-import lagPerson
-import lagSanityBegrunnelse
-import lagSanityEøsBegrunnelse
-import lagVedtaksbegrunnelse
-import lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagSanityBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagSanityEøsBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -39,7 +40,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import randomAktør
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

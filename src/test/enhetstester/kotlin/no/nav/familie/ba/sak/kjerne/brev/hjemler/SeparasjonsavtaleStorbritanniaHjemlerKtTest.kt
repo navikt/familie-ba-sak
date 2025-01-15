@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
-import lagSanityEøsBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagSanityEøsBegrunnelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

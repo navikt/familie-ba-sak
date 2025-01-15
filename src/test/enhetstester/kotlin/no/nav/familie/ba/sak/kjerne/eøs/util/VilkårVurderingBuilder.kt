@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import lagBehandling
-import lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
@@ -24,8 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import tilPersonEnkelSøkerOgBarn
-import tilfeldigPerson
 
 data class VilkårsvurderingBuilder<T : Tidsenhet>(
     val behandling: Behandling = lagBehandling(),

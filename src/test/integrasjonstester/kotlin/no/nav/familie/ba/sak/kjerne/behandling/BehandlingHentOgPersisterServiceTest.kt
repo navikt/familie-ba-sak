@@ -1,14 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import lagBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import randomFnr
 
 class BehandlingHentOgPersisterServiceTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,

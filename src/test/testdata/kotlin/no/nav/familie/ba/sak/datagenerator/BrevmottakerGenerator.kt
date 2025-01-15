@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.datagenerator
+
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 

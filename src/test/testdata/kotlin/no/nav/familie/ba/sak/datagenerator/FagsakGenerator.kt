@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.datagenerator
+
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus

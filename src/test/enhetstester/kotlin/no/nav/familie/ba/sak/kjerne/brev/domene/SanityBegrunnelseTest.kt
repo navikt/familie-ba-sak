@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import lagRestSanityBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagRestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test

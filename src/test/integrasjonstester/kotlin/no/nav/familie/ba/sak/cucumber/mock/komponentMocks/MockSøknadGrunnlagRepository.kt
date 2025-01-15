@@ -2,13 +2,13 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import lagSøknadDTO
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.kontrakter.felles.objectMapper
-import randomFnr
 
 fun mockSøknadGrunnlagRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): SøknadGrunnlagRepository {
     val søknadGrunnlagRepository = mockk<SøknadGrunnlagRepository>()

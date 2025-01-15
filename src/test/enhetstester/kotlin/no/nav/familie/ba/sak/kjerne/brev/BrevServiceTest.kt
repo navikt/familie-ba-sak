@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
-import lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder

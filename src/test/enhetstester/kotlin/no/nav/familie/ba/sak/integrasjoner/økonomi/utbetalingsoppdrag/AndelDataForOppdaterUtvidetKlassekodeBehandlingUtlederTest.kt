@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import lagAndelTilkjentYtelse
-import lagTilkjentYtelse
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested

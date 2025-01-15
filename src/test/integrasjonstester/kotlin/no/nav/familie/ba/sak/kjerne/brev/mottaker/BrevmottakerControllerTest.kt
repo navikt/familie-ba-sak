@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
-import defaultFagsak
 import io.mockk.mockk
-import lagBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -12,7 +13,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import randomAktør
 
 internal class BrevmottakerControllerTest(
     @Autowired private val brevmottakerService: BrevmottakerService,

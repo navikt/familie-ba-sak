@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import lagBehandling
-import lagPerson
-import lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType

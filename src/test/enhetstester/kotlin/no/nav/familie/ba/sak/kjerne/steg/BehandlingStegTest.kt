@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import lagBehandling
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak

@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.datagenerator
+
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
 import java.time.LocalDate
 

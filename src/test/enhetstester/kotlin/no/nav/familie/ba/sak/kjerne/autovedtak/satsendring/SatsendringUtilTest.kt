@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import lagBehandling
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -13,7 +14,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 

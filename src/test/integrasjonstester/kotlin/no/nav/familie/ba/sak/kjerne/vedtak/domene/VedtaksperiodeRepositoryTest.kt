@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
-import lagBehandling
-import lagVedtak
-import lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -13,7 +14,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import randomAktør
 
 class VedtaksperiodeRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,

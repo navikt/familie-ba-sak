@@ -2,14 +2,15 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import io.mockk.every
 import io.mockk.mockk
-import lagBehandling
-import lagEØSBegrunnelse
-import lagSanityBegrunnelse
-import lagSanityEøsBegrunnelse
-import lagVedtaksbegrunnelse
-import lagVedtaksperiodeMedBegrunnelser
-import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEØSBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagSanityBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagSanityEøsBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import randomAktør
 
 class HjemmeltekstUtlederTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()

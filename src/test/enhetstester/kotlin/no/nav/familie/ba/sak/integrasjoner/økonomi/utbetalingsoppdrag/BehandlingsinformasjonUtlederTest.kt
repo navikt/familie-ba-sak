@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
-import lagAndelTilkjentYtelse
-import lagBehandling
-import lagFagsak
-import lagInstitusjon
-import lagTilkjentYtelse
-import lagVedtak
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.assertj.core.api.Assertions.assertThat

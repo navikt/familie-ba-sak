@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import lagBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -10,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import randomAktør
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import lagAndelTilkjentYtelseUtvidet
-import lagBehandling
-import lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

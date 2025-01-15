@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import tilfeldigPerson
 import java.time.YearMonth
 
 internal class KompetanseMappingTest {

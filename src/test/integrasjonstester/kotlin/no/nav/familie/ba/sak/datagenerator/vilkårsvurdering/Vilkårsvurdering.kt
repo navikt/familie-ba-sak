@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.datagenerator.vilkårsvurdering
 
 import io.mockk.mockk
-import lagPerson
-import lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person

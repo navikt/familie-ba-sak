@@ -3,11 +3,12 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import lagAndelTilkjentYtelse
-import lagBehandling
-import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -28,7 +29,6 @@ import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month

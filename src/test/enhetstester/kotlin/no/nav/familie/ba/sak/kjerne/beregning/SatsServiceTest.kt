@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import lagPerson
 import no.nav.familie.ba.sak.common.årMnd
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull

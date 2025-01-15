@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.task
 
-import defaultFagsak
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import lagBehandling
-import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -23,8 +25,6 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import randomFnr
-import tilPersonEnkelSøkerOgBarn
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
