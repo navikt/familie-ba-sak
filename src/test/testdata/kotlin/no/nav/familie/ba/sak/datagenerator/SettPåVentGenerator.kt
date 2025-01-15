@@ -1,6 +1,5 @@
-package no.nav.familie.ba.sak.datagenerator.settpåvent
+package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVent
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak

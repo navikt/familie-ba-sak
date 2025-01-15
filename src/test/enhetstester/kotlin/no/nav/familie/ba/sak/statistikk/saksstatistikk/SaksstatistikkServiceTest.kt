@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent
+import no.nav.familie.ba.sak.datagenerator.lagSettPåVent
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
