@@ -39,8 +39,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Properties
 
-fun dato(s: String) = LocalDate.parse(s)
-
 fun årMnd(s: String) = YearMonth.parse(s)
 
 /**
