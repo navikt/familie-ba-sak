@@ -5,9 +5,9 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import lagBehandling
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat

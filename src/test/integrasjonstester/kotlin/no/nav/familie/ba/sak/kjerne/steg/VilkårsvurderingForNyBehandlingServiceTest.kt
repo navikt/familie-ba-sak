@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.BaseEntitet
 import lagBehandling
+import lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import randomFnr
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -44,6 +43,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomFnr
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.reflect.full.declaredMemberProperties

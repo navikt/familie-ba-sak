@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall.KVARTALSVIS
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall.MÅNEDLIG

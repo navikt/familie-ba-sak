@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import nyOrdinærBehandling
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import nyOrdinærBehandling
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.client.HttpClientErrorException
+import randomFnr
 import java.time.LocalDate
 import java.time.LocalDateTime
 

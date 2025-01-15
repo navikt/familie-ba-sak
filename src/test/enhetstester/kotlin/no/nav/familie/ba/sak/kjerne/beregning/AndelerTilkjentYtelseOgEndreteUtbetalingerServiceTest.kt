@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson

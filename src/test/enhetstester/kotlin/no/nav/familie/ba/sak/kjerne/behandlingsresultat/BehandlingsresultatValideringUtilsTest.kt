@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import lagAndelTilkjentYtelse
+import lagBehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

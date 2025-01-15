@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

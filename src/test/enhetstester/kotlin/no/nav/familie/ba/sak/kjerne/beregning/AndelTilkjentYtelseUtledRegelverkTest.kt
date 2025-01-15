@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import lagAndelTilkjentYtelse
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk

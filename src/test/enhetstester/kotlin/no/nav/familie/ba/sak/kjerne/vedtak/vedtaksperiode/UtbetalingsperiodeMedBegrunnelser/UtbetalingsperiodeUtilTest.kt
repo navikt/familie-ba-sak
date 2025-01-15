@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser
 
 import hentPerioderMedUtbetaling
+import lagAndelTilkjentYtelse
 import lagBehandling
 import lagVedtak
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser

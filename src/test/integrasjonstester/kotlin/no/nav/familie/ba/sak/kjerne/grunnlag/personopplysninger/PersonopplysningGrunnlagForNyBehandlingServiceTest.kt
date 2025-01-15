@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import randomFnr
+import lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -19,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Personopplysnin
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomFnr
 import java.time.YearMonth
 import kotlin.reflect.full.declaredMemberProperties
 

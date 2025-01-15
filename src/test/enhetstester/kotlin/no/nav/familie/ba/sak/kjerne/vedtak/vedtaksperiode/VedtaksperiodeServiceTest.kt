@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
 import lagVedtak
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient

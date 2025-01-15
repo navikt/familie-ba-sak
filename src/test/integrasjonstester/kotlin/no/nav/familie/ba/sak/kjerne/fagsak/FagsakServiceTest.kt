@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import lagBehandling
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -47,6 +46,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpServerErrorException
+import randomFnr
 import java.time.LocalDate
 import java.time.YearMonth
 

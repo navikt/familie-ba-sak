@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.cucumber
 
 import defaultFagsak
 import io.cucumber.datatable.DataTable
+import lagAndelTilkjentYtelse
 import lagBehandling
 import lagVedtak
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilddMMyyyy

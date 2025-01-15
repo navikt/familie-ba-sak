@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser

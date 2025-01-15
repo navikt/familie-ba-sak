@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
+import lagAndelTilkjentYtelse
+import lagTilkjentYtelse
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -13,8 +13,18 @@ class OppdaterUtvidetKlassekodeUtvidetAndelerSplitterTest {
         // Arrange
         val tilkjentYtelse = lagTilkjentYtelse()
         val denneMåned = inneværendeMåned()
-        val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-        val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+        val utvidetAndel =
+            lagAndelTilkjentYtelse(
+                fom = denneMåned.minusMonths(3),
+                tom = denneMåned.plusMonths(3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            )
+        val ordinærAndel =
+            lagAndelTilkjentYtelse(
+                fom = denneMåned.minusMonths(3),
+                tom = denneMåned.minusMonths(1),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 utvidetAndel,
@@ -47,9 +57,24 @@ class OppdaterUtvidetKlassekodeUtvidetAndelerSplitterTest {
         // Arrange
         val tilkjentYtelse = lagTilkjentYtelse()
         val denneMåned = inneværendeMåned()
-        val utvidetAndelFørNåtidspunkt = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-        val utvidetAndelEtterNåtidspunkt = lagAndelTilkjentYtelse(fom = denneMåned.plusMonths(1), tom = denneMåned.plusMonths(3), ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-        val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+        val utvidetAndelFørNåtidspunkt =
+            lagAndelTilkjentYtelse(
+                fom = denneMåned.minusMonths(3),
+                tom = denneMåned.minusMonths(1),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            )
+        val utvidetAndelEtterNåtidspunkt =
+            lagAndelTilkjentYtelse(
+                fom = denneMåned.plusMonths(1),
+                tom = denneMåned.plusMonths(3),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            )
+        val ordinærAndel =
+            lagAndelTilkjentYtelse(
+                fom = denneMåned.minusMonths(3),
+                tom = denneMåned.minusMonths(1),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 utvidetAndelFørNåtidspunkt,
@@ -83,8 +108,14 @@ class OppdaterUtvidetKlassekodeUtvidetAndelerSplitterTest {
         // Arrange
         val tilkjentYtelse = lagTilkjentYtelse()
         val denneMåned = inneværendeMåned()
-        val utvidetAndel = lagAndelTilkjentYtelse(fom = denneMåned, tom = denneMåned, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-        val ordinærAndel = lagAndelTilkjentYtelse(fom = denneMåned.minusMonths(3), tom = denneMåned.minusMonths(1), ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
+        val utvidetAndel =
+            lagAndelTilkjentYtelse(fom = denneMåned, tom = denneMåned, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
+        val ordinærAndel =
+            lagAndelTilkjentYtelse(
+                fom = denneMåned.minusMonths(3),
+                tom = denneMåned.minusMonths(1),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             listOf(
                 utvidetAndel,

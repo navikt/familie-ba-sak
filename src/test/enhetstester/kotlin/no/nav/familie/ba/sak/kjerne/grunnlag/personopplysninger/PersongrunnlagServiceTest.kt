@@ -7,9 +7,9 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import lagBehandling
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag

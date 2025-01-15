@@ -2,10 +2,9 @@ package no.nav.familie.ba.sak.ekstern.bisys
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
+import lagAndelTilkjentYtelseUtvidet
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import randomFnr
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -17,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import randomFnr
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

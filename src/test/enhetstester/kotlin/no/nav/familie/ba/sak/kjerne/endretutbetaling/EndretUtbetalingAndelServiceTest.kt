@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import io.mockk.every
 import io.mockk.mockk
+import lagAndelTilkjentYtelse
+import lagBehandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat

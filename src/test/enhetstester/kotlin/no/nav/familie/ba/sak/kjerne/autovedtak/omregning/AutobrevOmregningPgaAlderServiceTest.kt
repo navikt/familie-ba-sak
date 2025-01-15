@@ -5,9 +5,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import lagAndelTilkjentYtelse
 import lagBehandling
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper

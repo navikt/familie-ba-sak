@@ -4,7 +4,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toYearMonth

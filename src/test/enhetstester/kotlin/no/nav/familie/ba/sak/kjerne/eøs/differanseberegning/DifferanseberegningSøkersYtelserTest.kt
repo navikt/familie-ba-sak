@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.util.TilkjentYtelseBuilder

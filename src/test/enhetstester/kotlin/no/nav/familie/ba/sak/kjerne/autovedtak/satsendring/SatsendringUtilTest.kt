@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService

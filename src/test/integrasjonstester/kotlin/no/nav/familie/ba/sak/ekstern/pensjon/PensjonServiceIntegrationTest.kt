@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 
 import io.mockk.every
 import io.mockk.slot
+import lagAndelTilkjentYtelse
 import lagBehandling
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService

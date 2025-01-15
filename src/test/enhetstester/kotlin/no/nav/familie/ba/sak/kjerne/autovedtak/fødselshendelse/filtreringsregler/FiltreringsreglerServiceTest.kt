@@ -10,10 +10,10 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
+import lagAndelTilkjentYtelse
 import lagBehandling
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingMedOverstyrendeResultater

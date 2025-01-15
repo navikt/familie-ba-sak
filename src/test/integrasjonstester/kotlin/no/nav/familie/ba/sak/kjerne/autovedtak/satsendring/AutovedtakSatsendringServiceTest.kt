@@ -5,10 +5,9 @@ import io.mockk.just
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.unmockkObject
+import lagAndelTilkjentYtelse
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.LocalDateService
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -44,6 +43,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import randomFnr
 import java.time.LocalDate
 import java.time.YearMonth
 

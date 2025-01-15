@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
+import lagAndelTilkjentYtelse
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -61,7 +62,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
                     lagAndelTilkjentYtelse(
                         årMnd("2019-04"),
                         årMnd("2023-03"),
-                        no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
+                        YtelseType.ORDINÆR_BARNETRYGD,
                         660,
                         behandling,
                         person = barn1,
@@ -93,7 +94,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
                     lagAndelTilkjentYtelse(
                         årMnd("2019-04"),
                         årMnd("2023-03"),
-                        no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD,
+                        YtelseType.ORDINÆR_BARNETRYGD,
                         660,
                         behandling,
                         person = barn1,

@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import lagAndelTilkjentYtelse
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn

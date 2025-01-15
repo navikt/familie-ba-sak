@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.clearAllMocks
 import io.mockk.clearStaticMockk
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler

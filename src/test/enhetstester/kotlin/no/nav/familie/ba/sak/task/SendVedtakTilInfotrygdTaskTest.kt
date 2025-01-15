@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
+import lagAndelTilkjentYtelseUtvidet
 import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient

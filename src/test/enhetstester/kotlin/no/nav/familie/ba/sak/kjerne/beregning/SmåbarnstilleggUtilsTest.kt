@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned

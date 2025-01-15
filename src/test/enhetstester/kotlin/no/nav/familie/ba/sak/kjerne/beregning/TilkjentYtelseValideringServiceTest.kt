@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
 import io.mockk.mockk
+import lagAndelTilkjentYtelse
 import lagBehandling
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse

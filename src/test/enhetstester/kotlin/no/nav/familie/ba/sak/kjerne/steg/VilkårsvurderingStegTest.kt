@@ -7,9 +7,9 @@ import io.mockk.justRun
 import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
 import lagBehandling
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RealDateProvider
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag

@@ -2,13 +2,13 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
+import lagAndelTilkjentYtelse
+import lagBehandling
+import lagTilkjentYtelse
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService

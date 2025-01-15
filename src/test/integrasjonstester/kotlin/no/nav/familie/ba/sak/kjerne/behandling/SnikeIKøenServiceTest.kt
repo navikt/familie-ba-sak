@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import lagInitiellTilkjentYtelse
 import lagVedtak
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling

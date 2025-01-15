@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import lagAndelTilkjentYtelse
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
