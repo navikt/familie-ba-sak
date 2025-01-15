@@ -6,10 +6,10 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.BaseEntitet
 import lagBehandling
+import lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

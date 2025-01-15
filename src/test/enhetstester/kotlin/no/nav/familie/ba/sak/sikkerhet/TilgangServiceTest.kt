@@ -4,11 +4,10 @@ import defaultFagsak
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.clearAllCaches
-import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -31,6 +30,7 @@ import org.slf4j.MDC
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import randomAktør
 import randomFnr
+import tilPersonEnkelSøkerOgBarn
 import java.time.LocalDate
 
 class TilgangServiceTest {

@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import io.mockk.every
 import io.mockk.mockk
 import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import randomFnr
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import randomFnr
 
 class PersongrunnlagTest {
     val persongrunnlagService = mockk<PersongrunnlagService>()

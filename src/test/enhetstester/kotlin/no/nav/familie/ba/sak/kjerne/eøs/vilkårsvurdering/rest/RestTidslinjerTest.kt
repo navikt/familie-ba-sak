@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tilPersonEnkelSøkerOgBarn
 import tilfeldigPerson
 
 internal class RestTidslinjerTest {

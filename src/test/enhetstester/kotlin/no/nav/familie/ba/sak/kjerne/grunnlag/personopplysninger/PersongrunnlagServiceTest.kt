@@ -9,10 +9,10 @@ import io.mockk.spyk
 import io.mockk.verify
 import lagAndelTilkjentYtelse
 import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType

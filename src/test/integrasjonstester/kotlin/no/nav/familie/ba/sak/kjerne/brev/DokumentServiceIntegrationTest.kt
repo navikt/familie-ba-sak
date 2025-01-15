@@ -1,13 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.verify
+import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import randomBarnFnr
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -50,6 +48,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import randomBarnFnr
+import randomFnr
 import java.time.LocalDate
 
 class DokumentServiceIntegrationTest(

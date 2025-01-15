@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import lagBehandling
 import lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

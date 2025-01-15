@@ -5,8 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
@@ -25,6 +24,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import randomFnr
+import tilPersonEnkelSøkerOgBarn
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

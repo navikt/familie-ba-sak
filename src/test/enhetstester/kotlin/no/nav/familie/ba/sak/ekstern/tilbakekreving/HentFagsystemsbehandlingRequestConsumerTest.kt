@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

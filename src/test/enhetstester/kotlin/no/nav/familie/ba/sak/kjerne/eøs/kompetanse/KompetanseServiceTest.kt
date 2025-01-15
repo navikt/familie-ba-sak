@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.every
 import io.mockk.mockk
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -36,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tilPersonEnkelSøkerOgBarn
 import tilfeldigPerson
 
 internal class KompetanseServiceTest {

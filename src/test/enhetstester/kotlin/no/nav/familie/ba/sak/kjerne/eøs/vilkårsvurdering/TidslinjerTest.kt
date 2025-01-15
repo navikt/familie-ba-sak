@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.oppfyltVilkår
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
@@ -36,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_Å
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import tilPersonEnkelSøkerOgBarn
 import tilfeldigPerson
 import java.time.YearMonth
 

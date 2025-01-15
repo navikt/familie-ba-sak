@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
+import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import randomAktør
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -40,6 +38,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomAktør
+import randomFnr
 import java.time.LocalDate
 
 class VilkårVurderingTest(

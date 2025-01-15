@@ -10,9 +10,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import lagVedtak
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent

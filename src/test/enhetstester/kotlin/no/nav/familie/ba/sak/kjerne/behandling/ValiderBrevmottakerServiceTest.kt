@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository

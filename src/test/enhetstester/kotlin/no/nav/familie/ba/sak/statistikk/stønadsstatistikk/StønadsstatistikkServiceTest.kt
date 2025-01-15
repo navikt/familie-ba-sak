@@ -7,9 +7,9 @@ import io.mockk.junit5.MockKExtension
 import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagAndelTilkjentYtelseUtvidet
 import lagBehandling
+import lagTestPersonopplysningGrunnlag
 import lagVedtak
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
