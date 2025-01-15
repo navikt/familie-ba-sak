@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.clearStaticMockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import tilfeldigPerson
 import java.time.YearMonth
 import java.util.stream.Stream
 

@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassValutakurserTilUtenlandskePeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

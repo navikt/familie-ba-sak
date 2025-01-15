@@ -108,6 +108,9 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import randomAktør
 import randomFnr
+import tilPersonEnkel
+import tilfeldigPerson
+import tilfeldigSøker
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -135,43 +138,6 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     gjeldendeUtvidetVedtaksperiodeId += ID_INKREMENT
     return gjeldendeUtvidetVedtaksperiodeId
 }
-
-fun tilfeldigPerson(
-    fødselsdato: LocalDate = LocalDate.now(),
-    personType: PersonType = PersonType.BARN,
-    kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktør(),
-    personId: Long = nestePersonId(),
-    dødsfall: Dødsfall? = null,
-) = Person(
-    id = personId,
-    aktør = aktør,
-    fødselsdato = fødselsdato,
-    type = personType,
-    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-    navn = "",
-    kjønn = kjønn,
-    målform = Målform.NB,
-    dødsfall = dødsfall,
-).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
-
-fun Person.tilPersonEnkel() = PersonEnkel(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
-
-fun tilfeldigSøker(
-    fødselsdato: LocalDate = LocalDate.now(),
-    personType: PersonType = PersonType.SØKER,
-    kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktør(),
-) = Person(
-    id = nestePersonId(),
-    aktør = aktør,
-    fødselsdato = fødselsdato,
-    type = personType,
-    personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
-    navn = "",
-    kjønn = kjønn,
-    målform = Målform.NB,
-).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
 
 fun lagVedtak(
     behandling: Behandling = lagBehandling(),

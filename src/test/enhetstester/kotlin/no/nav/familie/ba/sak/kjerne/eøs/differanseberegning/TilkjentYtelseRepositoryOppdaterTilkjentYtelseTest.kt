@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import lagBehandling
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.oppdaterTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.util.TilkjentYtelseBuilder
@@ -12,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
 
 class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
     val barnsFødselsdato = 13.jan(2020)

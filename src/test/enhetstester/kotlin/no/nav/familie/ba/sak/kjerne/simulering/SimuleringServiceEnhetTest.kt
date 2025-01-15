@@ -5,8 +5,6 @@ import io.mockk.mockk
 import lagBehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPerson
-import randomFnr
-import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -31,6 +29,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import randomFnr
+import tilPersonEnkel
 import java.math.BigDecimal
 import java.time.LocalDate
 import org.hamcrest.CoreMatchers.`is` as Is

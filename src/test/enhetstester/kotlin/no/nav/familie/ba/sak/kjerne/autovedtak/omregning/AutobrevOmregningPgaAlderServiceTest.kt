@@ -5,12 +5,10 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import lagBehandling
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -37,6 +35,8 @@ import no.nav.familie.ba.sak.task.dto.AutobrevPgaAlderDTO
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
+import tilfeldigSøker
 import java.time.LocalDate
 import java.time.YearMonth
 

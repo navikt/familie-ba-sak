@@ -8,9 +8,7 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -22,6 +20,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import tilPersonEnkel
+import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 

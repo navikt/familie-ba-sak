@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import lagBehandling
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomIFremtiden
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.util.TilkjentYtelseBuilder
@@ -20,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
 
 class DifferanseberegningSøkersYtelserTest {
     @Test

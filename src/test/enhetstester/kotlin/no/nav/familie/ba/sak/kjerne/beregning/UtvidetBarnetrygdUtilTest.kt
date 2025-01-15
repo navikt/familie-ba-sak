@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.validerUtvidetVilkårsresultat
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import tilfeldigPerson
 import java.time.LocalDate
 import java.time.YearMonth
 

@@ -3,10 +3,9 @@
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
+import lagBehandling
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MockedDateProvider
-import lagBehandling
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMottaker
@@ -33,6 +32,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import tilfeldigPerson
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -181,7 +181,7 @@ class AutomatiskOppdaterValutakursServiceTest {
         every { behandlingHentOgPersisterService.hent(any()) } answers {
             lagBehandling(
                 id = firstArg(),
-                behandlingType = BehandlingType.REVURDERING
+                behandlingType = BehandlingType.REVURDERING,
             )
         }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
@@ -312,7 +312,7 @@ class AutomatiskOppdaterValutakursServiceTest {
         every { behandlingHentOgPersisterService.hent(any()) } answers {
             lagBehandling(
                 id = firstArg(),
-                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             )
         }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }

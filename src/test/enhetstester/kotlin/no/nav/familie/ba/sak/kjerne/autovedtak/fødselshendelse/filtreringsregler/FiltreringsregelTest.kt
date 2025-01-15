@@ -1,9 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
-import randomAktør
-import randomFnr
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
@@ -12,6 +8,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import randomAktør
+import randomFnr
+import tilfeldigPerson
+import tilfeldigSøker
 import java.time.LocalDate
 
 internal class FiltreringsregelTest {

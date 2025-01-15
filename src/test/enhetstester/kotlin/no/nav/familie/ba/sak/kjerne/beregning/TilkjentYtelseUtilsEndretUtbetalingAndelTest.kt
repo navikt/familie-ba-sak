@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.MånedPeriode
 import lagBehandling
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
-import randomAktør
-import randomBarnFnr
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -14,6 +11,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import randomAktør
+import randomBarnFnr
+import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

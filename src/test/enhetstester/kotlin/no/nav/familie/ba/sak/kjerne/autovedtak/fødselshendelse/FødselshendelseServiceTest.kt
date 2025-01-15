@@ -10,7 +10,6 @@ import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
@@ -51,6 +50,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Test
+import tilPersonEnkel
 import java.time.LocalDate
 import java.time.Month
 

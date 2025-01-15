@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import lagBehandling
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -20,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import tilfeldigPerson
 
 class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegrationTest() {
     @Autowired

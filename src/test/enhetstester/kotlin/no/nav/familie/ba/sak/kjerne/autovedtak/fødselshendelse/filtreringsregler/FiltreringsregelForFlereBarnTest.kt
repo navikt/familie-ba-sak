@@ -3,13 +3,11 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregl
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import lagBehandling
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import randomAktør
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.VergeResponse
@@ -46,6 +44,8 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import randomAktør
+import tilfeldigPerson
 import java.time.LocalDate
 import java.time.YearMonth
 

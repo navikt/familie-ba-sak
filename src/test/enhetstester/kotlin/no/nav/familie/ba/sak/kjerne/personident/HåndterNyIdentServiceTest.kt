@@ -5,14 +5,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import lagBehandling
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPerson
-import randomAktør
-import randomFnr
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
@@ -35,6 +32,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import randomAktør
+import randomFnr
+import tilPersonEnkel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent as PersonopplysningerPersonIdent

@@ -9,13 +9,11 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
-import no.nav.familie.ba.sak.common.Utils
 import lagBehandling
+import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -65,6 +63,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import randomAktør
+import tilfeldigPerson
+import tilfeldigSøker
 import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.LocalDate.now

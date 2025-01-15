@@ -5,7 +5,6 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -28,6 +27,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
+import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth

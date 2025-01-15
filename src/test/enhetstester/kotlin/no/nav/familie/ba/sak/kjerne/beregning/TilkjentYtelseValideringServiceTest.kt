@@ -2,11 +2,10 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
 import io.mockk.mockk
+import lagBehandling
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
 import java.time.LocalDate
 
 class TilkjentYtelseValideringServiceTest {

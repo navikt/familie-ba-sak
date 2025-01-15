@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassUtenlandskePeriodebeløpTilKompetanserService
@@ -22,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
 
 internal class UtenlandskPeriodebeløpServiceTest {
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =

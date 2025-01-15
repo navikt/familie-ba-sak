@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.kompetanse
@@ -8,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Test
+import tilfeldigPerson
 
 internal class OppdaterSkjemaTest {
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)

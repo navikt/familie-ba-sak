@@ -2,13 +2,12 @@ package no.nav.familie.ba.sak.cucumber
 
 import defaultFagsak
 import io.cucumber.datatable.DataTable
+import lagBehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilddMMyyyy
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
@@ -79,6 +78,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import randomAktør
+import tilfeldigPerson
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
