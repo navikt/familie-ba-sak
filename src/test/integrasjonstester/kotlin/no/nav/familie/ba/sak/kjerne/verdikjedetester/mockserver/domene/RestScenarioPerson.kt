@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene
 
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.ba.infotrygd.Sak
@@ -12,7 +13,7 @@ import java.time.Period
 
 data class RestScenarioPerson(
     // Settes av mock-server
-    val ident: String? = null,
+    private var _ident: String? = null,
     // Settes av mock-server
     val aktørId: String? = null,
     // Settes av mock-server
@@ -35,6 +36,8 @@ data class RestScenarioPerson(
         ),
     val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk,
 ) {
+    val ident: String
+        get() = _ident ?: randomFnr(LocalDate.parse(fødselsdato)).also { _ident = it }
     val navn = "$fornavn $etternavn"
 
     val alder = Period.between(LocalDate.parse(fødselsdato), LocalDate.now()).years

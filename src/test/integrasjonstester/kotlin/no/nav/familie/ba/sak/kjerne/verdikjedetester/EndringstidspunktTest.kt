@@ -39,24 +39,22 @@ class EndringstidspunktTest(
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato = "1982-01-12",
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato = "1982-01-12",
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = barnFødselsdato.toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val overstyrendeVilkårResultaterFGB =
             scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
@@ -65,8 +63,8 @@ class EndringstidspunktTest(
 
         kjørStegprosessForBehandling(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = scenario.søker.ident!!,
-            barnasIdenter = listOf(scenario.barna.first().ident!!),
+            søkerFnr = scenario.søker.ident,
+            barnasIdenter = listOf(scenario.barna.first().ident),
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,

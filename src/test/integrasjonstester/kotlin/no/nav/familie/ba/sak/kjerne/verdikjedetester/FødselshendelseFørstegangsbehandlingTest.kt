@@ -44,25 +44,23 @@ class FødselshendelseFørstegangsbehandlingTest(
         every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
 
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.of(2021, 11, 18).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.of(2021, 11, 18).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -120,30 +118,28 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Test
     fun `Skal innvilge fødselshendelse på mor med 2 barn uten utbetalinger`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen 2",
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusDays(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusDays(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen 2",
+                        ),
+                    ),
+            ).also { stubScenario(it) }
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = scenario.barna.map { it.ident },
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,

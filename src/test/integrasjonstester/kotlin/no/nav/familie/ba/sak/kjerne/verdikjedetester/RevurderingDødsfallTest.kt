@@ -43,24 +43,22 @@ class RevurderingDødsfallTest(
     @Test
     fun `Dødsfall bruker skal kjøre gjennom`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato = "1982-01-12",
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato = "1982-01-12",
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         behandleFødselshendelse(
             nyBehandlingHendelse =
@@ -128,24 +126,22 @@ class RevurderingDødsfallTest(
     @Test
     fun `Dødsfall bruker skal stoppes dersom ikke bosatt i riket er stoppet før dagens dato`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato = "1982-01-12",
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato = "1982-01-12",
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         behandleFødselshendelse(
             nyBehandlingHendelse =

@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -45,7 +44,6 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
 import org.springframework.web.client.RestOperations
 import org.testcontainers.containers.FixedHostPortGenericContainer
-import org.testcontainers.images.PullPolicy
 
 val MOCK_SERVER_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teamfamilie/familie-mock-server:latest"
 
@@ -53,23 +51,8 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "PDL_URL: http://localhost:1338/rest/api/pdl",
+            "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
-        val brukLokalMockserver = System.getProperty("brukLokalMockserver")?.toBoolean() ?: false
-        if (!brukLokalMockserver) {
-            mockServer.start()
-        }
-    }
-
-    companion object {
-        // Lazy because we only want it to be initialized when accessed
-        val mockServer: KMockServerContainer by lazy {
-            val mockServer = KMockServerContainer(MOCK_SERVER_IMAGE)
-            mockServer.withExposedPorts(1337)
-            mockServer.withFixedExposedPort(1337, 1337)
-            mockServer.withImagePullPolicy(PullPolicy.alwaysPull())
-            mockServer
-        }
     }
 }
 
@@ -91,7 +74,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
-@AutoConfigureWireMock(port = 1338)
+@AutoConfigureWireMock(port = 1337)
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     @AfterAll
     fun tearDownSuper() {
@@ -108,11 +91,11 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
             headers = hentHeadersForSystembruker(),
         )
 
-    fun mockServerKlient(): MockserverKlient =
-        MockserverKlient(
-            mockServerUrl = "http://localhost:1337",
-            restOperations = restOperations,
-        )
+    fun stubScenario(scenario: RestScenario) {
+        val alleIdenter = scenario.barna.map { it.ident } + scenario.søker.ident
+        alleIdenter.forEach { stubHentIdenter(it) }
+        stubHentPerson(scenario)
+    }
 
     fun stubHentIdenter(personIdent: String) {
         val response =

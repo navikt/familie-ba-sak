@@ -61,34 +61,32 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
         årMedReduksjonsbegrunnelse: Standardbegrunnelse?,
     ): List<Behandling> {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusYears(2).toString(),
-                                fornavn = "Toåringen",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusYears(6).toString(),
-                                fornavn = "Seksåringen",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusYears(18).toString(),
-                                fornavn = "Attenåringen",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusYears(2).toString(),
+                            fornavn = "Toåringen",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusYears(6).toString(),
+                            fornavn = "Seksåringen",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
+                        ),
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusYears(18).toString(),
+                            fornavn = "Attenåringen",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
+                        ),
+                    ),
+            ).also { stubScenario(it) }
 
-        val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident!!).data?.id!!
+        val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident).data?.id!!
         familieBaSakKlient().opprettBehandling(søkersIdent = scenario.søker.ident, fagsakId = fagsakId)
 
         val restFagsakEtterOpprettelse = familieBaSakKlient().hentFagsak(fagsakId = fagsakId)

@@ -43,25 +43,23 @@ class TekniskEndringAvFødselshendelseTest(
         System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING, "true")
 
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusDays(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1998-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusDays(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,

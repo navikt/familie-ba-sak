@@ -80,7 +80,7 @@ class BehandleSmåbarnstilleggTest(
     private val barnFødselsdato = LocalDate.now().minusYears(2)
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
 
-    val restScenario =
+    val scenario =
         RestScenario(
             søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
             barna =
@@ -94,11 +94,9 @@ class BehandleSmåbarnstilleggTest(
                 ),
         )
 
-    lateinit var scenario: RestScenario
-
     @BeforeAll
     fun init() {
-        scenario = mockServerKlient().lagScenario(restScenario)
+        stubScenario(scenario)
     }
 
     @BeforeEach

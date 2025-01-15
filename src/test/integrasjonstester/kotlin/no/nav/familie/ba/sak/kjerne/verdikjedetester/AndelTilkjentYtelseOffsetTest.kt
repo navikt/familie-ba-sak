@@ -91,20 +91,18 @@ class AndelTilkjentYtelseOffsetTest(
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
-        mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna =
-                    listOf(
-                        RestScenarioPerson(
-                            fødselsdato = barnFødselsdato.toString(),
-                            fornavn = "Barn",
-                            etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
-                        ),
+        RestScenario(
+            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            barna =
+                listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList(),
                     ),
-            ),
-        )
+                ),
+        ).also { stubScenario(it) }
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
 

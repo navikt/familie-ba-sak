@@ -70,7 +70,7 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal kjøre satsendring på løpende fagsak hvor brukeren har barnetrygd under 6 år`() {
-        val scenario = mockServerKlient().lagScenario(restScenario)
+        stubScenario(scenario)
         val behandling = opprettBehandling(scenario)
         val atyForBehandlingMedGammelSatsFraFørMars2024 =
             andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
@@ -124,7 +124,7 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
-        val scenario = mockServerKlient().lagScenario(restScenario)
+        stubScenario(scenario)
         val behandling = opprettBehandling(scenario)
 
         val satsendringResultat =
@@ -145,7 +145,7 @@ class BehandlingSatsendringTest(
             postnummer = "0202",
             kommunenummer = "2231",
         )
-    private val restScenario =
+    private val scenario =
         RestScenario(
             søker =
                 RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(

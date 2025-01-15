@@ -63,20 +63,18 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(6).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val fagsakId: Ressurs<String> =
             familieBaSakKlient().journalfør(
@@ -245,20 +243,18 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING, "true")
 
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(6).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val fagsakId: Ressurs<String> =
             familieBaSakKlient().journalfør(
@@ -270,7 +266,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         bruker =
                             NavnOgIdent(
                                 navn = scenario.søker.navn,
-                                id = scenario.søker.ident!!,
+                                id = scenario.søker.ident,
                             ),
                     ).copy(
                         journalpostTittel = "Søknad om utvidet barnetrygd",

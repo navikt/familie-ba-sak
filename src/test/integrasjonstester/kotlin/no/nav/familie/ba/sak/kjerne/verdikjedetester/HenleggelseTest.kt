@@ -30,7 +30,7 @@ class HenleggelseTest(
         RestScenario(
             søker =
                 RestScenarioPerson(
-                    ident = randomFnr(LocalDate.of(1990, 4, 20)),
+                    _ident = randomFnr(LocalDate.of(1990, 4, 20)),
                     fødselsdato = "1990-04-20",
                     fornavn = "Mor",
                     etternavn = "Søker",
@@ -38,7 +38,7 @@ class HenleggelseTest(
             barna =
                 listOf(
                     RestScenarioPerson(
-                        ident = randomFnr(LocalDate.now().minusMonths(2)),
+                        _ident = randomFnr(LocalDate.now().minusMonths(2)),
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -48,10 +48,7 @@ class HenleggelseTest(
 
     @BeforeAll
     fun init() {
-        val alleIdenter = restScenario.barna.map { it.ident!! } + restScenario.søker.ident!!
-
-        alleIdenter.forEach { stubHentIdenter(it) }
-        stubHentPerson(restScenario)
+        stubScenario(scenario = restScenario)
     }
 
     @Test

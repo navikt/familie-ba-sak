@@ -75,24 +75,22 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at søker er under 18 (filtreringsregel)`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato = now().minusYears(16).toString(),
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato = now().minusYears(16).toString(),
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = now().minusMonths(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val behandling =
             behandleFødselshendelse(
@@ -131,64 +129,62 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at søker har flere adresser uten fom-dato (vilkårsvurdering)`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
-                        RestScenarioPerson(
-                            fødselsdato = "1993-01-12",
-                            fornavn = "Mor",
-                            etternavn = "Søker",
-                            bostedsadresser =
-                                defaultBostedsadresseHistorikk +
-                                    listOf(
-                                        Bostedsadresse(
-                                            angittFlyttedato = null,
-                                            gyldigTilOgMed = null,
-                                            matrikkeladresse =
-                                                Matrikkeladresse(
-                                                    matrikkelId = 123L,
-                                                    bruksenhetsnummer = "H301",
-                                                    tilleggsnavn = "navn",
-                                                    postnummer = "0202",
-                                                    kommunenummer = "2231",
-                                                ),
-                                        ),
-                                        Bostedsadresse(
-                                            angittFlyttedato = null,
-                                            gyldigTilOgMed = null,
-                                            matrikkeladresse =
-                                                Matrikkeladresse(
-                                                    matrikkelId = 123L,
-                                                    bruksenhetsnummer = "H301",
-                                                    tilleggsnavn = "navn",
-                                                    postnummer = "0202",
-                                                    kommunenummer = "2231",
-                                                ),
-                                        ),
-                                        Bostedsadresse(
-                                            angittFlyttedato = now(),
-                                            gyldigTilOgMed = null,
-                                            matrikkeladresse =
-                                                Matrikkeladresse(
-                                                    matrikkelId = 123L,
-                                                    bruksenhetsnummer = "H301",
-                                                    tilleggsnavn = "navn",
-                                                    postnummer = "0202",
-                                                    kommunenummer = "2231",
-                                                ),
-                                        ),
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato = "1993-01-12",
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                        bostedsadresser =
+                            defaultBostedsadresseHistorikk + // TODO legg til overstyring av bostedsadresse
+                                listOf(
+                                    Bostedsadresse(
+                                        angittFlyttedato = null,
+                                        gyldigTilOgMed = null,
+                                        matrikkeladresse =
+                                            Matrikkeladresse(
+                                                matrikkelId = 123L,
+                                                bruksenhetsnummer = "H301",
+                                                tilleggsnavn = "navn",
+                                                postnummer = "0202",
+                                                kommunenummer = "2231",
+                                            ),
                                     ),
+                                    Bostedsadresse(
+                                        angittFlyttedato = null,
+                                        gyldigTilOgMed = null,
+                                        matrikkeladresse =
+                                            Matrikkeladresse(
+                                                matrikkelId = 123L,
+                                                bruksenhetsnummer = "H301",
+                                                tilleggsnavn = "navn",
+                                                postnummer = "0202",
+                                                kommunenummer = "2231",
+                                            ),
+                                    ),
+                                    Bostedsadresse(
+                                        angittFlyttedato = now(),
+                                        gyldigTilOgMed = null,
+                                        matrikkeladresse =
+                                            Matrikkeladresse(
+                                                matrikkelId = 123L,
+                                                bruksenhetsnummer = "H301",
+                                                tilleggsnavn = "navn",
+                                                postnummer = "0202",
+                                                kommunenummer = "2231",
+                                            ),
+                                    ),
+                                ),
+                    ),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = now().toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val behandling =
             behandleFødselshendelse(
@@ -221,20 +217,18 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at barn ikke er bosatt i riket og bor ikke med mor (vilkårsvurdering)`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = now().toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val barnIdent = scenario.barna.first().ident!!
         val behandling =
@@ -289,34 +283,32 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at mor mottar utvidet barnetrygd (filtreringsregel)`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato =
+                            now()
+                                .minusYears(26)
+                                .førsteDagINesteMåned()
+                                .plusDays(6)
+                                .toString(),
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato =
-                                now()
-                                    .minusYears(26)
-                                    .førsteDagINesteMåned()
-                                    .plusDays(6)
-                                    .toString(),
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = now().minusMonths(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                            RestScenarioPerson(
-                                fødselsdato = now().minusYears(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
+                        RestScenarioPerson(
+                            fødselsdato = now().minusYears(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val behandling =
             kjørStegprosessForFGB(
@@ -373,34 +365,32 @@ class FødselshendelseHenleggelseTest(
     @Test
     fun `Skal henlegge fødselshendelse på grunn av at mor mottar EØS-barnetrygd (filtreringsregel)`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato =
+                            now()
+                                .minusYears(26)
+                                .førsteDagINesteMåned()
+                                .plusDays(6)
+                                .toString(),
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato =
-                                now()
-                                    .minusYears(26)
-                                    .førsteDagINesteMåned()
-                                    .plusDays(6)
-                                    .toString(),
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = now().minusMonths(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                            RestScenarioPerson(
-                                fødselsdato = now().minusYears(2).toString(),
-                                fornavn = "Barn2",
-                                etternavn = "Barnesen",
-                            ),
+                        RestScenarioPerson(
+                            fødselsdato = now().minusYears(2).toString(),
+                            fornavn = "Barn2",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val behandling =
             kjørStegprosessForFGB(
@@ -453,40 +443,38 @@ class FødselshendelseHenleggelseTest(
         val fødselsdato = "1993-01-12"
         val barnFødselsdato = now()
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
-                        RestScenarioPerson(fødselsdato = fødselsdato, fornavn = "Mor", etternavn = "Søker").copy(
-                            statsborgerskap =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(fødselsdato = fødselsdato, fornavn = "Mor", etternavn = "Søker").copy(
+                        statsborgerskap =
+                            listOf(
+                                Statsborgerskap(
+                                    land = "UKR",
+                                    gyldigFraOgMed = LocalDate.parse(fødselsdato),
+                                    bekreftelsesdato = LocalDate.parse(fødselsdato),
+                                    gyldigTilOgMed = null,
+                                ),
+                            ),
+                    ),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                        ).copy(
+                            statsborgerskap = // TODO legg til overstyring av statsborgerskap
                                 listOf(
                                     Statsborgerskap(
                                         land = "UKR",
-                                        gyldigFraOgMed = LocalDate.parse(fødselsdato),
-                                        bekreftelsesdato = LocalDate.parse(fødselsdato),
+                                        gyldigFraOgMed = barnFødselsdato,
+                                        bekreftelsesdato = barnFødselsdato,
                                         gyldigTilOgMed = null,
                                     ),
                                 ),
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = barnFødselsdato.toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ).copy(
-                                statsborgerskap =
-                                    listOf(
-                                        Statsborgerskap(
-                                            land = "UKR",
-                                            gyldigFraOgMed = barnFødselsdato,
-                                            bekreftelsesdato = barnFødselsdato,
-                                            gyldigTilOgMed = null,
-                                        ),
-                                    ),
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
