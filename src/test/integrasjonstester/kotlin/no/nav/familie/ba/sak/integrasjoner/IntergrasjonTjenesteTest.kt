@@ -15,11 +15,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import no.nav.familie.ba.sak.common.MDCOperations
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagVedtak
-import randomAktør
-import randomFnr
+import lagVedtak
+import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
@@ -67,6 +65,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
+import randomAktør
+import randomFnr
 import java.net.URI
 import java.time.LocalDate
 

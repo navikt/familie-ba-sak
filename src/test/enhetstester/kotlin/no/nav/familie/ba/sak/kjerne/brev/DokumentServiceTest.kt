@@ -8,12 +8,12 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
+import lagBehandling
+import lagVedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import lagBehandling
 import no.nav.familie.ba.sak.common.lagBrevmottakerDb
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper

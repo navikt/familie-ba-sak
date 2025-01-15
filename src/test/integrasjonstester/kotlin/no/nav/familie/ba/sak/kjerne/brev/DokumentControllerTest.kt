@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import lagVedtak
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import lagBehandling
+import lagVedtak
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -113,7 +114,6 @@ import tilfeldigPerson
 import tilfeldigSøker
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Properties
 import kotlin.math.abs
@@ -132,17 +132,6 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     gjeldendeUtvidetVedtaksperiodeId += ID_INKREMENT
     return gjeldendeUtvidetVedtaksperiodeId
 }
-
-fun lagVedtak(
-    behandling: Behandling = lagBehandling(),
-    stønadBrevPdF: ByteArray? = null,
-    vedtaksdato: LocalDateTime? = LocalDateTime.now(),
-) = Vedtak(
-    id = nesteVedtakId(),
-    behandling = behandling,
-    vedtaksdato = vedtaksdato,
-    stønadBrevPdF = stønadBrevPdF,
-)
 
 fun lagAndelTilkjentYtelse(
     fom: YearMonth,

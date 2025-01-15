@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.cucumber
 import defaultFagsak
 import io.cucumber.datatable.DataTable
 import lagBehandling
+import lagVedtak
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -120,8 +121,7 @@ fun lagVedtak(
         dataTable
             .groupByBehandlingId()
             .map {
-                no.nav.familie.ba.sak.common
-                    .lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
+                lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
             },
     )
 }

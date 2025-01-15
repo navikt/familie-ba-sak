@@ -8,9 +8,9 @@ import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.TestClockProvider
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagVedtak
+import lagVedtak
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
@@ -312,10 +312,12 @@ class OppdragSteg {
                     lagBehandling(
                         id = it.key,
                         fagsak = fagsak,
-                        behandlingType = parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, sisteRad)
-                            ?: BehandlingType.FØRSTEGANGSBEHANDLING,
-                        årsak = parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, sisteRad)
-                            ?: BehandlingÅrsak.SØKNAD,
+                        behandlingType =
+                            parseValgfriEnum<BehandlingType>(Domenebegrep.BEHANDLINGSTYPE, sisteRad)
+                                ?: BehandlingType.FØRSTEGANGSBEHANDLING,
+                        årsak =
+                            parseValgfriEnum<BehandlingÅrsak>(Domenebegrep.BEHANDLINGSÅRSAK, sisteRad)
+                                ?: BehandlingÅrsak.SØKNAD,
                     )
                 }.toMutableMap()
     }

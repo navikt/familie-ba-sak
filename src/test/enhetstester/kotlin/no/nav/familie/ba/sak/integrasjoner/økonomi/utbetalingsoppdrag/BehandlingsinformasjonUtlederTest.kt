@@ -5,10 +5,10 @@ import io.mockk.mockk
 import lagBehandling
 import lagFagsak
 import lagInstitusjon
+import lagVedtak
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.assertj.core.api.Assertions.assertThat
