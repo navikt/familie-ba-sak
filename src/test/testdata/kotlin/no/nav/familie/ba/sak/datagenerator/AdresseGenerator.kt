@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.datagenerator.grunnlag
+package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 
