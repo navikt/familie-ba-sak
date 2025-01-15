@@ -9,12 +9,12 @@ import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
 import lagBehandling
+import lagBrevmottakerDb
 import lagPerson
 import lagVedtak
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagBrevmottakerDb
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService

@@ -8,9 +8,9 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
 import lagBehandling
+import lagBrevmottakerDb
 import lagVedtak
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagBrevmottakerDb
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
