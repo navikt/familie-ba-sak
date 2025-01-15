@@ -120,18 +120,12 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 private var gjeldendeVedtakId: Long = abs(Random.nextLong(10000000))
-private var gjeldendePersonId: Long = abs(Random.nextLong(10000000))
 private var gjeldendeUtvidetVedtaksperiodeId: Long = abs(Random.nextLong(10000000))
 private const val ID_INKREMENT = 50
 
 fun nesteVedtakId(): Long {
     gjeldendeVedtakId += ID_INKREMENT
     return gjeldendeVedtakId
-}
-
-fun nestePersonId(): Long {
-    gjeldendePersonId += ID_INKREMENT
-    return gjeldendePersonId
 }
 
 fun nesteUtvidetVedtaksperiodeId(): Long {

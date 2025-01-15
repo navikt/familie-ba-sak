@@ -1,4 +1,3 @@
-import no.nav.familie.ba.sak.common.nestePersonId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -10,13 +9,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import java.time.LocalDate
+import kotlin.random.Random
 
 fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
     aktør: Aktør = randomAktør(),
-    personId: Long = nestePersonId(),
+    personId: Long = Random.nextLong(10000000),
     dødsfall: Dødsfall? = null,
 ) = Person(
     id = personId,
@@ -38,7 +38,7 @@ fun tilfeldigSøker(
     kjønn: Kjønn = Kjønn.MANN,
     aktør: Aktør = randomAktør(),
 ) = Person(
-    id = nestePersonId(),
+    id = Random.nextLong(10000000),
     aktør = aktør,
     fødselsdato = fødselsdato,
     type = personType,
