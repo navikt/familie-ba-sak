@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 import io.mockk.every
 import io.mockk.mockk
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagRefusjonEøs
+import lagRefusjonEøs
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
