@@ -6,10 +6,10 @@ import io.mockk.unmockkObject
 import lagAndelTilkjentYtelse
 import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagInitiellTilkjentYtelse
+import lagPerson
 import lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth

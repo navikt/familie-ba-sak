@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 
-import no.nav.familie.ba.sak.common.lagPerson
+import lagPerson
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed

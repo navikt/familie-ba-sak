@@ -10,12 +10,12 @@ import io.mockk.verify
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagFagsak
+import lagPersonEnkel
 import lagPersonResultat
 import lagVilkårResultat
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

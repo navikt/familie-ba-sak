@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.steg
 import lagBehandling
 import lagEndretUtbetalingAndel
 import lagInitiellTilkjentYtelse
+import lagPerson
 import lagTestPersonopplysningGrunnlag
 import lagVilkårResultat
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService

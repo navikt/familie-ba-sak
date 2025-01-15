@@ -5,7 +5,7 @@ import io.mockk.mockk
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.common.lagPerson
+import lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak

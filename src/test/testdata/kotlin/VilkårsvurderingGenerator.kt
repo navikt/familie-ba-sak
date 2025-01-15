@@ -1,4 +1,3 @@
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

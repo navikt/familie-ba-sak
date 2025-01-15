@@ -6,10 +6,10 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import lagBehandling
+import lagPerson
 import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak

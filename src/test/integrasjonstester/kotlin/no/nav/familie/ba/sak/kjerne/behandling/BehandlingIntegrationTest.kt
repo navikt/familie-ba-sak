@@ -5,11 +5,11 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import lagBehandling
+import lagPerson
 import lagPersonResultat
 import lagPersonResultaterForSøkerOgToBarn
 import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest

@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import lagBehandling
+import lagPerson
 import lagPersonResultat
 import lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo

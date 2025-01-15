@@ -1,3 +1,4 @@
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -5,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -47,3 +49,43 @@ fun tilfeldigSøker(
     kjønn = kjønn,
     målform = Målform.NB,
 ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTANDTYPE.UGIFT, person = this)) }
+
+fun lagPerson(
+    personIdent: PersonIdent = PersonIdent(randomFnr()),
+    aktør: Aktør = tilAktør(personIdent.ident),
+    type: PersonType = PersonType.SØKER,
+    personopplysningGrunnlag: PersonopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 0),
+    fødselsdato: LocalDate = LocalDate.now().minusYears(19),
+    kjønn: Kjønn = Kjønn.KVINNE,
+    dødsfall: Dødsfall? = null,
+    id: Long = 0,
+) = Person(
+    aktør = aktør,
+    type = type,
+    personopplysningGrunnlag = personopplysningGrunnlag,
+    fødselsdato = fødselsdato,
+    navn = type.name,
+    kjønn = kjønn,
+    dødsfall = dødsfall,
+    id = id,
+)
+
+fun lagPersonEnkel(
+    personType: PersonType,
+    aktør: Aktør = randomAktør(),
+    dødsfallDato: LocalDate? = null,
+    fødselsdato: LocalDate =
+        if (personType == PersonType.SØKER) {
+            LocalDate.now().minusYears(34)
+        } else {
+            LocalDate.now().minusYears(4)
+        },
+    målform: Målform = Målform.NB,
+): PersonEnkel =
+    PersonEnkel(
+        type = personType,
+        aktør = aktør,
+        dødsfallDato = dødsfallDato,
+        fødselsdato = fødselsdato,
+        målform = målform,
+    )

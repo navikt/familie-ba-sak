@@ -6,7 +6,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
+import lagPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse

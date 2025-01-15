@@ -5,9 +5,9 @@ import io.mockk.mockk
 import io.mockk.spyk
 import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
+import lagPerson
 import lagTestPersonopplysningGrunnlag
 import lagVedtak
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

@@ -4,10 +4,10 @@ import io.mockk.mockk
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagEndretUtbetalingAndel
+import lagPerson
 import lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
 import no.nav.familie.ba.sak.common.rangeTo

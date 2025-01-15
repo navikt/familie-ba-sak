@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import lagAndelTilkjentYtelseUtvidet
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
+import lagPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

@@ -5,10 +5,10 @@ import io.mockk.mockk
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagEndretUtbetalingAndel
+import lagPerson
 import lagTilkjentYtelse
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService

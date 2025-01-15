@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import lagBehandling
+import lagPerson
 import lagPersonResultat
 import lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

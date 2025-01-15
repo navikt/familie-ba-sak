@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import lagBehandling
+import lagPerson
 import lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

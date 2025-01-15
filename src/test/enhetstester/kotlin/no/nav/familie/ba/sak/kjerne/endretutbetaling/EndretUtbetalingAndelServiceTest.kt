@@ -5,11 +5,11 @@ import io.mockk.mockk
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
+import lagPerson
 import lagPersonResultat
 import lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse

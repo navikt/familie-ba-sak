@@ -12,13 +12,13 @@ import io.mockk.verify
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagInitiellTilkjentYtelse
+import lagPerson
 import lagPersonResultat
 import lagSøknadDTO
 import lagTestPersonopplysningGrunnlag
 import lagVilkårResultat
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak

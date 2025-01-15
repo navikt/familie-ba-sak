@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.mockk
+import lagPerson
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_1990
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.FOM_2004

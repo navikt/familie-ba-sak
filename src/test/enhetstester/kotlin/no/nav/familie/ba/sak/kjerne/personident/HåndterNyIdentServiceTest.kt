@@ -6,8 +6,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import lagBehandling
+import lagPerson
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.common.lagPerson
+import lagPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomIFremtiden
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals

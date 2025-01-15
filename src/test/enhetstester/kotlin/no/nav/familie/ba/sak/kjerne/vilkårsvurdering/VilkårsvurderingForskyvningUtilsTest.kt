@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import lagBehandling
+import lagPerson
 import lagVilkårResultat
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato

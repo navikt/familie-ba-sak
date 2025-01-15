@@ -8,7 +8,7 @@ import io.mockk.verify
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagPerson
+import lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat

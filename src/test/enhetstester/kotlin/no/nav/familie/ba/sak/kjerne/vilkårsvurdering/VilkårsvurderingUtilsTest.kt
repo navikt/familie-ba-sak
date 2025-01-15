@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import lagBehandling
+import lagPerson
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

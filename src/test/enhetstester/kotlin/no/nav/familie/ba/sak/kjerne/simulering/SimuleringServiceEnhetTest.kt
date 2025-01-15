@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import io.mockk.every
 import io.mockk.mockk
 import lagBehandling
+import lagPerson
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

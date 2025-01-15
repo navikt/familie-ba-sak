@@ -7,6 +7,7 @@ import io.mockk.runs
 import lagAndelTilkjentYtelse
 import lagBehandling
 import lagInitiellTilkjentYtelse
+import lagPerson
 import lagVedtak
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.Feil
@@ -14,7 +15,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
