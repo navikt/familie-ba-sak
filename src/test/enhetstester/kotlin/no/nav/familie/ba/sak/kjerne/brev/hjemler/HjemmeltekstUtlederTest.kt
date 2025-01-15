@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 import io.mockk.every
 import io.mockk.mockk
 import lagBehandling
+import lagSanityBegrunnelse
+import lagSanityEøsBegrunnelse
 import lagVedtaksperiodeMedBegrunnelser
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagEØSBegrunnelse
-import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
-import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
