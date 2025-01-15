@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.common
 
 import lagSøknadDTO
-import lagVedtaksperiodeMedBegrunnelser
 import leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -26,9 +25,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -371,14 +367,3 @@ fun lagBrevmottakerDb(
 )
 
 val Number.årSiden: LocalDate get() = LocalDate.now().minusYears(this.toLong())
-
-fun lagEØSBegrunnelse(
-    id: Long = 0L,
-    vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
-    begrunnelse: EØSStandardbegrunnelse,
-): EØSBegrunnelse =
-    EØSBegrunnelse(
-        id = id,
-        vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-        begrunnelse = begrunnelse,
-    )
