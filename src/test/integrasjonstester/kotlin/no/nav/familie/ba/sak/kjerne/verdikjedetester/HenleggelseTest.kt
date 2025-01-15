@@ -18,26 +18,14 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import java.time.LocalDate
 
-@AutoConfigureWireMock(port = 1338)
 class HenleggelseTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractVerdikjedetest() {
-    // protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(1338))
-
-    // init {
-    //     wireMockServer.start()
-    // }
-    //
-    // @AfterAll
-    // fun stopWiremockServer() {
-    //     wireMockServer.stop()
-    // }
-
     val restScenario =
         RestScenario(
             søker =
@@ -58,16 +46,17 @@ class HenleggelseTest(
                 ),
         )
 
-    @Test
-    fun `Opprett behandling, henlegg behandling feilaktig opprettet og opprett behandling på nytt`() {
-        val scenario = mockServerKlient().lagScenario(restScenario)
-
-        val alleIdenter = scenario.barna.map { it.ident!! } + scenario.søker.ident!!
+    @BeforeAll
+    fun init() {
+        val alleIdenter = restScenario.barna.map { it.ident!! } + restScenario.søker.ident!!
 
         alleIdenter.forEach { stubHentIdenter(it) }
         stubHentPerson(restScenario)
+    }
 
-        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
+    @Test
+    fun `Opprett behandling, henlegg behandling feilaktig opprettet og opprett behandling på nytt`() {
+        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(restScenario)
 
         val responseHenlagtSøknad =
             familieBaSakKlient().henleggSøknad(
@@ -95,14 +84,13 @@ class HenleggelseTest(
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 0)
 
-        val andreBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
+        val andreBehandling = opprettBehandlingOgRegistrerSøknad(restScenario)
         assertEquals(andreBehandling.status, BehandlingStatus.UTREDES)
     }
 
     @Test
     fun `Opprett behandling, hent forhåndsvising av brev, henlegg behandling søknad trukket`() {
-        val scenario = mockServerKlient().lagScenario(restScenario)
-        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
+        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(restScenario)
 
         /**
          * Denne forhåndsvisningen går ikke til sanity for øyeblikket, men det er en mulighet å legge til
