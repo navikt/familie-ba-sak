@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -19,17 +20,37 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import java.time.LocalDate
 
+@AutoConfigureWireMock(port = 1338)
 class HenleggelseTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractVerdikjedetest() {
+    // protected final val wireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().port(1338))
+
+    // init {
+    //     wireMockServer.start()
+    // }
+    //
+    // @AfterAll
+    // fun stopWiremockServer() {
+    //     wireMockServer.stop()
+    // }
+
     val restScenario =
         RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
+            søker =
+                RestScenarioPerson(
+                    ident = randomFnr(LocalDate.of(1990, 4, 20)),
+                    fødselsdato = "1990-04-20",
+                    fornavn = "Mor",
+                    etternavn = "Søker",
+                ),
             barna =
                 listOf(
                     RestScenarioPerson(
+                        ident = randomFnr(LocalDate.now().minusMonths(2)),
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -40,6 +61,11 @@ class HenleggelseTest(
     @Test
     fun `Opprett behandling, henlegg behandling feilaktig opprettet og opprett behandling på nytt`() {
         val scenario = mockServerKlient().lagScenario(restScenario)
+
+        val alleIdenter = scenario.barna.map { it.ident!! } + scenario.søker.ident!!
+
+        alleIdenter.forEach { stubHentIdenter(it) }
+        stubHentPerson(restScenario)
 
         val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
 

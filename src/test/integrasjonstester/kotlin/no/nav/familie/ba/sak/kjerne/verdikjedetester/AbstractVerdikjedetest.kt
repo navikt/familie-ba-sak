@@ -1,7 +1,37 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.stubFor
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsDato
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKjoenn
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonData
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
+import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
+import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContextInitializer
@@ -19,7 +49,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "PDL_URL: http://localhost:1337/rest/api/pdl",
+            "PDL_URL: http://localhost:1338/rest/api/pdl",
         )
         val brukLokalMockserver = System.getProperty("brukLokalMockserver")?.toBoolean() ?: false
         if (!brukLokalMockserver) {
@@ -73,6 +103,179 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
             mockServerUrl = "http://localhost:1337",
             restOperations = restOperations,
         )
+
+    fun stubHentIdenter(personIdent: String) {
+        val response =
+            PdlBaseResponse(
+                data =
+                    PdlHentIdenterResponse(
+                        pdlIdenter =
+                            PdlIdenter(
+                                identer =
+                                    listOf(
+                                        IdentInformasjon(
+                                            ident = "$personIdent",
+                                            historisk = false,
+                                            gruppe = "FOLKEREGISTERIDENT",
+                                        ),
+                                        IdentInformasjon(
+                                            ident = "${personIdent}99",
+                                            historisk = false,
+                                            gruppe = "AKTORID",
+                                        ),
+                                    ),
+                            ),
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        val pdlRequestBody =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(personIdent),
+                query = hentGraphqlQuery("hentIdenter"),
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            objectMapper.writeValueAsString(response),
+                        ),
+                ),
+        )
+    }
+
+    fun stubHentPerson(scenario: RestScenario) {
+        stubHentPersonEnkel(scenario)
+        stubHentPersonMedRelasjon(scenario)
+    }
+
+    private fun stubHentPersonMedRelasjon(scenario: RestScenario) {
+        val response =
+            PdlBaseResponse(
+                data =
+                    PdlHentPersonResponse(
+                        person =
+                            enkelPdlHentPersonResponse(scenario).copy(
+                                forelderBarnRelasjon =
+                                    listOf(
+                                        ForelderBarnRelasjon(
+                                            relatertPersonsIdent = scenario.barna[0].ident!!,
+                                            relatertPersonsRolle = FORELDERBARNRELASJONROLLE.MOR,
+                                        ),
+                                    ),
+                            ),
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        val pdlRequestBody =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident = scenario.søker.ident!!),
+                query = PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON.graphQL,
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            objectMapper.writeValueAsString(response),
+                        ),
+                ),
+        )
+    }
+
+    private fun enkelPdlHentPersonResponse(scenario: RestScenario): PdlPersonData =
+        PdlPersonData(
+            folkeregisteridentifikator =
+                listOf(
+                    PdlFolkeregisteridentifikator(
+                        identifikasjonsnummer = scenario.søker.ident,
+                        status = FolkeregisteridentifikatorStatus.I_BRUK,
+                        type = FolkeregisteridentifikatorType.FNR,
+                    ),
+                ),
+            foedselsdato =
+                listOf(
+                    PdlFødselsDato(
+                        foedselsdato = scenario.søker.fødselsdato,
+                    ),
+                ),
+            navn =
+                listOf(
+                    PdlNavn(
+                        fornavn = scenario.søker.fornavn,
+                        mellomnavn = null,
+                        etternavn = scenario.søker.etternavn,
+                    ),
+                ),
+            kjoenn = listOf(PdlKjoenn(kjoenn = Kjønn.KVINNE)),
+            forelderBarnRelasjon = TODO(),
+            adressebeskyttelse = emptyList(),
+            sivilstand = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
+            bostedsadresse =
+                listOf(
+                    Bostedsadresse(
+                        angittFlyttedato = null,
+                        gyldigTilOgMed = null,
+                        vegadresse =
+                            Vegadresse(
+                                matrikkelId = 100L,
+                                husnummer = "3",
+                                husbokstav = null,
+                                bruksenhetsnummer = "H111",
+                                adressenavn = "OTTO SVERDRUPS VEG",
+                                kommunenummer = "1566",
+                                postnummer = "6650",
+                                tilleggsnavn = null,
+                            ),
+                    ),
+                ),
+            doedsfall = emptyList(),
+            kontaktinformasjonForDoedsbo = emptyList(),
+        )
+
+    private fun stubHentPersonEnkel(scenario: RestScenario) {
+        val response =
+            PdlBaseResponse(
+                data =
+                    PdlHentPersonResponse(
+                        person =
+                            enkelPdlHentPersonResponse(scenario),
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        val pdlRequestBody =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident = scenario.søker.ident!!),
+                query = PersonInfoQuery.ENKEL.graphQL,
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            objectMapper.writeValueAsString(response),
+                        ),
+                ),
+        )
+    }
 }
 
 /**
