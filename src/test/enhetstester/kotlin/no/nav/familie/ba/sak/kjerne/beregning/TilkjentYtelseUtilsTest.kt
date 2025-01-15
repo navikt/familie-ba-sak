@@ -5,12 +5,12 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import lagAndelTilkjentYtelse
 import lagBehandling
+import lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned

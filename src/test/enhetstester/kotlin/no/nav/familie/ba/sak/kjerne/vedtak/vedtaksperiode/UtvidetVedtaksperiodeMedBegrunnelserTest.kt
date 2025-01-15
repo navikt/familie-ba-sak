@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import lagBehandling
+import lagEndretUtbetalingAndel
 import lagTestPersonopplysningGrunnlag
 import lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser

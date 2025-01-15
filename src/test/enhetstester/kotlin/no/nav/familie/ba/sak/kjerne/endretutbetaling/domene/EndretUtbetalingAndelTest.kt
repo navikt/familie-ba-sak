@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import lagAndelTilkjentYtelse
 import lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
+import lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomIFremtiden
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
