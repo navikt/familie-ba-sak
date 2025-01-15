@@ -5,10 +5,8 @@ import lagVedtak
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -84,7 +82,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import randomAktør
 import randomFnr
-import tilfeldigSøker
 import vurderVilkårsvurderingTilInnvilget
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -422,20 +419,6 @@ fun lagUtbetalingsperiode(
     ytelseTyper,
     antallBarn,
     utbetaltPerMnd,
-)
-
-fun lagUtbetalingsperiodeDetalj(
-    person: RestPerson = tilfeldigSøker().tilRestPerson(),
-    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
-    utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
-    prosent: BigDecimal = BigDecimal.valueOf(100),
-) = UtbetalingsperiodeDetalj(
-    person = person,
-    ytelseType = ytelseType,
-    utbetaltPerMnd = utbetaltPerMnd,
-    erPåvirketAvEndring = false,
-    endringsårsak = null,
-    prosent = prosent,
 )
 
 fun lagVedtaksperiodeMedBegrunnelser(
