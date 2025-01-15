@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
+import lagFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagFagsak
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
-import randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagUtbetalingsoppdrag
@@ -17,6 +16,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomAktør
 import java.time.LocalDate
 
 class TilkjentYtelseRepositoryTest(

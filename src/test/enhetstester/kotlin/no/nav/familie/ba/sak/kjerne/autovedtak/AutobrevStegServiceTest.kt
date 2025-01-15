@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
+import defaultFagsak
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
-import randomAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
@@ -17,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import randomAktør
 import java.time.LocalDateTime
 
 class AutobrevStegServiceTest {

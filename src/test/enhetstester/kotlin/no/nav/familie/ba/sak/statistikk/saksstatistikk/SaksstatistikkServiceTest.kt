@@ -3,18 +3,17 @@ package no.nav.familie.ba.sak.statistikk.saksstatistikk
 import com.fasterxml.jackson.core.JsonFactory
 import com.worldturner.medeia.api.UrlSchemaSource
 import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
+import defaultFagsak
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.tilAktør
@@ -65,6 +64,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
+import randomAktør
 import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.LocalDate.now

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.common
 
+import defaultFagsak
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -53,7 +54,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResul
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
@@ -148,28 +148,6 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     gjeldendeUtvidetVedtaksperiodeId += ID_INKREMENT
     return gjeldendeUtvidetVedtaksperiodeId
 }
-
-fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) =
-    Fagsak(
-        1,
-        aktør = aktør,
-    )
-
-fun lagFagsak(
-    id: Long = 1,
-    aktør: Aktør = tilAktør(randomFnr()),
-    institusjon: Institusjon? = null,
-    status: FagsakStatus = FagsakStatus.OPPRETTET,
-    type: FagsakType = FagsakType.NORMAL,
-    arkivert: Boolean = false,
-) = Fagsak(
-    id = id,
-    aktør = aktør,
-    institusjon = institusjon,
-    status = status,
-    type = type,
-    arkivert = arkivert,
-)
 
 fun lagInstitusjon(
     id: Long = 0L,
