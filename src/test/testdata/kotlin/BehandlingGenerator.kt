@@ -1,4 +1,3 @@
-import no.nav.familie.ba.sak.common.nesteBehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.random.Random
 
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
@@ -27,7 +27,7 @@ fun lagBehandling(
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
     aktivertTid: LocalDateTime = LocalDateTime.now(),
-    id: Long = nesteBehandlingId(),
+    id: Long = Random.nextLong(10000000),
     endretTidspunkt: LocalDateTime = LocalDateTime.now(),
     aktiv: Boolean = true,
 ) = Behandling(
@@ -55,8 +55,8 @@ fun lagBehandling(
                 0,
                 it,
                 steg,
-                behandlingStegStatus = BehandlingStegStatus.UTFØRT
-            )
+                behandlingStegStatus = BehandlingStegStatus.UTFØRT,
+            ),
         )
     }
 
