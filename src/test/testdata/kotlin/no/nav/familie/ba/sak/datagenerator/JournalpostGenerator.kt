@@ -1,10 +1,16 @@
-package no.nav.familie.ba.sak.integrasjoner
+package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
+import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
+import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
-import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottaker
@@ -18,15 +24,6 @@ import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.journalpost.RelevantDato
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
-import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
-import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
-import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
-import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 fun lagTestJournalpost(
@@ -101,51 +98,36 @@ fun lagTilgangsstyrtJournalpost(
         harTilgang = harTilgang,
     )
 
-fun lagTestOppgave(): OpprettOppgaveRequest =
-    OpprettOppgaveRequest(
-        ident = OppgaveIdentV2(ident = "test", gruppe = IdentGruppe.AKTOERID),
-        saksId = "123",
-        tema = Tema.BAR,
-        oppgavetype = Oppgavetype.BehandleSak,
-        fristFerdigstillelse = LocalDate.now(),
-        beskrivelse = "test",
-        enhetsnummer = "1234",
-        behandlingstema = "behandlingstema",
-    )
-
-fun lagTestOppgaveDTO(
-    oppgaveId: Long,
-    oppgavetype: Oppgavetype = Oppgavetype.Journalføring,
-    tildeltRessurs: String? = null,
-    tildeltEnhetsnr: String? = "4820",
-): Oppgave =
-    Oppgave(
-        id = oppgaveId,
-        aktoerId = randomAktør().aktørId,
-        identer = listOf(OppgaveIdentV2("11111111111", IdentGruppe.FOLKEREGISTERIDENT)),
-        journalpostId = "1234",
-        tildeltEnhetsnr = tildeltEnhetsnr,
-        tilordnetRessurs = tildeltRessurs,
-        behandlesAvApplikasjon = "FS22",
-        beskrivelse = "Beskrivelse for oppgave",
-        tema = Tema.BAR,
-        oppgavetype = oppgavetype.value,
-        behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
-        behandlingstype = Behandlingstype.NASJONAL.value,
-        opprettetTidspunkt =
-            LocalDate
-                .of(
-                    2020,
-                    1,
-                    1,
-                ).toString(),
-        fristFerdigstillelse =
-            LocalDate
-                .of(
-                    2020,
-                    2,
-                    1,
-                ).toString(),
-        prioritet = OppgavePrioritet.NORM,
-        status = StatusEnum.OPPRETTET,
+fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
+    RestJournalføring(
+        avsender = bruker,
+        bruker = bruker,
+        datoMottatt = LocalDateTime.now().minusDays(10),
+        journalpostTittel = "Søknad om ordinær barnetrygd",
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        knyttTilFagsak = true,
+        opprettOgKnyttTilNyBehandling = true,
+        tilknyttedeBehandlingIder = emptyList(),
+        dokumenter =
+            listOf(
+                RestJournalpostDokument(
+                    dokumentTittel = "Søknad om barnetrygd",
+                    brevkode = "mock",
+                    dokumentInfoId = "1",
+                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
+                    eksisterendeLogiskeVedlegg = emptyList(),
+                ),
+                RestJournalpostDokument(
+                    dokumentTittel = "Ekstra vedlegg",
+                    brevkode = "mock",
+                    dokumentInfoId = "2",
+                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
+                    eksisterendeLogiskeVedlegg = emptyList(),
+                ),
+            ),
+        navIdent = "09123",
+        nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+        nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
+        fagsakType = FagsakType.NORMAL,
     )

@@ -10,9 +10,11 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.datagenerator.lagSanityEøsBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -25,8 +27,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt

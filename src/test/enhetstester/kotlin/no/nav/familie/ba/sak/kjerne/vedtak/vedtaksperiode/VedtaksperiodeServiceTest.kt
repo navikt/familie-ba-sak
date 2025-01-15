@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -16,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak

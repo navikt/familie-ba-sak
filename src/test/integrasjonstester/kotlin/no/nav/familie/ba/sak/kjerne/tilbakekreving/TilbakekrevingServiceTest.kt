@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -20,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingReposito
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import org.junit.jupiter.api.Assertions.assertEquals

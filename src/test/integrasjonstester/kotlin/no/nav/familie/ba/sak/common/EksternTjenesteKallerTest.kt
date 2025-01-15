@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.common
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagTestOppgave
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
-import no.nav.familie.ba.sak.integrasjoner.lagTestOppgave
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.ikkeTilgang

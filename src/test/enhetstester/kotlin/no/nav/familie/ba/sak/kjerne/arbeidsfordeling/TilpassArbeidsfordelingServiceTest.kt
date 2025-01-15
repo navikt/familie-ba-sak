@@ -81,7 +81,7 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
@@ -118,15 +118,15 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
@@ -185,11 +185,11 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
@@ -224,11 +224,11 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = "1234",
-                        enhetsnavn = "Fiktiv enhet"
+                        enhetsnavn = "Fiktiv enhet",
                     ),
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                 )
 
@@ -284,7 +284,7 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                 )
 
@@ -321,15 +321,15 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn
+                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
                 )
 
@@ -366,15 +366,15 @@ class TilpassArbeidsfordelingServiceTest {
                 listOf(
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn
+                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                     Enhet(
                         enhetsnummer = arbeidsfordelingEnhet.enhetsnummer,
-                        enhetsnavn = arbeidsfordelingEnhet.enhetsnavn
+                        enhetsnavn = arbeidsfordelingEnhet.enhetsnavn,
                     ),
                 )
 

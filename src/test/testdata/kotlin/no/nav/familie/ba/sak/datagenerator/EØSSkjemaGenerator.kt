@@ -1,8 +1,10 @@
-package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
+package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform

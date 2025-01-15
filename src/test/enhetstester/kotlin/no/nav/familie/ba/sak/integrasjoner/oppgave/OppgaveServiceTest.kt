@@ -8,8 +8,8 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService

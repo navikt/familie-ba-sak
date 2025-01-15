@@ -2,8 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -44,6 +42,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
