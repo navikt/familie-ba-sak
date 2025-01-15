@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
+import lagBehandling
 import lagFagsak
+import lagInstitusjon
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import lagBehandling
-import no.nav.familie.ba.sak.common.lagInstitusjon
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType

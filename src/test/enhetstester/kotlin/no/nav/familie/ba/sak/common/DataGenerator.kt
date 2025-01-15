@@ -65,7 +65,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.G
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
-import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
@@ -136,16 +135,6 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
     gjeldendeUtvidetVedtaksperiodeId += ID_INKREMENT
     return gjeldendeUtvidetVedtaksperiodeId
 }
-
-fun lagInstitusjon(
-    id: Long = 0L,
-    orgNummer: String = "123456789",
-    tssEksternId: String? = "tssEksternId",
-) = Institusjon(
-    id = id,
-    orgNummer = orgNummer,
-    tssEksternId = tssEksternId,
-)
 
 fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
