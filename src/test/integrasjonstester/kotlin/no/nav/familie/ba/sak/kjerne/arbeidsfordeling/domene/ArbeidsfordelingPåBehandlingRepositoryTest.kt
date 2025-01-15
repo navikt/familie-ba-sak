@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
-import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository

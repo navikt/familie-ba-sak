@@ -1,7 +1,6 @@
-package no.nav.familie.ba.sak.datagenerator.oppgave
+package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
-import no.nav.familie.kontrakter.felles.enhet.Enhet
 
 fun lagArbeidsfordelingPåBehandling(
     behandlingId: Long,
@@ -15,8 +14,3 @@ fun lagArbeidsfordelingPåBehandling(
         behandlendeEnhetNavn = behandlendeEnhetNavn,
         manueltOverstyrt = manueltOverstyrt,
     )
-
-fun lagEnhet(
-    enhetsnummer: String,
-    enhetsnavn: String = "Navn",
-): Enhet = Enhet(enhetsnummer = enhetsnummer, enhetsnavn = enhetsnavn)
