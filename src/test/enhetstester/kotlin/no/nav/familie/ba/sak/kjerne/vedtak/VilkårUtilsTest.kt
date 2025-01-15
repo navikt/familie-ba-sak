@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
 import lagUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
+import lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import org.junit.jupiter.api.Assertions

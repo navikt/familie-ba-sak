@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import lagBehandling
 import lagVedtak
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak

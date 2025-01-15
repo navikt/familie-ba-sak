@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.common
 
 import lagSøknadDTO
-import lagVedtak
+import lagVedtaksperiodeMedBegrunnelser
+import leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -56,20 +56,15 @@ import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
-import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -420,75 +415,6 @@ fun lagUtbetalingsperiode(
     antallBarn,
     utbetaltPerMnd,
 )
-
-fun lagVedtaksperiodeMedBegrunnelser(
-    vedtak: Vedtak = lagVedtak(),
-    fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
-    tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
-    type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
-    begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(lagVedtaksbegrunnelse()),
-    eøsBegrunnelser: MutableSet<EØSBegrunnelse> = mutableSetOf(),
-    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
-) = VedtaksperiodeMedBegrunnelser(
-    vedtak = vedtak,
-    fom = fom,
-    tom = tom,
-    type = type,
-    begrunnelser = begrunnelser,
-    fritekster = fritekster,
-    eøsBegrunnelser = eøsBegrunnelser,
-)
-
-fun lagUtvidetVedtaksperiodeMedBegrunnelser(
-    id: Long = nesteUtvidetVedtaksperiodeId(),
-    fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
-    tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
-    type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
-    begrunnelser: List<Vedtaksbegrunnelse> = listOf(lagVedtaksbegrunnelse()),
-    fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
-    utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
-    eøsBegrunnelser: List<EØSBegrunnelse> = emptyList(),
-) = UtvidetVedtaksperiodeMedBegrunnelser(
-    id = id,
-    fom = fom,
-    tom = tom,
-    type = type,
-    begrunnelser = begrunnelser,
-    fritekster = fritekster.map { it.fritekst },
-    utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
-    eøsBegrunnelser = eøsBegrunnelser,
-)
-
-fun leggTilBegrunnelsePåVedtaksperiodeIBehandling(
-    behandling: Behandling,
-    vedtakService: VedtakService,
-    vedtaksperiodeService: VedtaksperiodeService,
-) {
-    val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
-
-    val perisisterteVedtaksperioder =
-        vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)
-
-    if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = perisisterteVedtaksperioder.first { it.type == Vedtaksperiodetype.UTBETALING }.id,
-            standardbegrunnelserFraFrontend =
-                listOf(
-                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                ),
-            eøsStandardbegrunnelserFraFrontend = emptyList(),
-        )
-    } else {
-        vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
-            vedtaksperiodeId = perisisterteVedtaksperioder.first().id,
-            standardbegrunnelserFraFrontend =
-                listOf(
-                    Standardbegrunnelse.FORTSATT_INNVILGET_BARN_BOSATT_I_RIKET,
-                ),
-            eøsStandardbegrunnelserFraFrontend = emptyList(),
-        )
-    }
-}
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
 

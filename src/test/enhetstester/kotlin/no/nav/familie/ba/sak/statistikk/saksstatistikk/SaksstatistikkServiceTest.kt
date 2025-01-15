@@ -12,8 +12,8 @@ import io.mockk.unmockkAll
 import lagBehandling
 import lagTestPersonopplysningGrunnlag
 import lagVedtak
+import lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.Utils
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.settpåvent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
