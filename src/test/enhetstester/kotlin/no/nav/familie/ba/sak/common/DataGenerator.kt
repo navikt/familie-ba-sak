@@ -78,16 +78,6 @@ import vurderVilkårsvurderingTilInnvilget
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Properties
-import kotlin.math.abs
-import kotlin.random.Random
-
-private var gjeldendeUtvidetVedtaksperiodeId: Long = abs(Random.nextLong(10000000))
-private const val ID_INKREMENT = 50
-
-fun nesteUtvidetVedtaksperiodeId(): Long {
-    gjeldendeUtvidetVedtaksperiodeId += ID_INKREMENT
-    return gjeldendeUtvidetVedtaksperiodeId
-}
 
 fun dato(s: String) = LocalDate.parse(s)
 

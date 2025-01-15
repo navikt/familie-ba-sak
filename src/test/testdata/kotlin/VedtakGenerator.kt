@@ -1,4 +1,3 @@
-import no.nav.familie.ba.sak.common.nesteUtvidetVedtaksperiodeId
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -47,7 +46,7 @@ fun lagVedtaksperiodeMedBegrunnelser(
 )
 
 fun lagUtvidetVedtaksperiodeMedBegrunnelser(
-    id: Long = nesteUtvidetVedtaksperiodeId(),
+    id: Long = Random.nextLong(10000000),
     fom: LocalDate? = LocalDate.now().withDayOfMonth(1),
     tom: LocalDate? = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
     type: Vedtaksperiodetype = Vedtaksperiodetype.FORTSATT_INNVILGET,
