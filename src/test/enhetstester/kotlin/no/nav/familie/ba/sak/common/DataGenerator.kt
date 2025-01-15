@@ -1,17 +1,14 @@
 package no.nav.familie.ba.sak.common
 
 import lagBehandling
+import lagSøknadDTO
 import lagVedtak
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
-import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
-import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -120,26 +117,6 @@ fun nesteUtvidetVedtaksperiodeId(): Long {
 fun dato(s: String) = LocalDate.parse(s)
 
 fun årMnd(s: String) = YearMonth.parse(s)
-
-fun lagSøknadDTO(
-    søkerIdent: String,
-    barnasIdenter: List<String>,
-    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-): SøknadDTO =
-    SøknadDTO(
-        underkategori = underkategori.tilDto(),
-        søkerMedOpplysninger =
-            SøkerMedOpplysninger(
-                ident = søkerIdent,
-            ),
-        barnaMedOpplysninger =
-            barnasIdenter.map {
-                BarnMedOpplysninger(
-                    ident = it,
-                )
-            },
-        endringAvOpplysningerBegrunnelse = "",
-    )
 
 fun lagPersonResultaterForSøkerOgToBarn(
     vilkårsvurdering: Vilkårsvurdering,

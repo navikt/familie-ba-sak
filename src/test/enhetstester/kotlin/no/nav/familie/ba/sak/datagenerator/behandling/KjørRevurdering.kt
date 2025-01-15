@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.datagenerator.behandling
 
-import no.nav.familie.ba.sak.common.lagSøknadDTO
+import lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling

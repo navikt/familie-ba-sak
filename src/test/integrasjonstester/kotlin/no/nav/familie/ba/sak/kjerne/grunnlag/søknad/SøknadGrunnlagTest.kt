@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
+import lagSøknadDTO
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import randomBarnFnr
-import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -37,6 +35,8 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
+import randomBarnFnr
+import randomFnr
 import java.time.LocalDate
 
 class SøknadGrunnlagTest(

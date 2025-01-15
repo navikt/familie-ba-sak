@@ -2,13 +2,13 @@
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import randomFnr
+import lagSøknadDTO
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.kontrakter.felles.objectMapper
+import randomFnr
 
 fun mockSøknadGrunnlagRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): SøknadGrunnlagRepository {
     val søknadGrunnlagRepository = mockk<SøknadGrunnlagRepository>()
@@ -16,7 +16,16 @@ fun mockSøknadGrunnlagRepository(dataFraCucumber: VedtaksperioderOgBegrunnelser
         val behandlingId = firstArg<Long>()
         val behandling = dataFraCucumber.behandlinger[behandlingId]!!
         if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD) {
-            SøknadGrunnlag(behandlingId = behandlingId, søknad = objectMapper.writeValueAsString(lagSøknadDTO(randomFnr(), emptyList())))
+            SøknadGrunnlag(
+                behandlingId = behandlingId,
+                søknad =
+                    objectMapper.writeValueAsString(
+                        lagSøknadDTO(
+                            randomFnr(),
+                            emptyList(),
+                        ),
+                    ),
+            )
         } else {
             null
         }
