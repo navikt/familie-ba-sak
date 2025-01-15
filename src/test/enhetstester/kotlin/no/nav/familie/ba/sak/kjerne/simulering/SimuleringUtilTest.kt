@@ -3,23 +3,10 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.nesteBehandlingId
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPostering
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
-import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
@@ -655,28 +642,4 @@ class SimuleringUtilTest {
         assertThat(simuleringsperiode.resultat).isEqualTo((-49).toBigDecimal())
         assertThat(simuleringsperiode.etterbetaling).isEqualTo((0).toBigDecimal())
     }
-}
-
-fun lagBehandling(
-    fagsak: Fagsak = defaultFagsak(),
-    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
-    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-    årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
-    skalBehandlesAutomatisk: Boolean = false,
-    førsteSteg: StegType = FØRSTE_STEG,
-    resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
-    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-    status: BehandlingStatus = initStatus(),
-) = Behandling(
-    id = nesteBehandlingId(),
-    fagsak = fagsak,
-    skalBehandlesAutomatisk = skalBehandlesAutomatisk,
-    type = behandlingType,
-    kategori = behandlingKategori,
-    underkategori = underkategori,
-    opprettetÅrsak = årsak,
-    resultat = resultat,
-    status = status,
-).also {
-    it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
 }
