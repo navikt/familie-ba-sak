@@ -368,8 +368,6 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
 
-val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
-
 fun lagRestSanityBegrunnelse(
     apiNavn: String = "",
     navnISystem: String = "",

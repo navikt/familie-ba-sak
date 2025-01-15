@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
-import randomFnr
 import no.nav.familie.ba.sak.common.årSiden
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -42,6 +40,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
+import randomFnr
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @ActiveProfiles("snike-i-koen-test-config")
@@ -208,7 +208,7 @@ class SnikeIKøenIntegrationTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
-            vilkårInnvilgetFom = guttenBarnesenFødselsdato,
+            vilkårInnvilgetFom = LocalDate.now().withDayOfMonth(10).minusYears(6),
         )
 
     private fun kjørRevurderingTilSteg(
