@@ -31,6 +31,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
@@ -167,6 +168,15 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
                                         ForelderBarnRelasjon(
                                             relatertPersonsIdent = scenario.barna[0].ident!!,
                                             relatertPersonsRolle = FORELDERBARNRELASJONROLLE.MOR,
+                                        ),
+                                    ),
+                                statsborgerskap =
+                                    listOf(
+                                        Statsborgerskap(
+                                            land = "NOR",
+                                            gyldigFraOgMed = null,
+                                            gyldigTilOgMed = null,
+                                            bekreftelsesdato = null,
                                         ),
                                     ),
                             ),
