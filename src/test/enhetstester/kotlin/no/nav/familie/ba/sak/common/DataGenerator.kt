@@ -406,13 +406,6 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
 }
 
-fun opprettRestTilbakekreving(): RestTilbakekreving =
-    RestTilbakekreving(
-        valg = Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL,
-        varsel = "Varsel",
-        begrunnelse = "Begrunnelse",
-    )
-
 fun lagUtbetalingsperiode(
     periodeFom: LocalDate = LocalDate.now().withDayOfMonth(1),
     periodeTom: LocalDate = LocalDate.now().let { it.withDayOfMonth(it.lengthOfMonth()) },
