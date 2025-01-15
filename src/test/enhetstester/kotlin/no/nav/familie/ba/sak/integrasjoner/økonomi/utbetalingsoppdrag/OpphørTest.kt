@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode

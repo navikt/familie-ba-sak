@@ -2,10 +2,10 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import nyOrdinærBehandling
 import randomBarnFnr
 import randomFnr
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato

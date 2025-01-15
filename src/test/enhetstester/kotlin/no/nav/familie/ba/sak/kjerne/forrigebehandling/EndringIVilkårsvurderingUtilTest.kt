@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import randomAktør

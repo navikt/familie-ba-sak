@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.ekstern.bisys
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseUtvidet
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import randomFnr
 import no.nav.familie.ba.sak.config.tilAktør

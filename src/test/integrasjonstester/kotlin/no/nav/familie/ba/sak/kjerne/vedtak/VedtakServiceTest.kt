@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import randomAktør

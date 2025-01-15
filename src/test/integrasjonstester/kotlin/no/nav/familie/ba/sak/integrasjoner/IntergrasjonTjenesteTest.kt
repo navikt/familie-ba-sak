@@ -16,7 +16,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.MDCOperations
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import randomAktør
 import randomFnr

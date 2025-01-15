@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import nyOrdinærBehandling
 import randomAktør
 import randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth

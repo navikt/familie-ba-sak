@@ -5,7 +5,7 @@ import io.mockk.mockk
 import lagFagsak
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagInstitusjon
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak

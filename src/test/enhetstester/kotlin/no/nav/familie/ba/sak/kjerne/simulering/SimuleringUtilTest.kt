@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering

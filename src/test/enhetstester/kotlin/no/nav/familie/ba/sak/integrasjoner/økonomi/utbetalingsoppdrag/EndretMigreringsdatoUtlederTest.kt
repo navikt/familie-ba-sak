@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import randomAktør
 import no.nav.familie.ba.sak.common.toYearMonth

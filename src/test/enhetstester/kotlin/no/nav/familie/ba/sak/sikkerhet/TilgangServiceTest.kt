@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.common.clearAllCaches
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.AuditLoggerEvent

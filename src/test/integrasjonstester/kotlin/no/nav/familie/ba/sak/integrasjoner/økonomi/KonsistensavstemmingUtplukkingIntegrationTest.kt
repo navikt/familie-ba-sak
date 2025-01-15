@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.nyRevurdering
+import nyOrdinærBehandling
+import nyRevurdering
 import randomAktør
 import randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import randomAktør
 import randomFnr

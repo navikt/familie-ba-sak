@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.oppgave
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest

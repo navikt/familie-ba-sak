@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn

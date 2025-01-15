@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 
 import io.mockk.every
 import io.mockk.mockk
+import lagBehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPerson
 import randomFnr
@@ -66,7 +67,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -104,7 +105,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -155,7 +156,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -195,7 +196,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -210,7 +211,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -248,7 +249,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -283,7 +284,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,

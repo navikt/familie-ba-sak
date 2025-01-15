@@ -4,7 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import randomBarnFnr
 import randomFnr

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService

@@ -4,7 +4,7 @@ import defaultFagsak
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør

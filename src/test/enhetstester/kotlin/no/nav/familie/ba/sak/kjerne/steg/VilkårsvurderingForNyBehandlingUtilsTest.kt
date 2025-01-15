@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat

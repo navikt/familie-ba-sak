@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import nyOrdinærBehandling
 import randomAktør
 import randomBarnFnr
 import randomFnr

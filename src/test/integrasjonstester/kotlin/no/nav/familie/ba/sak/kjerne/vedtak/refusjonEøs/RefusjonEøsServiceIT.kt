@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

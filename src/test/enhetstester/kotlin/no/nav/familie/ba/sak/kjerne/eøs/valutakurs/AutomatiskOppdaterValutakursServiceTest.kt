@@ -5,7 +5,7 @@ import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MockedDateProvider
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -178,7 +178,12 @@ class AutomatiskOppdaterValutakursServiceTest {
 
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen januar 2023 for revurdering`() {
-        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg(), behandlingType = BehandlingType.REVURDERING) }
+        every { behandlingHentOgPersisterService.hent(any()) } answers {
+            lagBehandling(
+                id = firstArg(),
+                behandlingType = BehandlingType.REVURDERING
+            )
+        }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
         every { ecbService.hentValutakurs(any(), any()) } answers {
             val dato = secondArg<LocalDate>()
@@ -304,7 +309,12 @@ class AutomatiskOppdaterValutakursServiceTest {
 
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal kunne oppdatere valutakurser før praksisendringsdatoen januar 2023 for førstegangsbehandlinger`() {
-        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg(), behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING) }
+        every { behandlingHentOgPersisterService.hent(any()) } answers {
+            lagBehandling(
+                id = firstArg(),
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
+            )
+        }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
         every { ecbService.hentValutakurs(any(), any()) } answers {
             val dato = secondArg<LocalDate>()

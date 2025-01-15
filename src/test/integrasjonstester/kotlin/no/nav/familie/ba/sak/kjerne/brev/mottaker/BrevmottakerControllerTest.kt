@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import defaultFagsak
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository

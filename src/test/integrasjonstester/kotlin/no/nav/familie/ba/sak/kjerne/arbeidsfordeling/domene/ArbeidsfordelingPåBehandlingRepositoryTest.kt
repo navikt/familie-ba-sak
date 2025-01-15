@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene
 
 import lagFagsak
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
@@ -67,7 +67,12 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
-            val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET))
+            val behandling = behandlingRepository.save(
+                lagBehandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.AVSLUTTET
+                )
+            )
 
             arbeidsfordelingPåBehandlingRepository.save(
                 lagArbeidsfordelingPåBehandling(
@@ -88,7 +93,13 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
-            val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak, status = BehandlingStatus.FATTER_VEDTAK, aktivertTid = LocalDateTime.now()))
+            val behandling = behandlingRepository.save(
+                lagBehandling(
+                    fagsak = fagsak,
+                    status = BehandlingStatus.FATTER_VEDTAK,
+                    aktivertTid = LocalDateTime.now()
+                )
+            )
 
             arbeidsfordelingPåBehandlingRepository.save(lagArbeidsfordelingPåBehandling(behandlingId = behandling.id))
 

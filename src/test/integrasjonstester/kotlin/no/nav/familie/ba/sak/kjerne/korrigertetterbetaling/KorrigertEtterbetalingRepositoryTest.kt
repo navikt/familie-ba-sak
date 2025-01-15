@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.assertFalse

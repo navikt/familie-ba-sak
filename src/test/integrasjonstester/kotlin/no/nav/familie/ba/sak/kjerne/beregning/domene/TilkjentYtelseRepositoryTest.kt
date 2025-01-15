@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import lagFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA

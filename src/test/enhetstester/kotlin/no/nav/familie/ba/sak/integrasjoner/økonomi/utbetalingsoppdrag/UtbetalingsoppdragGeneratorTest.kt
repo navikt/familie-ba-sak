@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -330,7 +330,10 @@ class UtbetalingsoppdragGeneratorTest {
                     ),
                 )
             })
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE)
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
+        )
         val vedtak = lagVedtak(behandling = behandling)
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelse(

@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -47,7 +47,8 @@ internal class BrevmalServiceTest {
 
     @Test
     fun `hentVedtaksbrevmal skal kaste feil dersom behandling har status IKKE_VURDERT`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)
+        val behandling =
+            lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)
 
         assertThrows<Feil> {
             brevmalService.hentVedtaksbrevmal(behandling)

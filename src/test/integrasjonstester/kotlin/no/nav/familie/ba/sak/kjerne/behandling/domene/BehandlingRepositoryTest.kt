@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest

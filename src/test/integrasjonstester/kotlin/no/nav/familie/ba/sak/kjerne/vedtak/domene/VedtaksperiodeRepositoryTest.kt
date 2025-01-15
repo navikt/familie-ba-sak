@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import randomAktør

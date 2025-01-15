@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.common.lagBehandling
+import lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
