@@ -128,7 +128,7 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(1)
     fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
@@ -145,7 +145,7 @@ class BehandleSmåbarnstilleggTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = søkersIdent,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
@@ -300,7 +300,7 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(2)
     fun `Skal ikke opprette behandling når det ikke finnes endringer på perioder med full overgangsstønad`() {
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val søkersAktør = personidentService.hentAktør(søkersIdent)
@@ -320,7 +320,7 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId!!)
+        val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
@@ -380,7 +380,7 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal automatisk endre småbarnstilleggperioder`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()

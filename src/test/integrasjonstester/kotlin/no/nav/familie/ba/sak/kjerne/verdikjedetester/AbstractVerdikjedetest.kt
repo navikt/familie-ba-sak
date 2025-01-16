@@ -44,9 +44,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
 import org.springframework.web.client.RestOperations
-import org.testcontainers.containers.FixedHostPortGenericContainer
-
-val MOCK_SERVER_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teamfamilie/familie-mock-server:latest"
 
 class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
@@ -112,7 +109,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
                                 identer =
                                     listOf(
                                         IdentInformasjon(
-                                            ident = "$personIdent",
+                                            ident = personIdent,
                                             historisk = false,
                                             gruppe = "FOLKEREGISTERIDENT",
                                         ),
@@ -165,7 +162,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
                                 forelderBarnRelasjon =
                                     scenario.barna.map { barn ->
                                         ForelderBarnRelasjon(
-                                            relatertPersonsIdent = barn.ident!!,
+                                            relatertPersonsIdent = barn.ident,
                                             relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN,
                                         )
                                     },
@@ -178,7 +175,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
         val pdlRequestBody =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(ident = scenario.søker.ident!!),
+                variables = PdlPersonRequestVariables(ident = scenario.søker.ident),
                 query = PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON.graphQL,
             )
 
@@ -372,11 +369,3 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
         )
     }
 }
-
-/**
- * Hack needed because testcontainers use of generics confuses Kotlin.
- * Må bruke fixed host port for at klientene våres kan konfigureres med fast port.
- */
-class KMockServerContainer(
-    imageName: String,
-) : FixedHostPortGenericContainer<KMockServerContainer>(imageName)

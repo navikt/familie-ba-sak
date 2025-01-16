@@ -57,9 +57,9 @@ class EndringstidspunktTest(
             ).also { stubScenario(it) }
 
         val overstyrendeVilkårResultaterFGB =
-            scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
+            scenario.barna.associate { it.aktørId to emptyList<VilkårResultat>() }.toMutableMap()
 
-        overstyrendeVilkårResultaterFGB[scenario.søker.aktørId!!] = emptyList()
+        overstyrendeVilkårResultaterFGB[scenario.søker.aktørId] = emptyList()
 
         kjørStegprosessForBehandling(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
@@ -88,7 +88,7 @@ class EndringstidspunktTest(
         val overstyrendeVilkårResultaterRevurdering =
             scenario.barna
                 .associate {
-                    it.aktørId!! to
+                    it.aktørId to
                         listOf(
                             lagVilkårResultat(
                                 vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -119,7 +119,7 @@ class EndringstidspunktTest(
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
                 søkerFnr = scenario.søker.ident,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
+                barnasIdenter = listOf(scenario.barna.first().ident),
                 vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,

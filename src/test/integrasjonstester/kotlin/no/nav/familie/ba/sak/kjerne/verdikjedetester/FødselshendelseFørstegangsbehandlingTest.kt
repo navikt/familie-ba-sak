@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -36,7 +35,6 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val integrasjonClient: IntegrasjonClient,
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal innvilge fødselshendelse på mor med 1 barn født november 2021 og behandles desember 2021 uten utbetalinger`() {

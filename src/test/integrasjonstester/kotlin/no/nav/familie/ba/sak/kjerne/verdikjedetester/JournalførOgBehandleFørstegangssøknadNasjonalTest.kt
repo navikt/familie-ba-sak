@@ -86,7 +86,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         bruker =
                             NavnOgIdent(
                                 navn = scenario.søker.navn,
-                                id = scenario.søker.ident!!,
+                                id = scenario.søker.ident,
                             ),
                     ),
             )
@@ -106,7 +106,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                     ),
                 bekreftEndringerViaFrontend = false,
             )
@@ -292,7 +292,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,

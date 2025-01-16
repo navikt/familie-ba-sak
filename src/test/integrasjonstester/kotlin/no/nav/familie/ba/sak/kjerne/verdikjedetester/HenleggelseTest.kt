@@ -131,8 +131,8 @@ class HenleggelseTest(
     }
 
     private fun opprettBehandlingOgRegistrerSøknad(scenario: RestScenario): RestUtvidetBehandling {
-        val søkersIdent = scenario.søker.ident!!
-        val barn1 = scenario.barna[0].ident!!
+        val søkersIdent = scenario.søker.ident
+        val barn1 = scenario.barna[0].ident
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling =
             familieBaSakKlient().opprettBehandling(

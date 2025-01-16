@@ -97,7 +97,7 @@ class TriggingAvAutobrevOmregningPgaAlderTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                     ),
                 bekreftEndringerViaFrontend = false,
             )

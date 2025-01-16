@@ -87,7 +87,7 @@ class RestartAvSmåbarnstilleggTest(
             mockPerioderMedOvergangsstønad =
                 listOf(
                     EksternPeriode(
-                        personIdent = personScenario1.søker.ident!!,
+                        personIdent = personScenario1.søker.ident,
                         fomDato = barnFødselsdato.plusYears(1),
                         tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                         datakilde = Datakilde.EF,
@@ -120,7 +120,7 @@ class RestartAvSmåbarnstilleggTest(
             mockPerioderMedOvergangsstønad =
                 listOf(
                     EksternPeriode(
-                        personIdent = personScenario2.søker.ident!!,
+                        personIdent = personScenario2.søker.ident,
                         fomDato = barnFødselsdato.plusYears(1),
                         tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                         datakilde = Datakilde.EF,
@@ -149,7 +149,7 @@ class RestartAvSmåbarnstilleggTest(
             mockPerioderMedOvergangsstønad =
                 listOf(
                     EksternPeriode(
-                        personIdent = personScenario3.søker.ident!!,
+                        personIdent = personScenario3.søker.ident,
                         fomDato = barnFødselsdato.plusYears(1),
                         tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                         datakilde = Datakilde.EF,
@@ -196,7 +196,7 @@ class RestartAvSmåbarnstilleggTest(
             mockPerioderMedOvergangsstønad =
                 listOf(
                     EksternPeriode(
-                        personIdent = personScenario.søker.ident!!,
+                        personIdent = personScenario.søker.ident,
                         fomDato = barnFødselsdato.plusYears(1),
                         tomDato = satsendringDato.minusMonths(2).sisteDagIInneværendeMåned(),
                         datakilde = Datakilde.EF,
@@ -248,7 +248,7 @@ class RestartAvSmåbarnstilleggTest(
             mockPerioderMedOvergangsstønad =
                 listOf(
                     EksternPeriode(
-                        personIdent = personScenario2.søker.ident!!,
+                        personIdent = personScenario2.søker.ident,
                         fomDato = barnFødselsdato.plusYears(1),
                         tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
                         datakilde = Datakilde.EF,
@@ -279,7 +279,7 @@ class RestartAvSmåbarnstilleggTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
@@ -304,7 +304,7 @@ class RestartAvSmåbarnstilleggTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
-                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        barnasIdenter = personScenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
@@ -329,7 +329,7 @@ class RestartAvSmåbarnstilleggTest(
         mockPerioderMedOvergangsstønad: List<EksternPeriode> =
             listOf(
                 EksternPeriode(
-                    personIdent = personScenario.søker.ident!!,
+                    personIdent = personScenario.søker.ident,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                     datakilde = Datakilde.EF,
@@ -421,7 +421,7 @@ class RestartAvSmåbarnstilleggTest(
                 perioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = barnFødselsdato.plusYears(1),
                             tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                             datakilde = Datakilde.EF,
@@ -527,7 +527,7 @@ class RestartAvSmåbarnstilleggTest(
         )
         return håndterIverksettingAvBehandling(
             behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
-            søkerFnr = personScenario.søker.ident!!,
+            søkerFnr = personScenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,

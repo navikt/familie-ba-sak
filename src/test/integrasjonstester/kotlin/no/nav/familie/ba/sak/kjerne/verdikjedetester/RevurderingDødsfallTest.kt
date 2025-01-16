@@ -63,8 +63,8 @@ class RevurderingDødsfallTest(
         behandleFødselshendelse(
             nyBehandlingHendelse =
                 NyBehandlingHendelse(
-                    morsIdent = scenario.søker.ident!!,
-                    barnasIdenter = listOf(scenario.barna.first().ident!!),
+                    morsIdent = scenario.søker.ident,
+                    barnasIdenter = listOf(scenario.barna.first().ident),
                 ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -76,10 +76,10 @@ class RevurderingDødsfallTest(
         )
 
         val overstyrendeVilkårResultater =
-            scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
+            scenario.barna.associate { it.aktørId to emptyList<VilkårResultat>() }.toMutableMap()
 
         // Ved søkers dødsfall settes tomdatoen for "bosatt i riket"-vilkåret til dagen søker døde.
-        overstyrendeVilkårResultater[scenario.søker.aktørId!!] =
+        overstyrendeVilkårResultater[scenario.søker.aktørId] =
             listOf(
                 lagVilkårResultat(
                     vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -99,7 +99,7 @@ class RevurderingDødsfallTest(
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
                 søkerFnr = scenario.søker.ident,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
+                barnasIdenter = listOf(scenario.barna.first().ident),
                 vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
@@ -146,8 +146,8 @@ class RevurderingDødsfallTest(
         behandleFødselshendelse(
             nyBehandlingHendelse =
                 NyBehandlingHendelse(
-                    morsIdent = scenario.søker.ident!!,
-                    barnasIdenter = listOf(scenario.barna.first().ident!!),
+                    morsIdent = scenario.søker.ident,
+                    barnasIdenter = listOf(scenario.barna.first().ident),
                 ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -159,13 +159,16 @@ class RevurderingDødsfallTest(
         )
 
         val overstyrendeVilkårResultater =
-            (scenario.barna + scenario.søker).associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
+            (scenario.barna + scenario.søker).associate { it.aktørId to emptyList<VilkårResultat>() }.toMutableMap()
 
         assertThrows<FunksjonellFeil> {
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = scenario.søker.ident,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
+                barnasIdenter =
+                    listOf(
+                        scenario.barna.first().ident,
+                    ),
                 vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,

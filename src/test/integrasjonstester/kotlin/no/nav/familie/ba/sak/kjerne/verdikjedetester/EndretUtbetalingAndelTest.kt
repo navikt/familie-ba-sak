@@ -147,7 +147,7 @@ class EndretUtbetalingAndelTest(
                     ),
             ).also { stubScenario(it) }
 
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling =

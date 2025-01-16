@@ -73,7 +73,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 overgangsstønadPerioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = osFom,
                             tomDato = osTom,
                             datakilde = Datakilde.EF,
@@ -87,7 +87,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
 
         Assertions.assertEquals(
             1,
-            perioderBehandling1.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
+            perioderBehandling1.filter { utvidetVedtaksperiodeMedBegrunnelser -> utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
         )
 
         val behandling2 =
@@ -126,7 +126,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 ),
         ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandlingMedOvergangsstønad(
         fagsak: RestMinimalFagsak,
@@ -152,7 +152,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
-                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        barnasIdenter = personScenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
