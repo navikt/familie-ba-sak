@@ -136,7 +136,7 @@ class FødselshendelseHenleggelseTest(
                         fornavn = "Mor",
                         etternavn = "Søker",
                         bostedsadresser =
-                            defaultBostedsadresseHistorikk + // TODO legg til overstyring av bostedsadresse
+                            defaultBostedsadresseHistorikk +
                                 listOf(
                                     Bostedsadresse(
                                         angittFlyttedato = null,
