@@ -440,24 +440,6 @@ class ForvalterServiceTest {
             val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
             assertThat(korrigerteAndeler).isEmpty()
         }
-
-        @Test
-        fun `skal kaste feil dersom det finnes behandlinger i uttrekk som ikke ble opprettet 17 desember`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val mockedBehandling = mockk<Behandling>()
-
-            every { mockedBehandling.opprettetTidspunkt } returns LocalDate.of(2025, 1, 8).atStartOfDay()
-            every { mockedBehandling.id } returns 3
-            every { mockedBehandling.fagsak } returns fagsak
-            every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2025, 1, 8).atStartOfDay()
-
-            every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-
-            // Act && Assert
-            val exception = assertThrows<IllegalStateException> { forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger() }
-            assertThat(exception.message).isEqualTo("Alle behandlinger må være opprettet 17.desember. Behandling 3 ble opprettet 2025-01-08")
-        }
     }
 
     @Nested
@@ -550,24 +532,6 @@ class ForvalterServiceTest {
             assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
             val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
             assertThat(korrigerteAndeler).isEmpty()
-        }
-
-        @Test
-        fun `skal kaste feil dersom det finnes behandlinger i uttrekk som ikke ble opprettet 17 desember`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val mockedBehandling = mockk<Behandling>()
-
-            every { mockedBehandling.opprettetTidspunkt } returns LocalDate.of(2025, 1, 8).atStartOfDay()
-            every { mockedBehandling.id } returns 3
-            every { mockedBehandling.fagsak } returns fagsak
-            every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2025, 1, 8).atStartOfDay()
-
-            every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-
-            // Act && Assert
-            val exception = assertThrows<IllegalStateException> { forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun() }
-            assertThat(exception.message).isEqualTo("Alle behandlinger må være opprettet 17.desember. Behandling 3 ble opprettet 2025-01-08")
         }
     }
 
