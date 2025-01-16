@@ -7,8 +7,10 @@ import no.nav.familie.ba.sak.kjerne.personident.Personident
 import java.time.LocalDate
 import kotlin.random.Random
 
+private val fødselsnummerGenerator = FoedselsnummerGenerator()
+
 fun randomFnr(foedselsdato: LocalDate? = null): String =
-    FoedselsnummerGenerator()
+    fødselsnummerGenerator
         .foedselsnummer(
             foedselsdato ?: (20..70).random().årSiden.minusDays((1..364).random().toLong()),
         ).asString
