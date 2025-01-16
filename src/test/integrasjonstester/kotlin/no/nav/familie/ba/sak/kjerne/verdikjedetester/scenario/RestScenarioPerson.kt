@@ -2,14 +2,11 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
-import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 import java.time.Month
-import java.time.Period
 
 data class RestScenarioPerson(
     // Settes av mock-server
@@ -24,7 +21,6 @@ data class RestScenarioPerson(
     val fødselsdato: String,
     val fornavn: String,
     val etternavn: String,
-    val infotrygdSaker: InfotrygdSøkResponse<Sak>? = null,
     val statsborgerskap: List<Statsborgerskap> =
         listOf(
             Statsborgerskap(
@@ -42,8 +38,6 @@ data class RestScenarioPerson(
     val aktørId: String
         get() = _ident + "99"
     val navn = "$fornavn $etternavn"
-
-    val alder = Period.between(LocalDate.parse(fødselsdato), LocalDate.now()).years
 }
 
 val defaultBostedsadresseHistorikk =
