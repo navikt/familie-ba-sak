@@ -30,6 +30,7 @@ data class PdlPersonData(
     val doedsfall: List<PdlDødsfallResponse> = emptyList(),
     val doedfoedtBarn: List<PdlDødfødtBarnResponse> = emptyList(),
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
+    val vergemaalEllerFremtidsfullmakt: List<String> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
         if (foedselsdato.isEmpty() && doedfoedtBarn.isEmpty()) {

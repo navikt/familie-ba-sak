@@ -21,18 +21,19 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlStatsborgerskapPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlStatsborgerskapResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,7 +52,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "PDL_URL: http://localhost:1337/rest/api/pdl",
+            "PDL_URL: http://localhost:1338/rest/api/pdl",
         )
     }
 }
@@ -74,7 +75,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
-@AutoConfigureWireMock(port = 1337)
+@AutoConfigureWireMock(port = 1338)
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     @AfterAll
     fun tearDownSuper() {
@@ -92,8 +93,12 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
         )
 
     fun stubScenario(scenario: RestScenario) {
-        val alleIdenter = scenario.barna.map { it.ident } + scenario.søker.ident
-        alleIdenter.forEach { stubHentIdenter(it) }
+        val alleIdenter = scenario.barna.map { it } + scenario.søker
+        alleIdenter.forEach {
+            stubHentIdenter(it.ident)
+            stubHentPersonStatsborgerskap(it)
+            stubHentPersonVergemaalEllerFretidfullmakt(it)
+        }
         stubHentPerson(scenario)
     }
 
@@ -164,15 +169,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
                                             relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN,
                                         )
                                     },
-                                statsborgerskap =
-                                    listOf(
-                                        Statsborgerskap(
-                                            land = "NOR",
-                                            gyldigFraOgMed = null,
-                                            gyldigTilOgMed = null,
-                                            bekreftelsesdato = null,
-                                        ),
-                                    ),
+                                statsborgerskap = scenario.søker.statsborgerskap,
                             ),
                     ),
                 errors = null,
@@ -212,19 +209,11 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
                                 forelderBarnRelasjon =
                                     listOf(
                                         ForelderBarnRelasjon(
-                                            relatertPersonsIdent = søker.ident!!,
+                                            relatertPersonsIdent = søker.ident,
                                             relatertPersonsRolle = FORELDERBARNRELASJONROLLE.MOR,
                                         ),
                                     ),
-                                statsborgerskap =
-                                    listOf(
-                                        Statsborgerskap(
-                                            land = "NOR",
-                                            gyldigFraOgMed = null,
-                                            gyldigTilOgMed = null,
-                                            bekreftelsesdato = null,
-                                        ),
-                                    ),
+                                statsborgerskap = søker.statsborgerskap,
                             ),
                     ),
                 errors = null,
@@ -233,7 +222,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
         val pdlRequestBody =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(ident = barn.ident!!),
+                variables = PdlPersonRequestVariables(ident = barn.ident),
                 query = PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON.graphQL,
             )
 
@@ -278,24 +267,7 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
             kjoenn = listOf(PdlKjoenn(kjoenn = Kjønn.KVINNE)),
             adressebeskyttelse = emptyList(),
             sivilstand = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
-            bostedsadresse =
-                listOf(
-                    Bostedsadresse(
-                        angittFlyttedato = null,
-                        gyldigTilOgMed = null,
-                        vegadresse =
-                            Vegadresse(
-                                matrikkelId = 100L,
-                                husnummer = "3",
-                                husbokstav = null,
-                                bruksenhetsnummer = "H111",
-                                adressenavn = "OTTO SVERDRUPS VEG",
-                                kommunenummer = "1566",
-                                postnummer = "6650",
-                                tilleggsnavn = null,
-                            ),
-                    ),
-                ),
+            bostedsadresse = scenarioPerson.bostedsadresser,
             doedsfall = emptyList(),
             kontaktinformasjonForDoedsbo = emptyList(),
         )
@@ -314,8 +286,76 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
         val pdlRequestBody =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(ident = scenarioPerson.ident!!),
+                variables = PdlPersonRequestVariables(ident = scenarioPerson.ident),
                 query = PersonInfoQuery.ENKEL.graphQL,
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            objectMapper.writeValueAsString(response),
+                        ),
+                ),
+        )
+    }
+
+    private fun stubHentPersonStatsborgerskap(scenarioPerson: RestScenarioPerson) {
+        val response =
+            PdlBaseResponse(
+                data =
+                    PdlStatsborgerskapResponse(
+                        person =
+                            PdlStatsborgerskapPerson(
+                                statsborgerskap = scenarioPerson.statsborgerskap,
+                            ),
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        val pdlRequestBody =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident = scenarioPerson.ident),
+                query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
+            )
+
+        stubFor(
+            post(urlEqualTo("/rest/api/pdl/graphql"))
+                .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(
+                            objectMapper.writeValueAsString(response),
+                        ),
+                ),
+        )
+    }
+
+    private fun stubHentPersonVergemaalEllerFretidfullmakt(scenarioPerson: RestScenarioPerson) {
+        val response =
+            PdlBaseResponse(
+                data =
+                    PdlVergeResponse(
+                        person =
+                            PdlVergePerson(
+                                vergemaalEllerFremtidsfullmakt = emptyList(),
+                            ),
+                    ),
+                errors = null,
+                extensions = null,
+            )
+
+        val pdlRequestBody =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident = scenarioPerson.ident),
+                query = hentGraphqlQuery("verge"),
             )
 
         stubFor(

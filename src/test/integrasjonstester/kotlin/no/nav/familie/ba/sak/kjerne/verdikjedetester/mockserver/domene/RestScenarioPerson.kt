@@ -15,7 +15,7 @@ data class RestScenarioPerson(
     // Settes av mock-server
     private var _ident: String? = null,
     // Settes av mock-server
-    val aktørId: String? = null,
+    private val _aktørId: String? = null,
     // Settes av mock-server
     val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
     // Settes av mock-server
@@ -38,6 +38,9 @@ data class RestScenarioPerson(
 ) {
     val ident: String
         get() = _ident ?: randomFnr(LocalDate.parse(fødselsdato)).also { _ident = it }
+
+    val aktørId: String
+        get() = _ident + "99"
     val navn = "$fornavn $etternavn"
 
     val alder = Period.between(LocalDate.parse(fødselsdato), LocalDate.now()).years

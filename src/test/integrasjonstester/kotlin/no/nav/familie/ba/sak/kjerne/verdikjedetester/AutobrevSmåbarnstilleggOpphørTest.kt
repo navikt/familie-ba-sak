@@ -111,9 +111,9 @@ class AutobrevSmåbarnstilleggOpphørTest(
                         bostedsadresser = emptyList(),
                     ),
                 ),
-        )
+        ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
@@ -138,7 +138,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
-                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        barnasIdenter = personScenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
@@ -177,7 +177,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 perioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = barnFødselsdato.plusYears(1),
                             tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                             datakilde = Datakilde.EF,
@@ -222,7 +222,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 perioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = barnFødselsdato.plusYears(1),
                             tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                             datakilde = Datakilde.EF,

@@ -96,8 +96,8 @@ class FødselshendelseHenleggelseTest(
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -190,8 +190,8 @@ class FødselshendelseHenleggelseTest(
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -230,13 +230,13 @@ class FødselshendelseHenleggelseTest(
                     ),
             ).also { stubScenario(it) }
 
-        val barnIdent = scenario.barna.first().ident!!
+        val barnIdent = scenario.barna.first().ident
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -313,8 +313,8 @@ class FødselshendelseHenleggelseTest(
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
-                søkerFnr = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.last().ident!!),
+                søkerFnr = scenario.søker.ident,
+                barnasIdenter = listOf(scenario.barna.last().ident),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -338,7 +338,7 @@ class FødselshendelseHenleggelseTest(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -395,8 +395,8 @@ class FødselshendelseHenleggelseTest(
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
-                søkerFnr = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.last().ident!!),
+                søkerFnr = scenario.søker.ident,
+                barnasIdenter = listOf(scenario.barna.last().ident),
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,
@@ -414,7 +414,7 @@ class FødselshendelseHenleggelseTest(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
                         morsIdent = scenario.søker.ident,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
@@ -463,7 +463,7 @@ class FødselshendelseHenleggelseTest(
                             fornavn = "Barn",
                             etternavn = "Barnesen",
                         ).copy(
-                            statsborgerskap = // TODO legg til overstyring av statsborgerskap
+                            statsborgerskap =
                                 listOf(
                                     Statsborgerskap(
                                         land = "UKR",
@@ -479,8 +479,8 @@ class FødselshendelseHenleggelseTest(
             behandleFødselshendelse(
                 nyBehandlingHendelse =
                     NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
+                        morsIdent = scenario.søker.ident,
+                        barnasIdenter = listOf(scenario.barna.first().ident),
                     ),
                 behandleFødselshendelseTask = behandleFødselshendelseTask,
                 fagsakService = fagsakService,
