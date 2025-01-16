@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -9,14 +8,7 @@ import java.time.LocalDate
 import java.time.Month
 
 data class RestScenarioPerson(
-    // Settes av mock-server
     private var _ident: String? = null,
-    // Settes av mock-server
-    private val _aktørId: String? = null,
-    // Settes av mock-server
-    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
-    // Settes av mock-server
-    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> = emptyList(),
     // yyyy-mm-dd
     val fødselsdato: String,
     val fornavn: String,
