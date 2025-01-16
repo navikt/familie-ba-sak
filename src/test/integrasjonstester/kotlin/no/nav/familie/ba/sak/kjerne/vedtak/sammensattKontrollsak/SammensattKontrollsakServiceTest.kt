@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository

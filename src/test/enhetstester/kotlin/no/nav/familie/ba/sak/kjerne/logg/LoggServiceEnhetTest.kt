@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.RolleConfig
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.simulering.lagBehandling
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat

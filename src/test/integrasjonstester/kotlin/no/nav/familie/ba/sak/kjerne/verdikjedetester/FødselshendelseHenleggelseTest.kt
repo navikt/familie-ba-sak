@@ -34,16 +34,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
-import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
-import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,63 +70,6 @@ class FødselshendelseHenleggelseTest(
     @AfterEach
     fun etterHverTest() {
         unmockkObject(SatsTidspunkt)
-    }
-
-    @Test
-    fun `Skal ikke starte behandling i ba-sak fordi det finnes saker i infotrygd (velg fagsystem)`() {
-        val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
-                        RestScenarioPerson(
-                            fødselsdato = "1982-01-12",
-                            fornavn = "Mor",
-                            etternavn = "Søker",
-                            infotrygdSaker =
-                                InfotrygdSøkResponse(
-                                    bruker =
-                                        listOf(
-                                            lagInfotrygdSak(
-                                                sisteTilleggOrdinærSats(),
-                                                listOf("1234"),
-                                                "OR",
-                                                "OS",
-                                            ),
-                                        ),
-                                    barn = emptyList(),
-                                ),
-                        ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
-
-        val behandling =
-            behandleFødselshendelse(
-                nyBehandlingHendelse =
-                    NyBehandlingHendelse(
-                        morsIdent = scenario.søker.ident!!,
-                        barnasIdenter = listOf(scenario.barna.first().ident!!),
-                    ),
-                behandleFødselshendelseTask = behandleFødselshendelseTask,
-                fagsakService = fagsakService,
-                behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                vedtakService = vedtakService,
-                stegService = stegService,
-                personidentService = personidentService,
-                brevmalService = brevmalService,
-            )
-        assertNull(behandling)
-
-        verify(exactly = 1) {
-            opprettTaskService.opprettSendFeedTilInfotrygdTask(scenario.barna.map { it.ident!! })
-        }
     }
 
     @Test

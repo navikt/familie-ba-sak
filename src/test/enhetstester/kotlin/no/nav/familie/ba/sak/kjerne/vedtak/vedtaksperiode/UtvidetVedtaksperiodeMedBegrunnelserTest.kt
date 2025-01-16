@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser

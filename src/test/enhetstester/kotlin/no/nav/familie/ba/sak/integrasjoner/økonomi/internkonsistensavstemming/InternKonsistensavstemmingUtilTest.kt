@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.randomAktør
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.objectMapper

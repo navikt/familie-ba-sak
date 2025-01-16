@@ -2,18 +2,18 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType

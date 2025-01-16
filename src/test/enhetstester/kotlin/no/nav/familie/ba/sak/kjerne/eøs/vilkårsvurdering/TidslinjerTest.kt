@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.oppfyltVilkår
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType

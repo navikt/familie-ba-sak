@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler
 
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Evaluering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat

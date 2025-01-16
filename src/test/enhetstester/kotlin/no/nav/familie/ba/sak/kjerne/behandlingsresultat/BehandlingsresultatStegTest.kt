@@ -9,15 +9,15 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -205,7 +205,20 @@ class BehandlingsresultatStegTest {
             )
         } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
-        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp(fom = LocalDate.now().toYearMonth(), beløp = BigDecimal.valueOf(100), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "S", barnAktører = setOf(randomAktør())))
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns
+            listOf(
+                lagUtenlandskPeriodebeløp(
+                    fom = LocalDate.now().toYearMonth(),
+                    beløp = BigDecimal.valueOf(100),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "S",
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
+            )
         every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs())
 
         val exception = assertThrows<FunksjonellFeil> { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
@@ -226,8 +239,34 @@ class BehandlingsresultatStegTest {
             )
         } returns behandling.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)
 
-        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns listOf(lagUtenlandskPeriodebeløp(fom = LocalDate.now().toYearMonth(), beløp = BigDecimal.valueOf(100), intervall = Intervall.MÅNEDLIG, valutakode = "SEK", utbetalingsland = "S", barnAktører = setOf(randomAktør())))
-        every { valutakursRepository.finnFraBehandlingId(any()) } returns listOf(lagValutakurs(fom = LocalDate.now().toYearMonth(), valutakode = "SEK", valutakursdato = LocalDate.now(), kurs = BigDecimal.valueOf(1.2), barnAktører = setOf(randomAktør()), vurderingsform = Vurderingsform.MANUELL))
+        every { utenlandskPeriodebeløpRepository.finnFraBehandlingId(any()) } returns
+            listOf(
+                lagUtenlandskPeriodebeløp(
+                    fom = LocalDate.now().toYearMonth(),
+                    beløp = BigDecimal.valueOf(100),
+                    intervall = Intervall.MÅNEDLIG,
+                    valutakode = "SEK",
+                    utbetalingsland = "S",
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
+            )
+        every { valutakursRepository.finnFraBehandlingId(any()) } returns
+            listOf(
+                lagValutakurs(
+                    fom = LocalDate.now().toYearMonth(),
+                    valutakode = "SEK",
+                    valutakursdato = LocalDate.now(),
+                    kurs = BigDecimal.valueOf(1.2),
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                    vurderingsform = Vurderingsform.MANUELL,
+                ),
+            )
 
         every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 

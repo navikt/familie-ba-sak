@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -380,7 +380,8 @@ class EndringIVilkårsvurderingUtilTest {
         vilkårResultater: Set<VilkårResultat>,
         aktør: Aktør,
     ): PersonResultat {
-        val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)
 
         personResultat.setSortedVilkårResultater(vilkårResultater)

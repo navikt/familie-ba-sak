@@ -4,15 +4,15 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -330,7 +330,11 @@ class UtbetalingsoppdragGeneratorTest {
                     ),
                 )
             })
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE)
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE,
+            )
         val vedtak = lagVedtak(behandling = behandling)
         val andelTilkjentYtelse =
             lagAndelTilkjentYtelse(

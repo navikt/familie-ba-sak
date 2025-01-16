@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType

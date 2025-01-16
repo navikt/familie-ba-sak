@@ -1,7 +1,7 @@
 ﻿package no.nav.familie.ba.sak.datagenerator.simulering
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering

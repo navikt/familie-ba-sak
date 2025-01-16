@@ -2,14 +2,7 @@ package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilddMMyyyy
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
@@ -32,6 +25,14 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -120,8 +121,7 @@ fun lagVedtak(
         dataTable
             .groupByBehandlingId()
             .map {
-                no.nav.familie.ba.sak.common
-                    .lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
+                lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
             },
     )
 }
@@ -172,7 +172,8 @@ fun lagVilkårsvurdering(
     persongrunnlagForBehandling: PersonopplysningGrunnlag,
     behandling: Behandling,
 ): Vilkårsvurdering {
-    val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+    val vilkårsvurdering =
+        lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
     val personResultater =
         persongrunnlagForBehandling.personer
             .map { person ->

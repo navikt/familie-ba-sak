@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat

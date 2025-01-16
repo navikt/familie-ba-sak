@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling

@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene
 
-import no.nav.familie.ba.sak.common.lagFagsak
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat

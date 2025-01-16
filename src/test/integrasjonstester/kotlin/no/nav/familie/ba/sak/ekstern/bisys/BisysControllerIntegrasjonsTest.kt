@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
