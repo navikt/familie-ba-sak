@@ -49,7 +49,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
-            "PDL_URL: http://localhost:1338/rest/api/pdl",
+            "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
     }
 }
@@ -72,7 +72,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
-@AutoConfigureWireMock(port = 1338)
+@AutoConfigureWireMock(port = 1337)
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     @AfterAll
     fun tearDownSuper() {
