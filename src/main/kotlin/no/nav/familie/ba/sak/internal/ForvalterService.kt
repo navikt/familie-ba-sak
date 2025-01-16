@@ -285,6 +285,7 @@ class ForvalterService(
         logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
         val resultat = mutableListOf<Pair<Long, List<AndelTilkjentYtelse>>>()
         oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
+            logger.info("Korrigerer utvidet andeler i behandling ${behandling.id}")
             // Sørger for at behandlingen ble kjørt 17.desember
             if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
                 error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
@@ -306,7 +307,7 @@ class ForvalterService(
             val behandlingFørOppdaterUtvidetKlassekodeBehandling =
                 behandlingRepository
                     .finnBehandlinger(behandling.fagsak.id)
-                    .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt }
+                    .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt && !it.erHenlagt() }
                     .maxBy { it.aktivertTidspunkt }
 
             // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
@@ -315,6 +316,7 @@ class ForvalterService(
             // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
             // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
             // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i forrige behandling.
+            logger.info("Finner tilsvarende andel i forrige behandling blandt utvidet andelene (${utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.map { it.id }})")
             val tilsvarendeAndelIForrigeBehandling = utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.single { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
 
             resultat.add(
@@ -336,6 +338,7 @@ class ForvalterService(
         logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
         val resultat = mutableListOf<Pair<Long, List<AndelTilkjentYtelse>>>()
         oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
+            logger.info("Korrigerer utvidet andeler i behandling ${behandling.id}")
             // Sørger for at behandlingen ble kjørt 17.desember
             if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
                 error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
@@ -358,7 +361,7 @@ class ForvalterService(
             val behandlingFørOppdaterUtvidetKlassekodeBehandling =
                 behandlingRepository
                     .finnBehandlinger(behandling.fagsak.id)
-                    .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt }
+                    .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt && !it.erHenlagt() }
                     .maxBy { it.aktivertTidspunkt }
 
             // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen

@@ -364,9 +364,11 @@ class ForvalterServiceTest {
 
             every { mockedForrigeBehandling.id } returns 2
             every { mockedForrigeBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 8, 1).atStartOfDay()
+            every { mockedForrigeBehandling.erHenlagt() } returns false
 
             every { mockedForrigeBehandling2.id } returns 1
             every { mockedForrigeBehandling2.aktivertTidspunkt } returns LocalDate.of(2022, 8, 1).atStartOfDay()
+            every { mockedForrigeBehandling2.erHenlagt() } returns false
 
             every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
             every {
@@ -476,9 +478,11 @@ class ForvalterServiceTest {
 
             every { mockedForrigeBehandling.id } returns 2
             every { mockedForrigeBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 8, 1).atStartOfDay()
+            every { mockedForrigeBehandling.erHenlagt() } returns false
 
             every { mockedForrigeBehandling2.id } returns 1
             every { mockedForrigeBehandling2.aktivertTidspunkt } returns LocalDate.of(2022, 8, 1).atStartOfDay()
+            every { mockedForrigeBehandling2.erHenlagt() } returns false
 
             every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
             every {
