@@ -287,8 +287,7 @@ class ForvalterService(
         oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
             // Sørger for at behandlingen ble kjørt 17.desember
             if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
-                resultat.add(Pair(behandling.id, emptyList()))
-                logger.info("Behandling ${behandling.id} som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak ble ikke opprettet 17. desember, men ${behandling.opprettetTidspunkt.toLocalDate()}")
+                error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
             }
 
             val splittIMnd = LocalDate.of(2024, 12, 1).toYearMonth()
@@ -311,7 +310,7 @@ class ForvalterService(
                     .maxBy { it.aktivertTidspunkt }
 
             // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
-            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id)
+            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id).filter { it.erUtvidet() }
 
             // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
             // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
@@ -339,7 +338,7 @@ class ForvalterService(
         oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
             // Sørger for at behandlingen ble kjørt 17.desember
             if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
-                throw error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
+                error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
             }
 
             val splittIMnd = LocalDate.of(2024, 12, 1).toYearMonth()
@@ -363,7 +362,7 @@ class ForvalterService(
                     .maxBy { it.aktivertTidspunkt }
 
             // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
-            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id)
+            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id).filter { it.erUtvidet() }
 
             // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
             // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
