@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

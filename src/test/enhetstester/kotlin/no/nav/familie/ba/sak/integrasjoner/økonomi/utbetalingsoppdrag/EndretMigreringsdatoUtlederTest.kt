@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTilkjentYtelse
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository

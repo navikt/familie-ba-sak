@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService

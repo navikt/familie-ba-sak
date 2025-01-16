@@ -3,19 +3,19 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
-import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
-import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagSanityBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagSanityEøsBegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -760,18 +760,75 @@ internal class BrevUtilsTest {
         val andelerTilkjentYtelse =
             listOf(
                 // Søker har utvidet barnetrygd og småbarnstillegg de siste 12 månedene.
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().toYearMonth(), ytelseType = YtelseType.UTVIDET_BARNETRYGD, aktør = søker, kalkulertUtbetalingsbeløp = sats(YtelseType.UTVIDET_BARNETRYGD)),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().toYearMonth(), ytelseType = YtelseType.SMÅBARNSTILLEGG, aktør = søker, kalkulertUtbetalingsbeløp = sats(YtelseType.SMÅBARNSTILLEGG)),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    aktør = søker,
+                    kalkulertUtbetalingsbeløp = sats(YtelseType.UTVIDET_BARNETRYGD),
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                    aktør = søker,
+                    kalkulertUtbetalingsbeløp = sats(YtelseType.SMÅBARNSTILLEGG),
+                ),
                 // Barn har barnetrygd de siste 12 månedene, og fra og med 7 måneder siden har vi kjørt månedlig valutajustering.
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(8).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 1000),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(7).toYearMonth(), tom = LocalDate.now().minusMonths(7).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 900),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(6).toYearMonth(), tom = LocalDate.now().minusMonths(6).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 800),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(5).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 700),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 600),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 500),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 400),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 300),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = barn, kalkulertUtbetalingsbeløp = 200),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(8).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(7).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(7).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 900,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(6).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(6).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 800,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 700,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 600,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 500,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 400,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 300,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = barn,
+                    kalkulertUtbetalingsbeløp = 200,
+                ),
             )
         val utenlandskePeriodebeløp =
             listOf(
@@ -819,15 +876,60 @@ internal class BrevUtilsTest {
         val andelerTilkjentYtelse =
             listOf(
                 // Barn har barnetrygd de siste 12 månedene, og fra og med 7 måneder siden har vi kjørt månedlig valutajustering. Endretutbetaling andel som reduserer utbetaling til 0 finnes på de 4 siste månedene.
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(8).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 1000),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(7).toYearMonth(), tom = LocalDate.now().minusMonths(7).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 900),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(6).toYearMonth(), tom = LocalDate.now().minusMonths(6).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 800),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(5).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 700),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 600),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 500),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 400),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 300),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = barn.aktør, kalkulertUtbetalingsbeløp = 200),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(8).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(7).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(7).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 900,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(6).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(6).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 800,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 700,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 600,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 500,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 400,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 300,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = barn.aktør,
+                    kalkulertUtbetalingsbeløp = 200,
+                ),
             )
 
         val endretUtbetalingAndeler =
@@ -882,14 +984,49 @@ internal class BrevUtilsTest {
         val andelerTilkjentYtelse =
             listOf(
                 // Sekundærlandsbarn har barnetrygd de siste 12 månedene, og fra og med 5 måneder siden har vi kjørt månedlig valutajustering.
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 1000),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 600),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 500),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 400),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 300),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 200),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 600,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 500,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 400,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 300,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 200,
+                ),
                 // Primærlandsbarn har barntrygd de siste 12 månedene
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = primærlandsbarn, kalkulertUtbetalingsbeløp = 1054),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = primærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 1054,
+                ),
             )
         val utenlandskePeriodebeløp =
             listOf(
@@ -935,16 +1072,61 @@ internal class BrevUtilsTest {
         val andelerTilkjentYtelse =
             listOf(
                 // Sekundærlandsbarn har barnetrygd de siste 12 månedene, og fra og med 5 måneder siden har vi kjørt månedlig valutajustering.
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 1000),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 600),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 500),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 400),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 300),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 200),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 600,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 500,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 400,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 300,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 200,
+                ),
                 // Det andre sekundærlandsbarnet har barntrygd de siste 3 månedene
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), aktør = sekundærlandsbarn2, kalkulertUtbetalingsbeløp = 1000),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), aktør = sekundærlandsbarn2, kalkulertUtbetalingsbeløp = 900),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = sekundærlandsbarn2, kalkulertUtbetalingsbeløp = 800),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    aktør = sekundærlandsbarn2,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    aktør = sekundærlandsbarn2,
+                    kalkulertUtbetalingsbeløp = 900,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = sekundærlandsbarn2,
+                    kalkulertUtbetalingsbeløp = 800,
+                ),
             )
         val utenlandskePeriodebeløp =
             listOf(
@@ -993,12 +1175,42 @@ internal class BrevUtilsTest {
         val andelerTilkjentYtelse =
             listOf(
                 // Sekundærlandsbarn har barnetrygd de siste 12 månedene, og fra og med 5 måneder siden har vi kjørt månedlig valutajustering.
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(12).toYearMonth(), tom = LocalDate.now().minusMonths(5).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 1000),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().minusMonths(4).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 600),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(3).toYearMonth(), tom = LocalDate.now().minusMonths(3).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 500),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(2).toYearMonth(), tom = LocalDate.now().minusMonths(2).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 400),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().minusMonths(1).toYearMonth(), tom = LocalDate.now().minusMonths(1).toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 300),
-                lagAndelTilkjentYtelse(fom = LocalDate.now().toYearMonth(), tom = LocalDate.now().toYearMonth(), aktør = sekundærlandsbarn, kalkulertUtbetalingsbeløp = 200),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(12).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(5).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(4).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 600,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(3).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 500,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(2).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 400,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    tom = LocalDate.now().minusMonths(1).toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 300,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = LocalDate.now().toYearMonth(),
+                    tom = LocalDate.now().toYearMonth(),
+                    aktør = sekundærlandsbarn,
+                    kalkulertUtbetalingsbeløp = 200,
+                ),
             )
         val utenlandskePeriodebeløp =
             listOf(
@@ -1082,8 +1294,35 @@ internal class BrevUtilsTest {
 
         val kompetanser =
             listOf(
-                lagKompetanse(fom = YearMonth.now().minusMonths(2), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "SE", barnetsBostedsland = "SE", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
-                lagKompetanse(fom = YearMonth.now().plusMonths(3), søkersAktivitet = KompetanseAktivitet.ARBEIDER, søkersAktivitetsland = "NO", annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER, annenForeldersAktivitetsland = "DK", barnetsBostedsland = "DK", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+                lagKompetanse(
+                    fom = YearMonth.now().minusMonths(2),
+                    tom = YearMonth.now().plusMonths(2),
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    søkersAktivitetsland = "NO",
+                    annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    annenForeldersAktivitetsland = "SE",
+                    barnetsBostedsland = "SE",
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    erAnnenForelderOmfattetAvNorskLovgivning = false,
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
+                lagKompetanse(
+                    fom = YearMonth.now().plusMonths(3),
+                    søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    søkersAktivitetsland = "NO",
+                    annenForeldersAktivitet = KompetanseAktivitet.ARBEIDER,
+                    annenForeldersAktivitetsland = "DK",
+                    barnetsBostedsland = "DK",
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    erAnnenForelderOmfattetAvNorskLovgivning = false,
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
             )
 
         val landkoder =
@@ -1103,7 +1342,21 @@ internal class BrevUtilsTest {
 
         val kompetanser =
             listOf(
-                lagKompetanse(fom = YearMonth.now(), tom = YearMonth.now().plusMonths(2), søkersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN, søkersAktivitetsland = "SE", annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT, annenForeldersAktivitetsland = null, barnetsBostedsland = "NO", kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND, erAnnenForelderOmfattetAvNorskLovgivning = false, barnAktører = setOf(randomAktør())),
+                lagKompetanse(
+                    fom = YearMonth.now(),
+                    tom = YearMonth.now().plusMonths(2),
+                    søkersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
+                    søkersAktivitetsland = "SE",
+                    annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
+                    annenForeldersAktivitetsland = null,
+                    barnetsBostedsland = "NO",
+                    kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
+                    erAnnenForelderOmfattetAvNorskLovgivning = false,
+                    barnAktører =
+                        setOf(
+                            randomAktør(),
+                        ),
+                ),
             )
 
         val landkoder =

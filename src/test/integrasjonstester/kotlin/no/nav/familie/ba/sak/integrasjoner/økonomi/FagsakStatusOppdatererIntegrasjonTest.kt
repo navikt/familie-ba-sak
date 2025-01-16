@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository

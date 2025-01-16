@@ -5,9 +5,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

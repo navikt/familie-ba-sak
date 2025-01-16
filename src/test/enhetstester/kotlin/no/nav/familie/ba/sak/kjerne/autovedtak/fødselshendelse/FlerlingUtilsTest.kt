@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE

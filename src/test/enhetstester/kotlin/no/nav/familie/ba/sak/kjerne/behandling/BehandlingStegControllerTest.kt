@@ -5,9 +5,9 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService

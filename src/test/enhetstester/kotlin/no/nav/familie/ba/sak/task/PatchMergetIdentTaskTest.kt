@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService

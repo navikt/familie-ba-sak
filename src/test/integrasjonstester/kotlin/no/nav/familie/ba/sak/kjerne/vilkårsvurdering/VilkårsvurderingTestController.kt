@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling

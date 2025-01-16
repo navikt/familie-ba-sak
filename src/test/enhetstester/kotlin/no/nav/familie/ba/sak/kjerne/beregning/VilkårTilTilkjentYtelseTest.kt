@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori

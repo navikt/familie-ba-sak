@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak

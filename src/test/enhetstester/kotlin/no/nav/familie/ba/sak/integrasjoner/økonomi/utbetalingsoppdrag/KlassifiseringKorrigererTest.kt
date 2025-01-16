@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.simulering.lagBehandling
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

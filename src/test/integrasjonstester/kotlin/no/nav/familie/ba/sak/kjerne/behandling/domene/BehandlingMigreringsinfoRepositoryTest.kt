@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagFagsak
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -29,7 +29,14 @@ class BehandlingMigreringsinfoRepositoryTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
-            val behandling1 = behandlingRepository.save(lagBehandling(fagsak = fagsak, aktiv = false, status = BehandlingStatus.AVSLUTTET))
+            val behandling1 =
+                behandlingRepository.save(
+                    lagBehandling(
+                        fagsak = fagsak,
+                        aktiv = false,
+                        status = BehandlingStatus.AVSLUTTET,
+                    ),
+                )
             val behandling2 = behandlingRepository.save(lagBehandling(fagsak = fagsak, aktiv = true))
 
             val behandling1Migreringsdato = LocalDate.of(2022, 1, 1)

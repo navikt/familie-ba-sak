@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

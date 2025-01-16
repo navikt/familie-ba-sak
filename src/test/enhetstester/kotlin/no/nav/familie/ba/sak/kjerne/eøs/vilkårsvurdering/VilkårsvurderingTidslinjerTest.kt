@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat

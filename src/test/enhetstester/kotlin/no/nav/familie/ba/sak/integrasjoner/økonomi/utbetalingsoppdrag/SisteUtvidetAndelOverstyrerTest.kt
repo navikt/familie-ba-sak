@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
@@ -16,8 +16,26 @@ class SisteUtvidetAndelOverstyrerTest {
         // Arrange
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2033, 8), periodeIdOffset = 2),
-                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2033, 8), periodeIdOffset = 1),
+                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                5,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 2,
+                    ),
+                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                1,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 1,
+                    ),
             )
 
         val tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag =
@@ -97,8 +115,26 @@ class SisteUtvidetAndelOverstyrerTest {
         // Arrange
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2033, 8), periodeIdOffset = 2),
-                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2033, 8), periodeIdOffset = 1),
+                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                5,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 2,
+                    ),
+                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                1,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 1,
+                    ),
             )
 
         // Act
@@ -118,8 +154,26 @@ class SisteUtvidetAndelOverstyrerTest {
         // Arrange
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2033, 8), periodeIdOffset = 0),
-                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2033, 8), periodeIdOffset = 1),
+                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                5,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 0,
+                    ),
+                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                1,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 1,
+                    ),
             )
 
         val tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag =
@@ -171,8 +225,26 @@ class SisteUtvidetAndelOverstyrerTest {
         // Arrange
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 5), tom = YearMonth.of(2033, 8), periodeIdOffset = 0),
-                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 1), tom = YearMonth.of(2033, 8), periodeIdOffset = 1),
+                IdentOgType("123", YtelsetypeBA.UTVIDET_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                5,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 0,
+                    ),
+                IdentOgType("456", YtelsetypeBA.ORDINÆR_BARNETRYGD) to
+                    lagAndelTilkjentYtelse(
+                        fom =
+                            YearMonth.of(
+                                2024,
+                                1,
+                            ),
+                        tom = YearMonth.of(2033, 8),
+                        periodeIdOffset = 1,
+                    ),
             )
 
         val tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag =

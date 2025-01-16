@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak

@@ -2,15 +2,15 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient

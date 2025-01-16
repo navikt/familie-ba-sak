@@ -4,13 +4,13 @@ import io.mockk.every
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilRelasjonIPersonInfo
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet

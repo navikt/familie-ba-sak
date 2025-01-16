@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.nyRevurdering
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.nyRevurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat

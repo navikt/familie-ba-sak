@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomBarnFnr
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam

@@ -182,4 +182,14 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         behandlingId: Long,
         fomVedtaksperiode: LocalDate,
     ): List<String>
+
+    @Query(
+        """
+        SELECT b
+        FROM Fagsak f
+            JOIN Behandling b on f.id = b.fagsak.id
+        WHERE b.opprettetÅrsak = 'OPPDATER_UTVIDET_KLASSEKODE' AND (SELECT COUNT(*) FROM Behandling b2 WHERE b2.fagsak.id = f.id AND b2.opprettetÅrsak = 'OPPDATER_UTVIDET_KLASSEKODE') = 1
+    """,
+    )
+    fun finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling(): List<Behandling>
 }

@@ -577,6 +577,7 @@
                             <sources>
                                 <source>${project.basedir}/src/test/integrasjonstester/kotlin</source>
                                 <source>${project.basedir}/src/test/enhetstester/kotlin</source>
+                                <source>${project.basedir}/src/test/testdata/kotlin</source>
                             </sources>
                         </configuration>
                     </execution>
