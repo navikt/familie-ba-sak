@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene
+package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
