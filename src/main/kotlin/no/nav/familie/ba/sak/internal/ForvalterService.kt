@@ -281,15 +281,15 @@ class ForvalterService(
     }
 
     fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): List<Pair<Long, List<AndelTilkjentYtelse>>> {
-        val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling = behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
+        val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling =
+            behandlingRepository
+                .finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
+                .filter { it.opprettetTidspunkt.toLocalDate() <= LocalDate.of(2024, 12, 17) }
+
         logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
         val resultat = mutableListOf<Pair<Long, List<AndelTilkjentYtelse>>>()
         oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
             logger.info("Korrigerer utvidet andeler i behandling ${behandling.id}")
-            // Sørger for at behandlingen ble kjørt 17.desember
-            if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
-                error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
-            }
 
             val splittIMnd = LocalDate.of(2024, 12, 1).toYearMonth()
 
@@ -334,15 +334,15 @@ class ForvalterService(
 
     @Transactional
     fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): List<Pair<Long, List<AndelTilkjentYtelse>>> {
-        val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling = behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
+        val oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling =
+            behandlingRepository
+                .finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling()
+                .filter { it.opprettetTidspunkt.toLocalDate() <= LocalDate.of(2024, 12, 17) }
+
         logger.info("Fant ${oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.size} behandlinger som er eneste OPPDATER_UTVIDET_KLASSEKODE-behandling i fagsak")
         val resultat = mutableListOf<Pair<Long, List<AndelTilkjentYtelse>>>()
         oppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling.forEach { behandling ->
             logger.info("Korrigerer utvidet andeler i behandling ${behandling.id}")
-            // Sørger for at behandlingen ble kjørt 17.desember
-            if (behandling.opprettetTidspunkt.toLocalDate() != LocalDate.of(2024, 12, 17)) {
-                error("Alle behandlinger må være opprettet 17.desember. Behandling ${behandling.id} ble opprettet ${behandling.opprettetTidspunkt.toLocalDate()}")
-            }
 
             val splittIMnd = LocalDate.of(2024, 12, 1).toYearMonth()
 
