@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester

@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals

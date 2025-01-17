@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Ressurs

@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow

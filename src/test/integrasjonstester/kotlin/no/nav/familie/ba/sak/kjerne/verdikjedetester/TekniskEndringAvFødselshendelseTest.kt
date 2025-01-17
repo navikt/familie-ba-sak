@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
