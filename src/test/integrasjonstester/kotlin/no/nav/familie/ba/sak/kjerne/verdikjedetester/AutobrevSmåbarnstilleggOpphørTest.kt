@@ -19,8 +19,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
@@ -100,22 +101,20 @@ class AutobrevSmåbarnstilleggOpphørTest(
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
-        mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna =
-                    listOf(
-                        RestScenarioPerson(
-                            fødselsdato = barnFødselsdato.toString(),
-                            fornavn = "Barn",
-                            etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
-                        ),
+        RestScenario(
+            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            barna =
+                listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList(),
                     ),
-            ),
-        )
+                ),
+        ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
@@ -140,7 +139,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
-                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        barnasIdenter = personScenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
@@ -179,7 +178,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 perioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = barnFødselsdato.plusYears(1),
                             tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                             datakilde = Datakilde.EF,
@@ -224,7 +223,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 perioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = barnFødselsdato.plusYears(1),
                             tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
                             datakilde = Datakilde.EF,

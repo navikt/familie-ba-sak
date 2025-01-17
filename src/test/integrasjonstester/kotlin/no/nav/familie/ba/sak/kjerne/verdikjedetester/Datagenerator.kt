@@ -23,11 +23,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.kontrakter.ba.infotrygd.Barn
-import no.nav.familie.kontrakter.ba.infotrygd.Delytelse
-import no.nav.familie.kontrakter.ba.infotrygd.Sak
-import no.nav.familie.kontrakter.ba.infotrygd.Stønad
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.springframework.http.HttpHeaders
@@ -66,37 +62,6 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
         nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
         nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
         fagsakType = FagsakType.NORMAL,
-    )
-
-fun lagInfotrygdSak(
-    beløp: Double,
-    identBarn: List<String>,
-    valg: String? = "OR",
-    undervalg: String? = "OS",
-): Sak =
-    Sak(
-        stønad =
-            Stønad(
-                barn = identBarn.map { Barn(it, barnetrygdTom = "000000") },
-                delytelse =
-                    listOf(
-                        Delytelse(
-                            fom = LocalDate.now(),
-                            tom = null,
-                            beløp = beløp,
-                            typeDelytelse = "MS",
-                            typeUtbetaling = "J",
-                        ),
-                    ),
-                opphørsgrunn = "0",
-                antallBarn = identBarn.size,
-                mottakerNummer = 80000123456,
-                status = "04",
-                virkningFom = "797790",
-            ),
-        status = "FB",
-        valg = valg,
-        undervalg = undervalg,
     )
 
 fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
@@ -173,7 +138,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     )
     return håndterIverksettingAvBehandling(
         behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
-        søkerFnr = personScenario.søker.ident!!,
+        søkerFnr = personScenario.søker.ident,
         fagsakService = fagsakService,
         vedtakService = vedtakService,
         stegService = stegService,

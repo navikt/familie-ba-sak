@@ -16,8 +16,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -39,34 +40,32 @@ class EndringstidspunktTest(
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker =
+            RestScenario(
+                søker =
+                    RestScenarioPerson(
+                        fødselsdato = "1982-01-12",
+                        fornavn = "Mor",
+                        etternavn = "Søker",
+                    ),
+                barna =
+                    listOf(
                         RestScenarioPerson(
-                            fødselsdato = "1982-01-12",
-                            fornavn = "Mor",
-                            etternavn = "Søker",
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = barnFødselsdato.toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                        ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val overstyrendeVilkårResultaterFGB =
-            scenario.barna.associate { it.aktørId!! to emptyList<VilkårResultat>() }.toMutableMap()
+            scenario.barna.associate { it.aktørId to emptyList<VilkårResultat>() }.toMutableMap()
 
-        overstyrendeVilkårResultaterFGB[scenario.søker.aktørId!!] = emptyList()
+        overstyrendeVilkårResultaterFGB[scenario.søker.aktørId] = emptyList()
 
         kjørStegprosessForBehandling(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
-            søkerFnr = scenario.søker.ident!!,
-            barnasIdenter = listOf(scenario.barna.first().ident!!),
+            søkerFnr = scenario.søker.ident,
+            barnasIdenter = listOf(scenario.barna.first().ident),
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
@@ -90,7 +89,7 @@ class EndringstidspunktTest(
         val overstyrendeVilkårResultaterRevurdering =
             scenario.barna
                 .associate {
-                    it.aktørId!! to
+                    it.aktørId to
                         listOf(
                             lagVilkårResultat(
                                 vilkårType = Vilkår.BOSATT_I_RIKET,
@@ -121,7 +120,7 @@ class EndringstidspunktTest(
             kjørStegprosessForBehandling(
                 tilSteg = StegType.BEHANDLING_AVSLUTTET,
                 søkerFnr = scenario.søker.ident,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
+                barnasIdenter = listOf(scenario.barna.first().ident),
                 vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,

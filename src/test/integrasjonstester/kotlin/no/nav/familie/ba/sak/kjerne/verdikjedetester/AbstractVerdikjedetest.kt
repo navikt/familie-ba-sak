@@ -1,19 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.support.TestPropertySourceUtils
 import org.springframework.web.client.RestOperations
-import org.testcontainers.containers.FixedHostPortGenericContainer
-import org.testcontainers.images.PullPolicy
-
-val MOCK_SERVER_IMAGE = "europe-north1-docker.pkg.dev/nais-management-233d/teamfamilie/familie-mock-server:latest"
 
 class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextInitializer<ConfigurableApplicationContext?> {
     override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
@@ -21,21 +19,6 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
             configurableApplicationContext,
             "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
-        val brukLokalMockserver = System.getProperty("brukLokalMockserver")?.toBoolean() ?: false
-        if (!brukLokalMockserver) {
-            mockServer.start()
-        }
-    }
-
-    companion object {
-        // Lazy because we only want it to be initialized when accessed
-        val mockServer: KMockServerContainer by lazy {
-            val mockServer = KMockServerContainer(MOCK_SERVER_IMAGE)
-            mockServer.withExposedPorts(1337)
-            mockServer.withFixedExposedPort(1337, 1337)
-            mockServer.withImagePullPolicy(PullPolicy.alwaysPull())
-            mockServer
-        }
     }
 }
 
@@ -57,7 +40,13 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
+@AutoConfigureWireMock(port = 1337)
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
+    @AfterAll
+    fun tearDownSuper() {
+        WireMock.reset()
+    }
+
     @Autowired
     lateinit var restOperations: RestOperations
 
@@ -67,18 +56,4 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
             restOperations = restOperations,
             headers = hentHeadersForSystembruker(),
         )
-
-    fun mockServerKlient(): MockserverKlient =
-        MockserverKlient(
-            mockServerUrl = "http://localhost:1337",
-            restOperations = restOperations,
-        )
 }
-
-/**
- * Hack needed because testcontainers use of generics confuses Kotlin.
- * Må bruke fixed host port for at klientene våres kan konfigureres med fast port.
- */
-class KMockServerContainer(
-    imageName: String,
-) : FixedHostPortGenericContainer<KMockServerContainer>(imageName)

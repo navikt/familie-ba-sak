@@ -10,8 +10,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -134,22 +135,20 @@ class EndretUtbetalingAndelTest(
         val barnFødselsdato = LocalDate.of(2020, 1, 3)
 
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = barnFødselsdato.toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = barnFødselsdato.toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling =
@@ -165,7 +164,7 @@ class EndretUtbetalingAndelTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.ORDINÆR,
                     ),
                 bekreftEndringerViaFrontend = false,

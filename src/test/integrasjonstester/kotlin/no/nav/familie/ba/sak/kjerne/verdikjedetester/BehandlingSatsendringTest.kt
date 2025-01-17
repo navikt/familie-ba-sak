@@ -20,8 +20,9 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -70,7 +71,7 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal kjøre satsendring på løpende fagsak hvor brukeren har barnetrygd under 6 år`() {
-        val scenario = mockServerKlient().lagScenario(restScenario)
+        val scenario = lagScenario().also { stubScenario(it) }
         val behandling = opprettBehandling(scenario)
         val atyForBehandlingMedGammelSatsFraFørMars2024 =
             andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
@@ -124,7 +125,7 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
-        val scenario = mockServerKlient().lagScenario(restScenario)
+        val scenario = lagScenario().also { stubScenario(it) }
         val behandling = opprettBehandling(scenario)
 
         val satsendringResultat =
@@ -145,19 +146,21 @@ class BehandlingSatsendringTest(
             postnummer = "0202",
             kommunenummer = "2231",
         )
-    private val restScenario =
+
+    private fun lagScenario() =
         RestScenario(
             søker =
-                RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
-                    bostedsadresser =
-                        mutableListOf(
-                            Bostedsadresse(
-                                angittFlyttedato = LocalDate.now().minusYears(10),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = matrikkeladresse,
+                RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker")
+                    .copy(
+                        bostedsadresser =
+                            mutableListOf(
+                                Bostedsadresse(
+                                    angittFlyttedato = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    matrikkeladresse = matrikkeladresse,
+                                ),
                             ),
-                        ),
-                ),
+                    ),
             barna =
                 listOf(
                     RestScenarioPerson(
@@ -181,8 +184,8 @@ class BehandlingSatsendringTest(
         behandleFødselshendelse(
             nyBehandlingHendelse =
                 NyBehandlingHendelse(
-                    morsIdent = scenario.søker.ident!!,
-                    barnasIdenter = listOf(scenario.barna.first().ident!!),
+                    morsIdent = scenario.søker.ident,
+                    barnasIdenter = listOf(scenario.barna.first().ident),
                 ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,

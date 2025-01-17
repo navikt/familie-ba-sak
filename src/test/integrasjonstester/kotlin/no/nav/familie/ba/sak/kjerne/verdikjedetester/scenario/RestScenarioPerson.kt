@@ -1,29 +1,18 @@
-package no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene
+package no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario
 
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
-import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.ba.infotrygd.Sak
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import java.time.LocalDate
 import java.time.Month
-import java.time.Period
 
 data class RestScenarioPerson(
-    // Settes av mock-server
-    val ident: String? = null,
-    // Settes av mock-server
-    val aktørId: String? = null,
-    // Settes av mock-server
-    val forelderBarnRelasjon: List<ForelderBarnRelasjon> = emptyList(),
-    // Settes av mock-server
-    val folkeregisteridentifikator: List<PdlFolkeregisteridentifikator> = emptyList(),
+    private var _ident: String? = null,
     // yyyy-mm-dd
     val fødselsdato: String,
     val fornavn: String,
     val etternavn: String,
-    val infotrygdSaker: InfotrygdSøkResponse<Sak>? = null,
     val statsborgerskap: List<Statsborgerskap> =
         listOf(
             Statsborgerskap(
@@ -35,9 +24,12 @@ data class RestScenarioPerson(
         ),
     val bostedsadresser: List<Bostedsadresse> = defaultBostedsadresseHistorikk,
 ) {
-    val navn = "$fornavn $etternavn"
+    val ident: String
+        get() = _ident ?: randomFnr(LocalDate.parse(fødselsdato)).also { _ident = it }
 
-    val alder = Period.between(LocalDate.parse(fødselsdato), LocalDate.now()).years
+    val aktørId: String
+        get() = _ident + "99"
+    val navn = "$fornavn $etternavn"
 }
 
 val defaultBostedsadresseHistorikk =

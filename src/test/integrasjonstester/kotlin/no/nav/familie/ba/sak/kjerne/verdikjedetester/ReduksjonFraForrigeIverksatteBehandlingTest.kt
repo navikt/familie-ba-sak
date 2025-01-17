@@ -23,8 +23,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
@@ -73,7 +74,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 overgangsstønadPerioder =
                     listOf(
                         EksternPeriode(
-                            personIdent = personScenario.søker.ident!!,
+                            personIdent = personScenario.søker.ident,
                             fomDato = osFom,
                             tomDato = osTom,
                             datakilde = Datakilde.EF,
@@ -87,7 +88,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
 
         Assertions.assertEquals(
             1,
-            perioderBehandling1.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
+            perioderBehandling1.filter { utvidetVedtaksperiodeMedBegrunnelser -> utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
         )
 
         val behandling2 =
@@ -113,22 +114,20 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     }
 
     fun lagScenario(barnFødselsdato: LocalDate): RestScenario =
-        mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
-                barna =
-                    listOf(
-                        RestScenarioPerson(
-                            fødselsdato = barnFødselsdato.toString(),
-                            fornavn = "Barn",
-                            etternavn = "Barnesen",
-                            bostedsadresser = emptyList(),
-                        ),
+        RestScenario(
+            søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
+            barna =
+                listOf(
+                    RestScenarioPerson(
+                        fødselsdato = barnFødselsdato.toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen",
+                        bostedsadresser = emptyList(),
                     ),
-            ),
-        )
+                ),
+        ).also { stubScenario(it) }
 
-    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident!!).data!!
+    fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak = familieBaSakKlient().opprettFagsak(søkersIdent = personScenario.søker.ident).data!!
 
     fun fullførBehandlingMedOvergangsstønad(
         fagsak: RestMinimalFagsak,
@@ -154,7 +153,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = fagsak.søkerFødselsnummer,
-                        barnasIdenter = personScenario.barna.map { it.ident!! },
+                        barnasIdenter = personScenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
