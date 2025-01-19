@@ -25,10 +25,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
