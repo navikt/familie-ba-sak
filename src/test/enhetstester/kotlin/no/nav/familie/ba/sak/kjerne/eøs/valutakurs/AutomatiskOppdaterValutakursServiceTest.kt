@@ -79,6 +79,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     @BeforeEach
     fun beforeEach() {
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns emptyList()
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
         every { behandlingHentOgPersisterService.hent(any()) } answers {
             lagBehandling(id = firstArg())
         }
