@@ -44,7 +44,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.apache.kafka.common.protocol.types.Field.Bool
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -620,7 +619,7 @@ class ForvalterController(
         return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun())
     }
 
-    @PostMapping("/distribuer-dokument-fra-task-for-ferdigstilt-behandling/{dryRun}")
+    @PostMapping("/distribuer-dokument-fra-task-for-ferdigstilt-behandling")
     @Operation(
         summary = "Distribuer dokument fra task for ferdigstilt behandling",
         description = "Trenger dette endepunktet for å kunne distibuere dokumenter på behandler som er avsluttet pga. feil i JOARK.",

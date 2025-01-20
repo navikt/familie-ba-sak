@@ -386,7 +386,10 @@ class ForvalterService(
         return resultat
     }
 
-    fun distribuerDokumentFraTaskForFerdigstiltBehandling(dryRun: Boolean, tasker: List<Long>) {
+    fun distribuerDokumentFraTaskForFerdigstiltBehandling(
+        dryRun: Boolean,
+        tasker: List<Long>,
+    ) {
         tasker.forEach {
             val task = taskService.findById(it)
             val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
