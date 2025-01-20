@@ -44,6 +44,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.apache.kafka.common.protocol.types.Field.Bool
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -617,5 +618,23 @@ class ForvalterController(
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
         )
         return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun())
+    }
+
+    @PostMapping("/distribuer-dokument-fra-task-for-ferdigstilt-behandling/{dryRun}")
+    @Operation(
+        summary = "Distribuer dokument fra task for ferdigstilt behandling",
+        description = "Trenger dette endepunktet for å kunne distibuere dokumenter på behandler som er avsluttet pga. feil i JOARK.",
+    )
+    fun distribuerDokumentFraTaskForFerdigstiltBehandling(
+        @RequestParam("dryRun") dryRun: Boolean = false,
+        @RequestBody tasker: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Distribuer dokument fra task for ferdigstilt behandling",
+        )
+        forvalterService.distribuerDokumentFraTaskForFerdigstiltBehandling(dryRun, tasker)
+
+        return ResponseEntity.ok("OK")
     }
 }
