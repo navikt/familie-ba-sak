@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -75,6 +76,7 @@ class ForvalterService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
@@ -299,10 +301,12 @@ class ForvalterService(
 
             val splittIMnd = LocalDate.of(2024, 12, 1).toYearMonth()
 
-            // Finner alle utvidet andeler i behandlingen
+            val tilkjentYtelse =
+                tilkjentYtelseRepository.findByBehandling(behandling.id)
+
+            // Finner utvidetAndelSomOverlapper
             val utvidetAndelSomOverlapperSplitt =
-                andelTilkjentYtelseRepository
-                    .finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                tilkjentYtelse.andelerTilkjentYtelse
                     .singleOrNull { andelTilkjentYtelse -> andelTilkjentYtelse.erUtvidet() && andelTilkjentYtelse.stønadFom <= splittIMnd && andelTilkjentYtelse.stønadTom > splittIMnd }
 
             if (utvidetAndelSomOverlapperSplitt == null) {
@@ -348,10 +352,12 @@ class ForvalterService(
 
             val splittIMnd = LocalDate.of(2024, 12, 1).toYearMonth()
 
-            // Finner alle utvidet andeler i behandlingen
+            val tilkjentYtelse =
+                tilkjentYtelseRepository.findByBehandling(behandling.id)
+
+            // Finner utvidetAndelSomOverlapper
             val utvidetAndelSomOverlapperSplitt =
-                andelTilkjentYtelseRepository
-                    .finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                tilkjentYtelse.andelerTilkjentYtelse
                     .singleOrNull { andelTilkjentYtelse -> andelTilkjentYtelse.erUtvidet() && andelTilkjentYtelse.stønadFom <= splittIMnd && andelTilkjentYtelse.stønadTom > splittIMnd }
 
             if (utvidetAndelSomOverlapperSplitt == null) {
@@ -371,13 +377,21 @@ class ForvalterService(
             // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
             // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i tidligere behandling vi iverksatte mot Oppdrag.
 
+            val oppdatertOgNyAndel =
+                listOf(
+                    utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset),
+                    utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1)),
+                )
+
+            tilkjentYtelse.andelerTilkjentYtelse.remove(utvidetAndelSomOverlapperSplitt)
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(oppdatertOgNyAndel)
+            tilkjentYtelseRepository.save(tilkjentYtelse)
+
             resultat.add(
                 Pair(
                     behandling.id,
-                    listOf(
-                        andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset)),
-                        andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1))),
-                    ).map { RestKorrigertAndelTilkjentYtelseDto(id = it.id, fom = it.stønadFom, tom = it.stønadTom, periodeId = it.periodeOffset, forrigePeriodeId = it.forrigePeriodeOffset) },
+                    oppdatertOgNyAndel
+                        .map { RestKorrigertAndelTilkjentYtelseDto(id = it.id, fom = it.stønadFom, tom = it.stønadTom, periodeId = it.periodeOffset, forrigePeriodeId = it.forrigePeriodeOffset) },
                 ),
             )
         }

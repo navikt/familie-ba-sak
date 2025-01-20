@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -29,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -107,6 +109,9 @@ class ForvalterServiceTest {
 
     @MockK
     lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+
+    @MockK
+    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @MockK
     lateinit var taskService: TaskService
@@ -375,13 +380,12 @@ class ForvalterServiceTest {
             every { mockedForrigeBehandling2.erHenlagt() } returns false
 
             every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every {
-                andelTilkjentYtelseRepository
-                    .finnAndelerTilkjentYtelseForBehandling(3)
-            } returns
-                listOf(
-                    lagAndelTilkjentYtelse(id = 2, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 3, forrigeperiodeIdOffset = 2, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
+            every { tilkjentYtelseRepository.findByBehandling(3) } returns
+                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(id = 2, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 3, forrigeperiodeIdOffset = 2, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                    )
+                })
             every { behandlingRepository.finnBehandlinger(fagsak.id) } returns listOf(mockedForrigeBehandling, mockedForrigeBehandling2)
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(2) } returns
@@ -394,13 +398,13 @@ class ForvalterServiceTest {
                     lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 1, forrigeperiodeIdOffset = null, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
                 )
 
-            every { andelTilkjentYtelseRepository.save(any()) } answers { firstArg() }
+            every { tilkjentYtelseRepository.save(any()) } answers { firstArg() }
 
             // Act
             val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger()
 
             // Assert
-            verify(exactly = 2) { andelTilkjentYtelseRepository.save(any()) }
+            verify(exactly = 1) { tilkjentYtelseRepository.save(any()) }
             assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
             val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
             assertThat(korrigerteAndeler).hasSize(2)
@@ -431,14 +435,14 @@ class ForvalterServiceTest {
             every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
 
             every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every {
-                andelTilkjentYtelseRepository
-                    .finnAndelerTilkjentYtelseForBehandling(3)
-            } returns
-                listOf(
-                    lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 11), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                    lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 2), tom = YearMonth.of(2035, 5), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
+
+            every { tilkjentYtelseRepository.findByBehandling(3) } returns
+                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 11), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                        lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 2), tom = YearMonth.of(2035, 5), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                    )
+                })
 
             // Act
             val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger()
@@ -476,13 +480,12 @@ class ForvalterServiceTest {
             every { mockedForrigeBehandling2.erHenlagt() } returns false
 
             every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every {
-                andelTilkjentYtelseRepository
-                    .finnAndelerTilkjentYtelseForBehandling(3)
-            } returns
-                listOf(
-                    lagAndelTilkjentYtelse(id = 2, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 3, forrigeperiodeIdOffset = 2, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
+            every { tilkjentYtelseRepository.findByBehandling(3) } returns
+                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(id = 2, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 3, forrigeperiodeIdOffset = 2, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                    )
+                })
             every { behandlingRepository.finnBehandlinger(fagsak.id) } returns listOf(mockedForrigeBehandling, mockedForrigeBehandling2)
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(2) } returns
@@ -529,14 +532,13 @@ class ForvalterServiceTest {
             every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
 
             every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every {
-                andelTilkjentYtelseRepository
-                    .finnAndelerTilkjentYtelseForBehandling(3)
-            } returns
-                listOf(
-                    lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 11), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                    lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 2), tom = YearMonth.of(2035, 5), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
+            every { tilkjentYtelseRepository.findByBehandling(3) } returns
+                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 11), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                        lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 2), tom = YearMonth.of(2035, 5), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                    )
+                })
 
             // Act
             val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun()
