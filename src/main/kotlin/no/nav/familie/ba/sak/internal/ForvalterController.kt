@@ -598,7 +598,7 @@ class ForvalterController(
         summary = "Korrigerer OPPDATER_UTVIDET_KLASSEKODE behandlinger som tilhører fagsak som er opphørt eller avsluttet før 02.2025",
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
-    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): ResponseEntity<List<Pair<Long, List<RestKorrigertAndelTilkjentYtelse>>>> {
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): ResponseEntity<List<Pair<Long, List<RestKorrigertAndelTilkjentYtelseDto>>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
@@ -611,7 +611,7 @@ class ForvalterController(
         summary = "Korrigerer OPPDATER_UTVIDET_KLASSEKODE behandlinger som tilhører fagsak som er opphørt eller avsluttet før 02.2025",
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
-    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): ResponseEntity<List<Pair<Long, List<RestKorrigertAndelTilkjentYtelse>>>> {
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): ResponseEntity<List<Pair<Long, List<RestKorrigertAndelTilkjentYtelseDto>>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
