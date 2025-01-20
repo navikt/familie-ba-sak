@@ -383,7 +383,7 @@ class ForvalterService(
                     utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1)),
                 )
 
-            tilkjentYtelse.andelerTilkjentYtelse.remove(utvidetAndelSomOverlapperSplitt)
+            tilkjentYtelse.andelerTilkjentYtelse.removeAll { it.id == utvidetAndelSomOverlapperSplitt.id }
             tilkjentYtelse.andelerTilkjentYtelse.addAll(oppdatertOgNyAndel)
             tilkjentYtelseRepository.save(tilkjentYtelse)
 
