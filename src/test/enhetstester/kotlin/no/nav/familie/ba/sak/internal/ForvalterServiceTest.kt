@@ -404,13 +404,12 @@ class ForvalterServiceTest {
             val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger()
 
             // Assert
-            verify(exactly = 1) { tilkjentYtelseRepository.save(any()) }
             assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
             val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
             assertThat(korrigerteAndeler).hasSize(2)
             val førsteAndel = korrigerteAndeler.minBy { it.fom }
             val sisteAndel = korrigerteAndeler.maxBy { it.fom }
-            assertThat(førsteAndel.id).isEqualTo(2)
+            assertThat(førsteAndel.id).isEqualTo(0)
             assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2024, 7))
             assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2024, 12))
             assertThat(førsteAndel.periodeId).isEqualTo(2)
@@ -507,7 +506,7 @@ class ForvalterServiceTest {
             assertThat(korrigerteAndeler).hasSize(2)
             val førsteAndel = korrigerteAndeler.minBy { it.fom }
             val sisteAndel = korrigerteAndeler.maxBy { it.fom }
-            assertThat(førsteAndel.id).isEqualTo(2)
+            assertThat(førsteAndel.id).isEqualTo(0)
             assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2024, 7))
             assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2024, 12))
             assertThat(førsteAndel.periodeId).isEqualTo(2)

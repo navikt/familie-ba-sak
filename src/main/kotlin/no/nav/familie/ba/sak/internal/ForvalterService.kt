@@ -385,7 +385,6 @@ class ForvalterService(
 
             tilkjentYtelse.andelerTilkjentYtelse.removeAll { it.id == utvidetAndelSomOverlapperSplitt.id }
             tilkjentYtelse.andelerTilkjentYtelse.addAll(oppdatertOgNyAndel)
-            tilkjentYtelseRepository.save(tilkjentYtelse)
 
             resultat.add(
                 Pair(
