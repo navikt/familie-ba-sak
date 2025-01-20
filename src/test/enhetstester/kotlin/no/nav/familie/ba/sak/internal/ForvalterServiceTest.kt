@@ -46,7 +46,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
@@ -112,9 +111,6 @@ class ForvalterServiceTest {
 
     @MockK
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
-
-    @MockK
-    lateinit var taskService: TaskService
 
     @InjectMockKs
     lateinit var forvalterService: ForvalterService

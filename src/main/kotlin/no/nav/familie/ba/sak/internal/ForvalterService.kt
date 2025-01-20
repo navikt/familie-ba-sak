@@ -40,13 +40,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.task.ForvaltningRedistribuerBrevTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.mdc.MDCConstants
-import no.nav.familie.log.mdc.kjørMedCallId
-import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
@@ -55,7 +50,6 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
-import java.util.UUID
 
 @Service
 class ForvalterService(
@@ -77,7 +71,6 @@ class ForvalterService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -396,26 +389,6 @@ class ForvalterService(
             )
         }
         return resultat
-    }
-
-    fun distribuerDokumentFraTaskForFerdigstiltBehandling(
-        dryRun: Boolean,
-        tasker: List<Long>,
-    ) {
-        tasker.forEach {
-            val task = taskService.findById(it)
-            val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
-
-            if (!dryRun) {
-                kjørMedCallId(UUID.randomUUID().toString()) {
-                    ForvaltningRedistribuerBrevTask.opprettTask(distribuerDokumentDTO).also {
-                        taskService.save(it)
-                    }
-                }
-            } else {
-                logger.info("dry run: distribuerDokumentFraTaskForFerdigstiltBehandling: task: $it, distribuerDokumentDTO=$distribuerDokumentDTO")
-            }
-        }
     }
 }
 
