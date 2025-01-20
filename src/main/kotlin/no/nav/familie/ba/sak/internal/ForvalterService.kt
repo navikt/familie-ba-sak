@@ -329,7 +329,7 @@ class ForvalterService(
                 Pair(
                     behandling.id,
                     listOf(
-                        utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset),
+                        utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset),
                         utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1)),
                     ).map { RestKorrigertAndelTilkjentYtelseDto(id = it.id, fom = it.stønadFom, tom = it.stønadTom, periodeId = it.periodeOffset, forrigePeriodeId = it.forrigePeriodeOffset) },
                 ),
@@ -379,7 +379,7 @@ class ForvalterService(
 
             val oppdatertOgNyAndel =
                 listOf(
-                    utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset),
+                    utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset),
                     utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1)),
                 )
 
