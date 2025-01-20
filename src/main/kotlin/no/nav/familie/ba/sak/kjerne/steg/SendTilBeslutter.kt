@@ -82,7 +82,7 @@ class SendTilBeslutter(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     fristForFerdigstillelse = LocalDate.now(),
-                    beskrivelse = if (unleashService.isEnabled(FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE)) SikkerhetContext.hentSaksbehandlerNavn() else null
+                    beskrivelse = if (unleashService.isEnabled(FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE)) SikkerhetContext.hentSaksbehandlerNavn() else null,
                 )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)

@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
+import no.nav.familie.unleash.UnleashService
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -40,6 +41,7 @@ class SendTilBeslutterTest {
     private val mockVedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val mockAutomatiskBeslutningService = mockk<AutomatiskBeslutningService>()
     private val mockValiderBrevmottakerService = mockk<ValiderBrevmottakerService>()
+    private val mockUnleashService = mockk<UnleashService>()
 
     private val totrinnskontrollService = TotrinnskontrollService(mockBehandlingService, mockTotrinnskontrollRepository, mockSaksbehandlerContext)
 
@@ -54,6 +56,7 @@ class SendTilBeslutterTest {
             vedtaksperiodeService = mockVedtaksperiodeService,
             automatiskBeslutningService = mockAutomatiskBeslutningService,
             validerBrevmottakerService = mockValiderBrevmottakerService,
+            unleashService = mockUnleashService,
         )
 
     @Nested
@@ -73,6 +76,7 @@ class SendTilBeslutterTest {
             every { mockVedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vedtak
             every { mockVedtakService.oppdaterVedtakMedStønadsbrev(vedtak) } returns vedtak
             every { mockBehandlingService.sendBehandlingTilBeslutter(behandling) } just runs
+            every { mockUnleashService.isEnabled(any()) } returns true
 
             // Act
             sendTilBeslutter.utførStegOgAngiNeste(behandling, "")
@@ -102,6 +106,7 @@ class SendTilBeslutterTest {
             every { mockLoggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true) } just runs
             every { mockTaskRepository.save(any()) } returnsArgument 0
             every { mockBehandlingService.sendBehandlingTilBeslutter(behandling) } just runs
+            every { mockUnleashService.isEnabled(any()) } returns true
 
             // Act
             sendTilBeslutter.utførStegOgAngiNeste(behandling, "")
