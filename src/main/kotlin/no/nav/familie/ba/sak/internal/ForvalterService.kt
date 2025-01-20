@@ -304,26 +304,22 @@ class ForvalterService(
                 return@forEach
             }
 
-            val behandlingFørOppdaterUtvidetKlassekodeBehandling =
+            val tilsvarendeAndelFraTidligereBehandling =
                 behandlingRepository
                     .finnBehandlinger(behandling.fagsak.id)
                     .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt && !it.erHenlagt() }
-                    .maxBy { it.aktivertTidspunkt }
-
-            // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
-            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id).filter { it.erUtvidet() }
+                    .flatMap { behandling -> andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).filter { it.erUtvidet() } }
+                    .first { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
 
             // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
             // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
-            // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i forrige behandling.
-            logger.info("Finner tilsvarende andel i forrige behandling blandt utvidet andelene (${utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.map { it.id }})")
-            val tilsvarendeAndelIForrigeBehandling = utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.single { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
+            // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i tidligere behandling vi iverksatte mot Oppdrag.
 
             resultat.add(
                 Pair(
                     behandling.id,
                     listOf(
-                        utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelIForrigeBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelIForrigeBehandling.forrigePeriodeOffset),
+                        utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset),
                         utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1)),
                     ),
                 ),
@@ -358,25 +354,22 @@ class ForvalterService(
                 return@forEach
             }
 
-            val behandlingFørOppdaterUtvidetKlassekodeBehandling =
+            val tilsvarendeAndelFraTidligereBehandling =
                 behandlingRepository
                     .finnBehandlinger(behandling.fagsak.id)
                     .filter { it.aktivertTidspunkt < behandling.aktivertTidspunkt && !it.erHenlagt() }
-                    .maxBy { it.aktivertTidspunkt }
-
-            // Finner utvidet andeler i behandlingen før OPPDATER_UTVIDET_KLASSEKODE behandlingen
-            val utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingFørOppdaterUtvidetKlassekodeBehandling.id).filter { it.erUtvidet() }
+                    .flatMap { behandling -> andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).filter { it.erUtvidet() } }
+                    .first { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
 
             // Sørger for at vi opprettet splitt i andelene, og korrigerer periodeOffset og forrigePeriodeOffset.
             // Den nye andelen som vil gå fra januar 2025 -> beholder offsets fra andelen vi splitter
-            // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i forrige behandling.
-            val tilsvarendeAndelIForrigeBehandling = utvidetAndelerBehandlingFørOppdaterUtvidetKlassekodeBehandling.single { utvidetAndel -> utvidetAndel.periodeOffset == utvidetAndelSomOverlapperSplitt.forrigePeriodeOffset }
+            // I den opprinnelige andelen vi nå forkorter oppdaterer vi offsets til å være samme som andelen i tidligere behandling vi iverksatte mot Oppdrag.
 
             resultat.add(
                 Pair(
                     behandling.id,
                     listOf(
-                        andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelIForrigeBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelIForrigeBehandling.forrigePeriodeOffset)),
+                        andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(stønadTom = splittIMnd, periodeOffset = tilsvarendeAndelFraTidligereBehandling.periodeOffset, forrigePeriodeOffset = tilsvarendeAndelFraTidligereBehandling.forrigePeriodeOffset)),
                         andelTilkjentYtelseRepository.save(utvidetAndelSomOverlapperSplitt.copy(id = 0, stønadFom = splittIMnd.plusMonths(1))),
                     ),
                 ),

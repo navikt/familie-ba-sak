@@ -385,6 +385,11 @@ class ForvalterServiceTest {
                     lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 2, forrigeperiodeIdOffset = 1, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
                 )
 
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(1) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 1, forrigeperiodeIdOffset = null, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                )
+
             every { andelTilkjentYtelseRepository.save(any()) } answers { firstArg() }
 
             // Act
@@ -479,6 +484,11 @@ class ForvalterServiceTest {
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(2) } returns
                 listOf(
                     lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 2, forrigeperiodeIdOffset = 1, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
+                )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(1) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 1, forrigeperiodeIdOffset = null, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
                 )
 
             // Act
