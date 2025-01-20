@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -29,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -42,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_Å
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
+import no.nav.familie.ba.sak.task.ForvaltningRedistribuerBrevTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.mdc.MDCConstants
@@ -76,7 +75,6 @@ class ForvalterService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val dokumentDistribueringService: DokumentDistribueringService,
     private val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
@@ -396,8 +394,9 @@ class ForvalterService(
 
             if (!dryRun) {
                 kjørMedCallId(UUID.randomUUID().toString()) {
-                    logger.info("distribuerDokumentFraTaskForFerdigstiltBehandling: task: $it, distribuerDokumentDTO=$distribuerDokumentDTO")
-                    dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(distribuerDokumentDTO = distribuerDokumentDTO, loggBehandlerRolle = BehandlerRolle.SYSTEM)
+                    ForvaltningRedistribuerBrevTask.opprettTask(distribuerDokumentDTO).also {
+                        taskService.save(it)
+                    }
                 }
             } else {
                 logger.info("dry run: distribuerDokumentFraTaskForFerdigstiltBehandling: task: $it, distribuerDokumentDTO=$distribuerDokumentDTO")
