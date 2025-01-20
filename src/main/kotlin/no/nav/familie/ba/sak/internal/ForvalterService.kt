@@ -45,6 +45,7 @@ import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.log.mdc.kjørMedCallId
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -54,6 +55,7 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
+import java.util.UUID
 
 @Service
 class ForvalterService(
@@ -390,8 +392,10 @@ class ForvalterService(
             val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
             if (!dryRun) {
-                logger.info("distribuerDokumentFraTaskForFerdigstiltBehandling: task: $it, distribuerDokumentDTO=$distribuerDokumentDTO")
-                dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(distribuerDokumentDTO = distribuerDokumentDTO, loggBehandlerRolle = BehandlerRolle.SYSTEM)
+                kjørMedCallId(UUID.randomUUID().toString()) {
+                    logger.info("distribuerDokumentFraTaskForFerdigstiltBehandling: task: $it, distribuerDokumentDTO=$distribuerDokumentDTO")
+                    dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(distribuerDokumentDTO = distribuerDokumentDTO, loggBehandlerRolle = BehandlerRolle.SYSTEM)
+                }
             } else {
                 logger.info("dry run: distribuerDokumentFraTaskForFerdigstiltBehandling: task: $it, distribuerDokumentDTO=$distribuerDokumentDTO")
             }
