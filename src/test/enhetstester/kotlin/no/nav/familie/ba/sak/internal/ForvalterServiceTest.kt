@@ -400,19 +400,19 @@ class ForvalterServiceTest {
             assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
             val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
             assertThat(korrigerteAndeler).hasSize(2)
-            val førsteAndel = korrigerteAndeler.minBy { it.stønadFom }
-            val sisteAndel = korrigerteAndeler.maxBy { it.stønadFom }
+            val førsteAndel = korrigerteAndeler.minBy { it.fom }
+            val sisteAndel = korrigerteAndeler.maxBy { it.fom }
             assertThat(førsteAndel.id).isEqualTo(2)
-            assertThat(førsteAndel.stønadFom).isEqualTo(YearMonth.of(2024, 7))
-            assertThat(førsteAndel.stønadTom).isEqualTo(YearMonth.of(2024, 12))
-            assertThat(førsteAndel.periodeOffset).isEqualTo(2)
-            assertThat(førsteAndel.forrigePeriodeOffset).isEqualTo(1)
+            assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2024, 7))
+            assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2024, 12))
+            assertThat(førsteAndel.periodeId).isEqualTo(2)
+            assertThat(førsteAndel.forrigePeriodeId).isEqualTo(1)
 
             assertThat(sisteAndel.id).isEqualTo(0)
-            assertThat(sisteAndel.stønadFom).isEqualTo(YearMonth.of(2025, 1))
-            assertThat(sisteAndel.stønadTom).isEqualTo(YearMonth.of(2035, 5))
-            assertThat(sisteAndel.periodeOffset).isEqualTo(3)
-            assertThat(sisteAndel.forrigePeriodeOffset).isEqualTo(2)
+            assertThat(sisteAndel.fom).isEqualTo(YearMonth.of(2025, 1))
+            assertThat(sisteAndel.tom).isEqualTo(YearMonth.of(2035, 5))
+            assertThat(sisteAndel.periodeId).isEqualTo(3)
+            assertThat(sisteAndel.forrigePeriodeId).isEqualTo(2)
         }
 
         @Test
@@ -498,19 +498,19 @@ class ForvalterServiceTest {
             assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
             val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
             assertThat(korrigerteAndeler).hasSize(2)
-            val førsteAndel = korrigerteAndeler.minBy { it.stønadFom }
-            val sisteAndel = korrigerteAndeler.maxBy { it.stønadFom }
+            val førsteAndel = korrigerteAndeler.minBy { it.fom }
+            val sisteAndel = korrigerteAndeler.maxBy { it.fom }
             assertThat(førsteAndel.id).isEqualTo(2)
-            assertThat(førsteAndel.stønadFom).isEqualTo(YearMonth.of(2024, 7))
-            assertThat(førsteAndel.stønadTom).isEqualTo(YearMonth.of(2024, 12))
-            assertThat(førsteAndel.periodeOffset).isEqualTo(2)
-            assertThat(førsteAndel.forrigePeriodeOffset).isEqualTo(1)
+            assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2024, 7))
+            assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2024, 12))
+            assertThat(førsteAndel.periodeId).isEqualTo(2)
+            assertThat(førsteAndel.forrigePeriodeId).isEqualTo(1)
 
             assertThat(sisteAndel.id).isEqualTo(0)
-            assertThat(sisteAndel.stønadFom).isEqualTo(YearMonth.of(2025, 1))
-            assertThat(sisteAndel.stønadTom).isEqualTo(YearMonth.of(2035, 5))
-            assertThat(sisteAndel.periodeOffset).isEqualTo(3)
-            assertThat(sisteAndel.forrigePeriodeOffset).isEqualTo(2)
+            assertThat(sisteAndel.fom).isEqualTo(YearMonth.of(2025, 1))
+            assertThat(sisteAndel.tom).isEqualTo(YearMonth.of(2035, 5))
+            assertThat(sisteAndel.periodeId).isEqualTo(3)
+            assertThat(sisteAndel.forrigePeriodeId).isEqualTo(2)
         }
 
         @Test
