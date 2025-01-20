@@ -618,4 +618,22 @@ class ForvalterController(
         )
         return ResponseEntity.ok(forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun())
     }
+
+    @PostMapping("/distribuer-dokument-fra-task-for-ferdigstilt-behandling")
+    @Operation(
+        summary = "Distribuer dokument fra task for ferdigstilt behandling",
+        description = "Trenger dette endepunktet for å kunne distibuere dokumenter på behandler som er avsluttet pga. feil i JOARK.",
+    )
+    fun distribuerDokumentFraTaskForFerdigstiltBehandling(
+        @RequestParam("dryRun") dryRun: Boolean = false,
+        @RequestBody tasker: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Distribuer dokument fra task for ferdigstilt behandling",
+        )
+        forvalterService.distribuerDokumentFraTaskForFerdigstiltBehandling(dryRun, tasker)
+
+        return ResponseEntity.ok("OK")
+    }
 }
