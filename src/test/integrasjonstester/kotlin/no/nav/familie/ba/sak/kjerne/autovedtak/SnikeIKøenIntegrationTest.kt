@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
-import no.nav.familie.ba.sak.common.årSiden
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -26,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -78,8 +77,8 @@ class SnikeIKøenIntegrationTest(
     private val loggRepository: LoggRepository,
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = randomFnr()
-    val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 18.årSiden.withDayOfMonth(10)))
-    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 6.årSiden.withDayOfMonth(10)))
+    val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = LocalDate.now().minusYears(18).withDayOfMonth(10)))
+    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = LocalDate.now().minusYears(6).withDayOfMonth(10)))
 
     @BeforeEach
     fun init() {

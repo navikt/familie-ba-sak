@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.datagenerator.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
