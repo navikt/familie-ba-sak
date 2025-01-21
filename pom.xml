@@ -36,7 +36,7 @@
         <token-validation-spring.version>5.0.11</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <sentry.version>7.20.0</sentry.version>
+        <sentry.version>7.20.1</sentry.version>
         <kotlinx.version>1.10.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
