@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
@@ -80,7 +79,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -117,15 +116,15 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -184,11 +183,11 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -223,11 +222,11 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = "1234",
                         enhetsnavn = "Fiktiv enhet",
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
@@ -283,7 +282,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
@@ -320,15 +319,15 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -365,15 +364,15 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = arbeidsfordelingEnhet.enhetsnummer,
                         enhetsnavn = arbeidsfordelingEnhet.enhetsnavn,
                     ),

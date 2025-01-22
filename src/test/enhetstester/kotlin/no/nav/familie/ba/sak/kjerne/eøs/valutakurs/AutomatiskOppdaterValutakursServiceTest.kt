@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringMottaker
-import no.nav.familie.ba.sak.datagenerator.simulering.mockØkonomiSimuleringPostering
+import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -232,10 +232,10 @@ class AutomatiskOppdaterValutakursServiceTest {
         val tomDatoSisteManuellePostering = LocalDate.of(2023, 4, 30)
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns
             listOf(
-                mockØkonomiSimuleringMottaker(
+                lagØkonomiSimuleringMottaker(
                     økonomiSimuleringPostering =
                         listOf(
-                            mockØkonomiSimuleringPostering(
+                            lagØkonomiSimuleringPostering(
                                 fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
                                 fom = LocalDate.of(2023, 4, 1),
                                 tom = tomDatoSisteManuellePostering,
