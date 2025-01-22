@@ -15,6 +15,9 @@ class FeatureToggleConfig {
         // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
         const val SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM = "familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"
 
+        // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
+        const val BYTT_VALUTAJUSTERING_DATO = "familie-ba-sak.behandling.valutajustering_dato"
+
         // NAV-22995
         const val SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD = "familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd"
         const val KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD = "familie-ba-sak.kjor-autovedtak-ny-klassekode-for-utvidet-barnetrygd"
