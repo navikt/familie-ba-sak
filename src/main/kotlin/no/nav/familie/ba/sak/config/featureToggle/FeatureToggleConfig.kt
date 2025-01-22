@@ -15,7 +15,7 @@ class FeatureToggleConfig {
         // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
         const val SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM = "familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"
 
-        // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
+        // NAV-23955
         const val BYTT_VALUTAJUSTERING_DATO = "familie-ba-sak.behandling.valutajustering_dato"
 
         // NAV-22995
