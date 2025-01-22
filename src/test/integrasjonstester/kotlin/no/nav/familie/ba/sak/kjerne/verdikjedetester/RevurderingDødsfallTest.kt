@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

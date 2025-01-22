@@ -14,7 +14,6 @@ Egenskap: Vilkårsvurderingssteg
       | 2            | 1        | 1                   | ENDRET_UTBETALING   | TEKNISK_ENDRING  | Nei                       | EØS                 | UTREDES           | VILKÅRSVURDERING     | UTVIDET       | TEKNISK_ENDRING |
       | 3            | 1        | 1                   | ENDRET_UTBETALING   | NYE_OPPLYSNINGER | Nei                       | EØS                 | UTREDES           | VILKÅRSVURDERING     | UTVIDET       | REVURDERING     |
 
-    Og dagens dato er 01.06.2023
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
       | 1, 2, 3      | 1       | SØKER      | 20.03.1995  |              |
@@ -59,8 +58,9 @@ Egenskap: Vilkårsvurderingssteg
       | 2       | 1            | 01.07.2023 | 30.06.2024 | 498   | ORDINÆR_BARNETRYGD | 100     | 1766 |
       | 2       | 1            | 01.07.2024 | 30.06.2036 | 42    | ORDINÆR_BARNETRYGD | 100     | 1310 |
 
-  Scenario: skal generere valutakurser for behandling med type teknisk endring
+  Scenario: skal generere valutakurser for behandling med type teknisk endring men bare for perioden etter praksisendringen
 
+    Og dagens dato er 01.08.2024
     Og lag personresultater for behandling 2
     Og kopier vilkårresultater fra behandling 1 til behandling 2
     Og kopier kompetanser fra behandling 1 til behandling 2
@@ -72,15 +72,14 @@ Egenskap: Vilkårsvurderingssteg
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs         | Vurderingsform |
       | 2       | 01.12.2021 | 31.12.2021 | 2            | 2021-12-31     | SEK         | 0.9744885516 | MANUELL        |
       | 2       | 01.01.2022 | 31.12.2022 | 2            | 2022-12-30     | SEK         | 0.9453325900 | MANUELL        |
-      | 2       | 01.01.2023 | 31.01.2023 | 2            | 2022-12-30     | SEK         | 0.9453325900 | AUTOMATISK     |
-      | 2       | 01.02.2023 | 28.02.2023 | 2            | 2023-01-31     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.03.2023 | 31.03.2023 | 2            | 2023-02-28     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.04.2023 | 30.04.2023 | 2            | 2023-03-31     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.05.2023 | 31.05.2023 | 2            | 2023-04-28     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.06.2023 |            | 2            | 2023-05-31     | SEK         | 10           | AUTOMATISK     |
+      | 2       | 01.01.2023 | 31.05.2024 | 2            | 2023-06-07     | SEK         | 1.0147950626 | MANUELL        |
+      | 2       | 01.06.2024 | 30.06.2024 | 2            | 2024-05-31     | SEK         | 10           | AUTOMATISK     |
+      | 2       | 01.07.2024 | 31.07.2024 | 2            | 2024-06-28     | SEK         | 10           | AUTOMATISK     |
+      | 2       | 01.08.2024 |            | 2            | 2024-07-31     | SEK         | 10           | AUTOMATISK     |
 
-  Scenario: skal generere valutakurser for behandling med type revurdering
+  Scenario: skal generere valutakurser for behandling med type revurdering men bare for perioden etter praksisendringen
 
+    Og dagens dato er 01.08.2024
     Og lag personresultater for behandling 3
     Og kopier vilkårresultater fra behandling 1 til behandling 3
     Og kopier kompetanser fra behandling 1 til behandling 3
@@ -92,9 +91,7 @@ Egenskap: Vilkårsvurderingssteg
       | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs         | Vurderingsform |
       | 2       | 01.12.2021 | 31.12.2021 | 3            | 2021-12-31     | SEK         | 0.9744885516 | MANUELL        |
       | 2       | 01.01.2022 | 31.12.2022 | 3            | 2022-12-30     | SEK         | 0.9453325900 | MANUELL        |
-      | 2       | 01.01.2023 | 31.01.2023 | 3            | 2022-12-30     | SEK         | 0.9453325900 | AUTOMATISK     |
-      | 2       | 01.02.2023 | 28.02.2023 | 3            | 2023-01-31     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.03.2023 | 31.03.2023 | 3            | 2023-02-28     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.04.2023 | 30.04.2023 | 3            | 2023-03-31     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.05.2023 | 31.05.2023 | 3            | 2023-04-28     | SEK         | 10           | AUTOMATISK     |
-      | 2       | 01.06.2023 |            | 3            | 2023-05-31     | SEK         | 10           | AUTOMATISK     |
+      | 2       | 01.01.2023 | 31.05.2024 | 3            | 2023-06-07     | SEK         | 1.0147950626 | MANUELL        |
+      | 2       | 01.06.2024 | 30.06.2024 | 3            | 2024-05-31     | SEK         | 10           | AUTOMATISK     |
+      | 2       | 01.07.2024 | 31.07.2024 | 3            | 2024-06-28     | SEK         | 10           | AUTOMATISK     |
+      | 2       | 01.08.2024 |            | 3            | 2024-07-31     | SEK         | 10           | AUTOMATISK     |

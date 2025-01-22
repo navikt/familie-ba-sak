@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.datagenerator
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -10,7 +11,10 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -353,4 +357,205 @@ fun ikkeOppfyltVilkår(vilkår: Vilkår) =
     VilkårRegelverkResultat(
         vilkår = vilkår,
         regelverkResultat = RegelverkResultat.IKKE_OPPFYLT,
+    )
+
+fun lagPersonResultatAvOverstyrteResultater(
+    person: Person,
+    overstyrendeVilkårResultater: List<VilkårResultat>,
+    vilkårsvurdering: Vilkårsvurdering,
+    id: Long = 0,
+): PersonResultat {
+    val personResultat =
+        PersonResultat(
+            id = id,
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = person.aktør,
+        )
+
+    val erUtvidet = overstyrendeVilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
+    val vilkårResultater =
+        Vilkår
+            .hentVilkårFor(
+                personType = person.type,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR,
+            ).foldIndexed(mutableListOf<VilkårResultat>()) { index, acc, vilkårType ->
+                val overstyrteVilkårResultaterForVilkår: List<VilkårResultat> =
+                    overstyrendeVilkårResultater
+                        .filter { it.vilkårType == vilkårType }
+                if (overstyrteVilkårResultaterForVilkår.isNotEmpty()) {
+                    acc.addAll(overstyrteVilkårResultaterForVilkår)
+                } else {
+                    acc.add(
+                        VilkårResultat(
+                            id = if (id != 0L) index + 1L else 0L,
+                            personResultat = personResultat,
+                            periodeFom =
+                                if (vilkårType == Vilkår.UNDER_18_ÅR) {
+                                    person.fødselsdato
+                                } else {
+                                    maxOf(
+                                        person.fødselsdato,
+                                        LocalDate.now().minusYears(3),
+                                    )
+                                },
+                            periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
+                            vilkårType = vilkårType,
+                            resultat = Resultat.OPPFYLT,
+                            begrunnelse = "",
+                            sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
+                            utdypendeVilkårsvurderinger = emptyList(),
+                        ),
+                    )
+                }
+                acc
+            }.toSet()
+
+    personResultat.setSortedVilkårResultater(vilkårResultater)
+
+    return personResultat
+}
+typealias AktørId = String
+
+/**
+ * Setter vilkår som ikke er overstyrte til oppfylt fra det seneste av
+ *      fødselsdato eller tre år tilbake i tid for personen som vurderes.
+ * Dersom personen er et barn settes også tom-datoen til barnets attenårsdag.
+ * Om du vil ha med utvidet vilkår og delt bosted må det sendes med uansett.
+ **/
+fun lagVilkårsvurderingMedOverstyrendeResultater(
+    søker: Person,
+    barna: List<Person>,
+    behandling: Behandling? = null,
+    id: Long = 0,
+    overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
+): Vilkårsvurdering {
+    val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true), id = id)
+
+    val søkerPersonResultater =
+        lagPersonResultatAvOverstyrteResultater(
+            person = søker,
+            overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
+            vilkårsvurdering = vilkårsvurdering,
+            id = id,
+        )
+
+    val barnaPersonResultater =
+        barna.map {
+            lagPersonResultatAvOverstyrteResultater(
+                person = it,
+                overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
+                vilkårsvurdering = vilkårsvurdering,
+            )
+        }
+
+    vilkårsvurdering.personResultater = barnaPersonResultater.toSet() + søkerPersonResultater
+    return vilkårsvurdering
+}
+
+fun lagVilkårsvurderingFraRestScenario(
+    scenario: RestScenario,
+    overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
+): Vilkårsvurdering {
+    fun RestScenarioPerson.tilAktør() =
+        Aktør(
+            this.aktørId!!,
+            mutableSetOf(Personident(this.ident!!, mockk(relaxed = true))),
+        )
+
+    val søker =
+        lagPerson(
+            aktør = scenario.søker.tilAktør(),
+            fødselsdato = LocalDate.parse(scenario.søker.fødselsdato),
+            type = PersonType.SØKER,
+        )
+    val barna =
+        scenario.barna.map {
+            lagPerson(
+                aktør = it.tilAktør(),
+                fødselsdato = LocalDate.parse(it.fødselsdato),
+                type = PersonType.BARN,
+            )
+        }
+    return lagVilkårsvurderingMedOverstyrendeResultater(
+        søker = søker,
+        barna = barna,
+        overstyrendeVilkårResultater = overstyrendeVilkårResultater,
+    )
+}
+
+fun lagSøkerVilkårResultat(
+    søkerPersonResultat: PersonResultat,
+    periodeFom: LocalDate,
+    periodeTom: LocalDate? = null,
+    behandlingId: Long,
+): Set<VilkårResultat> =
+    setOf(
+        lagVilkårResultat(
+            personResultat = søkerPersonResultat,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            behandlingId = behandlingId,
+        ),
+        lagVilkårResultat(
+            personResultat = søkerPersonResultat,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            behandlingId = behandlingId,
+        ),
+    )
+
+fun lagBarnVilkårResultat(
+    barnPersonResultat: PersonResultat,
+    barnetsFødselsdato: LocalDate,
+    behandlingId: Long,
+    periodeFom: LocalDate,
+    flytteSak: Boolean = false,
+): Set<VilkårResultat> =
+    setOf(
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.UNDER_18_ÅR,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = barnetsFødselsdato,
+            periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
+            behandlingId = behandlingId,
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.GIFT_PARTNERSKAP,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = barnetsFødselsdato,
+            periodeTom = null,
+            behandlingId = behandlingId,
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.BOR_MED_SØKER,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = periodeFom,
+            periodeTom = null,
+            behandlingId = behandlingId,
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.BOSATT_I_RIKET,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
+            periodeTom = null,
+            behandlingId = behandlingId,
+        ),
+        lagVilkårResultat(
+            personResultat = barnPersonResultat,
+            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
+            periodeTom = null,
+            behandlingId = behandlingId,
+        ),
     )
