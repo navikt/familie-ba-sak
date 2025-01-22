@@ -35,7 +35,7 @@
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.11</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.6.0</springdoc.version>
+        <springdoc.version>2.8.3</springdoc.version>
         <sentry.version>7.20.1</sentry.version>
         <kotlinx.version>1.10.1</kotlinx.version>
 
