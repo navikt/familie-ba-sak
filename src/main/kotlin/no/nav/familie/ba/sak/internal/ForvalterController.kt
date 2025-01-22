@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.Populer
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -599,7 +598,7 @@ class ForvalterController(
         summary = "Korrigerer OPPDATER_UTVIDET_KLASSEKODE behandlinger som tilhører fagsak som er opphørt eller avsluttet før 02.2025",
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
-    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger(): ResponseEntity<List<Pair<Long, List<RestKorrigertAndelTilkjentYtelseDto>>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
@@ -612,7 +611,7 @@ class ForvalterController(
         summary = "Korrigerer OPPDATER_UTVIDET_KLASSEKODE behandlinger som tilhører fagsak som er opphørt eller avsluttet før 02.2025",
         description = "Korrigerer og legger til andeler i disse behandlingene for å få med splitt som reflekterer det som er sendt til Oppdrag",
     )
-    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelse>>>> {
+    fun korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun(): ResponseEntity<List<Pair<Long, List<RestKorrigertAndelTilkjentYtelseDto>>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Korrigere andeler i OPPDATER_UTVIDET_KLASSEKODE behandlinger",
