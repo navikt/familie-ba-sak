@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.kjerne.brev.slåSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 
 fun kombinerHjemler(
@@ -24,9 +25,7 @@ fun kombinerHjemler(
                     Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
                 }
             } ${
-                Utils.slåSammen(
-                    separasjonsavtaleStorbritanniaHjemler,
-                )
+                separasjonsavtaleStorbritanniaHjemler.slåSammen()
             }",
         )
     }
@@ -64,11 +63,11 @@ fun kombinerHjemler(
     }
 
     if (eøsForordningen883Hjemler.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(eøsForordningen883Hjemler)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${eøsForordningen883Hjemler.slåSammen()}")
     }
 
     if (eøsForordningen987Hjemler.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(eøsForordningen987Hjemler)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${eøsForordningen987Hjemler.slåSammen()}")
     }
 
     if (forvaltningslovenHjemler.isNotEmpty()) {
@@ -97,5 +96,5 @@ private fun hjemlerTilHjemmeltekst(
     when (hjemler.size) {
         0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
         1 -> "§ ${hjemler[0]}"
-        else -> "§§ ${Utils.slåSammen(hjemler)}"
+        else -> "§§ ${hjemler.slåSammen()}"
     }

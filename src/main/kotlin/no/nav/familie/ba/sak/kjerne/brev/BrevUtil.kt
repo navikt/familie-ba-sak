@@ -107,7 +107,7 @@ fun hjemlerTilHjemmeltekst(
     when (hjemler.size) {
         0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
         1 -> "§ ${hjemler[0]}"
-        else -> "§§ ${Utils.slåSammen(hjemler)}"
+        else -> "§§ ${hjemler.slåSammen()}"
     }
 
 fun hentHjemmeltekst(
@@ -206,9 +206,7 @@ private fun hentAlleTyperHjemler(
                     Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
                 }
             } ${
-                Utils.slåSammen(
-                    hjemlerSeparasjonsavtaleStorbritannia,
-                )
+                hjemlerSeparasjonsavtaleStorbritannia.slåSammen()
             }",
         )
     }
@@ -243,10 +241,10 @@ private fun hentAlleTyperHjemler(
         )
     }
     if (hjemlerEØSForordningen883.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(hjemlerEØSForordningen883)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${hjemlerEØSForordningen883.slåSammen()}")
     }
     if (hjemlerEØSForordningen987.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(hjemlerEØSForordningen987)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${hjemlerEØSForordningen987.slåSammen()}")
     }
     if (hjemlerFraForvaltningsloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(

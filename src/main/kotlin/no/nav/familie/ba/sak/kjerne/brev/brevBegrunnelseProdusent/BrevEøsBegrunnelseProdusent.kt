@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBeg
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentBarnasFødselsdatoerForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
+import no.nav.familie.ba.sak.kjerne.brev.slåSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -66,7 +67,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
             EØSBegrunnelseDataUtenKompetanse(
                 vedtakBegrunnelseType = this.vedtakBegrunnelseType,
                 apiNavn = sanityBegrunnelse.apiNavn,
-                barnasFodselsdatoer = Utils.slåSammen(barnasFødselsdatoer.sorted().map { it.tilKortString() }),
+                barnasFodselsdatoer = barnasFødselsdatoer.sorted().map { it.tilKortString() }.slåSammen(),
                 antallBarn = barnasFødselsdatoer.size,
                 maalform =
                     grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform
