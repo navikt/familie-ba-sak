@@ -4,18 +4,13 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -24,14 +19,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -48,12 +39,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.time.YearMonth
 import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
@@ -105,12 +94,6 @@ class ForvalterServiceTest {
 
     @MockK
     lateinit var infotrygdService: InfotrygdService
-
-    @MockK
-    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
-
-    @MockK
-    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @InjectMockKs
     lateinit var forvalterService: ForvalterService
@@ -349,201 +332,6 @@ class ForvalterServiceTest {
                     assertTrue(vilkårResultat.periodeFom?.isSameOrAfter(barn.fødselsdato) ?: false)
                 }
             }
-    }
-
-    @Nested
-    inner class KorrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger {
-        @Test
-        fun `skal splitte andel og oppdatere periodeOffset og forrigePeriodeOffset når andel overlapper med splittmåned`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val mockedBehandling = mockk<Behandling>()
-
-            every { mockedBehandling.opprettetTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-            every { mockedBehandling.id } returns 3
-            every { mockedBehandling.fagsak } returns fagsak
-            every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-
-            val mockedForrigeBehandling = mockk<Behandling>()
-            val mockedForrigeBehandling2 = mockk<Behandling>()
-
-            every { mockedForrigeBehandling.id } returns 2
-            every { mockedForrigeBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 8, 1).atStartOfDay()
-            every { mockedForrigeBehandling.erHenlagt() } returns false
-
-            every { mockedForrigeBehandling2.id } returns 1
-            every { mockedForrigeBehandling2.aktivertTidspunkt } returns LocalDate.of(2022, 8, 1).atStartOfDay()
-            every { mockedForrigeBehandling2.erHenlagt() } returns false
-
-            every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every { tilkjentYtelseRepository.findByBehandling(3) } returns
-                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
-                    setOf(
-                        lagAndelTilkjentYtelse(id = 2, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 3, forrigeperiodeIdOffset = 2, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                    )
-                })
-            every { behandlingRepository.finnBehandlinger(fagsak.id) } returns listOf(mockedForrigeBehandling, mockedForrigeBehandling2)
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(2) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 2, forrigeperiodeIdOffset = 1, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(1) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 1, forrigeperiodeIdOffset = null, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
-
-            every { tilkjentYtelseRepository.save(any()) } answers { firstArg() }
-
-            // Act
-            val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger()
-
-            // Assert
-            assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
-            val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
-            assertThat(korrigerteAndeler).hasSize(2)
-            val førsteAndel = korrigerteAndeler.minBy { it.fom }
-            val sisteAndel = korrigerteAndeler.maxBy { it.fom }
-            assertThat(førsteAndel.id).isEqualTo(0)
-            assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2024, 7))
-            assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2024, 12))
-            assertThat(førsteAndel.periodeId).isEqualTo(2)
-            assertThat(førsteAndel.forrigePeriodeId).isEqualTo(1)
-
-            assertThat(sisteAndel.id).isEqualTo(0)
-            assertThat(sisteAndel.fom).isEqualTo(YearMonth.of(2025, 1))
-            assertThat(sisteAndel.tom).isEqualTo(YearMonth.of(2035, 5))
-            assertThat(sisteAndel.periodeId).isEqualTo(3)
-            assertThat(sisteAndel.forrigePeriodeId).isEqualTo(2)
-        }
-
-        @Test
-        fun `skal ikke gjøre noe dersom ingen andel overlapper med splittmåned`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val mockedBehandling = mockk<Behandling>()
-
-            every { mockedBehandling.opprettetTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-            every { mockedBehandling.id } returns 3
-            every { mockedBehandling.fagsak } returns fagsak
-            every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-
-            every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-
-            every { tilkjentYtelseRepository.findByBehandling(3) } returns
-                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
-                    setOf(
-                        lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 11), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                        lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 2), tom = YearMonth.of(2035, 5), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                    )
-                })
-
-            // Act
-            val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlinger()
-
-            // Assert
-            verify(exactly = 0) { andelTilkjentYtelseRepository.save(any()) }
-            assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
-            val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
-            assertThat(korrigerteAndeler).isEmpty()
-        }
-    }
-
-    @Nested
-    inner class KorrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun {
-        @Test
-        fun `skal splitte andel og oppdatere periodeOffset og forrigePeriodeOffset når andel overlapper med splittmåned`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val mockedBehandling = mockk<Behandling>()
-
-            every { mockedBehandling.opprettetTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-            every { mockedBehandling.id } returns 3
-            every { mockedBehandling.fagsak } returns fagsak
-            every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-
-            val mockedForrigeBehandling = mockk<Behandling>()
-            val mockedForrigeBehandling2 = mockk<Behandling>()
-
-            every { mockedForrigeBehandling.id } returns 2
-            every { mockedForrigeBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 8, 1).atStartOfDay()
-            every { mockedForrigeBehandling.erHenlagt() } returns false
-
-            every { mockedForrigeBehandling2.id } returns 1
-            every { mockedForrigeBehandling2.aktivertTidspunkt } returns LocalDate.of(2022, 8, 1).atStartOfDay()
-            every { mockedForrigeBehandling2.erHenlagt() } returns false
-
-            every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every { tilkjentYtelseRepository.findByBehandling(3) } returns
-                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
-                    setOf(
-                        lagAndelTilkjentYtelse(id = 2, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 3, forrigeperiodeIdOffset = 2, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                    )
-                })
-            every { behandlingRepository.finnBehandlinger(fagsak.id) } returns listOf(mockedForrigeBehandling, mockedForrigeBehandling2)
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(2) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 2, forrigeperiodeIdOffset = 1, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(1) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(id = 1, fom = YearMonth.of(2024, 7), tom = YearMonth.of(2035, 5), periodeIdOffset = 1, forrigeperiodeIdOffset = null, ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                )
-
-            // Act
-            val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun()
-
-            // Assert
-            assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
-            val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
-            assertThat(korrigerteAndeler).hasSize(2)
-            val førsteAndel = korrigerteAndeler.minBy { it.fom }
-            val sisteAndel = korrigerteAndeler.maxBy { it.fom }
-            assertThat(førsteAndel.id).isEqualTo(0)
-            assertThat(førsteAndel.fom).isEqualTo(YearMonth.of(2024, 7))
-            assertThat(førsteAndel.tom).isEqualTo(YearMonth.of(2024, 12))
-            assertThat(førsteAndel.periodeId).isEqualTo(2)
-            assertThat(førsteAndel.forrigePeriodeId).isEqualTo(1)
-
-            assertThat(sisteAndel.id).isEqualTo(0)
-            assertThat(sisteAndel.fom).isEqualTo(YearMonth.of(2025, 1))
-            assertThat(sisteAndel.tom).isEqualTo(YearMonth.of(2035, 5))
-            assertThat(sisteAndel.periodeId).isEqualTo(3)
-            assertThat(sisteAndel.forrigePeriodeId).isEqualTo(2)
-        }
-
-        @Test
-        fun `skal ikke gjøre noe dersom ingen andel overlapper med splittmåned`() {
-            // Arrange
-            val fagsak = lagFagsak()
-            val mockedBehandling = mockk<Behandling>()
-
-            every { mockedBehandling.opprettetTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-            every { mockedBehandling.id } returns 3
-            every { mockedBehandling.fagsak } returns fagsak
-            every { mockedBehandling.aktivertTidspunkt } returns LocalDate.of(2024, 12, 17).atStartOfDay()
-
-            every { behandlingRepository.finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling() } returns listOf(mockedBehandling)
-            every { tilkjentYtelseRepository.findByBehandling(3) } returns
-                lagTilkjentYtelse(lagAndelerTilkjentYtelse = {
-                    setOf(
-                        lagAndelTilkjentYtelse(fom = YearMonth.of(2024, 7), tom = YearMonth.of(2024, 11), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                        lagAndelTilkjentYtelse(fom = YearMonth.of(2025, 2), tom = YearMonth.of(2035, 5), ytelseType = YtelseType.UTVIDET_BARNETRYGD),
-                    )
-                })
-
-            // Act
-            val korrigerteAndelerForBehandlinger = forvalterService.korrigerUtvidetAndelerIOppdaterUtvidetKlassekodeBehandlingerDryRun()
-
-            // Assert
-            verify(exactly = 0) { andelTilkjentYtelseRepository.save(any()) }
-            assertThat(korrigerteAndelerForBehandlinger).hasSize(1)
-            val korrigerteAndeler = korrigerteAndelerForBehandlinger.single().second
-            assertThat(korrigerteAndeler).isEmpty()
-        }
     }
 
     private fun personTilPersonEnkel(barn: Person) =
