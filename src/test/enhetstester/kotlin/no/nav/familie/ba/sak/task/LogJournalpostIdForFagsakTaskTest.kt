@@ -5,8 +5,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

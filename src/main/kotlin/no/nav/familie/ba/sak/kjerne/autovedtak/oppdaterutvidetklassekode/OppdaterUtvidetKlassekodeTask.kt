@@ -16,6 +16,7 @@ import java.util.Properties
     taskStepType = OppdaterUtvidetKlassekodeTask.TASK_STEP_TYPE,
     beskrivelse = "Migrer fagsak til ny klassekode for utvidet barnetrygd",
     maxAntallFeil = 1,
+    settTilManuellOppfølgning = true,
 )
 class OppdaterUtvidetKlassekodeTask(
     private val autovedtakOppdaterUtvidetKlassekodeService: AutovedtakOppdaterUtvidetKlassekodeService,

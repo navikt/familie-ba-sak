@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
@@ -11,58 +8,17 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
-import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.springframework.http.HttpHeaders
 import java.time.LocalDate
-import java.time.LocalDateTime
-
-fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
-    RestJournalføring(
-        avsender = bruker,
-        bruker = bruker,
-        datoMottatt = LocalDateTime.now().minusDays(10),
-        journalpostTittel = "Søknad om ordinær barnetrygd",
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.ORDINÆR,
-        knyttTilFagsak = true,
-        opprettOgKnyttTilNyBehandling = true,
-        tilknyttedeBehandlingIder = emptyList(),
-        dokumenter =
-            listOf(
-                RestJournalpostDokument(
-                    dokumentTittel = "Søknad om barnetrygd",
-                    brevkode = "mock",
-                    dokumentInfoId = "1",
-                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
-                    eksisterendeLogiskeVedlegg = emptyList(),
-                ),
-                RestJournalpostDokument(
-                    dokumentTittel = "Ekstra vedlegg",
-                    brevkode = "mock",
-                    dokumentInfoId = "2",
-                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
-                    eksisterendeLogiskeVedlegg = emptyList(),
-                ),
-            ),
-        navIdent = "09123",
-        nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-        nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
-        fagsakType = FagsakType.NORMAL,
-    )
 
 fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     restUtvidetBehandling: RestUtvidetBehandling,
