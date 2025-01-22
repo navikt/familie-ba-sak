@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -78,6 +79,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     @BeforeEach
     fun beforeEach() {
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns emptyList()
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
         every { behandlingHentOgPersisterService.hent(any()) } answers {
             lagBehandling(id = firstArg())
         }
@@ -177,7 +179,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     }
 
     @Test
-    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen januar 2023 for revurdering`() {
+    fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen juni 2024 for revurdering`() {
         every { behandlingHentOgPersisterService.hent(any()) } answers {
             lagBehandling(
                 id = firstArg(),
@@ -190,11 +192,11 @@ class AutomatiskOppdaterValutakursServiceTest {
             (dato.month.value % 10).toBigDecimal()
         }
 
-        UtenlandskPeriodebeløpBuilder(sep(2022), behandlingId)
+        UtenlandskPeriodebeløpBuilder(feb(2024), behandlingId)
             .medBeløp("77778888", "EUR", "N", barn1, barn2, barn3)
             .lagreTil(utenlandskPeriodebeløpRepository)
 
-        ValutakursBuilder(sep(2022), behandlingId)
+        ValutakursBuilder(feb(2024), behandlingId)
             .medKurs("11111111", "EUR", barn1, barn2, barn3)
             .medVurderingsform(Vurderingsform.MANUELL)
             .lagreTil(valutakursRepository)
@@ -204,14 +206,14 @@ class AutomatiskOppdaterValutakursServiceTest {
         automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(behandlingId)
 
         val forventetUberørteValutakurser =
-            ValutakursBuilder(sep(2022), behandlingId)
+            ValutakursBuilder(feb(2024), behandlingId)
                 .medKurs("1111", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.MANUELL)
                 .bygg()
 
         val forventetOppdaterteValutakurser =
-            ValutakursBuilder(sep(2022), behandlingId)
-                .medKurs("    2123", "EUR", barn1, barn2, barn3)
+            ValutakursBuilder(feb(2024), behandlingId)
+                .medKurs("    5678", "EUR", barn1, barn2, barn3)
                 .medVurderingsform(Vurderingsform.AUTOMATISK)
                 .bygg()
 
