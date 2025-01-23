@@ -14,6 +14,7 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.HentFagsystemsbehandlingR
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -68,6 +69,9 @@ class DefaultKafkaProducer(
     @Autowired
     lateinit var kafkaAivenTemplate: KafkaTemplate<String, String>
 
+    @Value("\${TILBAKEKREVING_RESPONSE_TOPIC}")
+    lateinit var tilbakekrevingResponseTopic: String
+
     override fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long {
         val vedtakForDVHV2Melding =
             kafkaObjectMapper.writeValueAsString(vedtakV2)
@@ -116,16 +120,16 @@ class DefaultKafkaProducer(
         val meldingIString: String = objectMapper.writeValueAsString(melding)
 
         kafkaAivenTemplate
-            .send(FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC, key, meldingIString)
+            .send(tilbakekrevingResponseTopic, key, meldingIString)
             .thenAccept {
                 logger.info(
-                    "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
+                    "Melding på topic $tilbakekrevingResponseTopic for " +
                         "$behandlingId med $key er sendt. " +
                         "Fikk offset ${it?.recordMetadata?.offset()}",
                 )
             }.exceptionally {
                 val feilmelding =
-                    "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC kan ikke sendes for " +
+                    "Melding på topic $tilbakekrevingResponseTopic kan ikke sendes for " +
                         "$behandlingId med $key. Feiler med ${it.message}"
                 logger.warn(feilmelding)
                 throw Feil(message = feilmelding)
@@ -177,8 +181,6 @@ class DefaultKafkaProducer(
         private const val SAKSSTATISTIKK_BEHANDLING_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-behandling-v1"
         private const val SAKSSTATISTIKK_SAK_TOPIC = "teamfamilie.aapen-barnetrygd-saksstatistikk-sak-v1"
         private const val COUNTER_NAME = "familie.ba.sak.kafka.produsert"
-        private const val FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC =
-            "teamfamilie.privat-tbk-hentfagsystemsbehandling-respons-topic"
         const val OPPHOER_BARNETRYGD_BISYS_TOPIC = "teamfamilie.aapen-familie-ba-sak-opphoer-barnetrygd"
         const val BARNETRYGD_PENSJON_TOPIC = "teamfamilie.aapen-familie-ba-sak-identer-med-barnetrygd"
     }
