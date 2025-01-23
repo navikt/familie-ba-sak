@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -38,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollE�
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
+import no.nav.familie.ba.sak.kjerne.brev.slåSammen
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -487,7 +487,7 @@ fun ManueltBrevRequest.tilBrev(
                 navn = mottakerNavn,
                 fødselsnummer = mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
+                mottakerlandSed = this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }.slåSammen(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
 
@@ -497,7 +497,7 @@ fun ManueltBrevRequest.tilBrev(
                 navn = mottakerNavn,
                 fødselsnummer = mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
+                mottakerlandSed = this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }.slåSammen(),
                 dokumentliste = this.multiselectVerdier,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
@@ -572,9 +572,9 @@ private fun tilLandNavn(
 }
 
 private fun List<LocalDate>?.tilFormaterteFødselsdager() =
-    Utils.slåSammen(
-        this?.map { it.tilKortString() }
-            ?: throw Feil("Fikk ikke med barna sine fødselsdager"),
+    this?.map { it.tilKortString() }
+        ?.slåSammen()
+        ?: throw Feil("Fikk ikke med barna sine fødselsdager",
     )
 
 private fun erOrgNr(ident: String): Boolean = ident.length == 9 && ident.all { it.isDigit() }

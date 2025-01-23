@@ -1,5 +1,4 @@
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
@@ -93,7 +92,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                     annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
                     annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland?.tilLandNavn(landkoder)?.navn,
                     barnetsBostedsland = kompetanse.barnetsBostedsland.tilLandNavn(landkoder).navn,
-                    barnasFodselsdatoer = Utils.slåSammen(barnIBegrunnelseOgIKompetanse.map { it.fødselsdato.tilKortString() }),
+                    barnasFodselsdatoer = barnIBegrunnelseOgIKompetanse.map { it.fødselsdato.tilKortString() }.slåSammen(),
                     antallBarn = barnIBegrunnelseOgIKompetanse.size,
                     maalform =
                         grunnlag.behandlingsGrunnlagForVedtaksperioder.persongrunnlag.søker.målform

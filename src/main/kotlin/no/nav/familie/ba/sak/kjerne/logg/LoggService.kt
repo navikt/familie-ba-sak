@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
+import no.nav.familie.ba.sak.kjerne.brev.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -222,17 +222,15 @@ class LoggService(
     }
 
     private fun fødselsdatoer(behandling: BehandlingLoggRequest) =
-        Utils.slåSammen(
-            behandling.barnasIdenter
-                .filter { Identkonverterer.er11Siffer(it) }
-                .distinct()
-                .map { Fødselsnummer(it) }
-                .map {
-                    // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
-                    @Suppress("DEPRECATION")
-                    it.fødselsdato
-                }.map { it.tilKortString() },
-        )
+        behandling.barnasIdenter
+            .filter { Identkonverterer.er11Siffer(it) }
+            .distinct()
+            .map { Fødselsnummer(it) }
+            .map {
+                // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
+                @Suppress("DEPRECATION")
+                it.fødselsdato
+            }.map { it.tilKortString() }.slåSammen()
 
     fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
         val behandling = behandlingLogg.behandling
