@@ -28,7 +28,7 @@ class HentFagsystemsbehandlingRequestConsumer(
 
     @KafkaListener(
         id = "familie-ba-sak",
-        topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
+        topics = ["\${TILBAKEKREVING_REQUEST_TOPIC}"],
         containerFactory = "concurrentKafkaListenerContainerFactory",
     )
     fun listen(

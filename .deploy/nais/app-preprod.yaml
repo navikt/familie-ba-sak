@@ -99,7 +99,8 @@ spec:
           cluster: dev-fss
         - application: familie-ef-sak
           cluster: dev-gcp
-        - application: familie-tilbake
+        - application: tilbakekreving-backend
+          namespace: tilbake
           cluster: dev-gcp
         - application: familie-oppdrag
           cluster: dev-fss
