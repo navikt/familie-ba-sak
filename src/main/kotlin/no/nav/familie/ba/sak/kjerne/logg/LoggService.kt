@@ -230,7 +230,8 @@ class LoggService(
                 // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
                 @Suppress("DEPRECATION")
                 it.fødselsdato
-            }.map { it.tilKortString() }.slåSammen()
+            }.map { it.tilKortString() }
+            .slåSammen()
 
     fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
         val behandling = behandlingLogg.behandling

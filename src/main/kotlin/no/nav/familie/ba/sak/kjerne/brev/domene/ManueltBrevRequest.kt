@@ -572,9 +572,11 @@ private fun tilLandNavn(
 }
 
 private fun List<LocalDate>?.tilFormaterteFødselsdager() =
-    this?.map { it.tilKortString() }
+    this
+        ?.map { it.tilKortString() }
         ?.slåSammen()
-        ?: throw Feil("Fikk ikke med barna sine fødselsdager",
-    )
+        ?: throw Feil(
+            "Fikk ikke med barna sine fødselsdager",
+        )
 
 private fun erOrgNr(ident: String): Boolean = ident.length == 9 && ident.all { it.isDigit() }
