@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
@@ -107,7 +107,7 @@ fun hjemlerTilHjemmeltekst(
     when (hjemler.size) {
         0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
         1 -> "§ ${hjemler[0]}"
-        else -> "§§ ${Utils.slåSammen(hjemler)}"
+        else -> "§§ ${hjemler.slåSammen()}"
     }
 
 fun hentHjemmeltekst(
@@ -177,15 +177,6 @@ private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) =
         else -> hjemler.slåSammen()
     }
 
-fun Collection<String>.slåSammen(): String =
-    this.reduceIndexed { index, acc, s ->
-        when (index) {
-            0 -> s
-            this.size - 1 -> "$acc og $s"
-            else -> "$acc, $s"
-        }
-    }
-
 private fun hentAlleTyperHjemler(
     hjemlerSeparasjonsavtaleStorbritannia: List<String>,
     ordinæreHjemler: List<String>,
@@ -206,9 +197,7 @@ private fun hentAlleTyperHjemler(
                     Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
                 }
             } ${
-                Utils.slåSammen(
-                    hjemlerSeparasjonsavtaleStorbritannia,
-                )
+                hjemlerSeparasjonsavtaleStorbritannia.slåSammen()
             }",
         )
     }
@@ -243,10 +232,10 @@ private fun hentAlleTyperHjemler(
         )
     }
     if (hjemlerEØSForordningen883.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(hjemlerEØSForordningen883)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${hjemlerEØSForordningen883.slåSammen()}")
     }
     if (hjemlerEØSForordningen987.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(hjemlerEØSForordningen987)}")
+        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${hjemlerEØSForordningen987.slåSammen()}")
     }
     if (hjemlerFraForvaltningsloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(

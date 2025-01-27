@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -43,7 +43,7 @@ fun validerIngenVilkårSattEtterSøkersDød(
         throw FunksjonellFeil(
             "Ved behandlingsårsak \"Dødsfall Bruker\" må vilkårene på søker avsluttes " +
                 "senest dagen søker døde, men " +
-                Utils.slåSammen(vilkårSomEnderEtterSøkersDød.map { "\"" + it.beskrivelse + "\"" }) +
+                vilkårSomEnderEtterSøkersDød.map { "\"" + it.beskrivelse + "\"" }.slåSammen() +
                 " vilkåret til søker slutter etter søkers død.",
         )
     }

@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming
 
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -110,7 +110,7 @@ private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecima
         }
     }
 
-private fun List<Utbetalingsperiode>.tilTidStrenger() = Utils.slåSammen(this.map { "${it.vedtakdatoFom.toYearMonth()} til ${it.vedtakdatoTom.toYearMonth()}" })
+private fun List<Utbetalingsperiode>.tilTidStrenger() = this.map { "${it.vedtakdatoFom.toYearMonth()} til ${it.vedtakdatoTom.toYearMonth()}" }.slåSammen()
 
 private sealed interface AndelOgOppdragForskjell
 
