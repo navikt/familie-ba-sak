@@ -86,7 +86,7 @@ class BeslutteVedtak(
 
         validerBrevmottakere(BehandlingId(behandling.id), data.beslutning.erGodkjent())
 
-        val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandling.id) }
+        val feilutbetaling by lazy { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(behandling.id) }
         val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
         val tilbakekrevingsvalg by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
         val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
