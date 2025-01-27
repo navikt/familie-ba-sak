@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
@@ -174,15 +175,6 @@ private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) =
         0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel.")
         1 -> hjemler.single()
         else -> hjemler.slåSammen()
-    }
-
-fun Collection<String>.slåSammen(): String =
-    this.reduceIndexed { index, acc, s ->
-        when (index) {
-            0 -> s
-            this.size - 1 -> "$acc og $s"
-            else -> "$acc, $s"
-        }
     }
 
 private fun hentAlleTyperHjemler(

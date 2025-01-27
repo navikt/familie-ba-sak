@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.brev.slåSammen
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 
 fun kombinerHjemler(
