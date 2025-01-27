@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -170,7 +170,7 @@ class AutovedtakFødselshendelseService(
                 )
             taskRepository.save(task)
 
-            if (unleashService.isEnabled(FeatureToggleConfig.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM, false)) {
+            if (unleashService.isEnabled(FeatureToggle.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM.navn, false)) {
                 opprettFremleggsoppgaveDersomEØSMedlem(behandling)
             }
 

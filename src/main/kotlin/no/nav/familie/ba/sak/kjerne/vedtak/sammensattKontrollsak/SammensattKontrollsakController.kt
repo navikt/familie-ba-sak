@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
@@ -42,7 +42,7 @@ class SammensattKontrollsakController(
     fun hentSammensattKontrollsak(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestSammensattKontrollsak?>> {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
@@ -62,7 +62,7 @@ class SammensattKontrollsakController(
     fun opprettSammensattKontrollsak(
         @RequestBody restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestSammensattKontrollsak>> {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
@@ -84,7 +84,7 @@ class SammensattKontrollsakController(
     fun oppdaterSammensattKontrollsak(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestSammensattKontrollsak>> {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
@@ -105,7 +105,7 @@ class SammensattKontrollsakController(
     fun slettSammensattKontrollsak(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<Long>> {
-        if (!unleashService.isEnabled(FeatureToggleConfig.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 

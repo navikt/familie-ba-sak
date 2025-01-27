@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -105,14 +105,14 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
                 behandlingId = behandling.id,
             )
         } returns true
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+                toggleId = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn,
             )
         } returns true
 
@@ -244,14 +244,14 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
                 behandlingId = any(),
             )
         } returns true
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+                toggleId = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn,
             )
         } returns true
 
@@ -389,14 +389,14 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
+                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
                 behandlingId = any(),
             )
         } returns true
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggleConfig.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
+                toggleId = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn,
             )
         } returns true
 
