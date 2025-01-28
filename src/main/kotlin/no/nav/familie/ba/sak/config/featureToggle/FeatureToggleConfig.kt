@@ -47,5 +47,3 @@ enum class FeatureToggleConfig(
     // Kjører satsendring lørdag
     SATSENDRING_LØRDAG("familie-ba-sak.satsendring-lordag"),
 }
-
-
