@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -35,7 +35,7 @@ class StartSatsendring(
     fun startSatsendring(
         antallFagsaker: Int,
     ) {
-        if (!unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET.navn, false)) {
+        if (!unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET.navn, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }

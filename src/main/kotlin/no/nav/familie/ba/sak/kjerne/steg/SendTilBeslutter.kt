@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
@@ -82,7 +82,7 @@ class SendTilBeslutter(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     fristForFerdigstillelse = LocalDate.now(),
-                    beskrivelse = if (unleashService.isEnabled(FeatureToggle.FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE.navn)) SikkerhetContext.hentSaksbehandlerNavn() else null,
+                    beskrivelse = if (unleashService.isEnabled(FeatureToggleConfig.FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE.navn)) SikkerhetContext.hentSaksbehandlerNavn() else null,
                 )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)

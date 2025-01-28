@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
@@ -242,7 +242,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
-        System.setProperty(FeatureToggle.TEKNISK_ENDRING.navn, "true")
+        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING.navn, "true")
 
         val scenario =
             RestScenario(

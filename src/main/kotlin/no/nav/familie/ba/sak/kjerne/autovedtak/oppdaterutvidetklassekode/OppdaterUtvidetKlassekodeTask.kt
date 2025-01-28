@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -23,7 +23,7 @@ class OppdaterUtvidetKlassekodeTask(
     private val unleashService: UnleashService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        if (!unleashService.isEnabled(FeatureToggle.KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn)) {
+        if (!unleashService.isEnabled(FeatureToggleConfig.KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn)) {
             logger.info("Hopper ut av kjøring av migrering til ny klassekode for utvidet barnetrygd da toggle er skrudd av")
             return
         }

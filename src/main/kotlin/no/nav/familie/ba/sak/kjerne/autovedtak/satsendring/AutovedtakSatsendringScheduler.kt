@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
@@ -15,7 +15,7 @@ class AutovedtakSatsendringScheduler(
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendring() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_HØYT_VOLUM.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_HØYT_VOLUM.navn, false)) {
             startSatsendring(1200)
         } else {
             startSatsendring(100)
@@ -24,14 +24,14 @@ class AutovedtakSatsendringScheduler(
 
     @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID)
     fun triggSatsendringUtenforArbeidstid() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_KVELD.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_KVELD.navn, false)) {
             startSatsendring(1000)
         }
     }
 
     @Scheduled(cron = CRON_HVERT_5_MIN_LØRDAG)
     fun triggSatsendringLørdag() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_LØRDAG.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_LØRDAG.navn, false)) {
             startSatsendring(1000)
         }
     }

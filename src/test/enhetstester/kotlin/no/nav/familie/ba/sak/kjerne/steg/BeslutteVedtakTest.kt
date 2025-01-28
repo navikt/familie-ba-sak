@@ -8,7 +8,7 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -251,7 +251,7 @@ class BeslutteVedtakTest {
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
         every {
             unleashService.isEnabled(
-                FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn,
+                FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn,
                 any(),
             )
         } returns false
@@ -274,7 +274,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING.navn, any()) } returns false
+        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING.navn, any()) } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
