@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
@@ -24,7 +23,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillLagVedtakOppgaver
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.unleash.UnleashService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -39,7 +37,6 @@ class SendTilBeslutter(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
-    private val unleashService: UnleashService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -82,7 +79,7 @@ class SendTilBeslutter(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     fristForFerdigstillelse = LocalDate.now(),
-                    beskrivelse = if (unleashService.isEnabled(FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE)) SikkerhetContext.hentSaksbehandlerNavn() else null,
+                    beskrivelse = SikkerhetContext.hentSaksbehandlerNavn(),
                 )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)
