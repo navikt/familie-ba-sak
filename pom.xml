@@ -17,14 +17,14 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.1.0</kotlin.version>
+        <kotlin.version>2.1.10</kotlin.version>
         <kotlin.compiler.languageVersion>2.1</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.1</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20250114104710_d9ad759</prosessering.version>
-        <felles.version>3.20250106100611_6ae49d2</felles.version>
+        <felles.version>3.20250122103549_5bcb4dc</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20241220141021_9e86ad8</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>5.0.11</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <sentry.version>7.20.1</sentry.version>
+        <sentry.version>8.0.0</sentry.version>
         <kotlinx.version>1.10.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->

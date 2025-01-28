@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.logg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -222,17 +222,16 @@ class LoggService(
     }
 
     private fun fødselsdatoer(behandling: BehandlingLoggRequest) =
-        Utils.slåSammen(
-            behandling.barnasIdenter
-                .filter { Identkonverterer.er11Siffer(it) }
-                .distinct()
-                .map { Fødselsnummer(it) }
-                .map {
-                    // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
-                    @Suppress("DEPRECATION")
-                    it.fødselsdato
-                }.map { it.tilKortString() },
-        )
+        behandling.barnasIdenter
+            .filter { Identkonverterer.er11Siffer(it) }
+            .distinct()
+            .map { Fødselsnummer(it) }
+            .map {
+                // En litt forenklet løsning for å hente fødselsdato uten å kalle PDL. Gir ikke helt riktige data, men godt nok.
+                @Suppress("DEPRECATION")
+                it.fødselsdato
+            }.map { it.tilKortString() }
+            .slåSammen()
 
     fun opprettBehandlingLogg(behandlingLogg: BehandlingLoggRequest) {
         val behandling = behandlingLogg.behandling

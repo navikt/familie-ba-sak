@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -231,7 +231,7 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() = Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
+    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() = this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" }.slåSammen()
 
     fun maksBeløp(
         personType: PersonType,

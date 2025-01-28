@@ -31,9 +31,6 @@ enum class FeatureToggleConfig(
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
 
-    // NAV-23989
-    FYLL_INN_SB_NAVN_I_GODKJENNE_VEDTAK_OPPGAVE("familie-ba-sak.sb-navn-i-godkjenne-vedtak-oppgave"),
-
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task
     SATSENDRING_ENABLET("familie-ba-sak.satsendring-enablet"),
