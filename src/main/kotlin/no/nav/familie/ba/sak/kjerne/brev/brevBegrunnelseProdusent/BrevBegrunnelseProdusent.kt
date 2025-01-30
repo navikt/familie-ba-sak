@@ -256,6 +256,16 @@ private fun hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson: M
                 .isNullOrEmpty()
         }.keys
 
+private fun hentPersonerMedAndelHøyereEnn0IForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson
+        .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+            !begrunnelseGrunnlagForPersonIPeriode.forrigePeriode
+                ?.andeler
+                ?.filter { it.kalkulertUtbetalingsbeløp > 0 }
+                ?.toList()
+                .isNullOrEmpty()
+        }.keys
+
 private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson
         .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
@@ -292,8 +302,11 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMedOppfylteVilkår = hentBarnMedOppfylteVilkår(begrunnelsesGrunnlagPerPerson)
     val barnMedUtbetalingIForrigeperiode =
         hentPersonerMedAndelIForrigePeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+    val barnMedUtbetalingHøyereEnn0IForrigeperiode = hentPersonerMedAndelHøyereEnn0IForrigePeriode(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val barnMistetUtbetalingFraForrigeBehandling =
         hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
+
+    val barnSomNåFårUtbetalingIPeriode = barnMedUtbetaling - barnMedUtbetalingHøyereEnn0IForrigeperiode
 
     return when {
         this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
@@ -331,7 +344,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
         }
 
-        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) -> barnMedUtbetaling.map { it.fødselsdato }
+        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) -> barnSomNåFårUtbetalingIPeriode.map { it.fødselsdato }
 
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
