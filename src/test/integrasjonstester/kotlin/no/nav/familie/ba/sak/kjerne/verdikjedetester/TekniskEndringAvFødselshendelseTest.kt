@@ -41,7 +41,7 @@ class TekniskEndringAvFødselshendelseTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING, "true")
+        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING.navn, "true")
 
         val scenario =
             RestScenario(

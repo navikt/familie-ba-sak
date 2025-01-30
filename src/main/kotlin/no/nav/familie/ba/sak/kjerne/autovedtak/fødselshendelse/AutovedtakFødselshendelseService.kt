@@ -170,7 +170,7 @@ class AutovedtakFødselshendelseService(
                 )
             taskRepository.save(task)
 
-            if (unleashService.isEnabled(FeatureToggleConfig.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM, false)) {
+            if (unleashService.isEnabled(FeatureToggleConfig.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM.navn, false)) {
                 opprettFremleggsoppgaveDersomEØSMedlem(behandling)
             }
 

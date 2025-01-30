@@ -35,7 +35,7 @@ class StartSatsendring(
     fun startSatsendring(
         antallFagsaker: Int,
     ) {
-        if (!unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false)) {
+        if (!unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET.navn, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }

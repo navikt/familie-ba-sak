@@ -15,7 +15,7 @@ class AutovedtakSatsendringScheduler(
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendring() {
-        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_HØYT_VOLUM, false)) {
+        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_HØYT_VOLUM.navn, false)) {
             startSatsendring(1200)
         } else {
             startSatsendring(100)
@@ -24,14 +24,14 @@ class AutovedtakSatsendringScheduler(
 
     @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID)
     fun triggSatsendringUtenforArbeidstid() {
-        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_KVELD, false)) {
+        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_KVELD.navn, false)) {
             startSatsendring(1000)
         }
     }
 
     @Scheduled(cron = CRON_HVERT_5_MIN_LØRDAG)
     fun triggSatsendringLørdag() {
-        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_LØRDAG, false)) {
+        if (unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_LØRDAG.navn, false)) {
             startSatsendring(1000)
         }
     }

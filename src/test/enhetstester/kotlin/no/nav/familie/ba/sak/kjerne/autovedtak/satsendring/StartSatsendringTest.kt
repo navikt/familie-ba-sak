@@ -66,7 +66,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
-        every { unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false) } returns true
+        every { unleashService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET.navn, false) } returns true
 
         val behandling = lagBehandling()
 

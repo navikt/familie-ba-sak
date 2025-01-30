@@ -33,10 +33,10 @@ class BehandlingStegControllerTest {
     fun `Skal kaste feil hvis saksbehandler uten teknisk endring-tilgang prøver å henlegge en behandling med årsak=teknisk endring`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
 
-        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING, behandling.id) } returns false
+        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING.navn, behandling.id) } returns false
         every {
             unleashService.isEnabled(
-                FeatureToggleConfig.TEKNISK_VEDLIKEHOLD_HENLEGGELSE,
+                FeatureToggleConfig.TEKNISK_VEDLIKEHOLD_HENLEGGELSE.navn,
                 behandling.id,
             )
         } returns false

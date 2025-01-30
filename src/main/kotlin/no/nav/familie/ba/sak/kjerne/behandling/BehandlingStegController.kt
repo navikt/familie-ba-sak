@@ -2,8 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_VEDLIKEHOLD_HENLEGGELSE
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -180,13 +179,13 @@ class BehandlingStegController(
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniskVedlikeholdToggel = unleashService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE, behandling.id),
+            tekniskVedlikeholdToggel = unleashService.isEnabled(FeatureToggleConfig.TEKNISK_VEDLIKEHOLD_HENLEGGELSE.navn, behandling.id),
             behandlingId = behandling.id,
         )
 
         validerTilgangTilHenleggelseAvBehandling(
             behandling = behandling,
-            tekniskEndringToggle = unleashService.isEnabled(TEKNISK_ENDRING, behandling.id),
+            tekniskEndringToggle = unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING.navn, behandling.id),
         )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)

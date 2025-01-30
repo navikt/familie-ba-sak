@@ -473,7 +473,7 @@ class BrevService(
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
         val hjemler =
-            if (unleashService.isEnabled(FeatureToggleConfig.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV, false)) {
+            if (unleashService.isEnabled(FeatureToggleConfig.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV.navn, false)) {
                 hjemmeltekstUtleder.utledHjemmeltekst(
                     behandlingId = behandlingId,
                     vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
