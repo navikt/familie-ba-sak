@@ -190,21 +190,6 @@ class ForvalterController(
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
     }
 
-    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlinger/{fraÅrMåned}")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(
-        @PathVariable fraÅrMåned: YearMonth,
-    ): ResponseEntity<List<Pair<Long, String>>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Finn åpne fagsaker med flere migreringsbehandlinger",
-        )
-
-        val åpneFagsakerMedFlereMigreringsbehandlinger =
-            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned)
-        logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
-        return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlinger)
-    }
-
     @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])
     fun hentBegrunnelsetestPåBehandling(
         @PathVariable behandlingId: Long,

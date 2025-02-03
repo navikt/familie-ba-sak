@@ -10,7 +10,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -40,7 +39,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -157,12 +155,6 @@ class ForvalterService(
             }
         }
     }
-
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned: YearMonth): List<Pair<Long, String>> =
-        fagsakRepository
-            .finnFagsakerMedFlereMigreringsbehandlinger(
-                fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
-            ).map { Pair(it.fagsakId, it.fødselsnummer) }
 
     fun settFomPåVilkårTilPersonsFødselsdato(behandlingId: Long): Vilkårsvurdering {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
