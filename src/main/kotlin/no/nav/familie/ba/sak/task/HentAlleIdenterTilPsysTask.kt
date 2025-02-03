@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype.DATA
@@ -64,7 +64,7 @@ class HentAlleIdenterTilPsysTask(
         logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
         val identerFraInfotrygd =
             when {
-                envService.erPreprod() && !unleashNext.isEnabled(FeatureToggleConfig.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn) -> emptyList()
+                envService.erPreprod() && !unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn) -> emptyList()
                 else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
             }
         logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")

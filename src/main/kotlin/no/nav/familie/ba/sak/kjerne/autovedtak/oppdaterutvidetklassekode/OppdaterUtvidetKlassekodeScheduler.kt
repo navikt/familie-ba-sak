@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
@@ -22,8 +22,8 @@ class OppdaterUtvidetKlassekodeScheduler(
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggAutovedtakOppdaterUtvidetKlassekode() {
-        if (leaderClientService.isLeader() && unleashService.isEnabled(FeatureToggleConfig.OPPRETT_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_AUTOMATISK.navn)) {
-            if (unleashService.isEnabled(FeatureToggleConfig.AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_HØYT_VOLUM.navn)) {
+        if (leaderClientService.isLeader() && unleashService.isEnabled(FeatureToggle.OPPRETT_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_AUTOMATISK.navn)) {
+            if (unleashService.isEnabled(FeatureToggle.AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_HØYT_VOLUM.navn)) {
                 startAutovedtakOppdaterUtvidetKlassekode(1200)
             } else {
                 startAutovedtakOppdaterUtvidetKlassekode(100)

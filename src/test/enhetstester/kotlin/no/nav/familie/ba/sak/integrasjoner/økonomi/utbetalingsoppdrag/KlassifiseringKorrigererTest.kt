@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -42,7 +42,7 @@ class KlassifiseringKorrigererTest {
                 andeler = emptyList(),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns false
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns false
 
         // Act
         val justertUtbetalingsoppdrag =
@@ -75,7 +75,7 @@ class KlassifiseringKorrigererTest {
                 andeler = emptyList(),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns true
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns true
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns true
 
         // Act
@@ -109,7 +109,7 @@ class KlassifiseringKorrigererTest {
                 andeler = emptyList(),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns true
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns true
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
 
         // Act
@@ -172,7 +172,7 @@ class KlassifiseringKorrigererTest {
                     ),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns true
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn, behandling.id) } returns true
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
 
         // Act

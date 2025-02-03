@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -473,7 +473,7 @@ class BrevService(
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
         val hjemler =
-            if (unleashService.isEnabled(FeatureToggleConfig.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV.navn, false)) {
+            if (unleashService.isEnabled(FeatureToggle.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV.navn, false)) {
                 hjemmeltekstUtleder.utledHjemmeltekst(
                     behandlingId = behandlingId,
                     vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,

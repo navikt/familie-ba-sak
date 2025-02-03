@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -41,7 +41,7 @@ class TekniskEndringAvFødselshendelseTest(
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING.navn, "true")
+        System.setProperty(FeatureToggle.TEKNISK_ENDRING.navn, "true")
 
         val scenario =
             RestScenario(
