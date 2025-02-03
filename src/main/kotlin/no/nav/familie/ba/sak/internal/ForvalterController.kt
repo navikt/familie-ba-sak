@@ -122,25 +122,6 @@ class ForvalterController(
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
     }
 
-    @PostMapping(
-        path = ["/start-manuell-restart-av-smaabarnstillegg-jobb/skalOppretteOppgaver/{skalOppretteOppgaver}"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun triggManuellStartAvSmåbarnstillegg(
-        @PathVariable skalOppretteOppgaver: Boolean = true,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Trigg manuell start av småbarnstillegg",
-        )
-
-        restartAvSmåbarnstilleggService.finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(
-            skalOppretteOppgaver,
-        )
-        return ResponseEntity.ok("OK")
-    }
-
     private fun ferdigstillOppgave(oppgaveId: Long) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
