@@ -158,17 +158,6 @@ class ForvalterService(
         }
     }
 
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned: YearMonth): List<Pair<Long, String>> {
-        val løpendeFagsakerMedFlereMigreringsbehandlinger =
-            fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
-                fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
-            )
-
-        return løpendeFagsakerMedFlereMigreringsbehandlinger
-            .filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.fødselsnummer)) }
-            .map { Pair(it.fagsakId, it.fødselsnummer) }
-    }
-
     fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned: YearMonth): List<Pair<Long, String>> =
         fagsakRepository
             .finnFagsakerMedFlereMigreringsbehandlinger(
