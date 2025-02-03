@@ -266,6 +266,15 @@ private fun hentPersonerMedAndelHøyereEnn0IForrigePeriode(begrunnelsesGrunnlagP
                 .isNullOrEmpty()
         }.keys
 
+private fun hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson
+        .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+            val deltBostedIForrigePeriode = begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.endretUtbetalingAndel?.prosent == BigDecimal.valueOf(50)
+            val deltBostedIDennePerioden = begrunnelseGrunnlagForPersonIPeriode.dennePerioden?.endretUtbetalingAndel?.prosent == BigDecimal.valueOf(50)
+
+            deltBostedIForrigePeriode && !deltBostedIDennePerioden
+        }.keys
+
 private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson
         .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
@@ -306,6 +315,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMistetUtbetalingFraForrigeBehandling =
         hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
 
+    val barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne = hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGrunnlagPerPerson)
     val barnSomNåFårUtbetalingIPeriode = barnMedUtbetaling - barnMedUtbetalingHøyereEnn0IForrigeperiode
 
     return when {
@@ -344,7 +354,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson).keys.map { it.fødselsdato }
         }
 
-        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) -> barnSomNåFårUtbetalingIPeriode.map { it.fødselsdato }
+        erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) ->
+            (barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne + barnSomNåFårUtbetalingIPeriode).distinct().map { it.fødselsdato }
 
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
