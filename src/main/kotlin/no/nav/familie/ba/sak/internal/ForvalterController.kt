@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.OppdaterUtvidetKlassekodeTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.PopulerOppdaterUtvidetKlassekodeKjøringTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -72,7 +71,6 @@ import kotlin.concurrent.thread
 class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonClient: IntegrasjonClient,
-    private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
     private val testVerktøyService: TestVerktøyService,
