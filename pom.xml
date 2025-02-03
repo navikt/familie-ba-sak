@@ -47,7 +47,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
-        <unleash.version>9.3.2</unleash.version>
+        <unleash.version>10.0.0</unleash.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
