@@ -20,11 +20,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -37,14 +33,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
@@ -92,34 +85,6 @@ class ForvalterService(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId),
             saksbehandlerId = "VL",
         )
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun kjørForenkletSatsendringFor(fagsakId: Long) {
-        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-
-        val nyBehandling =
-            stegService.håndterNyBehandling(
-                NyBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                    søkersIdent = fagsak.aktør.aktivFødselsnummer(),
-                    skalBehandlesAutomatisk = true,
-                    fagsakId = fagsakId,
-                ),
-            )
-
-        val behandlingEtterVilkårsvurdering =
-            stegService.håndterVilkårsvurdering(nyBehandling)
-
-        val opprettetVedtak =
-            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterVilkårsvurdering,
-            )
-        behandlingService.oppdaterStatusPåBehandling(nyBehandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        val task =
-            IverksettMotOppdragTask.opprettTask(nyBehandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
-        taskRepository.save(task)
     }
 
     fun identifiserUtbetalingerOver100Prosent(callId: String) {

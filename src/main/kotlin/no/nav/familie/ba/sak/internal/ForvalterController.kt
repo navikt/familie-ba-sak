@@ -160,26 +160,6 @@ class ForvalterController(
         return ResponseEntity.ok("OK")
     }
 
-    @PostMapping("/kjor-satsendring-uten-validering")
-    @Transactional
-    fun kjørSatsendringFor(
-        @RequestBody fagsakListe: List<Long>,
-    ) {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Kjør satsendring uten validering",
-        )
-
-        fagsakListe.parallelStream().forEach { fagsakId ->
-            try {
-                logger.info("Kjører satsendring uten validering for $fagsakId")
-                forvalterService.kjørForenkletSatsendringFor(fagsakId)
-            } catch (e: Exception) {
-                logger.warn("Klarte ikke kjøre satsendring for fagsakId=$fagsakId", e)
-            }
-        }
-    }
-
     @PostMapping("/identifiser-utbetalinger-over-100-prosent")
     fun identifiserUtbetalingerOver100Prosent(): ResponseEntity<Pair<String, String>> {
         tilgangService.verifiserHarTilgangTilHandling(
