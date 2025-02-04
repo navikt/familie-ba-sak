@@ -30,13 +30,13 @@
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20241209130157_6873c2d</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250106092521_bcb342f</utbetalingsgenerator.version>
-        <cucumber.version>7.20.1</cucumber.version>
+        <cucumber.version>7.21.0</cucumber.version>
         <mockk.version>1.13.16</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.16</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.6.0</springdoc.version>
-        <sentry.version>8.0.0</sentry.version>
+        <sentry.version>8.1.0</sentry.version>
         <kotlinx.version>1.10.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -47,7 +47,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
-        <unleash.version>9.3.2</unleash.version>
+        <unleash.version>10.0.0</unleash.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>

@@ -441,6 +441,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetOvergangEosTilNasjonalSeparasjonsavtalen"
     },
+    INNVILGET_OVERGANG_EØS_TIL_NASJONAL_ALENEFORELDER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOvergangEosTilNasjonalAleneforelder"
+    },
     INNVILGET_FÅR_ETTERBETALT_UTVIDET_FOR_PRAKTISERT_DELT_BOSTED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetFaarEtterbetaltUtvidetForPraktisertDeltBosted"

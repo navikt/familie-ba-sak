@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.OppdaterUtvidetKlassekodeTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.PopulerOppdaterUtvidetKlassekodeKjøringTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -72,7 +71,6 @@ import kotlin.concurrent.thread
 class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonClient: IntegrasjonClient,
-    private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val ecbService: ECBService,
     private val testVerktøyService: TestVerktøyService,
@@ -122,25 +120,6 @@ class ForvalterController(
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
     }
 
-    @PostMapping(
-        path = ["/start-manuell-restart-av-smaabarnstillegg-jobb/skalOppretteOppgaver/{skalOppretteOppgaver}"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun triggManuellStartAvSmåbarnstillegg(
-        @PathVariable skalOppretteOppgaver: Boolean = true,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Trigg manuell start av småbarnstillegg",
-        )
-
-        restartAvSmåbarnstilleggService.finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(
-            skalOppretteOppgaver,
-        )
-        return ResponseEntity.ok("OK")
-    }
-
     private fun ferdigstillOppgave(oppgaveId: Long) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -179,26 +158,6 @@ class ForvalterController(
         return ResponseEntity.ok("OK")
     }
 
-    @PostMapping("/kjor-satsendring-uten-validering")
-    @Transactional
-    fun kjørSatsendringFor(
-        @RequestBody fagsakListe: List<Long>,
-    ) {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Kjør satsendring uten validering",
-        )
-
-        fagsakListe.parallelStream().forEach { fagsakId ->
-            try {
-                logger.info("Kjører satsendring uten validering for $fagsakId")
-                forvalterService.kjørForenkletSatsendringFor(fagsakId)
-            } catch (e: Exception) {
-                logger.warn("Klarte ikke kjøre satsendring for fagsakId=$fagsakId", e)
-            }
-        }
-    }
-
     @PostMapping("/identifiser-utbetalinger-over-100-prosent")
     fun identifiserUtbetalingerOver100Prosent(): ResponseEntity<Pair<String, String>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -227,35 +186,6 @@ class ForvalterController(
             throw Feil("Valutakode må ha store bokstaver og være tre bokstaver lang")
         }
         return ResponseEntity.ok(ecbService.hentValutakurs(valuta, dato))
-    }
-
-    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd/{fraÅrMåned}")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(
-        @PathVariable fraÅrMåned: YearMonth,
-    ): ResponseEntity<List<Pair<Long, String>>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Finn åpne fagsaker med flere migreringsbehandlinger og løpende sak i infotrygd",
-        )
-        val åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd =
-            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned)
-        logger.info("Følgende fagsaker har flere migreringsbehandlinger og løpende sak i Infotrygd: $åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd")
-        return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd)
-    }
-
-    @GetMapping("/finnÅpneFagsakerMedFlereMigreringsbehandlinger/{fraÅrMåned}")
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(
-        @PathVariable fraÅrMåned: YearMonth,
-    ): ResponseEntity<List<Pair<Long, String>>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Finn åpne fagsaker med flere migreringsbehandlinger",
-        )
-
-        val åpneFagsakerMedFlereMigreringsbehandlinger =
-            forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned)
-        logger.info("Følgende fagsaker har flere migreringsbehandlinger og løper i ba-sak: $åpneFagsakerMedFlereMigreringsbehandlinger")
-        return ResponseEntity.ok(åpneFagsakerMedFlereMigreringsbehandlinger)
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}/begrunnelsetest"])

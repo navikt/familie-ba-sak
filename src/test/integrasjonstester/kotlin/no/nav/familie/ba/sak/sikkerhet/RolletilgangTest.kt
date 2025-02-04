@@ -218,7 +218,7 @@ class RolletilgangTest(
                 header,
             )
 
-        val response = restTemplate.postForEntity<Ressurs<Any>>(hentUrl("/api/forvalter/kjor-satsendring-uten-validering"), requestEntity)
+        val response = restTemplate.postForEntity<String>(hentUrl("/api/forvalter/ferdigstill-oppgaver"), requestEntity)
 
         assertEquals(HttpStatus.OK, response.statusCode)
     }
