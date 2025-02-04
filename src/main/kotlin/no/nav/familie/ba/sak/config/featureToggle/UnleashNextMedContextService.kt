@@ -43,12 +43,13 @@ class UnleashNextMedContextService(
                 ),
         )
 
-    fun isEnabled(toggleId: String) = unleashService.isEnabled(
-        toggleId,
-        properties =
-            mapOf(
-                UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
-                UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
-            ),
-    )
+    fun isEnabled(toggleId: String) =
+        unleashService.isEnabled(
+            toggleId,
+            properties =
+                mapOf(
+                    UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
+                    UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
+                ),
+        )
 }
