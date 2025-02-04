@@ -44,7 +44,4 @@ class UnleashNextMedContextService(
         )
 
     fun isEnabled(toggleId: String) = unleashService.isEnabled(toggleId)
-
-
-
 }
