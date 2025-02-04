@@ -41,7 +41,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -63,7 +63,7 @@ class AutovedtakFødselshendelseService(
     private val statsborgerskapService: StatsborgerskapService,
     private val opprettTaskService: OpprettTaskService,
     private val oppgaveService: OppgaveService,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) : AutovedtakBehandlingService<FødselshendelseData> {
     val stansetIAutomatiskFiltreringCounter =
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
@@ -170,7 +170,7 @@ class AutovedtakFødselshendelseService(
                 )
             taskRepository.save(task)
 
-            if (unleashService.isEnabled(FeatureToggle.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM.navn, false)) {
+            if (unleashService.isEnabled(FeatureToggle.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM, false)) {
                 opprettFremleggsoppgaveDersomEØSMedlem(behandling)
             }
 

@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
@@ -24,7 +24,7 @@ class StartSatsendring(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
     private val satsendringService: SatsendringService,
@@ -35,7 +35,7 @@ class StartSatsendring(
     fun startSatsendring(
         antallFagsaker: Int,
     ) {
-        if (!unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET.navn, false)) {
+        if (!unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }

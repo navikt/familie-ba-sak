@@ -14,7 +14,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -31,7 +31,7 @@ class HentAlleIdenterTilPsysTask(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
-    private val unleashNext: UnleashService,
+    private val unleashNext: UnleashNextMedContextService,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
 
@@ -64,7 +64,7 @@ class HentAlleIdenterTilPsysTask(
         logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
         val identerFraInfotrygd =
             when {
-                envService.erPreprod() && !unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn) -> emptyList()
+                envService.erPreprod() && !unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
                 else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
             }
         logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")

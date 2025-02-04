@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -43,14 +43,14 @@ class PensjonService(
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
-    private val unleashNext: UnleashService,
+    private val unleashNext: UnleashNextMedContextService,
 ) {
     fun hentBarnetrygd(
         personIdent: String,
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
         secureLogger.info("Henter data til pensjon for personIdent=$personIdent fraDato=$fraDato")
-        if (envService.erPreprod() && unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn)) {
+        if (envService.erPreprod() && unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
             val barnetrygdTilPensjonFraInfotrygdQ = hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent, fraDato)
             if (barnetrygdTilPensjonFraInfotrygdQ.isNotEmpty()) {
                 return barnetrygdTilPensjonFraInfotrygdQ.distinct()
@@ -182,7 +182,7 @@ class PensjonService(
 
     private fun testidenter(
         fraDato: LocalDate,
-    ) = if (unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn)) {
+    ) = if (unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
         emptyList() // Skal egentlig ikke kunne havne her, tror jeg, siden hentBarnetrygd() i dette tilfellet skulle returnert på linje 54 for å unngå at det på linje 57 forsøkes å hente data fra pdl på en ident som ikke finnes der i testmiljø
     } else {
         listOfNotNull(

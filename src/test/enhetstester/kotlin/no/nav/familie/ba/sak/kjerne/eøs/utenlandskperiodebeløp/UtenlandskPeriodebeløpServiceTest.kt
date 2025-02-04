@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -27,7 +27,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnSkjemaRepository()
     val kompetanseRepository: KompetanseRepository = mockk()
-    val unleashService: UnleashService = mockk()
+    val unleashService: UnleashNextMedContextService = mockk()
 
     val utenlandskPeriodebeløpService =
         UtenlandskPeriodebeløpService(

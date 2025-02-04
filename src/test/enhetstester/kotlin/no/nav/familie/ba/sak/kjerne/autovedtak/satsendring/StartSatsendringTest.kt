@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -30,7 +30,7 @@ internal class StartSatsendringTest {
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
-    private val unleashService: UnleashService = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
     private val satsendringService: SatsendringService = mockk()
@@ -66,7 +66,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
-        every { unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET.navn, false) } returns true
+        every { unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false) } returns true
 
         val behandling = lagBehandling()
 
@@ -87,7 +87,7 @@ internal class StartSatsendringTest {
     @Test
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
         every { unleashService.isEnabled(any(), false) } returns true
-        every { unleashService.isEnabled(any()) } returns true
+        every { unleashService.isEnabled(any<FeatureToggle>()) } returns true
 
         val behandling = lagBehandling()
 

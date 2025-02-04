@@ -6,7 +6,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
@@ -20,10 +20,10 @@ import java.util.Properties
 )
 class OppdaterUtvidetKlassekodeTask(
     private val autovedtakOppdaterUtvidetKlassekodeService: AutovedtakOppdaterUtvidetKlassekodeService,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        if (!unleashService.isEnabled(FeatureToggle.KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn)) {
+        if (!unleashService.isEnabled(FeatureToggle.KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD)) {
             logger.info("Hopper ut av kjøring av migrering til ny klassekode for utvidet barnetrygd da toggle er skrudd av")
             return
         }

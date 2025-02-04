@@ -75,7 +75,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -103,7 +103,7 @@ class BrevService(
     private val valutakursRepository: ValutakursRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -473,7 +473,7 @@ class BrevService(
         val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
         val hjemler =
-            if (unleashService.isEnabled(FeatureToggle.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV.navn, false)) {
+            if (unleashService.isEnabled(FeatureToggle.BRUK_OMSKRIVING_AV_HJEMLER_I_BREV, false)) {
                 hjemmeltekstUtleder.utledHjemmeltekst(
                     behandlingId = behandlingId,
                     vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,

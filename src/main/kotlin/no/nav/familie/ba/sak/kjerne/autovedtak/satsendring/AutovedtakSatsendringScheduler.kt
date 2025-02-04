@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.LeaderClientService
-import no.nav.familie.unleash.UnleashService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service
 @Service
 class AutovedtakSatsendringScheduler(
     private val startSatsendring: StartSatsendring,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
     private val leaderClientService: LeaderClientService,
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendring() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_HØYT_VOLUM.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_HØYT_VOLUM, false)) {
             startSatsendring(1200)
         } else {
             startSatsendring(100)
@@ -24,14 +24,14 @@ class AutovedtakSatsendringScheduler(
 
     @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID)
     fun triggSatsendringUtenforArbeidstid() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_KVELD.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_KVELD, false)) {
             startSatsendring(1000)
         }
     }
 
     @Scheduled(cron = CRON_HVERT_5_MIN_LØRDAG)
     fun triggSatsendringLørdag() {
-        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_LØRDAG.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggle.SATSENDRING_LØRDAG, false)) {
             startSatsendring(1000)
         }
     }

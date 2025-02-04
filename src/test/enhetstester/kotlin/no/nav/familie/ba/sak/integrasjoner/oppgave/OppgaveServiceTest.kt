@@ -40,7 +40,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -58,7 +57,6 @@ class OppgaveServiceTest {
     private val mockedOpprettTaskService: OpprettTaskService = mockk()
     private val mockedLoggService: LoggService = mockk()
     private val mockedTilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
-    private val unleashService: UnleashService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
             integrasjonClient = mockedIntegrasjonClient,
@@ -69,7 +67,6 @@ class OppgaveServiceTest {
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
             tilpassArbeidsfordelingService = mockedTilpassArbeidsfordelingService,
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
-            unleashService = unleashService,
         )
 
     @Test
