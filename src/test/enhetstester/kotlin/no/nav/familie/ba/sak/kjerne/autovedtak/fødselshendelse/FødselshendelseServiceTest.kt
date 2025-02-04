@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -49,7 +50,6 @@ import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month

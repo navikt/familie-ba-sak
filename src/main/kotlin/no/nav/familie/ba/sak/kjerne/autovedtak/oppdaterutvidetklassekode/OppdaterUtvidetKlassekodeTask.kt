@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.Properties
