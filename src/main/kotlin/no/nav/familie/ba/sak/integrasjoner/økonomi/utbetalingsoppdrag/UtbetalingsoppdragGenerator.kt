@@ -47,7 +47,7 @@ class UtbetalingsoppdragGenerator(
 
         val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
+                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = vedtak.behandling.id,
             )
 
@@ -81,7 +81,7 @@ class UtbetalingsoppdragGenerator(
     ): Map<IdentOgType, AndelDataLongId> {
         val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
+                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = behandling.id,
             )
 
@@ -92,7 +92,7 @@ class UtbetalingsoppdragGenerator(
 
         val tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(behandling.fagsak.id)
 
-        return if (tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.isNotEmpty() && unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn)) {
+        return if (tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.isNotEmpty() && unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag,

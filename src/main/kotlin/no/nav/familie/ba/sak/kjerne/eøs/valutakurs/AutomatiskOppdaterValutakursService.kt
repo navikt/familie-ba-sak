@@ -111,7 +111,7 @@ class AutomatiskOppdaterValutakursService(
         endringstidspunkt: YearMonth,
     ) {
         val datoForPraksisEndringAutomatiskValutajustering =
-            if (unleashNextMedContextService.isEnabled(FeatureToggle.BYTT_VALUTAJUSTERING_DATO.navn)) {
+            if (unleashNextMedContextService.isEnabled(FeatureToggle.BYTT_VALUTAJUSTERING_DATO)) {
                 DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING
             } else {
                 YearMonth.of(2023, 1)
@@ -231,7 +231,7 @@ class AutomatiskOppdaterValutakursService(
         behandlingId: BehandlingId,
         nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
-        if (!unleashNextMedContextService.isEnabled(FeatureToggle.TEKNISK_ENDRING.navn)) {
+        if (!unleashNextMedContextService.isEnabled(FeatureToggle.TEKNISK_ENDRING)) {
             throw Feil("Relevante toggler for å overstyre vurderingsstrategi for valutakurser er ikke satt.")
         }
 

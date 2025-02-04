@@ -42,7 +42,7 @@ class SammensattKontrollsakController(
     fun hentSammensattKontrollsak(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestSammensattKontrollsak?>> {
-        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
@@ -62,7 +62,7 @@ class SammensattKontrollsakController(
     fun opprettSammensattKontrollsak(
         @RequestBody restOpprettSammensattKontrollsak: RestOpprettSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestSammensattKontrollsak>> {
-        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
@@ -84,7 +84,7 @@ class SammensattKontrollsakController(
     fun oppdaterSammensattKontrollsak(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<RestSammensattKontrollsak>> {
-        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 
@@ -105,7 +105,7 @@ class SammensattKontrollsakController(
     fun slettSammensattKontrollsak(
         @RequestBody restSammensattKontrollsak: RestSammensattKontrollsak,
     ): ResponseEntity<Ressurs<Long>> {
-        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER.navn)) {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_OG_ENDRE_SAMMENSATTE_KONTROLLSAKER)) {
             throw FunksjonellFeil(melding = ikkeTilgangFeilmelding)
         }
 

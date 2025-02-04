@@ -18,7 +18,7 @@ class KlassifiseringKorrigerer(
     ): BeregnetUtbetalingsoppdragLongId {
         // For fagsaker vi ikke har skrudd på ny klassekode for, returnerer vi det originale utbetalingsoppdraget.
         if (!unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
+                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = behandling.id,
             )
         ) {

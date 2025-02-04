@@ -105,14 +105,14 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
+                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = behandling.id,
             )
         } returns true
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn,
+                toggle = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
             )
         } returns true
 
@@ -244,14 +244,14 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
+                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = any(),
             )
         } returns true
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn,
+                toggle = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
             )
         } returns true
 
@@ -389,14 +389,14 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn,
+                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
                 behandlingId = any(),
             )
         } returns true
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggleId = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET.navn,
+                toggle = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
             )
         } returns true
 

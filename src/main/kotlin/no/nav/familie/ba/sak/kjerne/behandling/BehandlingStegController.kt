@@ -179,13 +179,13 @@ class BehandlingStegController(
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniskVedlikeholdToggel = unleashService.isEnabled(FeatureToggle.TEKNISK_VEDLIKEHOLD_HENLEGGELSE.navn, behandling.id),
+            tekniskVedlikeholdToggel = unleashService.isEnabled(FeatureToggle.TEKNISK_VEDLIKEHOLD_HENLEGGELSE, behandling.id),
             behandlingId = behandling.id,
         )
 
         validerTilgangTilHenleggelseAvBehandling(
             behandling = behandling,
-            tekniskEndringToggle = unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING.navn, behandling.id),
+            tekniskEndringToggle = unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, behandling.id),
         )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)

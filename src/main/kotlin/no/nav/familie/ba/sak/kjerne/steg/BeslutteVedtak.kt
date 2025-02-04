@@ -67,7 +67,7 @@ class BeslutteVedtak(
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
-            !unleashService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn, behandling.id)
+            !unleashService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)
         ) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn} false",
@@ -75,7 +75,7 @@ class BeslutteVedtak(
             )
         } else if (behandling.erTekniskEndring() &&
             !unleashService.isEnabled(
-                FeatureToggle.TEKNISK_ENDRING.navn,
+                FeatureToggle.TEKNISK_ENDRING,
                 behandling.id,
             )
         ) {

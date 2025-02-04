@@ -198,12 +198,12 @@ class OppdragSteg {
         } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
             unleashNextMedContextService.isEnabled(
-                any(),
-                any(),
+                any<FeatureToggle>(),
+                any<Long>(),
             )
         } answers {
-            val featureToggleId = firstArg<String>()
-            toggles[tilkjentYtelse.behandling.id]?.get(featureToggleId) ?: true
+            val featureToggle = firstArg<FeatureToggle>()
+            toggles[tilkjentYtelse.behandling.id]?.get(featureToggle.navn) ?: true
         }
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
             beregnetUtbetalingsoppdrag.values.any { beregnetUtbetalingsoppdrag ->

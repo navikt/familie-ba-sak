@@ -251,7 +251,7 @@ class BeslutteVedtakTest {
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
         every {
             unleashService.isEnabled(
-                FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn,
+                FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
                 any(),
             )
         } returns false
@@ -274,7 +274,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING.navn, any()) } returns false
+        every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any()) } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.config.featureToggle
 
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -14,13 +15,13 @@ class UnleashNextMedContextService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
 ) {
     fun isEnabled(
-        toggleId: String,
+        toggle: FeatureToggle,
         behandlingId: Long,
     ): Boolean {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         return unleashService.isEnabled(
-            toggleId,
+            toggle.navn,
             properties =
                 mapOf(
                     UnleashContextFields.FAGSAK_ID to behandling.fagsak.id.toString(),
@@ -32,13 +33,18 @@ class UnleashNextMedContextService(
         )
     }
 
-    fun isEnabled(toggleId: String): Boolean =
+    fun isEnabled(toggle: FeatureToggle): Boolean =
         unleashService.isEnabled(
-            toggleId,
+            toggle.navn,
             properties =
                 mapOf(
                     UnleashContextFields.NAV_IDENT to SikkerhetContext.hentSaksbehandler(),
                     UnleashContextFields.EPOST to SikkerhetContext.hentSaksbehandlerEpost(),
                 ),
         )
+
+    fun isEnabled(toggleId: String) = unleashService.isEnabled(toggleId)
+
+
+
 }
