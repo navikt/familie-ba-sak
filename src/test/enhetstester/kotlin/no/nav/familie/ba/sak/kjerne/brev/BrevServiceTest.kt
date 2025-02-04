@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -13,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +27,7 @@ import java.time.YearMonth
 class BrevServiceTest {
     val saksbehandlerContext = mockk<SaksbehandlerContext>()
     val brevmalService = mockk<BrevmalService>()
-    val unleashService = mockk<UnleashService>()
+    val unleashService = mockk<UnleashNextMedContextService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
@@ -61,7 +62,7 @@ class BrevServiceTest {
     @BeforeEach
     fun setUp() {
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-        every { unleashService.isEnabled(any()) } returns true
+        every { unleashService.isEnabled(any<FeatureToggle>()) } returns true
         every { hjemmeltekstUtleder.utledHjemmeltekst(any(), any(), any()) } returns "Hjemmel 1, 2, 3"
     }
 

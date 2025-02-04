@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-enum class FeatureToggleConfig(
+enum class FeatureToggle(
     val navn: String,
 ) {
     // Operasjonelle
