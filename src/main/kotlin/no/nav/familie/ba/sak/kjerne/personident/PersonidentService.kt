@@ -89,8 +89,9 @@ class PersonidentService(
             return aktørIdent
         }
 
+        secureLogger.info("Henter identer for ident=$ident")
         val identerFraPdl = hentIdenter(ident, false)
-        val fødselsnummerAktiv = identerFraPdl.hentAktivFødselsnummer(ident)
+        val fødselsnummerAktiv = identerFraPdl.hentAktivFødselsnummer()
         val aktørIdStr = identerFraPdl.hentAktivAktørId()
 
         val personidentPersistert = personidentRepository.findByFødselsnummerOrNull(fødselsnummerAktiv)
