@@ -17,10 +17,10 @@ data class IdentInformasjon(
     val gruppe: String,
 )
 
-fun List<IdentInformasjon>.hentAktivFødselsnummer(): String =
+fun List<IdentInformasjon>.hentAktivFødselsnummer(ident: String): String =
     this.singleOrNull { it.gruppe == Type.FOLKEREGISTERIDENT.name && !it.historisk }?.ident
         ?: run {
-            secureLogger.error("Finner ikke folkeregisterident i liste fra PDL: $this")
+            secureLogger.error("Finner ikke folkeregisterident i liste fra PDL: $this. Ident vi har gjort oppslag på: $ident")
             throw Error("Finner ikke folkeregisteriden i Pdl")
         }
 

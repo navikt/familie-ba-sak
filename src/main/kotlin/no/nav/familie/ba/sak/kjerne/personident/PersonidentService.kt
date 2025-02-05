@@ -90,7 +90,7 @@ class PersonidentService(
         }
 
         val identerFraPdl = hentIdenter(ident, false)
-        val fødselsnummerAktiv = identerFraPdl.hentAktivFødselsnummer()
+        val fødselsnummerAktiv = identerFraPdl.hentAktivFødselsnummer(ident)
         val aktørIdStr = identerFraPdl.hentAktivAktørId()
 
         val personidentPersistert = personidentRepository.findByFødselsnummerOrNull(fødselsnummerAktiv)
