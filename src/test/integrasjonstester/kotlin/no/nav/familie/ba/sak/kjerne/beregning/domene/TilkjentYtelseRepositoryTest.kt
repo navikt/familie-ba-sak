@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
@@ -35,7 +35,7 @@ class TilkjentYtelseRepositoryTest(
         fun `skal returnere true hvis klassifisering er BAUTV-OP`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
 
             tilkjentYtelseRepository.save(
@@ -57,7 +57,7 @@ class TilkjentYtelseRepositoryTest(
         fun `skal returnere false hvis klassifisering ikke er BAUTV-OP`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
 
             tilkjentYtelseRepository.save(
@@ -82,7 +82,7 @@ class TilkjentYtelseRepositoryTest(
         fun `skal returnere alle tilkjente ytelser tilknyttet fagsak`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
             val migreringsdatoPluss1Mnd = LocalDate.of(2025, 1, 1)
 
@@ -120,7 +120,7 @@ class TilkjentYtelseRepositoryTest(
         fun `skal returnere tom liste dersom det ikke er sendt opphør fra migreringsdato pluss 1 mnd tidligere`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
 
             // Act
             val tilkjenteYtelser =
