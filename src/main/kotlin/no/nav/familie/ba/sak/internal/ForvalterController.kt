@@ -302,7 +302,7 @@ class ForvalterController(
         description =
             "Dette endepunktet oppretter en ny rad i batch-tabellen for konsistensavstemming. " +
                 "Det vil også trigge en task for å kjøre avstemming mot oppdrag. " +
-                "Dryrun kan settes til true for å ikke trigge tasken"
+                "Dryrun kan settes til true for å ikke trigge tasken",
     )
     fun opprettKonsistensavstemmingsBatch(
         @PathVariable dryrun: Boolean = true,
