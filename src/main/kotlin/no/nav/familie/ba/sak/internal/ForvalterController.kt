@@ -15,6 +15,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.Batch
+import no.nav.familie.ba.sak.integrasjoner.økonomi.BatchService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.KjøreStatus
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
@@ -28,6 +31,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
+import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask
 import no.nav.familie.ba.sak.task.LogJournalpostIdForFagsakTask
 import no.nav.familie.ba.sak.task.MaskineltUnderkjennVedtakTask
@@ -37,9 +41,11 @@ import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
+import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -62,6 +68,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
+import java.util.Properties
 import java.util.UUID
 import kotlin.concurrent.thread
 
@@ -72,6 +79,7 @@ class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val forvalterService: ForvalterService,
+    private val batchService: BatchService,
     private val ecbService: ECBService,
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
@@ -285,6 +293,46 @@ class ForvalterController(
         val task = taskService.findById(taskId)
         if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) error("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
         opprettTaskService.opprettGrensesnittavstemMotOppdragTask(GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
+        return ResponseEntity.ok("Ok")
+    }
+
+    @PostMapping("/opprett-konsistensavstemmingsbatch/dryrun/{dryrun}")
+    @Operation(
+        summary = "Opprett konsistensavstemmings batch og trigg task for kjøring av avstemming mot oppdrag",
+        description =
+            "Dette endepunktet oppretter en ny rad i batch-tabellen for konsistensavstemming. " +
+                "Det vil også trigge en task for å kjøre avstemming mot oppdrag. " +
+                "Dryrun kan settes til true for å ikke trigge tasken"
+    )
+    fun opprettKonsistensavstemmingsBatch(
+        @PathVariable dryrun: Boolean = true,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett ny konsistensavstemmingsbatch",
+        )
+
+        val batch = batchService.batchRepository.save(Batch(id = 0, kjøreDato = LocalDate.now(), status = KjøreStatus.LEDIG))
+        if (!dryrun) {
+            val transaksjonsId = UUID.randomUUID()
+            taskRepository.save(
+                Task(
+                    type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE,
+                    payload =
+                        objectMapper.writeValueAsString(
+                            KonsistensavstemmingStartTaskDTO(
+                                batchId = batch.id,
+                                avstemmingdato = LocalDateTime.now(),
+                                transaksjonsId = transaksjonsId,
+                            ),
+                        ),
+                    properties =
+                        Properties().apply {
+                            this["transaksjonsId"] = transaksjonsId.toString()
+                        },
+                ),
+            )
+        }
         return ResponseEntity.ok("Ok")
     }
 
