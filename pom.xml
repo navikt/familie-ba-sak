@@ -29,7 +29,7 @@
         <felles-kontrakter.version>3.0_20250113155636_bb71360</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20241209130157_6873c2d</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250106092521_bcb342f</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20250206122712_9ec24df</utbetalingsgenerator.version>
         <cucumber.version>7.21.0</cucumber.version>
         <mockk.version>1.13.16</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
