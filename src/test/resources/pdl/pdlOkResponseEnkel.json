@@ -4,7 +4,11 @@
       "navn": [
         {
           "fornavn": "ENGASJERT",
-          "etternavn": "FYR"
+          "etternavn": "FYR",
+          "metadata": {
+            "master": "PDL",
+            "historisk": false
+          }
         }
       ],
       "foedselsdato": [
@@ -14,7 +18,11 @@
       ],
       "kjoenn": [
         {
-          "kjoenn": "MANN"
+          "kjoenn": "MANN",
+          "metadata": {
+            "master": "PDL",
+            "historisk": false
+          }
         }
       ],
       "bostedsadresse": [

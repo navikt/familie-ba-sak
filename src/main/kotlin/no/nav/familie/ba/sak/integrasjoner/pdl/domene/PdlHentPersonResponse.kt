@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -65,6 +66,7 @@ data class PdlNavn(
     val fornavn: String,
     val mellomnavn: String? = null,
     val etternavn: String,
+    val metadata: PdlMetadata,
 ) {
     fun fulltNavn(): String =
         when (mellomnavn) {
@@ -76,4 +78,49 @@ data class PdlNavn(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlKjoenn(
     val kjoenn: Kjønn,
+    val metadata: PdlMetadata,
 )
+
+data class PdlMetadata(
+    val master: String,
+    val historisk: Boolean,
+)
+
+fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? {
+    val funksjonelleNavn = this.filter { it.metadata.historisk == false }
+
+    return when (funksjonelleNavn.size) {
+        0 -> null
+        1 -> this.first()
+        else ->
+            this.find {
+                it.metadata.master == PdlMaster.PDL.navn
+            } ?: run {
+                secureLogger.error("Fikk flere navn fra PDL med samme master / kilde: $funksjonelleNavn")
+                throw IllegalStateException("Fikk flere navn fra PDL med samme master / kilde. Se securelogs for detaljer.")
+            }
+    }
+}
+
+fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? {
+    val funksjoneltKjønn = this.filter { it.metadata.historisk == false }
+
+    return when (funksjoneltKjønn.size) {
+        0 -> null
+        1 -> this.first()
+        else ->
+            this.find {
+                it.metadata.master == PdlMaster.PDL.navn
+            } ?: run {
+                secureLogger.error("Fikk flere kjønn fra PDL med samme master / kilde: $funksjoneltKjønn")
+                throw IllegalStateException("Fikk flere kjønn fra PDL med samme master / kilde. Se securelogs for detaljer.")
+            }
+    }
+}
+
+enum class PdlMaster(
+    val navn: String,
+) {
+    PDL(navn = "PDL"),
+    FREG(navn = "Freg"),
+}

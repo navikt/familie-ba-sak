@@ -1,0 +1,86 @@
+{
+  "data": {
+    "person": {
+      "folkeregisteridentifikator": [
+        {
+          "identifikasjonsnummer": "26528903613",
+          "status": "I_BRUK",
+          "type": "FNR"
+        },
+        {
+          "identifikasjonsnummer": "26528903613",
+          "status": "I_BRUK",
+          "type": "FNR"
+        }
+      ],
+      "foedselsdato": [
+        {
+          "foedselsdato": "1989-12-26"
+        }
+      ],
+      "navn": [
+        {
+          "fornavn": "UFUNKSJONELL",
+          "mellomnavn": null,
+          "etternavn": "NATUR",
+          "metadata": {
+            "master": "PDL",
+            "historisk": false
+          }
+        },
+        {
+          "fornavn": "FUNKSJONELL",
+          "mellomnavn": null,
+          "etternavn": "BYKJERNE",
+          "metadata": {
+            "master": "Freg",
+            "historisk": false
+          }
+        }
+      ],
+      "kjoenn": [
+        {
+          "kjoenn": "KVINNE",
+          "metadata": {
+            "master": "Freg",
+            "historisk": false
+          }
+        },
+        {
+          "kjoenn": "MANN",
+          "metadata": {
+            "master": "Freg",
+            "historisk": false
+          }
+        }
+      ],
+      "adressebeskyttelse": [],
+      "bostedsadresse": [
+        {
+          "angittFlyttedato": "1989-12-26",
+          "gyldigTilOgMed": null,
+          "vegadresse": {
+            "matrikkelId": 212261815,
+            "husnummer": "963",
+            "husbokstav": null,
+            "bruksenhetsnummer": null,
+            "adressenavn": "Østsideveien",
+            "kommunenummer": "1573",
+            "tilleggsnavn": "Vikan",
+            "postnummer": "6570"
+          },
+          "matrikkeladresse": null,
+          "ukjentBosted": null
+        }
+      ],
+      "sivilstand": [
+        {
+          "gyldigFraOgMed": "1989-12-26",
+          "type": "UGIFT"
+        }
+      ],
+      "doedsfall": [],
+      "kontaktinformasjonForDoedsbo": []
+    }
+  }
+}

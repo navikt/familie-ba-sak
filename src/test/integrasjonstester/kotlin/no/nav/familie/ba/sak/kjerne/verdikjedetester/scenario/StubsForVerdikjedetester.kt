@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKjoenn
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMetadata
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
@@ -202,9 +203,10 @@ private fun enkelPdlHentPersonResponse(scenarioPerson: RestScenarioPerson): PdlP
                     fornavn = scenarioPerson.fornavn,
                     mellomnavn = null,
                     etternavn = scenarioPerson.etternavn,
+                    metadata = PdlMetadata(master = "kilde", historisk = false),
                 ),
             ),
-        kjoenn = listOf(PdlKjoenn(kjoenn = Kjønn.KVINNE)),
+        kjoenn = listOf(PdlKjoenn(kjoenn = Kjønn.KVINNE, metadata = PdlMetadata(master = "kilde", historisk = false))),
         adressebeskyttelse = emptyList(),
         sivilstand = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
         bostedsadresse = scenarioPerson.bostedsadresser,
