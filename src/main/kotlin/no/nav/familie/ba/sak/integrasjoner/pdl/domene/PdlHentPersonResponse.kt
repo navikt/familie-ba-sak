@@ -85,17 +85,17 @@ data class PdlMetadata(
     val historisk: Boolean,
 )
 
-fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? {
-    val funksjonelleNavn = this.filter { it.metadata.historisk == false }
+// Filtrer på historisk slik at ikke-historiske alltid får prioritet
+fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? =
+    this
+        .filter { it.metadata.historisk == false }
+        .minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
 
-    return funksjonelleNavn.minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
-}
-
-fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? {
-    val funksjoneltKjønn = this.filter { it.metadata.historisk == false }
-
-    return funksjoneltKjønn.minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
-}
+// Filtrer på historisk slik at ikke-historiske alltid får prioritet
+fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? =
+    this
+        .filter { it.metadata.historisk == false }
+        .minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
 
 enum class PdlMaster(
     val prioritet: Int,
