@@ -37,8 +37,6 @@ object Behandlingutils {
         behandlingFørFølgende: Behandling,
     ): List<Behandling> =
         iverksatteBehandlinger
-            // Ønsker ikke ta med behandlinger av typen `OPPDATER_UTVIDET_KLASSEKODE` da disse inneholder kunstig splitt i andeler som kan skape 0-utbetalinger mot Oppdrag/Økonomisystemet.
-            .filter { !it.erOppdaterUtvidetKlassekode() }
             .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
 
     fun harBehandlingsårsakAlleredeKjørt(
