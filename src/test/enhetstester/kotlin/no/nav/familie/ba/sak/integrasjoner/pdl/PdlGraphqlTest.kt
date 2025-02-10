@@ -45,8 +45,9 @@ class PdlGraphqlTest {
                 .navn
                 .first()
                 .metadata
-                .master,
-        ).isEqualTo(PdlMaster.PDL.navn)
+                .master
+                .uppercase(),
+        ).isEqualTo(PdlMaster.PDL.name)
         assertThat(
             resp.data.person!!
                 .kjoenn

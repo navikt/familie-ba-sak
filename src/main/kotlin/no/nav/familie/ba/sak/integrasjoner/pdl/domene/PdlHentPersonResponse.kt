@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -89,38 +88,18 @@ data class PdlMetadata(
 fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? {
     val funksjonelleNavn = this.filter { it.metadata.historisk == false }
 
-    return when (funksjonelleNavn.size) {
-        0 -> null
-        1 -> this.first()
-        else ->
-            this.find {
-                it.metadata.master == PdlMaster.PDL.navn
-            } ?: run {
-                secureLogger.error("Fikk flere navn fra PDL med samme master / kilde: $funksjonelleNavn")
-                throw IllegalStateException("Fikk flere navn fra PDL med samme master / kilde. Se securelogs for detaljer.")
-            }
-    }
+    return funksjonelleNavn.minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
 }
 
 fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? {
     val funksjoneltKjønn = this.filter { it.metadata.historisk == false }
 
-    return when (funksjoneltKjønn.size) {
-        0 -> null
-        1 -> this.first()
-        else ->
-            this.find {
-                it.metadata.master == PdlMaster.PDL.navn
-            } ?: run {
-                secureLogger.error("Fikk flere kjønn fra PDL med samme master / kilde: $funksjoneltKjønn")
-                throw IllegalStateException("Fikk flere kjønn fra PDL med samme master / kilde. Se securelogs for detaljer.")
-            }
-    }
+    return funksjoneltKjønn.minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
 }
 
 enum class PdlMaster(
-    val navn: String,
+    val prioritet: Int,
 ) {
-    PDL(navn = "PDL"),
-    FREG(navn = "Freg"),
+    PDL(1),
+    FREG(2),
 }
