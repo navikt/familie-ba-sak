@@ -18,6 +18,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.random.Random
 
+/**
+ * Bruk denne for enhetstester hvor. Bruk lagBehandlingUtenId for integrasjonstester
+ */
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
@@ -45,6 +48,9 @@ fun lagBehandling(
     aktiv = aktiv,
 ).copy(id = id)
 
+/**
+ * Bruk denne for integrasjonstester hvor man ikke kan ha en predefinert id for å kunne lagre til DB. Bruk heller lagBehandling for enhetstester
+ */
 fun lagBehandlingUtenId(
     fagsak: Fagsak = defaultFagsak().copy(id = 0L),
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
