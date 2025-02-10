@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
@@ -28,7 +28,7 @@ internal class SendVedtakTilInfotrygdTaskTest {
 
     @Test
     fun `skal sende vedtak til infotrygd ved første gang behandling`() {
-        val behandling = lagBehandlingMedId(status = BehandlingStatus.AVSLUTTET)
+        val behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET)
         val fom = YearMonth.now().minusMonths(2)
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id) } returns lagAndelerMedFom(behandling, fom)
         val slot = slot<InfotrygdVedtakFeedDto>()

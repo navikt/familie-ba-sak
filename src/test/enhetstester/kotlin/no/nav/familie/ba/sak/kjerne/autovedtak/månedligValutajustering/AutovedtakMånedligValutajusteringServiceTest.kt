@@ -7,7 +7,7 @@ import io.mockk.unmockkStatic
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -46,7 +46,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster Feil hvis en annen enn nåværende måned blir sendt inn`() {
         every { localDateProvider.now() } returns LocalDate.now()
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandlingMedId()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
         every { valutaKursService.hentValutakurser(any()) } returns
             listOf(
                 Valutakurs(
@@ -84,7 +84,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster Feil hvis fagsakstatus ikke er løpende`() {
         val fagsak = defaultFagsak()
-        val behandling = lagBehandlingMedId(fagsak = fagsak)
+        val behandling = lagBehandling(fagsak = fagsak)
 
         every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
@@ -110,8 +110,8 @@ class AutovedtakMånedligValutajusteringServiceTest {
     @Test
     fun `utførMånedligValutajustering kaster RekjørSenereException hvis åpen behandling har status FATTER_VEDTAK`() {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
-        val behandling = lagBehandlingMedId(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
-        val åpenBehandling = lagBehandlingMedId(fagsak = fagsak, status = BehandlingStatus.FATTER_VEDTAK)
+        val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
+        val åpenBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.FATTER_VEDTAK)
         val klokkenSeksNesteVirkedag = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0)
 
         every { localDateProvider.now() } returns LocalDate.now()
@@ -144,8 +144,8 @@ class AutovedtakMånedligValutajusteringServiceTest {
         behandlingStatus: BehandlingStatus,
     ) {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
-        val behandling = lagBehandlingMedId(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
-        val åpenBehandling = lagBehandlingMedId(fagsak = fagsak, status = behandlingStatus)
+        val behandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.AVSLUTTET)
+        val åpenBehandling = lagBehandling(fagsak = fagsak, status = behandlingStatus)
         val nå = LocalDateTime.now()
 
         mockkStatic(LocalDateTime::class)

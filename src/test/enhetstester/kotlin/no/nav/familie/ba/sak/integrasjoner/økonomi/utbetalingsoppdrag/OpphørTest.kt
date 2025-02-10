@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsperiode
@@ -15,7 +15,7 @@ class OpphørTest {
         // Arrange
         val dagensDato = LocalDate.of(2024, 11, 1)
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val utbetalingsoppdrag =
             Utbetalingsoppdrag(
@@ -58,7 +58,7 @@ class OpphørTest {
         // Arrange
         val dagensDato = LocalDate.of(2024, 11, 1)
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val utbetalingsoppdrag =
             Utbetalingsoppdrag(
@@ -97,7 +97,7 @@ class OpphørTest {
     @Test
     fun `skal opprette opphør uten opphørsdato når utbetalingsperiodene er tom og det ikke er revurdering`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val utbetalingsoppdrag =
             Utbetalingsoppdrag(
@@ -123,7 +123,7 @@ class OpphørTest {
         val dagensDato = LocalDate.of(2024, 11, 1)
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
             )
 
@@ -169,7 +169,7 @@ class OpphørTest {
         val dagensDato = LocalDate.of(2024, 11, 1)
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
             )
 
@@ -211,7 +211,7 @@ class OpphørTest {
     fun `skal opprette opphør uten opphørsdato når utbetalingsperiodene er tom og det er revurdering`() {
         // Arrange
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
             )
 

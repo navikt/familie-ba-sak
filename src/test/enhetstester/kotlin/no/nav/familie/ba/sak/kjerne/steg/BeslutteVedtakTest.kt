@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBrevmottakerDb
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
@@ -84,7 +84,7 @@ class BeslutteVedtakTest {
             brevmottakerService = brevmottakerService,
         )
 
-    private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+    private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
@@ -100,7 +100,7 @@ class BeslutteVedtakTest {
             )
         } returns
             Totrinnskontroll(
-                behandling = lagBehandlingMedId(),
+                behandling = lagBehandling(),
                 saksbehandler = "Mock Saksbehandler",
                 saksbehandlerId = "Mock.Saksbehandler",
             )
@@ -115,7 +115,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal ferdigstille Godkjenne vedtak-oppgave ved Godkjent vedtak`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
@@ -139,7 +139,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal ferdigstille Godkjenne vedtak-oppgave og opprette Behandle Underkjent Vedtak-oppgave ved Underkjent vedtak`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
@@ -181,7 +181,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal ikke iverksette hvis det ikke er forskjell i utbetaling mellom nåværende og forrige andeler`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -221,7 +221,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal initiere nytt vedtak når vedtak ikke er godkjent`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
@@ -256,7 +256,7 @@ class BeslutteVedtakTest {
             )
         } returns false
 
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
@@ -276,7 +276,7 @@ class BeslutteVedtakTest {
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
         every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
 
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
@@ -295,7 +295,7 @@ class BeslutteVedtakTest {
     @Test
     fun `Skal feile ferdigstilling av Godkjenne vedtak-oppgave ved Godkjent vedtak når brevmottakerne er ugyldige`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)

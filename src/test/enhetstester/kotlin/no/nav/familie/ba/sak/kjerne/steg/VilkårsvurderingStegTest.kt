@@ -8,7 +8,7 @@ import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RealDateProvider
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -67,7 +67,7 @@ class VilkårsvurderingStegTest {
         )
 
     val behandling =
-        lagBehandlingMedId(
+        lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
         )
@@ -132,7 +132,7 @@ class VilkårsvurderingStegTest {
                 fødselsdato = LocalDate.now().minusMonths(2).withDayOfMonth(1),
             )
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vilkårsvurderingBygger =
             VilkårsvurderingBuilder<Måned>(behandling)
@@ -157,7 +157,7 @@ class VilkårsvurderingStegTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN)
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vilkårsvurderingBygger =
             VilkårsvurderingBuilder<Måned>(behandling)

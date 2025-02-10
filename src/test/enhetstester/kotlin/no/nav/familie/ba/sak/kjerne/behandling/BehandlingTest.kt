@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -17,7 +17,7 @@ class BehandlingTest {
     @Test
     fun `validerBehandling kaster feil hvis behandlingType og behandlingÅrsak ikke samsvarer ved teknisk endring`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.TEKNISK_ENDRING,
                 årsak = BehandlingÅrsak.SØKNAD,
             )
@@ -27,7 +27,7 @@ class BehandlingTest {
     @Test
     fun `validerBehandling kaster feil hvis man prøver å opprette revurdering uten andre vedtatte behandlinger`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.SØKNAD,
             )
@@ -37,14 +37,14 @@ class BehandlingTest {
     @Test
     fun `validerBehandling kaster ikke feil hvis man prøver å opprette revurdering med andre vedtatte behandlinger`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.SØKNAD,
             )
         assertDoesNotThrow {
             behandling.validerBehandlingstype(
                 sisteBehandlingSomErVedtatt =
-                    lagBehandlingMedId(
+                    lagBehandling(
                         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                         årsak = BehandlingÅrsak.SØKNAD,
                     ),
@@ -54,14 +54,14 @@ class BehandlingTest {
 
     @Test
     fun `erBehandlingMedVedtaksbrevutsending kan sende vedtaksbrev for ordinær førstegangsbehandling`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         assertTrue { behandling.erBehandlingMedVedtaksbrevutsending() }
     }
 
     @Test
     fun `erBehandlingMedVedtaksbrevutsending kan sende vedtaksbrev for ordinær revurdering`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             )
@@ -74,7 +74,7 @@ class BehandlingTest {
         årsak: BehandlingÅrsak,
     ) {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = årsak,
             )
@@ -84,7 +84,7 @@ class BehandlingTest {
     @Test
     fun `erBehandlingMedVedtaksbrevutsending kan ikke sende vedtaksbrev for teknisk endring`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.TEKNISK_ENDRING,
             )
         assertFalse { behandling.erBehandlingMedVedtaksbrevutsending() }
@@ -96,7 +96,7 @@ class BehandlingTest {
         årsak: BehandlingÅrsak,
     ) {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = årsak,
             )

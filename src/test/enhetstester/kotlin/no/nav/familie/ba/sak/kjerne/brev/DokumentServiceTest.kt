@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBrevmottakerDb
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -91,7 +91,7 @@ internal class DokumentServiceTest {
     fun `sendManueltBrev skal journalføre med brukerIdType ORGNR når fagsakType er INSTITUSJON`() {
         val avsenderMottaker = slot<AvsenderMottaker>()
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 Fagsak(
                     type = FagsakType.INSTITUSJON,
                     aktør = randomAktør(),
@@ -140,7 +140,7 @@ internal class DokumentServiceTest {
     @Test
     fun `sendManueltBrev skal journalføre uten eksplisitt AvsenderMottaker når mottaker er bruker`() {
         val avsenderMottaker = slot<AvsenderMottaker>()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { fagsakRepository.finnFagsak(any()) } returns behandling.fagsak
 
@@ -178,7 +178,7 @@ internal class DokumentServiceTest {
         val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
-            val behandling = lagBehandlingMedId()
+            val behandling = lagBehandling()
             val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
             val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
 
@@ -212,8 +212,8 @@ internal class DokumentServiceTest {
         val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
-            val behandling = lagBehandlingMedId()
-            val forrigeVedtatteBehandling = lagBehandlingMedId()
+            val behandling = lagBehandling()
+            val forrigeVedtatteBehandling = lagBehandling()
             val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
             val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
 
@@ -251,7 +251,7 @@ internal class DokumentServiceTest {
         val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
-            val behandling = lagBehandlingMedId()
+            val behandling = lagBehandling()
             val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
             val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
 
@@ -270,7 +270,7 @@ internal class DokumentServiceTest {
 
     @Test
     fun `sendManueltBrev skal sende manuelt brev til FULLMEKTIG og bruker som har FULLMEKTIG manuelt brev mottaker`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
@@ -407,7 +407,7 @@ internal class DokumentServiceTest {
     @Test
     fun `sendManueltBrev skal feile hvis den manuelle brevmottakeren er ugyldig`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val manueltBrevRequest = ManueltBrevRequest(brevmal = Brevmal.SVARTIDSBREV)
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 

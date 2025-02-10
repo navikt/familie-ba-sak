@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
@@ -44,7 +44,7 @@ class AutobrevStegServiceTest {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
-            lagBehandlingMedId(fagsak = fagsak).also {
+            lagBehandling(fagsak = fagsak).also {
                 it.status = BehandlingStatus.UTREDES
             }
 
@@ -67,7 +67,7 @@ class AutobrevStegServiceTest {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
-            lagBehandlingMedId(fagsak = fagsak).also {
+            lagBehandling(fagsak = fagsak).also {
                 it.status = BehandlingStatus.FATTER_VEDTAK
             }
 
@@ -98,7 +98,7 @@ class AutobrevStegServiceTest {
         val aktør = randomAktør()
         val fagsak = defaultFagsak(aktør)
         val behandling =
-            lagBehandlingMedId(fagsak = fagsak).also {
+            lagBehandling(fagsak = fagsak).also {
                 it.status = BehandlingStatus.IVERKSETTER_VEDTAK
             }
 

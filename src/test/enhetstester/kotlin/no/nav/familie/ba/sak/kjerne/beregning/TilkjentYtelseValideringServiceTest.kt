@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -55,7 +55,7 @@ class TilkjentYtelseValideringServiceTest {
         } answers {
             listOf(
                 TilkjentYtelse(
-                    behandling = lagBehandlingMedId(),
+                    behandling = lagBehandling(),
                     endretDato = LocalDate.now().minusYears(1),
                     opprettetDato = LocalDate.now().minusYears(1),
                 ),
@@ -67,7 +67,7 @@ class TilkjentYtelseValideringServiceTest {
     fun `Skal returnere false hvis ingen barn allerede mottar barnetrygd`() {
         Assertions.assertFalse(
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
-                behandling = lagBehandlingMedId(),
+                behandling = lagBehandling(),
                 barna = listOf(barn1, barn2),
             ),
         )
@@ -77,7 +77,7 @@ class TilkjentYtelseValideringServiceTest {
     fun `Skal returnere true hvis det løper barnetrygd for minst ett barn`() {
         Assertions.assertTrue(
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
-                behandling = lagBehandlingMedId(),
+                behandling = lagBehandling(),
                 barna = listOf(barn1, barn3MedUtbetalinger),
             ),
         )
@@ -85,7 +85,7 @@ class TilkjentYtelseValideringServiceTest {
 
     @Test
     fun `Skal returnere liste med personer som har etterbetaling som er mer enn 3 år tilbake i tid`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val person1 = tilfeldigPerson()
         val person2 = tilfeldigPerson()
 
@@ -111,7 +111,7 @@ class TilkjentYtelseValideringServiceTest {
                     ),
             )
 
-        val forrigeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
 
         val forrigeTilkjentYtelse =
             TilkjentYtelse(

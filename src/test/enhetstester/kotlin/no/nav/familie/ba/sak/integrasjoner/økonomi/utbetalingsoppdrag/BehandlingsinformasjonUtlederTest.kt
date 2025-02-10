@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
@@ -45,7 +45,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -101,7 +101,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -157,7 +157,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -216,7 +216,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -287,7 +287,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -358,7 +358,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -414,7 +414,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -476,7 +476,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -530,7 +530,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -577,7 +577,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -618,7 +618,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -674,7 +674,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 
@@ -730,7 +730,7 @@ class BehandlingsinformasjonUtlederTest {
             )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
             )
 

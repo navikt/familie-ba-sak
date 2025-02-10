@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
-    val behandling = lagBehandlingMedId()
+    val behandling = lagBehandling()
     val tilkjentYtelse =
         TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
     val beløp = BigDecimal(100)

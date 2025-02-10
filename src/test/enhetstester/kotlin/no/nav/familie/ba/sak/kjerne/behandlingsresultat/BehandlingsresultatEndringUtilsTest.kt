@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -195,8 +195,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i kompetanse`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
 
         val barnPerson = lagPerson(aktør = barn1Aktør)
 
@@ -979,8 +979,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere false når ingenting endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1006,8 +1006,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere true når søkers aktivitetsland endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1036,8 +1036,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere true når søkers aktivitet endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1068,8 +1068,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere true når annen forelders aktivitetsland endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1100,8 +1100,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere true når annen forelders aktivitet endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1132,8 +1132,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere true når barnets bostedsland endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1162,8 +1162,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere true når resultat på kompetansen endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1194,8 +1194,8 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere false når det kun blir lagt på en ekstra kompetanseperiode`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -1541,7 +1541,7 @@ class BehandlingsresultatEndringUtilsTest {
         aktør: Aktør,
     ): PersonResultat {
         val vilkårsvurdering =
-            lagVilkårsvurdering(behandling = lagBehandlingMedId(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
+            lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)
 
         personResultat.setSortedVilkårResultater(vilkårResultater)

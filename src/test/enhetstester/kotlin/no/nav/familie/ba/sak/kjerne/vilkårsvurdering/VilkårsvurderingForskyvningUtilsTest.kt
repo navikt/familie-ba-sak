@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -467,7 +467,7 @@ class VilkårsvurderingForskyvningUtilsTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(
                 søkerAktør = søker.aktør,
-                behandling = lagBehandlingMedId(),
+                behandling = lagBehandling(),
                 resultat = Resultat.OPPFYLT,
             )
 

@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -59,7 +59,7 @@ internal class StegServiceTest {
 
     @BeforeEach
     fun setup() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(any(), any()) } returns behandling
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
@@ -68,7 +68,7 @@ internal class StegServiceTest {
     @Test
     fun `skal IKKE feile validering av helmanuell migrering når fagsak har aktivt vedtak som er et opphør`() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
-            lagBehandlingMedId()
+            lagBehandling()
 
         every { behandlingService.erLøpende(any()) } returns false
 
@@ -91,7 +91,7 @@ internal class StegServiceTest {
     @Test
     fun `skal feile validering av helmanuell migrering når fagsak har aktivt vedtak med løpende utbetalinger`() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
-            lagBehandlingMedId()
+            lagBehandling()
 
         every { behandlingService.erLøpende(any()) } returns true
 
@@ -176,7 +176,7 @@ internal class StegServiceTest {
 
     @Test
     fun `Skal feile dersom behandlingen er satt på vent`() {
-        val behandling = lagBehandlingMedId(status = BehandlingStatus.SATT_PÅ_VENT)
+        val behandling = lagBehandling(status = BehandlingStatus.SATT_PÅ_VENT)
         val grunnlag = RegistrerPersongrunnlagDTO("", emptyList())
         assertThatThrownBy { stegService.håndterPersongrunnlag(behandling, grunnlag) }
             .hasMessageContaining("er på vent")

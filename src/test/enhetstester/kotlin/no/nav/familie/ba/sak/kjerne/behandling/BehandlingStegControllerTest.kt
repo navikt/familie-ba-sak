@@ -7,7 +7,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -31,7 +31,7 @@ class BehandlingStegControllerTest {
 
     @Test
     fun `Skal kaste feil hvis saksbehandler uten teknisk endring-tilgang prøver å henlegge en behandling med årsak=teknisk endring`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
 
         every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, behandling.id) } returns false
         every {

@@ -9,7 +9,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -65,8 +65,8 @@ class PersongrunnlagServiceTest {
         val barnFnr = barn.aktør.aktivFødselsnummer()
         val søkerFnr = søker.aktør.aktivFødselsnummer()
 
-        val forrigeBehandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val forrigeBehandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val forrigeBehandlingPersongrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -123,7 +123,7 @@ class PersongrunnlagServiceTest {
         val barnet = lagPerson()
         val behandlinger =
             listOf(FagsakType.INSTITUSJON, FagsakType.BARN_ENSLIG_MINDREÅRIG).map { fagsakType ->
-                lagBehandlingMedId(fagsak = defaultFagsak().copy(type = fagsakType))
+                lagBehandling(fagsak = defaultFagsak().copy(type = fagsakType))
             }
         behandlinger.forEach { behandling ->
             val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
@@ -160,7 +160,7 @@ class PersongrunnlagServiceTest {
         val dødsfallsDato = LocalDate.of(2020, 10, 10)
         val person = lagPerson(fødselsdato = dødsfallsDato.plusMonths(10))
         val personFnr = person.aktør.aktivFødselsnummer()
-        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -193,7 +193,7 @@ class PersongrunnlagServiceTest {
             }
 
         val personFnr = person.aktør.aktivFødselsnummer()
-        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -223,7 +223,7 @@ class PersongrunnlagServiceTest {
         val person = lagPerson(fødselsdato = dødsfallsDato.minusMonths(10))
 
         val personFnr = person.aktør.aktivFødselsnummer()
-        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(

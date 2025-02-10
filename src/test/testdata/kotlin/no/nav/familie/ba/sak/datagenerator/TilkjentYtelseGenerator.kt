@@ -18,7 +18,7 @@ fun lagAndelTilkjentYtelse(
     tom: YearMonth,
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     beløp: Int = sats(ytelseType),
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
     aktør: Aktør = person.aktør,
     periodeIdOffset: Long? = null,
@@ -55,7 +55,7 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
     tom: YearMonth,
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     beløp: Int = sats(ytelseType),
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
     aktør: Aktør = person.aktør,
     periodeIdOffset: Long? = null,
@@ -91,7 +91,7 @@ fun lagAndelTilkjentYtelseUtvidet(
     tom: String,
     ytelseType: YtelseType,
     beløp: Int = sats(ytelseType),
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigSøker(),
     periodeIdOffset: Long? = null,
     forrigeperiodeIdOffset: Long? = null,
@@ -113,7 +113,7 @@ fun lagAndelTilkjentYtelseUtvidet(
     )
 
 fun lagTilkjentYtelse(
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     stønadFom: YearMonth? = YearMonth.now(),
     stønadTom: YearMonth? = YearMonth.now(),
     opphørFom: YearMonth? = YearMonth.now(),
@@ -141,7 +141,7 @@ fun lagTilkjentYtelse(
 }
 
 fun lagInitiellTilkjentYtelse(
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     utbetalingsoppdrag: String? = null,
 ): TilkjentYtelse =
     TilkjentYtelse(

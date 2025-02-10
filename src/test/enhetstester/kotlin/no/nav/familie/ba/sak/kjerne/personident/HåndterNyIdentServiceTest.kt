@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -70,7 +70,7 @@ internal class HåndterNyIdentServiceTest {
         val nyttFnr = randomFnr(nyFødselsdato)
         val nyAktør = tilAktør(nyttFnr)
 
-        var gammelBehandling = lagBehandlingMedId()
+        var gammelBehandling = lagBehandling()
 
         val identInformasjonFraPdl =
             listOf(
@@ -302,7 +302,7 @@ internal class HåndterNyIdentServiceTest {
                 pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
             } returns PersonInfo(fødselsdato = fødselsdato)
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandlingMedId()
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
 
             every { persongrunnlagService.hentAktiv(any()) } returns
                 PersonopplysningGrunnlag(
@@ -461,7 +461,7 @@ internal class HåndterNyIdentServiceTest {
                 pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
             } returns PersonInfo(fødselsdato = fødselsdato.minusMonths(2))
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandlingMedId()
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
 
             every { persongrunnlagService.hentAktiv(any()) } returns
                 PersonopplysningGrunnlag(

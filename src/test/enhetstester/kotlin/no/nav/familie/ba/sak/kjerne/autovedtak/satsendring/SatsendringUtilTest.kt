@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -128,7 +128,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere true hvis den har siste satsendring`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val atyMedBareSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.SMA,
@@ -178,7 +178,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere false hvis den har gammel satsendring`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val atyMedUgyldigSatsSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.SMA,
@@ -226,7 +226,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere false en av satsene ikke er ny`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val atyMedUgyldigSatsSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
                 SatsType.SMA,
@@ -260,7 +260,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere true på ytelse med rett sats når tom dato er på samme dato som satstidspunkt`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val atySomGårUtPåSatstidspunktGyldig =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
@@ -292,7 +292,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere true hvis ingen aktive andel tilkjent ytelser`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(10),
@@ -310,7 +310,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere true for ny sats når fom er på satstidspunktet`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
@@ -328,7 +328,7 @@ class SatsendringUtilTest {
 
     @Test
     fun `harAlleredeSatsendring skal returnere false for gammel sats når fom er på satstidspunktet`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = datoForSisteSatsendringForSatsType(SatsType.ORBA),

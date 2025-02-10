@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.hamcrest.CoreMatchers
@@ -29,7 +29,7 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `finnAktivtKorrigertVedtakPåBehandling skal hente aktivt korrigert vedtak fra repository hvis det finnes`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertVedtak = lagKorrigertVedtak(behandling)
 
         every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) } returns korrigertVedtak
@@ -46,7 +46,7 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `lagreKorrigertVedtak skal lagre korrigert vedtak på behandling og logg på dette`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertVedtak = lagKorrigertVedtak(behandling)
 
         every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) } returns null
@@ -70,7 +70,7 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `lagreKorrigertVedtak skal sette og lagre forrige korrigert vedtak til inaktivt hvis det finnes tidligere korrigering`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val forrigeKorrigering = mockk<KorrigertVedtak>(relaxed = true)
         val korrigertVedtak = lagKorrigertVedtak(behandling, vedtaksdato = LocalDate.now().minusDays(3))
 
@@ -89,7 +89,7 @@ internal class KorrigertVedtakServiceTest {
 
     @Test
     fun `settKorrigertVedtakPåBehandlingTilInaktiv skal sette korrigert vedtak til inaktivt hvis det finnes`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertVedtak = mockk<KorrigertVedtak>(relaxed = true)
 
         every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(any()) } returns korrigertVedtak

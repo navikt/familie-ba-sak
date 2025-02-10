@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
 import org.assertj.core.api.Assertions.assertThat
@@ -25,7 +25,7 @@ class KlassifiseringKorrigererTest {
     @Test
     fun `skal returnere originalt utbetalingsoppdrag dersom toggle er av for fagsak`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 utbetalingsperioder =
@@ -58,7 +58,7 @@ class KlassifiseringKorrigererTest {
     @Test
     fun `skal returnere originalt utbetalingsoppdrag dersom fagsak er over på ny klassekode`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 utbetalingsperioder =
@@ -92,7 +92,7 @@ class KlassifiseringKorrigererTest {
     @Test
     fun `skal returnere originalt utbetalingsoppdrag dersom behandling ikke inneholder et opphør av utvidet barnetrygd`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 utbetalingsperioder =
@@ -126,7 +126,7 @@ class KlassifiseringKorrigererTest {
     @Test
     fun `skal erstatte klassekode for periode med opphør av utvidet barnetrygd når toggle er på og fagsak ikke er over på ny klassekode`() {
         // Arrange
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val beregnetUtbetalingsoppdragLongId =
             lagBeregnetUtbetalingsoppdragLongId(
                 utbetalingsperioder =

@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
@@ -49,7 +49,7 @@ class PatchMergetIdentTaskTest {
     private val gammelAktør = tilAktør(randomFnr())
     private val nyAktør = tilAktør(randomFnr())
     private val fagsak = defaultFagsak()
-    private val behandling = lagBehandlingMedId(fagsak)
+    private val behandling = lagBehandling(fagsak)
     private val søkerAktør = fagsak.aktør
     private val personopplysningGrunnlag =
         lagTestPersonopplysningGrunnlag(

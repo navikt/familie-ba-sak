@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
@@ -119,9 +119,9 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal finne ut at omregningsbehandling allerede har kjørt inneværende måned`() {
-        val fgb = lagBehandlingMedId()
+        val fgb = lagBehandling()
         val omregning6År =
-            lagBehandlingMedId(
+            lagBehandling(
                 årsak = BehandlingÅrsak.OMREGNING_18ÅR,
             )
         val behandlingsårsakHarAlleredeKjørt =
@@ -136,7 +136,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal finne ut at omregningsbehandling ikke har kjørt inneværende måned`() {
-        val fgb = lagBehandlingMedId()
+        val fgb = lagBehandling()
         val behandlingsårsakHarAlleredeKjørt =
             Behandlingutils.harBehandlingsårsakAlleredeKjørt(
                 behandlingÅrsak = BehandlingÅrsak.OMREGNING_18ÅR,
@@ -149,7 +149,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal kaste feil etter at vedtaksbrev er distribuert`() {
-        val fgb = lagBehandlingMedId()
+        val fgb = lagBehandling()
         fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
             BehandlingStegTilstand(
@@ -164,7 +164,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal kaste feil etter iverksetting mot økonomi`() {
-        val fgb = lagBehandlingMedId()
+        val fgb = lagBehandling()
         fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
             BehandlingStegTilstand(
@@ -179,7 +179,7 @@ class BehandlingUtilsTest {
 
     @Test
     fun `Skal kaste feil etter at brev er journalført`() {
-        val fgb = lagBehandlingMedId()
+        val fgb = lagBehandling()
         fgb.behandlingStegTilstand.clear()
         fgb.behandlingStegTilstand.add(
             BehandlingStegTilstand(

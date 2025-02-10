@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import kotlin.random.Random
 
 fun lagVedtak(
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
     vedtaksdato: LocalDateTime? = LocalDateTime.now(),
     id: Long = Random.nextLong(10000000),

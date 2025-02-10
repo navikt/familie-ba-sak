@@ -6,7 +6,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -45,10 +45,10 @@ class SendMeldingTilBisysTaskTest {
         val listenableFutureMock = mockk<CompletableFuture<SendResult<String, String>>>()
         val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
 
-        val forrigeBehandling = lagBehandlingMedId(fagsak = defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
+        val forrigeBehandling = lagBehandling(fagsak = defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
 
         val nyBehandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = forrigeBehandling.fagsak,
                 resultat = Behandlingsresultat.OPPHØRT,
                 førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG,

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -87,7 +87,7 @@ class UtbetalingsperiodeUtilTest {
                 ),
             )
 
-        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val personResultater =
             setOf(
                 vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
@@ -168,7 +168,7 @@ class UtbetalingsperiodeUtilTest {
                 ),
             )
 
-        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val personResultater =
             setOf(
                 vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
@@ -227,7 +227,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(
                 søkerAktør = søker.aktør,
-                behandling = lagBehandlingMedId(),
+                behandling = lagBehandling(),
                 resultat = Resultat.OPPFYLT,
             )
 
@@ -436,7 +436,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(
                 søkerAktør = søker.aktør,
-                behandling = lagBehandlingMedId(),
+                behandling = lagBehandling(),
                 resultat = Resultat.OPPFYLT,
             )
 

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -60,7 +60,7 @@ class TilgangServiceTest {
         )
 
     private val fagsak = defaultFagsak()
-    private val behandling = lagBehandlingMedId(fagsak)
+    private val behandling = lagBehandling(fagsak)
     private val aktør = fagsak.aktør
     private val personopplysningGrunnlag =
         lagTestPersonopplysningGrunnlag(

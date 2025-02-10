@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
@@ -126,7 +126,7 @@ class OppdragSteg {
                 .groupByBehandlingId()
                 .mapValues {
                     it.value
-                        .map { entry: Map<String, String> -> BehandlingMigreringsinfo(behandling = lagBehandlingMedId(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
+                        .map { entry: Map<String, String> -> BehandlingMigreringsinfo(behandling = lagBehandling(id = it.key), migreringsdato = parseÅrMåned(entry[Domenebegrep.ENDRET_MIGRERINGSDATO.nøkkel]!!).toLocalDate()) }
                         .single()
                 }.toMutableMap()
     }
@@ -309,7 +309,7 @@ class OppdragSteg {
                 .groupByBehandlingId()
                 .mapValues {
                     val sisteRad = it.value.last()
-                    lagBehandlingMedId(
+                    lagBehandling(
                         id = it.key,
                         fagsak = fagsak,
                         behandlingType =

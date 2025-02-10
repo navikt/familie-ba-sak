@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
@@ -17,8 +17,8 @@ class EndringIKompetanseUtilTest {
 
     @Test
     fun `Endring i kompetanse - skal ikke returnere noen endrede perioder når ingenting endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -48,8 +48,8 @@ class EndringIKompetanseUtilTest {
 
     @Test
     fun `Endring i kompetanse - skal returnere endret periode når søkers aktivitetsland endrer seg`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -85,8 +85,8 @@ class EndringIKompetanseUtilTest {
 
     @Test
     fun `Endring i kompetanse - skal ikke lage endret periode når det kun blir lagt på en ekstra kompetanseperiode`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,
@@ -122,8 +122,8 @@ class EndringIKompetanseUtilTest {
 
     @Test
     fun `Endring i kompetanse - skal ikke lage endret periode når forrige kompetanse ikke er utfylt (pga migrering+ evt autovedtak)`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nåværendeBehandling = lagBehandlingMedId()
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
                 behandlingId = forrigeBehandling.id,

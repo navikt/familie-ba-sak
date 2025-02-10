@@ -7,7 +7,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -33,14 +33,14 @@ internal class BrevmalServiceTest {
 
     @Test
     fun `hentBrevmal skal returnere VEDTAK_OPPHØR_DØDSFALL dersom behandlingårsak er DØDSFALL_BRUKER`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
 
         assertThat(brevmalService.hentBrevmal(behandling), Is(Brevmal.VEDTAK_OPPHØR_DØDSFALL))
     }
 
     @Test
     fun `hentBrevmal skal returnere VEDTAK_KORREKSJON_VEDTAKSBREV dersom behandlingårsak er KORREKSJON_VEDTAKSBREV`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
 
         assertThat(brevmalService.hentBrevmal(behandling), Is(Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV))
     }
@@ -48,7 +48,7 @@ internal class BrevmalServiceTest {
     @Test
     fun `hentVedtaksbrevmal skal kaste feil dersom behandling har status IKKE_VURDERT`() {
         val behandling =
-            lagBehandlingMedId(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)
+            lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)
 
         assertThrows<Feil> {
             brevmalService.hentVedtaksbrevmal(behandling)

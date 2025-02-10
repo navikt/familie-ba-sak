@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -381,7 +381,7 @@ class EndringIVilkårsvurderingUtilTest {
         aktør: Aktør,
     ): PersonResultat {
         val vilkårsvurdering =
-            lagVilkårsvurdering(behandling = lagBehandlingMedId(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
+            lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)
 
         personResultat.setSortedVilkårResultater(vilkårResultater)

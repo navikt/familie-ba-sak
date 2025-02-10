@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling.domene
 
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -18,7 +18,7 @@ import java.time.YearMonth
 internal class EndretUtbetalingAndelTest {
     @Test
     fun `Sjekk validering med tomme felt`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
         endretUtbetalingAndel.begrunnelse = ""
 
@@ -29,7 +29,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering for delt bosted med tomt felt avtaletidpunkt`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
@@ -47,7 +47,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Sjekk validering for delt bosted med ikke tomt felt avtaletidpunkt`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
@@ -64,7 +64,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Skal sette tom til siste måned med andel tilkjent ytelse hvis tom er null og det ikke finnes noen andre endringsperioder`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
@@ -107,7 +107,7 @@ internal class EndretUtbetalingAndelTest {
 
     @Test
     fun `Skal sette tom til måneden før neste endringsperiode`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(

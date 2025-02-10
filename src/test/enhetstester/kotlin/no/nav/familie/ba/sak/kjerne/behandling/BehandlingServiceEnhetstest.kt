@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -76,7 +76,7 @@ class BehandlingServiceEnhetstest {
 
     @Test
     fun `erLøpende - skal returnere true dersom det finnes andeler i en behandling hvor tom er etter YearMonth now`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
             listOf(
@@ -89,7 +89,7 @@ class BehandlingServiceEnhetstest {
 
     @Test
     fun `erLøpende - skal returnere false dersom det finnes andeler i en behandling hvor tom er det samme som YearMonth now`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
             listOf(
@@ -102,7 +102,7 @@ class BehandlingServiceEnhetstest {
 
     @Test
     fun `erLøpende - skal returnere false dersom alle andeler i en behandling har tom før YearMonth now`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
             listOf(

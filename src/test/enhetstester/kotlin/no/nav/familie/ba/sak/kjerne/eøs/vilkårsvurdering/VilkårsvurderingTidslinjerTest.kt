@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -27,7 +27,7 @@ internal class VilkårsvurderingTidslinjerTest {
         val barn2Fnr = randomFnr()
         val barnaFnr = listOf(barnFnr, barn2Fnr)
 
-        val defaultBehandling = lagBehandlingMedId(defaultFagsak())
+        val defaultBehandling = lagBehandling(defaultFagsak())
         val vilkårsvurdering =
             Vilkårsvurdering(
                 behandling = defaultBehandling,
@@ -77,7 +77,7 @@ internal class VilkårsvurderingTidslinjerTest {
         val barn2Fnr = randomFnr()
         val barnaFnr = listOf(barnFnr, barn2Fnr)
 
-        val defaultBehandling = lagBehandlingMedId(defaultFagsak())
+        val defaultBehandling = lagBehandling(defaultFagsak())
         val vilkårsvurdering =
             Vilkårsvurdering(
                 behandling = defaultBehandling,
@@ -125,7 +125,7 @@ internal class VilkårsvurderingTidslinjerTest {
         periodeFom: LocalDate? = LocalDate.of(2009, 12, 24),
         periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
         begrunnelse: String = "",
-        behandlingId: Long = lagBehandlingMedId().id,
+        behandlingId: Long = lagBehandling().id,
         utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     ) = VilkårResultat(
         id = id,

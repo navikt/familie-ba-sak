@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEØSBegrunnelse
 import no.nav.familie.ba.sak.datagenerator.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.datagenerator.lagSanityEøsBegrunnelse
@@ -62,7 +62,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -135,7 +135,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -206,7 +206,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -278,7 +278,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperiodeMedBegrunnelser =
             lagVedtaksperiodeMedBegrunnelser(
@@ -343,7 +343,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -414,7 +414,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns true
         every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB
@@ -453,7 +453,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -525,7 +525,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -624,7 +624,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -724,7 +724,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -824,7 +824,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -923,7 +923,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -1026,7 +1026,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -1110,7 +1110,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val vedtaksperioderMedBegrunnelser =
             listOf(
@@ -1194,7 +1194,7 @@ class HjemmeltekstUtlederTest {
         // Arrange
         val søker = randomAktør()
 
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { refusjonEøsService.harRefusjonEøsPåBehandling(behandlingId = behandling.id) } returns false
         every { persongrunnlagService.hentSøkersMålform(behandlingId = behandling.id) } returns Målform.NB

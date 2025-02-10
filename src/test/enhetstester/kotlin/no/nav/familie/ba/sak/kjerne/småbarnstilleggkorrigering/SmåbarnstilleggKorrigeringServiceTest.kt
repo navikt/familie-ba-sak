@@ -8,7 +8,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -34,7 +34,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `leggTilSmåbarnstilleggPåBehandling skal legge til småbarnstillegg på behandling som en AndelTilkjentYtelse`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
@@ -58,7 +58,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `leggTilSmåbarnstilleggPåBehandling skal kaste feil hvis småbarnstillegg allerede finnes for periode`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val tilkjentYtelseMock = mockk<TilkjentYtelse>()
 
         val andelTilkjentYtelse =
@@ -84,7 +84,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `fjernSmåbarnstilleggPåBehandling skal splitte eksisterende overlappende småbarnstilleggsperiode`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
         tilkjentYtelse.andelerTilkjentYtelse.add(
@@ -119,7 +119,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
     @Test
     fun `fjernSmåbarnstilleggPåBehandling skal kaste feil hvis småbarnstillegg ikke finnes for periode`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
         tilkjentYtelse.andelerTilkjentYtelse.add(

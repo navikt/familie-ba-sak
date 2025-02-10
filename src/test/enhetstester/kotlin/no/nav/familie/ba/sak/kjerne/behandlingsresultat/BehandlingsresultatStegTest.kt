@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
@@ -101,7 +101,7 @@ class BehandlingsresultatStegTest {
         )
 
     private val behandling =
-        lagBehandlingMedId(
+        lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
         )
@@ -270,11 +270,11 @@ class BehandlingsresultatStegTest {
 
         every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns lagBehandlingMedId()
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns lagBehandling()
 
         every { beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(any(), any()) } returns true
 
-        every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns lagBehandlingMedId()
+        every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns lagBehandling()
 
         assertDoesNotThrow { behandlingsresultatSteg.utførStegOgAngiNeste(behandling, "") }
     }
@@ -288,7 +288,7 @@ class BehandlingsresultatStegTest {
             )
 
         assertThrows<FunksjonellFeil> {
-            endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandlingMedId())
+            endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandling())
         }
     }
 
@@ -303,7 +303,7 @@ class BehandlingsresultatStegTest {
             )
 
         assertDoesNotThrow {
-            endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandlingMedId())
+            endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
         }
     }
 
@@ -350,7 +350,7 @@ class BehandlingsresultatStegTest {
         val søker = lagPerson()
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeBehandling =
-            lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+            lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
 
         val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
         forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
@@ -383,7 +383,7 @@ class BehandlingsresultatStegTest {
         )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = forrigeBehandling.fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.SATSENDRING,
@@ -445,7 +445,7 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `postValiderSteg - skal validere at behandlingsresultat ved omregning er uendret`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.OMREGNING_18ÅR)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR)
 
         for (resultat in endretBehandlingsresultat()) {
             behandling.resultat = resultat
@@ -466,7 +466,7 @@ class BehandlingsresultatStegTest {
         val søker = lagPerson()
         val barn = lagPerson()
         val forrigeBehandling =
-            lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+            lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
         val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
         forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
             mutableSetOf(
@@ -500,7 +500,7 @@ class BehandlingsresultatStegTest {
         )
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = forrigeBehandling.fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.SATSENDRING,

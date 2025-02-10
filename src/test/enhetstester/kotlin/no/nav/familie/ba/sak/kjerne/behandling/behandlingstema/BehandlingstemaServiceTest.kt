@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -66,7 +66,7 @@ class BehandlingstemaServiceTest {
         )
 
     private val fagsak = defaultFagsak()
-    private val behandling = lagBehandlingMedId(fagsak = fagsak, id = 0L)
+    private val behandling = lagBehandling(fagsak = fagsak, id = 0L)
 
     @Nested
     inner class OppdaterBehandlingstemaFraRegistrereSøknadStegTest {
@@ -74,7 +74,7 @@ class BehandlingstemaServiceTest {
         fun `skal ikke oppdatere behandlingstema hvis behandling skal oppdates automatisk`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                     skalBehandlesAutomatisk = true,
@@ -97,7 +97,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere behandlingstema for registrering av søknad når det er en endring`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -135,7 +135,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere behandlingstema for registrering av søknad når ikke det er en endring`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -158,7 +158,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere behandlingstema i database men ikke patch oppgave om det allerede er i synk`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -198,7 +198,7 @@ class BehandlingstemaServiceTest {
         fun `skal kaste exception om behandlingen skal behandles automatisk men saksbehandler prøver å oppdatere behandlingestema`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                     skalBehandlesAutomatisk = true,
@@ -220,7 +220,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere både saksbehandlet kategori og underkategori på behandling`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -269,7 +269,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere kun saksbehandlet kategori behandling`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -318,7 +318,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere kun saksbehandlet underkategori behandling`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -367,7 +367,7 @@ class BehandlingstemaServiceTest {
         fun `skal ikke oppdatere kategori eller underkategori om de er uendret fra det some allerede finnes i databasen`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -415,7 +415,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere patche oppgave om det allerde er i synk med databaseendringen`() {
             // Arrange
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -466,7 +466,7 @@ class BehandlingstemaServiceTest {
         fun `skal ikke oppdatere kategori og underkategori om behandling skal behandles automatisk`() {
             // Arrange
             val aktivBehandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                     skalBehandlesAutomatisk = true,
@@ -488,7 +488,7 @@ class BehandlingstemaServiceTest {
         fun `skal sette overstyr underkategori`() {
             // Arrange
             val aktivBehandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.NASJONAL,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
                 )
@@ -531,7 +531,7 @@ class BehandlingstemaServiceTest {
         fun `skal oppdatere behandling ved utledet kategori og underkategori`() {
             // Arrange
             val aktivBehandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.EØS,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                 )
@@ -588,7 +588,7 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal returnere siste vedtatt behandling sin kategori når det ikke finnes en aktiv behandling men en siste vedtatt behandling finnes`() {
             // Arrange
-            val sisteVedtatteBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
@@ -603,7 +603,7 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal returnere NASJONAL når ingen tidslinje blir funnet for vilkårsvurderingen til den aktive behandlingen og den siste vedtatte behandlingen finnes ikke`() {
             // Arrange
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
@@ -619,8 +619,8 @@ class BehandlingstemaServiceTest {
         @Test
         fun `skal returnere kategorien til den siste vedtatte behandlingen når ingen tidslinje blir funnet for vilkårsvurderingen til den aktive behandlingen men den siste vedtatte behandlingen finnes`() {
             // Arrange
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
-            val sisteVedtatteBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
@@ -644,7 +644,7 @@ class BehandlingstemaServiceTest {
             val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak)
+            val aktivBehandling = lagBehandling(fagsak = fagsak)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(
@@ -747,7 +747,7 @@ class BehandlingstemaServiceTest {
             val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak)
+            val aktivBehandling = lagBehandling(fagsak = fagsak)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(
@@ -825,8 +825,8 @@ class BehandlingstemaServiceTest {
             val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
-            val sisteVedtatteBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(
@@ -906,7 +906,7 @@ class BehandlingstemaServiceTest {
             val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(
@@ -982,8 +982,8 @@ class BehandlingstemaServiceTest {
             val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = LocalDate.of(2022, 11, 15))
 
             val fagsak = lagFagsak(aktør = søker.aktør)
-            val aktivBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
-            val sisteVedtatteBehandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
 
             val vilkårsvurdering =
                 lagVilkårsvurdering(

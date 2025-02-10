@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -25,7 +25,7 @@ class AutomatiskBeslutningServiceTest {
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
@@ -38,7 +38,7 @@ class AutomatiskBeslutningServiceTest {
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er endre migreringsdato behandling`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
             )
@@ -49,7 +49,7 @@ class AutomatiskBeslutningServiceTest {
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser men det finnes manuelle posteringer`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
@@ -62,7 +62,7 @@ class AutomatiskBeslutningServiceTest {
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik utenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
@@ -75,7 +75,7 @@ class AutomatiskBeslutningServiceTest {
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere false dersom behandling er helmanuell migrering med avvik utenfor beløpsgrenser og det finnes manuelle posteringer`() {
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
             )
@@ -99,7 +99,7 @@ class AutomatiskBeslutningServiceTest {
                 ).contains(it)
             }.forEach { behandlingType ->
                 val behandling =
-                    lagBehandlingMedId(
+                    lagBehandling(
                         behandlingType = behandlingType,
                         årsak = behandlingÅrsak,
                     )

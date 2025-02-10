@@ -6,7 +6,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -26,7 +26,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
     val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2).minusMonths(1))
     val barn3 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(4).minusMonths(1))
 
-    val behandling = lagBehandlingMedId()
+    val behandling = lagBehandling()
     val tilkjentYtelse =
         TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 

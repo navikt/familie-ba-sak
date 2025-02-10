@@ -18,7 +18,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.random.Random
 
-fun lagBehandlingMedId(
+fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
     behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,

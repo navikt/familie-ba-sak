@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -28,7 +28,7 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal legge til nytt vilkår`() {
         val fnr1 = randomFnr()
         val aktørId1 = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
@@ -54,7 +54,7 @@ class OppdaterVilkårsvurderingTest {
     fun `Skal fjerne vilkår`() {
         val fnr1 = randomFnr()
         val aktørId1 = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val resA = lagVilkårsvurderingResultatB(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
 
@@ -88,7 +88,7 @@ class OppdaterVilkårsvurderingTest {
         val fnr2 = randomFnr()
         val aktørId1 = randomAktør()
         val aktørId2 = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val resA = lagVilkårsvurdering(behandling = behandling, fnrAktør = listOf(Pair(fnr1, aktørId1)))
         val resB =
             lagVilkårsvurdering(
@@ -107,7 +107,7 @@ class OppdaterVilkårsvurderingTest {
         val fnr2 = randomFnr()
         val aktørId1 = randomAktør()
         val aktørId2 = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val resA =
             lagVilkårsvurdering(
                 behandling = behandling,
@@ -126,7 +126,7 @@ class OppdaterVilkårsvurderingTest {
         val fnr2 = randomFnr()
         val aktørId1 = tilAktør(fnr1)
         val aktørId2 = tilAktør(fnr2)
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val resultat1 =
             lagVilkårsvurdering(
                 behandling = behandling,
@@ -154,8 +154,8 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal ha med tomt vilkår på person hvis vilkåret ble avslått forrige behandling`() {
         val søkerAktørId = randomAktør()
-        val nyBehandling = lagBehandlingMedId()
-        val forrigeBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
 
         val init =
             lagBasicVilkårsvurdering(
@@ -206,8 +206,8 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal ha med oppfylte perioder fra vilkår på person hvis vilkåret ble både avslått og innvilget forrige behandling`() {
         val søkerAktørId = randomAktør()
-        val nyBehandling = lagBehandlingMedId()
-        val forrigeBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
 
         val init =
             lagBasicVilkårsvurdering(
@@ -265,7 +265,7 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når forrige behandling inneholdt utvidet-vilkåret, men inneværende behandling er ordinær`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
@@ -297,7 +297,7 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal beholde vilkår om utvidet barnetrygd når det eksisterer løpende sak med utvidet, men inneværende behandling er ordinær`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
@@ -328,7 +328,7 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal fjerne vilkår om utvidet barnetrygd når den inneværende behandlingen gjelder ordinær, og det ikke eksisterer løpende sak med utvidet, eller utvidet-vilkåret var på forrige behandling`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
@@ -365,8 +365,8 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal kun kopiere over oppfylte utvidet-vilkår ved opprettelse av ny behandling, men slette alle fra aktiv`() {
         val søkerAktørId = randomAktør()
-        val nyBehandling = lagBehandlingMedId()
-        val forrigeBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, nyBehandling, listOf())
@@ -418,7 +418,7 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal kopiere over alle utvidet-vilkår fra aktiv vilkårsvurdering hvis den aktive vilkårsvurderingen er fra den inneværende behandlingen`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, behandling, listOf())
@@ -470,8 +470,8 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal ikke legge til utvidet vilkåret hvis det kun eksisterer ikke-oppfylte perioder, men fortsatt slette fra aktiv`() {
         val søkerAktørId = randomAktør()
-        val nyBehandling = lagBehandlingMedId()
-        val forrigeBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandling()
 
         val initUtenUtvidetVilkår =
             lagVilkårsvurderingMedForskjelligeTyperVilkår(søkerAktørId, nyBehandling, listOf())
@@ -523,7 +523,7 @@ class OppdaterVilkårsvurderingTest {
     @Test
     fun `Skal beholde andreVurderinger lagt til på inneværende behandling`() {
         val søkerAktørId = randomAktør()
-        val nyBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
 
         val initiellVilkårsvurderingUtenAndreVurderinger =
             lagBasicVilkårsvurdering(

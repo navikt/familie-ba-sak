@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -70,10 +70,10 @@ class VedtaksperiodeServiceTest {
 
     private val person = lagPerson()
     private val forrigeBehandling =
-        lagBehandlingMedId().also {
+        lagBehandling().also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, StegType.BEHANDLING_AVSLUTTET))
         }
-    private val behandling = lagBehandlingMedId(fagsak = forrigeBehandling.fagsak)
+    private val behandling = lagBehandling(fagsak = forrigeBehandling.fagsak)
     private val vedtak = lagVedtak(behandling)
 
     private val endringstidspunkt = LocalDate.of(2022, 11, 1)
@@ -118,7 +118,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `nasjonal sak skal ikke ha årlig kontroll`() {
-        val behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.NASJONAL)
+        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
         val vedtak = Vedtak(behandling = behandling)
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id) } returns emptyList()
@@ -127,7 +127,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
-        val vedtak = Vedtak(behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.EØS))
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
             listOf(
@@ -142,7 +142,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
-        val vedtak = Vedtak(behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.EØS))
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
             listOf(
@@ -157,7 +157,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `EØS med periode uten tom skal ha årlig kontroll`() {
-        val vedtak = Vedtak(behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.EØS))
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
 
         every { kompetanseRepository.finnFraBehandlingId(behandlingId = vedtak.behandling.id) } returns
             listOf(
@@ -172,7 +172,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `skal beskrive perioder med for mye utbetalt for behandling med feilutbetalt valuta`() {
-        val vedtak = Vedtak(behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.EØS))
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         val perioder =
             listOf(
                 LocalDate.now() to LocalDate.now().plusYears(1),
@@ -196,7 +196,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `skal beskrive perioder med eøs refusjoner for behandlinger med avklarte refusjon eøs`() {
-        val behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.EØS)
+        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
         assertThat(
             vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
                 behandling = behandling,
@@ -224,7 +224,7 @@ class VedtaksperiodeServiceTest {
 
     @Test
     fun `skal beskrive perioder med eøs refusjoner for behandlinger med uavklarte refusjon eøs`() {
-        val behandling = lagBehandlingMedId(behandlingKategori = BehandlingKategori.EØS)
+        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
         assertThat(
             vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
                 behandling = behandling,

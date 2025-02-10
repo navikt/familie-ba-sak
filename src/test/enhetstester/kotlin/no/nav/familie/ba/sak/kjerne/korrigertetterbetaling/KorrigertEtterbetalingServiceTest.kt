@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.hamcrest.MatcherAssert.assertThat
@@ -28,7 +28,7 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `finnAktivtKorrigeringPåBehandling skal hente aktivt korrigering fra repository hvis det finnes`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
         every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id) } returns korrigertEtterbetaling
@@ -45,7 +45,7 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `finnAlleKorrigeringerPåBehandling skal hente alle korrigering fra repository hvis de finnes`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
         every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns
@@ -64,7 +64,7 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `lagreKorrigertEtterbetaling skal lagre korrigering på behandling og logg på dette`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
         every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id) } returns null
@@ -88,7 +88,7 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `lagreKorrigertEtterbetaling skal sette og lagre forrige korrigering til inaktivt hvis det finnes tidligere korrigering`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val forrigeKorrigering = mockk<KorrigertEtterbetaling>(relaxed = true)
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
@@ -107,7 +107,7 @@ internal class KorrigertEtterbetalingServiceTest {
 
     @Test
     fun `settKorrigeringPåBehandlingTilInaktiv skal sette korrigering til inaktivt hvis det finnes`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val korrigertEtterbetaling = mockk<KorrigertEtterbetaling>(relaxed = true)
 
         every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(any()) } returns korrigertEtterbetaling

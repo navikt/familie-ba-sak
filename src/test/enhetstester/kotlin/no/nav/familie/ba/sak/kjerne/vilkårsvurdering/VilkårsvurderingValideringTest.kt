@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -30,7 +30,7 @@ class VilkårsvurderingValideringTest {
     inner class ValiderIkkeBlandetRegelverk {
         @Test
         fun `skal kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS`() {
-            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val søker = lagPersonEnkel(PersonType.SØKER)
             val barn1 = lagPersonEnkel(PersonType.BARN)
             val barn2 = lagPersonEnkel(PersonType.BARN)
@@ -49,14 +49,14 @@ class VilkårsvurderingValideringTest {
                 validerIkkeBlandetRegelverk(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(søker, barn1, barn2),
-                    behandling = lagBehandlingMedId(),
+                    behandling = lagBehandling(),
                 )
             }
         }
 
         @Test
         fun `skal ikke kaste feil hvis søker vurderes etter nasjonal og minst ett barn etter EØS om der er satsendring`() {
-            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val søker = lagPersonEnkel(PersonType.SØKER)
             val barn1 = lagPersonEnkel(PersonType.BARN)
             val barn2 = lagPersonEnkel(PersonType.BARN)
@@ -75,14 +75,14 @@ class VilkårsvurderingValideringTest {
                 validerIkkeBlandetRegelverk(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(søker, barn1, barn2),
-                    behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SATSENDRING),
+                    behandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING),
                 )
             }
         }
 
         @Test
         fun `skal ikke kaste feil hvis både søker og barn vurderes etter eøs`() {
-            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val søker = lagPersonEnkel(PersonType.SØKER)
             val barn1 = lagPersonEnkel(PersonType.BARN)
             val personResultatSøker = byggPersonResultatForPersonEnkel(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
@@ -98,14 +98,14 @@ class VilkårsvurderingValideringTest {
                 validerIkkeBlandetRegelverk(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(søker, barn1),
-                    behandling = lagBehandlingMedId(),
+                    behandling = lagBehandling(),
                 )
             }
         }
 
         @Test
         fun `skal ikke kaste feil hvis søker vurderes etter eøs, men barn vurderes etter nasjonal`() {
-            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val søker = lagPersonEnkel(PersonType.SØKER)
             val barn1 = lagPersonEnkel(PersonType.BARN)
             val personResultatSøker = byggPersonResultatForPersonEnkel(søker, Regelverk.EØS_FORORDNINGEN, vilkårsvurdering)
@@ -121,14 +121,14 @@ class VilkårsvurderingValideringTest {
                 validerIkkeBlandetRegelverk(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(søker, barn1),
-                    behandling = lagBehandlingMedId(),
+                    behandling = lagBehandling(),
                 )
             }
         }
 
         @Test
         fun `skal ikke kaste feil hvis både søker og barn vurderes etter nasjonal og eøs, men i samme perioder`() {
-            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val søker = lagPersonEnkel(PersonType.SØKER)
             val barn = lagPersonEnkel(PersonType.BARN)
 
@@ -159,7 +159,7 @@ class VilkårsvurderingValideringTest {
                 validerIkkeBlandetRegelverk(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(søker, barn),
-                    behandling = lagBehandlingMedId(),
+                    behandling = lagBehandling(),
                 )
             }
         }
@@ -169,7 +169,7 @@ class VilkårsvurderingValideringTest {
     inner class Valider18ÅrsVilkårEksistererFraFødselsdato {
         @Test
         fun `skal kaste feil hvis barn ikke har 18-års vilkår vurdert fra fødselsdato`() {
-            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
+            val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
             val barn = lagPersonEnkel(PersonType.BARN)
             val personResultatBarn = byggPersonResultatForPersonEnkel(barn, Regelverk.NASJONALE_REGLER, vilkårsvurdering)
 
@@ -182,7 +182,7 @@ class VilkårsvurderingValideringTest {
                 valider18ÅrsVilkårEksistererFraFødselsdato(
                     vilkårsvurdering = vilkårsvurdering,
                     søkerOgBarn = listOf(barn),
-                    behandling = lagBehandlingMedId(),
+                    behandling = lagBehandling(),
                 )
             }
         }
@@ -192,7 +192,7 @@ class VilkårsvurderingValideringTest {
         fun `skal ikke kaste feil for satsendring og månedlig valutajustering selv om barn ikke har 18-års vilkår vurdert fra fødselsdato`(
             årsak: BehandlingÅrsak,
         ) {
-            val behandling = lagBehandlingMedId(årsak = årsak)
+            val behandling = lagBehandling(årsak = årsak)
             val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
             val barn = lagPersonEnkel(PersonType.BARN)
             val personResultatBarn = byggPersonResultatForPersonEnkel(barn, Regelverk.NASJONALE_REGLER, vilkårsvurdering)

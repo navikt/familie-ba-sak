@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
@@ -71,7 +71,7 @@ class HentStatusTest {
     @Test
     fun `henter status fra økonomi for behandling der alle utbetalingene hører til denne behandlinga`() {
         val tilfeldigPerson = tilfeldigPerson()
-        val nyBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
         lagTilkjentYtelse(nyBehandling, listOf(lagUtbetalingsperiode(nyBehandling)))
 
         every {
@@ -105,7 +105,7 @@ class HentStatusTest {
     @Test
     fun `kan håndtere nullutbetaling uten tidligere historikk`() {
         val tilfeldigPerson = tilfeldigPerson()
-        val nyBehandling = lagBehandlingMedId()
+        val nyBehandling = lagBehandling()
         lagTilkjentYtelse(nyBehandling, listOf())
 
         every {

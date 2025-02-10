@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 fun lagKompetanse(
-    behandlingId: Long = lagBehandlingMedId().id,
+    behandlingId: Long = lagBehandling().id,
     fom: YearMonth? = YearMonth.now(),
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
@@ -39,7 +39,7 @@ fun lagKompetanse(
 ).also { it.behandlingId = behandlingId }
 
 fun lagValutakurs(
-    behandlingId: Long = lagBehandlingMedId().id,
+    behandlingId: Long = lagBehandling().id,
     fom: YearMonth? = null,
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
@@ -58,7 +58,7 @@ fun lagValutakurs(
 ).also { it.behandlingId = behandlingId }
 
 fun lagUtenlandskPeriodebeløp(
-    behandlingId: Long = lagBehandlingMedId().id,
+    behandlingId: Long = lagBehandling().id,
     fom: YearMonth? = null,
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),

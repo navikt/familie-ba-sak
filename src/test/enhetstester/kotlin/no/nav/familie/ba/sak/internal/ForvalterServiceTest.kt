@@ -8,7 +8,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -76,7 +76,7 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal endre periodeFom på vilkårresultat når den er før fødselsdato på person`() {
-        val behandling = lagBehandlingMedId(status = BehandlingStatus.AVSLUTTET)
+        val behandling = lagBehandling(status = BehandlingStatus.AVSLUTTET)
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
         val søker = lagPerson(type = PersonType.SØKER)
@@ -141,7 +141,7 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal kaste feil når vi har etterfølgende perioder som begge begynner før fødselsdato`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.AVSLUTTET
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
@@ -202,7 +202,7 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal kaste feil når vilkårResultat begynner tidligere måned enn fødselsdato`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.AVSLUTTET
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)
@@ -253,7 +253,7 @@ class ForvalterServiceTest {
 
     @Test
     fun `Skal ikke endre på fom på under-18-vilkår`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.status = BehandlingStatus.AVSLUTTET
 
         val barnFødselsdato = LocalDate.now().minusYears(1).withDayOfMonth(15)

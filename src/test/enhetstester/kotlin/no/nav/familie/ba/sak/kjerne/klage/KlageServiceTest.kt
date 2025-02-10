@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.klage
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -43,7 +43,7 @@ class KlageServiceTest {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
-                lagBehandlingMedId(
+                lagBehandling(
                     status = BehandlingStatus.AVSLUTTET,
                 )
 
@@ -58,7 +58,7 @@ class KlageServiceTest {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
-                lagBehandlingMedId(
+                lagBehandling(
                     status = BehandlingStatus.UTREDES,
                 )
 
@@ -88,7 +88,7 @@ class KlageServiceTest {
             val aktør = randomAktør()
             val fagsak = Fagsak(aktør = aktør)
             val forrigeBehandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingKategori = BehandlingKategori.EØS,
                     underkategori = BehandlingUnderkategori.UTVIDET,
                     fagsak = fagsak,
@@ -123,7 +123,7 @@ class KlageServiceTest {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
-                lagBehandlingMedId(
+                lagBehandling(
                     status = BehandlingStatus.UTREDES,
                 )
 

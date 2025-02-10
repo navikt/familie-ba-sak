@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -55,7 +55,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
     fun `Skal lage vilkårsvurdering med søkers vilkår satt med tom=dødsdato`() {
         val søker = lagPerson(type = PersonType.SØKER).also { it.dødsfall = Dødsfall(person = it, dødsfallDato = LocalDate.now(), dødsfallAdresse = "Adresse 1", dødsfallPostnummer = "1234", dødsfallPoststed = "Oslo") }
         val barn = lagPerson(type = PersonType.BARN)
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val tomPåFørsteUtvidetVilkår = LocalDate.now().minusMonths(8)

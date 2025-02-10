@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder
@@ -68,7 +68,7 @@ class BrevServiceTest {
 
     @Test
     fun `Saksbehandler blir hentet fra sikkerhetscontext og beslutter viser placeholder tekst under behandling`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val (saksbehandler, beslutter) =
             brevService.hentSaksbehandlerOgBeslutter(
@@ -82,7 +82,7 @@ class BrevServiceTest {
 
     @Test
     fun `Saksbehandler blir hentet og beslutter er hentet fra sikkerhetscontext under beslutning`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
         val (saksbehandler, beslutter) =
@@ -102,7 +102,7 @@ class BrevServiceTest {
 
     @Test
     fun `Saksbehandler blir hentet og beslutter viser placeholder tekst under beslutning`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
         val (saksbehandler, beslutter) =
@@ -122,7 +122,7 @@ class BrevServiceTest {
 
     @Test
     fun `Saksbehandler og beslutter blir hentet etter at totrinnskontroll er besluttet`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
 
         val (saksbehandler, beslutter) =
@@ -144,7 +144,7 @@ class BrevServiceTest {
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det ikke er noe andeler i behandlingen`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns emptyList()
 
@@ -155,7 +155,7 @@ class BrevServiceTest {
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det ikke er noe løpende andeler i behandlingen`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val andeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -173,7 +173,7 @@ class BrevServiceTest {
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere false dersom det løpende andeler i behandlingen men ikke differanseberegnet`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val andeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -191,7 +191,7 @@ class BrevServiceTest {
 
     @Test
     fun `sjekkOmDetErLøpendeDifferanseUtbetalingPåBehandling skal returnere true dersom det løpende andeler i behandlingen som er differanseberegnet`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val andeler =
             listOf(
                 lagAndelTilkjentYtelse(
@@ -215,7 +215,7 @@ class BrevServiceTest {
     ) {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2020, 1, 1)
 
-        val behandling = lagBehandlingMedId(årsak = behandlingÅrsak)
+        val behandling = lagBehandling(årsak = behandlingÅrsak)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
@@ -226,7 +226,7 @@ class BrevServiceTest {
     fun `finnStarttidspunktForUtbetalingstabell returnerer endringstidspunkt for behandlingsårsak ÅRLIG_KONTROLL, dersom endringstidspunkt er tidligere enn 1 januar i fjor`() {
         every { vedtaksperiodeService.finnEndringstidspunktForBehandling(any()) } returns LocalDate.of(2020, 1, 1)
 
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
@@ -245,7 +245,7 @@ class BrevServiceTest {
                 ),
             )
 
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
@@ -264,7 +264,7 @@ class BrevServiceTest {
                 ),
             )
 
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
@@ -283,7 +283,7 @@ class BrevServiceTest {
                 ),
             )
 
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.ÅRLIG_KONTROLL)
 
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class AndelTilkjentYtelseUtledRegelverkTest {
-    val behandling = lagBehandlingMedId()
+    val behandling = lagBehandling()
     val barnPerson = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(1))
 
     val andelTilkjentYtelse =

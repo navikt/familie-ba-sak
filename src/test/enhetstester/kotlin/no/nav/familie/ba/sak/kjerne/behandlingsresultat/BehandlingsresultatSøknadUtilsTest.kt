@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -475,7 +475,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @Test
     fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom det er eksplisitt avslag på søker (uten at det er søkt om utvidet)`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søker = lagPerson(type = PersonType.SØKER)
@@ -508,7 +508,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @ParameterizedTest
     @EnumSource(value = Resultat::class, names = ["IKKE_OPPFYLT", "IKKE_VURDERT"])
     fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom behandlingen er en fødselshendelse og det finnes vilkårsvurdering som ikke er oppfylt eller vurdert`(resultat: Resultat) {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val barnPersonResultat =
@@ -538,7 +538,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @Test
     fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom er eksplisitt avslag på minst en person det er framstilt krav for`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = des21)
@@ -571,7 +571,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @Test
     fun `utledResultatPåSøknad - skal returnere INNVILGET dersom barnet det er søkt for har fått andeler med positive beløp som er annerledes enn forrige gang`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val barn1Person = lagPerson(type = PersonType.BARN, fødselsdato = des21)
@@ -613,7 +613,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @Test
     fun `utledResultatPåSøknad - skal returnere DELVIS_INNVILGET dersom det finnes et barn som har fått innvilget men også et barn som ikke er registrert`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val barn1Person = lagPerson(type = PersonType.BARN)
@@ -655,7 +655,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @Test
     fun `utledResultatPåSøknad - skal returnere INGEN_RELEVANTE_ENDRINGER dersom barnet det er søkt for har fått helt lik andel som forrige behandling`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val barn1Person = lagPerson(type = PersonType.BARN, fødselsdato = des21)

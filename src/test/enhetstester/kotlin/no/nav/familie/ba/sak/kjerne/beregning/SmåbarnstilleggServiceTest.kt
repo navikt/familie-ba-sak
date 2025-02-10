@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -65,8 +65,8 @@ class SmåbarnstilleggServiceTest {
     ) {
         val søker = lagPerson(type = PersonType.SØKER)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val forrigeBehandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
-        val behandling = lagBehandlingMedId(årsak = årsak, fagsak = fagsak)
+        val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
+        val behandling = lagBehandling(årsak = årsak, fagsak = fagsak)
 
         val perioderForrigeBehandling =
             listOf(
@@ -115,7 +115,7 @@ class SmåbarnstilleggServiceTest {
 
     @Test
     fun `Vanlige behandlinger skal hente perioder fra EF`() {
-        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.NYE_OPPLYSNINGER)
         val søker = lagPerson(type = PersonType.SØKER)
 
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns

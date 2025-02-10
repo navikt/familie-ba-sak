@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -80,7 +80,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
 
     @Test
     fun `Verifiser at løpende fagsak med småbarnstillegg sender opphørsbrev måneden etter yngste barn ble 3 år`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
@@ -110,7 +110,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     @Test
     fun `Skal ikke sende lage autobrevbehandling om det i forrige måned ble vedtatt en reduksjon på småbarnstillegg`() {
         val behandling =
-            lagBehandlingMedId().apply {
+            lagBehandling().apply {
                 status = BehandlingStatus.AVSLUTTET
             }
         val vedtak = lagVedtak(behandling = behandling)
@@ -167,7 +167,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
 
     @Test
     fun `Verifiser at behandling ikke blir opprettet om behandling allerede har kjørt`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         val barn3ÅrForrigeMåned = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)

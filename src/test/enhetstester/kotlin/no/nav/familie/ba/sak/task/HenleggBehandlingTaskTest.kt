@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
@@ -34,7 +34,7 @@ internal class HenleggBehandlingTaskTest {
 
     @Test
     fun `skal ikke henlegge dersom behandlingen allerede er avsluttet`() {
-        every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandlingMedId(status = BehandlingStatus.AVSLUTTET)
+        every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandling(status = BehandlingStatus.AVSLUTTET)
         val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
         henleggBehandlingTask.doTask(task)
         verify(exactly = 0) {
@@ -45,7 +45,7 @@ internal class HenleggBehandlingTaskTest {
 
     @Test
     fun `skal ikke henlegge dersom behandlingsfristen ikke er etter angitt valideringsdato`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { oppgaveService.hentOppgaverSomIkkeErFerdigstilt(any(), any()) } returns
             listOf(DbOppgave(behandling = behandling, gsakId = "1", type = Oppgavetype.BehandleSak))
@@ -61,7 +61,7 @@ internal class HenleggBehandlingTaskTest {
 
     @Test
     fun `skal henlegge med årsak TEKNISK_VEDLIKEHOLD og begrunnelse Satsendring`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { oppgaveService.hentOppgaverSomIkkeErFerdigstilt(any(), any()) } returns
             listOf(DbOppgave(behandling = behandling, gsakId = "1", type = Oppgavetype.BehandleSak))

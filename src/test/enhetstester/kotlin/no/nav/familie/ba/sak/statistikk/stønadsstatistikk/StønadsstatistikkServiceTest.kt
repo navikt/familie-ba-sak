@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -70,7 +70,7 @@ internal class StønadsstatistikkServiceTest(
             kompetanseService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
-    private val behandling = lagBehandlingMedId()
+    private val behandling = lagBehandling()
     private val søkerFnr = "12345678910"
     private val barnFnr = listOf(randomFnr(), randomFnr())
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, barnFnr)

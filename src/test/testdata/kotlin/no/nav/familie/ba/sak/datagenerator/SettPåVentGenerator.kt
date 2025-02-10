@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import java.time.LocalDate
 
 fun lagSettPåVent(
-    behandling: Behandling = lagBehandlingMedId(),
+    behandling: Behandling = lagBehandling(),
     frist: LocalDate = LocalDate.now(),
     tidTattAvVent: LocalDate = LocalDate.now(),
     tidSattPåVent: LocalDate = LocalDate.now(),

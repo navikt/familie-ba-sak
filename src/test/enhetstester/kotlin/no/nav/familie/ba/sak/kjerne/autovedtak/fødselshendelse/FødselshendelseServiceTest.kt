@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
@@ -110,7 +110,7 @@ class FødselshendelseServiceTest {
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
-        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandlingMedId())
+        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
@@ -134,7 +134,7 @@ class FødselshendelseServiceTest {
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
 
-        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandlingMedId())
+        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
 
         verify(exactly = 0) {
             opprettTaskService.opprettOppgaveTask(
@@ -170,7 +170,7 @@ class FødselshendelseServiceTest {
         } returns fagsak
 
         val forrigeBehandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
@@ -179,7 +179,7 @@ class FødselshendelseServiceTest {
                 status = BehandlingStatus.AVSLUTTET,
             )
         val nyBehandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak,
                 behandlingKategori = BehandlingKategori.NASJONAL,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,

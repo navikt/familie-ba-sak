@@ -1,6 +1,6 @@
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -47,7 +47,7 @@ internal class VilkårsvurderingTidslinjeServiceTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val behandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
                 søker = søker,
@@ -90,7 +90,7 @@ internal class VilkårsvurderingTidslinjeServiceTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val behandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
                 søker = søker,
@@ -133,7 +133,7 @@ internal class VilkårsvurderingTidslinjeServiceTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val behandling = lagBehandlingMedId(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+        val behandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
                 søker = søker,

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -55,7 +55,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             )
@@ -87,7 +87,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             )
@@ -129,7 +129,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             )
@@ -176,7 +176,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val migreringsBehandling1 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.MIGRERING,
@@ -197,7 +197,7 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         val migreringsBehandling2 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -234,7 +234,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val migreringsBehandling1 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.MIGRERING,
@@ -255,7 +255,7 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         val behandling2 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
@@ -285,7 +285,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val migreringsBehandling1 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.MIGRERING,
@@ -306,7 +306,7 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         val migreringsBehandling2 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -346,7 +346,7 @@ class EndretMigreringsdatoUtlederTest {
         val fagsak = Fagsak(0L, randomAktør())
 
         val migreringsBehandling1 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.MIGRERING,
@@ -381,7 +381,7 @@ class EndretMigreringsdatoUtlederTest {
             )
 
         val migreringsBehandling2 =
-            lagBehandlingMedId(
+            lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,

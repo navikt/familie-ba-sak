@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
@@ -229,7 +229,7 @@ class SimuleringUtilTest {
         val vedtakSimuleringMottakere =
             ytelseMedManuellePosteringer.simuleringMottaker.map {
                 it.tilBehandlingSimuleringMottaker(
-                    lagBehandlingMedId(),
+                    lagBehandling(),
                 )
             }
 

@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.tilAktør
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -64,8 +64,8 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val barnFnr = barn.aktør.aktivFødselsnummer()
         val søkerFnr = søker.aktør.aktivFødselsnummer()
 
-        val forrigeBehandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
-        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val forrigeBehandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
 
         every { personidentService.hentOgLagreAktør(søkerFnr, true) } returns søker.aktør
         every { personidentService.hentOgLagreAktørIder(listOf(barnFnr), true) } returns listOf(barn.aktør)
@@ -107,8 +107,8 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
     fun `hentOgLagrePersonopplysningGrunnlag - skal kopiere persongrunnlaget fra forrige behandling ved satsendring og månedlig valutajustering`(
         årsak: BehandlingÅrsak,
     ) {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nyBehandling = lagBehandlingMedId(årsak = årsak)
+        val forrigeBehandling = lagBehandling()
+        val nyBehandling = lagBehandling(årsak = årsak)
         val søker = PersonIdent(randomFnr())
         val barn = PersonIdent(randomFnr())
         val søkerPerson = lagPerson(personIdent = søker, id = 1)
@@ -196,8 +196,8 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
 
     @Test
     fun `hentOgLagrePersonopplysningGrunnlag - skal kopiere søker og barn med tilkjent ytelse fra persongrunnlaget fra forrige behandling ved satsendring`() {
-        val forrigeBehandling = lagBehandlingMedId()
-        val nyBehandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SATSENDRING)
+        val forrigeBehandling = lagBehandling()
+        val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
         val søker = PersonIdent(randomFnr())
         val barn1 = PersonIdent(randomFnr())
         val barn2 = PersonIdent(randomFnr())
@@ -311,7 +311,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
 
     @Test
     fun `hentOgLagrePersonopplysningGrunnlag - skal kaste feil dersom behandling er satsendring og forrige behandling er null`() {
-        val nyBehandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SATSENDRING)
+        val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
         val søker = PersonIdent(randomFnr())
         val barn = PersonIdent(randomFnr())
         assertThatThrownBy {

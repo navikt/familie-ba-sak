@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
@@ -24,7 +24,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
 
     @Test
     fun `Skal kun legge på utbetalingsdetaljer som gjelder riktig andeler tilkjent ytelse for fortsatt innvilget`() {
-        val behandling = lagBehandlingMedId()
+        val behandling = lagBehandling()
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(

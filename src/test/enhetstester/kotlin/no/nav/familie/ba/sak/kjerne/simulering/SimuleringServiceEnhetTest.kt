@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
@@ -70,7 +70,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -108,7 +108,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -159,7 +159,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -199,7 +199,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -214,7 +214,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -252,7 +252,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -287,7 +287,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -300,7 +300,7 @@ internal class SimuleringServiceEnhetTest {
     fun `hentFeilutbetalingTilOgMedForrigeMåned skal summere feilutbetaling for tidligere enn inneværende måned`() {
         // Arrange
         val behandling =
-            lagBehandlingMedId(
+            lagBehandling(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
             )

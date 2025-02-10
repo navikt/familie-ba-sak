@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -50,7 +50,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
             årsak: BehandlingÅrsak,
         ) {
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = årsak,
                 )
@@ -69,7 +69,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
         @Test
         fun `For behandling med årsak nye opplysinger blir endrete utbetalinger uten overlappende andeler filtrert bort`() {
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 )
@@ -106,7 +106,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
         @Test
         fun `For behandling med årsak nye opplsyninger blir endrete utbetalinger med overlappende andeler kombinert`() {
             val behandling =
-                lagBehandlingMedId(
+                lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 )
