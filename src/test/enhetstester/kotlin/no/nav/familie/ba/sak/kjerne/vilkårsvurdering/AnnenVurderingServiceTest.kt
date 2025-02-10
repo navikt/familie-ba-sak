@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
@@ -31,7 +31,7 @@ class AnnenVurderingServiceTest {
 
         personResultat =
             lagPersonResultat(
-                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId()),
                 person = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1)),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = LocalDate.of(2020, 1, 1),

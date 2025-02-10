@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -423,7 +423,7 @@ internal class TilkjentYtelseUtilsTest {
         val søkerAktørId = tilAktør(søkerFnr)
         val barnAktørId = tilAktør(barnFnr)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val vilkårsvurdering =
             lagVilkårsvurdering(
@@ -524,7 +524,7 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `endret utbetalingsandel skal overstyre andel`() {
         val person = lagPerson()
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = YearMonth.of(2018, 1)
         val tom = YearMonth.of(2019, 1)
         val utbetalinsandeler =
@@ -564,7 +564,7 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `endret utbetalingsandel koble endrede andeler til riktig endret utbetalingandel`() {
         val person = lagPerson()
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom1 = YearMonth.of(2018, 1)
         val tom1 = YearMonth.of(2018, 11)
 
@@ -1517,7 +1517,7 @@ internal class TilkjentYtelseUtilsTest {
         atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
         atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(),
     ): Vilkårsvurdering {
-        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
 
         val eldsteBarn = barn.minBy { it.fødselsdato }
 

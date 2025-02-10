@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -24,7 +24,7 @@ internal class RestTidslinjerTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
         val vilkårsvurderingBygger =
@@ -78,7 +78,7 @@ internal class RestTidslinjerTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barn1Fødselsdato.tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barn2Fødselsdato.tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val vilkårsvurderingBygger =
             VilkårsvurderingBuilder<Måned>(behandling)

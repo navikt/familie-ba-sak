@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
@@ -166,7 +166,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         fom: YearMonth = årMnd("2019-04"),
         tom: YearMonth = årMnd("2023-03"),
     ) {
-        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
+        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
                 val andel =

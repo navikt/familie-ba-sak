@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -23,9 +23,9 @@ class RefusjonEøsServiceIT(
     @Test
     fun kanLagreEndreOgSlette() {
         val fagsak =
-            defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
+            lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling =
-            lagBehandling(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
+            lagBehandlingUtenId(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
         val refusjonEøs =
             RestRefusjonEøs(
                 id = 0,

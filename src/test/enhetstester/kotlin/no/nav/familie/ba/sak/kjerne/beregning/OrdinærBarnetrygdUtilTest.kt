@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -31,7 +31,7 @@ class OrdinærBarnetrygdUtilTest {
     @Test
     fun `Skal lage riktig tidslinje med rett til prosent for person med start og stopp av delt bosted`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
-        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
+        val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId())
 
         val personResultat =
             PersonResultat(
@@ -131,7 +131,7 @@ class OrdinærBarnetrygdUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat =
             PersonResultat(
-                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId()),
                 aktør = barn.aktør,
             )
         val vilkårResultater =
@@ -156,7 +156,7 @@ class OrdinærBarnetrygdUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat =
             PersonResultat(
-                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId()),
                 aktør = barn.aktør,
             )
         val vilkårResultater =
@@ -181,7 +181,7 @@ class OrdinærBarnetrygdUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat =
             PersonResultat(
-                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId()),
                 aktør = barn.aktør,
             )
         val vilkårResultater =
@@ -210,7 +210,7 @@ class OrdinærBarnetrygdUtilTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val personResultat =
             PersonResultat(
-                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+                vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingMedId()),
                 aktør = søker.aktør,
             )
         val vilkårResultater =

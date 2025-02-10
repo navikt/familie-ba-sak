@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -28,7 +28,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
         val barn2 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
 
         val utenlandskPeriodebeløp =
             utenlandskPeriodebeløpRepository.save(
@@ -53,7 +53,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
         val barn1 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
 
         val utenlandskPeriodebeløp =
             utenlandskPeriodebeløpRepository.save(

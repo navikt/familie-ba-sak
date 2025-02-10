@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -57,7 +57,7 @@ class ArbeidsfordelingServiceTest {
         @Test
         fun `skal overstyre behandlende enhet fra NORG dersom enhet fra finnArbeidsfordelingForOppgave er en annen`() {
             // Arrange
-            val behandling = lagBehandling()
+            val behandling = lagBehandlingMedId()
             val søker = lagPersonEnkel(PersonType.SØKER, behandling.fagsak.aktør)
             val barn = lagPersonEnkel(PersonType.BARN)
             val arbeidsfordelingsenhet =
@@ -108,7 +108,7 @@ class ArbeidsfordelingServiceTest {
         @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal kaste Feil hvis forrige behandling er null for automatiske behandlinger som skal ha tidligere behandlinger`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
-            val behandling = lagBehandling(årsak = behandlingÅrsak)
+            val behandling = lagBehandlingMedId(årsak = behandlingÅrsak)
 
             every {
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())
@@ -126,8 +126,8 @@ class ArbeidsfordelingServiceTest {
         @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal sette 4863 til behandlende enhet dersom ingen av de tidligere behandlingene har hatt en annen behandlende enhet enn 4863`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
-            val forrigeBehandling = lagBehandling()
-            val behandling = lagBehandling(årsak = behandlingÅrsak)
+            val forrigeBehandling = lagBehandlingMedId()
+            val behandling = lagBehandlingMedId(årsak = behandlingÅrsak)
 
             val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
 
@@ -156,8 +156,8 @@ class ArbeidsfordelingServiceTest {
         @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal sette behandlende enhet til en gyldig enhet dersom en av de tidligere behandlingene har hatt en annen behandlende enhet enn 4863`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
-            val forrigeBehandling = lagBehandling()
-            val behandling = lagBehandling(årsak = behandlingÅrsak)
+            val forrigeBehandling = lagBehandlingMedId()
+            val behandling = lagBehandlingMedId(årsak = behandlingÅrsak)
 
             val arbeidsfordelingPåBehandlingSlot = slot<ArbeidsfordelingPåBehandling>()
 
@@ -186,8 +186,8 @@ class ArbeidsfordelingServiceTest {
         @EnumSource(BehandlingÅrsak::class, names = ["SATSENDRING", "MÅNEDLIG_VALUTAJUSTERING", "SMÅBARNSTILLEGG", "OMREGNING_18ÅR", "OMREGNING_SMÅBARNSTILLEGG", "OPPDATER_UTVIDET_KLASSEKODE"], mode = EnumSource.Mode.INCLUDE)
         fun `fastsettBehandlendeEnhet skal ikke gjøre noe dersom aktiv behandlende enhet finnes`(behandlingÅrsak: BehandlingÅrsak) {
             // Arrange
-            val forrigeBehandling = lagBehandling()
-            val behandling = lagBehandling(årsak = behandlingÅrsak)
+            val forrigeBehandling = lagBehandlingMedId()
+            val behandling = lagBehandlingMedId(årsak = behandlingÅrsak)
 
             every {
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any())

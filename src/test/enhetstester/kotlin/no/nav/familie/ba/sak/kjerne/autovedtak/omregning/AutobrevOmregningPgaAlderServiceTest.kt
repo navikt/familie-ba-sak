@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigSøker
@@ -299,7 +299,7 @@ internal class AutobrevOmregningPgaAlderServiceTest {
         eøsNullUtbetaling: Boolean = false,
     ): Triple<Behandling, Person, Person> {
         val behandling =
-            lagBehandling().also {
+            lagBehandlingMedId().also {
                 it.fagsak.status = fagsakStatus
                 it.status = behandlingStatus
                 it.kategori = if (eøsNullUtbetaling) BehandlingKategori.EØS else BehandlingKategori.NASJONAL

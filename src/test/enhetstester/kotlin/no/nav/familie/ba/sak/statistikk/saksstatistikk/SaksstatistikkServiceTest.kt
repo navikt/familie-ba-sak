@@ -11,7 +11,7 @@ import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagSettPåVent
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -142,7 +142,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
         val behandling =
-            lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
+            lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE).also {
                 it.resultat = Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
             }
 
@@ -160,7 +160,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
         val behandling =
-            lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
+            lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
                 it.resultat = Behandlingsresultat.INNVILGET
             }
 
@@ -222,7 +222,7 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til behandlingDVH for manuell rute`() {
         val behandling =
-            lagBehandling(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = Behandlingsresultat.AVSLÅTT }
+            lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD).also { it.resultat = Behandlingsresultat.AVSLÅTT }
 
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns
             Totrinnskontroll(
@@ -305,7 +305,7 @@ internal class SaksstatistikkServiceTest(
         listOf(FagsakType.INSTITUSJON, FagsakType.BARN_ENSLIG_MINDREÅRIG, null)
             .forEach { optionalSakstype ->
                 val fagsak = defaultFagsak().copy(type = optionalSakstype ?: FagsakType.NORMAL)
-                val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
+                val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD, fagsak = fagsak)
 
                 every { behandlingHentOgPersisterService.hent(any()) } returns behandling
 
@@ -409,7 +409,7 @@ internal class SaksstatistikkServiceTest(
                 tilfeldigPerson(personType = PersonType.SØKER),
             )
 
-        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling(fagsak)
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandlingMedId(fagsak)
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))

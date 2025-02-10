@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -36,7 +36,7 @@ class TilkjentYtelseRepositoryTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-            val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+            val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
             tilkjentYtelseRepository.save(
                 lagTilkjentYtelse(
@@ -58,7 +58,7 @@ class TilkjentYtelseRepositoryTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-            val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+            val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
             tilkjentYtelseRepository.save(
                 lagTilkjentYtelse(
@@ -83,7 +83,7 @@ class TilkjentYtelseRepositoryTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-            val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+            val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
             val migreringsdatoPluss1Mnd = LocalDate.of(2025, 1, 1)
 
             tilkjentYtelseRepository.save(

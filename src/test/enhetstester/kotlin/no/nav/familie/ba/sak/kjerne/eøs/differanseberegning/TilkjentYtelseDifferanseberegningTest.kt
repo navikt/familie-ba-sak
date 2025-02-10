@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -36,7 +36,7 @@ class TilkjentYtelseDifferanseberegningTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val behandlingId = BehandlingId(behandling.id)
         val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
@@ -112,7 +112,7 @@ class TilkjentYtelseDifferanseberegningTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val behandlingId = BehandlingId(behandling.id)
         val startMåned = barnsFødselsdato.tilInneværendeMåned()
 

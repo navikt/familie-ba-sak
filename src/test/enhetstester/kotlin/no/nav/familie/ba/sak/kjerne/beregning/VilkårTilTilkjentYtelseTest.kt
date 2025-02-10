@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -256,7 +256,7 @@ class TestVilkårsvurderingBuilder(
     private val vilkårsvurdering =
         Vilkårsvurdering(
             behandling =
-                lagBehandling(
+                lagBehandlingMedId(
                     behandlingKategori = BehandlingKategori.valueOf(sakType),
                 ),
         )

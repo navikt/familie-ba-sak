@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseUtvidet
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
@@ -92,7 +92,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal returnere utvidet barnetrygdperiode fra basak`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
@@ -130,7 +130,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
@@ -185,7 +185,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd når periodene overlapper`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
@@ -239,7 +239,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal slå sammen resultat fra ba-sak og infotrygd, typisk rett etter en migrering, hvor tomMåned i infotrygd er null`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 
@@ -293,7 +293,7 @@ internal class BisysServiceTest {
 
     @Test
     fun `Skal ikke slå sammen resultat fra ba-sak og infotrygd hvis periode er manuelt beregnet i infotrygd`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling).copy(utbetalingsoppdrag = "utbetalt")
 

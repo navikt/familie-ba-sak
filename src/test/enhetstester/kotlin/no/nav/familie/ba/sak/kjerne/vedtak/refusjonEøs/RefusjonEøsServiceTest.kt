@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagRefusjonEøs
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.assertj.core.api.Assertions.assertThat
@@ -24,7 +24,7 @@ class RefusjonEøsServiceTest {
         @Test
         fun `skal returnere false om refusjon eøs på behandling er tom`() {
             // Arrange
-            val behandling = lagBehandling()
+            val behandling = lagBehandlingMedId()
 
             every {
                 refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId = behandling.id)
@@ -40,7 +40,7 @@ class RefusjonEøsServiceTest {
         @Test
         fun `skal returnere true om refusjon eøs på behandling ikke er tom`() {
             // Arrange
-            val behandling = lagBehandling()
+            val behandling = lagBehandlingMedId()
 
             every {
                 refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId = behandling.id)

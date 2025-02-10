@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -47,8 +47,8 @@ import java.time.YearMonth
 internal class BrevUtilsTest {
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
-        assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
-        val revurdering = lagBehandling().copy(type = BehandlingType.REVURDERING)
+        assertNull(hentOverstyrtDokumenttittel(lagBehandlingMedId().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
+        val revurdering = lagBehandlingMedId().copy(type = BehandlingType.REVURDERING)
         assertNull(hentOverstyrtDokumenttittel(revurdering))
 
         Assertions.assertEquals(

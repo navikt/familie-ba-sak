@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_MARS_2023
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -68,7 +68,7 @@ internal class StartSatsendringTest {
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
         every { unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false) } returns true
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns
             PageImpl(
@@ -89,7 +89,7 @@ internal class StartSatsendringTest {
         every { unleashService.isEnabled(any(), false) } returns true
         every { unleashService.isEnabled(any<FeatureToggle>()) } returns true
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns
             PageImpl(
@@ -121,7 +121,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandlingMedId()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns
             Satskjøring(
                 fagsakId = 1L,
@@ -133,7 +133,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandlingMedId()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
@@ -142,7 +142,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandlingMedId()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
@@ -158,7 +158,7 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(1L) } returns lagBehandlingMedId()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 

@@ -7,7 +7,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -62,8 +62,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
-        val forrigeBehandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
+        val forrigeBehandling = lagBehandlingMedId(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
 
         val forrigeVilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
@@ -116,8 +116,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
-        val forrigeBehandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
+        val forrigeBehandling = lagBehandlingMedId(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
 
         val forrigeVilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
@@ -205,8 +205,8 @@ class VilkårsvurderingForNyBehandlingServiceTest {
         val barn2 = lagPerson(type = PersonType.BARN)
         val barna = listOf(barn1, barn2)
         val fagsak = Fagsak(aktør = søker.aktør)
-        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
-        val forrigeBehandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
+        val forrigeBehandling = lagBehandlingMedId(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
 
         val forrigeVilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(

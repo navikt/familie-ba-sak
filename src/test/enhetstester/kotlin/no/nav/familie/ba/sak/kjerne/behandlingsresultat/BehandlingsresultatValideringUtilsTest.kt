@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -20,7 +20,7 @@ import java.time.YearMonth
 internal class BehandlingsresultatValideringUtilsTest {
     @Test
     fun `Valider eksplisitt avlag - Skal kaste feil hvis eksplisitt avslått for barn det ikke er fremstilt krav for`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
@@ -58,7 +58,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `Valider eksplisitt avslag - Skal ikke kaste feil hvis søker er eksplisitt avslått`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søker = lagPerson(type = PersonType.SØKER)
 
@@ -84,7 +84,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
     @Test
     fun `Valider eksplisitt avslag - Skal ikke kaste feil hvis person med eksplsitt avslag er fremstilt krav for`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))

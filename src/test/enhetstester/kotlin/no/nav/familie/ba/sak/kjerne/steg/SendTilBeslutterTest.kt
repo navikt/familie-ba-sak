@@ -8,7 +8,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -61,7 +61,7 @@ class SendTilBeslutterTest {
         @Test
         fun `Skal opprette totrinnskontroll, logg, task og oppdatere vedtaksbrev før sending til neste steg`() {
             // Arrange
-            val behandling = lagBehandling()
+            val behandling = lagBehandlingMedId()
             val vedtak = lagVedtak(behandling = behandling)
 
             every { mockTotrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id) } returns null
@@ -92,7 +92,7 @@ class SendTilBeslutterTest {
         @Test
         fun `Skal ikke oppdatere vedtaksbrev dersom det er automatisk behandling`() {
             // Arrange
-            val behandling = lagBehandling(skalBehandlesAutomatisk = true)
+            val behandling = lagBehandlingMedId(skalBehandlesAutomatisk = true)
             val vedtak = lagVedtak(behandling = behandling)
 
             every { mockTotrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id) } returns null
@@ -121,7 +121,7 @@ class SendTilBeslutterTest {
 
     @Test
     fun `Sjekk at validering er bakoverkompatibel med endring i stegrekkefølge`() {
-        val behandling = lagBehandling(førsteSteg = StegType.REGISTRERE_SØKNAD)
+        val behandling = lagBehandlingMedId(førsteSteg = StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_PERSONGRUNNLAG)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
@@ -131,7 +131,7 @@ class SendTilBeslutterTest {
 
     @Test
     fun `Sjekk validering med gyldig stegrekkefølge`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
@@ -141,7 +141,7 @@ class SendTilBeslutterTest {
 
     @Test
     fun `Sjekk validering med ugyldig flere steg av samme type`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         behandling.behandlingStegTilstand.add(
@@ -158,7 +158,7 @@ class SendTilBeslutterTest {
 
     @Test
     fun `Sjekk validering med ugyldig stegrekkefølge`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         behandling.leggTilBehandlingStegTilstand(StegType.REGISTRERE_SØKNAD)
         behandling.leggTilBehandlingStegTilstand(StegType.SEND_TIL_BESLUTTER)
         behandling.behandlingStegTilstand.add(
@@ -176,7 +176,7 @@ class SendTilBeslutterTest {
     @Test
     fun `Sjekk validering som inneholder annen vurdering som ikke er vurdert`() {
         val vilkårsvurdering =
-            lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_VURDERT)
+            lagVilkårsvurdering(randomAktør(), lagBehandlingMedId(), Resultat.IKKE_VURDERT)
 
         assertThrows<FunksjonellFeil> {
             vilkårsvurdering.validerAtAndreVurderingerErVurdert()
@@ -186,7 +186,7 @@ class SendTilBeslutterTest {
     @Test
     fun `Sjekk validering som inneholder annen vurdering hvor alle er vurdert`() {
         val vilkårsvurdering =
-            lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_OPPFYLT)
+            lagVilkårsvurdering(randomAktør(), lagBehandlingMedId(), Resultat.IKKE_OPPFYLT)
 
         vilkårsvurdering.validerAtAndreVurderingerErVurdert()
     }

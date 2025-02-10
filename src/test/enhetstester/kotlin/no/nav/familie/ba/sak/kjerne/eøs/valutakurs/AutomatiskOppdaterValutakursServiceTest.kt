@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -80,9 +80,9 @@ class AutomatiskOppdaterValutakursServiceTest {
     @BeforeEach
     fun beforeEach() {
         every { simuleringService.oppdaterSimuleringPåBehandlingVedBehov(any()) } returns emptyList()
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandlingMedId(id = forrigeBehandlingId.id) }
         every { behandlingHentOgPersisterService.hent(any()) } answers {
-            lagBehandling(id = firstArg())
+            lagBehandlingMedId(id = firstArg())
         }
         every { ecbService.hentValutakurs(any(), any()) } answers {
             val dato = secondArg<LocalDate>()
@@ -133,8 +133,8 @@ class AutomatiskOppdaterValutakursServiceTest {
 
     @Test
     fun `resettValutakurserOgLagValutakurserEtterEndringstidspunkt skal resette valutakursene før endringstidspunktet til forrige behandling`() {
-        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandling(id = firstArg()) }
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { behandlingHentOgPersisterService.hent(any()) } answers { lagBehandlingMedId(id = firstArg()) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandlingMedId(id = forrigeBehandlingId.id) }
 
         UtenlandskPeriodebeløpBuilder(jan(2023), forrigeBehandlingId)
             .medBeløp("77777777", "EUR", "N", barn1, barn2, barn3)
@@ -182,12 +182,12 @@ class AutomatiskOppdaterValutakursServiceTest {
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal ikke oppdatere valutakurser før praksisendringsdatoen juni 2024 for revurdering`() {
         every { behandlingHentOgPersisterService.hent(any()) } answers {
-            lagBehandling(
+            lagBehandlingMedId(
                 id = firstArg(),
                 behandlingType = BehandlingType.REVURDERING,
             )
         }
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandlingMedId(id = forrigeBehandlingId.id) }
         every { ecbService.hentValutakurs(any(), any()) } answers {
             val dato = secondArg<LocalDate>()
             (dato.month.value % 10).toBigDecimal()
@@ -313,12 +313,12 @@ class AutomatiskOppdaterValutakursServiceTest {
     @Test
     fun `oppdaterValutakurserEtterEndringstidspunkt skal kunne oppdatere valutakurser før praksisendringsdatoen januar 2023 for førstegangsbehandlinger`() {
         every { behandlingHentOgPersisterService.hent(any()) } answers {
-            lagBehandling(
+            lagBehandlingMedId(
                 id = firstArg(),
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             )
         }
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandling(id = forrigeBehandlingId.id) }
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(any()) } answers { lagBehandlingMedId(id = forrigeBehandlingId.id) }
         every { ecbService.hentValutakurs(any(), any()) } answers {
             val dato = secondArg<LocalDate>()
             (dato.month.value % 10).toBigDecimal()

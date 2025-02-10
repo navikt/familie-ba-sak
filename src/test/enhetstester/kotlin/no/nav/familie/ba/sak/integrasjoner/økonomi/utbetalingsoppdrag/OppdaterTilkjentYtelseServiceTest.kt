@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
@@ -44,7 +44,7 @@ class OppdaterTilkjentYtelseServiceTest {
     @Test
     fun `skal oppdatere tilkjent ytelse med beregnet utbetalingsoppdrag`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
@@ -113,7 +113,7 @@ class OppdaterTilkjentYtelseServiceTest {
     @Test
     fun `skal oppdatere tilkjent ytelse med beregnet utbetalingsoppdrag når det finnes endrede utbetalingsandeler`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val søker = lagPerson()
@@ -193,7 +193,7 @@ class OppdaterTilkjentYtelseServiceTest {
     @Test
     fun `skal oppdatere tilkjent ytelse med beregnet utbetalingsoppdrag ved rent opphør`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
@@ -263,7 +263,7 @@ class OppdaterTilkjentYtelseServiceTest {
     @Test
     fun `skal oppdatere tilkjent ytelse med beregnet utbetalingsoppdrag ved opphør`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
@@ -360,7 +360,7 @@ class OppdaterTilkjentYtelseServiceTest {
     @Test
     fun `skal kaste feil dersom antall andeler med utbetaling ikke stemmer overens med antall andeler med periode id i beregnet utbetalingsoppdrag`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =
@@ -427,7 +427,7 @@ class OppdaterTilkjentYtelseServiceTest {
     @Test
     fun `skal kaste feil dersom vi ikke finner andel med periode id i beregnet utbetalingsoppdrag som matcher andel med utbetaling`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fom = dagensDato.plusMonths(1).toYearMonth()
         val tom = dagensDato.plusMonths(2).toYearMonth()
         val tilkjentYtelse =

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
@@ -47,7 +47,7 @@ internal class TidslinjerTest {
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
         val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
         val vilkårsvurderingBygger =
@@ -97,7 +97,7 @@ internal class TidslinjerTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val startMåned = barnsFødselsdato.tilInneværendeMåned()
 
         val vilkårsvurderingBygger =
@@ -135,7 +135,7 @@ internal class TidslinjerTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val vilkårsvurderingBygger =
             VilkårsvurderingBuilder<Måned>(behandling)

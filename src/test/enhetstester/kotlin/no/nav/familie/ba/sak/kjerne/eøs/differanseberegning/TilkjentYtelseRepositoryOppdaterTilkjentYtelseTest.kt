@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.oppdaterTilkjentYtelse
@@ -24,7 +24,7 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
     @Test
     fun `skal ikke kaste exception hvis tilkjent ytelse oppdateres med gyldige andeler`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val forrigeTilkjentYtelse =
             TilkjentYtelseBuilder(startMåned, behandling)

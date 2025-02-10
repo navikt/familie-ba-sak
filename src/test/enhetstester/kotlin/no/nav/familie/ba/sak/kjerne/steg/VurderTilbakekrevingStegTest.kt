@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -24,7 +24,7 @@ class VurderTilbakekrevingStegTest {
         VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
 
     private val behandling: Behandling =
-        lagBehandling(
+        lagBehandlingMedId(
             behandlingType = BehandlingType.REVURDERING,
             årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             førsteSteg = StegType.VURDER_TILBAKEKREVING,

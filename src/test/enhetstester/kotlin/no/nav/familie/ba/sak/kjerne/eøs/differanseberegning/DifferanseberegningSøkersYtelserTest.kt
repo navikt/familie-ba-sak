@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -29,7 +29,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn2 = barn født 15.des(2017)
         val barn3 = barn født 9.des(2018)
         val barna = listOf(barn1, barn2, barn3)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser =
             KompetanseBuilder(jan(2017))
@@ -115,7 +115,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
         val barna = listOf(barn1, barn2)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser =
             KompetanseBuilder(jan(2017))
@@ -161,7 +161,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
         val barna = listOf(barn1, barn2)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser = emptyList<Kompetanse>()
 
@@ -210,7 +210,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn2 = barn født 15.des(2017)
         val barn3 = barn født 9.des(2018)
         val barna = listOf(barn1, barn2, barn3)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser = emptyList<Kompetanse>()
 
@@ -291,7 +291,7 @@ class DifferanseberegningSøkersYtelserTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barna = listOf(barn1)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser =
             KompetanseBuilder(jan(2017))
@@ -334,7 +334,7 @@ class DifferanseberegningSøkersYtelserTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.des(2016)
         val barna = listOf(barn1)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser =
             KompetanseBuilder(jan(2017))
@@ -379,7 +379,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn2 = barn født 15.des(2017)
         val barn3 = barn født 9.des(2018)
         val barna = listOf(barn1, barn2, barn3)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser =
             KompetanseBuilder(jul(2020))
@@ -430,7 +430,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn2 = barn født 15.des(2017)
         val barn3 = barn født 9.des(2018)
         val barna = listOf(barn1, barn2, barn3)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val kompetanser =
             KompetanseBuilder(jul(2020))
@@ -480,7 +480,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
         val barna = listOf(barn1, barn2)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         // Ett Sekundærlandsbarn og ett primærlandsbarn
         val kompetanser =
@@ -536,7 +536,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
         val barna = listOf(barn1, barn2)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         // Ett Sekundærlandsbarn og ett primærlandsbarn
         val kompetanser =
@@ -592,7 +592,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn1 = barn født 13.des(2016)
         val barn2 = barn født 15.des(2017)
         val barna = listOf(barn1, barn2)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         // Ett Sekundærlandsbarn og ett primærlandsbarn
         val kompetanser =
@@ -650,7 +650,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn2 = barn født 15.des(2017)
         val barn3 = barn født 13.des(2016)
         val barna = listOf(barn1, barn2, barn3)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         // Ett Sekundærlandsbarn og to primærlandsbarn
         val kompetanser =
@@ -714,7 +714,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn2 = barn født 15.des(2017)
         val barn3 = barn født 13.des(2016)
         val barna = listOf(barn1, barn2, barn3)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         // Ett Sekundærlandsbarn og to primærlandsbarn
         val kompetanser =
@@ -790,7 +790,7 @@ class DifferanseberegningSøkersYtelserTest {
         val barn1 = barn født 1.jan(2016)
         val barn2 = barn født 1.jan(2019)
         val barna = listOf(barn1, barn2)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         // To sekundærlandsbarn
         val kompetanser =

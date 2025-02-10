@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -80,7 +80,7 @@ class LagreMigreringsdatoTest {
         assertDoesNotThrow {
             behandlingService.lagreNedMigreringsdato(
                 migreringsdato = LocalDate.now(),
-                behandling = lagBehandling(),
+                behandling = lagBehandlingMedId(),
             )
         }
     }
@@ -96,7 +96,7 @@ class LagreMigreringsdatoTest {
                 behandlingService.lagreNedMigreringsdato(
                     migreringsdato = LocalDate.now(),
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                         ),
@@ -118,7 +118,7 @@ class LagreMigreringsdatoTest {
             behandlingService.lagreNedMigreringsdato(
                 migreringsdato = LocalDate.now().minusMonths(1),
                 behandling =
-                    lagBehandling(
+                    lagBehandlingMedId(
                         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                         årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                     ),
@@ -130,7 +130,7 @@ class LagreMigreringsdatoTest {
     fun `Lagre tidligere migreringstidspunkt skal kaste feil dersom forrige behandling ikke har lagret migreringsdato`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns null
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
-            lagBehandling(behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD).also {
+            lagBehandlingMedId(behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD).also {
                 it.status = BehandlingStatus.AVSLUTTET
                 it.resultat = Behandlingsresultat.INNVILGET
             }
@@ -143,7 +143,7 @@ class LagreMigreringsdatoTest {
                 behandlingService.lagreNedMigreringsdato(
                     migreringsdato = LocalDate.now(),
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                         ),
@@ -159,7 +159,7 @@ class LagreMigreringsdatoTest {
     fun `Lagre tidligere migreringstidspunkt skal ikke kaste feil dersom forrige behandling ikke er migreringsbehandling`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns null
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
-            lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING).also {
+            lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING).also {
                 it.status = BehandlingStatus.AVSLUTTET
                 it.resultat = Behandlingsresultat.INNVILGET
             }
@@ -171,7 +171,7 @@ class LagreMigreringsdatoTest {
             behandlingService.lagreNedMigreringsdato(
                 migreringsdato = LocalDate.now(),
                 behandling =
-                    lagBehandling(
+                    lagBehandlingMedId(
                         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                         årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                     ),

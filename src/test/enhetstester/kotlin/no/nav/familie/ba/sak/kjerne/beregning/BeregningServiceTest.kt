@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -138,7 +138,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak med 18-års vilkår som sluttdato`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2002, 7, 1))
@@ -219,7 +219,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for innvilget vedtak som spenner over flere satsperioder`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 5, 4))
@@ -294,7 +294,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal verifisere at endret utbetaling andel appliseres på en innvilget utbetaling andel`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2016, 4, 5))
         val søker = lagPerson(type = PersonType.SØKER)
@@ -394,7 +394,7 @@ class BeregningServiceTest {
 
     @Test
     fun `Skal mappe perioderesultat til andel ytelser for avslått vedtak`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barn = lagPerson(type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
@@ -450,7 +450,7 @@ class BeregningServiceTest {
 
     @Test
     fun `For flere barn med forskjellige perioderesultat skal perioderesultat mappes til andel ytelser`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
@@ -891,8 +891,8 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom det utbetalingsbeløpene er like mellom nåværende og forrige behandling`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandlingMedId()
+        val nåværendeBehandling = lagBehandlingMedId()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -943,8 +943,8 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom man har gått fra andeler med 0 i beløp til ingen andeler`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandlingMedId()
+        val nåværendeBehandling = lagBehandlingMedId()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -980,8 +980,8 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom man har gått fra ingen andeler til andeler med 0 i beløp`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandlingMedId()
+        val nåværendeBehandling = lagBehandlingMedId()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -1017,8 +1017,8 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere ENDRING_I_UTBETALING dersom man har gått fra ingen andeler til andeler med over 0 i beløp`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandlingMedId()
+        val nåværendeBehandling = lagBehandlingMedId()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -1054,8 +1054,8 @@ class BeregningServiceTest {
 
     @Test
     fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere ENDRING_I_UTBETALING dersom man fikk beløp over 0 i forrige behandling og det har forandret på seg`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandlingMedId()
+        val nåværendeBehandling = lagBehandlingMedId()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -1114,7 +1114,7 @@ class BeregningServiceTest {
         deltBostedForAndrePeriode: Boolean = false,
         skalLageSplitt: Boolean,
     ) {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
 
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
@@ -1276,7 +1276,7 @@ class BeregningServiceTest {
         barna: List<Person>,
         søker: Person,
     ): List<AndelTilkjentYtelse> {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hent(behandling.id) } returns behandling
         val vilkårsvurdering =
             lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)

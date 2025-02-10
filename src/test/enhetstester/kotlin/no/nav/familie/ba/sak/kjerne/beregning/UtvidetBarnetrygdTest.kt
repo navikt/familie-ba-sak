@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -57,7 +57,7 @@ internal class UtvidetBarnetrygdTest {
         val barnB =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 2, 15), rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søkerResultat =
@@ -149,7 +149,7 @@ internal class UtvidetBarnetrygdTest {
         val oppfyltBarn =
             OppfyltPeriode(fom = fødselsdatoUnder6År, tom = LocalDate.of(2021, 6, 15), rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søkerResultat =
@@ -225,7 +225,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Utvidet andeler får største prosent funnet blant andelene til barna som bor med søker`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
 
@@ -305,7 +305,7 @@ internal class UtvidetBarnetrygdTest {
         val barnOppfylt =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15), rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -387,7 +387,7 @@ internal class UtvidetBarnetrygdTest {
         val barnOppfylt =
             OppfyltPeriode(fom = LocalDate.of(2019, 6, 1), tom = LocalDate.of(2019, 8, 15), rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -469,7 +469,7 @@ internal class UtvidetBarnetrygdTest {
         val barnOppfylt =
             OppfyltPeriode(fom = søkerOrdinær.fom, tom = søkerOrdinær.tom, rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -548,7 +548,7 @@ internal class UtvidetBarnetrygdTest {
             OppfyltPeriode(fom = søkerOrdinær.fom, tom = søkerOrdinær.tom, rolle = PersonType.BARN)
         val b2bTom = LocalDate.of(2020, 2, 29)
         val b2bFom = LocalDate.of(2020, 3, 1)
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -661,7 +661,7 @@ internal class UtvidetBarnetrygdTest {
         val barnOppfylt =
             OppfyltPeriode(fom = søkerOrdinær.fom, tom = søkerOrdinær.tom, rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -775,7 +775,7 @@ internal class UtvidetBarnetrygdTest {
         val barnOppfylt =
             OppfyltPeriode(fom = søkerOrdinær.fom, tom = søkerOrdinær.tom, rolle = PersonType.BARN)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -905,7 +905,7 @@ internal class UtvidetBarnetrygdTest {
         val utvidetFørstePeriodeTom = LocalDate.of(2020, 2, 20)
         val utvidetAndrePeriodeFom = LocalDate.of(2020, 3, 15)
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerResultat =
             PersonResultat(
@@ -997,7 +997,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal kaste feil hvis utvidet-andeler ikke overlapper med noen av barnas andeler`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
 
@@ -1053,7 +1053,7 @@ internal class UtvidetBarnetrygdTest {
 
     @Test
     fun `Skal dele opp utvidet-segment ved endring i sats`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
         val søkerAktør = randomAktør()
 

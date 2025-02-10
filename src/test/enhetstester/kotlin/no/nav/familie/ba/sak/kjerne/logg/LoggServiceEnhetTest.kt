@@ -5,7 +5,7 @@ import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.config.RolleConfig
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -24,7 +24,7 @@ internal class LoggServiceEnhetTest {
 
     @Test
     fun `loggSammensattKontrollsakLagtTil skal lagre ned logg på at sammensatt kontrollsak er opprettet`() {
-        val behandling = lagBehandling(id = 1)
+        val behandling = lagBehandlingMedId(id = 1)
         val sammensattKontrollsak = SammensattKontrollsak(behandlingId = behandling.id, fritekst = "test")
 
         every { loggRepository.save(any()) } returnsArgument 0
@@ -37,7 +37,7 @@ internal class LoggServiceEnhetTest {
 
     @Test
     fun `loggSammensattKontrollsakEndret skal lagre ned logg på at sammensatt kontrollsak er endret`() {
-        val behandling = lagBehandling(id = 1)
+        val behandling = lagBehandlingMedId(id = 1)
         val oppdatertSammensattKontrollsak = SammensattKontrollsak(behandlingId = behandling.id, fritekst = "test2")
 
         every { loggRepository.save(any()) } returnsArgument 0
@@ -50,7 +50,7 @@ internal class LoggServiceEnhetTest {
 
     @Test
     fun `loggSammensattKontrollsakFjernet skal lagre ned logg på at sammensatt kontrollsak er fjernet`() {
-        val behandling = lagBehandling(id = 1)
+        val behandling = lagBehandlingMedId(id = 1)
 
         every { loggRepository.save(any()) } returnsArgument 0
 

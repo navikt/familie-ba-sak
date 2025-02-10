@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -31,7 +31,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                         ),
                     utførendeStegType = it,
@@ -63,7 +63,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.SØKNAD,
                         ),
@@ -94,7 +94,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.SØKNAD,
                         ),
@@ -124,7 +124,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.FØDSELSHENDELSE,
                         ),
@@ -149,7 +149,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                             årsak = BehandlingÅrsak.FØDSELSHENDELSE,
                         ),
@@ -165,7 +165,7 @@ class BehandlingStegTest {
             assertThrows<Feil> {
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                             årsak = BehandlingÅrsak.MIGRERING,
                         ),
@@ -196,7 +196,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.TEKNISK_ENDRING,
                             årsak = BehandlingÅrsak.TEKNISK_ENDRING,
                         ),
@@ -225,7 +225,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             behandlingType = BehandlingType.TEKNISK_ENDRING,
                             årsak = BehandlingÅrsak.TEKNISK_ENDRING,
                         ),
@@ -251,7 +251,7 @@ class BehandlingStegTest {
             assertEquals(it, steg)
             steg =
                 hentNesteSteg(
-                    behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR),
+                    behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.OMREGNING_18ÅR),
                     utførendeStegType = it,
                     endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
                 )
@@ -271,7 +271,7 @@ class BehandlingStegTest {
             if (it == StegType.BEHANDLINGSRESULTAT) {
                 assertThrows<Feil> {
                     hentNesteSteg(
-                        behandling = lagBehandling(årsak = BehandlingÅrsak.OMREGNING_18ÅR),
+                        behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.OMREGNING_18ÅR),
                         utførendeStegType = it,
                         endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
                     )
@@ -280,7 +280,7 @@ class BehandlingStegTest {
                 steg =
                     hentNesteSteg(
                         behandling =
-                            lagBehandling(
+                            lagBehandlingMedId(
                                 årsak = BehandlingÅrsak.OMREGNING_18ÅR,
                             ),
                         utførendeStegType = it,
@@ -313,7 +313,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
                         ),
                     utførendeStegType = it,
@@ -345,7 +345,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
                         ),
                     utførendeStegType = it,
@@ -371,7 +371,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             årsak = BehandlingÅrsak.SATSENDRING,
                         ),
                     utførendeStegType = it,
@@ -394,7 +394,7 @@ class BehandlingStegTest {
                 assertThrows<Feil> {
                     hentNesteSteg(
                         behandling =
-                            lagBehandling(
+                            lagBehandlingMedId(
                                 årsak = BehandlingÅrsak.SATSENDRING,
                             ),
                         utførendeStegType = it,
@@ -405,7 +405,7 @@ class BehandlingStegTest {
                 steg =
                     hentNesteSteg(
                         behandling =
-                            lagBehandling(
+                            lagBehandlingMedId(
                                 årsak = BehandlingÅrsak.SATSENDRING,
                             ),
                         utførendeStegType = it,
@@ -435,7 +435,7 @@ class BehandlingStegTest {
             steg =
                 hentNesteSteg(
                     behandling =
-                        lagBehandling(
+                        lagBehandlingMedId(
                             årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
                         ),
                     utførendeStegType = it,
@@ -448,7 +448,7 @@ class BehandlingStegTest {
     fun `Skal kaste feil dersom det er en søknad og det forsøkes å gå videre fra beslutt vedtak uten at det har vært sjekk om det finnes endringer i utbetaling`() {
         assertThrows<Feil> {
             hentNesteSteg(
-                lagBehandling(
+                lagBehandlingMedId(
                     årsak = BehandlingÅrsak.SØKNAD,
                 ),
                 utførendeStegType = StegType.BESLUTTE_VEDTAK,

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.common
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -94,7 +94,7 @@ internal class TidTest {
     @Test
     fun `skal bestemme om periode er etterfølgende periode`() {
         val personAktørId = randomAktør()
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val resultat: Resultat = mockk()
         val vilkår: Vilkår = mockk(relaxed = true)
         val vilkårsvurdering = lagVilkårsvurdering(personAktørId, behandling, resultat)

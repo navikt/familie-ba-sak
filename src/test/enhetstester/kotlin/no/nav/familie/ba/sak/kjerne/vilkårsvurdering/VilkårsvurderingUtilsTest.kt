@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 
 class VilkårsvurderingUtilsTest {
     private val uvesentligVilkårsvurdering =
-        lagVilkårsvurdering(randomAktør(), lagBehandling(), Resultat.IKKE_VURDERT)
+        lagVilkårsvurdering(randomAktør(), lagBehandlingMedId(), Resultat.IKKE_VURDERT)
 
     @Test
     fun `feil kastes når det finnes løpende oppfylt ved forsøk på å legge til avslag uten periode`() {
@@ -231,7 +231,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `genererPersonResultatForPerson skal sette til-og-med dato på alle vilkår til dødsfallsdato og begrunnelse til dødsfall hvis barn er død`() {
-        val nyBehandling = lagBehandling()
+        val nyBehandling = lagBehandlingMedId()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
         val dødtBarn = lagPerson(type = PersonType.BARN).apply { dødsfall = lagDødsfallFraPdl(this, "2012-12-12", null) }
@@ -252,7 +252,7 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `genererPersonResultatForPerson skal sette til-og-med dato på under-18-årsvilkår til 18 års datoen hvis barn ikke er død`() {
-        val nyBehandling = lagBehandling()
+        val nyBehandling = lagBehandlingMedId()
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
         val levendeBarn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 10, 10))

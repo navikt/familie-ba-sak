@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -31,7 +31,7 @@ internal class VilkårsvurderingServiceTest {
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal sette tom dato til dødsfallsdato dersom dødsfallsdato er tidligere enn nåværende tom`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         val aktør = randomAktør()
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
         val vilkårTomDato = LocalDate.of(2020, 1, 1)
@@ -57,7 +57,7 @@ internal class VilkårsvurderingServiceTest {
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal ikke sette tom dato til dødsfallsdato dersom dødsfallsdato er senere enn nåværende tom`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         val aktør = randomAktør()
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
         val vilkårTomDato = LocalDate.of(2020, 1, 1)
@@ -83,7 +83,7 @@ internal class VilkårsvurderingServiceTest {
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal ikke sette tom dato til dødsfallsdato dersom tom dato ikke allerede er satt`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         val aktør = randomAktør()
         val vilkårFomDato = LocalDate.of(2000, 1, 1)
         val dødsfallsDato = LocalDate.of(2022, 1, 1)

@@ -13,7 +13,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
@@ -85,8 +85,8 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
-        val sisteVedtatteBehandling = lagBehandling()
-        val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
+        val behandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
@@ -135,8 +135,8 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
-        val behandling = lagBehandling()
-        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
@@ -185,8 +185,8 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
-        val behandling = lagBehandling()
-        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
@@ -240,8 +240,8 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
-        val behandling = lagBehandling()
-        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
@@ -298,8 +298,8 @@ class FiltreringsreglerServiceTest {
 
         val nyBehandlingHendelse =
             NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
-        val behandling = lagBehandling()
-        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
@@ -356,8 +356,8 @@ class FiltreringsreglerServiceTest {
 
         val nyBehandlingHendelse =
             NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
-        val behandling = lagBehandling()
-        val sisteVedtatteBehandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
@@ -411,8 +411,8 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
-        val sisteVedtatteBehandling = lagBehandling()
-        val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
+        val behandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
@@ -448,8 +448,8 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
-        val sisteVedtatteBehandling = lagBehandling()
-        val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
+        val behandling = lagBehandlingMedId()
 
         val fødselshendelsefiltreringResultatSlot =
             settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)

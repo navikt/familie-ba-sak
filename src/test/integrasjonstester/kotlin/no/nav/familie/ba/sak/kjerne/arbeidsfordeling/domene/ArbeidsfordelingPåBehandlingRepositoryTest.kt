@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
@@ -69,7 +69,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
                     ),
@@ -96,7 +96,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.FATTER_VEDTAK,
                         aktivertTid = LocalDateTime.now(),
@@ -125,7 +125,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
                     val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
                     val behandling =
                         behandlingRepository.save(
-                            lagBehandling(
+                            lagBehandlingUtenId(
                                 fagsak = fagsak,
                                 status = BehandlingStatus.AVSLUTTET,
                                 resultat = behandlingsResultat,
@@ -152,7 +152,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
 
             val nyBehandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
                         aktivertTid = LocalDateTime.now(),
@@ -160,7 +160,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
                 )
             val gammelBehandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
                         aktivertTid = LocalDateTime.now().minusDays(10),

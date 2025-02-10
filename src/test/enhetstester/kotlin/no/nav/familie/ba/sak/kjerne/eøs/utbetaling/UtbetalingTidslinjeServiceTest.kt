@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utbetaling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -35,7 +35,7 @@ class UtbetalingTidslinjeServiceTest {
     @Test
     fun `Skal returnere emptyMap hvis det ikke finnes noen endringer eller utbetaling av utvidet`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
 
         // Act
@@ -52,7 +52,7 @@ class UtbetalingTidslinjeServiceTest {
     @Test
     fun `Skal returnere emptyMap hvis det finnes utbetaling av utvidet når det ikke finnes endret utbetaling andeler`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
         val tomUtvidet = YearMonth.now().plusYears(1)
 
@@ -80,7 +80,7 @@ class UtbetalingTidslinjeServiceTest {
     @Test
     fun `Skal returnere false-periode hvis det finnes utbetaling av utvidet når ordinær er endret til 0kr`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
         val tomUtvidet = YearMonth.now().plusYears(1)
 
@@ -130,7 +130,7 @@ class UtbetalingTidslinjeServiceTest {
     @Test
     fun `Skal returnere true-periode hvis det finnes endring hvor ordinær er satt til 0kr og det ikke betales ut utvidet`() {
         // Arrange
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns emptyList()
 

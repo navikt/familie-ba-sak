@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -18,7 +18,7 @@ class PersongrunnlagTest {
         val barn = randomFnr()
         val nyttbarn = randomFnr()
 
-        val forrigeBehandling = lagBehandling()
+        val forrigeBehandling = lagBehandlingMedId()
         val forrigeGrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = forrigeBehandling.id,
@@ -26,7 +26,7 @@ class PersongrunnlagTest {
                 barnasIdenter = listOf(barn),
             )
 
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val grunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = behandling.id,

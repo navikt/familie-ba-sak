@@ -5,7 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -47,7 +47,7 @@ class RegistrereSøknadTest {
         @Test
         fun `skal registrer søknad uten å oppdatere behandlingstema`() {
             // Arrange
-            val behandling = lagBehandling(underkategori = BehandlingUnderkategori.ORDINÆR)
+            val behandling = lagBehandlingMedId(underkategori = BehandlingUnderkategori.ORDINÆR)
 
             val søknadDTO =
                 lagSøknadDTO(
@@ -94,7 +94,7 @@ class RegistrereSøknadTest {
         @Test
         fun `skal registrer søknad og oppdatere behandlingstema`() {
             // Arrange
-            val behandling = lagBehandling(underkategori = BehandlingUnderkategori.ORDINÆR)
+            val behandling = lagBehandlingMedId(underkategori = BehandlingUnderkategori.ORDINÆR)
 
             val søknadDTO =
                 lagSøknadDTO(

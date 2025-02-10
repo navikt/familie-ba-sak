@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -46,7 +46,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns null
 
         val personerFramstiltForKrav =
@@ -60,7 +60,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
 
         val barnSomIkkeErKryssetAvFor =
             BarnMedOpplysninger(
@@ -92,7 +92,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd og barn som er krysset for`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
         val barnSomErKryssetAvFor =
@@ -127,7 +127,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal bare returnere barn som er folkeregistret og krysset av på søknad`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
         val barn1Fnr = randomFnr()
         val mocketAktør = mockk<Aktør>()
 
@@ -184,8 +184,8 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere nye barn dersom behandlingen har fødselshendelse som årsak`() {
-        val forrigeBehandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val forrigeBehandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val nyttBarn = lagPerson()
 
         every { persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling) } returns listOf(nyttBarn)
@@ -205,7 +205,7 @@ internal class SøknadGrunnlagServiceTest {
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere eksisterende personer fra persongrunnlaget dersom behandlingen er en manuell migrering`() {
         val behandling =
-            lagBehandling(
+            lagBehandlingMedId(
                 årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             )
@@ -229,7 +229,7 @@ internal class SøknadGrunnlagServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal ikke returnere duplikater av personer`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val behandling = lagBehandlingMedId(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
         val barnSomErKryssetAvFor =

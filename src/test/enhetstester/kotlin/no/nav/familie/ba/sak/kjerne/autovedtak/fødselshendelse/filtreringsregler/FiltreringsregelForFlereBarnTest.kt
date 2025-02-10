@@ -6,7 +6,7 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -112,7 +112,7 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i NEI når det er registrert dødsfall på minst ett barn`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
         val personopplysningGrunnlag =
@@ -170,7 +170,7 @@ class FiltreringsregelForFlereBarnTest {
 
         every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
-        val sisteVedtatteBehandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
             lagVilkårsvurderingMedOverstyrendeResultater(
@@ -215,7 +215,7 @@ class FiltreringsregelForFlereBarnTest {
 
     @Test
     fun `Regelevaluering skal resultere i JA når alle filtreringsregler er oppfylt`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
         val personopplysningGrunnlag =
@@ -271,7 +271,7 @@ class FiltreringsregelForFlereBarnTest {
             }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns andelTilkjentytelse
 
-        val sisteVedtatteBehandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandlingMedId()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns
             lagVilkårsvurderingMedOverstyrendeResultater(

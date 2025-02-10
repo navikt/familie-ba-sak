@@ -8,7 +8,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -59,7 +59,7 @@ class RegistrerInstitusjonStegTest {
 
     @Test
     fun `utførStegOgAngiNeste() skal lagre institusjon og verge`() {
-        val behandling = lagBehandling(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
+        val behandling = lagBehandlingMedId(fagsak = defaultFagsak().copy(type = FagsakType.INSTITUSJON))
         val fagsakSlot = slot<Fagsak>()
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakServiceMock.lagre(capture(fagsakSlot)) } returns behandling.fagsak
@@ -86,7 +86,7 @@ class RegistrerInstitusjonStegTest {
     @Test
     fun `utførStegOgAngiNeste() skal returnere REGISTRERE_SØKNAD som neste steg`() {
         val behandling =
-            lagBehandling(
+            lagBehandlingMedId(
                 fagsak =
                     defaultFagsak().copy(
                         type = FagsakType.INSTITUSJON,

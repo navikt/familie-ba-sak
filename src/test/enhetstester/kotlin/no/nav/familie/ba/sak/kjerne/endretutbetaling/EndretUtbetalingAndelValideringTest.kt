@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -344,7 +344,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for barn, og slå sammen de som er sammenhengende`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val fom = LocalDate.now().minusMonths(5)
         val tom = LocalDate.now().plusMonths(7)
@@ -429,7 +429,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for barn og ikke slå de sammen når de ikke er sammenhengde`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val barn = lagPerson(type = PersonType.BARN)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val fom1 = LocalDate.now().minusMonths(5)
@@ -520,7 +520,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for søker, og slå sammen de som er sammenhengende`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val barn = lagPerson(type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
@@ -605,7 +605,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal finne riktige delt bosted perioder for søker, og slå sammen de som overlapper`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val barn = lagPerson(type = PersonType.BARN)
         val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
@@ -690,7 +690,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `Skal returnere tom liste hvis det ikke finnes noen delt bosted perioder på person`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(4))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)

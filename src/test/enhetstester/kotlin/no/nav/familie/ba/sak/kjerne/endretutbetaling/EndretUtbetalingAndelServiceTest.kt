@@ -5,7 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
@@ -57,7 +57,7 @@ class EndretUtbetalingAndelServiceTest {
 
     @Test
     fun `Skal kaste feil hvis endringsperiode har årsak delt bosted, men ikke overlapper med delt bosted perioder`() {
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(

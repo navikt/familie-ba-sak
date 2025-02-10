@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -117,7 +117,7 @@ class VedtakServiceTest(
 
         val personAktørId = randomAktør()
 
-        behandling = lagBehandling()
+        behandling = lagBehandlingUtenId()
 
         vilkår = Vilkår.LOVLIG_OPPHOLD
         resultat = Resultat.OPPFYLT
@@ -185,7 +185,7 @@ class VedtakServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val vilkårsvurdering = lagVilkårsvurdering(fnrAktørNr, behandling, Resultat.OPPFYLT)
 
@@ -235,7 +235,7 @@ class VedtakServiceTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         assertThrows<IllegalStateException> {
             vedtakService.oppdater(

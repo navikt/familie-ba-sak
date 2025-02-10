@@ -160,7 +160,7 @@ fun vurderVilkårsvurderingTilInnvilget(
 
 fun lagVilkårsvurdering(
     id: Long = 0L,
-    behandling: Behandling = lagBehandling(),
+    behandling: Behandling = lagBehandlingMedId(),
     aktiv: Boolean = true,
     lagPersonResultater: (vilkårsvurdering: Vilkårsvurdering) -> Set<PersonResultat> = {
         setOf(
@@ -320,7 +320,7 @@ fun lagVilkårResultat(
     periodeFom: LocalDate? = LocalDate.of(2009, 12, 24),
     periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
-    behandlingId: Long = lagBehandling().id,
+    behandlingId: Long = lagBehandlingMedId().id,
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     erEksplisittAvslagPåSøknad: Boolean = false,
     standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),

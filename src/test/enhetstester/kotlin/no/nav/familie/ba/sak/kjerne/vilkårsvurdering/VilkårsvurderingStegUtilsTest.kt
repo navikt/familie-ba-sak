@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
@@ -37,7 +37,7 @@ class VilkårsvurderingStegUtilsTest {
     fun init() {
         val personAktørId = randomAktør()
 
-        behandling = lagBehandling()
+        behandling = lagBehandlingMedId()
 
         vilkår = Vilkår.BOR_MED_SØKER
         resultat = Resultat.OPPFYLT
@@ -427,7 +427,7 @@ class VilkårsvurderingStegUtilsTest {
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke bort ikke oppfylte perioder når det gjelder samme behandling`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val initiellVilkårvurdering =
             lagVilkårsvurderingMedForskelligeResultat(søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
@@ -457,8 +457,8 @@ class VilkårsvurderingStegUtilsTest {
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke oppfylt om oppfylt finnes ved kopiering fra forrige behandling`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandling()
-        val behandling2 = lagBehandling()
+        val behandling = lagBehandlingMedId()
+        val behandling2 = lagBehandlingMedId()
 
         val initiellVilkårvurdering =
             lagVilkårsvurderingMedForskelligeResultat(søkerAktørId, behandling, listOf(Resultat.OPPFYLT))
@@ -485,7 +485,7 @@ class VilkårsvurderingStegUtilsTest {
     @Test
     fun `flyttResultaterTilInitielt filtrer ikke ikke oppfylt om oppfylt ikke finnes`() {
         val søkerAktørId = randomAktør()
-        val behandling = lagBehandling()
+        val behandling = lagBehandlingMedId()
 
         val initiellVilkårsvurdering =
             lagVilkårsvurderingMedForskelligeResultat(søkerAktørId, behandling, listOf(Resultat.OPPFYLT))

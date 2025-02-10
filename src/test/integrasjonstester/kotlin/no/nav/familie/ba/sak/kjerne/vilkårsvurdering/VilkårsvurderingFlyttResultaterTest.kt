@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.personInfo
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
@@ -63,7 +63,7 @@ class VilkårsvurderingFlyttResultaterTest(
         val barn2Aktør = personidentService.hentAktør(barn2Fnr)
 
         // Lager førstegangsbehandling med utvidet vilkåret avslått
-        val vilkårsvurderingMedUtvidetAvslått = Vilkårsvurdering(behandling = lagBehandling())
+        val vilkårsvurderingMedUtvidetAvslått = Vilkårsvurdering(behandling = lagBehandlingUtenId())
         val søkerPersonResultat =
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
@@ -148,7 +148,7 @@ class VilkårsvurderingFlyttResultaterTest(
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            overstyrendeVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+            overstyrendeVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingUtenId()),
             behandlingstype = BehandlingType.REVURDERING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,

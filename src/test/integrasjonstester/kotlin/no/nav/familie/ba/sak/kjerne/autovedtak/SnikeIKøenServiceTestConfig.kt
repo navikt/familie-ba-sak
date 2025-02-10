@@ -37,7 +37,7 @@ class SnikeIKøenServiceTestConfig(
         aktivOgÅpenBehandling.endretTidspunkt = endringstidspunktMock
         loggRepository.hentLoggForBehandling(aktivOgÅpenBehandling.id).forEach {
             loggRepository.deleteById(it.id)
-            loggRepository.saveAndFlush(it.copy(opprettetTidspunkt = endringstidspunktMock))
+            loggRepository.saveAndFlush(it.copy(id = 0, opprettetTidspunkt = endringstidspunktMock))
         }
     }
 

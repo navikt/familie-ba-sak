@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -54,7 +54,7 @@ class UtbetalingsoppdragGeneratorTest {
     fun `skal lage utbetalingsoppdrag for førstegangsbehandling`(erSimulering: Boolean) {
         // Arrange
         val saksbehandlerId = "123abc"
-        val behandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
         val vedtak = lagVedtak(behandling = behandling)
         val barn = lagPerson()
         val andelerTilkjentYtelse =
@@ -173,7 +173,7 @@ class UtbetalingsoppdragGeneratorTest {
         // Arrange
         val saksbehandlerId = "123abc"
         val barn = lagPerson()
-        val forrigeBehandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val forrigeBehandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
         val forrigeTilkjenteYtelse =
             lagTilkjentYtelse(behandling = forrigeBehandling, lagAndelerTilkjentYtelse = {
                 setOf(
@@ -191,7 +191,7 @@ class UtbetalingsoppdragGeneratorTest {
                     ),
                 )
             })
-        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING)
+        val behandling = lagBehandlingMedId(behandlingType = BehandlingType.REVURDERING)
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse =
             setOf(
@@ -312,7 +312,7 @@ class UtbetalingsoppdragGeneratorTest {
         // Arrange
         val saksbehandlerId = "123abc"
         val barn = lagPerson()
-        val forrigeBehandling = lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
+        val forrigeBehandling = lagBehandlingMedId(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING)
         val forrigeTilkjenteYtelse =
             lagTilkjentYtelse(behandling = forrigeBehandling, lagAndelerTilkjentYtelse = {
                 setOf(
@@ -331,7 +331,7 @@ class UtbetalingsoppdragGeneratorTest {
                 )
             })
         val behandling =
-            lagBehandling(
+            lagBehandlingMedId(
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE,
             )

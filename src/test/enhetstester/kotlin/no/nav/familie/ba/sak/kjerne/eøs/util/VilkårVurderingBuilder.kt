@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingMedId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -28,7 +28,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 data class VilkårsvurderingBuilder<T : Tidsenhet>(
-    val behandling: Behandling = lagBehandling(),
+    val behandling: Behandling = lagBehandlingMedId(),
     private val vilkårsvurdering: Vilkårsvurdering = Vilkårsvurdering(behandling = behandling),
 ) {
     val personresultater: MutableSet<PersonResultat> = mutableSetOf()
