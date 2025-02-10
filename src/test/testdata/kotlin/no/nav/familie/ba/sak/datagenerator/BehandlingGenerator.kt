@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 import kotlin.random.Random
 
 /**
- * Bruk denne for enhetstester hvor. Bruk lagBehandlingUtenId for integrasjonstester
+ * Bruk denne for enhetstester. Bruk lagBehandlingUtenId for integrasjonstester
  */
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
