@@ -26,8 +26,9 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                    |
       | 1            | 07.2023  | 05.2034  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
-      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
-      | 3            | 01.2025  | 05.2034  | 07.2023     | 700   | ENDR         | Ja         | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 07.2023  | 12.2024  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
+      | 3            | 01.2025  | 05.2034  | 07.2023     | 700   | ENDR         | Ja         | 2          | 1                  | UTVIDET_BARNETRYGD        |
 
 
   Scenario: Endring av utvidet barnetrygd etter behandling med årsak OPPDATER_UTVIDET_KLASSEKODE
@@ -53,8 +54,9 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                    |
       | 1            | 07.2023  | 05.2034  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
-      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
-      | 3            | 07.2023  | 05.2026  |             | 750   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
+      | 2            | 07.2023  | 12.2024  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
+      | 3            | 07.2023  | 05.2026  |             | 750   | ENDR         | Nei        | 3          | 2                  | UTVIDET_BARNETRYGD        |
 
 
   Scenario: Opphør av utvidet barnetrygd 2 behandlinger etter behandling med årsak OPPDATER_UTVIDET_KLASSEKODE
@@ -84,10 +86,11 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                    |
       | 1            | 07.2023  | 05.2034  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
-      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
-      | 3            | 07.2023  | 05.2026  |             | 500   | ENDR         | Nei        | 2          |                    | ORDINÆR_BARNETRYGD        |
-      | 4            | 07.2023  | 05.2026  |             | 400   | ENDR         | Nei        | 3          | 2                  | ORDINÆR_BARNETRYGD        |
-      | 5            | 01.2025  | 05.2034  | 07.2023     | 700   | ENDR         | Ja         | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 07.2023  | 12.2024  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
+      | 3            | 07.2023  | 05.2026  |             | 500   | ENDR         | Nei        | 3          |                    | ORDINÆR_BARNETRYGD        |
+      | 4            | 07.2023  | 05.2026  |             | 400   | ENDR         | Nei        | 4          | 3                  | ORDINÆR_BARNETRYGD        |
+      | 5            | 01.2025  | 05.2034  | 07.2023     | 700   | ENDR         | Ja         | 2          | 1                  | UTVIDET_BARNETRYGD        |
 
   Scenario: Opphør/forkorting av utvidet barnetrygd 2 behandlinger etter behandling med årsak OPPDATER_UTVIDET_KLASSEKODE
 
@@ -117,7 +120,8 @@ Egenskap: Utbetalingsoppdrag: Opphør/simulering etter OppdaterUtvidetKlassekode
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Ytelse                    |
       | 1            | 07.2023  | 05.2034  |             | 700   | NY           | Nei        | 0          |                    | UTVIDET_BARNETRYGD_GAMMEL |
-      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
-      | 3            | 07.2023  | 05.2026  |             | 500   | ENDR         | Nei        | 2          |                    | ORDINÆR_BARNETRYGD        |
-      | 4            | 07.2023  | 05.2026  |             | 400   | ENDR         | Nei        | 3          | 2                  | ORDINÆR_BARNETRYGD        |
-      | 5            | 01.2025  | 05.2034  | 06.2030     | 700   | ENDR         | Ja         | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 07.2023  | 12.2024  |             | 700   | ENDR         | Nei        | 1          | 0                  | UTVIDET_BARNETRYGD        |
+      | 2            | 01.2025  | 05.2034  |             | 700   | ENDR         | Nei        | 2          | 1                  | UTVIDET_BARNETRYGD        |
+      | 3            | 07.2023  | 05.2026  |             | 500   | ENDR         | Nei        | 3          |                    | ORDINÆR_BARNETRYGD        |
+      | 4            | 07.2023  | 05.2026  |             | 400   | ENDR         | Nei        | 4          | 3                  | ORDINÆR_BARNETRYGD        |
+      | 5            | 01.2025  | 05.2034  | 06.2030     | 700   | ENDR         | Ja         | 2          | 1                  | UTVIDET_BARNETRYGD        |

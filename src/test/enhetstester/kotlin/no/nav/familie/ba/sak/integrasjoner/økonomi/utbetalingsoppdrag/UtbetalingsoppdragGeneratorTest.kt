@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
@@ -28,6 +30,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
+import java.time.YearMonth
 
 class UtbetalingsoppdragGeneratorTest {
     private val klassifiseringKorrigerer: KlassifiseringKorrigerer = mockk()
@@ -36,7 +39,7 @@ class UtbetalingsoppdragGeneratorTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
-    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder: AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = mockk()
+    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder: AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2025, 2)))
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
@@ -319,8 +322,8 @@ class UtbetalingsoppdragGeneratorTest {
                     lagAndelTilkjentYtelse(
                         id = 1,
                         behandling = forrigeBehandling,
-                        fom = LocalDate.now().toYearMonth(),
-                        tom = LocalDate.now().toYearMonth(),
+                        fom = YearMonth.of(2024, 6),
+                        tom = YearMonth.of(2025, 3),
                         periodeIdOffset = 0,
                         forrigeperiodeIdOffset = null,
                         person = barn,
@@ -340,8 +343,8 @@ class UtbetalingsoppdragGeneratorTest {
             lagAndelTilkjentYtelse(
                 id = 2,
                 behandling = behandling,
-                fom = LocalDate.now().toYearMonth(),
-                tom = LocalDate.now().toYearMonth(),
+                fom = YearMonth.of(2024, 6),
+                tom = YearMonth.of(2025, 3),
                 person = barn,
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 kildeBehandlingId = null,
@@ -409,8 +412,6 @@ class UtbetalingsoppdragGeneratorTest {
             firstArg()
         }
 
-        every { andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(any(), any()) } returns emptyList()
-
         every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
         // Act
         val beregnetUtbetalingsoppdragLongId =
@@ -444,11 +445,21 @@ class UtbetalingsoppdragGeneratorTest {
             beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode
                 .single()
                 .vedtakdatoFom,
-        ).isEqualTo(LocalDate.now().førsteDagIInneværendeMåned())
+        ).isEqualTo(
+            tilkjentYtelse.andelerTilkjentYtelse
+                .single()
+                .stønadFom
+                .førsteDagIInneværendeMåned(),
+        )
         assertThat(
             beregnetUtbetalingsoppdragLongId.utbetalingsoppdrag.utbetalingsperiode
                 .single()
                 .vedtakdatoTom,
-        ).isEqualTo(LocalDate.now().sisteDagIMåned())
+        ).isEqualTo(
+            tilkjentYtelse.andelerTilkjentYtelse
+                .single()
+                .stønadTom
+                .sisteDagIInneværendeMåned(),
+        )
     }
 }

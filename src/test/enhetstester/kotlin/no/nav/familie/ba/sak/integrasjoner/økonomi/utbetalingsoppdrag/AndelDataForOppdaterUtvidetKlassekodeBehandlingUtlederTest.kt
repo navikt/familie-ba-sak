@@ -53,7 +53,7 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtlederTest {
         }
 
         @Test
-        fun `skal splitte utvidet andel dersom nåtidspunkt treffer andelen samt fjerne alle utvidet andeler etter nåtidspunkt`() {
+        fun `skal fjerne utvidet andel dersom nåtidspunkt treffer andelen samt fjerne alle utvidet andeler etter nåtidspunkt`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
             val denneMåned = YearMonth.now(clockProvider.get())
@@ -80,13 +80,8 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtlederTest {
             val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
-            assertThat(forrigeAndeler).hasSize(2)
-            val utvidetAndelData = forrigeAndeler.single { it.type == YtelsetypeBA.UTVIDET_BARNETRYGD }
-            assertThat(utvidetAndelData.fom).isEqualTo(utvidetAndel.stønadFom)
-            assertThat(utvidetAndelData.tom).isEqualTo(denneMåned)
-            assertThat(utvidetAndelData.id).isEqualTo(utvidetAndel.id)
-            assertThat(utvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
-            assertThat(utvidetAndelData.type).isEqualTo(YtelsetypeBA.UTVIDET_BARNETRYGD)
+            assertThat(forrigeAndeler).hasSize(1)
+            assertThat(forrigeAndeler.none { it.type == YtelsetypeBA.UTVIDET_BARNETRYGD }).isTrue
         }
 
         @Test
@@ -118,7 +113,7 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtlederTest {
         }
 
         @Test
-        fun `skal returnere tom liste dersom det ikke finnes noen forrige tilkjent ytelse`() {
+        fun `skal fjerne utvidet andel som treffer nåtidspunkt og alle etterfølgende utvidet andeler`() {
             // Arrange
             val tilkjentYtelse = lagTilkjentYtelse()
             val denneMåned = YearMonth.now(clockProvider.get())
@@ -152,13 +147,8 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtlederTest {
             val forrigeAndeler = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(tilkjentYtelse, true)
 
             // Assert
-            assertThat(forrigeAndeler).hasSize(2)
-            val utvidetAndelData = forrigeAndeler.single { it.type == YtelsetypeBA.UTVIDET_BARNETRYGD }
-            assertThat(utvidetAndelData.fom).isEqualTo(utvidetAndel.stønadFom)
-            assertThat(utvidetAndelData.tom).isEqualTo(denneMåned)
-            assertThat(utvidetAndelData.id).isEqualTo(utvidetAndel.id)
-            assertThat(utvidetAndelData.beløp).isEqualTo(utvidetAndel.kalkulertUtbetalingsbeløp)
-            assertThat(utvidetAndelData.type).isEqualTo(YtelsetypeBA.UTVIDET_BARNETRYGD)
+            assertThat(forrigeAndeler).hasSize(1)
+            assertThat(forrigeAndeler.none { it.type == YtelsetypeBA.UTVIDET_BARNETRYGD }).isTrue
         }
     }
 }
