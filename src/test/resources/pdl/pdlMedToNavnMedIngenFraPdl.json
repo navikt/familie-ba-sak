@@ -33,7 +33,7 @@
           "mellomnavn": null,
           "etternavn": "BYKJERNE",
           "metadata": {
-            "master": "Freg",
+            "master": "RandomUkjentKilde",
             "historisk": false
           }
         }
@@ -49,7 +49,7 @@
         {
           "kjoenn": "MANN",
           "metadata": {
-            "master": "Freg",
+            "master": "RandomUkjentKilde",
             "historisk": false
           }
         }
