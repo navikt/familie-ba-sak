@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -59,7 +59,7 @@ class ØkonomiIntegrasjonTest(
         val stønadTom = stønadFom.plusYears(17)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val barnAktørId = personidentService.hentOgLagreAktør(barnFnr, true)
 
         val vilkårsvurdering =
@@ -106,7 +106,7 @@ class ØkonomiIntegrasjonTest(
 
         // Lag fagsak med behandling og personopplysningsgrunnlag og Iverksett.
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val barnAktørId = personidentService.hentAktør(barnFnr)
 
         val vedtak =

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
@@ -55,7 +55,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
         val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
-        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
+        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
                 val andel =
@@ -87,7 +87,7 @@ class FinnIdenterMedLøpendeBarnetrygdForGittÅrTest : AbstractSpringIntegration
         val barnAktør = personidentService.hentOgLagreAktør(barn1.aktør.aktivFødselsnummer(), true)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
-        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
+        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
                 val andel =

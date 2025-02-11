@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -23,8 +23,8 @@ class FeilutbetaltValutaServiceTest(
     @Test
     fun kanLagreEndreOgSlette() {
         val fagsak =
-            defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
-        val behandling = lagBehandling(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
+            lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
+        val behandling = lagBehandlingUtenId(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
         val feilutbetaltValuta =
             RestFeilutbetaltValuta(
                 id = 0,

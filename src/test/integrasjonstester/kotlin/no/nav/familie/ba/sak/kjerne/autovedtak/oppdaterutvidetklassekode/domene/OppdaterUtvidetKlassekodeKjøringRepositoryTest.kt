@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -26,7 +26,7 @@ class OppdaterUtvidetKlassekodeKjøringRepositoryTest(
             val oppdaterUtvidetKlassekodeKjøringer = mutableListOf<OppdaterUtvidetKlassekodeKjøring>()
             for (index in 1..20) {
                 val aktør = aktørIdRepository.saveAndFlush(randomAktør())
-                val fagsak = fagsakRepository.saveAndFlush(lagFagsak(aktør = aktør))
+                val fagsak = fagsakRepository.saveAndFlush(lagFagsakUtenId(aktør = aktør))
                 if (index.mod(2) == 0) {
                     oppdaterUtvidetKlassekodeKjøringer.add(OppdaterUtvidetKlassekodeKjøring(fagsakId = fagsak.id))
                 } else {
@@ -50,7 +50,7 @@ class OppdaterUtvidetKlassekodeKjøringRepositoryTest(
         fun `skal sette brukerNyKlassekode til true og status til utført`() {
             // Arrange
             val aktør = aktørIdRepository.saveAndFlush(randomAktør())
-            val fagsak = fagsakRepository.saveAndFlush(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.saveAndFlush(lagFagsakUtenId(aktør = aktør))
             oppdaterUtvidetKlassekodeKjøringRepository.saveAndFlush(OppdaterUtvidetKlassekodeKjøring(fagsakId = fagsak.id))
 
             // Act
@@ -71,7 +71,7 @@ class OppdaterUtvidetKlassekodeKjøringRepositoryTest(
         fun `skal oppdatere status`(status: Status) {
             // Arrange
             val aktør = aktørIdRepository.saveAndFlush(randomAktør())
-            val fagsak = fagsakRepository.saveAndFlush(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.saveAndFlush(lagFagsakUtenId(aktør = aktør))
             oppdaterUtvidetKlassekodeKjøringRepository.saveAndFlush(OppdaterUtvidetKlassekodeKjøring(fagsakId = fagsak.id))
 
             // Act

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -43,7 +43,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val førsteBehandling =
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             førsteBehandling,
@@ -79,7 +79,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
 
         val satsendring =
-            lagBehandling(
+            lagBehandlingUtenId(
                 fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.SATSENDRING,
@@ -117,7 +117,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val førsteBehandling =
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             førsteBehandling,
@@ -154,7 +154,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn2Id }).isTrue
 
         val satsendring =
-            lagBehandling(
+            lagBehandlingUtenId(
                 fagsak,
                 behandlingType = BehandlingType.REVURDERING,
                 årsak = BehandlingÅrsak.SATSENDRING,

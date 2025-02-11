@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -194,7 +194,7 @@ class StegServiceIntegrationTest(
         mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         assertEquals(FØRSTE_STEG, behandling.steg)
 
         assertThrows<FunksjonellFeil> {
@@ -209,7 +209,7 @@ class StegServiceIntegrationTest(
         mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, aktiv = true)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
@@ -233,7 +233,7 @@ class StegServiceIntegrationTest(
         mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling, aktiv = true)
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
@@ -252,7 +252,7 @@ class StegServiceIntegrationTest(
         mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
         behandling.status = BehandlingStatus.IVERKSETTER_VEDTAK
         assertThrows<FunksjonellFeil> {
@@ -273,7 +273,7 @@ class StegServiceIntegrationTest(
         mockHentPersoninfoForIdenter(søkerFnr, barnFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(
             lagVilkårsvurdering(
                 søkerAktørId,
@@ -390,7 +390,7 @@ class StegServiceIntegrationTest(
         mockHentPersoninfoForIdenter(søkerFnr, "98765432110")
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         behandling.behandlingStegTilstand.add(
             BehandlingStegTilstand(

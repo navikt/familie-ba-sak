@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -28,8 +28,8 @@ class VedtaksperiodeRepositoryTest(
         fun `skal kunne hente behandlingId til en vedtaksperiode`() {
             val søker = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-            val behandling = behandlingRepository.save(lagBehandling(fagsak))
-            val vedtak = vedtakRepository.save(lagVedtak(behandling))
+            val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
+            val vedtak = vedtakRepository.save(lagVedtak(behandling = behandling, id = 0))
             val lagVedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
             lagVedtaksperiodeMedBegrunnelser.begrunnelser.clear()
             val vedtaksperiode = vedtaksperiodeRepository.save(lagVedtaksperiodeMedBegrunnelser)

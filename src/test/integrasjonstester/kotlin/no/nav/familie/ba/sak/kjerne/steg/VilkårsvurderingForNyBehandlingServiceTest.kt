@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -89,7 +89,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val forrigeBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
@@ -148,7 +148,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -217,7 +217,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val forrigeBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
@@ -318,7 +318,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -393,7 +393,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val forrigeBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
@@ -495,7 +495,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -578,7 +578,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val forrigeBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
@@ -648,7 +648,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -699,7 +699,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val forrigeBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
@@ -769,7 +769,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -820,7 +820,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -890,7 +890,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -961,7 +961,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD,
@@ -1030,7 +1030,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         val behandling2 =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = BehandlingÅrsak.SATSENDRING,

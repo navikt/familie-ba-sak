@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -52,7 +52,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -108,7 +108,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         logger.addAppender(listAppender)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
