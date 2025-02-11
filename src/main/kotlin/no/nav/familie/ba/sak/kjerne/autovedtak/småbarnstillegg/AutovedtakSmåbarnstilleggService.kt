@@ -58,11 +58,11 @@ class AutovedtakSmåbarnstilleggService(
     private val opprettTaskService: OpprettTaskService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
-        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall")
+        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall", "aarsak", "ikke_relevant", "beskrivelse", "ikke_relevant")
     private val antallVedtakOmOvergangsstønadPåvirkerFagsak: Counter =
-        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_fagsak")
+        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_fagsak", "aarsak", "ikke_relevant", "beskrivelse", "ikke_relevant")
     private val antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak: Counter =
-        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak")
+        Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "paavirker_ikke_fagsak", "aarsak", "ikke_relevant", "beskrivelse", "ikke_relevant")
 
     enum class TilManuellBehandlingÅrsak(
         val beskrivelse: String,
