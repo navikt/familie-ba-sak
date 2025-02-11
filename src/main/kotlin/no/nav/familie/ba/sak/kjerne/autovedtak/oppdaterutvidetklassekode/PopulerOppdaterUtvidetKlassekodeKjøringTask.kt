@@ -32,7 +32,7 @@ class PopulerOppdaterUtvidetKlassekodeKjøringTask(
         val (fagsakerSomSkalLagres, time) =
             measureTimedValue {
                 fagsakRepository
-                    .finnFagsakerMedLøpendeUtvidetBarnetrygdSomBrukerGammelKlassekode()
+                    .finnFagsakerMedIverksattRevurderingEtterOppdaterUtvidetKlassekodeBehandling()
                     .minus(fagsakerSomErLagret)
                     .map { OppdaterUtvidetKlassekodeKjøring(fagsakId = it) }
             }
