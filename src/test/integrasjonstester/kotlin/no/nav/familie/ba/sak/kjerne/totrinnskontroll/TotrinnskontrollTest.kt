@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.totrinnskontroll
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -133,7 +133,7 @@ class TotrinnskontrollTest(
     fun `Skal ikke kunne godkjenne eget vedtak`() {
         val totrinnskontroll =
             Totrinnskontroll(
-                behandling = lagBehandling(),
+                behandling = lagBehandlingUtenId(),
                 saksbehandler = "Mock Saksbehandler",
                 saksbehandlerId = "Mock.Saksbehandler",
                 beslutter = "Mock Saksbehandler",
@@ -148,7 +148,7 @@ class TotrinnskontrollTest(
     fun `Skal kunne underkjenne eget vedtak`() {
         val totrinnskontroll =
             Totrinnskontroll(
-                behandling = lagBehandling(),
+                behandling = lagBehandlingUtenId(),
                 saksbehandler = "Mock Saksbehandler",
                 saksbehandlerId = "Mock.Saksbehandler",
                 beslutter = "Mock Saksbehandler",

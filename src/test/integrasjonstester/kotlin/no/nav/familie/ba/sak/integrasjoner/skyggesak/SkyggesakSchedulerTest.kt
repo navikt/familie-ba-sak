@@ -50,7 +50,7 @@ class SkyggesakSchedulerTest {
     fun `Skal sende skyggesak for fagsak med sendtTidspunkt null`() {
         val sendtTidspunkt = listOf(null, LocalDateTime.now())
         skyggesakRepository.saveAll(
-            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(i.toLong(), fagsakId = i.toLong(), sendtTidspunkt = tid) },
+            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(fagsakId = i.toLong(), sendtTidspunkt = tid) },
         )
 
         every { skyggesakScheduler.fagsakRepository.finnFagsak(any()) } returns Fagsak(aktør = Aktør("1234567890123"))
@@ -69,7 +69,7 @@ class SkyggesakSchedulerTest {
         val sendtTidspunkt = listOf(now.minusDays(13), now.minusDays(14), null)
 
         skyggesakRepository.saveAll(
-            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(i.toLong(), fagsakId = i.toLong(), sendtTidspunkt = tid) },
+            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(fagsakId = i.toLong(), sendtTidspunkt = tid) },
         )
 
         Assertions.assertEquals(2, skyggesakRepository.finnSkyggesakerSomErSendt().size)

@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.defaultFagsak
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -31,8 +31,8 @@ internal class BrevmottakerControllerTest(
     @Tag("integration")
     fun kanLagreOgSlette() {
         val fagsak =
-            defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
-        val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
+            lagFagsakUtenId(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
+        val behandling = lagBehandlingUtenId(fagsak = fagsak).let { behandlingRepository.save(it) }
 
         val brevmottaker =
             RestBrevmottaker(

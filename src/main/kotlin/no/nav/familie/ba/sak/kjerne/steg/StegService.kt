@@ -110,7 +110,9 @@ class StegService(
 
                 else ->
                     when (nyBehandling.behandlingType) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        -> emptyList()
+
                         BehandlingType.REVURDERING,
                         BehandlingType.TEKNISK_ENDRING,
                         BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -141,7 +143,7 @@ class StegService(
         }
     }
 
-    fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
+    private fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
         check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
         if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId = nyBehandling.fagsakId)) {
@@ -155,7 +157,7 @@ class StegService(
         }
     }
 
-    fun validerIverksettKAVedtak() {
+    private fun validerIverksettKAVedtak() {
         if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK)) {
             throw FunksjonellFeil("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
         }

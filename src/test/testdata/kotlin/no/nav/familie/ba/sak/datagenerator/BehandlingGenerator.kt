@@ -18,6 +18,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.random.Random
 
+/**
+ * Bruk denne for enhetstester. Bruk lagBehandlingUtenId for integrasjonstester
+ */
 fun lagBehandling(
     fagsak: Fagsak = defaultFagsak(),
     behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
@@ -32,8 +35,37 @@ fun lagBehandling(
     id: Long = Random.nextLong(10000000),
     endretTidspunkt: LocalDateTime = LocalDateTime.now(),
     aktiv: Boolean = true,
+) = lagBehandlingUtenId(
+    fagsak = fagsak,
+    skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+    behandlingType = behandlingType,
+    behandlingKategori = behandlingKategori,
+    underkategori = underkategori,
+    årsak = årsak,
+    resultat = resultat,
+    status = status,
+    aktivertTid = aktivertTid,
+    aktiv = aktiv,
+).copy(id = id)
+
+/**
+ * Bruk denne for integrasjonstester hvor man ikke kan ha en predefinert id for å kunne lagre til DB. Bruk heller lagBehandling for enhetstester
+ */
+fun lagBehandlingUtenId(
+    fagsak: Fagsak = defaultFagsak().copy(id = 0L),
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+    skalBehandlesAutomatisk: Boolean = false,
+    førsteSteg: StegType = FØRSTE_STEG,
+    resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    status: BehandlingStatus = initStatus(),
+    aktivertTid: LocalDateTime = LocalDateTime.now(),
+    endretTidspunkt: LocalDateTime = LocalDateTime.now(),
+    aktiv: Boolean = true,
 ) = Behandling(
-    id = id,
+    id = 0,
     fagsak = fagsak,
     skalBehandlesAutomatisk = skalBehandlesAutomatisk,
     type = behandlingType,

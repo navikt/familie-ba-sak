@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -152,7 +152,7 @@ fun lagBehandlinger(
         val underkategori = parseValgfriEnum<BehandlingUnderkategori>(Domenebegrep.UNDERKATEGORI, rad) ?: BehandlingUnderkategori.ORDINÆR
         val endretTidspunkt = parseValgfriDato(Domenebegrep.ENDRET_TIDSPUNKT, rad) ?: LocalDate.now()
 
-        lagBehandling(
+        lagBehandlingUtenId(
             endretTidspunkt = endretTidspunkt.atStartOfDay(),
             fagsak = fagsak,
             årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,

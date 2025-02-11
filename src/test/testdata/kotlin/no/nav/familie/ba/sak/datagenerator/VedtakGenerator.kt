@@ -21,8 +21,9 @@ fun lagVedtak(
     behandling: Behandling = lagBehandling(),
     stønadBrevPdF: ByteArray? = null,
     vedtaksdato: LocalDateTime? = LocalDateTime.now(),
+    id: Long = Random.nextLong(10000000),
 ) = Vedtak(
-    id = Random.nextLong(10000000),
+    id = id,
     behandling = behandling,
     vedtaksdato = vedtaksdato,
     stønadBrevPdF = stønadBrevPdF,

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
@@ -90,7 +90,7 @@ class BehandlingServiceTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val behandlingerSomErOpprettetFørIMorgen =
             behandlingRepository.finnÅpneBehandlinger(LocalDateTime.now().plusDays(1))
 
@@ -103,7 +103,7 @@ class BehandlingServiceTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         tilkjentYtelseRepository.save(
             lagInitiellTilkjentYtelse(behandling).also {
@@ -114,7 +114,7 @@ class BehandlingServiceTest(
 
         val revurderingInnvilgetBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.REVURDERING,
                 ),
@@ -132,7 +132,7 @@ class BehandlingServiceTest(
         val barn = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         tilkjentYtelseRepository.save(
             TilkjentYtelse(

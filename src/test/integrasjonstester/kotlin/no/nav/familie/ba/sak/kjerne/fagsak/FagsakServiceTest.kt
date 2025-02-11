@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -347,15 +347,15 @@ class FagsakServiceTest(
             )
 
         val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
-        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
+        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
         behandlingService.oppdaterStatusPåBehandling(behandlingMor.id, BehandlingStatus.AVSLUTTET)
-        val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
+        val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor2))
 
         val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
-        val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
+        val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakFar))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar))
 
         val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
