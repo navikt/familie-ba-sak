@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
+import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -89,17 +90,20 @@ data class PdlMetadata(
 fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? =
     this
         .filter { it.metadata.historisk == false }
-        .minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
+        .minByOrNull { it.metadata.master.kildeTilPrioritet() }
 
 // Filtrer på historisk slik at ikke-historiske alltid får prioritet
 fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? =
     this
         .filter { it.metadata.historisk == false }
-        .minByOrNull { PdlMaster.valueOf(it.metadata.master.uppercase()).prioritet }
+        .minByOrNull { it.metadata.master.kildeTilPrioritet() }
 
-enum class PdlMaster(
-    val prioritet: Int,
-) {
-    PDL(1),
-    FREG(2),
-}
+fun String.kildeTilPrioritet(): Int =
+    when (uppercase()) {
+        "PDL" -> 1
+        "FREG" -> 2
+        else -> {
+            logger.warn("Ukjent kilde fra PDL: $this. Bør legges til.")
+            3
+        }
+    }

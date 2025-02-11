@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseRespo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonRelasjonerResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMaster
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMetadata
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerKjønnPåKilde
@@ -47,7 +46,7 @@ class PdlGraphqlTest {
                 .metadata
                 .master
                 .uppercase(),
-        ).isEqualTo(PdlMaster.PDL.name)
+        ).isEqualTo("PDL")
         assertThat(
             resp.data.person!!
                 .kjoenn
