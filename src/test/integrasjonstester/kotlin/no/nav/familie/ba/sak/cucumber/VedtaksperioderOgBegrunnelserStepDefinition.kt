@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
-import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakOppdaterUtvidetKlassekodeService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -670,16 +669,6 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             nyBehanldingId = nyBehandling,
             svarFraEcbMock = svarFraEcbMock,
         ).utførMånedligValutajustering(fagsakId = fagsakId, måned = dagensDato.toYearMonth())
-    }
-
-    @Når("vi lager automatisk behandling på fagsak {} med årsak OPPDATER_UTVIDET_KLASSEKODE")
-    fun `kjør autovetak med årsak OPPDATER_UTVIDET_KLASSEKODE på fagsak `(fagsakId: Long) {
-        val fagsak = fagsaker[fagsakId]!!
-
-        mockAutovedtakOppdaterUtvidetKlassekodeService(
-            dataFraCucumber = this,
-            fagsak = fagsak,
-        ).utførMigreringTilOppdatertUtvidetKlassekode(fagsakId = fagsakId)
     }
 
     @Så("forvent følgende valutakurser for behandling {}")
