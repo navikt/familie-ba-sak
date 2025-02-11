@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
-import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.OppdaterUtvidetKlassekodeUtvidetAndelerSplitter
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -62,10 +61,6 @@ data class UtvidetBarnetrygdGenerator(
             )
         }
 
-        return if (tilkjentYtelse.behandling.erOppdaterUtvidetKlassekode()) {
-            OppdaterUtvidetKlassekodeUtvidetAndelerSplitter.splittUtvidetAndelerIInneværendeMåned(utvidetAndeler)
-        } else {
-            utvidetAndeler
-        }
+        return utvidetAndeler
     }
 }

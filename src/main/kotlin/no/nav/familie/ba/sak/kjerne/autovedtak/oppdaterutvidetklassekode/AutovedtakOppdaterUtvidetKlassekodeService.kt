@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -27,27 +28,38 @@ class AutovedtakOppdaterUtvidetKlassekodeService(
     private val autovedtakService: AutovedtakService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun utførMigreringTilOppdatertUtvidetKlassekode(fagsakId: Long) {
-        logger.info("Utfører migrering til ny klassekode for utvidet barnetrygd for fagsak=$fagsakId")
+        logger.info("Revurderer fagsak=$fagsakId som kan ha feil periodeId'er i siste vedtatte behandling")
 
-        if (tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(fagsakId)) {
-            logger.info("Hopper ut av behandling fordi fagsak $fagsakId allerede bruker ny klassekode for utvidet barnetrygd.")
-            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(fagsakId)
-            return
-        }
-
-        val sisteVedtatteBehandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
+        val sisteIverksatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
                 ?: error("Fant ikke siste vedtatte behandling for fagsak $fagsakId")
 
-        if (!sisteVedtatteBehandling.harLøpendeUtvidetBarnetrygd()) {
+        if (!sisteIverksatteBehandling.harLøpendeUtvidetBarnetrygd()) {
             logger.info("Hopper ut av behandling fordi fagsak $fagsakId ikke har løpende utvidet barnetrygd.")
             oppdaterUtvidetKlassekodeKjøringRepository.deleteByFagsakId(fagsakId)
             return
+        }
+
+        val sisteAndelIUtvidetKjede =
+            andelTilkjentYtelseRepository
+                .hentSisteAndelPerIdentOgType(fagsakId)
+                .single { it.erUtvidet() }
+
+        val harSisteUtvidetAndelISisteIverksatteBehandling =
+            andelTilkjentYtelseRepository
+                .finnAndelerTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
+                .filter { it.erUtvidet() }
+                .any { it.periodeOffset == sisteAndelIUtvidetKjede.periodeOffset }
+
+        if (harSisteUtvidetAndelISisteIverksatteBehandling) {
+            logger.info("Hopper ut av behandling fordi fagsak $fagsakId har siste utvidet andel i siste vedtatte behandling")
+            oppdaterUtvidetKlassekodeKjøringRepository.deleteByFagsakId(fagsakId)
         }
 
         val aktivOgÅpenBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
@@ -69,7 +81,7 @@ class AutovedtakOppdaterUtvidetKlassekodeService(
 
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
-                aktør = sisteVedtatteBehandling.fagsak.aktør,
+                aktør = sisteIverksatteBehandling.fagsak.aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE,
                 fagsakId = fagsakId,
