@@ -81,7 +81,7 @@ class RestTemplateTestConfig {
         mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
     ): RestTemplateBuilder =
         RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofSeconds(5))
+            .connectTimeout(Duration.ofSeconds(5))
             .additionalInterceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
-            .setReadTimeout(Duration.ofSeconds(5))
+            .readTimeout(Duration.ofSeconds(5))
 }

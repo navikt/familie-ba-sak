@@ -97,7 +97,7 @@ private fun lagGenereltTestoppsettForVedtaksperioderOgBegrunnelser(
 # language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
+Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.secure().nextAlphanumeric(10)}
 
   Bakgrunn:""" +
             hentTekstForFagsak(behandling) +
@@ -105,7 +105,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
             """
       
-  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
+  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.secure().nextAlphanumeric(10)}
     Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
             hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
             lagPersonresultaterTekst(forrigeBehandling) +
