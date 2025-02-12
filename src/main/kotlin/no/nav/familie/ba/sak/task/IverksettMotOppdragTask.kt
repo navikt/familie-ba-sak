@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask.Companion.TASK_STEP_TYPE
@@ -23,7 +22,6 @@ import java.util.Properties
 class IverksettMotOppdragTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val personidentService: PersonidentService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
@@ -36,7 +34,11 @@ class IverksettMotOppdragTask(
 
     override fun onCompletion(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
-        val personIdent = personidentService.hentAktør(iverksettingTask.personIdent).aktivFødselsnummer()
+        val personIdent =
+            behandlingHentOgPersisterService
+                .hent(iverksettingTask.behandlingsId)
+                .fagsak.aktør
+                .aktivFødselsnummer()
         val statusFraOppdragTask =
             Task(
                 type = StatusFraOppdragTask.TASK_STEP_TYPE,

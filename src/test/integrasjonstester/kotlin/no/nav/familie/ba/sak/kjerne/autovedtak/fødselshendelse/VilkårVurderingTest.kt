@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -69,7 +69,7 @@ class VilkårVurderingTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true),
+                lagBehandlingUtenId(fagsak, årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true),
             )
 
         val personopplysningGrunnlag =

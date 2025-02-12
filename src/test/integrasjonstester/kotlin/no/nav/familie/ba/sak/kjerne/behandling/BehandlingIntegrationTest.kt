@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
@@ -157,7 +157,7 @@ class BehandlingIntegrationTest(
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         assertEquals(fagsak.id, behandling.fagsak.id)
     }
 
@@ -168,7 +168,7 @@ class BehandlingIntegrationTest(
 
         every { infotrygdBarnetrygdClient.harÅpenSakIInfotrygd(listOf(fnr)) } returns true
 
-        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak)) }
+        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
     }
 
@@ -179,7 +179,7 @@ class BehandlingIntegrationTest(
 
         every { infotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(listOf(fnr)) } returns true
 
-        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak)) }
+        assertThatThrownBy { behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak)) }
             .hasMessageContaining("sak i Infotrygd")
 
         val behandling =
@@ -197,7 +197,7 @@ class BehandlingIntegrationTest(
         markerBehandlingSomAvsluttet(behandling)
         assertDoesNotThrow {
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak,
                     behandlingType = BehandlingType.REVURDERING,
                 ),

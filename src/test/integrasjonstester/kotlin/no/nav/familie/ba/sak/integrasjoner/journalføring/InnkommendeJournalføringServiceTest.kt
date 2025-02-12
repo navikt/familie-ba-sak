@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
@@ -40,7 +40,7 @@ class InnkommendeJournalføringServiceTest(
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
+        behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak))
 
         val (sak, behandlinger) =
             innkommendeJournalføringService

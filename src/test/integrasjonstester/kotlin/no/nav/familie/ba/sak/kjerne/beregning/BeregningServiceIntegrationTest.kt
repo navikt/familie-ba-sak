@@ -5,7 +5,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultaterForSøkerOgToBarn
@@ -92,7 +92,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val dato20211101 = LocalDate.of(2021, 11, 1)
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
@@ -159,7 +159,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 behandling =
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         behandlingKategori = BehandlingKategori.EØS,
                         skalBehandlesAutomatisk = true,

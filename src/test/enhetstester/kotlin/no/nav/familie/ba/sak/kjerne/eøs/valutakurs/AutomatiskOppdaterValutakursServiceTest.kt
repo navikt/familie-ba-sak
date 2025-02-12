@@ -6,6 +6,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
@@ -88,7 +89,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             dato.month.value.toBigDecimal()
         }
         every { vurderingsstrategiForValutakurserRepository.findByBehandlingId(any()) } returns null
-        every { unleashNextMedContextService.isEnabled(any()) } returns true
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.BYTT_VALUTAJUSTERING_DATO) } returns true
         valutakursRepository.deleteAll()
         utenlandskPeriodebeløpRepository.deleteAll()
         justRun { tilpassDifferanseberegningEtterValutakursService.skjemaerEndret(any(), any()) }

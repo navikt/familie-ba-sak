@@ -145,7 +145,10 @@ SANITY_DATASET: "ba-brev"
 PDL_URL: https://pdl-api.prod-fss-pub.nais.io
 PDL_SCOPE: api://prod-fss.pdl.pdl-api/.default
 
-FAMILIE_TILBAKE_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-tilbake/.default
+FAMILIE_TILBAKE_API_URL_SCOPE: api://prod-gcp.tilbake.tilbakekreving-backend/.default
+FAMILIE_TILBAKE_API_URL: http://tilbakekreving-backend.tilbake/api
+TILBAKEKREVING_REQUEST_TOPIC: tilbake.privat-tbk-hentfagsystemsbehandling
+TILBAKEKREVING_RESPONSE_TOPIC: tilbake.privat-tbk-hentfagsystemsbehandling-svar
 
 FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
 

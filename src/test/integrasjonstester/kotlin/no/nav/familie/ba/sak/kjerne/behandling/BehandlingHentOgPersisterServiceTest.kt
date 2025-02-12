@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -19,11 +19,11 @@ class BehandlingHentOgPersisterServiceTest(
         val fødselsnummere = listOf(randomFnr(), randomFnr())
         val fagsak1 = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummere[0])
         fagsakService.oppdaterStatus(fagsak1, FagsakStatus.LØPENDE)
-        val behandling1 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak1), false)
+        val behandling1 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak1), false)
 
         val fagsak2 = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummere[1])
         fagsakService.oppdaterStatus(fagsak2, FagsakStatus.LØPENDE)
-        val behandling2 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak2), false)
+        val behandling2 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak2), false)
 
         val aktivFødselsnummere =
             behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
@@ -40,7 +40,7 @@ class BehandlingHentOgPersisterServiceTest(
     fun `skal hente status på behandling`() {
         val fnr = randomFnr()
         val fagsak1 = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling1 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak1), false)
+        val behandling1 = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak1), false)
         assertThat(behandlingHentOgPersisterService.hentStatus(behandling1.id)).isEqualTo(behandling1.status)
     }
 }

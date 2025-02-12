@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.4.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -23,19 +23,19 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250128112334_99d3496</prosessering.version>
+        <prosessering.version>2.20250205080941_29def62</prosessering.version>
         <felles.version>3.20250122103549_5bcb4dc</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250113155636_bb71360</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20241209130157_6873c2d</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250106092521_bcb342f</utbetalingsgenerator.version>
-        <cucumber.version>7.21.0</cucumber.version>
+        <utbetalingsgenerator.version>1.0_20250206122712_9ec24df</utbetalingsgenerator.version>
+        <cucumber.version>7.21.1</cucumber.version>
         <mockk.version>1.13.16</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.16</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.6.0</springdoc.version>
+        <springdoc.version>2.8.4</springdoc.version>
         <sentry.version>8.1.0</sentry.version>
         <kotlinx.version>1.10.1</kotlinx.version>
 
@@ -47,7 +47,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
-        <unleash.version>10.0.0</unleash.version>
+        <unleash.version>10.0.1</unleash.version>
         <testcontainers.postgresql.version>1.20.4</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
@@ -67,7 +67,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.3.5</version>
+                <version>3.4.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -383,11 +383,6 @@
             <artifactId>medeia-validator-jackson</artifactId>
             <version>${medeia-validator-jackson.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.jsqlparser</groupId>
-            <artifactId>jsqlparser</artifactId>
-            <version>5.1</version>
         </dependency>
 
         <dependency>

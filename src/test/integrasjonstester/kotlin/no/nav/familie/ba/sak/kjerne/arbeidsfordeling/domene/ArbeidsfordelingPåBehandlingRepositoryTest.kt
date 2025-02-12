@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
-import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -66,10 +66,10 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
         fun `skal ikke hente arbeidsfordelingPåBehandling med behandlende enhet er midlertidig enhet`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
                     ),
@@ -93,10 +93,10 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
         fun `skal ikke hente arbeidsfordeling på behandling som ikke har status AVSLUTTET`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
             val behandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.FATTER_VEDTAK,
                         aktivertTid = LocalDateTime.now(),
@@ -122,10 +122,10 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
                 dynamicTest("resultat: $behandlingsResultat skal bli filtrert") {
                     // Arrange
                     val aktør = aktørIdRepository.save(randomAktør())
-                    val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+                    val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
                     val behandling =
                         behandlingRepository.save(
-                            lagBehandling(
+                            lagBehandlingUtenId(
                                 fagsak = fagsak,
                                 status = BehandlingStatus.AVSLUTTET,
                                 resultat = behandlingsResultat,
@@ -148,11 +148,11 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
         fun `skal hente nyeste arbeidsfordeling på behandling`() {
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
-            val fagsak = fagsakRepository.save(lagFagsak(aktør = aktør))
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
 
             val nyBehandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
                         aktivertTid = LocalDateTime.now(),
@@ -160,7 +160,7 @@ class ArbeidsfordelingPåBehandlingRepositoryTest(
                 )
             val gammelBehandling =
                 behandlingRepository.save(
-                    lagBehandling(
+                    lagBehandlingUtenId(
                         fagsak = fagsak,
                         status = BehandlingStatus.AVSLUTTET,
                         aktivertTid = LocalDateTime.now().minusDays(10),

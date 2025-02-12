@@ -9,7 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.toLocalDate
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
@@ -187,7 +187,7 @@ class OppdragSteg {
         every {
             andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any())
         } answers {
-            val skalBrukeNyKlassekodeForUtvidetBarnetrygd = toggles[tilkjentYtelse.behandling.id]?.get(FeatureToggleConfig.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn) ?: false
+            val skalBrukeNyKlassekodeForUtvidetBarnetrygd = toggles[tilkjentYtelse.behandling.id]?.get(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn) ?: false
             sisteAndelPerIdentNy(tidligereTilkjenteYtelser, skalBrukeNyKlassekodeForUtvidetBarnetrygd).values.toList()
         }
         every {
@@ -198,12 +198,12 @@ class OppdragSteg {
         } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
             unleashNextMedContextService.isEnabled(
-                any(),
-                any(),
+                any<FeatureToggle>(),
+                any<Long>(),
             )
         } answers {
-            val featureToggleId = firstArg<String>()
-            toggles[tilkjentYtelse.behandling.id]?.get(featureToggleId) ?: true
+            val featureToggle = firstArg<FeatureToggle>()
+            toggles[tilkjentYtelse.behandling.id]?.get(featureToggle.navn) ?: true
         }
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
             beregnetUtbetalingsoppdrag.values.any { beregnetUtbetalingsoppdrag ->

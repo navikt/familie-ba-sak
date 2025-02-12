@@ -6,8 +6,9 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -25,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -43,14 +43,14 @@ class PensjonService(
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
-    private val unleashNext: UnleashService,
+    private val unleashNext: UnleashNextMedContextService,
 ) {
     fun hentBarnetrygd(
         personIdent: String,
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
         secureLogger.info("Henter data til pensjon for personIdent=$personIdent fraDato=$fraDato")
-        if (envService.erPreprod() && unleashNext.isEnabled(FeatureToggleConfig.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn)) {
+        if (envService.erPreprod() && unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
             val barnetrygdTilPensjonFraInfotrygdQ = hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent, fraDato)
             if (barnetrygdTilPensjonFraInfotrygdQ.isNotEmpty()) {
                 return barnetrygdTilPensjonFraInfotrygdQ.distinct()
@@ -182,7 +182,7 @@ class PensjonService(
 
     private fun testidenter(
         fraDato: LocalDate,
-    ) = if (unleashNext.isEnabled(FeatureToggleConfig.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD.navn)) {
+    ) = if (unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
         emptyList() // Skal egentlig ikke kunne havne her, tror jeg, siden hentBarnetrygd() i dette tilfellet skulle returnert på linje 54 for å unngå at det på linje 57 forsøkes å hente data fra pdl på en ident som ikke finnes der i testmiljø
     } else {
         listOfNotNull(

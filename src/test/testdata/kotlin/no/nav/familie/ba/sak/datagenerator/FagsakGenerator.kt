@@ -13,6 +13,9 @@ fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) =
         aktør = aktør,
     )
 
+/**
+ * Bruk for enhetstest. Bruk lagFagsakUtenId for integrasjonstest
+ */
 fun lagFagsak(
     id: Long = 1,
     aktør: Aktør = tilAktør(randomFnr()),
@@ -20,8 +23,25 @@ fun lagFagsak(
     status: FagsakStatus = FagsakStatus.OPPRETTET,
     type: FagsakType = FagsakType.NORMAL,
     arkivert: Boolean = false,
+) = lagFagsakUtenId(
+    aktør = aktør,
+    institusjon = institusjon,
+    status = status,
+    type = type,
+    arkivert = arkivert,
+).copy(id)
+
+/**
+ * Bruk for integrasjonstest. Bruk lagFagsak for enhetstest
+ */
+fun lagFagsakUtenId(
+    aktør: Aktør = tilAktør(randomFnr()),
+    institusjon: Institusjon? = null,
+    status: FagsakStatus = FagsakStatus.OPPRETTET,
+    type: FagsakType = FagsakType.NORMAL,
+    arkivert: Boolean = false,
 ) = Fagsak(
-    id = id,
+    id = 0,
     aktør = aktør,
     institusjon = institusjon,
     status = status,

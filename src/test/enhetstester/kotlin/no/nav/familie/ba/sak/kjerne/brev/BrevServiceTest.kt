@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +25,6 @@ import java.time.YearMonth
 class BrevServiceTest {
     val saksbehandlerContext = mockk<SaksbehandlerContext>()
     val brevmalService = mockk<BrevmalService>()
-    val unleashService = mockk<UnleashService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
@@ -39,14 +37,11 @@ class BrevServiceTest {
             arbeidsfordelingService = mockk(),
             simuleringService = mockk(),
             vedtaksperiodeService = vedtaksperiodeService,
-            sanityService = mockk(),
-            vilkårsvurderingService = mockk(),
             korrigertEtterbetalingService = mockk(),
             organisasjonService = mockk(),
             korrigertVedtakService = mockk(),
             saksbehandlerContext = saksbehandlerContext,
             brevmalService = brevmalService,
-            refusjonEøsRepository = mockk(),
             integrasjonClient = mockk(),
             testVerktøyService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -55,13 +50,11 @@ class BrevServiceTest {
             kompetanseRepository = mockk(),
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
             hjemmeltekstUtleder = hjemmeltekstUtleder,
-            unleashService = unleashService,
         )
 
     @BeforeEach
     fun setUp() {
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-        every { unleashService.isEnabled(any()) } returns true
         every { hjemmeltekstUtleder.utledHjemmeltekst(any(), any(), any()) } returns "Hjemmel 1, 2, 3"
     }
 

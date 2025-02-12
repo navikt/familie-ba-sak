@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-enum class FeatureToggleConfig(
+enum class FeatureToggle(
     val navn: String,
 ) {
     // Operasjonelle
@@ -25,11 +25,11 @@ enum class FeatureToggleConfig(
     OPPRETT_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_AUTOMATISK("familie-ba-sak.opprett-autovedtak-ny-klassekode-for-utvidet-barnetrygd-automatisk"),
     AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_HØYT_VOLUM("familie-ba-sak.autovedtak-ny-klassekode-for-utvidet-barnetrygd-hoyt-volum"),
 
-    // NAV-23449 - Skrud av/på ny refaktorert logikk for hjemler i brev, skal i teorien produsere det samme resultatet
-    BRUK_OMSKRIVING_AV_HJEMLER_I_BREV("familie-ba-sak.bruk_omskriving_av_hjemler_i_brev"),
-
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
+
+    // NAV-24196
+    TILLAT_OPPRETT_AV_BEHANDLING_PÅ_VIKAFOSSEN("familie-ba-sak.tillatt_opprett_av_behandling_paa_vikafossen"),
 
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task
