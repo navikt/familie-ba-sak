@@ -3,6 +3,10 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         fornavn
         mellomnavn
         etternavn
+        metadata {
+            master
+            historisk
+        }
     }
     bostedsadresse(historikk: false) {
         gyldigTilOgMed

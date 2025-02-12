@@ -11,9 +11,17 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         fornavn
         mellomnavn
         etternavn
+        metadata {
+            master
+            historisk
+        }
     }
     kjoenn {
         kjoenn
+        metadata {
+            master
+            historisk
+        }
     }
     forelderBarnRelasjon {
         relatertPersonsIdent,
