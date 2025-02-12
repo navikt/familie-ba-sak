@@ -28,6 +28,9 @@ enum class FeatureToggle(
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
 
+    // NAV-24196
+    TILLAT_OPPRETT_AV_BEHANDLING_PÅ_VIKAFOSSEN("familie-ba-sak.tillatt_opprett_av_behandling_paa_vikafossen"),
+
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task
     SATSENDRING_ENABLET("familie-ba-sak.satsendring-enablet"),
