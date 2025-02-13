@@ -18,12 +18,13 @@ class AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(
         val (utvidetAndelerTilkjentYtelse, øvrigeAndelerTilkjentYtelse) = forrigeTilkjentYtelse.andelerTilkjentYtelse.partition { it.erUtvidet() }
         val utvidetAndeler =
             utvidetAndelerTilkjentYtelse.mapNotNull {
-                // Splitter andel som treffer inneværende måned og fjerner alle andeler som kommer etter.
-                if (it.stønadFom <= inneværendeMåned && it.stønadTom > inneværendeMåned) {
-                    it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd).copy(tom = inneværendeMåned)
+                // Fjerner alle andeler som overlapper eller kommer etter inneværende måned
+                if (it.stønadFom <= inneværendeMåned && it.stønadTom >= inneværendeMåned) {
+                    null
                 } else if (it.stønadFom >= inneværendeMåned) {
                     null
                 } else {
+                    // Tar med alle andeler som kommer før
                     it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
                 }
             }
