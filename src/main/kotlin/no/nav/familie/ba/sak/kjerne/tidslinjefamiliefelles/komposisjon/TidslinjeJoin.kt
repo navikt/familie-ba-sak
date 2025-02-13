@@ -53,23 +53,3 @@ fun <K, V, H, R> Map<K, Tidslinje<V>>.joinIkkeNull(
         venstreTidslinje.kombinerUtenNullMed(høyreTidslinje, kombinator)
     }
 }
-
-/**
- * Extension-metode for å kombinere en nøkkel-verdi-map'er der verdiene er tidslinjer, med en enkelt tidslinje
- * Innholdet i tidslinjene i map'en på venstre side må alle være av typen V
- * Innholdet i tidslinjen på høyre side er av typen H
- * Kombinator-funksjonen kalles for hvert tidspunkt med med verdien for det tidspunktet fra høyre tidslinje og
- * vedien fra den enkelte av venstre tidslinjer etter tur.
- * Kombinator-funksjonen blir IKKE kalt Hvis venstre, høyre eller begge tidslinjer mangler verdi for et tidspunkt
- * Resultatet er en ny map der nøklene er av type K, og tidslinjene har innhold av typen (nullable) R.
- */
-fun <K, V, H, R> Map<K, Tidslinje<V>>.kombinerKunVerdiMed(
-    høyreTidslinje: Tidslinje<H>,
-    kombinator: (V, H) -> R?,
-): Map<K, Tidslinje<R>> {
-    val venstreTidslinjer = this
-
-    return venstreTidslinjer.mapValues { (_, venstreTidslinje) ->
-        venstreTidslinje.kombinerUtenNullMed(høyreTidslinje, kombinator)
-    }
-}

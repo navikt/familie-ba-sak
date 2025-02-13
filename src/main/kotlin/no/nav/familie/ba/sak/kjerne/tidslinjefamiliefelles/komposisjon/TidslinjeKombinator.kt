@@ -72,6 +72,26 @@ fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNullOgIkkeTom(
 fun <V> Collection<Tidslinje<V>>.kombiner() = this.kombinerNullableKombinator { if (it.toList().isNotEmpty()) it else null }
 
 /**
+ * Extension-metode for å kombinere en nøkkel-verdi-map'er der verdiene er tidslinjer, med en enkelt tidslinje
+ * Innholdet i tidslinjene i map'en på venstre side må alle være av typen V
+ * Innholdet i tidslinjen på høyre side er av typen H
+ * Kombinator-funksjonen kalles for hvert tidspunkt med med verdien for det tidspunktet fra høyre tidslinje og
+ * vedien fra den enkelte av venstre tidslinjer etter tur.
+ * Kombinator-funksjonen blir IKKE kalt Hvis venstre, høyre eller begge tidslinjer mangler verdi for et tidspunkt
+ * Resultatet er en ny map der nøklene er av type K, og tidslinjene har innhold av typen (nullable) R.
+ */
+fun <K, V, H, R> Map<K, Tidslinje<V>>.kombinerKunVerdiMed(
+    høyreTidslinje: Tidslinje<H>,
+    kombinator: (V, H) -> R?,
+): Map<K, Tidslinje<R>> {
+    val venstreTidslinjer = this
+
+    return venstreTidslinjer.mapValues { (_, venstreTidslinje) ->
+        venstreTidslinje.kombinerUtenNullMed(høyreTidslinje, kombinator)
+    }
+}
+
+/**
  * Extension-metode for å kombinere tre tidslinjer
  * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
  * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
@@ -80,7 +100,7 @@ fun <V> Collection<Tidslinje<V>>.kombiner() = this.kombinerNullableKombinator { 
  * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
  * Resultatet er en tidslinje med tidsenhet T og innhold R
  */
-fun <A, B, C, R> Tidslinje<A>.kombinerMedKunVerdi(
+fun <A, B, C, R> Tidslinje<A>.kombinerKunVerdiMed(
     tidslinjeB: Tidslinje<B>,
     tidslinjeC: Tidslinje<C>,
     kombinator: (A, B, C) -> R?,
