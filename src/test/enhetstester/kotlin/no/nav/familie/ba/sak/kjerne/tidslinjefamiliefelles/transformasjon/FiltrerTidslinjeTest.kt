@@ -1,14 +1,36 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.somBoolskTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class FiltrerTidslinjeTest {
+    @Test
+    fun filtrerIkkeNull() {
+        val tidslinje = "aabbcc".tilCharTidslinje(feb(2000)).mapVerdi { if (it == 'b') null else it }
+        val opprinneligePerioder = tidslinje.tilPerioder()
+
+        assertThat(opprinneligePerioder[0]).isEqualTo(Periode('a', 1.feb(2000), 31.mar(2000)))
+        assertThat(opprinneligePerioder[1]).isEqualTo(Periode(null, 1.apr(2000), 31.mai(2000)))
+        assertThat(opprinneligePerioder[2]).isEqualTo(Periode('c', 1.jun(2000), 31.jul(2000)))
+
+        val filtrertePerioder = tidslinje.filtrerIkkeNull { it == 'a' }.tilPerioder()
+
+        assertThat(filtrertePerioder[0]).isEqualTo(Periode('a', 1.feb(2000), 31.mar(2000)))
+        assertThat(filtrertePerioder[1]).isEqualTo(Periode(null, 1.apr(2000), 31.jul(2000)))
+    }
+
     @Test
     fun filtrerMed() {
         val tidslinje = "aaaaa".tilCharTidslinje(feb(2000))

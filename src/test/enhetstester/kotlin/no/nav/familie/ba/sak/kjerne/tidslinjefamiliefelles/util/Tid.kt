@@ -41,15 +41,15 @@ fun Int.apr(år: Int) = LocalDate.of(år, 4, this)
 
 fun Int.mai(år: Int) = LocalDate.of(år, 5, this)
 
-fun Int.jun(år: Int) = LocalDate.of(år, 5, this)
+fun Int.jun(år: Int) = LocalDate.of(år, 6, this)
 
-fun Int.jul(år: Int) = LocalDate.of(år, 5, this)
+fun Int.jul(år: Int) = LocalDate.of(år, 7, this)
 
-fun Int.aug(år: Int) = LocalDate.of(år, 5, this)
+fun Int.aug(år: Int) = LocalDate.of(år, 8, this)
 
-fun Int.sep(år: Int) = LocalDate.of(år, 5, this)
+fun Int.sep(år: Int) = LocalDate.of(år, 9, this)
 
-fun Int.okt(år: Int) = LocalDate.of(år, 5, this)
+fun Int.okt(år: Int) = LocalDate.of(år, 10, this)
 
 fun Int.nov(år: Int) = LocalDate.of(år, 11, this)
 
