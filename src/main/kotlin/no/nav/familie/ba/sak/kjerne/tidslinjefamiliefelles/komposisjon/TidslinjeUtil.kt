@@ -20,13 +20,13 @@ fun erUnder18ÅrVilkårTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean> =
 
 fun erUnder6ÅrTidslinje(person: Person): Tidslinje<Boolean> =
     opprettBooleanTidslinje(
-        fraDato = person.fødselsdato,
+        fraDato = person.fødselsdato.førsteDagIInneværendeMåned(),
         tilDato = person.fødselsdato.plusYears(6).sisteDagIForrigeMåned(),
     )
 
 fun erTilogMed3ÅrTidslinje(fødselsdato: LocalDate): Tidslinje<Boolean> =
     opprettBooleanTidslinje(
-        fraDato = fødselsdato,
+        fraDato = fødselsdato.førsteDagINesteMåned(),
         tilDato = fødselsdato.plusYears(3).sisteDagIMåned(),
     )
 
