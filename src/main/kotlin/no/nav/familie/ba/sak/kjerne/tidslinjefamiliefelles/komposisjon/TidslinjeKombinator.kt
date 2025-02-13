@@ -9,6 +9,7 @@ import no.nav.familie.tidslinje.utvidelser.biFunksjon
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.map
 import no.nav.familie.tidslinje.utvidelser.slåSammen
+import no.nav.familie.tidslinje.utvidelser.trim
 
 /**
  * Extension-metode for å kombinere to tidslinjer der begge har verdi
@@ -107,7 +108,7 @@ fun <A, B, C, R> Tidslinje<A>.kombinerKunVerdiMed(
 
 fun <V> Tidslinje<V>.erIkkeTom() = !this.erTom()
 
-fun <V, H> Tidslinje<V>.harOverlappMed(tidslinje: Tidslinje<H>) = this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
+fun <V, H> Tidslinje<V>.harOverlappMed(tidslinje: Tidslinje<H>) = this.kombinerUtenNullMed(tidslinje) { v, h -> true }.trim(Null()).erIkkeTom()
 
 fun <V, H> Tidslinje<V>.harIkkeOverlappMed(tidslinje: Tidslinje<H>) = !this.harOverlappMed(tidslinje)
 
