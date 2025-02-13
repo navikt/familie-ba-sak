@@ -4,7 +4,6 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import java.time.LocalDate
 
 /**
  * Returnerer en tidslinje med par av hvert etterfølgende element i tidslinjen.
@@ -26,13 +25,16 @@ enum class ZipPadding {
 }
 
 fun <T> Tidslinje<T>.zipMedNeste(zipPadding: ZipPadding = ZipPadding.INGEN_PADDING): Tidslinje<Pair<T?, T?>> {
-    val padding = listOf(Periode(null, LocalDate.now(), LocalDate.now()))
+    val padding = listOf(Periode(null, null, null))
 
     return when (zipPadding) {
         ZipPadding.FØR -> padding + tilPerioder()
         ZipPadding.ETTER -> tilPerioder() + padding
         ZipPadding.INGEN_PADDING -> tilPerioder()
     }.zipWithNext { forrige, denne ->
-        Periode(Pair(forrige.verdi, denne.verdi), denne.fom, denne.tom)
+        val verdi = forrige.verdi to denne.verdi
+        val fom = if (zipPadding == ZipPadding.ETTER) forrige.fom else denne.fom
+        val tom = if (zipPadding == ZipPadding.ETTER) forrige.tom else denne.tom
+        Periode(verdi, fom, tom)
     }.tilTidslinje()
 }
