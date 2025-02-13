@@ -19,4 +19,30 @@ class ZipTidslinjeTest {
             listOf(Pair(null, 'a'), Pair('a', 'b'), Pair('b', 'c'), Pair('c', 'd'), Pair('d', 'e'), Pair('e', 'f')),
         )
     }
+
+    @Test
+    fun testZipMedNesteTidslinjePaddingEtter() {
+        val aTilF = ('a'..'f').toList().joinToString("")
+        val bokstavTidslinje = aTilF.tilCharTidslinje(YearMonth.now())
+        val bokstavParTidslinje = bokstavTidslinje.zipMedNeste(ZipPadding.ETTER)
+
+        assertThat(aTilF).isEqualTo("abcdef")
+
+        assertThat(bokstavParTidslinje.tilPerioder().map { it.verdi }).isEqualTo(
+            listOf(Pair('a', 'b'), Pair('b', 'c'), Pair('c', 'd'), Pair('d', 'e'), Pair('e', 'f'), Pair('f', null)),
+        )
+    }
+
+    @Test
+    fun testZipMedNesteTidslinjeIngenPadding() {
+        val aTilF = ('a'..'f').toList().joinToString("")
+        val bokstavTidslinje = aTilF.tilCharTidslinje(YearMonth.now())
+        val bokstavParTidslinje = bokstavTidslinje.zipMedNeste(ZipPadding.INGEN_PADDING)
+
+        assertThat(aTilF).isEqualTo("abcdef")
+
+        assertThat(bokstavParTidslinje.tilPerioder().map { it.verdi }).isEqualTo(
+            listOf(Pair('a', 'b'), Pair('b', 'c'), Pair('c', 'd'), Pair('d', 'e'), Pair('e', 'f')),
+        )
+    }
 }
