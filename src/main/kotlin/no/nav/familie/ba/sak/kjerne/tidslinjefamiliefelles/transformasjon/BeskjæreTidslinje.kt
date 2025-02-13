@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 /**
  * Extension-metode for å beskjære (forkorte) en tidslinje etter til-og-med fra en annen tidslinje
- * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra [this]s fraOgMed() og til [tidslinje]s tilOgMed()
+ * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra [this]s startTidspunkt og til [tidslinje]s sluttTidspunkt
  * Perioder som ligger helt utenfor grensene vil forsvinne.
  * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
  * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den nye benyttes
@@ -28,9 +28,7 @@ fun <I> Tidslinje<I>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*>): Tidslinje<I
  * Etter beskjæringen vil tidslinjen maksimalt strekke seg fra innsendt [fraOgMed] og til [tilOgMed]
  * Perioder som ligger helt utenfor grensene vil forsvinne.
  * Perioden i hver ende som ligger delvis innenfor, vil forkortes.
- * Uendelige endepunkter vil beskjæres til endelig hvis [fraOgMed] eller [tilOgMed] er endelige
- * Endelige endepunkter som beskjæres mot uendelige endepunkter, beholdes
- * Hvis ny og eksisterende grenseverdi begge er uendelige, vil den mest ekstreme benyttes
+ * Uendelige endepunkter vil beskjæres til endelig
  */
 fun <V> Tidslinje<V>.beskjær(
     fraOgMed: LocalDate,

@@ -6,9 +6,9 @@ import no.nav.familie.tidslinje.utvidelser.kombinerMed
 
 /**
  * Extension-metode for å kombinere to nøkkel-verdi-map'er der verdiene er tidslinjer
- * Nøkkelen må være av samme type, K, tidslinjene må være i samme tidsenhet (T)
- * Innholdet i tidslinjene i map'en på venstre side må alle være av typen V
- * Innholdet i tidslinjene i map'en på høyre side må alle være av typen H
+ * Nøkkelen må være av samme type K
+ * Verdiene i tidslinjene i map'en på venstre side må alle være av typen V
+ * Verdiene i tidslinjene i map'en på høyre side må alle være av typen H
  * Kombinator-funksjonen kalles med verdiene av fra venstre og høyre tidslinje for samme nøkkel og tidspunkt.
  * <null> blir sendt som verdier hvis venstre, høyre eller begge tidslinjer mangler verdi for et tidspunkt
  * Resultatet er en ny map der nøklene er av type K, og tidslinjene har innhold av typen (nullable) R.
@@ -31,11 +31,11 @@ fun <K, V, H, R> Map<K, Tidslinje<V>>.join(
 
 /**
  * Extension-metode for å kombinere to nøkkel-verdi-map'er der verdiene er tidslinjer
- * Nøkkelen må være av samme type, K, tidslinjene må være i samme tidsenhet (T)
- * Innholdet i tidslinjene i map'en på venstre side må alle være av typen V
- * Innholdet i tidslinjene i map'en på høyre side må alle være av typen H
+ * Nøkkelen må være av samme type K
+ * Verdiene i tidslinjene i map'en på venstre side må alle være av typen V
+ * Verdiene i tidslinjene i map'en på høyre side må alle være av typen H
  * Kombinator-funksjonen kalles med verdiene av fra venstre og høyre tidslinje for samme nøkkel og tidspunkt.
- * Kombinator-funksjonen blir IKKE kalt Hvis venstre, høyre eller begge tidslinjer mangler verdi for et tidspunkt
+ * Kombinator-funksjonen blir IKKE kalt hvis venstre, høyre eller begge tidslinjer mangler verdi for et tidspunkt
  * Resultatet er en ny map der nøklene er av type K, og tidslinjene har innhold av typen (nullable) R.
  * Bare nøkler som finnes i begge map'ene vil finnes i den resulterende map'en
  */
