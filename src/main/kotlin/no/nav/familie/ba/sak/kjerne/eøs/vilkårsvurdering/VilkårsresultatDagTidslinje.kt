@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 /**
  * Lager tidslinje av VilkårRegelverkResultat for ett vilkår og én aktør
@@ -36,3 +38,21 @@ fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
         ),
     )
 }
+
+fun Iterable<VilkårResultat>.tilVilkårRegelverkResultatTidslinjeFamilieFelles() =
+    this
+        .filter { it.erOppfylt() }
+        .map { it.tilPeriodeNy() }
+        .tilTidslinje()
+
+private fun VilkårResultat.tilPeriodeNy(): FamilieFellesPeriode<VilkårRegelverkResultat> =
+    FamilieFellesPeriode(
+        verdi =
+            VilkårRegelverkResultat(
+                vilkår = vilkårType,
+                regelverkResultat = this.tilRegelverkResultat(),
+                utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
+            ),
+        fom = periodeFom,
+        tom = periodeTom,
+    )
