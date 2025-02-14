@@ -30,7 +30,7 @@ internal class MånedFraMånedsskifteTest {
                     verdiFørsteDagDenneMåned
                 }
 
-        assertEquals("d".tilCharTidslinje(des(2021)), månedTidslinje)
+        assertEquals("d".tilCharTidslinje(des(2021)).tilMåned { it.single() }, månedTidslinje)
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class MånedFraMånedsskifteTest {
                     verdiSisteDagForrigeMåned
                 }
 
-        assertEquals("c4".tilCharTidslinje(des(2021)), månedTidslinje)
+        assertEquals("c4".tilCharTidslinje(des(2021)).tilMåned { it.single() }, månedTidslinje)
     }
 
     @Test
