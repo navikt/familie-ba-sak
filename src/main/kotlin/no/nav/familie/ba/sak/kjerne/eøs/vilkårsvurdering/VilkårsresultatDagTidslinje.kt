@@ -1,11 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligSent
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
 
 /**
  * Lager tidslinje av VilkårRegelverkResultat for ett vilkår og én aktør
@@ -17,22 +14,19 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
  * Overlapp er ikke støttet av tidsliner, og ville gitt exception
  */
 fun Iterable<VilkårResultat>.tilVilkårRegelverkResultatTidslinje() =
-    tidslinje {
-        this
-            .filter { it.erOppfylt() }
-            .map { it.tilPeriode() }
-    }
+    this
+        .filter { it.erOppfylt() }
+        .map { it.tilPeriode() }
+        .tilTidslinje()
 
-fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
-    val fom = periodeFom.tilTidspunktEllerUendeligTidlig(periodeTom)
-    val tom = periodeTom.tilTidspunktEllerUendeligSent(periodeFom)
-    return Periode(
-        fom,
-        tom,
-        VilkårRegelverkResultat(
-            vilkår = vilkårType,
-            regelverkResultat = this.tilRegelverkResultat(),
-            utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
-        ),
+private fun VilkårResultat.tilPeriode() =
+    Periode(
+        verdi =
+            VilkårRegelverkResultat(
+                vilkår = vilkårType,
+                regelverkResultat = this.tilRegelverkResultat(),
+                utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
+            ),
+        fom = periodeFom,
+        tom = periodeTom,
     )
-}
