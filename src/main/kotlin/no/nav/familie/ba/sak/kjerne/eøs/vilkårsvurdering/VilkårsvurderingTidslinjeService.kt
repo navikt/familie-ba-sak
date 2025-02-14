@@ -28,9 +28,20 @@ class VilkårsvurderingTidslinjeService(
         )
     }
 
-    fun hentTidslinjer(behandlingId: BehandlingId): VilkårsvurderingTidslinjer? {
+    // TODO: Endre navn til hentTidslinjerThrows når den andre funksjonen er slettet
+    fun hentFamilieFellesTidslinjerThrows(behandlingId: BehandlingId): VilkårsvurderingFamilieFellesTidslinjer {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)!!
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandlingId.id)
+
+        return VilkårsvurderingFamilieFellesTidslinjer(
+            vilkårsvurdering = vilkårsvurdering,
+            søkerOgBarn = søkerOgBarn,
+        )
+    }
+
+    fun hentTidslinjer(behandlingId: BehandlingId): VilkårsvurderingFamilieFellesTidslinjer? {
         return try {
-            hentTidslinjerThrows(behandlingId)
+            hentFamilieFellesTidslinjerThrows(behandlingId)
         } catch (exception: NullPointerException) {
             return null
         }

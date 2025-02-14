@@ -12,13 +12,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.verdiPåTidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
-import java.time.YearMonth
+import java.time.LocalDate
 
 @Service
 class BehandlingstemaService(
@@ -87,14 +86,14 @@ class BehandlingstemaService(
             tidslinjer
                 .barnasTidslinjer()
                 .values
-                .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(YearMonth.now(clockProvider.get()).tilTidspunkt()) }
+                .map { it.egetRegelverkResultatTidslinje.verdiPåTidspunkt(LocalDate.now(clockProvider.get())) }
 
-        val etBarnHarMinstEnLøpendeEØSPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
+        val etBarnHarMinstEnLøpendeEØSPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it?.regelverk == Regelverk.EØS_FORORDNINGEN }
         if (etBarnHarMinstEnLøpendeEØSPeriode) {
             return BehandlingKategori.EØS
         }
 
-        val etBarnHarMinstEnLøpendeNasjonalPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it.innhold?.regelverk == Regelverk.NASJONALE_REGLER }
+        val etBarnHarMinstEnLøpendeNasjonalPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it?.regelverk == Regelverk.NASJONALE_REGLER }
         if (etBarnHarMinstEnLøpendeNasjonalPeriode) {
             return BehandlingKategori.NASJONAL
         }
