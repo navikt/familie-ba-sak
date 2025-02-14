@@ -1,27 +1,27 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMedEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilDag
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingFamilieFellesTidslinjer
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMedEtter
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilDag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.beskjærEtter
+import no.nav.familie.tidslinje.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
 
-fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
+fun VilkårsvurderingFamilieFellesTidslinjer.tilRestTidslinjer(): RestTidslinjer {
     val barnasTidslinjer = this.barnasTidslinjer()
-    val søkersTidslinjer = this.søkersTidslinjer()
+    val søkersTidslinje = this.søkersTidslinje()
 
-    val erNoenAvBarnaMellom0Og18ÅrTidslinje: Tidslinje<Boolean, Måned> =
+    val erNoenAvBarnaMellom0Og18ÅrTidslinje: Tidslinje<Boolean> =
         barnasTidslinjer.values
             .map { it.erUnder18ÅrVilkårTidslinje }
             .kombinerUtenNull { barnaEr0Til18ÅrListe -> barnaEr0Til18ÅrListe.any { it } }
@@ -41,12 +41,12 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                         oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
                             it.value
                                 .regelverkResultatTidslinje
-                                .map { it?.resultat }
+                                .mapVerdiNullable { it?.resultat }
                                 .beskjærEtter(erUnder18årTidslinje)
                                 .tilRestTidslinje(),
                         regelverkTidslinje =
                             it.value.regelverkResultatTidslinje
-                                .map { it?.regelverk }
+                                .mapVerdiNullable { it?.regelverk }
                                 .beskjærEtter(erUnder18årTidslinje)
                                 .tilRestTidslinje(),
                     )
@@ -54,27 +54,27 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
         søkersTidslinjer =
             RestTidslinjerForSøker(
                 vilkårTidslinjer =
-                    søkersTidslinjer.vilkårsresultatTidslinjer.map {
+                    søkersTidslinje.vilkårsresultatTidslinjer.map {
                         it
                             .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
                             .tilRestTidslinje()
                     },
                 oppfyllerEgneVilkårTidslinje =
-                    søkersTidslinjer
+                    søkersTidslinje
                         .regelverkResultatTidslinje
-                        .map { it?.resultat }
+                        .mapVerdiNullable { it?.resultat }
                         .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
                         .tilRestTidslinje(),
             ),
     )
 }
 
-fun <I, T : Tidsenhet> Tidslinje<I, T>.tilRestTidslinje(): List<RestTidslinjePeriode<I>> =
-    this.filtrerIkkeNull().perioder().map { periode ->
+fun <V> Tidslinje<V>.tilRestTidslinje(): List<RestTidslinjePeriode<V>> =
+    this.tilPerioder().filtrerIkkeNull().map { periode ->
         RestTidslinjePeriode(
-            fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
-            innhold = periode.innhold!!,
+            fraOgMed = periode.fom?.førsteDagIInneværendeMåned() ?: PRAKTISK_TIDLIGSTE_DAG,
+            tilOgMed = periode.tom?.sisteDagIMåned(),
+            innhold = periode.verdi,
         )
     }
 

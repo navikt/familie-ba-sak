@@ -34,7 +34,7 @@ class TidslinjeController(
         )
         return ResponseEntity.ok(
             success(
-                tidslinjeService.hentTidslinjerThrows(BehandlingId(behandlingId)).tilRestTidslinjer(),
+                tidslinjeService.hentFamilieFellesTidslinjerThrows(BehandlingId(behandlingId)).tilRestTidslinjer(),
             ),
         )
     }
