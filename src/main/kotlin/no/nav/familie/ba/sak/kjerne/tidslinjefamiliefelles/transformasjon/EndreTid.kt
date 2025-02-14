@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.verdiPåTidspunkt
 import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.Udefinert
@@ -32,24 +35,14 @@ fun <V> Tidslinje<V>.tilMånedFraMånedsskifteIkkeNull(
     mapper: (innholdSisteDagForrigeMåned: V, innholdFørsteDagDenneMåned: V) -> V?,
 ): Tidslinje<V> =
     this
-        .konverterTilMåned(antallMndBakoverITid = 1) { dato, måneder ->
-            val sisteDagForrigeMåned =
-                måneder
-                    .first()
-                    .lastOrNull()
-                    ?.periodeVerdi
-                    ?.verdi
-            val førsteDagDenneMåned =
-                måneder
-                    .last()
-                    .firstOrNull()
-                    ?.periodeVerdi
-                    ?.verdi
+        .konverterTilMåned { dato, _ ->
+            val verdiForrigeMåned = verdiPåTidspunkt(dato.sisteDagIForrigeMåned())
+            val verdiDenneMåned = verdiPåTidspunkt(dato.førsteDagIInneværendeMåned())
 
-            if (sisteDagForrigeMåned == null || førsteDagDenneMåned == null) {
+            if (verdiForrigeMåned == null || verdiDenneMåned == null) {
                 Null()
             } else {
-                mapper(sisteDagForrigeMåned, førsteDagDenneMåned).tilPeriodeVerdi()
+                mapper(verdiForrigeMåned, verdiDenneMåned).tilPeriodeVerdi()
             }
         }.trim(Null(), Udefinert())
 
