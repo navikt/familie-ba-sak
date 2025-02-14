@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
@@ -16,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingFamilieFellesTidslinjer as VilkårsvurderingTidslinjer
 
 val logger = LoggerFactory.getLogger("VilkårsvurderingValidering.kt")
 

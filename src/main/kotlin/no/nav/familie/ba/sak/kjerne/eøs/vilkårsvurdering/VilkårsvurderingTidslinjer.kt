@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -134,21 +133,6 @@ class VilkårsvurderingTidslinjer(
                 .beskjærEtter(søkersTidslinje.regelverkResultatTidslinje)
     }
 }
-
-fun VilkårsvurderingTidslinjer.harBlandetRegelverk(): Boolean =
-    this.søkerHarNasjonalOgFinnesBarnMedEøs() ||
-        søkersTidslinjer().regelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) ||
-        barnasTidslinjer().values.any { it.egetRegelverkResultatTidslinje.inneholder(RegelverkResultat.OPPFYLT_BLANDET_REGELVERK) }
-
-private fun VilkårsvurderingTidslinjer.søkerHarNasjonalOgFinnesBarnMedEøs(): Boolean =
-    barnasTidslinjer().values.any {
-        it.egetRegelverkResultatTidslinje
-            .kombinerMed(søkersTidslinjer().regelverkResultatTidslinje) { barnRegelverk, søkerRegelverk ->
-                barnRegelverk == RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN && søkerRegelverk == RegelverkResultat.OPPFYLT_NASJONALE_REGLER
-            }.inneholder(true)
-    }
-
-fun <I, T : Tidsenhet> Tidslinje<I, T>.inneholder(innhold: I): Boolean = this.perioder().any { it.innhold == innhold }
 
 // TODO: Endre navn til VilkårsvurderingTidslinjer når den andre klassen er slettet
 class VilkårsvurderingFamilieFellesTidslinjer(
