@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
-import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.domene.OppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -9,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -27,7 +25,6 @@ class FerdigstillBehandling(
     private val behandlingMetrikker: BehandlingMetrikker,
     private val loggService: LoggService,
     private val snikeIKøenService: SnikeIKøenService,
-    private val oppdaterUtvidetKlassekodeKjøringRepository: OppdaterUtvidetKlassekodeKjøringRepository,
 ) : BehandlingSteg<String> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -58,10 +55,6 @@ class FerdigstillBehandling(
                 aktiv = true
                 behandlingHentOgPersisterService.lagreEllerOppdater(this, sendTilDvh = false)
             }
-        }
-
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
-            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(behandling.fagsak.id)
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)

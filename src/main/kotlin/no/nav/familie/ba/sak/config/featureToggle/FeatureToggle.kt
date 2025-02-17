@@ -22,9 +22,6 @@ enum class FeatureToggle(
 
     // NAV-22995
     SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD("familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd"),
-    KJØR_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD("familie-ba-sak.kjor-autovedtak-ny-klassekode-for-utvidet-barnetrygd"),
-    OPPRETT_AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_AUTOMATISK("familie-ba-sak.opprett-autovedtak-ny-klassekode-for-utvidet-barnetrygd-automatisk"),
-    AUTOVEDTAK_OPPDATER_KLASSEKODE_FOR_UTVIDET_BARNETRYGD_HØYT_VOLUM("familie-ba-sak.autovedtak-ny-klassekode-for-utvidet-barnetrygd-hoyt-volum"),
 
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),

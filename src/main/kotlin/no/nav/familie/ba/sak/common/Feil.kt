@@ -41,10 +41,6 @@ class MånedligValutaJusteringFeil(
     val melding: String,
 ) : RuntimeException(melding)
 
-class OppdaterUtvidetKlassekodeFeil(
-    val melding: String,
-) : RuntimeException(melding)
-
 class UtbetalingsikkerhetFeil(
     melding: String,
     override val frontendFeilmelding: String? = null,
