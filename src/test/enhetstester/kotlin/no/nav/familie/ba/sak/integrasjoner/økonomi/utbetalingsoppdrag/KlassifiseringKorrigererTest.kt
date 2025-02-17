@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.domain.Opphør
@@ -14,11 +13,9 @@ import java.time.LocalDate
 
 class KlassifiseringKorrigererTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
     private val klassifiseringKorrigerer =
         KlassifiseringKorrigerer(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     @Test

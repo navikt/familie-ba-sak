@@ -407,7 +407,6 @@ class CucumberMock(
             klassifiseringKorrigerer =
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
-                    unleashNextMedContextService,
                 ),
             behandlingsinformasjonUtleder =
                 BehandlingsinformasjonUtleder(

@@ -217,7 +217,6 @@ class OppdragSteg {
                 Utbetalingsgenerator(),
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
-                    unleashNextMedContextService,
                 ),
                 unleashNextMedContextService,
                 BehandlingsinformasjonUtleder(
