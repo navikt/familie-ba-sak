@@ -3,16 +3,20 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilPersonEnkel
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -26,6 +30,7 @@ import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -41,7 +46,8 @@ internal class SimuleringServiceEnhetTest {
     private val vedtakRepository: VedtakRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
 
     private val simuleringService: SimuleringService =
         SimuleringService(
@@ -50,9 +56,10 @@ internal class SimuleringServiceEnhetTest {
             økonomiSimuleringMottakerRepository = økonomiSimuleringMottakerRepository,
             tilgangService = tilgangService,
             vedtakRepository = vedtakRepository,
-            utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+            utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             persongrunnlagService = persongrunnlagService,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
         )
 
     val februar2023 = LocalDate.of(2023, 2, 1)
@@ -63,7 +70,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -101,7 +108,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -152,7 +159,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -192,7 +199,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -207,7 +214,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -245,7 +252,7 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
@@ -280,13 +287,54 @@ internal class SimuleringServiceEnhetTest {
         behandlingÅrsak: BehandlingÅrsak,
     ) {
         val behandling: Behandling =
-            no.nav.familie.ba.sak.common.lagBehandling(
+            lagBehandling(
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 årsak = behandlingÅrsak,
                 førsteSteg = StegType.VURDER_TILBAKEKREVING,
             )
 
         assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
+    }
+
+    @Test
+    fun `hentFeilutbetalingTilOgMedForrigeMåned skal summere feilutbetaling for tidligere enn inneværende måned`() {
+        // Arrange
+        val behandling =
+            lagBehandling(
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
+            )
+
+        val økonomiSimuleringPostering =
+            listOf(
+                mockVedtakSimuleringPostering(
+                    beløp = 100,
+                    fom = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().minusMonths(2).sisteDagIMåned(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                ),
+                mockVedtakSimuleringPostering(
+                    beløp = 200,
+                    fom = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().minusMonths(1).sisteDagIMåned(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                ),
+                mockVedtakSimuleringPostering(
+                    beløp = 300,
+                    fom = LocalDate.now().førsteDagIInneværendeMåned(),
+                    tom = LocalDate.now().sisteDagIMåned(),
+                    posteringType = PosteringType.FEILUTBETALING,
+                ),
+            )
+
+        every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = økonomiSimuleringPostering))
+
+        // Act
+        val feilutbetalingTilOgMedForrigeMåned = simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(behandling.id)
+
+        // Assert
+        assertThat(feilutbetalingTilOgMedForrigeMåned, Is(BigDecimal(300)))
     }
 
     private fun mockØkonomiSimuleringMottaker(

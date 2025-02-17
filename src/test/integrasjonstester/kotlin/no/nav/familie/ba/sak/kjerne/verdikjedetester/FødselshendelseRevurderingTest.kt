@@ -12,8 +12,9 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -35,30 +36,28 @@ class FødselshendelseRevurderingTest(
     fun `Skal innvilge fødselshendelse på mor med 1 barn med eksisterende utbetalinger`() {
         val revurderingsbarnSinFødselsdato = now().minusMonths(3)
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = now().minusMonths(12).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
-                            RestScenarioPerson(
-                                fødselsdato = revurderingsbarnSinFødselsdato.toString(),
-                                fornavn = "Barn2",
-                                etternavn = "Barnesen2",
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = now().minusMonths(12).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                        RestScenarioPerson(
+                            fødselsdato = revurderingsbarnSinFødselsdato.toString(),
+                            fornavn = "Barn2",
+                            etternavn = "Barnesen2",
+                        ),
+                    ),
+            ).also { stubScenario(it) }
 
         behandleFødselshendelse(
             nyBehandlingHendelse =
                 NyBehandlingHendelse(
-                    morsIdent = scenario.søker.ident!!,
-                    barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!),
+                    morsIdent = scenario.søker.ident,
+                    barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident),
                 ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -70,7 +69,7 @@ class FødselshendelseRevurderingTest(
         )
 
         val søkerIdent = scenario.søker.ident
-        val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident!!
+        val vurdertBarn = scenario.barna.maxByOrNull { it.fødselsdato }!!.ident
         val behandling =
             behandleFødselshendelse(
                 nyBehandlingHendelse =

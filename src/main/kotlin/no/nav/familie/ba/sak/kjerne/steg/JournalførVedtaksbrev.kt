@@ -200,15 +200,14 @@ class JournalførVedtaksbrev(
         behandling: Behandling,
         journalPostId: String,
         mottakerInfo: MottakerInfo,
-    ) =
-        DistribuerDokumentDTO(
-            fagsakId = behandling.fagsak.id,
-            behandlingId = behandling.id,
-            journalpostId = journalPostId,
-            brevmal = brevmalService.hentBrevmal(behandling),
-            erManueltSendt = false,
-            manuellAdresseInfo = mottakerInfo.manuellAdresseInfo,
-        )
+    ) = DistribuerDokumentDTO(
+        fagsakId = behandling.fagsak.id,
+        behandlingId = behandling.id,
+        journalpostId = journalPostId,
+        brevmal = brevmalService.hentBrevmal(behandling),
+        erManueltSendt = false,
+        manuellAdresseInfo = mottakerInfo.manuellAdresseInfo,
+    )
 
     override fun stegType(): StegType = StegType.JOURNALFØR_VEDTAKSBREV
 

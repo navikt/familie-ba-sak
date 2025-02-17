@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -38,7 +38,7 @@ class SammensattKontrollsakServiceTest(
     fun `finnSammensattKontrollsak skal returnere SammensattKontrollsak dersom det finnes en SammensattKontrollsak knyttet til behandlingsId`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         sammensattKontrollsakRepository.saveAndFlush(SammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
 
@@ -52,7 +52,7 @@ class SammensattKontrollsakServiceTest(
     fun `opprettSammensattKontrollsak skal opprette SammensattKontrollsak basert på RestOpprettSammensattKontrollsak`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         val sammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(RestOpprettSammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
 
@@ -68,7 +68,7 @@ class SammensattKontrollsakServiceTest(
     fun `oppdaterSammensattKontrollsak skal oppdatere SammensattKontrollsak basert på RestSammensattKontrollsak`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(RestOpprettSammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
         val oppdatertSammensattKontrollsak = sammensattKontrollsakService.oppdaterSammensattKontrollsak(RestSammensattKontrollsak(id = eksisterendeSammensattKontrollsak.id, behandlingId = behandling.id, fritekst = "Oppdatert fritekst"))
@@ -87,7 +87,7 @@ class SammensattKontrollsakServiceTest(
     fun `slettSammensattKontrollsak skal slette SammensattKontrollsak basert på RestSammensattKontrollsak`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         val eksisterendeSammensattKontrollsak = sammensattKontrollsakService.opprettSammensattKontrollsak(RestOpprettSammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
         sammensattKontrollsakService.slettSammensattKontrollsak(eksisterendeSammensattKontrollsak.id)

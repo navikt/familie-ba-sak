@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
@@ -27,6 +27,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerOmBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Svartidsbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtak
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingDeltBostedParagraf14Data
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboerBrev
@@ -65,6 +67,21 @@ data class ManuellBrevmottaker(
         poststed = brevmottakerDb.poststed,
         landkode = brevmottakerDb.landkode,
     )
+
+    fun harGyldigAdresse(): Boolean {
+        if (this.landkode == "NO") {
+            return this.navn.isNotEmpty() &&
+                this.adresselinje1.isNotEmpty() &&
+                this.postnummer.isNotEmpty() &&
+                this.poststed.isNotEmpty()
+        } else {
+            // Utenlandske manuelle brevmottakere skal ha postnummer og poststed satt i adresselinjene
+            return this.navn.isNotEmpty() &&
+                this.adresselinje1.isNotEmpty() &&
+                this.postnummer.isEmpty() &&
+                this.poststed.isEmpty()
+        }
+    }
 }
 
 data class ManueltBrevRequest(
@@ -239,6 +256,26 @@ fun ManueltBrevRequest.tilBrev(
                                 gjelder = this.vedrørende?.navn,
                                 dokumentliste = this.multiselectVerdier,
                             ),
+                    ),
+            )
+
+        Brevmal.UTBETALING_ETTER_KA_VEDTAK ->
+            UtbetalingEtterKAVedtak(
+                mal = Brevmal.UTBETALING_ETTER_KA_VEDTAK,
+                data =
+                    UtbetalingEtterKAVedtakData(
+                        delmalData =
+                            UtbetalingEtterKAVedtakData.DelmalData(
+                                signatur = signaturDelmal,
+                            ),
+                        flettefelter =
+                            UtbetalingEtterKAVedtakData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                                gjelder = this.vedrørende?.navn,
+                            ),
+                        fritekst = this.fritekstAvsnitt,
                     ),
             )
 
@@ -450,7 +487,7 @@ fun ManueltBrevRequest.tilBrev(
                 navn = mottakerNavn,
                 fødselsnummer = mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
+                mottakerlandSed = this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }.slåSammen(),
                 saksbehandlerNavn = saksbehandlerNavn,
             )
 
@@ -460,7 +497,7 @@ fun ManueltBrevRequest.tilBrev(
                 navn = mottakerNavn,
                 fødselsnummer = mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
+                mottakerlandSed = this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }.slåSammen(),
                 dokumentliste = this.multiselectVerdier,
                 saksbehandlerNavn = saksbehandlerNavn,
             )
@@ -535,9 +572,11 @@ private fun tilLandNavn(
 }
 
 private fun List<LocalDate>?.tilFormaterteFødselsdager() =
-    Utils.slåSammen(
-        this?.map { it.tilKortString() }
-            ?: throw Feil("Fikk ikke med barna sine fødselsdager"),
-    )
+    this
+        ?.map { it.tilKortString() }
+        ?.slåSammen()
+        ?: throw Feil(
+            "Fikk ikke med barna sine fødselsdager",
+        )
 
 private fun erOrgNr(ident: String): Boolean = ident.length == 9 && ident.all { it.isDigit() }

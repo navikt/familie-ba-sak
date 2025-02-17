@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
@@ -14,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -34,37 +32,15 @@ class InnkommendeJournalføringServiceTest(
     @Autowired
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
     @Autowired
-    private val journalføringRepository: JournalføringRepository,
-    @Autowired
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 ) : AbstractSpringIntegrationTest() {
-    @Test
-    fun `lagrer journalpostreferanse til behandling og fagsak til journalpost`() {
-        val søkerFnr = randomFnr()
-        val søkerAktør = personidentService.hentAktør(søkerFnr)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        val behandling = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
-
-        val (sak, behandlinger) =
-            innkommendeJournalføringService
-                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
-
-        val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
-
-        assertEquals(1, journalposter.size)
-        assertEquals(DbJournalpostType.I, journalposter.first().type)
-        assertEquals(fagsak.id.toString(), sak.fagsakId)
-        assertEquals(1, behandlinger.size)
-    }
-
     @Test
     fun `ferdigstill skal oppdatere journalpost med GENERELL_SAKSTYPE hvis knyttTilFagsak er false`() {
         val søkerFnr = randomFnr()
         val søkerAktør = personidentService.hentAktør(søkerFnr)
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
+        behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak))
 
         val (sak, behandlinger) =
             innkommendeJournalføringService

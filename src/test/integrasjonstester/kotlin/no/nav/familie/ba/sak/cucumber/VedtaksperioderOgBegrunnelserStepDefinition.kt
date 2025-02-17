@@ -12,11 +12,14 @@ import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
+import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
@@ -85,6 +88,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var totrinnskontroller = mutableMapOf<Long, Totrinnskontroll>()
     var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
+    var toggles = mapOf<Long, Map<String, Boolean>>()
 
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
@@ -113,6 +117,20 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             vedtaksListe = vedtaksliste,
             fagsaker = fagsaker,
         )
+    }
+
+    @Og("med følgende feature toggles")
+    fun følgendeFeatureToggles(dataTable: DataTable) {
+        toggles =
+            dataTable
+                .groupByBehandlingId()
+                .mapValues {
+                    it.value.associate { rad ->
+                        val featureToggleId = parseString(Domenebegrep.FEATURE_TOGGLE_ID, rad)
+                        val featureToggleVerdi = parseBoolean(Domenebegrep.ER_FEATURE_TOGGLE_TOGGLET_PÅ, rad)
+                        featureToggleId to featureToggleVerdi
+                    }
+                }
     }
 
     /**
@@ -259,7 +277,15 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
      */
     @Og("med andeler tilkjent ytelse")
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
-        tilkjenteYtelser = lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste, behandlingTilForrigeBehandling = behandlingTilForrigeBehandling)
+        tilkjenteYtelser =
+            lagTilkjentYtelse(
+                dataFraCucumber = this,
+                dataTable = dataTable,
+                behandlinger = behandlinger,
+                personGrunnlag = persongrunnlag,
+                vedtaksliste = vedtaksliste,
+                behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            )
     }
 
     /**
@@ -556,7 +582,14 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
         val forventedeAndeler =
-            lagTilkjentYtelse(dataTable = dataTable, behandlinger = behandlinger, personGrunnlag = persongrunnlag, vedtaksliste = vedtaksliste, behandlingTilForrigeBehandling = behandlingTilForrigeBehandling)[behandlingId]!!
+            lagTilkjentYtelse(
+                dataFraCucumber = this,
+                dataTable = dataTable,
+                behandlinger = behandlinger,
+                personGrunnlag = persongrunnlag,
+                vedtaksliste = vedtaksliste,
+                behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            )[behandlingId]!!
                 .andelerTilkjentYtelse
                 .sortedWith(compareBy({ it.aktør.aktørId }, { it.stønadFom }, { it.stønadTom }))
 
@@ -605,6 +638,16 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         forventedeBehandlinger.forEach {
             assertThat(behandlinger[it.id].toString()).isEqualTo(it.toString())
         }
+    }
+
+    @Så("forvent nøyaktig disse behandlingene for fagsak {}")
+    fun `forvent nøyaktig disse behandlingene for fagsak`(
+        fagsakId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeBehandlinger = lagBehandlinger(dataTable, fagsaker).map { it.toString() }
+        val behandlingerPåFagsak = behandlinger.filter { it.value.fagsak.id == fagsakId }.map { it.value.toString() }
+        assertThat(behandlingerPåFagsak).containsExactlyInAnyOrder(*forventedeBehandlinger.toTypedArray())
     }
 
     /**

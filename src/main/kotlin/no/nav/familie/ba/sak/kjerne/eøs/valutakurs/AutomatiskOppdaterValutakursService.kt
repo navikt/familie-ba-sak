@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.TEKNISK_ENDRING
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
 
-val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2023, 1)
+val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2024, 6)
 
 @Service
 class AutomatiskOppdaterValutakursService(
@@ -86,13 +86,12 @@ class AutomatiskOppdaterValutakursService(
     fun oppdaterValutakurserEtterEndringstidspunkt(
         behandlingId: BehandlingId,
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>? = null,
-        endringstidspunkt: YearMonth? = null,
     ) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId.id)
         oppdaterValutakurserEtterEndringstidspunkt(
             behandling = behandling,
             utenlandskePeriodebeløp = utenlandskePeriodebeløp ?: utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id),
-            endringstidspunkt = endringstidspunkt ?: finnEndringstidspunktForOppdateringAvValutakurs(behandling),
+            endringstidspunkt = finnEndringstidspunktForOppdateringAvValutakurs(behandling),
         )
     }
 
@@ -111,6 +110,13 @@ class AutomatiskOppdaterValutakursService(
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
         endringstidspunkt: YearMonth,
     ) {
+        val datoForPraksisEndringAutomatiskValutajustering =
+            if (unleashNextMedContextService.isEnabled(FeatureToggle.BYTT_VALUTAJUSTERING_DATO)) {
+                DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING
+            } else {
+                YearMonth.of(2023, 1)
+            }
+
         if (behandling.erMigrering() || behandling.opprettetÅrsak.erManuellMigreringsårsak()) return
 
         if (behandling.skalBehandlesAutomatisk) return
@@ -127,8 +133,8 @@ class AutomatiskOppdaterValutakursService(
                 logger.info("Førstegangsbehandling: Setter tidligste måned for automatisk valutakurs det seneste av endringstidspunkt($endringstidspunkt) og måned etter siste manuelle postering($månedEtterSisteManuellePostering)")
                 maxOf(endringstidspunkt, månedEtterSisteManuellePostering)
             } else {
-                logger.info("Revurdering: Setter tidligste måned for automatisk valutakurs det seneste av endringstidspunkt($endringstidspunkt), måned etter siste manuelle postering($månedEtterSisteManuellePostering) og praksisendring($DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)")
-                maxOf(endringstidspunkt, månedEtterSisteManuellePostering, DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING)
+                logger.info("Revurdering: Setter tidligste måned for automatisk valutakurs det seneste av endringstidspunkt($endringstidspunkt), måned etter siste manuelle postering($månedEtterSisteManuellePostering) og praksisendring($datoForPraksisEndringAutomatiskValutajustering)")
+                maxOf(endringstidspunkt, månedEtterSisteManuellePostering, datoForPraksisEndringAutomatiskValutajustering)
             }
 
         val automatiskGenererteValutakurser =
@@ -225,7 +231,7 @@ class AutomatiskOppdaterValutakursService(
         behandlingId: BehandlingId,
         nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
-        if (!unleashNextMedContextService.isEnabled(TEKNISK_ENDRING)) {
+        if (!unleashNextMedContextService.isEnabled(FeatureToggle.TEKNISK_ENDRING)) {
             throw Feil("Relevante toggler for å overstyre vurderingsstrategi for valutakurser er ikke satt.")
         }
 
@@ -255,5 +261,4 @@ class AutomatiskOppdaterValutakursService(
     }
 }
 
-private fun List<ØkonomiSimuleringMottaker>.finnDatoSisteManuellePostering() =
-    this.flatMap { it.økonomiSimuleringPostering }.filter { it.erManuellPostering }.maxOfOrNull { it.tom }
+private fun List<ØkonomiSimuleringMottaker>.finnDatoSisteManuellePostering() = this.flatMap { it.økonomiSimuleringPostering }.filter { it.erManuellPostering }.maxOfOrNull { it.tom }

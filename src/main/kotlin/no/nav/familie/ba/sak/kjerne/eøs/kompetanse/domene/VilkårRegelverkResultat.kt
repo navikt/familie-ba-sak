@@ -41,6 +41,7 @@ fun VilkårResultat.tilRegelverkResultat() =
                 Regelverk.NASJONALE_REGLER -> OPPFYLT_NASJONALE_REGLER
                 null -> OPPFYLT_REGELVERK_IKKE_SATT
             }
+
         Resultat.IKKE_OPPFYLT -> IKKE_OPPFYLT
         Resultat.IKKE_VURDERT -> IKKE_FULLT_VURDERT
     }
@@ -63,6 +64,7 @@ fun RegelverkResultat?.kombinerMed(resultat: RegelverkResultat?) =
                 IKKE_FULLT_VURDERT -> IKKE_FULLT_VURDERT
                 IKKE_OPPFYLT -> IKKE_OPPFYLT
             }
+
         OPPFYLT_NASJONALE_REGLER ->
             when (resultat) {
                 null -> IKKE_FULLT_VURDERT

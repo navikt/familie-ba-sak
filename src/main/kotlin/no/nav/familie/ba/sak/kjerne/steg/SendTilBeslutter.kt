@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.validerPerioderInnehol
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillLagVedtakOppgaver
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -78,6 +79,7 @@ class SendTilBeslutter(
                     behandlingId = behandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
                     fristForFerdigstillelse = LocalDate.now(),
+                    beskrivelse = SikkerhetContext.hentSaksbehandlerNavn(),
                 )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)
@@ -86,6 +88,11 @@ class SendTilBeslutter(
         }
 
         taskRepository.save(FerdigstillLagVedtakOppgaver.opprettTask(behandling.id))
+
+        if (!behandling.skalBehandlesAutomatisk) {
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
+        }
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
 

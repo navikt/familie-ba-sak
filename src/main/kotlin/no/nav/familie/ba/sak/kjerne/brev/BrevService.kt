@@ -10,10 +10,8 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
@@ -51,11 +49,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelterSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Vedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
+import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
@@ -66,12 +64,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -84,14 +79,11 @@ class BrevService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val simuleringService: SimuleringService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val sanityService: SanityService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val organisasjonService: OrganisasjonService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val brevmalService: BrevmalService,
-    private val refusjonEøsRepository: RefusjonEøsRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val testVerktøyService: TestVerktøyService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
@@ -99,6 +91,7 @@ class BrevService(
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+    private val hjemmeltekstUtleder: HjemmeltekstUtleder,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -441,7 +434,6 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
 
         val behandlingId = vedtak.behandling.id
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val grunnlagForBegrunnelser = vedtaksperiodeService.hentGrunnlagForBegrunnelse(vedtak.behandling)
         val brevperioder =
@@ -465,16 +457,12 @@ class BrevService(
         val utbetalingerPerMndEøs = hentUtbetalingerPerMndEøs(vedtak)
 
         val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
-        val refusjonEøs = refusjonEøsRepository.finnRefusjonEøsForBehandling(behandlingId)
 
-        val hjemler =
-            hentHjemler(
+        val hjemmeltekst =
+            hjemmeltekstUtleder.utledHjemmeltekst(
                 behandlingId = behandlingId,
-                erFritekstIBrev = sorterteVedtaksperioderMedBegrunnelser.any { it.fritekster.isNotEmpty() },
-                vedtaksperioder = sorterteVedtaksperioderMedBegrunnelser,
-                målform = personopplysningGrunnlag.søker.målform,
                 vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null,
-                refusjonEøsHjemmelSkalMedIBrev = refusjonEøs.isNotEmpty(),
+                sorterteVedtaksperioderMedBegrunnelser = sorterteVedtaksperioderMedBegrunnelser,
             )
 
         val organisasjonsnummer =
@@ -486,7 +474,7 @@ class BrevService(
             enhet = grunnlagOgSignaturData.enhet,
             saksbehandler = grunnlagOgSignaturData.saksbehandler,
             beslutter = grunnlagOgSignaturData.beslutter,
-            hjemmeltekst = Hjemmeltekst(hjemler),
+            hjemmeltekst = Hjemmeltekst(hjemmeltekst),
             søkerNavn = organisasjonsnavn ?: grunnlagOgSignaturData.grunnlag.søker.navn,
             søkerFødselsnummer =
                 grunnlagOgSignaturData.grunnlag.søker.aktør
@@ -530,41 +518,11 @@ class BrevService(
         )
     }
 
-    private fun hentHjemler(
-        behandlingId: Long,
-        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-        målform: Målform,
-        vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
-        refusjonEøsHjemmelSkalMedIBrev: Boolean,
-        erFritekstIBrev: Boolean,
-    ): String {
-        val vilkårsvurdering =
-            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
-                ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
-        val opplysningspliktHjemlerSkalMedIBrev =
-            vilkårsvurdering.finnOpplysningspliktVilkår()?.resultat == Resultat.IKKE_OPPFYLT
+    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? = hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
 
-        return hentHjemmeltekst(
-            vedtaksperioder = vedtaksperioder,
-            standardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser(),
-            eøsStandardbegrunnelseTilSanityBegrunnelse = sanityService.hentSanityEØSBegrunnelser(),
-            opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
-            målform = målform,
-            vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev,
-            refusjonEøsHjemmelSkalMedIBrev = refusjonEøsHjemmelSkalMedIBrev,
-            erFritekstIBrev = erFritekstIBrev,
-        )
-    }
-
-    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
-        persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
-
-    private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
-        hentEtterbetalingsbeløp(vedtak)?.let { Etterbetaling(it) }
-
-    private fun hentEtterbetalingInstitusjon(vedtak: Vedtak): EtterbetalingInstitusjon? =
-        hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
+    private fun hentEtterbetalingInstitusjon(vedtak: Vedtak): EtterbetalingInstitusjon? = hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
         val etterbetalingsBeløp =
@@ -574,8 +532,7 @@ class BrevService(
         return etterbetalingsBeløp.takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
-    private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
-        simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
+    private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean = simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
 
     private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
         val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)

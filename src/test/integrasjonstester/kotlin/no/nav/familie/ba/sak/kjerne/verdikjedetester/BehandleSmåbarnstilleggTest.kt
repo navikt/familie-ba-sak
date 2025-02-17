@@ -4,10 +4,10 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -35,8 +35,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
@@ -80,7 +81,7 @@ class BehandleSmåbarnstilleggTest(
     private val barnFødselsdato = LocalDate.now().minusYears(2)
     private val periodeMedFullOvergangsstønadFom = barnFødselsdato.plusYears(1)
 
-    val restScenario =
+    val scenario =
         RestScenario(
             søker = RestScenarioPerson(fødselsdato = "1996-01-12", fornavn = "Mor", etternavn = "Søker"),
             barna =
@@ -94,11 +95,9 @@ class BehandleSmåbarnstilleggTest(
                 ),
         )
 
-    lateinit var scenario: RestScenario
-
     @BeforeAll
     fun init() {
-        scenario = mockServerKlient().lagScenario(restScenario)
+        stubScenario(scenario)
     }
 
     @BeforeEach
@@ -130,7 +129,7 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(1)
     fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
@@ -147,7 +146,7 @@ class BehandleSmåbarnstilleggTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = søkersIdent,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,
@@ -302,7 +301,7 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(2)
     fun `Skal ikke opprette behandling når det ikke finnes endringer på perioder med full overgangsstønad`() {
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
         val søkersAktør = personidentService.hentAktør(søkersIdent)
@@ -322,7 +321,7 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal stoppe automatisk behandling som må fortsette manuelt pga tilbakekreving`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId!!)
+        val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
@@ -382,7 +381,7 @@ class BehandleSmåbarnstilleggTest(
     fun `Skal automatisk endre småbarnstilleggperioder`() {
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
 
-        val søkersIdent = scenario.søker.ident!!
+        val søkersIdent = scenario.søker.ident
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()

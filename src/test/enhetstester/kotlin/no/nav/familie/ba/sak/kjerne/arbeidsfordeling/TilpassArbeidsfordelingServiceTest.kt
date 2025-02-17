@@ -3,28 +3,38 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.datagenerator.oppgave.lagEnhet
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class TilpassArbeidsfordelingServiceTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService =
-        TilpassArbeidsfordelingService(integrasjonClient = mockedIntegrasjonClient)
+        TilpassArbeidsfordelingService(
+            integrasjonClient = mockedIntegrasjonClient,
+            unleashService = unleashService,
+        )
+
+    @BeforeEach
+    fun oppsett() {
+        every { unleashService.isEnabled(FeatureToggle.TILLAT_OPPRETT_AV_BEHANDLING_PÅ_VIKAFOSSEN, false) } returns true
+    }
 
     @Nested
     inner class TilpassArbeidsfordelingTilSaksbehandler {
         @Test
         fun `skal kaste feil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident er null`() {
             // Arrange
-
             val arbeidsfordelingPåBehandling =
                 Arbeidsfordelingsenhet(
                     enhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
@@ -43,11 +53,57 @@ class TilpassArbeidsfordelingServiceTest {
         }
 
         @Test
+        fun `skal kaste midlertidigEnhetIAutomatiskBehandlingFeil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident er systembruker`() {
+            // Arrange
+            val arbeidsfordelingPåBehandling =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                )
+
+            // Act & assert
+            val exception =
+                assertThrows<MidlertidigEnhetIAutomatiskBehandlingFeil> {
+                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                        arbeidsfordelingsenhet = arbeidsfordelingPåBehandling,
+                        navIdent = NavIdent(SYSTEM_FORKORTELSE),
+                    )
+                }
+            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger")
+        }
+
+        @Test
         fun `skal kaste feil om arbeidsfordeling er midlertidig enhet 4863 og NAV-ident ikke har tilgang til noen andre enheter enn 4863 og 2103`() {
             // Arrange
             val navIdent = NavIdent("1")
 
-            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VIKAFOSSEN
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                    enhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                )
+
+            every {
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
+                    navIdent = navIdent,
+                )
+            } returns emptyList()
+
+            // Act & assert
+            val exception =
+                assertThrows<Feil> {
+                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                        arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                        navIdent = navIdent,
+                    )
+                }
+            assertThat(exception.message).isEqualTo("NAV-ident $navIdent har ikke tilgang til noen enheter")
+        }
+
+        @Test
+        fun `skal returnere Vikafossen om NAV-identen kun har tilgang til Vikafossen når arbeidsfordeling er midlertidig enhet 4863`() {
+            // Arrange
+            val navIdent = NavIdent("1")
 
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
@@ -61,21 +117,22 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
+                    Enhet(
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
                 )
 
-            // Act & assert
-            val exception =
-                assertThrows<Feil> {
-                    tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
-                        arbeidsfordelingsenhet = arbeidsfordelingsenhet,
-                        navIdent = navIdent,
-                    )
-                }
-            assertThat(exception.message).isEqualTo("Fant ingen passende enhetsnummer for nav-ident $navIdent")
+            // Act
+            val tilpassetArbeidsfordelingsenhet =
+                tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                    arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                    navIdent = navIdent,
+                )
+
+            // Assert
+            assertThat(tilpassetArbeidsfordelingsenhet.enhetId).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(tilpassetArbeidsfordelingsenhet.enhetNavn).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
         }
 
         @Test
@@ -98,15 +155,15 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -165,11 +222,11 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -204,11 +261,11 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = "1234",
                         enhetsnavn = "Fiktiv enhet",
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
@@ -262,13 +319,7 @@ class TilpassArbeidsfordelingServiceTest {
                 mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
                     navIdent = navIdent,
                 )
-            } returns
-                listOf(
-                    lagEnhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+            } returns emptyList()
 
             // Act & assert
             val exception =
@@ -278,7 +329,42 @@ class TilpassArbeidsfordelingServiceTest {
                         navIdent = navIdent,
                     )
                 }
-            assertThat(exception.message).isEqualTo("Fant ingen passende enhetsnummer for NAV-ident $navIdent")
+            assertThat(exception.message).isEqualTo("NAV-ident $navIdent har ikke tilgang til noen enheter")
+        }
+
+        @Test
+        fun `skal returnere Vikafossen hvis Nav-ident kun har tilgang til Vikafossen`() {
+            // Arrange
+            val navIdent = NavIdent("1")
+
+            val arbeidsfordelingsenhet =
+                Arbeidsfordelingsenhet(
+                    enhetId = "1234",
+                    enhetNavn = "Fiktiv enhet",
+                )
+
+            every {
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
+                    navIdent = navIdent,
+                )
+            } returns
+                listOf(
+                    Enhet(
+                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
+                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
+                    ),
+                )
+
+            // Act
+            val tilpassetArbeidsfordelingsenhet =
+                tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                    arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                    navIdent = navIdent,
+                )
+
+            // Assert
+            assertThat(tilpassetArbeidsfordelingsenhet.enhetId).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(tilpassetArbeidsfordelingsenhet.enhetNavn).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
         }
 
         @Test
@@ -301,15 +387,15 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
                         enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
                     ),
@@ -346,15 +432,15 @@ class TilpassArbeidsfordelingServiceTest {
                 )
             } returns
                 listOf(
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
                         enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
                     ),
-                    lagEnhet(
+                    Enhet(
                         enhetsnummer = arbeidsfordelingEnhet.enhetsnummer,
                         enhetsnavn = arbeidsfordelingEnhet.enhetsnavn,
                     ),

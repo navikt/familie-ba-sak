@@ -18,27 +18,28 @@ class UtenlandskPeriodebeløpBuilder(
         valutakode: String?,
         utbetalingsland: String?,
         vararg barn: Person,
-    ) =
-        medSkjema(k, barn.toList()) {
-            when {
-                it == '-' -> UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
-                it == '$' ->
-                    UtenlandskPeriodebeløp.NULL.copy(
-                        valutakode = valutakode,
-                        utbetalingsland = utbetalingsland,
-                    )
-                it?.isDigit() ?: false -> {
-                    UtenlandskPeriodebeløp.NULL.copy(
-                        beløp = it?.digitToInt()?.toBigDecimal(),
-                        valutakode = valutakode,
-                        intervall = Intervall.MÅNEDLIG,
-                        utbetalingsland = utbetalingsland,
-                        kalkulertMånedligBeløp = it?.digitToInt()?.toBigDecimal(),
-                    )
-                }
-                else -> null
+    ) = medSkjema(k, barn.toList()) {
+        when {
+            it == '-' -> UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
+            it == '$' ->
+                UtenlandskPeriodebeløp.NULL.copy(
+                    valutakode = valutakode,
+                    utbetalingsland = utbetalingsland,
+                )
+
+            it?.isDigit() ?: false -> {
+                UtenlandskPeriodebeløp.NULL.copy(
+                    beløp = it?.digitToInt()?.toBigDecimal(),
+                    valutakode = valutakode,
+                    intervall = Intervall.MÅNEDLIG,
+                    utbetalingsland = utbetalingsland,
+                    kalkulertMånedligBeløp = it?.digitToInt()?.toBigDecimal(),
+                )
             }
+
+            else -> null
         }
+    }
 
     fun medIntervall(intervall: Intervall) =
         medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(intervall = intervall) }.medTransformasjon { utenlandskPeriodebeløp ->

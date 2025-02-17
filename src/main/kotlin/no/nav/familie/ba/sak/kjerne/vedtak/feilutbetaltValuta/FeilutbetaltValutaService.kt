@@ -45,8 +45,7 @@ class FeilutbetaltValutaService(
         feilutbetaltValutaRepository.deleteById(id)
     }
 
-    fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
+    fun hentFeilutbetaltValutaPerioder(behandlingId: Long) = feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
     private fun tilRest(it: FeilutbetaltValuta) =
         RestFeilutbetaltValuta(

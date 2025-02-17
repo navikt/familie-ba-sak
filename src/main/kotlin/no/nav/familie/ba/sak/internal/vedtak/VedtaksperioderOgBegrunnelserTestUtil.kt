@@ -97,7 +97,7 @@ private fun lagGenereltTestoppsettForVedtaksperioderOgBegrunnelser(
 # language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric(10)}
+Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.secure().nextAlphanumeric(10)}
 
   Bakgrunn:""" +
             hentTekstForFagsak(behandling) +
@@ -105,7 +105,7 @@ Egenskap: Plassholdertekst for egenskap - ${RandomStringUtils.randomAlphanumeric
             hentTekstForPersongrunnlag(persongrunnlag, persongrunnlagForrigeBehandling) +
             """
       
-  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.randomAlphanumeric(10)}
+  Scenario: Plassholdertekst for scenario - ${RandomStringUtils.secure().nextAlphanumeric(10)}
     Og dagens dato er ${LocalDate.now().tilddMMyyyy()}""" +
             hentTekstForPersonerFremstiltKravFor(behandling.id, personerFremstiltKravFor) +
             lagPersonresultaterTekst(forrigeBehandling) +
@@ -156,28 +156,26 @@ private fun hentTekstForFagsak(behandling: Behandling) =
 private fun hentTekstForBehandlinger(
     behandling: Behandling,
     forrigeBehandling: Behandling?,
-) =
-    """
+) = """
 
     Gitt følgende behandlinger
     | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |${
-        forrigeBehandling?.let {
-            """ 
+    forrigeBehandling?.let {
+        """ 
       | ${it.id} | 1 |           | ${it.resultat} | ${it.opprettetÅrsak} | ${if (it.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${it.kategori} | ${it.status} |"""
-        } ?: ""
-    }
+    } ?: ""
+}
     | ${behandling.id} | 1 | ${forrigeBehandling?.id ?: ""} |${behandling.resultat} | ${behandling.opprettetÅrsak} | ${if (behandling.skalBehandlesAutomatisk) "Ja" else "Nei"} | ${behandling.kategori} | ${behandling.status} |"""
 
 private fun hentTekstForPersongrunnlag(
     persongrunnlag: PersonopplysningGrunnlag,
     persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
-) =
-    """
+) = """
 
     Og følgende persongrunnlag
     | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |""" +
-        hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
-        hentPersongrunnlagRader(persongrunnlag)
+    hentPersongrunnlagRader(persongrunnlagForrigeBehandling) +
+    hentPersongrunnlagRader(persongrunnlag)
 
 private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): String =
     persongrunnlag?.personer?.sortedBy { it.fødselsdato }?.joinToString("") {
@@ -188,14 +186,13 @@ private fun hentPersongrunnlagRader(persongrunnlag: PersonopplysningGrunnlag?): 
 private fun hentTekstForPersonerFremstiltKravFor(
     behandlingId: Long?,
     personerFremstiltKravFor: List<Aktør>,
-) =
-    """
+) = """
     Og med personer fremstilt krav for
     | BehandlingId | AktørId |""" +
-        personerFremstiltKravFor.joinToString(separator = "") {
-            """
+    personerFremstiltKravFor.joinToString(separator = "") {
+        """
     | $behandlingId | ${it.aktørId} |"""
-        }
+    }
 
 private fun lagPersonresultaterTekst(behandling: Behandling?) =
     behandling?.let {
@@ -259,8 +256,7 @@ private fun tilVilkårResultatRader(personResultater: List<PersonResultat>?) =
             }
     } ?: ""
 
-private fun Set<PersonResultat>.sorterPåFødselsdato(persongrunnlag: PersonopplysningGrunnlag) =
-    this.sortedBy { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
+private fun Set<PersonResultat>.sorterPåFødselsdato(persongrunnlag: PersonopplysningGrunnlag) = this.sortedBy { personresultat -> persongrunnlag.personer.single { personresultat.aktør == it.aktør }.fødselsdato }
 
 private fun hentTekstForKompetanse(
     kompetanse: Collection<Kompetanse>,
@@ -436,14 +432,13 @@ private fun hentTekstForTilkjentYtelse(
     persongrunnlag: PersonopplysningGrunnlag,
     andelerForrigeBehandling: List<AndelTilkjentYtelse>?,
     persongrunnlagForrigeBehandling: PersonopplysningGrunnlag?,
-) =
-    """
+) = """
 
     Og med andeler tilkjent ytelse
     | AktørId | BehandlingId | Fra dato | Til dato | Beløp | Ytelse type | Prosent | Sats | """ +
-        hentAndelRader(andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
-        "\n" +
-        hentAndelRader(andeler, persongrunnlag)
+    hentAndelRader(andelerForrigeBehandling, persongrunnlagForrigeBehandling) +
+    "\n" +
+    hentAndelRader(andeler, persongrunnlag)
 
 private fun hentAndelRader(
     andeler: List<AndelTilkjentYtelse>?,

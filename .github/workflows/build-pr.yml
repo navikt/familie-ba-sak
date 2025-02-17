@@ -131,34 +131,12 @@ jobs:
           java-version: 21
           distribution: 'temurin'
           cache: 'maven'
-      - name: Checkout mock-server
-        uses: actions/checkout@v4
-        with:
-          ref: "main"
-          repository: navikt/familie-mock-server
-          token: ${{ secrets.READER_TOKEN }}
-          path: familie-mock-server
-      - name: 🔧💻 Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: yarn
-          cache-dependency-path: familie-mock-server/yarn.lock
-          registry-url: "https://npm.pkg.github.com"
-      - name: 🧶📥 Yarn install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: cd familie-mock-server; yarn --prefer-offline --frozen-lockfile
-      - name: 🧶📥 Yarn start
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: cd familie-mock-server; yarn start:dev &
       - name: Kjør verdikjedetester m/ feature toggles slått av
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=false -DbrukLokalMockserver=true" -Dgroups=verdikjedetest
+          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=false" -Dgroups=verdikjedetest
 
   verdikjedetesterFeatureToggleOn:
     name: Verdikjedetester m/ feature toggles slått på
@@ -173,31 +151,9 @@ jobs:
           java-version: 21
           distribution: 'temurin'
           cache: 'maven'
-      - name: Checkout mock-server
-        uses: actions/checkout@v4
-        with:
-          ref: "main"
-          repository: navikt/familie-mock-server
-          token: ${{ secrets.READER_TOKEN }}
-          path: familie-mock-server
-      - name: 🔧💻 Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: yarn
-          cache-dependency-path: familie-mock-server/yarn.lock
-          registry-url: "https://npm.pkg.github.com"
-      - name: 🧶📥 Yarn install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: cd familie-mock-server; yarn --prefer-offline --frozen-lockfile
-      - name: 🧶📥 Yarn start
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: cd familie-mock-server; yarn start:dev &
       - name: Kjør verdikjedetester m/ feature toggles slått på
         env:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=true -DbrukLokalMockserver=true" -Dgroups=verdikjedetest
+          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=true" -Dgroups=verdikjedetest

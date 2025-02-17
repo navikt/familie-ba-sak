@@ -22,7 +22,9 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
     every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just runs
     every { tilkjentYtelseRepository.save(any()) } answers {
         val tilkjentYtelse = firstArg<TilkjentYtelse>()
-        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelse
+
+        val tilkjentYtelseMedUnikIdPåAndeler = tilkjentYtelse.copy(andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.map { it.copy(id = Random.nextLong()) }.toMutableSet())
+        dataFraCucumber.tilkjenteYtelser[tilkjentYtelse.behandling.id] = tilkjentYtelseMedUnikIdPåAndeler
         tilkjentYtelse
     }
     every { tilkjentYtelseRepository.saveAndFlush(any()) } answers {
@@ -35,6 +37,19 @@ fun mockTilkjentYtelseRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserS
     every { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any()) } answers {
         val behandlingId = firstArg<Long>()
         dataFraCucumber.tilkjenteYtelser[behandlingId]
+    }
+    every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(any()) } answers {
+        val fagsakId = firstArg<Long>()
+        dataFraCucumber.tilkjenteYtelser
+            .map { it.value }
+            .filter { it.behandling.fagsak.id == fagsakId }
+            .mapNotNull { it.utbetalingsoppdrag }
+            .any { it.contains("\"klassifisering\":\"BAUTV-OP\"") }
+    }
+
+    every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } answers {
+        val fagsakId = firstArg<Long>()
+        dataFraCucumber.tilkjenteYtelser.map { it.value }.filter { it.utbetalingsoppdrag != null && it.utbetalingsoppdrag!!.contains("\"klassifisering\":\"BAUTV-OP\"") }
     }
     return tilkjentYtelseRepository
 }

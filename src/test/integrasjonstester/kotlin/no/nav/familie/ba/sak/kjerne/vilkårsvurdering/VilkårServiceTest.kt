@@ -1,20 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomBarnFnr
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
-import no.nav.familie.ba.sak.common.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
-import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagBarnVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagSøkerVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.vurderVilkårsvurderingTilInnvilget
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
@@ -49,6 +48,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -103,7 +103,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -199,7 +199,7 @@ class VilkårServiceTest(
         val barnFnr2 = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -246,7 +246,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
@@ -265,7 +265,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -489,7 +489,7 @@ class VilkårServiceTest(
 
         val barnFnr2 = randomFnr()
 
-        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
@@ -534,7 +534,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -563,7 +563,7 @@ class VilkårServiceTest(
 
         val barnFnr2 = randomFnr()
 
-        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
@@ -784,7 +784,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD,
@@ -825,7 +825,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     underkategori = BehandlingUnderkategori.UTVIDET,
@@ -968,7 +968,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD,
@@ -1149,7 +1149,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -1230,7 +1230,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -1334,7 +1334,7 @@ class VilkårServiceTest(
             }
         }
 
-        behandlingstemaService.oppdaterBehandlingstema(
+        behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
             behandling,
             BehandlingKategori.EØS,
             BehandlingUnderkategori.ORDINÆR,
@@ -1371,7 +1371,7 @@ class VilkårServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         var forrigeBehandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
@@ -1429,7 +1429,7 @@ class VilkårServiceTest(
 
         val behandling =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(
+                lagBehandlingUtenId(
                     fagsak = fagsak,
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -1453,7 +1453,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling =
+        val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
         val forrigeBehandlingSomErIverksatt =

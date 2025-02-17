@@ -21,6 +21,7 @@ fun <T : Tidsenhet, I> Iterable<Tidspunkt<T>>.tidslinjeFraTidspunkt(
                 when {
                     sistePeriode != null && sistePeriode.kanUtvidesMed(tidspunktMedInnhold) ->
                         perioder.replaceLast(sistePeriode.utvidMed(tidspunktMedInnhold))
+
                     else -> perioder + tidspunktMedInnhold.tilPeriode()
                 }
             }
@@ -55,8 +56,7 @@ fun <I> I?.tilInnhold() = Innhold(this)
 
 fun <I> I?.tilVerdi() = this?.let { Innhold<I>(it) } ?: Innhold.utenInnhold()
 
-fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdForTidspunkt(tidspunkt: Tidspunkt<T>): Innhold<I> =
-    perioder().innholdForTidspunkt(tidspunkt)
+fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdForTidspunkt(tidspunkt: Tidspunkt<T>): Innhold<I> = perioder().innholdForTidspunkt(tidspunkt)
 
 fun <I, T : Tidsenhet> Collection<Periode<I, T>>.innholdForTidspunkt(
     tidspunkt: Tidspunkt<T>,
@@ -68,8 +68,7 @@ fun <I, T : Tidsenhet> Collection<Periode<I, T>>.innholdForTidspunkt(
     }
 }
 
-private fun <I, T : Tidsenhet> Periode<I, T>.omfatter(tidspunkt: Tidspunkt<T>) =
-    this.fraOgMed <= tidspunkt && this.tilOgMed >= tidspunkt
+private fun <I, T : Tidsenhet> Periode<I, T>.omfatter(tidspunkt: Tidspunkt<T>) = this.fraOgMed <= tidspunkt && this.tilOgMed >= tidspunkt
 
 private data class TidspunktMedInnhold<I, T : Tidsenhet>(
     val tidspunkt: Tidspunkt<T>,
@@ -84,11 +83,8 @@ private fun <I, T : Tidsenhet> Periode<I, T>.kanUtvidesMed(tidspunktMedInnhold: 
         this.innhold == tidspunktMedInnhold.innhold &&
         this.tilOgMed.erRettFør(tidspunktMedInnhold.tidspunkt.somEndelig())
 
-private fun <I, T : Tidsenhet> Periode<I, T>.utvidMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>): Periode<I, T> =
-    this.copy(tilOgMed = tidspunktMedInnhold.tidspunkt)
+private fun <I, T : Tidsenhet> Periode<I, T>.utvidMed(tidspunktMedInnhold: TidspunktMedInnhold<I, T>): Periode<I, T> = this.copy(tilOgMed = tidspunktMedInnhold.tidspunkt)
 
-private fun <I, T : Tidsenhet> TidspunktMedInnhold<I, T>.tilPeriode() =
-    Periode(this.tidspunkt.somFraOgMed(), this.tidspunkt.somTilOgMed(), this.innhold)
+private fun <I, T : Tidsenhet> TidspunktMedInnhold<I, T>.tilPeriode() = Periode(this.tidspunkt.somFraOgMed(), this.tidspunkt.somTilOgMed(), this.innhold)
 
-private fun <T> Collection<T>.replaceLast(replacement: T) =
-    this.take(this.size - 1) + replacement
+private fun <T> Collection<T>.replaceLast(replacement: T) = this.take(this.size - 1) + replacement

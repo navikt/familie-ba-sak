@@ -3,13 +3,15 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGeneratorService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.årMnd
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -24,7 +26,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragStatus
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.prosessering.domene.Task
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,9 +42,11 @@ class HentStatusTest {
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    private val utbetalingsoppdragGeneratorService: UtbetalingsoppdragGeneratorService = mockk()
+    private val oppdaterTilkjentYtelseService = mockk<OppdaterTilkjentYtelseService>()
 
-    private val unleashService: UnleashService = mockk()
+    private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator = mockk()
+
+    private val unleashService: UnleashNextMedContextService = mockk()
 
     @BeforeEach
     fun setUp() {
@@ -52,8 +55,9 @@ class HentStatusTest {
                 økonomiKlient = økonomiKlient,
                 tilkjentYtelseValideringService = mockk(),
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
-                utbetalingsoppdragGeneratorService = utbetalingsoppdragGeneratorService,
+                utbetalingsoppdragGenerator = utbetalingsoppdragGenerator,
                 behandlingHentOgPersisterService = mockk(),
+                oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
             )
         statusFraOppdrag =
             StatusFraOppdrag(
@@ -61,7 +65,7 @@ class HentStatusTest {
                 taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
             )
 
-        every { unleashService.isEnabled(toggleId = any(), properties = any()) } returns false
+        every { unleashService.isEnabled(toggle = any()) } returns false
     }
 
     @Test

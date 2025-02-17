@@ -324,8 +324,7 @@ fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
         .map { it?.toList()?.filtrerVilkårErOrdinærtFor(søker) }
 }
 
-fun VilkårResultat.erGenereltAvslag() =
-    periodeFom == null && periodeTom == null && erEksplisittAvslagPåSøknad == true
+fun VilkårResultat.erGenereltAvslag() = periodeFom == null && periodeTom == null && erEksplisittAvslagPåSøknad == true
 
 private fun hentErMinstEttBarnMedUtbetalingTidslinje(
     personResultater: Set<PersonResultat>,
@@ -509,32 +508,25 @@ fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperi
         overgangsstønad.takeIf { erUtbetalingSmåbarnstillegg == true }
     }
 
-private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedtaksPeriodeTidslinje() =
-    this.map { vilkårResultater -> vilkårResultater?.map { VilkårResultatForVedtaksperiode(it) } }
+private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedtaksPeriodeTidslinje() = this.map { vilkårResultater -> vilkårResultater?.map { VilkårResultatForVedtaksperiode(it) } }
 
 @JvmName("internPeriodeOvergangsstønaderFiltrerPåAktør")
-fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) =
-    this.filter { it.personIdent == aktør.aktivFødselsnummer() }
+fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) = this.filter { it.personIdent == aktør.aktivFødselsnummer() }
 
 @JvmName("andelerTilkjentYtelserFiltrerPåAktør")
-fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) =
-    this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
+fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) = this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
 @JvmName("endredeUtbetalingerFiltrerPåAktør")
-fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) =
-    this.filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
+fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) = this.filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
 
 @JvmName("utfyltKompetanseFiltrerPåAktør")
-fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
-    this.filter { it.barnAktører.contains(aktør) }
+fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }
 
 @JvmName("utfyltValutakursFiltrerPåAktør")
-fun List<UtfyltValutakurs>.filtrerPåAktør(aktør: Aktør) =
-    this.filter { it.barnAktører.contains(aktør) }
+fun List<UtfyltValutakurs>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }
 
 @JvmName("utfyltUtenlandskPeriodebeløpFiltrerPåAktør")
-fun List<UtfyltUtenlandskPeriodebeløp>.filtrerPåAktør(aktør: Aktør) =
-    this.filter { it.barnAktører.contains(aktør) }
+fun List<UtfyltUtenlandskPeriodebeløp>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }
 
 private fun Periode<VedtaksperiodeGrunnlagForPerson, Måned>.erInnvilgetEllerEksplisittAvslag(): Boolean {
     val grunnlagForPerson = innhold ?: return false

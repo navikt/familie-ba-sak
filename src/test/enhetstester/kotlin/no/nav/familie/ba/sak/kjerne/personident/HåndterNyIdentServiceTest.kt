@@ -6,15 +6,15 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
@@ -89,6 +89,7 @@ internal class HåndterNyIdentServiceTest {
             every { aktørIdRepository.findByAktørIdOrNull(gammelAktør.aktørId) } returns gammelAktør
             every { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) } returns Task("", "")
             every { fagsakService.hentFagsakerPåPerson(any()) } returns listOf(Fagsak(id = 0, aktør = randomAktør()))
+            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns emptyList()
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns gammelBehandling
             every { persongrunnlagService.hentAktiv(any()) } returns
                 PersonopplysningGrunnlag(
@@ -139,7 +140,7 @@ internal class HåndterNyIdentServiceTest {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
-            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt.")
+            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling.")
         }
 
         @Test
@@ -183,7 +184,7 @@ internal class HåndterNyIdentServiceTest {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
-            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt.")
+            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling.")
         }
 
         @Test
@@ -264,6 +265,7 @@ internal class HåndterNyIdentServiceTest {
             clearMocks(answers = true, firstMock = taskRepositoryMock)
 
             every { fagsakService.hentFagsakerPåPerson(any()) } returns listOf(Fagsak(id = 0, aktør = aktørIdAktiv))
+            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns emptyList()
 
             every { personidentRepository.saveAndFlush(capture(personIdentSlot)) } answers {
                 personIdentSlot.captured
@@ -301,6 +303,87 @@ internal class HåndterNyIdentServiceTest {
             } returns PersonInfo(fødselsdato = fødselsdato)
 
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
+
+            every { persongrunnlagService.hentAktiv(any()) } returns
+                PersonopplysningGrunnlag(
+                    behandlingId = 1L,
+                    personer =
+                        mutableSetOf(
+                            lagPerson(
+                                personIdent = PersonopplysningerPersonIdent(personIdentSomFinnes),
+                                aktør = aktørIdSomFinnes,
+                                fødselsdato = fødselsdato,
+                            ),
+                        ),
+                )
+
+            every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
+                listOf(
+                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                    IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
+                )
+            }
+
+            every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, true) } answers {
+                listOf(
+                    IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
+                    IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
+                    IdentInformasjon(historiskAktør.aktørId, true, "AKTORID"),
+                    IdentInformasjon(historiskIdent, true, "FOLKEREGISTERIDENT"),
+                )
+            }
+
+            every { personidentRepository.findByFødselsnummerOrNull(personIdentSomFinnes) }.answers {
+                Personident(fødselsnummer = randomFnr(), aktør = aktørIdSomFinnes, aktiv = true)
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
+                aktørIdSomFinnes
+            }
+
+            every { aktørIdRepository.findByAktørIdOrNull(historiskAktør.aktørId) }.answers {
+                null
+            }
+            every { personidentRepository.findByFødselsnummerOrNull(personIdentSomSkalLeggesTil) }.answers {
+                null
+            }
+
+            val aktør = håndterNyIdentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
+
+            assertThat(aktør?.personidenter?.size).isEqualTo(2)
+            assertThat(personIdentSomSkalLeggesTil).isEqualTo(aktør!!.aktivFødselsnummer())
+            assertThat(
+                aktør.personidenter
+                    .first { !it.aktiv }
+                    .gjelderTil!!
+                    .isBefore(LocalDateTime.now()),
+            )
+            assertThat(
+                aktør.personidenter
+                    .first { !it.aktiv }
+                    .gjelderTil!!
+                    .isBefore(LocalDateTime.now()),
+            )
+            verify(exactly = 0) { personidentRepository.saveAndFlush(any()) }
+        }
+
+        @Test
+        fun `Skal legge til ny ident på aktør som finnes i systemet, og som kun har fagsak og ingen behandling`() {
+            val personIdentSomFinnes = randomFnr()
+            val personIdentSomSkalLeggesTil = randomFnr()
+            val historiskIdent = randomFnr()
+            val historiskAktør = tilAktør(historiskIdent)
+            val aktørIdSomFinnes = tilAktør(personIdentSomFinnes)
+            val fødselsdato = LocalDate.now().minusYears(4)
+
+            every {
+                pdlRestClient.hentPerson(personIdentSomSkalLeggesTil, PersonInfoQuery.ENKEL)
+            } returns PersonInfo(fødselsdato = fødselsdato)
+
+            every { fagsakService.hentFagsakerPåPerson(any()) } returns emptyList()
+            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns listOf(Fagsak(id = 0, aktør = aktørIdAktiv))
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
             every { persongrunnlagService.hentAktiv(any()) } returns
                 PersonopplysningGrunnlag(

@@ -19,7 +19,13 @@ val nbLocale = Locale.of("nb", "Norway")
 val secureLogger = LoggerFactory.getLogger("secureLogger")
 
 object Utils {
-    fun slåSammen(values: List<String>): String = Regex("(.*),").replace(values.joinToString(", "), "$1 og")
+    fun List<String>.slåSammen(): String =
+        when (size) {
+            0 -> ""
+            1 -> first()
+            2 -> joinToString(" og ")
+            else -> this.dropLast(1).joinToString(", ") + " og ${last()}"
+        }
 
     fun formaterBeløp(beløp: Int): String = NumberFormat.getNumberInstance(nbLocale).format(beløp)
 
@@ -66,8 +72,7 @@ object Utils {
 
     inline fun <reified T : Enum<T>> konverterEnumsTilString(liste: List<T>) = liste.joinToString(separator = ";")
 
-    inline fun <reified T : Enum<T>> konverterStringTilEnums(string: String?): List<T> =
-        if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf(it) }
+    inline fun <reified T : Enum<T>> konverterStringTilEnums(string: String?): List<T> = if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf(it) }
 }
 
 fun Any.convertDataClassToJson(): String = objectMapper.writeValueAsString(this)

@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -26,7 +26,7 @@ class SammensattKontrollsakRepositoryTest(
     fun `save skal kaste feil dersom vi forsøker å lagre ny SammensattKontrollsak og det allerede finnes en SammensattKontrollsak tilknyttet behandling`() {
         val søker = aktørIdRepository.save(randomAktør())
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak = fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
         sammensattKontrollsakRepository.saveAndFlush(SammensattKontrollsak(behandlingId = behandling.id, fritekst = "Fritekst"))
 

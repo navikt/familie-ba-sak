@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -22,7 +23,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendringEllerMånedligValutajustering()) {
+        if (behandling.erSatsendringEllerMånedligValutajustering() || behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 throw Feil("Vi kan ikke kjøre behandling med årsak ${behandling.opprettetÅrsak} dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }

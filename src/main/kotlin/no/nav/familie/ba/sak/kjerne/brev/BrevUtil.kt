@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅrMedium
@@ -21,8 +20,6 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpph�
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.AndelUpbOgValutakurs
@@ -39,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
@@ -50,9 +46,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import tilLandNavn
 import java.time.LocalDate
@@ -100,187 +93,6 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? =
         null
     }
 
-fun hjemlerTilHjemmeltekst(
-    hjemler: List<String>,
-    lovForHjemmel: String,
-): String =
-    when (hjemler.size) {
-        0 -> throw Feil("Kan ikke lage hjemmeltekst for $lovForHjemmel når ingen begrunnelser har hjemler fra $lovForHjemmel knyttet til seg.")
-        1 -> "§ ${hjemler[0]}"
-        else -> "§§ ${Utils.slåSammen(hjemler)}"
-    }
-
-fun hentHjemmeltekst(
-    vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
-    standardbegrunnelseTilSanityBegrunnelse: Map<Standardbegrunnelse, SanityBegrunnelse>,
-    eøsStandardbegrunnelseTilSanityBegrunnelse: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
-    opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
-    målform: Målform,
-    vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
-    refusjonEøsHjemmelSkalMedIBrev: Boolean = false,
-    erFritekstIBrev: Boolean,
-): String {
-    val sanityStandardbegrunnelser =
-        vedtaksperioder.flatMap { vedtaksperiode -> vedtaksperiode.begrunnelser.mapNotNull { begrunnelse -> standardbegrunnelseTilSanityBegrunnelse[begrunnelse.standardbegrunnelse] } }
-    val sanityEøsBegrunnelser =
-        vedtaksperioder.flatMap { vedtaksperiode -> vedtaksperiode.eøsBegrunnelser.mapNotNull { eøsBegrunnelse -> eøsStandardbegrunnelseTilSanityBegrunnelse[eøsBegrunnelse.begrunnelse] } }
-
-    val ordinæreHjemler =
-        hentOrdinæreHjemler(
-            hjemler =
-                (sanityStandardbegrunnelser.flatMap { it.hjemler } + sanityEøsBegrunnelser.flatMap { it.hjemler })
-                    .toMutableSet(),
-            opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
-            finnesVedtaksperiodeMedFritekst = erFritekstIBrev,
-        )
-
-    val forvaltningsloverHjemler = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev)
-
-    val alleHjemlerForBegrunnelser =
-        hentAlleTyperHjemler(
-            hjemlerSeparasjonsavtaleStorbritannia =
-                sanityEøsBegrunnelser
-                    .flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
-                    .distinct(),
-            ordinæreHjemler = ordinæreHjemler.distinct(),
-            hjemlerFraFolketrygdloven =
-                (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
-                    .distinct(),
-            hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }.distinct(),
-            hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev),
-            målform = målform,
-            hjemlerFraForvaltningsloven = forvaltningsloverHjemler,
-        )
-
-    return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
-}
-
-private fun hentHjemlerForEøsForordningen987(
-    sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>,
-    refusjonEøsHjemmelSkalMedIBrev: Boolean,
-): List<String> {
-    val hjemler = mutableListOf<String>()
-
-    hjemler.addAll(sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 })
-
-    if (refusjonEøsHjemmelSkalMedIBrev) {
-        hjemler.add("60")
-    }
-
-    return hjemler.distinct()
-}
-
-private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) =
-    when (hjemler.size) {
-        0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel.")
-        1 -> hjemler.single()
-        else -> hjemler.slåSammen()
-    }
-
-fun Collection<String>.slåSammen(): String =
-    this.reduceIndexed { index, acc, s ->
-        when (index) {
-            0 -> s
-            this.size - 1 -> "$acc og $s"
-            else -> "$acc, $s"
-        }
-    }
-
-private fun hentAlleTyperHjemler(
-    hjemlerSeparasjonsavtaleStorbritannia: List<String>,
-    ordinæreHjemler: List<String>,
-    hjemlerFraFolketrygdloven: List<String>,
-    hjemlerEØSForordningen883: List<String>,
-    hjemlerEØSForordningen987: List<String>,
-    målform: Målform,
-    hjemlerFraForvaltningsloven: List<String>,
-): List<String> {
-    val alleHjemlerForBegrunnelser = mutableListOf<String>()
-
-    // Rekkefølgen her er viktig
-    if (hjemlerSeparasjonsavtaleStorbritannia.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add(
-            "${
-                when (målform) {
-                    Målform.NB -> "Separasjonsavtalen mellom Storbritannia og Norge artikkel"
-                    Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
-                }
-            } ${
-                Utils.slåSammen(
-                    hjemlerSeparasjonsavtaleStorbritannia,
-                )
-            }",
-        )
-    }
-    if (ordinæreHjemler.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add(
-            "${
-                when (målform) {
-                    Målform.NB -> "barnetrygdloven"
-                    Målform.NN -> "barnetrygdlova"
-                }
-            } ${
-                hjemlerTilHjemmeltekst(
-                    hjemler = ordinæreHjemler,
-                    lovForHjemmel = "barnetrygdloven",
-                )
-            }",
-        )
-    }
-    if (hjemlerFraFolketrygdloven.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add(
-            "${
-                when (målform) {
-                    Målform.NB -> "folketrygdloven"
-                    Målform.NN -> "folketrygdlova"
-                }
-            } ${
-                hjemlerTilHjemmeltekst(
-                    hjemler = hjemlerFraFolketrygdloven,
-                    lovForHjemmel = "folketrygdloven",
-                )
-            }",
-        )
-    }
-    if (hjemlerEØSForordningen883.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 883/2004 artikkel ${Utils.slåSammen(hjemlerEØSForordningen883)}")
-    }
-    if (hjemlerEØSForordningen987.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(hjemlerEØSForordningen987)}")
-    }
-    if (hjemlerFraForvaltningsloven.isNotEmpty()) {
-        alleHjemlerForBegrunnelser.add(
-            "${
-                when (målform) {
-                    Målform.NB -> "forvaltningsloven"
-                    Målform.NN -> "forvaltningslova"
-                }
-            } ${
-                hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
-            }",
-        )
-    }
-    return alleHjemlerForBegrunnelser
-}
-
-private fun hentOrdinæreHjemler(
-    hjemler: MutableSet<String>,
-    opplysningspliktHjemlerSkalMedIBrev: Boolean,
-    finnesVedtaksperiodeMedFritekst: Boolean,
-): List<String> {
-    if (opplysningspliktHjemlerSkalMedIBrev) {
-        val hjemlerNårOpplysningspliktIkkeOppfylt = listOf("17", "18")
-        hjemler.addAll(hjemlerNårOpplysningspliktIkkeOppfylt)
-    }
-
-    if (finnesVedtaksperiodeMedFritekst) {
-        hjemler.addAll(hjemlerTilhørendeFritekst.map { it.toString() }.toSet())
-    }
-
-    val sorterteHjemler = hjemler.map { it.toInt() }.sorted().map { it.toString() }
-    return sorterteHjemler
-}
-
 fun hentVirkningstidspunktForDødsfallbrev(
     opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     behandlingId: Long,
@@ -295,8 +107,6 @@ fun hentVirkningstidspunktForDødsfallbrev(
     }
     return virkningstidspunkt.tilMånedÅr()
 }
-
-fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> = if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()
 
 fun skalHenteUtbetalingerEøs(
     endringstidspunkt: LocalDate,

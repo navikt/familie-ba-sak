@@ -5,7 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -252,9 +252,8 @@ class ClientMocks {
 fun tilAktør(
     fnr: String,
     toSisteSiffrer: String = "00",
-) =
-    Aktør(fnr + toSisteSiffrer).also {
-        it.personidenter.add(Personident(fnr, aktør = it))
-    }
+) = Aktør(fnr + toSisteSiffrer).also {
+    it.personidenter.add(Personident(fnr, aktør = it))
+}
 
 val TEST_PDF = ClientMocks::class.java.getResource("/dokument/mockvedtak.pdf").readBytes()

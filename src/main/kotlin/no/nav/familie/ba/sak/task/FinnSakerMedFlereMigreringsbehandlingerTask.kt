@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.internal.ForvalterService
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -14,12 +15,16 @@ import java.time.YearMonth
     maxAntallFeil = 1,
 )
 class FinnSakerMedFlereMigreringsbehandlingerTask(
-    val forvalterService: ForvalterService,
+    val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val fraOgMedÅrMåned = YearMonth.parse(task.payload)
 
-        val sakerMedFlereMigreringsbehandlinger = forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraOgMedÅrMåned)
+        val sakerMedFlereMigreringsbehandlinger =
+            fagsakRepository
+                .finnFagsakerMedFlereMigreringsbehandlinger(
+                    fraOgMedÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
+                ).map { Pair(it.fagsakId, it.fødselsnummer) }
 
         if (sakerMedFlereMigreringsbehandlinger.isNotEmpty()) {
             error("$FEILMELDING fraOgMedÅrMåned=$fraOgMedÅrMåned \n${sakerMedFlereMigreringsbehandlinger.joinToString("\n")}")

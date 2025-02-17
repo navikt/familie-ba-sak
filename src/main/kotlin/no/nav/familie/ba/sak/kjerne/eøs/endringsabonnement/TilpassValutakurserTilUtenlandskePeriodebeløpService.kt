@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
@@ -11,14 +12,20 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilForrigeMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forlengFremtidTilUendelig
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: FinnPeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>,
+    private val clockProvider: ClockProvider,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     val skjemaService =
         PeriodeOgBarnSkjemaService(
@@ -49,8 +56,9 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
 
         val oppdaterteValutakurser =
             tilpassValutakurserTilUtenlandskePeriodebeløp(
-                forrigeValutakurser,
-                gjeldendeUtenlandskePeriodebeløp,
+                forrigeValutakurser = forrigeValutakurser,
+                gjeldendeUtenlandskePeriodebeløp = gjeldendeUtenlandskePeriodebeløp,
+                inneværendeMåned = YearMonth.now(clockProvider.get()),
             ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, forrigeValutakurser, oppdaterteValutakurser)
@@ -60,6 +68,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
 internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
     forrigeValutakurser: Collection<Valutakurs>,
     gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
+    inneværendeMåned: YearMonth,
 ): Collection<Valutakurs> {
     val barnasUtenlandskePeriodebeløpTidslinjer =
         gjeldendeUtenlandskePeriodebeløp
@@ -72,7 +81,13 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
                 utenlandskPeriodebeløp == null -> null
                 valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode ->
                     Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
+
                 else -> valutakurs
             }
+        }.mapValues { (_, value) ->
+            val nåMåned = inneværendeMåned.tilTidspunkt()
+            value
+                .beskjærTilOgMed(nåMåned)
+                .forlengFremtidTilUendelig(senesteEndeligeTidspunkt = nåMåned.tilForrigeMåned())
         }.tilSkjemaer()
 }

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -167,10 +167,13 @@ private fun Vilkårsvurdering.leggPåUtdypendeVilkår(): Vilkårsvurdering {
             when {
                 it.vilkårType == BOSATT_I_RIKET && personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + OMFATTET_AV_NORSK_LOVGIVNING
+
                 it.vilkårType == BOSATT_I_RIKET && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE
+
                 it.vilkårType == BOR_MED_SØKER && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE_MED_SØKER
+
                 else -> Any()
             }
         }

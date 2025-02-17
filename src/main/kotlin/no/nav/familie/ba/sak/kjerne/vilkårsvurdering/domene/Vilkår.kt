@@ -75,11 +75,13 @@ enum class Vilkår(
                         SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
                         ANNENPART -> emptySet()
                     }
+
                 FagsakType.INSTITUSJON ->
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                         SØKER, ANNENPART -> emptySet()
                     }
+
                 FagsakType.BARN_ENSLIG_MINDREÅRIG ->
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()

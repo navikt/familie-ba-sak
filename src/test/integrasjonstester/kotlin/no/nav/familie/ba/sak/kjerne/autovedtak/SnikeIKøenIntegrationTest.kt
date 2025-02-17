@@ -1,15 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak
 
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.guttenBarnesenFødselsdato
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.årSiden
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService.Companion.BEHANDLING_FERDIG
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -27,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -42,6 +40,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ActiveProfiles
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @ActiveProfiles("snike-i-koen-test-config")
@@ -78,8 +77,8 @@ class SnikeIKøenIntegrationTest(
     private val loggRepository: LoggRepository,
 ) : AbstractSpringIntegrationTest() {
     val søkerFnr = randomFnr()
-    val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 18.årSiden.withDayOfMonth(10)))
-    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = 6.årSiden.withDayOfMonth(10)))
+    val barn18år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = LocalDate.now().minusYears(18).withDayOfMonth(10)))
+    val barn2år = leggTilPersonInfo(randomFnr(), PersonInfo(fødselsdato = LocalDate.now().minusYears(6).withDayOfMonth(10)))
 
     @BeforeEach
     fun init() {
@@ -208,7 +207,7 @@ class SnikeIKøenIntegrationTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
-            vilkårInnvilgetFom = guttenBarnesenFødselsdato,
+            vilkårInnvilgetFom = LocalDate.now().withDayOfMonth(10).minusYears(6),
         )
 
     private fun kjørRevurderingTilSteg(
@@ -223,5 +222,6 @@ class SnikeIKøenIntegrationTest(
             stegService = stegService,
             fagsakId = fagsakId,
             brevmalService = brevmalService,
+            vedtaksperiodeService = vedtaksperiodeService,
         )
 }

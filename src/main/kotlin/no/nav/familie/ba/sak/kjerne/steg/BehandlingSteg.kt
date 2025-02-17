@@ -249,7 +249,9 @@ fun hentNesteSteg(
             }
         }
 
-        BehandlingÅrsak.TEKNISK_ENDRING -> {
+        BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
+        BehandlingÅrsak.TEKNISK_ENDRING,
+        -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -322,6 +324,7 @@ fun hentNesteSteg(
                     } else {
                         VURDER_TILBAKEKREVING
                     }
+
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
@@ -376,6 +379,19 @@ fun hentNesteSteg(
                         throw Feil("Behandlingen har ingen endringer i utbetaling.")
                     }
 
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+            }
+        }
+
+        BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

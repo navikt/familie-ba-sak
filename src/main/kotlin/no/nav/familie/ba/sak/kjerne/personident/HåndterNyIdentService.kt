@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.prosessering.domene.Task
+import no.nav.person.pdl.aktor.v2.Type
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -40,7 +41,7 @@ class HåndterNyIdentService(
 
         val aktørId = identerFraPdl.hentAktivAktørId()
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-        val aktuellFagsakVedMerging = hentAktuellFagsak(identerFraPdl)
+        val aktuellFagsakVedMerging = hentAktuellFagsakForIdenthendelse(identerFraPdl)
 
         return when {
             // Personen er ikke i noen fagsaker
@@ -91,7 +92,7 @@ class HåndterNyIdentService(
         return task
     }
 
-    private fun hentAktuellFagsak(alleIdenterFraPdl: List<IdentInformasjon>): Fagsak? {
+    private fun hentAktuellFagsakForIdenthendelse(alleIdenterFraPdl: List<IdentInformasjon>): Fagsak? {
         val aktørerMedAktivPersonident =
             alleIdenterFraPdl
                 .hentAktørIder()
@@ -100,10 +101,14 @@ class HåndterNyIdentService(
 
         val fagsaker =
             aktørerMedAktivPersonident
-                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) }
+                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) + fagsakService.hentAlleFagsakerForAktør(aktør) }
 
         if (fagsaker.toSet().size > 1) {
-            throw Feil("Det eksisterer flere fagsaker på identer som skal merges: ${aktørerMedAktivPersonident.first()}. $LENKE_INFO_OM_MERGING")
+            secureLogger.warn(
+                "Det eksisterer flere fagsaker på identer som skal merges $fagsaker.\n" +
+                    "Identer: ${alleIdenterFraPdl.filter { it.gruppe == Type.FOLKEREGISTERIDENT.name }}",
+            )
+            throw Feil("Det eksisterer flere fagsaker på identer som skal merges. Patch manuelt. Info om fagsaker og identer ligger i securelog. $LENKE_INFO_OM_MERGING")
         }
 
         return fagsaker.firstOrNull()
@@ -131,7 +136,17 @@ class HåndterNyIdentService(
                 ?: return // Hvis aktør ikke er med i forrige behandling kan vi patche selv om fødselsdato er ulik
 
         if (fødselsdatoFraPdl.toYearMonth() != fødselsdatoForrigeBehandling.toYearMonth()) {
-            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Må patche ny ident manuelt. $LENKE_INFO_OM_MERGING")
+            secureLogger.warn(
+                """Fødselsdato er forskjellig fra forrige behandling.
+                    Ny fødselsdato $fødselsdatoFraPdl, forrige fødselsdato $fødselsdatoForrigeBehandling
+                    Fagsak: ${forrigeBehandling.fagsak.id}
+                    Ny ident: ${alleIdenterFraPdl.filter { !it.historisk && it.gruppe == Type.FOLKEREGISTERIDENT.name }.map { it.ident }}
+                    Gamle identer: ${alleIdenterFraPdl.filter { it.historisk && it.gruppe == Type.FOLKEREGISTERIDENT.name }.map { it.ident }}
+                    Send informasjonen beskrevet over til en fagressurs og patch identen manuelt. Se lenke for mer info:
+                    ${LENKE_INFO_OM_MERGING}
+                """.trimMargin(),
+            )
+            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Kopier tekst fra securelog og send til en fagressurs")
         }
     }
 

@@ -1,15 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpServerErrorException
@@ -345,15 +347,15 @@ class FagsakServiceTest(
             )
 
         val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
-        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
+        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
         behandlingService.oppdaterStatusPåBehandling(behandlingMor.id, BehandlingStatus.AVSLUTTET)
-        val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
+        val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakMor))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor2))
 
         val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
-        val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
+        val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakFar))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar))
 
         val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
@@ -677,6 +679,30 @@ class FagsakServiceTest(
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.first())
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.last())
+    }
+
+    @Test
+    fun `Skal kaste feil ved forsøk på å opprette institusjon fagsak med org nummer som allerede finnes for person`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+        val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
+
+        opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.INSTITUSJON)
+
+        // Act && Assert
+        val feilmelding =
+            assertThrows<FunksjonellFeil> {
+                fagsakService.hentEllerOpprettFagsak(
+                    fagsakRequest =
+                        FagsakRequest(
+                            personIdent = barn.aktør.aktivFødselsnummer(),
+                            fagsakType = FagsakType.INSTITUSJON,
+                            institusjon = institusjon,
+                        ),
+                )
+            }.melding
+
+        assertThat(feilmelding).isEqualTo("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
     }
 
     private data class PeriodeForAktør(

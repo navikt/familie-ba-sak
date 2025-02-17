@@ -6,8 +6,9 @@ import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -25,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -43,14 +43,14 @@ class PensjonService(
     private val taskRepository: TaskRepositoryWrapper,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
-    private val unleashNext: UnleashService,
+    private val unleashNext: UnleashNextMedContextService,
 ) {
     fun hentBarnetrygd(
         personIdent: String,
         fraDato: LocalDate,
     ): List<BarnetrygdTilPensjon> {
         secureLogger.info("Henter data til pensjon for personIdent=$personIdent fraDato=$fraDato")
-        if (envService.erPreprod() && unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
+        if (envService.erPreprod() && unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
             val barnetrygdTilPensjonFraInfotrygdQ = hentBarnetrygdTilPensjonFraInfotrygdQ(personIdent, fraDato)
             if (barnetrygdTilPensjonFraInfotrygdQ.isNotEmpty()) {
                 return barnetrygdTilPensjonFraInfotrygdQ.distinct()
@@ -182,7 +182,7 @@ class PensjonService(
 
     private fun testidenter(
         fraDato: LocalDate,
-    ) = if (unleashNext.isEnabled(HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
+    ) = if (unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD)) {
         emptyList() // Skal egentlig ikke kunne havne her, tror jeg, siden hentBarnetrygd() i dette tilfellet skulle returnert på linje 54 for å unngå at det på linje 57 forsøkes å hente data fra pdl på en ident som ikke finnes der i testmiljø
     } else {
         listOfNotNull(
@@ -245,7 +245,7 @@ class PensjonService(
                     .values
                     .fold(emptyList<BarnetrygdPeriode>()) { acc, perioderTilhørendePerson ->
                         try {
-                            acc + perioderTilhørendePerson.fjernOverlappendeInfotrygdperioder()
+                            acc + perioderTilhørendePerson.distinct().fjernOverlappendeInfotrygdperioder()
                         } catch (e: Exception) {
                             logger.error("Klarte ikke kombinere BA og IT-perioder for fjerning av eventuelle overlapp")
                             secureLogger.warn("Klarte ikke kombinere ba-perioder og infotrygd-perioder", e)
@@ -309,12 +309,11 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
         .map {
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
-                tilOgMed = it.stønadTom.tilTidspunkt(),
+                // 999999999-12 er Infotrygds definisjon av uendelighet, klippes til 9999-12 for å kunne brukes i tidslinje. Kan fjernes når vi ikke lenger har løpende saker i infotrygd
+                tilOgMed = if (it.stønadTom > YearMonth.of(9999, 12)) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
                 innhold = it,
             )
         }.tilTidslinje()
-
-private fun List<BarnetrygdPeriode>.fomDatoer(): List<YearMonth> = map { it.stønadFom }
 
 private operator fun BarnetrygdTilPensjon.plus(other: BarnetrygdTilPensjon?): List<BarnetrygdTilPensjon> =
     when {

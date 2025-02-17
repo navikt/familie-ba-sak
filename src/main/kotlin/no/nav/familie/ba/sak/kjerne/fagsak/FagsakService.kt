@@ -19,8 +19,8 @@ import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -50,7 +50,6 @@ class FagsakService(
     private val personRepository: PersonRepository,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
-    private val behandlingstemaService: BehandlingstemaService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val behandlingService: BehandlingService,
     private val vedtakRepository: VedtakRepository,
@@ -103,8 +102,13 @@ class FagsakService(
             when (type) {
                 FagsakType.INSTITUSJON -> {
                     if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
-                    fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
+                    val eksisterendeFagsakPåPersonMedSammeOrgnummer = fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
+
+                    eksisterendeFagsakPåPersonMedSammeOrgnummer?.let {
+                        throw FunksjonellFeil("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
+                    }
                 }
+
                 else -> fagsakRepository.finnFagsakForAktør(aktør, type)
             }
 
@@ -182,8 +186,7 @@ class FagsakService(
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
 
-    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> =
-        Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
+    fun hentRestMinimalFagsak(fagsakId: Long): Ressurs<RestMinimalFagsak> = Ressurs.success(data = lagRestMinimalFagsak(fagsakId))
 
     fun lagRestMinimalFagsaker(fagsaker: List<Fagsak>): List<RestMinimalFagsak> = fagsaker.map { lagRestMinimalFagsak(it.id) }
 
@@ -193,11 +196,15 @@ class FagsakService(
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger =
-            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId).map {
-                it.tilRestVisningBehandling(
-                    vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
-                )
-            }
+            behandlingHentOgPersisterService
+                .hentBehandlinger(fagsakId = fagsakId)
+                // Fjerner behandlinger med opprettetÅrsak = OPPDATER_UTVIDET_KLASSEKODE. Dette er kun en teknisk greie og ikke noe saksbehandler trenger å forholde seg til.
+                .filter { it.opprettetÅrsak != BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE }
+                .map {
+                    it.tilRestVisningBehandling(
+                        vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
+                    )
+                }
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
         return restBaseFagsak.tilRestMinimalFagsak(
             restVisningBehandlinger = visningsbehandlinger,
@@ -240,8 +247,8 @@ class FagsakService(
                 } else {
                     aktivBehandling.status == BehandlingStatus.UTREDES || (aktivBehandling.steg >= StegType.BESLUTTE_VEDTAK && aktivBehandling.steg != StegType.BEHANDLING_AVSLUTTET)
                 },
-            løpendeKategori = behandlingstemaService.hentLøpendeKategori(fagsakId = fagsakId),
-            løpendeUnderkategori = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsakId),
+            løpendeKategori = (aktivBehandling ?: sistVedtatteBehandling)?.kategori,
+            løpendeUnderkategori = (aktivBehandling ?: sistVedtatteBehandling)?.underkategori,
             gjeldendeUtbetalingsperioder = gjeldendeUtbetalingsperioder,
             fagsakType = fagsak.type,
             institusjon =

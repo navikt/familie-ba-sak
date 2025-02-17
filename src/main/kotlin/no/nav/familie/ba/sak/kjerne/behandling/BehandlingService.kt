@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -61,7 +63,7 @@ class BehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -81,17 +83,14 @@ class BehandlingService(
                     overstyrtKategori = nyBehandling.kategori,
                     behandlingType = nyBehandling.behandlingType,
                     behandlingÅrsak = nyBehandling.behandlingÅrsak,
-                    kategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeKategori(fagsak.id),
+                    tilbakefallendeKategori = behandlingstemaService.finnBehandlingKategori(fagsak.id),
                 )
 
             val underkategori =
                 bestemUnderkategori(
                     overstyrtUnderkategori = nyBehandling.underkategori,
-                    underkategoriFraLøpendeBehandling = behandlingstemaService.hentLøpendeUnderkategori(fagsakId = fagsak.id),
-                    underkategoriFraInneværendeBehandling =
-                        behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(
-                            fagsak.id,
-                        ),
+                    løpendeUnderkategoriFraForrigeVedtatteBehandling = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId = fagsak.id),
+                    underkategoriFraAktivBehandling = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsakId = fagsak.id),
                 )
 
             val behandling =
@@ -221,7 +220,7 @@ class BehandlingService(
     }
 
     fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
-        if (unleashService.isEnabled(FeatureToggleConfig.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true)) {
+        if (unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true)) {
             val søkerIdenter =
                 behandling.fagsak.aktør.personidenter
                     .map { it.fødselsnummer }

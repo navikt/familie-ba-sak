@@ -6,7 +6,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.hamcrest.CoreMatchers
@@ -111,11 +111,10 @@ internal class KorrigertVedtakServiceTest {
         vedtaksdato: LocalDate = LocalDate.now().minusDays(6),
         begrunnelse: String? = null,
         aktiv: Boolean = true,
-    ) =
-        KorrigertVedtak(
-            behandling = behandling,
-            vedtaksdato = vedtaksdato,
-            begrunnelse = begrunnelse,
-            aktiv = aktiv,
-        )
+    ) = KorrigertVedtak(
+        behandling = behandling,
+        vedtaksdato = vedtaksdato,
+        begrunnelse = begrunnelse,
+        aktiv = aktiv,
+    )
 }

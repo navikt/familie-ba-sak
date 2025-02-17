@@ -76,6 +76,12 @@ enum class Brevmal(
         "Varsel om årlig revurdering EØS med innhenting av opplysninger",
     ),
 
+    UTBETALING_ETTER_KA_VEDTAK(
+        false,
+        "utbetalingEtterKAVedtak",
+        "Utbetaling etter KA-vedtak",
+    ),
+
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
     SVARTIDSBREV_INSTITUSJON(false, "svartidsbrevInstitusjon", "Svartidsbrev institusjon"),
     FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
@@ -179,6 +185,7 @@ enum class Brevmal(
             INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER,
             INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL,
             INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HENTER_IKKE_REGISTEROPPLYSNINGER,
+            UTBETALING_ETTER_KA_VEDTAK,
             -> false
 
             VEDTAK_FØRSTEGANGSVEDTAK,
@@ -233,6 +240,7 @@ enum class Brevmal(
             SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_SVARTIDSBREV_INSTITUSJON
             FORLENGET_SVARTIDSBREV_INSTITUSJON -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV_INSTITUSJON
             VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT -> Dokumenttype.BARNETRYGD_VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT
+            UTBETALING_ETTER_KA_VEDTAK -> Dokumenttype.BARNETRYGD_UTBETALING_ETTER_KA_VEDTAK
 
             VEDTAK_ENDRING,
             VEDTAK_OPPHØRT,
@@ -284,6 +292,7 @@ enum class Brevmal(
                 INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER -> Distribusjonstype.VIKTIG
                 INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL -> Distribusjonstype.VIKTIG
                 INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HENTER_IKKE_REGISTEROPPLYSNINGER -> Distribusjonstype.VIKTIG
+                UTBETALING_ETTER_KA_VEDTAK -> Distribusjonstype.VIKTIG
                 VEDTAK_FØRSTEGANGSVEDTAK -> Distribusjonstype.VEDTAK
                 VEDTAK_ENDRING -> Distribusjonstype.VEDTAK
                 VEDTAK_OPPHØRT -> Distribusjonstype.VEDTAK

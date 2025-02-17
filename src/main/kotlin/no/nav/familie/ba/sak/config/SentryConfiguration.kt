@@ -61,8 +61,7 @@ class SentryConfiguration(
         }
     }
 
-    private fun hentKibanalenke(callId: String) =
-        "https://logs.adeo.no/app/discover#/?_g=(time:(from:now-1M,to:now))&_a=(filters:!((query:(match_phrase:(x_callId:'$callId')))))"
+    private fun hentKibanalenke(callId: String) = "https://logs.adeo.no/app/discover#/?_g=(time:(from:now-1M,to:now))&_a=(filters:!((query:(match_phrase:(x_callId:'$callId')))))"
 
     fun finnMetodeSomFeiler(e: Throwable?): String {
         val firstElement =

@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
+import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -27,13 +29,17 @@ data class PdlPersonData(
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
     val doedsfall: List<PdlDødsfallResponse> = emptyList(),
+    val doedfoedtBarn: List<PdlDødfødtBarnResponse> = emptyList(),
     val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
-        if (foedselsdato.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
+        if (foedselsdato.isEmpty() && doedfoedtBarn.isEmpty()) {
+            throw PdlPersonKanIkkeBehandlesIFagsystem(PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO)
+        }
+
         if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
-                "er opphørt",
+                PdlPersonKanIkkeBehandlesIFagSystemÅrsak.OPPHØRT,
             )
         }
     }
@@ -60,6 +66,7 @@ data class PdlNavn(
     val fornavn: String,
     val mellomnavn: String? = null,
     val etternavn: String,
+    val metadata: PdlMetadata,
 ) {
     fun fulltNavn(): String =
         when (mellomnavn) {
@@ -71,4 +78,32 @@ data class PdlNavn(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlKjoenn(
     val kjoenn: Kjønn,
+    val metadata: PdlMetadata,
 )
+
+data class PdlMetadata(
+    val master: String,
+    val historisk: Boolean,
+)
+
+// Filtrer på historisk slik at ikke-historiske alltid får prioritet
+fun List<PdlNavn>.filtrerNavnPåKilde(): PdlNavn? =
+    this
+        .filter { it.metadata.historisk == false }
+        .minByOrNull { it.metadata.master.kildeTilPrioritet() }
+
+// Filtrer på historisk slik at ikke-historiske alltid får prioritet
+fun List<PdlKjoenn>.filtrerKjønnPåKilde(): PdlKjoenn? =
+    this
+        .filter { it.metadata.historisk == false }
+        .minByOrNull { it.metadata.master.kildeTilPrioritet() }
+
+fun String.kildeTilPrioritet(): Int =
+    when (uppercase()) {
+        "PDL" -> 1
+        "FREG" -> 2
+        else -> {
+            logger.warn("Ukjent kilde fra PDL: $this. Bør legges til.")
+            3
+        }
+    }

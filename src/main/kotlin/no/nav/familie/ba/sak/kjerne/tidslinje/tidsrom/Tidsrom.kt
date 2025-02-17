@@ -62,11 +62,9 @@ fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>
 
 fun <T : Tidsenhet> tidsrom(vararg tidslinjer: Tidslinje<*, T>) = tidslinjer.toList().tidsrom()
 
-private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
-    this.reduceOrNull { acc, neste -> størsteAv(acc, neste) }
+private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() = this.reduceOrNull { acc, neste -> størsteAv(acc, neste) }
 
-private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() =
-    this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
+private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.minsteEllerNull() = this.reduceOrNull { acc, neste -> minsteAv(acc, neste) }
 
 internal fun <T : Tidsenhet> størsteAv(
     t1: Tidspunkt<T>,

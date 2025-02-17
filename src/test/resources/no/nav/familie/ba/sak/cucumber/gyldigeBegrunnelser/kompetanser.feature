@@ -369,9 +369,9 @@ Egenskap: Gyldige begrunnelser for kompetanser
       | 01.01.2022 | 31.03.2022 |                      | INNVILGET_PRIMÆRLAND_STANDARD |            |
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.01.2022 til 31.03.2022
-      | Begrunnelse                   | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet                     | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
-      | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 10.08.09             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | INAKTIV                   | Norge                 | Polen                          | Norge               |
-      | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 07.05.14             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | I_ARBEID                  | Norge                 | Polen                          | Norge               |
+      | Begrunnelse                   | Type | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet                     | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland | Gjelder søker |
+      | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 10.08.09             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | INAKTIV                   | Norge                 | Polen                          | Norge               | Nei           |
+      | INNVILGET_PRIMÆRLAND_STANDARD | EØS  | 07.05.14             | 1           | NB      | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | I_ARBEID                  | Norge                 | Polen                          | Norge               | Nei           |
 
   Scenario: Skal kunne begrunne nullutbetaling når det er reduksjon i samme måned
     Gitt følgende fagsaker

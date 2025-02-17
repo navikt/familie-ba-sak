@@ -202,11 +202,9 @@ private fun Int?.erStørreEnn0(): Boolean = this != null && this > 0
 
 private fun Int?.er0EllerNull(): Boolean = this == null || this == 0
 
-private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
-    this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
+private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) = this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
 
-private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnEnMånedFramITid(nåMåned: YearMonth) =
-    this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = nåMåned.plusMonths(1).tilTidspunkt())
+private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnEnMånedFramITid(nåMåned: YearMonth) = this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = nåMåned.plusMonths(1).tilTidspunkt())
 
 internal fun erEndringIKompetanseForPerson(
     nåværendeKompetanserForPerson: List<Kompetanse>,

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent
 
 import lagBrevBegrunnelse
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -124,8 +124,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
     }
 }
 
-private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() =
-    this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
+private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.hentTotaltUtbetaltIPeriode() = this.values.sumOf { it.dennePerioden.andeler.sumOf { andeler -> andeler.kalkulertUtbetalingsbeløp } }
 
 private fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedUtbetaling() =
     this
@@ -160,7 +159,7 @@ fun Set<Person>.tilBarnasFødselsdatoer(): String {
             .sortedBy { it.fødselsdato }
             .map { it.fødselsdato.tilKortString() }
 
-    return Utils.slåSammen(barnasFødselsdatoerListe)
+    return barnasFødselsdatoerListe.slåSammen()
 }
 
 private fun hentDuEllerInstitusjonenTekst(

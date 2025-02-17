@@ -10,44 +10,29 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -55,16 +40,10 @@ class ForvalterService(
     private val vedtakService: VedtakService,
     private val beregningService: BeregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val stegService: StegService,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val taskRepository: TaskRepositoryWrapper,
-    private val autovedtakService: AutovedtakService,
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val infotrygdService: InfotrygdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
@@ -92,34 +71,6 @@ class ForvalterService(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId),
             saksbehandlerId = "VL",
         )
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun kjørForenkletSatsendringFor(fagsakId: Long) {
-        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-
-        val nyBehandling =
-            stegService.håndterNyBehandling(
-                NyBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                    søkersIdent = fagsak.aktør.aktivFødselsnummer(),
-                    skalBehandlesAutomatisk = true,
-                    fagsakId = fagsakId,
-                ),
-            )
-
-        val behandlingEtterVilkårsvurdering =
-            stegService.håndterVilkårsvurdering(nyBehandling)
-
-        val opprettetVedtak =
-            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterVilkårsvurdering,
-            )
-        behandlingService.oppdaterStatusPåBehandling(nyBehandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        val task =
-            IverksettMotOppdragTask.opprettTask(nyBehandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
-        taskRepository.save(task)
     }
 
     fun identifiserUtbetalingerOver100Prosent(callId: String) {
@@ -192,23 +143,6 @@ class ForvalterService(
             }
         }
     }
-
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlingerOgLøpendeSakIInfotrygd(fraÅrMåned: YearMonth): List<Pair<Long, String>> {
-        val løpendeFagsakerMedFlereMigreringsbehandlinger =
-            fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(
-                fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
-            )
-
-        return løpendeFagsakerMedFlereMigreringsbehandlinger
-            .filter { infotrygdService.harLøpendeSakIInfotrygd(listOf(it.fødselsnummer)) }
-            .map { Pair(it.fagsakId, it.fødselsnummer) }
-    }
-
-    fun finnÅpneFagsakerMedFlereMigreringsbehandlinger(fraÅrMåned: YearMonth): List<Pair<Long, String>> =
-        fagsakRepository
-            .finnFagsakerMedFlereMigreringsbehandlinger(
-                fraÅrMåned.førsteDagIInneværendeMåned().atStartOfDay(),
-            ).map { Pair(it.fagsakId, it.fødselsnummer) }
 
     fun settFomPåVilkårTilPersonsFødselsdato(behandlingId: Long): Vilkårsvurdering {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)

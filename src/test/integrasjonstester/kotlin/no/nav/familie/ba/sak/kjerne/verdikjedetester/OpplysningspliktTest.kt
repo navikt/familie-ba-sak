@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -19,10 +18,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions
@@ -46,25 +47,23 @@ class OpplysningspliktTest(
     @Test
     fun `Skal opprette opplysningsplikt-vilkår på søker når 'innhente opplysninger'-brev sendes ut og ta med hjemmel 17 og 18 i vedtaksbrev når opplysningsplikt-vilkåret ikke er oppfylt`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(2).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusMonths(2).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val behandling =
             kjørStegprosessForFGB(
                 tilSteg = StegType.VILKÅRSVURDERING,
-                søkerFnr = scenario.søker.ident!!,
-                barnasIdenter = scenario.barna.map { it.ident!! },
+                søkerFnr = scenario.søker.ident,
+                barnasIdenter = scenario.barna.map { it.ident },
                 fagsakService = fagsakService,
                 vedtakService = vedtakService,
                 persongrunnlagService = persongrunnlagService,

@@ -3,13 +3,13 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 import io.mockk.every
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.årMnd
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -136,6 +136,18 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     @Test
+    fun `skal finne og returnere perioder fra Infotrygd som har infotrygd sin definisjon på uendelighet`() {
+        val søker = tilfeldigPerson()
+        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+
+        mockInfotrygdBarnetrygdResponse(søkerAktør, YearMonth.now(), YearMonth.of(999999999, 12))
+
+        val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
+        assertThat(barnetrygdTilPensjon).hasSize(1)
+        assertThat(barnetrygdTilPensjon.filter { it.barnetrygdPerioder.all { it.kildesystem == "Infotrygd" } }).hasSize(1)
+    }
+
+    @Test
     fun `skal finne og returnere perioder fra Infotrygd`() {
         val søker = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -154,7 +166,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         fom: YearMonth = årMnd("2019-04"),
         tom: YearMonth = årMnd("2023-03"),
     ) {
-        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))) {
+        with(behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))) {
             val behandling = this
             with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
                 val andel =

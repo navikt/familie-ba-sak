@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -43,7 +43,7 @@ fun validerIngenVilkårSattEtterSøkersDød(
         throw FunksjonellFeil(
             "Ved behandlingsårsak \"Dødsfall Bruker\" må vilkårene på søker avsluttes " +
                 "senest dagen søker døde, men " +
-                Utils.slåSammen(vilkårSomEnderEtterSøkersDød.map { "\"" + it.beskrivelse + "\"" }) +
+                vilkårSomEnderEtterSøkersDød.map { "\"" + it.beskrivelse + "\"" }.slåSammen() +
                 " vilkåret til søker slutter etter søkers død.",
         )
     }
@@ -58,7 +58,7 @@ fun validerIkkeBlandetRegelverk(
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
         val feilmelding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna."
 
-        if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.SATSENDRING, BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING)) {
+        if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.SATSENDRING, BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING, BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE)) {
             logger.warn("$feilmelding Gjelder $behandling")
         } else {
             throw FunksjonellFeil(melding = feilmelding)
@@ -74,7 +74,7 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
-            if (behandling.erSatsendringEllerMånedligValutajustering() || behandling.opprettetÅrsak.erOmregningsårsak()) {
+            if (behandling.erSatsendringEllerMånedligValutajustering() || behandling.opprettetÅrsak.erOmregningsårsak() || behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
                 secureLogger.warn(
                     "Fødselsdato ${person.fødselsdato} ulik fom ${
                         personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
@@ -116,5 +116,4 @@ fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
     }
 }
 
-private fun Set<VilkårResultat>.finnesUnder18VilkårFraFødselsdato(fødselsdato: LocalDate): Boolean =
-    this.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.any { it.periodeFom == fødselsdato }
+private fun Set<VilkårResultat>.finnesUnder18VilkårFraFødselsdato(fødselsdato: LocalDate): Boolean = this.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.any { it.periodeFom == fødselsdato }

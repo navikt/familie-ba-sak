@@ -67,7 +67,7 @@ class SanityKlient(
                 .body
                 ?.result
                 ?.mapNotNull { it.tilSanityEØSBegrunnelse() }
-                ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
+                ?: throw Feil("Klarer ikke å hente EØS-begrunnelser fra sanity")
         }
     }
 }

@@ -2,20 +2,27 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.internal.ForvalterService
+import no.nav.familie.ba.sak.internal.FagsakMedFlereMigreringer
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
-    private val forvalterService = mockk<ForvalterService>()
-    private val task = FinnSakerMedFlereMigreringsbehandlingerTask(forvalterService)
+    private val fagsakRepository = mockk<FagsakRepository>()
+    private val task = FinnSakerMedFlereMigreringsbehandlingerTask(fagsakRepository)
 
     @Test
     fun `Skal kaste feil hvis man finner åpne saker med flere migreringsbehandlinger fra sist måned`() {
-        every { forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(any()) } returns
-            listOf(Pair(1, "fnr1"), Pair(2, "fnr2"))
+        val fagsakMedMigrering1 = mockk<FagsakMedFlereMigreringer>()
+        val fagsakMedMigrering2 = mockk<FagsakMedFlereMigreringer>()
+        every { fagsakMedMigrering1.fagsakId } returns 1
+        every { fagsakMedMigrering1.fødselsnummer } returns "fnr1"
+        every { fagsakMedMigrering2.fagsakId } returns 2
+        every { fagsakMedMigrering2.fødselsnummer } returns "fnr2"
+        every { fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(any()) } returns
+            listOf(fagsakMedMigrering1, fagsakMedMigrering2)
 
         val exception =
             assertThrows<IllegalStateException> {
@@ -33,7 +40,7 @@ class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
 
     @Test
     fun `Skal ikke kaste feil hvis man ikke finner nye åpne saker som har flere enn 1 migrering`() {
-        every { forvalterService.finnÅpneFagsakerMedFlereMigreringsbehandlinger(any()) } returns emptyList()
+        every { fagsakRepository.finnFagsakerMedFlereMigreringsbehandlinger(any()) } returns emptyList()
 
         task.doTask(Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "2023-10"))
     }

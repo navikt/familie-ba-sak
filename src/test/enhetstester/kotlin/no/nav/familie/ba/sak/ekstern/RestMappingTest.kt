@@ -73,12 +73,10 @@ class RestMappingTest {
     }
 
     @Test
-    fun `Fyller ikke ut tom-dato når det ikke finnes påfølgende perioder`() =
-        assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
+    fun `Fyller ikke ut tom-dato når det ikke finnes påfølgende perioder`() = assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
 
     @Test
-    fun `Fyller ikke ut tom-dato når fom-dato er kjent`() =
-        assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
+    fun `Fyller ikke ut tom-dato når fom-dato er kjent`() = assertEquals(null, listOf(RestRegisteropplysning(fom = null, tom = null, verdi = ""))[0].tom)
 
     @Test
     fun `Fyller ikke ut tom-dato når denne er kjent, ved utvandring`() {

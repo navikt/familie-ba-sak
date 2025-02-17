@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -43,7 +43,7 @@ class RegistrerPersongrunnlagTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
             registrerPersongrunnlagDTO =
@@ -78,7 +78,7 @@ class RegistrerPersongrunnlagTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
         val behandling1 =
-            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
         stegService.håndterPersongrunnlag(
             behandling = behandling1,
             registrerPersongrunnlagDTO =

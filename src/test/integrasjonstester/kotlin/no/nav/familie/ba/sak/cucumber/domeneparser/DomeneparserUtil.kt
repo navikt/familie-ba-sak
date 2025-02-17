@@ -30,9 +30,10 @@ enum class Domenebegrep(
     BEHANDLINGSTYPE("Behandlingstype"),
     BEHANDLINGSSTEG("Behandlingssteg"),
     UNDERKATEGORI("Underkategori"),
+    FEATURE_TOGGLE_ID("FeatureToggleId"),
+    ER_FEATURE_TOGGLE_TOGGLET_PÅ("Er togglet på"),
 }
 
 object DomeneparserUtil {
-    fun DataTable.groupByBehandlingId(): Map<Long, List<Map<String, String>>> =
-        this.asMaps().groupBy { rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }
+    fun DataTable.groupByBehandlingId(): Map<Long, List<Map<String, String>>> = this.asMaps().groupBy { rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }
 }

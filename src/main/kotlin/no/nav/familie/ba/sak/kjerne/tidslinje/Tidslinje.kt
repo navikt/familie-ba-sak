@@ -86,8 +86,7 @@ abstract class Tidslinje<I, T : Tidsenhet> {
 
     override fun hashCode(): Int = perioder().hashCode()
 
-    override fun toString(): String =
-        lagPerioder().joinToString(" | ") { it.toString() }
+    override fun toString(): String = lagPerioder().joinToString(" | ") { it.toString() }
 
     companion object {
         data class TidslinjeFeil(

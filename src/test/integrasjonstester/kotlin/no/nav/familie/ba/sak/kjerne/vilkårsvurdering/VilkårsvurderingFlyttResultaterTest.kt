@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.randomBarnFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.personInfo
-import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForBehandling
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -63,7 +63,7 @@ class VilkårsvurderingFlyttResultaterTest(
         val barn2Aktør = personidentService.hentAktør(barn2Fnr)
 
         // Lager førstegangsbehandling med utvidet vilkåret avslått
-        val vilkårsvurderingMedUtvidetAvslått = Vilkårsvurdering(behandling = lagBehandling())
+        val vilkårsvurderingMedUtvidetAvslått = Vilkårsvurdering(behandling = lagBehandlingUtenId())
         val søkerPersonResultat =
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
@@ -91,7 +91,12 @@ class VilkårsvurderingFlyttResultaterTest(
                 søkerPersonResultat,
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                    person = lagPerson(type = PersonType.BARN, aktør = barn1Aktør, fødselsdato = personInfo[barn1Fnr]!!.fødselsdato),
+                    person =
+                        lagPerson(
+                            type = PersonType.BARN,
+                            aktør = barn1Aktør,
+                            fødselsdato = personInfo[barn1Fnr]!!.fødselsdato,
+                        ),
                     periodeFom = LocalDate.now().minusMonths(8),
                     periodeTom = LocalDate.now().plusYears(2),
                     lagFullstendigVilkårResultat = true,
@@ -100,7 +105,12 @@ class VilkårsvurderingFlyttResultaterTest(
                 ),
                 lagPersonResultat(
                     vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                    person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = personInfo[barn2Fnr]!!.fødselsdato),
+                    person =
+                        lagPerson(
+                            type = PersonType.BARN,
+                            aktør = barn2Aktør,
+                            fødselsdato = personInfo[barn2Fnr]!!.fødselsdato,
+                        ),
                     periodeFom = LocalDate.now().minusMonths(8),
                     periodeTom = LocalDate.now().plusYears(2),
                     lagFullstendigVilkårResultat = true,
@@ -138,7 +148,7 @@ class VilkårsvurderingFlyttResultaterTest(
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            overstyrendeVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
+            overstyrendeVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandlingUtenId()),
             behandlingstype = BehandlingType.REVURDERING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,

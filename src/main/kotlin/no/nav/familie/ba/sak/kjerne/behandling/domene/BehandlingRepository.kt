@@ -152,7 +152,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         "SELECT new kotlin.Pair(b.id, p.fødselsnummer) from Behandling b " +
             "INNER JOIN Fagsak f ON f.id = b.fagsak.id INNER JOIN Aktør a on f.aktør.aktørId = a.aktørId " +
             "INNER JOIN Personident p on p.aktør.aktørId = a.aktørId " +
-            "where b.id in (:behandlingIder) AND p.aktiv=true AND f.status = 'LØPENDE' ",
+            "where b.id in (:behandlingIder) AND p.aktiv=true AND f.arkivert = false",
     )
     fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 
@@ -182,4 +182,14 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         behandlingId: Long,
         fomVedtaksperiode: LocalDate,
     ): List<String>
+
+    @Query(
+        """
+        SELECT b
+        FROM Fagsak f
+            JOIN Behandling b on f.id = b.fagsak.id
+        WHERE b.opprettetÅrsak = 'OPPDATER_UTVIDET_KLASSEKODE' AND (SELECT COUNT(*) FROM Behandling b2 WHERE b2.fagsak.id = f.id AND b2.opprettetÅrsak = 'OPPDATER_UTVIDET_KLASSEKODE') = 1
+    """,
+    )
+    fun finnOppdaterUtvidetKlassekodeBehandlingerIFagsakerHvorDetKunFinnes1SlikBehandling(): List<Behandling>
 }

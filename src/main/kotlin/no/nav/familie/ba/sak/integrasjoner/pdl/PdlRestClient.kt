@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdressseRespo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.VergemaalEllerFremtidsfullmakt
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerKjønnPåKilde
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.filtrerNavnPåKilde
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
@@ -89,14 +91,16 @@ class PdlRestClient(
                                 }
                             }.toSet()
                     }
+
                     else -> emptySet()
                 }
 
             pdlPerson.person.let {
                 PersonInfo(
-                    fødselsdato = LocalDate.parse(it.foedselsdato.first().foedselsdato),
-                    navn = it.navn.firstOrNull()?.fulltNavn(),
-                    kjønn = it.kjoenn.firstOrNull()?.kjoenn,
+                    // Hvis det ikke finnes fødselsdato på person forsøker vi å bruke dato for barnets død fordi det var et dødfødt barn.
+                    fødselsdato = LocalDate.parse(it.foedselsdato.firstOrNull()?.foedselsdato ?: it.doedfoedtBarn.first().dato),
+                    navn = it.navn.filtrerNavnPåKilde()?.fulltNavn(),
+                    kjønn = it.kjoenn.filtrerKjønnPåKilde()?.kjoenn,
                     forelderBarnRelasjon = forelderBarnRelasjon,
                     adressebeskyttelseGradering = it.adressebeskyttelse.firstOrNull()?.gradering,
                     bostedsadresser = it.bostedsadresse,

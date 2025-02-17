@@ -143,8 +143,7 @@ class SnikeIKøenService(
             ?: BehandlingStatus.UTREDES
 }
 
-private fun Behandling.harVærtPåVilkårsvurderingSteg() =
-    behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
+private fun Behandling.harVærtPåVilkårsvurderingSteg() = behandlingStegTilstand.any { it.behandlingSteg == StegType.VILKÅRSVURDERING }
 
 enum class SettPåMaskinellVentÅrsak(
     val årsak: String,
@@ -154,6 +153,7 @@ enum class SettPåMaskinellVentÅrsak(
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     FØDSELSHENDELSE("Fødselshendelse"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
+    OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
 }
 
 class BehandlingErIkkeAvsluttetException(

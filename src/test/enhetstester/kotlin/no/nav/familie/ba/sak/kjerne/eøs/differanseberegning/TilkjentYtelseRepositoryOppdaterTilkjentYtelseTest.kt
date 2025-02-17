@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.oppdaterTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.util.TilkjentYtelseBuilder

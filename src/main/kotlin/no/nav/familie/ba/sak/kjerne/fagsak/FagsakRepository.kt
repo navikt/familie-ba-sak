@@ -35,7 +35,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     ): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = 'INSTITUSJON' and f.status <> 'AVSLUTTET' and f.arkivert = false and f.institusjon.orgNummer = :orgNummer")
+    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :aktør and f.type = 'INSTITUSJON' and f.arkivert = false and f.institusjon.orgNummer = :orgNummer")
     fun finnFagsakForInstitusjonOgOrgnummer(
         aktør: Aktør,
         orgNummer: String,
@@ -222,4 +222,22 @@ WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
         nativeQuery = true,
     )
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
+
+    @Query(
+        """
+            SELECT DISTINCT b1.fk_fagsak_id
+            FROM behandling b1
+                JOIN behandling b2
+                    ON b1.fk_fagsak_id = b2.fk_fagsak_id
+                    AND b2.aktivert_tid > b1.aktivert_tid
+                    AND b2.opprettet_aarsak != 'OPPDATER_UTVIDET_KLASSEKODE'
+                    AND b2.status = 'AVSLUTTET'
+                    AND b2.resultat NOT LIKE 'HENLAGT%'
+                JOIN tilkjent_ytelse ty
+                    ON b2.id = ty.fk_behandling_id AND ty.utbetalingsoppdrag IS NOT NULL
+            WHERE b1.opprettet_aarsak = 'OPPDATER_UTVIDET_KLASSEKODE';
+        """,
+        nativeQuery = true,
+    )
+    fun finnFagsakerMedIverksattRevurderingEtterOppdaterUtvidetKlassekodeBehandling(): List<Long>
 }

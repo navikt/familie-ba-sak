@@ -7,10 +7,9 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.datagenerator.oppgave.lagArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
@@ -41,7 +40,6 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
-import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -59,7 +57,6 @@ class OppgaveServiceTest {
     private val mockedOpprettTaskService: OpprettTaskService = mockk()
     private val mockedLoggService: LoggService = mockk()
     private val mockedTilpassArbeidsfordelingService: TilpassArbeidsfordelingService = mockk()
-    private val unleashService: UnleashService = mockk()
     private val oppgaveService: OppgaveService =
         OppgaveService(
             integrasjonClient = mockedIntegrasjonClient,
@@ -70,7 +67,6 @@ class OppgaveServiceTest {
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
             tilpassArbeidsfordelingService = mockedTilpassArbeidsfordelingService,
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
-            unleashService = unleashService,
         )
 
     @Test
@@ -98,8 +94,6 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
-
-        every { unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false) } returns true
 
         // Act
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
@@ -153,8 +147,6 @@ class OppgaveServiceTest {
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
 
         every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
-
-        every { unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false) } returns true
 
         // Act
         oppgaveService.opprettOppgave(

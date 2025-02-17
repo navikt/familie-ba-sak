@@ -45,14 +45,11 @@ fun <T : PeriodeOgBarnSkjema<T>> T.inneholder(skjema: T): Boolean =
         (this.tom == null || this.tom!! >= skjema.tom) &&
         this.barnAktører.containsAll(skjema.barnAktører)
 
-fun <T : PeriodeOgBarnSkjema<T>> T.bareInnhold(): T =
-    this.kopier(fom = null, tom = null, barnAktører = emptySet())
+fun <T : PeriodeOgBarnSkjema<T>> T.bareInnhold(): T = this.kopier(fom = null, tom = null, barnAktører = emptySet())
 
-fun <T : PeriodeOgBarnSkjema<T>> T.utenBarn(): T =
-    this.kopier(fom = this.fom, tom = this.tom, barnAktører = emptySet())
+fun <T : PeriodeOgBarnSkjema<T>> T.utenBarn(): T = this.kopier(fom = this.fom, tom = this.tom, barnAktører = emptySet())
 
-fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T =
-    this.kopier(fom = null, tom = null, barnAktører = this.barnAktører)
+fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T = this.kopier(fom = null, tom = null, barnAktører = this.barnAktører)
 
 fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdTilOgMed(tom: YearMonth?) =
     this
@@ -61,20 +58,14 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdTilOgMed(tom: YearMonth?) =
             tom = tom,
         ).utenInnhold()
 
-fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =
-    this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))
+fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T = this.kopier(barnAktører = skjema.barnAktører.minus(this.barnAktører))
 
-fun <T : PeriodeOgBarnSkjema<T>> T.tilOgMedBlirForkortetEllerLukketAv(skjema: T): Boolean =
-    skjema.tom != null && (this.tom == null || this.tom!! > skjema.tom)
+fun <T : PeriodeOgBarnSkjema<T>> T.tilOgMedBlirForkortetEllerLukketAv(skjema: T): Boolean = skjema.tom != null && (this.tom == null || this.tom!! > skjema.tom)
 
-fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraTilOgMed(skjema: T): Boolean =
-    this.kopier(tom = skjema.tom) == skjema
+fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraTilOgMed(skjema: T): Boolean = this.kopier(tom = skjema.tom) == skjema
 
-fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarn(skjema: T): Boolean =
-    this.kopier(barnAktører = skjema.barnAktører) == skjema
+fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarn(skjema: T): Boolean = this.kopier(barnAktører = skjema.barnAktører) == skjema
 
-fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarnOgTilOgMed(skjema: T): Boolean =
-    this.kopier(barnAktører = skjema.barnAktører, tom = skjema.tom) == skjema
+fun <T : PeriodeOgBarnSkjema<T>> T.erLikBortsettFraBarnOgTilOgMed(skjema: T): Boolean = this.kopier(barnAktører = skjema.barnAktører, tom = skjema.tom) == skjema
 
-fun <T : PeriodeOgBarnSkjema<T>> T.harEkteDelmengdeAvBarna(skjema: T): Boolean =
-    this.barnAktører.erEkteDelmengdeAv(skjema.barnAktører)
+fun <T : PeriodeOgBarnSkjema<T>> T.harEkteDelmengdeAvBarna(skjema: T): Boolean = this.barnAktører.erEkteDelmengdeAv(skjema.barnAktører)

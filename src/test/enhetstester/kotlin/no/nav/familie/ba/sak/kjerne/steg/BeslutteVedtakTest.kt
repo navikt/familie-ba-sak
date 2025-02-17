@@ -8,11 +8,12 @@ import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBrevmottakerDb
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
@@ -39,6 +41,7 @@ import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,6 +63,7 @@ class BeslutteVedtakTest {
     private val valutakursRepository = mockk<ValutakursRepository>()
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
+    private val brevmottakerService = mockk<BrevmottakerService>()
 
     val beslutteVedtak =
         BeslutteVedtak(
@@ -77,6 +81,7 @@ class BeslutteVedtakTest {
             valutakursRepository = valutakursRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
+            brevmottakerService = brevmottakerService,
         )
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
@@ -121,6 +126,10 @@ class BeslutteVedtakTest {
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                lagBrevmottakerDb(behandlingId = behandling.id),
+            )
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -150,6 +159,10 @@ class BeslutteVedtakTest {
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                lagBrevmottakerDb(behandlingId = behandling.id),
+            )
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -187,6 +200,10 @@ class BeslutteVedtakTest {
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                lagBrevmottakerDb(behandlingId = behandling.id),
+            )
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -221,6 +238,11 @@ class BeslutteVedtakTest {
 
         every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                lagBrevmottakerDb(behandlingId = behandling.id),
+            )
+
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
     }
@@ -229,8 +251,8 @@ class BeslutteVedtakTest {
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
         every {
             unleashService.isEnabled(
-                FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
-                any(),
+                FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
+                any<Long>(),
             )
         } returns false
 
@@ -252,7 +274,7 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { unleashService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING, any()) } returns false
+        every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
 
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -268,5 +290,35 @@ class BeslutteVedtakTest {
             )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+    }
+
+    @Test
+    fun `Skal feile ferdigstilling av Godkjenne vedtak-oppgave ved Godkjent vedtak når brevmottakerne er ugyldige`() {
+        // Arrange
+        val behandling = lagBehandling()
+        behandling.status = BehandlingStatus.FATTER_VEDTAK
+        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        mockkObject(FerdigstillOppgaver.Companion)
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
+        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+            listOf(
+                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
+                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
+            )
+
+        // Act & assert
+        val exception =
+            assertThrows<FunksjonellFeil> {
+                beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            }
+
+        assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket")
     }
 }

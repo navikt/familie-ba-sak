@@ -1,41 +1,49 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
-import io.mockk.MockK
-import io.mockk.clearAllMocks
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
-import no.nav.familie.ba.sak.config.tilAktør
+import io.mockk.runs
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPersonEnkel
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
+import no.nav.familie.kontrakter.felles.Behandlingstema
+import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype
+import no.nav.familie.kontrakter.felles.oppgave.Oppgave
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.YearMonth
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class BehandlingstemaServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
@@ -44,7 +52,9 @@ class BehandlingstemaServiceTest {
     private val tidslinjeService = mockk<VilkårsvurderingTidslinjeService>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
 
-    val behandlingstemaService =
+    private val dagensDato = LocalDate.of(2024, 10, 1)
+
+    private val behandlingstemaService =
         BehandlingstemaService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -52,212 +62,1308 @@ class BehandlingstemaServiceTest {
             oppgaveService = oppgaveService,
             vilkårsvurderingTidslinjeService = tidslinjeService,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
+            clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato),
         )
-    val defaultFagsak = defaultFagsak()
-    val defaultBehandling = lagBehandling(defaultFagsak)
 
-    @BeforeAll
-    fun init() {
-        clearAllMocks()
+    private val fagsak = defaultFagsak()
+    private val behandling = lagBehandling(fagsak = fagsak, id = 0L)
 
-        MockK.useImpl { }
-        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(defaultFagsak.id) } returns defaultBehandling
+    @Nested
+    inner class OppdaterBehandlingstemaFraRegistrereSøknadStegTest {
+        @Test
+        fun `skal ikke oppdatere behandlingstema hvis behandling skal oppdates automatisk`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                    skalBehandlesAutomatisk = true,
+                )
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
+                    behandling = behandling,
+                    nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            // Assert
+            assertThat(oppdatertBehandling).isEqualTo(behandling)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `skal oppdatere behandlingstema for registrering av søknad når det er en endring`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.UtvidetBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
+                    behandling = behandling,
+                    nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
+            assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(behandling.kategori)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
+
+        @Test
+        fun `skal oppdatere behandlingstema for registrering av søknad når ikke det er en endring`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
+                    behandling = behandling,
+                    nyUnderkategori = behandling.underkategori,
+                )
+
+            // Assert
+            verify(exactly = 0) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 0) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            assertThat(oppdatertBehandling.kategori).isEqualTo(behandling.kategori)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `skal oppdatere behandlingstema i database men ikke patch oppgave om det allerede er i synk`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaFraRegistrereSøknadSteg(
+                    behandling = behandling,
+                    nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            assertThat(patchedOppgave).isNull()
+            assertThat(oppdatertBehandling.kategori).isEqualTo(behandling.kategori)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
     }
 
-    @Test
-    fun `Skal utlede EØS dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
-        val barn = randomAktør()
-        val vilkårsvurdering =
-            Vilkårsvurdering(
-                behandling = defaultBehandling,
-            )
-        val personResultat =
-            PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn,
-                vilkårResultater =
-                    mutableSetOf(
-                        lagVilkårResultat(
-                            vilkår = Vilkår.BOSATT_I_RIKET,
-                            vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                            behandlingId = defaultBehandling.id,
-                        ),
-                        lagVilkårResultat(
-                            vilkår = Vilkår.BOSATT_I_RIKET,
-                            vilkårRegelverk = Regelverk.EØS_FORORDNINGEN,
-                            behandlingId = defaultBehandling.id,
-                        ),
+    @Nested
+    inner class OppdaterSaksbehandletBehandlingstemaTest {
+        @Test
+        fun `skal kaste exception om behandlingen skal behandles automatisk men saksbehandler prøver å oppdatere behandlingestema`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                    skalBehandlesAutomatisk = true,
+                )
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                        behandling,
+                        nyKategori = BehandlingKategori.EØS,
+                        nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    )
+                }
+            assertThat(exception.message).isEqualTo("Kan ikke oppdatere behandlingstema manuelt på behandlinger som skal behandles automatisk.")
+        }
+
+        @Test
+        fun `skal oppdatere både saksbehandlet kategori og underkategori på behandling`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                    behandling = behandling,
+                    nyKategori = BehandlingKategori.EØS,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = oppdatertBehandling,
+                    forrigeKategori = BehandlingKategori.NASJONAL,
+                    forrigeUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                    nyKategori = BehandlingKategori.EØS,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+            }
+            assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.UtvidetBarnetrygd.value)
+            assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.EØS.value)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.EØS)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `skal oppdatere kun saksbehandlet kategori behandling`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.UtvidetBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                    behandling = behandling,
+                    nyKategori = BehandlingKategori.EØS,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = oppdatertBehandling,
+                    forrigeKategori = BehandlingKategori.NASJONAL,
+                    forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    nyKategori = BehandlingKategori.EØS,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+            }
+            assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.UtvidetBarnetrygd.value)
+            assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.EØS.value)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.EØS)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `skal oppdatere kun saksbehandlet underkategori behandling`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.UtvidetBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                    behandling = behandling,
+                    nyKategori = BehandlingKategori.NASJONAL,
+                    nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = oppdatertBehandling,
+                    forrigeKategori = BehandlingKategori.NASJONAL,
+                    forrigeUnderkategori = BehandlingUnderkategori.UTVIDET,
+                    nyKategori = BehandlingKategori.NASJONAL,
+                    nyUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+            }
+            assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
+            assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
+
+        @Test
+        fun `skal ikke oppdatere kategori eller underkategori om de er uendret fra det some allerede finnes i databasen`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.UtvidetBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                    behandling = behandling,
+                    nyKategori = BehandlingKategori.NASJONAL,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            // Assert
+            verify(exactly = 0) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 0) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 0) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = any(),
+                    forrigeKategori = any(),
+                    forrigeUnderkategori = any(),
+                    nyKategori = any(),
+                    nyUnderkategori = any(),
+                )
+            }
+            assertThat(patchedOppgave).isNull()
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `skal oppdatere patche oppgave om det allerde er i synk med databaseendringen`() {
+            // Arrange
+            val behandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.UtvidetBarnetrygd.value,
+                    behandlingstype = Behandlingstype.EØS.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(behandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(behandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            every { loggService.opprettEndretBehandlingstema(any(), any(), any(), any(), any()) } just runs
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
+                    behandling = behandling,
+                    nyKategori = BehandlingKategori.EØS,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            verify(exactly = 1) {
+                loggService.opprettEndretBehandlingstema(
+                    behandling = oppdatertBehandling,
+                    forrigeKategori = BehandlingKategori.NASJONAL,
+                    forrigeUnderkategori = BehandlingUnderkategori.ORDINÆR,
+                    nyKategori = BehandlingKategori.EØS,
+                    nyUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+            }
+            assertThat(patchedOppgave).isNull()
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.EØS)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+    }
+
+    @Nested
+    inner class OppdaterBehandlingstemaForVilkårTest {
+        @Test
+        fun `skal ikke oppdatere kategori og underkategori om behandling skal behandles automatisk`() {
+            // Arrange
+            val aktivBehandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    skalBehandlesAutomatisk = true,
+                )
+
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaForVilkår(
+                    behandling = aktivBehandling,
+                )
+
+            // Assert
+            verify(exactly = 0) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 0) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+            assertThat(oppdatertBehandling).isEqualTo(aktivBehandling)
+        }
+
+        @Test
+        fun `skal sette overstyr underkategori`() {
+            // Arrange
+            val aktivBehandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(aktivBehandling.id) } returns null
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.OrdinærBarnetrygd.value,
+                    behandlingstype = Behandlingstype.NASJONAL.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(aktivBehandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(aktivBehandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaForVilkår(
+                    behandling = aktivBehandling,
+                    overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+
+            assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.UtvidetBarnetrygd.value)
+            assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `skal oppdatere behandling ved utledet kategori og underkategori`() {
+            // Arrange
+            val aktivBehandling =
+                lagBehandling(
+                    behandlingKategori = BehandlingKategori.EØS,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(aktivBehandling.id) } returns null
+
+            val oppgave =
+                Oppgave(
+                    behandlingstema = Behandlingstema.BarnetrygdEØS.value,
+                    behandlingstype = Behandlingstype.EØS.value,
+                )
+            val patchOppgaveCallback = slot<(Oppgave) -> Oppgave>()
+            var patchedOppgave: Oppgave? = null
+
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(aktivBehandling) } returnsArgument 0
+            every { oppgaveService.patchOppgaverForBehandling(eq(aktivBehandling), capture(patchOppgaveCallback)) } answers {
+                patchedOppgave = patchOppgaveCallback.captured.invoke(oppgave)
+            }
+            // Act
+            val oppdatertBehandling =
+                behandlingstemaService.oppdaterBehandlingstemaForVilkår(
+                    behandling = aktivBehandling,
+                )
+
+            // Assert
+            verify(exactly = 1) { behandlingHentOgPersisterService.lagreEllerOppdater(any()) }
+            verify(exactly = 1) { oppgaveService.patchOppgaverForBehandling(any(), any()) }
+
+            assertThat(patchedOppgave?.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
+            assertThat(patchedOppgave?.behandlingstype).isEqualTo(Behandlingstype.NASJONAL.value)
+            assertThat(oppdatertBehandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(oppdatertBehandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
+    }
+
+    @Nested
+    inner class FinnBehandlingKategoriTest {
+        @Test
+        fun `skal returnere NASJONAL når hverken aktiv eller siste vedtatte behandling finnes`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+
+        @Test
+        fun `skal returnere siste vedtatt behandling sin kategori når det ikke finnes en aktiv behandling men en siste vedtatt behandling finnes`() {
+            // Arrange
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal returnere NASJONAL når ingen tidslinje blir funnet for vilkårsvurderingen til den aktive behandlingen og den siste vedtatte behandlingen finnes ikke`() {
+            // Arrange
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+
+        @Test
+        fun `skal returnere kategorien til den siste vedtatte behandlingen når ingen tidslinje blir funnet for vilkårsvurderingen til den aktive behandlingen men den siste vedtatte behandlingen finnes`() {
+            // Arrange
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns null
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal utlede kategori EØS et barn har en løpende EØS periode`() {
+            // Arrange
+            val stønadFom = dagensDato.minusMonths(1)
+            val stønadTom = dagensDato.plusYears(2)
+
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
+            val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+            val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.SØKER,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn1.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = {
+                                            if (it in
+                                                listOf(
+                                                    Vilkår.BOR_MED_SØKER,
+                                                    Vilkår.BOSATT_I_RIKET,
+                                                    Vilkår.LOVLIG_OPPHOLD,
+                                                )
+                                            ) {
+                                                Regelverk.EØS_FORORDNINGEN
+                                            } else {
+                                                null
+                                            }
+                                        },
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn2.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = {
+                                            if (it in
+                                                listOf(
+                                                    Vilkår.BOR_MED_SØKER,
+                                                    Vilkår.BOSATT_I_RIKET,
+                                                    Vilkår.LOVLIG_OPPHOLD,
+                                                )
+                                            ) {
+                                                Regelverk.NASJONALE_REGLER
+                                            } else {
+                                                null
+                                            }
+                                        },
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn1, barn2),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal utlede kategori NASJONAL når et barn har en løpenede nasjonal periode`() {
+            // Arrange
+            val stønadFom = dagensDato.minusMonths(1)
+            val stønadTom = dagensDato.plusYears(2)
+
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
+            val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.SØKER,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = {
+                                            if (it in
+                                                listOf(
+                                                    Vilkår.BOR_MED_SØKER,
+                                                    Vilkår.BOSATT_I_RIKET,
+                                                    Vilkår.LOVLIG_OPPHOLD,
+                                                )
+                                            ) {
+                                                Regelverk.NASJONALE_REGLER
+                                            } else {
+                                                null
+                                            }
+                                        },
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Assert
+            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+
+        @Test
+        fun `skal utlede kategorien til siste vedtatte behandling når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandling men den siste vedtatte behandling finnes`() {
+            // Arrange
+            val stønadFom = dagensDato.minusMonths(3)
+            val stønadTom = dagensDato.minusMonths(2)
+
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
+            val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+            val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.SØKER,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn1.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn2.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn1, barn2),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Act
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
+        }
+
+        @Test
+        fun `skal utlede kategori NASJONAL når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling finnes ikke`() {
+            // Arrange
+            val stønadFom = dagensDato.minusMonths(3)
+            val stønadTom = dagensDato.minusMonths(2)
+
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør())
+            val barn1 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+            val barn2 = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = stønadFom)
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.SØKER,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn1.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn2.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    lagAlleVilkårResultater(
+                                        behandling = aktivBehandling,
+                                        personType = PersonType.BARN,
+                                        personResultat = personResultat,
+                                        stønadFom = stønadFom,
+                                        stønadTom = stønadTom,
+                                        vurderesEtterFn = { null },
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn1, barn2),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Act
+            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+
+        @Test
+        fun `skal utlede kategori NASJONAl`() {
+            // Arrange
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør(), fødselsdato = LocalDate.of(1983, 6, 22))
+            val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = LocalDate.of(2022, 11, 15))
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 1, 15),
+                                            periodeTom = LocalDate.of(2024, 8, 31),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2024, 9, 1),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 1, 15),
+                                            periodeTom = LocalDate.of(2024, 8, 31),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2024, 9, 1),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        ),
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 11, 15),
+                                            periodeTom = LocalDate.of(2024, 8, 31),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2024, 9, 1),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 11, 15),
+                                            periodeTom = LocalDate.of(2024, 8, 31),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2024, 9, 1),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 11, 15),
+                                            periodeTom = LocalDate.of(2024, 8, 31),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOR_MED_SØKER,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2024, 9, 1),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            vilkårType = Vilkår.BOR_MED_SØKER,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 11, 15),
+                                            periodeTom = LocalDate.of(2040, 11, 14),
+                                            vurderesEtter = null,
+                                            vilkårType = Vilkår.UNDER_18_ÅR,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2022, 11, 15),
+                                            periodeTom = null,
+                                            vurderesEtter = null,
+                                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Act
+            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+
+        private fun lagAlleVilkårResultater(
+            behandling: Behandling,
+            personType: PersonType,
+            personResultat: PersonResultat,
+            stønadFom: LocalDate,
+            stønadTom: LocalDate,
+            vurderesEtterFn: (vilkår: Vilkår) -> Regelverk? = { vilkår -> personResultat.let { vilkår.defaultRegelverk(it.vilkårsvurdering.behandling.kategori) } },
+        ) = Vilkår
+            .hentVilkårFor(
+                personType = personType,
+                fagsakType = behandling.fagsak.type,
+                behandlingUnderkategori = behandling.underkategori,
+            ).map { vilkår ->
+                lagVilkårResultat(
+                    personResultat = personResultat,
+                    periodeFom = stønadFom,
+                    periodeTom = stønadTom,
+                    vilkårType = vilkår,
+                    resultat = Resultat.OPPFYLT,
+                    behandlingId = behandling.id,
+                    vurderesEtter = vurderesEtterFn(vilkår),
+                )
+            }.toSet()
+    }
+
+    @Nested
+    inner class FinnLøpendeUnderkategoriFraForrigeVedtatteBehandlingTest {
+        @Test
+        fun `skal returnere null om ingen vedtatt behandling for fagsaken blir funnet`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns null
+
+            // Act
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
+
+            // Assert
+            assertThat(underkategori).isNull()
+        }
+
+        @Test
+        fun `skal returnere UTVIDET om det finnes en andel tilkjent ytelse som er løpende og er av ytelsestype UTVIDET_BARNETRYGD`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now().minusMonths(1),
+                        tom = YearMonth.now().plusMonths(1),
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                     ),
-            )
-        vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+                )
+            // Act
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
-        val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(defaultFagsak.id)
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
 
-        assertEquals(BehandlingKategori.EØS, kategori)
-    }
-
-    @Test
-    fun `Skal utlede NASJONAL dersom EØS vilkåret ble behandlet i annen behandling`() {
-        val barn = randomAktør()
-        val vilkårsvurdering =
-            Vilkårsvurdering(
-                behandling = defaultBehandling,
-            )
-        val personResultat =
-            PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn,
-                vilkårResultater =
-                    mutableSetOf(
-                        lagVilkårResultat(
-                            vilkår = Vilkår.BOSATT_I_RIKET,
-                            vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                            behandlingId = defaultBehandling.id,
-                        ),
-                        lagVilkårResultat(
-                            vilkår = Vilkår.BOSATT_I_RIKET,
-                            vilkårRegelverk = Regelverk.EØS_FORORDNINGEN,
-                            behandlingId = 0L,
-                        ),
+        @Test
+        fun `skal returnere ORDINÆR om det finnes en andel tilkjent ytelse som er løpende men ikke av ytelsestype UTVIDET_BARNETRYGD`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now().minusMonths(1),
+                        tom = YearMonth.now().plusMonths(1),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     ),
-            )
-        vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+                )
+            // Act
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
-        val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(defaultFagsak.id)
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
 
-        assertEquals(BehandlingKategori.NASJONAL, kategori)
-    }
-
-    @Test
-    fun `Skal utlede UTVIDET dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
-        val vilkårsvurdering =
-            Vilkårsvurdering(
-                behandling = defaultBehandling,
-            )
-        val personResultat =
-            PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = defaultFagsak.aktør,
-                vilkårResultater =
-                    mutableSetOf(
-                        lagVilkårResultat(
-                            vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                            behandlingId = defaultBehandling.id,
-                        ),
-                        lagVilkårResultat(
-                            vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                            behandlingId = defaultBehandling.id,
-                        ),
+        @Test
+        fun `skal returnere ORDINÆR om det finnes en andel tilkjent ytelse som ikke er løpende men er av ytelsestype UTVIDET_BARNETRYGD`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns behandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.now().minusMonths(2),
+                        tom = YearMonth.now().minusMonths(1),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                     ),
-            )
-        vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+                )
+            // Act
+            val underkategori = behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsak.id)
 
-        val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
-
-        assertEquals(BehandlingUnderkategori.UTVIDET, underkategori)
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
     }
 
-    @Test
-    fun `Skal utlede ORDINÆR dersom UTVIDET vilkåret ble behandlet i annen behandling`() {
-        val barn = randomAktør()
-        val vilkårsvurdering =
-            Vilkårsvurdering(
-                behandling = defaultBehandling,
-            )
-        val personResultat =
-            PersonResultat(
-                vilkårsvurdering = vilkårsvurdering,
-                aktør = barn,
-                vilkårResultater =
-                    mutableSetOf(
-                        lagVilkårResultat(
-                            vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                            vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                            behandlingId = 0L,
-                        ),
-                    ),
-            )
-        vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+    @Nested
+    inner class FinnUnderkategoriFraAktivBehandlingTest {
+        @Test
+        fun `skal returnere ORDINÆR om ingen aktiv og åpen behandling blir funnet for fagsak`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns null
 
-        val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
+            // Act
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
-        assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
-    }
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
 
-    @Test
-    fun `skal hente løpende kategori til NASJONAL når siste behandling er NASJONAL og har løpende utbetaling`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = listOf(randomFnr())
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(defaultFagsak.id) } returns defaultBehandling
-        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
-            VilkårsvurderingTidslinjer(
-                vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
-                søkerOgBarn =
-                    lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
-                        .tilPersonEnkelSøkerOgBarn(),
-            )
-        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
-    }
+        @Test
+        fun `skal returnere ORDINÆR om ingen vilkårsvurdering blir funnet for behandlingen`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns null
 
-    @Test
-    fun `skal hente løpende kategori til EØS når siste behandling er EØS og har løpende utbetaling`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val barn2Fnr = randomFnr()
-        val barnaFnr = listOf(barnFnr, barn2Fnr)
-        val behandlingMedEøsRegelverk = defaultBehandling.copy(kategori = BehandlingKategori.EØS)
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(defaultFagsak.id) } returns
-            behandlingMedEøsRegelverk
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandlingMedEøsRegelverk)
-        vilkårsvurdering.personResultater =
-            lagPersonResultaterForSøkerOgToBarn(
-                vilkårsvurdering,
-                tilAktør(søkerFnr),
-                tilAktør(barnFnr),
-                tilAktør(barn2Fnr),
-                LocalDate.now().minusMonths(1),
-                LocalDate.now().plusYears(2),
-            )
-        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
-            VilkårsvurderingTidslinjer(
-                vilkårsvurdering = vilkårsvurdering,
-                søkerOgBarn =
-                    lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                        .tilPersonEnkelSøkerOgBarn(),
-            )
-        assertEquals(BehandlingKategori.EØS, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
-    }
+            // Act
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
 
-    @Test
-    fun `skal hente løpende kategori til NASJONAL når siste behandling er EØS opphørt`() {
-        val søkerFnr = randomFnr()
-        val barnFnr = randomFnr()
-        val barn2Fnr = randomFnr()
-        val barnaFnr = listOf(barnFnr, barn2Fnr)
-        val behandlingMedEøsRegelverk = defaultBehandling.copy(kategori = BehandlingKategori.EØS)
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(defaultFagsak.id) } returns
-            behandlingMedEøsRegelverk
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandlingMedEøsRegelverk)
-        vilkårsvurdering.personResultater =
-            lagPersonResultaterForSøkerOgToBarn(
-                vilkårsvurdering,
-                tilAktør(søkerFnr),
-                tilAktør(barnFnr),
-                tilAktør(barn2Fnr),
-                LocalDate.now().minusMonths(3),
-                LocalDate.now().minusMonths(2),
-            )
-        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
-            VilkårsvurderingTidslinjer(
-                vilkårsvurdering = vilkårsvurdering,
-                søkerOgBarn =
-                    lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                        .tilPersonEnkelSøkerOgBarn(),
-            )
-        assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
+
+        @Test
+        fun `Skal utlede UTVIDET dersom minst ett vilkår i har blitt behandlet i inneværende behandling`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = fagsak.aktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                            periodeFom = dagensDato.minusMonths(1),
+                                            periodeTom = dagensDato,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                            periodeFom = dagensDato.plusDays(1),
+                                            periodeTom = dagensDato.plusMonths(2),
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
+
+            // Act
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
+
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.UTVIDET)
+        }
+
+        @Test
+        fun `Skal utlede ORDINÆR dersom ingen utvidet barnetrygd vilkår i har blitt behandlet i inneværende behandling`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = fagsak.aktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = behandling.id,
+                                            vilkårType = Vilkår.BOR_MED_SØKER,
+                                            periodeFom = dagensDato.minusMonths(1),
+                                            periodeTom = dagensDato,
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
+
+            // Act
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
+
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
+
+        @Test
+        fun `Skal utlede ORDINÆR dersom UTVIDET vilkåret ble behandlet i annen behandling`() {
+            // Arrange
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = behandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = fagsak.aktør,
+                                lagVilkårResultater = {
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = it,
+                                            behandlingId = 1337L,
+                                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                                            periodeFom = dagensDato.minusMonths(1),
+                                            periodeTom = dagensDato.plusMonths(1),
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns behandling
+            every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns vilkårsvurdering
+
+            // Act
+            val underkategori = behandlingstemaService.finnUnderkategoriFraAktivBehandling(fagsak.id)
+
+            // Assert
+            assertThat(underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        }
     }
 }

@@ -7,10 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJourn
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.FagsakSystem
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype.FAGSAK
@@ -45,7 +42,6 @@ class InnkommendeJournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
     private val journalføringMetrikk: JournalføringMetrikk,
@@ -222,17 +218,6 @@ class InnkommendeJournalføringService(
             tilknyttedeBehandlingIder.map {
                 behandlingHentOgPersisterService.hent(it.toLong())
             }
-
-        val journalpost = hentJournalpost(journalpostId)
-        behandlinger.forEach {
-            journalføringRepository.save(
-                DbJournalpost(
-                    behandling = it,
-                    journalpostId = journalpostId,
-                    type = DbJournalpostType.valueOf(journalpost.journalposttype.name),
-                ),
-            )
-        }
 
         val fagsak =
             when (tilknyttedeBehandlingIder.isNotEmpty()) {

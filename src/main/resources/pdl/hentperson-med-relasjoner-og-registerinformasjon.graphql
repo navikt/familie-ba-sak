@@ -11,9 +11,17 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         fornavn
         mellomnavn
         etternavn
+        metadata {
+            master
+            historisk
+        }
     }
     kjoenn {
         kjoenn
+        metadata {
+            master
+            historisk
+        }
     }
     forelderBarnRelasjon {
         relatertPersonsIdent,
@@ -62,6 +70,9 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
     }
     doedsfall {
         doedsdato
+    }
+    doedfoedtBarn {
+        dato
     }
     kontaktinformasjonForDoedsbo(historikk: false) {
         adresse {

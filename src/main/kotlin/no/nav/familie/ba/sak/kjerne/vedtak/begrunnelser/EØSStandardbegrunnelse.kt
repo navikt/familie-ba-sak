@@ -164,7 +164,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandFaarYtelseIUtlandet"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
-
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_TO_ARBEIDSLAND_MER_ENN_25_PROSENT_I_NORGE {
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstToArbeidslandMerEnn25INorge"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_SEKUNDÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE {
         override val sanityApiNavn = "innvilgetSekundaerlandBeggeForeldreBosattINorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
@@ -219,12 +222,20 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetPrimarlandSokerNorskArbeidsgiverIEosLand"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_PRIMÆRLAND_OPPHOLD_ANNET_EØS_LAND_NORGE_LOVVALGSLAND {
+        override val sanityApiNavn = "innvilgetPrimarlandOppholdAnnetEosLandNorgeLovvalgsland"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_PRIMÆRLAND_ANNEN_FORELDER_NORSK_ARBEIDSGIVER_I_EØS_LAND {
         override val sanityApiNavn = "innvilgetPrimarlandAnnenForelderNorskArbeidsgiverIEosLand"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
     INNVILGET_SEKUNDÆRLAND_SELVSTENDIG_RETT_ANNEN_FORELDER_NORSK_ARBEIDSGIVER_EØS {
         override val sanityApiNavn = "innvilgetSekundarlandSelvstendigRettAnnenForelderNorskArbeidsgiverEos"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SEKUNDÆRLAND_HELE_FAMILIEN_BOSATT_UTENFOR_NORGE {
+        override val sanityApiNavn = "innvilgetSekundaerlandHeleFamilienBosattUtenforNorge"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
     INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {
@@ -271,6 +282,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundaerIkkeFaattSvarPaaSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_SELVSTENDIG_RETT_SEKUNDÆRLAND_SØKER_BOR_I_NORGE_UNNTATT_MEDLEMSKAP {
+        override val sanityApiNavn = "innvilgetSelvstendigRettSekundaerlandSokerBorINorgeUnntattMedlemskap"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_TILLEGGSTEKST_DELT_BOSTED {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstDeltBosted"
@@ -278,6 +293,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     INNVILGET_TILLEGGSTEKST_FULL_BARNETRYGD_HAR_AVTALE_DELT {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstFullBarnetrygdHarAvtaleDelt"
+    },
+    INNVILGET_TILLEGSTEKST_TO_ARBEIDSLAND_MER_ENN_25_PROSENT_ARBEID_I_NORGE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstToArbeidslandMerEnn25ProsentArbeidINorge"
+    },
+    INNVILGET_TILLEGSTEKST_OVERTATT_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstOvertattAnsvarForBarn"
     },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR

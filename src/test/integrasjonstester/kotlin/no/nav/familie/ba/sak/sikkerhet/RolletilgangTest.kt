@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.sikkerhet
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
@@ -218,7 +218,7 @@ class RolletilgangTest(
                 header,
             )
 
-        val response = restTemplate.postForEntity<Ressurs<Any>>(hentUrl("/api/forvalter/kjor-satsendring-uten-validering"), requestEntity)
+        val response = restTemplate.postForEntity<String>(hentUrl("/api/forvalter/ferdigstill-oppgaver"), requestEntity)
 
         assertEquals(HttpStatus.OK, response.statusCode)
     }

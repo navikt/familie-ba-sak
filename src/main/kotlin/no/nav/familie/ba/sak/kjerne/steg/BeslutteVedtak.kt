@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
@@ -13,6 +13,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -52,6 +56,7 @@ class BeslutteVedtak(
     private val valutakursRepository: ValutakursRepository,
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val brevmottakerService: BrevmottakerService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -62,15 +67,15 @@ class BeslutteVedtak(
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
         } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
-            !unleashService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)
+            !unleashService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)
         ) {
             throw FunksjonellFeil(
-                melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV} false",
+                melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
             )
         } else if (behandling.erTekniskEndring() &&
             !unleashService.isEnabled(
-                FeatureToggleConfig.TEKNISK_ENDRING,
+                FeatureToggle.TEKNISK_ENDRING,
                 behandling.id,
             )
         ) {
@@ -79,7 +84,9 @@ class BeslutteVedtak(
             )
         }
 
-        val feilutbetaling by lazy { simuleringService.hentFeilutbetaling(behandling.id) }
+        validerBrevmottakere(BehandlingId(behandling.id), data.beslutning.erGodkjent())
+
+        val feilutbetaling by lazy { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(behandling.id) }
         val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
         val tilbakekrevingsvalg by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
         val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
@@ -239,5 +246,18 @@ class BeslutteVedtak(
                 behandlingId = behandling.id,
             )
         taskRepository.save(task)
+    }
+
+    private fun validerBrevmottakere(
+        behandlingId: BehandlingId,
+        totrinnskontrollErGodkjent: Boolean,
+    ) {
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId.id).map { ManuellBrevmottaker(it) }
+        if (totrinnskontrollErGodkjent && !BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og vedtaksbrevet kan ikke sendes. Behandlingen må underkjennes, og saksbehandler må legge til manuell adresse på nytt.",
+            )
+        }
     }
 }

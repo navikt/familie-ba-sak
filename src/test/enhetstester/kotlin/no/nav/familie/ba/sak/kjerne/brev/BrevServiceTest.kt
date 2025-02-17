@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -25,10 +25,10 @@ import java.time.YearMonth
 class BrevServiceTest {
     val saksbehandlerContext = mockk<SaksbehandlerContext>()
     val brevmalService = mockk<BrevmalService>()
-    val unleashService = mockk<UnleashNextMedContextService>()
     val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
+    val hjemmeltekstUtleder = mockk<HjemmeltekstUtleder>()
 
     val brevService =
         BrevService(
@@ -37,14 +37,11 @@ class BrevServiceTest {
             arbeidsfordelingService = mockk(),
             simuleringService = mockk(),
             vedtaksperiodeService = vedtaksperiodeService,
-            sanityService = mockk(),
-            vilkårsvurderingService = mockk(),
             korrigertEtterbetalingService = mockk(),
             organisasjonService = mockk(),
             korrigertVedtakService = mockk(),
             saksbehandlerContext = saksbehandlerContext,
             brevmalService = brevmalService,
-            refusjonEøsRepository = mockk(),
             integrasjonClient = mockk(),
             testVerktøyService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
@@ -52,12 +49,13 @@ class BrevServiceTest {
             valutakursRepository = mockk(),
             kompetanseRepository = mockk(),
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
+            hjemmeltekstUtleder = hjemmeltekstUtleder,
         )
 
     @BeforeEach
     fun setUp() {
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-        every { unleashService.isEnabled(any()) } returns true
+        every { hjemmeltekstUtleder.utledHjemmeltekst(any(), any(), any()) } returns "Hjemmel 1, 2, 3"
     }
 
     @Test

@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
@@ -31,12 +30,10 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -49,7 +46,6 @@ class OppgaveService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
-    private val unleashService: UnleashService,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -81,15 +77,8 @@ class OppgaveService(
                     .hentArbeidsfordelingPåBehandling(behandlingId)
                     .tilArbeidsfordelingsenhet()
 
-            val opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå = unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)
-
             val navIdent = tilordnetNavIdent?.let { NavIdent(it) }
-            val tilordnetRessurs =
-                if (opprettSakPåRiktigEnhetOgSaksbehandlerToggleErPå) {
-                    tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-                } else {
-                    navIdent
-                }
+            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
 
             val opprettOppgave =
                 OpprettOppgaveRequest(
@@ -279,9 +268,9 @@ class OppgaveService(
         }
     }
 
-    fun forlengFristÅpneOppgaverPåBehandling(
+    fun settNyFristPåOppgaver(
         behandlingId: Long,
-        forlengelse: Period,
+        nyFrist: LocalDate,
     ) {
         val dbOppgaver = oppgaveRepository.findByBehandlingIdAndIkkeFerdigstilt(behandlingId)
 
@@ -301,7 +290,6 @@ class OppgaveService(
                 }
 
                 else -> {
-                    val nyFrist = LocalDate.parse(gammelOppgave.fristFerdigstillelse!!).plus(forlengelse)
                     val nyOppgave = gammelOppgave.copy(fristFerdigstillelse = nyFrist.toString())
                     logger.info("Oppgave ${dbOppgave.gsakId} endrer frist fra ${gammelOppgave.fristFerdigstillelse} til $nyFrist")
                     integrasjonClient.oppdaterOppgave(nyOppgave.id!!, nyOppgave)

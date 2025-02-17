@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import org.assertj.core.api.Assertions.assertThat
@@ -95,6 +96,26 @@ class ManueltBrevRequestTest {
             assertThat(flettefelter.navn).containsExactly(mottakerNavn)
             assertThat(flettefelter.gjelder).containsExactly(brevRequestTilInstitusjon.vedrørende?.navn)
         }
+    }
+
+    @Test
+    fun `tilBrev genererer 'Utbetaling etter KA-vedtak'-brev som forventet`() {
+        val fnr = "12345678910"
+        val brevRequestTilPerson =
+            baseRequest.copy(
+                brevmal = Brevmal.UTBETALING_ETTER_KA_VEDTAK,
+                fritekstAvsnitt = "Fritekst avsnitt",
+            )
+        val mottakerNavn = "mottakerNavn"
+        val brev = brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as UtbetalingEtterKAVedtakData
+        with(brev.flettefelter) {
+            assertThat(fodselsnummer).containsExactly(fnr)
+            assertThat(navn).containsExactly(mottakerNavn)
+            assertThat(organisasjonsnummer).isNull()
+            assertThat(gjelder).isNull()
+        }
+        assertThat(brev.fritekst).isEqualTo("Fritekst avsnitt")
+        assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
     }
 
     @Test

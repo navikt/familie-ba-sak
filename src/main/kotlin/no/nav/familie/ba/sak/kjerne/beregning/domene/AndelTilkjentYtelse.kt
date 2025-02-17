@@ -175,32 +175,37 @@ enum class YtelseType(
     val klassifisering: String,
 ) {
     ORDINÆR_BARNETRYGD("BATR"),
-    UTVIDET_BARNETRYGD("BATR"),
+    UTVIDET_BARNETRYGD("BAUTV-OP"),
     SMÅBARNSTILLEGG("BATRSMA"),
     ;
 
-    fun tilYtelseType(): YtelsetypeBA =
+    fun tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): YtelsetypeBA =
         when (this) {
             ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
-            UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
+            UTVIDET_BARNETRYGD ->
+                if (skalBrukeNyKlassekodeForUtvidetBarnetrygd) {
+                    YtelsetypeBA.UTVIDET_BARNETRYGD
+                } else {
+                    YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL
+                }
+
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
         }
 
     fun tilSatsType(
         person: Person,
         ytelseDato: LocalDate,
-    ) =
-        when (this) {
-            ORDINÆR_BARNETRYGD ->
-                if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
-                    SatsType.TILLEGG_ORBA
-                } else {
-                    SatsType.ORBA
-                }
+    ) = when (this) {
+        ORDINÆR_BARNETRYGD ->
+            if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
+                SatsType.TILLEGG_ORBA
+            } else {
+                SatsType.ORBA
+            }
 
-            UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
-            SMÅBARNSTILLEGG -> SatsType.SMA
-        }
+        UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
+        SMÅBARNSTILLEGG -> SatsType.SMA
+    }
 }
 
 private fun regelverkAvhengigeVilkår() =

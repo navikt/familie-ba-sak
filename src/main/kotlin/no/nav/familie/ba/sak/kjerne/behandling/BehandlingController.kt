@@ -93,8 +93,7 @@ class BehandlingController(
     @PutMapping(path = ["/{behandlingId}/behandlingstema"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreBehandlingstema(
         @PathVariable behandlingId: Long,
-        @RequestBody
-        endreBehandling: RestEndreBehandlingstema,
+        @RequestBody endreBehandlingstema: RestEndreBehandlingstema,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
@@ -104,11 +103,10 @@ class BehandlingController(
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val behandling =
-            behandlingstemaService.oppdaterBehandlingstema(
+            behandlingstemaService.oppdaterSaksbehandletBehandlingstema(
                 behandling = behandlingHentOgPersisterService.hent(behandlingId),
-                overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
-                overstyrtKategori = endreBehandling.behandlingKategori,
-                manueltOppdatert = true,
+                nyUnderkategori = endreBehandlingstema.behandlingUnderkategori,
+                nyKategori = endreBehandlingstema.behandlingKategori,
             )
 
         return ResponseEntity.ok(
@@ -160,6 +158,7 @@ data class NyBehandling(
                 message = "Søkers ident kan ikke være blank",
                 frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.",
             )
+
             BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
                 behandlingÅrsak.erManuellMigreringsårsak() &&
                 nyMigreringsdato == null -> {
@@ -168,6 +167,7 @@ data class NyBehandling(
                     frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre",
                 )
             }
+
             behandlingType in listOf(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING) &&
                 behandlingÅrsak == BehandlingÅrsak.SØKNAD &&
                 søknadMottattDato == null -> {

@@ -116,9 +116,11 @@ data class Behandling(
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
+            opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE -> false
             erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
+            erIverksetteKAVedtak() -> false
             else -> true
         }
 
@@ -164,6 +166,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
+            skalBehandlesAutomatisk && opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE -> true
             else -> false
         }
 
@@ -214,14 +217,19 @@ data class Behandling(
 
     fun erKlage() = this.opprettetÅrsak == BehandlingÅrsak.KLAGE
 
-    fun erMigrering() =
-        type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+    fun erIverksetteKAVedtak() = this.opprettetÅrsak == BehandlingÅrsak.IVERKSETTE_KA_VEDTAK
+
+    fun erMigrering() = type == BehandlingType.MIGRERING_FRA_INFOTRYGD || type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
 
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     fun erMånedligValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
+
+    fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
+
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erOppdaterUtvidetKlassekode()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
@@ -235,11 +243,9 @@ data class Behandling(
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
-    fun kanLeggeTilOgFjerneUtvidetVilkår() =
-        erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage()
+    fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage() || erIverksetteKAVedtak()
 
-    private fun erOmregning() =
-        this.opprettetÅrsak.erOmregningsårsak()
+    private fun erOmregning() = this.opprettetÅrsak.erOmregningsårsak()
 
     private fun erFødselshendelse() = this.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE
 
@@ -337,10 +343,11 @@ enum class BehandlingÅrsak(
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
     HELMANUELL_MIGRERING("Manuell migrering"),
     MÅNEDLIG_VALUTAJUSTERING("Månedlig valutajustering"),
+    OPPDATER_UTVIDET_KLASSEKODE("Ny klassekode for utvidet barnetrygd"),
+    IVERKSETTE_KA_VEDTAK("Iverksette KA-vedtak"),
     ;
 
-    fun erOmregningsårsak(): Boolean =
-        this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
+    fun erOmregningsårsak(): Boolean = this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
 
     fun hentOverstyrtDokumenttittelForOmregningsbehandling(): String? =
         when (this) {

@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagKompetanse
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -27,7 +27,7 @@ class KompetanseRepositoryTest(
         val barn2 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
 
         val kompetanse =
             kompetanseRepository.save(
@@ -52,7 +52,7 @@ class KompetanseRepositoryTest(
         val barn1 = aktørIdRepository.save(randomAktør())
 
         val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
-        val behandling = behandlingRepository.save(lagBehandling(fagsak))
+        val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak))
 
         val kompetanse =
             kompetanseRepository.save(

@@ -8,13 +8,13 @@ import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RealDateProvider
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonEnkel
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -61,7 +61,7 @@ class VilkårsvurderingStegTest {
             tilbakestillBehandlingService = tilbakestillBehandlingService,
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
-            månedligValutajusteringSevice = mockk(),
+            månedligValutajusteringService = mockk(),
             localDateProvider = RealDateProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
         )
@@ -126,7 +126,11 @@ class VilkårsvurderingStegTest {
     @Test
     fun `skal validere når regelverk er konsistent`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.now().minusMonths(2).withDayOfMonth(1))
+        val barn1 =
+            tilfeldigPerson(
+                personType = PersonType.BARN,
+                fødselsdato = LocalDate.now().minusMonths(2).withDayOfMonth(1),
+            )
 
         val behandling = lagBehandling()
 

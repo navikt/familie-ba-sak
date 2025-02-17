@@ -2,14 +2,7 @@ package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.defaultFagsak
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.lagVilkårsvurdering
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilddMMyyyy
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
@@ -31,10 +24,15 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriStringList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.tilSisteAndelPerAktørOgType
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterAndelerMedPeriodeOffset
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.oppdaterTilkjentYtelseMedUtbetalingsoppdrag
+import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
+import no.nav.familie.ba.sak.datagenerator.defaultFagsak
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -82,16 +80,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
 
-fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
-    this[behandlingId] ?: error("Finner ikke behandling med id $behandlingId")
+fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) = this[behandlingId] ?: error("Finner ikke behandling med id $behandlingId")
 
-fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag =
-    this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
+fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag = this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
 
 fun lagFagsaker(dataTable: DataTable) =
     dataTable
@@ -126,8 +121,7 @@ fun lagVedtak(
         dataTable
             .groupByBehandlingId()
             .map {
-                no.nav.familie.ba.sak.common
-                    .lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
+                lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
             },
     )
 }
@@ -158,7 +152,7 @@ fun lagBehandlinger(
         val underkategori = parseValgfriEnum<BehandlingUnderkategori>(Domenebegrep.UNDERKATEGORI, rad) ?: BehandlingUnderkategori.ORDINÆR
         val endretTidspunkt = parseValgfriDato(Domenebegrep.ENDRET_TIDSPUNKT, rad) ?: LocalDate.now()
 
-        lagBehandling(
+        lagBehandlingUtenId(
             endretTidspunkt = endretTidspunkt.atStartOfDay(),
             fagsak = fagsak,
             årsak = behandlingÅrsak ?: BehandlingÅrsak.SØKNAD,
@@ -178,7 +172,8 @@ fun lagVilkårsvurdering(
     persongrunnlagForBehandling: PersonopplysningGrunnlag,
     behandling: Behandling,
 ): Vilkårsvurdering {
-    val vilkårsvurdering = lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+    val vilkårsvurdering =
+        lagVilkårsvurdering(søkerAktør = behandling.fagsak.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
     val personResultater =
         persongrunnlagForBehandling.personer
             .map { person ->
@@ -272,121 +267,118 @@ private fun hentStandardBegrunnelser(rad: MutableMap<String, String>): List<IVed
 fun lagKompetanser(
     nyeKompetanserPerBarn: MutableList<MutableMap<String, String>>,
     personopplysningGrunnlag: Map<Long, PersonopplysningGrunnlag>,
-) =
-    nyeKompetanserPerBarn
-        .map { rad ->
-            val aktørerForKompetanse = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
-            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
-            Kompetanse(
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
-                barnAktører =
-                    personopplysningGrunnlag
-                        .finnPersonGrunnlagForBehandling(behandlingId)
-                        .personer
-                        .filter { aktørerForKompetanse.contains(it.aktør.aktørId) }
-                        .map { it.aktør }
-                        .toSet(),
-                søkersAktivitet =
-                    parseValgfriEnum<KompetanseAktivitet>(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
-                        rad,
-                    )
-                        ?: KompetanseAktivitet.ARBEIDER,
-                annenForeldersAktivitet =
-                    parseValgfriEnum<KompetanseAktivitet>(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
-                        rad,
-                    )
-                        ?: KompetanseAktivitet.I_ARBEID,
-                søkersAktivitetsland =
-                    parseValgfriString(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
-                        rad,
-                    )?.also { validerErLandkode(it) } ?: "PL",
-                annenForeldersAktivitetsland =
-                    parseValgfriString(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND,
-                        rad,
-                    )?.also { validerErLandkode(it) } ?: "NO",
-                barnetsBostedsland =
-                    parseValgfriString(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND,
-                        rad,
-                    )?.also { validerErLandkode(it) } ?: "NO",
-                resultat =
-                    parseEnum<KompetanseResultat>(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.RESULTAT,
-                        rad,
-                    ),
-            ).also { it.behandlingId = behandlingId }
-        }.groupBy { it.behandlingId }
-        .toMutableMap()
+) = nyeKompetanserPerBarn
+    .map { rad ->
+        val aktørerForKompetanse = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+        Kompetanse(
+            fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
+            tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
+            barnAktører =
+                personopplysningGrunnlag
+                    .finnPersonGrunnlagForBehandling(behandlingId)
+                    .personer
+                    .filter { aktørerForKompetanse.contains(it.aktør.aktørId) }
+                    .map { it.aktør }
+                    .toSet(),
+            søkersAktivitet =
+                parseValgfriEnum<KompetanseAktivitet>(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
+                    rad,
+                )
+                    ?: KompetanseAktivitet.ARBEIDER,
+            annenForeldersAktivitet =
+                parseValgfriEnum<KompetanseAktivitet>(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
+                    rad,
+                )
+                    ?: KompetanseAktivitet.I_ARBEID,
+            søkersAktivitetsland =
+                parseValgfriString(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
+                    rad,
+                )?.also { validerErLandkode(it) } ?: "PL",
+            annenForeldersAktivitetsland =
+                parseValgfriString(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND,
+                    rad,
+                )?.also { validerErLandkode(it) } ?: "NO",
+            barnetsBostedsland =
+                parseValgfriString(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND,
+                    rad,
+                )?.also { validerErLandkode(it) } ?: "NO",
+            resultat =
+                parseEnum<KompetanseResultat>(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.RESULTAT,
+                    rad,
+                ),
+        ).also { it.behandlingId = behandlingId }
+    }.groupBy { it.behandlingId }
+    .toMutableMap()
 
 fun lagValutakurs(
     nyeValutakursPerBarn: MutableList<MutableMap<String, String>>,
     personopplysningGrunnlag: Map<Long, PersonopplysningGrunnlag>,
-) =
-    nyeValutakursPerBarn
-        .map { rad ->
-            val aktørerForValutakurs = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
-            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+) = nyeValutakursPerBarn
+    .map { rad ->
+        val aktørerForValutakurs = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
 
-            Valutakurs(
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
-                barnAktører =
-                    personopplysningGrunnlag
-                        .finnPersonGrunnlagForBehandling(behandlingId)
-                        .personer
-                        .filter { aktørerForValutakurs.contains(it.aktør.aktørId) }
-                        .map { it.aktør }
-                        .toSet(),
-                valutakursdato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTAKURSDATO, rad),
-                valutakode =
-                    parseValgfriString(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTA_KODE,
-                        rad,
-                    ),
-                kurs = parseValgfriBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad),
-                vurderingsform = parseValgfriEnum<Vurderingsform>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VURDERINGSFORM, rad) ?: Vurderingsform.MANUELL,
-            ).also { it.behandlingId = behandlingId }
-        }.groupBy { it.behandlingId }
-        .toMutableMap()
+        Valutakurs(
+            fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
+            tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
+            barnAktører =
+                personopplysningGrunnlag
+                    .finnPersonGrunnlagForBehandling(behandlingId)
+                    .personer
+                    .filter { aktørerForValutakurs.contains(it.aktør.aktørId) }
+                    .map { it.aktør }
+                    .toSet(),
+            valutakursdato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTAKURSDATO, rad),
+            valutakode =
+                parseValgfriString(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VALUTA_KODE,
+                    rad,
+                ),
+            kurs = parseValgfriBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.KURS, rad),
+            vurderingsform = parseValgfriEnum<Vurderingsform>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepValutakurs.VURDERINGSFORM, rad) ?: Vurderingsform.MANUELL,
+        ).also { it.behandlingId = behandlingId }
+    }.groupBy { it.behandlingId }
+    .toMutableMap()
 
 fun lagUtenlandskperiodeBeløp(
     nyeUtenlandskPeriodebeløpPerBarn: MutableList<MutableMap<String, String>>,
     personopplysningGrunnlag: Map<Long, PersonopplysningGrunnlag>,
-) =
-    nyeUtenlandskPeriodebeløpPerBarn
-        .map { rad ->
-            val aktørerForValutakurs = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
-            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+) = nyeUtenlandskPeriodebeløpPerBarn
+    .map { rad ->
+        val aktørerForValutakurs = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
 
-            val intervall = parseValgfriEnum<Intervall>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.INTERVALL, rad) ?: Intervall.MÅNEDLIG
-            val beløp = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.BELØP, rad)
-            UtenlandskPeriodebeløp(
-                fom = parseValgfriÅrMåned(Domenebegrep.FRA_MÅNED, rad),
-                tom = parseValgfriÅrMåned(Domenebegrep.TIL_MÅNED, rad),
-                barnAktører =
-                    personopplysningGrunnlag
-                        .finnPersonGrunnlagForBehandling(behandlingId)
-                        .personer
-                        .filter { aktørerForValutakurs.contains(it.aktør.aktørId) }
-                        .map { it.aktør }
-                        .toSet(),
-                beløp = beløp,
-                valutakode =
-                    parseValgfriString(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.VALUTA_KODE,
-                        rad,
-                    ),
-                intervall = intervall,
-                utbetalingsland = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.UTBETALINGSLAND, rad),
-                kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(beløp),
-            ).also { it.behandlingId = behandlingId }
-        }.groupBy { it.behandlingId }
-        .toMutableMap()
+        val intervall = parseValgfriEnum<Intervall>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.INTERVALL, rad) ?: Intervall.MÅNEDLIG
+        val beløp = parseBigDecimal(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.BELØP, rad)
+        UtenlandskPeriodebeløp(
+            fom = parseValgfriÅrMåned(Domenebegrep.FRA_MÅNED, rad),
+            tom = parseValgfriÅrMåned(Domenebegrep.TIL_MÅNED, rad),
+            barnAktører =
+                personopplysningGrunnlag
+                    .finnPersonGrunnlagForBehandling(behandlingId)
+                    .personer
+                    .filter { aktørerForValutakurs.contains(it.aktør.aktørId) }
+                    .map { it.aktør }
+                    .toSet(),
+            beløp = beløp,
+            valutakode =
+                parseValgfriString(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.VALUTA_KODE,
+                    rad,
+                ),
+            intervall = intervall,
+            utbetalingsland = parseValgfriString(VedtaksperiodeMedBegrunnelserParser.DomenebegrepUtenlandskPeriodebeløp.UTBETALINGSLAND, rad),
+            kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(beløp),
+        ).also { it.behandlingId = behandlingId }
+    }.groupBy { it.behandlingId }
+    .toMutableMap()
 
 private fun validerErLandkode(it: String) {
     if (it.length != 2) {
@@ -397,34 +389,33 @@ private fun validerErLandkode(it: String) {
 fun lagEndredeUtbetalinger(
     nyeEndredeUtbetalingAndeler: MutableList<MutableMap<String, String>>,
     persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
-) =
-    nyeEndredeUtbetalingAndeler
-        .map { rad ->
-            val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
-            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
-            EndretUtbetalingAndel(
-                behandlingId = behandlingId,
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
-                person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId },
-                prosent =
-                    parseValgfriLong(
-                        VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
-                        rad,
-                    )?.toBigDecimal() ?: BigDecimal.valueOf(100),
-                årsak =
-                    parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad)
-                        ?: Årsak.ALLEREDE_UTBETALT,
-                søknadstidspunkt = parseValgfriDato(Domenebegrep.SØKNADSTIDSPUNKT, rad) ?: LocalDate.now(),
-                begrunnelse = "Fordi at...",
-                avtaletidspunktDeltBosted =
-                    parseValgfriDato(
-                        BrevPeriodeParser.DomenebegrepBrevBegrunnelse.AVTALETIDSPUNKT_DELT_BOSTED,
-                        rad,
-                    ),
-            )
-        }.groupBy { it.behandlingId }
-        .toMutableMap()
+) = nyeEndredeUtbetalingAndeler
+    .map { rad ->
+        val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+        EndretUtbetalingAndel(
+            behandlingId = behandlingId,
+            fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
+            tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
+            person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId },
+            prosent =
+                parseValgfriLong(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,
+                    rad,
+                )?.toBigDecimal() ?: BigDecimal.valueOf(100),
+            årsak =
+                parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad)
+                    ?: Årsak.ALLEREDE_UTBETALT,
+            søknadstidspunkt = parseValgfriDato(Domenebegrep.SØKNADSTIDSPUNKT, rad) ?: LocalDate.now(),
+            begrunnelse = "Fordi at...",
+            avtaletidspunktDeltBosted =
+                parseValgfriDato(
+                    BrevPeriodeParser.DomenebegrepBrevBegrunnelse.AVTALETIDSPUNKT_DELT_BOSTED,
+                    rad,
+                ),
+        )
+    }.groupBy { it.behandlingId }
+    .toMutableMap()
 
 fun lagPersonGrunnlag(dataTable: DataTable): Map<Long, PersonopplysningGrunnlag> =
     dataTable
@@ -462,6 +453,7 @@ fun lagPersonGrunnlag(dataTable: DataTable): Map<Long, PersonopplysningGrunnlag>
         }.associateBy { it.behandlingId }
 
 fun lagTilkjentYtelse(
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
@@ -524,7 +516,7 @@ fun lagTilkjentYtelse(
             (skalIverksettesMotOppdrag(nåværendeAndeler, forrigeAndeler) || behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD)
         ) {
             val vedtak = vedtaksliste.single { it.behandling.id == tilkjentYtelse.value.behandling.id && it.aktiv }
-            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(vedtak)
+            tilkjentYtelse.value.oppdaterMedUtbetalingsoppdrag(dataFraCucumber, vedtak)
         }
     }
 
@@ -541,26 +533,21 @@ private fun skalIverksettesMotOppdrag(
         .any { it.innhold == true }
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
+    dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,
     vedtak: Vedtak,
 ) {
+    if (this.andelerTilkjentYtelse.none { it.erAndelSomSkalSendesTilOppdrag() }) {
+        return
+    }
+    val mock = CucumberMock(dataFraCucumber, behandling.id)
     val beregnetUtbetalingsoppdrag =
-        UtbetalingsoppdragGenerator().lagUtbetalingsoppdrag(
+        mock.utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
-            forrigeTilkjentYtelse = null,
-            nyTilkjentYtelse = this,
-            sisteAndelPerKjede = andelerTilkjentYtelse.tilSisteAndelPerAktørOgType().associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) },
+            tilkjentYtelse = this,
             erSimulering = false,
         )
-    oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
-        tilkjentYtelse = this,
-        utbetalingsoppdrag = beregnetUtbetalingsoppdrag.utbetalingsoppdrag,
-        endretUtbetalingAndeler = emptyList(),
-    )
-    oppdaterAndelerMedPeriodeOffset(
-        tilkjentYtelse = this,
-        andelerMedPeriodeId = beregnetUtbetalingsoppdrag.andeler,
-    )
+    mock.oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(this, beregnetUtbetalingsoppdrag)
 }
 
 fun lagOvergangsstønad(

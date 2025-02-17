@@ -3,8 +3,9 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -27,8 +28,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -63,20 +65,18 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Test
     fun `Skal journalføre og behandle ordinær nasjonal sak`() {
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(6).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val fagsakId: Ressurs<String> =
             familieBaSakKlient().journalfør(
@@ -88,7 +88,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         bruker =
                             NavnOgIdent(
                                 navn = scenario.søker.navn,
-                                id = scenario.søker.ident!!,
+                                id = scenario.søker.ident,
                             ),
                     ),
             )
@@ -108,7 +108,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                     ),
                 bekreftEndringerViaFrontend = false,
             )
@@ -242,23 +242,21 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
-        System.setProperty(FeatureToggleConfig.TEKNISK_ENDRING, "true")
+        System.setProperty(FeatureToggle.TEKNISK_ENDRING.navn, "true")
 
         val scenario =
-            mockServerKlient().lagScenario(
-                RestScenario(
-                    søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
-                    barna =
-                        listOf(
-                            RestScenarioPerson(
-                                fødselsdato = LocalDate.now().minusMonths(6).toString(),
-                                fornavn = "Barn",
-                                etternavn = "Barnesen",
-                                bostedsadresser = emptyList(),
-                            ),
+            RestScenario(
+                søker = RestScenarioPerson(fødselsdato = "1996-12-12", fornavn = "Mor", etternavn = "Søker"),
+                barna =
+                    listOf(
+                        RestScenarioPerson(
+                            fødselsdato = LocalDate.now().minusMonths(6).toString(),
+                            fornavn = "Barn",
+                            etternavn = "Barnesen",
+                            bostedsadresser = emptyList(),
                         ),
-                ),
-            )
+                    ),
+            ).also { stubScenario(it) }
 
         val fagsakId: Ressurs<String> =
             familieBaSakKlient().journalfør(
@@ -270,7 +268,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         bruker =
                             NavnOgIdent(
                                 navn = scenario.søker.navn,
-                                id = scenario.søker.ident!!,
+                                id = scenario.søker.ident,
                             ),
                     ).copy(
                         journalpostTittel = "Søknad om utvidet barnetrygd",
@@ -296,7 +294,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 søknad =
                     lagSøknadDTO(
                         søkerIdent = scenario.søker.ident,
-                        barnasIdenter = scenario.barna.map { it.ident!! },
+                        barnasIdenter = scenario.barna.map { it.ident },
                         underkategori = BehandlingUnderkategori.UTVIDET,
                     ),
                 bekreftEndringerViaFrontend = false,

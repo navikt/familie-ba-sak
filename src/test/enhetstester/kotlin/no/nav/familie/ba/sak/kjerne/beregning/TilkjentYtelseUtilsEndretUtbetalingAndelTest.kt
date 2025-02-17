@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomBarnFnr
-import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -264,17 +264,16 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         barn: Person,
         fom: YearMonth,
         tom: YearMonth,
-    ) =
-        AndelTilkjentYtelse(
-            behandlingId = behandling.id,
-            tilkjentYtelse = tilkjentYtelse,
-            aktør = barn.aktør,
-            kalkulertUtbetalingsbeløp = beløp.toInt(),
-            nasjonaltPeriodebeløp = beløp.toInt(),
-            stønadFom = fom,
-            stønadTom = tom,
-            type = YtelseType.ORDINÆR_BARNETRYGD,
-            sats = beløp.toInt(),
-            prosent = BigDecimal(100),
-        )
+    ) = AndelTilkjentYtelse(
+        behandlingId = behandling.id,
+        tilkjentYtelse = tilkjentYtelse,
+        aktør = barn.aktør,
+        kalkulertUtbetalingsbeløp = beløp.toInt(),
+        nasjonaltPeriodebeløp = beløp.toInt(),
+        stønadFom = fom,
+        stønadTom = tom,
+        type = YtelseType.ORDINÆR_BARNETRYGD,
+        sats = beløp.toInt(),
+        prosent = BigDecimal(100),
+    )
 }

@@ -7,9 +7,6 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
@@ -18,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Bruker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.FullmektigEllerVerge
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.Institusjon
@@ -47,7 +45,6 @@ import java.util.Properties
 
 @Service
 class DokumentService(
-    private val journalføringRepository: JournalføringRepository,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
@@ -64,11 +61,12 @@ class DokumentService(
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
-        if (SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig) == BehandlerRolle.VEILEDER && vedtak.stønadBrevPdF == null) {
+        val høyesteRolletilgangForInnloggetBruker = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
+
+        if (høyesteRolletilgangForInnloggetBruker in listOf(BehandlerRolle.VEILEDER, BehandlerRolle.FORVALTER) && vedtak.stønadBrevPdF == null) {
             throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
         } else {
-            val pdf =
-                vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}")
+            val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}")
             return Ressurs.success(pdf)
         }
     }
@@ -109,6 +107,13 @@ class DokumentService(
         val brevmottakere =
             manueltBrevRequest.manuelleBrevmottakere + brevmottakereFraBehandling.map { ManuellBrevmottaker(it) }
 
+        if (!BrevmottakerValidering.erBrevmottakereGyldige(brevmottakere)) {
+            throw FunksjonellFeil(
+                melding = "Det finnes ugyldige brevmottakere i utsending av manuelt brev",
+                frontendFeilmelding = "Adressen som er lagt til manuelt har ugyldig format, og brevet kan ikke sendes. Du må legge til manuell adresse på nytt.",
+            )
+        }
+
         val mottakere =
             lagMottakere(
                 fagsak = fagsak,
@@ -117,24 +122,17 @@ class DokumentService(
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
 
         mottakere.forEach { mottakerInfo ->
-            val journalpostId =
-                utgåendeJournalføringService
-                    .journalførManueltBrev(
-                        fnr = fagsak.aktør.aktivFødselsnummer(),
-                        fagsakId = fagsakId.toString(),
-                        journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
-                        brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
-                        dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
-                        førsteside = førsteside,
-                        eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
-                        avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
-                    ).also { journalposterTilDistribusjon[it] = mottakerInfo }
-
-            behandling?.let {
-                journalføringRepository.save(
-                    DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.U),
-                )
-            }
+            utgåendeJournalføringService
+                .journalførManueltBrev(
+                    fnr = fagsak.aktør.aktivFødselsnummer(),
+                    fagsakId = fagsakId.toString(),
+                    journalførendeEnhet = manueltBrevRequest.enhet?.enhetId ?: DEFAULT_JOURNALFØRENDE_ENHET,
+                    brev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest, fagsak),
+                    dokumenttype = manueltBrevRequest.brevmal.tilFamilieKontrakterDokumentType(),
+                    førsteside = førsteside,
+                    eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsakId, behandling?.id, mottakerInfo),
+                    avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
+                ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
         if (behandling != null && manueltBrevRequest.brevmal.førerTilOpplysningsplikt()) {
@@ -174,10 +172,12 @@ class DokumentService(
                     ),
                 )
             }
+
             brevmottakere.isNotEmpty() ->
                 brevmottakerService.lagMottakereFraBrevMottakere(
                     brevmottakere,
                 )
+
             else -> listOf(Bruker)
         }
 

@@ -89,8 +89,7 @@ data class RestSanityEØSBegrunnelse(
         )
     }
 
-    private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
-        enumValues<T>().find { enum -> enum.name == it }
+    private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> = enumValues<T>().find { enum -> enum.name == it }
 }
 
 enum class BarnetsBostedsland {

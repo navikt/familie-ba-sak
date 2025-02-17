@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import no.nav.familie.ba.sak.common.nyOrdinærBehandling
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.datagenerator.nyOrdinærBehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -182,13 +182,12 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     private fun tilkjentYtelse(
         behandling: Behandling,
         erIverksatt: Boolean,
-    ) =
-        TilkjentYtelse(
-            behandling = behandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-            utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
-        )
+    ) = TilkjentYtelse(
+        behandling = behandling,
+        opprettetDato = LocalDate.now(),
+        endretDato = LocalDate.now(),
+        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
+    )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(

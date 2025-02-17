@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -12,11 +13,13 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggType
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -26,10 +29,17 @@ class HenleggelseTest(
 ) : AbstractVerdikjedetest() {
     val restScenario =
         RestScenario(
-            søker = RestScenarioPerson(fødselsdato = "1990-04-20", fornavn = "Mor", etternavn = "Søker"),
+            søker =
+                RestScenarioPerson(
+                    _ident = randomFnr(LocalDate.of(1990, 4, 20)),
+                    fødselsdato = "1990-04-20",
+                    fornavn = "Mor",
+                    etternavn = "Søker",
+                ),
             barna =
                 listOf(
                     RestScenarioPerson(
+                        _ident = randomFnr(LocalDate.now().minusMonths(2)),
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
@@ -37,11 +47,14 @@ class HenleggelseTest(
                 ),
         )
 
+    @BeforeAll
+    fun init() {
+        stubScenario(scenario = restScenario)
+    }
+
     @Test
     fun `Opprett behandling, henlegg behandling feilaktig opprettet og opprett behandling på nytt`() {
-        val scenario = mockServerKlient().lagScenario(restScenario)
-
-        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
+        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(restScenario)
 
         val responseHenlagtSøknad =
             familieBaSakKlient().henleggSøknad(
@@ -69,14 +82,13 @@ class HenleggelseTest(
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.HENLEGG_BEHANDLING }?.size == 1)
         assertThat(behandlingslogg.data?.filter { it.type == LoggType.DISTRIBUERE_BREV }?.size == 0)
 
-        val andreBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
+        val andreBehandling = opprettBehandlingOgRegistrerSøknad(restScenario)
         assertEquals(andreBehandling.status, BehandlingStatus.UTREDES)
     }
 
     @Test
     fun `Opprett behandling, hent forhåndsvising av brev, henlegg behandling søknad trukket`() {
-        val scenario = mockServerKlient().lagScenario(restScenario)
-        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(scenario)
+        val førsteBehandling = opprettBehandlingOgRegistrerSøknad(restScenario)
 
         /**
          * Denne forhåndsvisningen går ikke til sanity for øyeblikket, men det er en mulighet å legge til
@@ -120,8 +132,8 @@ class HenleggelseTest(
     }
 
     private fun opprettBehandlingOgRegistrerSøknad(scenario: RestScenario): RestUtvidetBehandling {
-        val søkersIdent = scenario.søker.ident!!
-        val barn1 = scenario.barna[0].ident!!
+        val søkersIdent = scenario.søker.ident
+        val barn1 = scenario.barna[0].ident
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling =
             familieBaSakKlient().opprettBehandling(

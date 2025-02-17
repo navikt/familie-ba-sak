@@ -16,11 +16,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.MDCOperations
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
+import no.nav.familie.ba.sak.datagenerator.lagTestOppgave
+import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
+import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -168,7 +171,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 ),
         )
 
-        val vedtak = lagVedtak(lagBehandling())
+        val vedtak = lagVedtak(lagBehandlingUtenId())
         vedtak.stønadBrevPdF = mockPdf
 
         val journalPostId =
@@ -196,7 +199,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         ),
                     ),
                 behandlingId = vedtak.behandling.id,
-                eksternReferanseId = "1_${vedtak.behandling.id}_journalfør",
+                eksternReferanseId = "0_${vedtak.behandling.id}_journalfør",
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)

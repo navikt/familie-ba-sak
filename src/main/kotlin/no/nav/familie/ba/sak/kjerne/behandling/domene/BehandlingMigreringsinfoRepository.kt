@@ -13,6 +13,15 @@ interface BehandlingMigreringsinfoRepository : JpaRepository<BehandlingMigrering
     )
     fun finnSisteMigreringsdatoPåFagsak(fagsakId: Long): LocalDate?
 
+    @Query(
+        """SELECT bm FROM BehandlingMigreringsinfo bm 
+            JOIN Behandling b on bm.behandling.id = b.id where b.fagsak.id = :fagsakId
+            ORDER BY bm.migreringsdato ASC
+            LIMIT 1
+            """,
+    )
+    fun finnSisteBehandlingMigreringsInfoPåFagsak(fagsakId: Long): BehandlingMigreringsinfo?
+
     @Query("SELECT bm FROM BehandlingMigreringsinfo bm where bm.behandling.id=:behandlingId ")
     fun findByBehandlingId(behandlingId: Long): BehandlingMigreringsinfo?
 }

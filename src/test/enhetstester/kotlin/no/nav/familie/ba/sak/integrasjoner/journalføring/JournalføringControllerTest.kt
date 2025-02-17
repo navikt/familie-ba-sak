@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.integrasjoner.lagTilgangsstyrtJournalpost
+import no.nav.familie.ba.sak.datagenerator.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
@@ -27,7 +27,10 @@ class JournalføringControllerTest {
             val personIdent = PersonIdent("123")
             val journalpostId = "1"
 
-            every { innkommendeJournalføringService.hentJournalposterForBruker(personIdent.ident) } returns listOf(lagTilgangsstyrtJournalpost(personIdent.ident, journalpostId = journalpostId, harTilgang = true))
+            every { innkommendeJournalføringService.hentJournalposterForBruker(personIdent.ident) } returns
+                listOf(
+                    lagTilgangsstyrtJournalpost(personIdent.ident, journalpostId = journalpostId, harTilgang = true),
+                )
 
             // Act
             val responseEntity = journalføringController.hentJournalposterForBruker(personIdentBody = personIdent)

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.util
 
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
-import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -138,6 +138,7 @@ class TilkjentYtelseBuilder(
                                 andelTilkjentYtelseTidslinje.beskjærEtter(
                                     erUnder18ÅrVilkårTidslinje(person.fødselsdato),
                                 )
+
                             else -> andelTilkjentYtelseTidslinje
                         }
 

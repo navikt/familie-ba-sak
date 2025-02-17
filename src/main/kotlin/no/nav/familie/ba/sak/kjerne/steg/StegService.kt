@@ -4,10 +4,13 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagSystemÅrsak
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -68,6 +71,7 @@ class StegService(
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -90,6 +94,7 @@ class StegService(
         when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(nyBehandling)
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> validerEndreMigreringsdato(nyBehandling)
+            BehandlingÅrsak.IVERKSETTE_KA_VEDTAK -> validerIverksettKAVedtak()
             else -> Unit
         }
 
@@ -105,7 +110,9 @@ class StegService(
 
                 else ->
                     when (nyBehandling.behandlingType) {
-                        BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
+                        BehandlingType.FØRSTEGANGSBEHANDLING,
+                        -> emptyList()
+
                         BehandlingType.REVURDERING,
                         BehandlingType.TEKNISK_ENDRING,
                         BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -136,7 +143,7 @@ class StegService(
         }
     }
 
-    fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
+    private fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
         check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
         if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId = nyBehandling.fagsakId)) {
@@ -147,6 +154,12 @@ class StegService(
             } else if (satskjøring.ferdigTidspunkt == null) {
                 throw FunksjonellFeil("Det kjøres satsendring på fagsaken. Vennligst prøv igjen senere")
             }
+        }
+    }
+
+    private fun validerIverksettKAVedtak() {
+        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK)) {
+            throw FunksjonellFeil("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
         }
     }
 
@@ -177,9 +190,14 @@ class StegService(
                     personopplysningerService.hentPersoninfoEnkel(it)
                     it.aktivFødselsnummer()
                 } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
-                    logger.warn("Ignorerer barn fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
-                    secureLogger.warn("Ignorerer barn ${it.aktivFødselsnummer()} fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
-                    null
+                    if (behandling.opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING && pdlPersonKanIkkeBehandlesIFagsystem.årsak == PdlPersonKanIkkeBehandlesIFagSystemÅrsak.MANGLER_FØDSELSDATO) {
+                        logger.warn("Barn fra forrige behandling mangler fødselsdato. Inkluderes alikevel siden det er en teknisk endring")
+                        it.aktivFødselsnummer()
+                    } else {
+                        logger.warn("Ignorerer barn fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                        secureLogger.warn("Ignorerer barn ${it.aktivFødselsnummer()} fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                        null
+                    }
                 }
             }
     }
@@ -225,8 +243,7 @@ class StegService(
     fun håndterSøknad(
         behandling: Behandling,
         restRegistrerSøknad: RestRegistrerSøknad,
-    ): Behandling =
-        fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
+    ): Behandling = fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
     private fun fullførSøknadsHåndtering(
         behandling: Behandling,

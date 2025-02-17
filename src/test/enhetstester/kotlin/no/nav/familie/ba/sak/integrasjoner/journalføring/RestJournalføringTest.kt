@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
+import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
+import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
-import no.nav.familie.ba.sak.integrasjoner.lagTestJournalpost
-import no.nav.familie.ba.sak.kjerne.verdikjedetester.lagMockRestJournalføring
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Sak
 import org.assertj.core.api.Assertions.assertThat

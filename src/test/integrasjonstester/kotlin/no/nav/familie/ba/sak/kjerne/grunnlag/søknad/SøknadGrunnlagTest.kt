@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
-import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
-import no.nav.familie.ba.sak.common.lagSøknadDTO
-import no.nav.familie.ba.sak.common.randomBarnFnr
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -28,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -186,15 +186,14 @@ class SøknadGrunnlagTest(
     private fun lagNyBehandling(
         søkerIdent: String,
         fagsakId: Long,
-    ) =
-        NyBehandling(
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            søkersIdent = søkerIdent,
-            behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            søknadMottattDato = LocalDate.now(),
-            fagsakId = fagsakId,
-        )
+    ) = NyBehandling(
+        kategori = BehandlingKategori.NASJONAL,
+        underkategori = BehandlingUnderkategori.ORDINÆR,
+        søkersIdent = søkerIdent,
+        behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+        søknadMottattDato = LocalDate.now(),
+        fagsakId = fagsakId,
+    )
 
     @Test
     fun `Skal tilbakestille behandling ved endring på søknadsregistrering`() {

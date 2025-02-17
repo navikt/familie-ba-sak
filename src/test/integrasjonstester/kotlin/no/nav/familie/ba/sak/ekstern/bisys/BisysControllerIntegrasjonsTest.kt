@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
-import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
@@ -50,33 +50,6 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
     }
 
     @Test
-    fun `Skal kaste feil når fraDato er mer enn 5 år tilbake i tid`() {
-        val fnr = randomFnr()
-
-        val requestEntity =
-            byggRequestEntity(
-                BisysUtvidetBarnetrygdRequest(
-                    fnr,
-                    LocalDate.now().minusYears(5).minusDays(1),
-                ),
-            )
-
-        val error =
-            assertThrows<HttpClientErrorException> {
-                restTemplate.postForEntity<Any>(
-                    hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                    requestEntity,
-                )
-            }
-
-        assertThat(error.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
-        val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
-        assertThat(errorObject.melding).isEqualTo("fraDato kan ikke være lenger enn 5 år tilbake i tid")
-        assertThat(errorObject.path).isEqualTo("/api/bisys/hent-utvidet-barnetrygd")
-        assertThat(errorObject.timestamp).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
-    }
-
-    @Test
     fun `Skal kaste gode feilmeldinger ved feil mot infotrygd-barnetrygd`() {
         val fnr = randomFnr()
 
@@ -108,7 +81,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
 
         assertThat(error.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         val errorObject = objectMapper.readValue<EksternTjenesteFeil>(error.responseBodyAsByteArray)
-        assertThat(errorObject.melding).isEqualTo("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error: \"foobar\"")
+        assertThat(errorObject.melding).contains("Henting av utvidet barnetrygd feilet. Gav feil: 500 Server Error on POST request for")
+        assertThat(errorObject.melding).contains("foobar")
         assertThat(errorObject.path).isEqualTo("/api/bisys/hent-utvidet-barnetrygd")
         assertThat(errorObject.timestamp).isCloseTo(LocalDateTime.now(), within(10, ChronoUnit.SECONDS))
         assertThat(errorObject.exception).contains("HttpServerErrorException")

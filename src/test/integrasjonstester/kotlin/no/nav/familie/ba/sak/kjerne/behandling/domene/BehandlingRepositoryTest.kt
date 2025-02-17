@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
-import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
+import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.IVERKSETTER_VEDTAK
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -81,7 +81,7 @@ class BehandlingRepositoryTest(
         aktiv: Boolean = false,
     ): Behandling {
         val behandling =
-            lagBehandling(fagsak = fagsak, status = behandlingStatus)
+            lagBehandlingUtenId(fagsak = fagsak, status = behandlingStatus)
                 .copy(
                     id = 0,
                     aktiv = aktiv,

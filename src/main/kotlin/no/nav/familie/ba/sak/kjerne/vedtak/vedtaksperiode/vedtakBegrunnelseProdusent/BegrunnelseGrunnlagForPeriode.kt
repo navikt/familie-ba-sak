@@ -8,8 +8,7 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
     val forrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?
     val sammePeriodeForrigeBehandling: BegrunnelseGrunnlagForPersonIPeriode?
 
-    fun erSmåbarnstilleggIForrigeBehandlingPeriode() =
-        sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
+    fun erSmåbarnstilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 
     companion object {
         fun opprett(

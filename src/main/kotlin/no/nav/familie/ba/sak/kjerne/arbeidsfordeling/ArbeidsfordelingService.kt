@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -22,7 +21,6 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -38,7 +36,6 @@ class ArbeidsfordelingService(
     private val personopplysningerService: PersonopplysningerService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
-    private val unleashService: UnleashService,
 ) {
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(
@@ -83,44 +80,18 @@ class ArbeidsfordelingService(
         val forrigeArbeidsfordelingsenhet = aktivArbeidsfordelingPåBehandling?.tilArbeidsfordelingsenhet()
 
         val oppdatertArbeidsfordelingPåBehandling =
-            if (behandling.erSatsendringEllerMånedligValutajustering()) {
-                fastsettArbeidsfordelingsenhetUtIfraForrigeBehandling(
-                    behandling,
-                    sisteBehandlingSomErIverksatt,
-                    aktivArbeidsfordelingPåBehandling,
-                )
-            } else {
-                val arbeidsfordelingsenhet =
-                    if (unleashService.isEnabled(FeatureToggleConfig.OPPRETT_SAK_PÅ_RIKTIG_ENHET_OG_SAKSBEHANDLER, false)) {
-                        val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
-                        tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(arbeidsfordelingsenhet, NavIdent(SikkerhetContext.hentSaksbehandler()))
-                    } else {
-                        hentArbeidsfordelingsenhet(behandling)
-                    }
-
-                when (aktivArbeidsfordelingPåBehandling) {
-                    null -> {
-                        arbeidsfordelingPåBehandlingRepository.save(
-                            ArbeidsfordelingPåBehandling(
-                                behandlingId = behandling.id,
-                                behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
-                                behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn,
-                            ),
-                        )
-                    }
-
-                    else -> {
-                        if (!aktivArbeidsfordelingPåBehandling.manueltOverstyrt &&
-                            (aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != arbeidsfordelingsenhet.enhetId)
-                        ) {
-                            aktivArbeidsfordelingPåBehandling.also {
-                                it.behandlendeEnhetId = arbeidsfordelingsenhet.enhetId
-                                it.behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
-                            }
-                            arbeidsfordelingPåBehandlingRepository.save(aktivArbeidsfordelingPåBehandling)
-                        }
-                        aktivArbeidsfordelingPåBehandling
-                    }
+            when {
+                behandling.erAutomatiskOgSkalHaTidligereBehandling() && aktivArbeidsfordelingPåBehandling != null -> {
+                    aktivArbeidsfordelingPåBehandling
+                }
+                behandling.erAutomatiskOgSkalHaTidligereBehandling() && sisteBehandlingSomErIverksatt == null -> {
+                    throw Feil("Kan ikke fastsette arbeidsfordelingsenhet. Finner ikke tidligere behandling.")
+                }
+                behandling.erAutomatiskOgSkalHaTidligereBehandling() -> {
+                    fastsettArbeidsfordelingFraTidligereBehandlinger(behandling.id, behandling.fagsak.id)
+                }
+                else -> {
+                    fastsettArbeidsfordelingPåBehandling(behandling, aktivArbeidsfordelingPåBehandling)
                 }
             }
 
@@ -132,28 +103,68 @@ class ArbeidsfordelingService(
         )
     }
 
-    private fun fastsettArbeidsfordelingsenhetUtIfraForrigeBehandling(
+    private fun fastsettArbeidsfordelingPåBehandling(
         behandling: Behandling,
-        sisteBehandlingSomErIverksatt: Behandling?,
         aktivArbeidsfordelingPåBehandling: ArbeidsfordelingPåBehandling?,
-    ): ArbeidsfordelingPåBehandling =
-        aktivArbeidsfordelingPåBehandling
-            ?: if (sisteBehandlingSomErIverksatt != null) {
-                val forrigeIverksattesBehandlingArbeidsfordelingsenhet =
-                    arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(
-                        sisteBehandlingSomErIverksatt.id,
-                    )
+    ): ArbeidsfordelingPåBehandling {
+        val arbeidsfordelingsenhet = hentArbeidsfordelingsenhet(behandling)
+        val tilpassetArbeidsfordelingsenhet =
+            tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
+                arbeidsfordelingsenhet = arbeidsfordelingsenhet,
+                navIdent = NavIdent(SikkerhetContext.hentSaksbehandler()),
+            )
 
+        return when {
+            aktivArbeidsfordelingPåBehandling == null -> {
                 arbeidsfordelingPåBehandlingRepository.save(
-                    forrigeIverksattesBehandlingArbeidsfordelingsenhet?.copy(
-                        id = 0,
+                    ArbeidsfordelingPåBehandling(
                         behandlingId = behandling.id,
-                    )
-                        ?: throw Feil("Finner ikke arbeidsfordelingsenhet på forrige iverksatte behandling på satsendringsbehandling"),
+                        behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                        behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
+                    ),
                 )
-            } else {
-                throw Feil("Klarte ikke å fastsette arbeidsfordelingsenhet på satsendringsbehandling.")
             }
+
+            aktivArbeidsfordelingPåBehandling.manueltOverstyrt -> {
+                aktivArbeidsfordelingPåBehandling
+            }
+
+            aktivArbeidsfordelingPåBehandling.behandlendeEnhetId != tilpassetArbeidsfordelingsenhet.enhetId -> {
+                arbeidsfordelingPåBehandlingRepository.save(
+                    aktivArbeidsfordelingPåBehandling.copy(
+                        behandlendeEnhetId = tilpassetArbeidsfordelingsenhet.enhetId,
+                        behandlendeEnhetNavn = tilpassetArbeidsfordelingsenhet.enhetNavn,
+                    ),
+                )
+            }
+
+            else -> aktivArbeidsfordelingPåBehandling
+        }
+    }
+
+    private fun fastsettArbeidsfordelingFraTidligereBehandlinger(
+        behandlingId: Long,
+        fagsakId: Long,
+    ): ArbeidsfordelingPåBehandling {
+        val sisteGyldigeArbeidsfordeling = arbeidsfordelingPåBehandlingRepository.finnSisteGyldigeArbeidsfordelingPåBehandlingIFagsak(fagsakId)
+
+        if (sisteGyldigeArbeidsfordeling == null) {
+            return arbeidsfordelingPåBehandlingRepository.save(
+                ArbeidsfordelingPåBehandling(
+                    behandlingId = behandlingId,
+                    behandlendeEnhetNavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
+                    behandlendeEnhetId = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
+                ),
+            )
+        }
+
+        return arbeidsfordelingPåBehandlingRepository.save(
+            sisteGyldigeArbeidsfordeling.copy(
+                id = 0,
+                behandlingId = behandlingId,
+            ),
+        )
+    }
 
     private fun postFastsattBehandlendeEnhet(
         behandling: Behandling,

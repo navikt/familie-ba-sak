@@ -218,7 +218,7 @@ class PersongrunnlagService(
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
-        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering()
+        val skalHenteEnkelPersonInfo = behandling.erMigrering() || behandling.erSatsendringEllerMånedligValutajustering() || behandling.erOppdaterUtvidetKlassekode()
         val søker =
             hentPerson(
                 aktør = aktør,
@@ -353,8 +353,7 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    fun hentSøkersMålform(behandlingId: Long) =
-        hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
+    fun hentSøkersMålform(behandlingId: Long) = hentSøkerOgBarnPåBehandlingThrows(behandlingId).søker().målform
 
     @Transactional
     fun registrerManuellDødsfallPåPerson(

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer.er11Siffer
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
@@ -24,12 +25,10 @@ internal class UtilsTest {
     }
 
     @Test
-    fun `Navn i uppercase blir formatert korrekt`() =
-        assertEquals("Store Bokstaver Her", "STORE BOKSTAVER HER ".storForbokstavIHvertOrd())
+    fun `Navn i uppercase blir formatert korrekt`() = assertEquals("Store Bokstaver Her", "STORE BOKSTAVER HER ".storForbokstavIHvertOrd())
 
     @Test
-    fun `Navn i uppercase med mellomrom og bindestrek blir formatert korrekt`() =
-        assertEquals("Hense-Ravnen Hopp", "HENSE-RAVNEN HOPP".storForbokstavIAlleNavn())
+    fun `Navn i uppercase med mellomrom og bindestrek blir formatert korrekt`() = assertEquals("Hense-Ravnen Hopp", "HENSE-RAVNEN HOPP".storForbokstavIAlleNavn())
 
     @Test
     fun `Nullable verdier blir tom string`() {

@@ -1,8 +1,8 @@
 ﻿package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagValutakurs
+import no.nav.familie.ba.sak.datagenerator.lagValutakurs
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

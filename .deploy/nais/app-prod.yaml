@@ -45,6 +45,11 @@ spec:
         databases:
           - name: familie-ba-sak
             envVarPrefix: DB
+        flags:
+          - name: cloudsql.enable_pgaudit
+            value: "true"
+          - name: pgaudit.log
+            value: 'write'
   azure:
     application:
       enabled: true
