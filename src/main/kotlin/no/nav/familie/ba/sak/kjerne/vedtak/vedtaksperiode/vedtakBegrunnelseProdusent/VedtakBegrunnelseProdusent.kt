@@ -101,7 +101,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
             ?.vilkårResultater
             ?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
-    val utbetalingPåSøkerIPeriode =
+    val erUtbetalingPåSøkerIPeriode =
         begrunnelseGrunnlagForSøkerIPeriode
             ?.dennePerioden
             ?.andeler
@@ -110,7 +110,7 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
 
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
-            hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode, utbetalingPåSøkerIPeriode)
+            hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode, erUtbetalingPåSøkerIPeriode)
 
         val temaSomPeriodeErVurdertEtter = hentTemaSomPeriodeErVurdertEtter(begrunnelseGrunnlag)
 
@@ -406,7 +406,7 @@ internal fun hentResultaterForForrigePeriode(
 private fun hentResultaterForPeriode(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
-    utbetalingPåSøkerIPeriode: Boolean,
+    erUtbetalingPåSøkerIPeriode: Boolean,
 ): List<SanityPeriodeResultat> {
     val erAndelerPåPersonHvisBarn =
         begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
@@ -423,7 +423,7 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForrigePeriode,
         )
 
-    return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn || utbetalingPåSøkerIPeriode) {
+    return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn || erUtbetalingPåSøkerIPeriode) {
         val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
         val erØkingIAndel =
             erØkningIAndelMellomPerioder(
