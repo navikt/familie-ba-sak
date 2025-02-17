@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -85,7 +86,7 @@ class VedtakServiceTest(
     @Autowired
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     @Autowired
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat

@@ -271,7 +271,7 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = mockkUnleash,
+            unleashService = unleashNextMedContextService,
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =
