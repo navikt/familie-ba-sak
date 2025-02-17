@@ -77,6 +77,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -133,6 +134,7 @@ class CucumberMock(
     val mockPåVentService = mockk<SettPåVentService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
+    val mockkUnleash = mockk<UnleashService>()
     val brevmottakerService = mockk<BrevmottakerService>()
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
 
@@ -266,6 +268,7 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
+            unleashService = unleashNextMedContextService,
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =
