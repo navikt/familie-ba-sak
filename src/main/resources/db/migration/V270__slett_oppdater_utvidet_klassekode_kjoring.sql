@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS oppdater_utvidet_klassekode_kjoring;
+DROP SEQUENCE IF EXISTS oppdater_utvidet_klassekode_kjoring_seq;
+DROP INDEX IF EXISTS oppdater_utvidet_klassekode_kjoring_fagsak_id_idx;
