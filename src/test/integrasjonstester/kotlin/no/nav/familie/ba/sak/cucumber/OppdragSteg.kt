@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -174,10 +173,10 @@ class OppdragSteg {
     ): BeregnetUtbetalingsoppdragLongId {
         every {
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull { !it.behandling.erOppdaterUtvidetKlassekode() }?.behandling
+        } returns tidligereTilkjenteYtelser.lastOrNull()?.behandling
         every {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(any())
-        } returns tidligereTilkjenteYtelser.lastOrNull { !it.behandling.erOppdaterUtvidetKlassekode() }?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
+        } returns tidligereTilkjenteYtelser.lastOrNull()?.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[tidligereTilkjenteYtelser.last().behandling.id]?.utbetalingsoppdrag))
         every {
             tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any())
         } returns tidligereTilkjenteYtelser.filter { beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag?.utbetalingsperiode?.any { it.klassifisering == YtelsetypeBA.UTVIDET_BARNETRYGD.klassifisering } == true }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
@@ -232,7 +231,6 @@ class OppdragSteg {
                 andelTilkjentYtelseRepository,
                 behandlingHentOgPersisterService,
                 tilkjentYtelseRepository,
-                AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(clockProvider),
             )
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
             saksbehandlerId = "saksbehandlerId",

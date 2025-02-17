@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -28,7 +27,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
-import java.time.YearMonth
 
 class UtbetalingsoppdragGeneratorTest {
     private val klassifiseringKorrigerer: KlassifiseringKorrigerer = mockk()
@@ -37,7 +35,6 @@ class UtbetalingsoppdragGeneratorTest {
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val tilkjentYtelseRepository: TilkjentYtelseRepository = mockk()
-    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder: AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(TestClockProvider.lagClockProviderMedFastTidspunkt(YearMonth.of(2025, 2)))
     private val utbetalingsoppdragGenerator =
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
@@ -47,7 +44,6 @@ class UtbetalingsoppdragGeneratorTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder,
         )
 
     @ParameterizedTest
