@@ -315,7 +315,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnMistetUtbetalingFraForrigeBehandling =
         hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
 
-    val barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne = hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGrunnlagPerPerson)
+    val barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne = hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val barnSomNåFårUtbetalingIPeriode = barnMedUtbetaling - barnMedUtbetalingHøyereEnn0IForrigeperiode
 
     return when {
