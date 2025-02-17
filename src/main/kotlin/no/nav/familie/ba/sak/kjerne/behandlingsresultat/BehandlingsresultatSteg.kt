@@ -193,12 +193,6 @@ class BehandlingsresultatSteg(
                     "Meld sak i Porten om du er uenig i resultatet.",
             )
         }
-
-        if (behandlingMedOppdatertBehandlingsresultat.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE &&
-            behandlingMedOppdatertBehandlingsresultat.resultat !in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT)
-        ) {
-            throw Feil("Behandling med årsak ${BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE} må ha $FORTSATT_INNVILGET eller $FORTSATT_OPPHØRT som resultat")
-        }
     }
 
     private fun settBehandlingsresultat(

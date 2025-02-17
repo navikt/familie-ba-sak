@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -58,10 +57,6 @@ class FerdigstillBehandling(
                 aktiv = true
                 behandlingHentOgPersisterService.lagreEllerOppdater(this, sendTilDvh = false)
             }
-        }
-
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
-            oppdaterUtvidetKlassekodeKjøringRepository.settBrukerNyKlassekodeTilTrueOgStatusTilUtført(behandling.fagsak.id)
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
