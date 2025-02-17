@@ -17,12 +17,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifte
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFamilieFellesTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.konverterTilDag
 import java.time.LocalDate
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object VilkårsvurderingForskyvningUtils {
     fun Set<PersonResultat>.tilTidslinjeForSplitt(
@@ -99,6 +103,18 @@ object VilkårsvurderingForskyvningUtils {
                     else -> innholdFørsteDagDenneMåned
                 }
             }
+
+    fun Collection<VilkårResultat>.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> =
+        this
+            .filter { it.vilkårType == vilkår && it.erOppfylt() }
+            .tilFamilieFellesTidslinje()
+            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+                when {
+                    !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
+                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                    else -> innholdFørsteDagDenneMåned
+                }
+            }.konverterTilDag()
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinje(
         vilkår: Vilkår,

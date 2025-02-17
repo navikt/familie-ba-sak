@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -15,8 +17,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.YearMonth
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> =
     this
@@ -67,6 +71,18 @@ fun Iterable<AndelTilkjentYtelse>.tilTidslinjeForSøkersYtelse(ytelseType: Ytels
                 it.map { Periode(it.stønadFom.tilTidspunkt(), it.stønadTom.tilTidspunkt(), it) }
             }
         }
+
+fun Iterable<AndelTilkjentYtelse>.tilFamilieFellesTidslinjeForSøkersYtelse(ytelseType: YtelseType) =
+    this
+        .filter { it.erSøkersAndel() }
+        .filter { it.type == ytelseType }
+        .map {
+            FamilieFellesPeriode(
+                verdi = it,
+                fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                tom = it.stønadTom.sisteDagIInneværendeMåned(),
+            )
+        }.tilTidslinje()
 
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
     val barnasErInntil3ÅrTidslinjer = barna.associate { it.aktør to erTilogMed3ÅrTidslinje(it.fødselsdato) }
