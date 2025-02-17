@@ -116,7 +116,6 @@ data class Behandling(
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
-            opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE -> false
             erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
@@ -166,7 +165,6 @@ data class Behandling(
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
-            skalBehandlesAutomatisk && opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE -> true
             else -> false
         }
 
@@ -229,7 +227,7 @@ data class Behandling(
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erOppdaterUtvidetKlassekode()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
