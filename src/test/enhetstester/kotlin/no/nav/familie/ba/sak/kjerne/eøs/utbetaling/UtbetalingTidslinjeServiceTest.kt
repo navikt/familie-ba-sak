@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.utbetaling
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
@@ -13,13 +14,12 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.somBoolskTidslinje
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,7 +46,7 @@ class UtbetalingTidslinjeServiceTest {
             )
 
         // Assert
-        assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
+        assertEquals(emptyMap<Aktør, Tidslinje<Boolean>>(), resultatMap)
     }
 
     @Test
@@ -74,7 +74,7 @@ class UtbetalingTidslinjeServiceTest {
             )
 
         // Assert
-        assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), resultatMap)
+        assertEquals(emptyMap<Aktør, Tidslinje<Boolean>>(), resultatMap)
     }
 
     @Test
@@ -116,15 +116,15 @@ class UtbetalingTidslinjeServiceTest {
         assertEquals(1, resultatMap.size)
 
         val tidslinjeForBarn = resultatMap[barn.aktør]
-        val perioderForBarn = tidslinjeForBarn?.perioder() ?: emptyList()
+        val perioderForBarn = tidslinjeForBarn?.tilPerioder() ?: emptyList()
 
         assertEquals(1, perioderForBarn.size)
 
         val periode = perioderForBarn.first()
 
-        assertEquals(fomUtvidetOgEndring, periode.fraOgMed.tilYearMonth())
-        assertEquals(tomUtvidet, periode.tilOgMed.tilYearMonth())
-        assertFalse(periode.innhold!!)
+        assertEquals(fomUtvidetOgEndring, periode.fom?.toYearMonth())
+        assertEquals(tomUtvidet, periode.tom?.toYearMonth())
+        assertFalse(periode.verdi!!)
     }
 
     @Test
@@ -158,15 +158,15 @@ class UtbetalingTidslinjeServiceTest {
         assertEquals(1, resultatMap.size)
 
         val tidslinjeForBarn = resultatMap[barn.aktør]
-        val perioderForBarn = tidslinjeForBarn?.perioder() ?: emptyList()
+        val perioderForBarn = tidslinjeForBarn?.tilPerioder() ?: emptyList()
 
         assertEquals(1, perioderForBarn.size)
 
         val periode = perioderForBarn.first()
 
-        assertEquals(fomEndretUtbetaling, periode.fraOgMed.tilYearMonth())
-        assertEquals(tomEndretUtbetaling, periode.tilOgMed.tilYearMonth())
-        assertTrue(periode.innhold!!)
+        assertEquals(fomEndretUtbetaling, periode.fom?.toYearMonth())
+        assertEquals(tomEndretUtbetaling, periode.tom?.toYearMonth())
+        assertTrue(periode.verdi!!)
     }
 
     @Nested
@@ -299,7 +299,7 @@ class UtbetalingTidslinjeServiceTest {
 
             val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
 
-            assertEquals(emptyMap<Aktør, Tidslinje<Boolean, Måned>>(), faktisk)
+            assertEquals(emptyMap<Aktør, Tidslinje<Boolean>>(), faktisk)
         }
     }
 }

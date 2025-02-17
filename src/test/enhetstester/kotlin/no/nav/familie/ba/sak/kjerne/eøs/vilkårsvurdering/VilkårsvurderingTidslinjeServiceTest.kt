@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
+
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -8,18 +10,17 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeRe
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erTom
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -176,6 +177,6 @@ internal class VilkårsvurderingTidslinjeServiceTest {
                 behandlingId = BehandlingId(behandling.id),
             )
         val forventetTidslinje = "++ +++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023)).filtrerIkkeNull()
-        assertThat(faktiskTidslinje).isEqualTo(forventetTidslinje)
+        assertThat(faktiskTidslinje.tilPerioder()).isEqualTo(forventetTidslinje.tilPerioder())
     }
 }

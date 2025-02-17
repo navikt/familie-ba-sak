@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
@@ -34,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.tidslinje.tomTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -297,7 +297,7 @@ internal class KompetanseServiceTest {
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
-        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
         every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
@@ -359,7 +359,7 @@ internal class KompetanseServiceTest {
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
-        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
         every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
@@ -416,7 +416,7 @@ internal class KompetanseServiceTest {
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
-        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns TomTidslinje()
+        every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
         every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }

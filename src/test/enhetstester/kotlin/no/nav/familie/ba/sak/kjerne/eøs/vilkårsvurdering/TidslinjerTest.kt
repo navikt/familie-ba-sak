@@ -10,23 +10,22 @@ import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggVilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.trimNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilRegelverkResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
@@ -34,6 +33,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RI
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.GIFT_PARTNERSKAP
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -56,7 +57,7 @@ internal class TidslinjerTest {
                 .medVilkår("EEEEEEEENNEEEEEEEEEEE", BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEENNEEEEEEEEEEE", LOVLIG_OPPHOLD)
                 .byggPerson()
-        val søkerResult = " EEEEEEENNEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
+        val søkerResult = " EEEEEEENNEEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned.tilYearMonth()).trimNull()
 
         vilkårsvurderingBygger
             .forPerson(barn1, startMåned)
@@ -66,7 +67,7 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = " ???????NN!???EE?????".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
+        val barn1Result = " ???????NN!???EE?????".tilRegelverkResultatTidslinje(startMåned.tilYearMonth()).trimNull()
 
         vilkårsvurderingBygger
             .forPerson(barn2, startMåned)
@@ -76,17 +77,15 @@ internal class TidslinjerTest {
             .medVilkår("EEEENNEEE>", BOR_MED_SØKER)
             .medVilkår("+++++++++>", GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn2Result = " ?EE!!!E!!EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
+        val barn2Result = " ?EE!!!E!!EEEEEEEEEEE".tilRegelverkResultatTidslinje(startMåned.tilYearMonth()).trimNull()
 
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-                søkerOgBarn =
-                    lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
-                        .tilPersonEnkelSøkerOgBarn(),
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2).tilPersonEnkelSøkerOgBarn(),
             )
 
-        assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
+        assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinje().regelverkResultatTidslinje)
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
         assertEquals(barn2Result, vilkårsvurderingTidslinjer.forBarn(barn2).regelverkResultatTidslinje)
     }
@@ -106,7 +105,7 @@ internal class TidslinjerTest {
                 .medVilkår("EEEEEEEEEEEEENNNNNNNN", BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEEEENNNNNNNN", LOVLIG_OPPHOLD)
                 .byggPerson()
-        val søkerResult = " EEEEEEEEEEEENNNNNNNN".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
+        val søkerResult = " EEEEEEEEEEEENNNNNNNN".tilRegelverkResultatTidslinje(startMåned.tilYearMonth()).trimNull()
 
         vilkårsvurderingBygger
             .forPerson(barn1, startMåned)
@@ -116,17 +115,15 @@ internal class TidslinjerTest {
             .medVilkår("NNNNNNNNNNEEEEEEEEEEE", BOR_MED_SØKER)
             .medVilkår("+++++++++++++++++++++", GIFT_PARTNERSKAP)
             .byggPerson()
-        val barn1Result = " ?????!!!!!EE!!!?????".tilRegelverkResultatTidslinje(startMåned).filtrerIkkeNull()
+        val barn1Result = " ?????!!!!!EE!!!?????".tilRegelverkResultatTidslinje(startMåned.tilYearMonth()).trimNull()
 
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-                søkerOgBarn =
-                    lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
-                        .tilPersonEnkelSøkerOgBarn(),
+                søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1).tilPersonEnkelSøkerOgBarn(),
             )
 
-        assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
+        assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinje().regelverkResultatTidslinje)
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
 
@@ -167,8 +164,8 @@ internal class TidslinjerTest {
                 .forBarn(barn1)
                 .egetRegelverkResultatTidslinje
                 .filtrerIkkeNull()
-                .perioder()
-                .maxOf { it.tilOgMed.tilYearMonth() },
+                .tilPerioder()
+                .maxOf { it.tom!!.toYearMonth() },
         )
     }
 
@@ -186,7 +183,7 @@ internal class TidslinjerTest {
                 .medVilkår("NE", BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
                 .byggVilkårsvurderingTidslinjer()
 
-        val barn1Result = "E".tilRegelverkResultatTidslinje(mai(2020))
+        val barn1Result = "E".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
 
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
@@ -205,7 +202,7 @@ internal class TidslinjerTest {
                 .medVilkår("EN", BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
                 .byggVilkårsvurderingTidslinjer()
 
-        val barn1Result = "N".tilRegelverkResultatTidslinje(mai(2020))
+        val barn1Result = "N".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
 
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
@@ -226,7 +223,7 @@ internal class TidslinjerTest {
                 .medVilkår("EN", BOR_MED_SØKER)
                 .byggVilkårsvurderingTidslinjer()
 
-        val barn1Result = "!".tilRegelverkResultatTidslinje(mai(2020))
+        val barn1Result = "!".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
 
         assertEquals(barn1Result, vilkårsvurderingTidslinjer.forBarn(barn1).regelverkResultatTidslinje)
     }
