@@ -173,7 +173,7 @@ FAMILIE_TILBAKE_API_URL: https://tilbakekreving-backend.intern.dev.nav.no
 FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.tilbake.tilbakekreving-backend/.default
 FAMILIE_KLAGE_URL: https://familie-klage-backend.intern.dev.nav.no
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
-FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev.intern.nav.no
+FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.intern.dev.nav.no
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
 FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.dev.nav.no
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
