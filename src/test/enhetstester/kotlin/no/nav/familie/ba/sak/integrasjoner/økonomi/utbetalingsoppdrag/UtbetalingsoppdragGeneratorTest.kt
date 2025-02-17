@@ -102,13 +102,6 @@ class UtbetalingsoppdragGeneratorTest {
 
         every {
             unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
-                behandlingId = behandling.id,
-            )
-        } returns true
-
-        every {
-            unleashNextMedContextService.isEnabled(
                 toggle = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
             )
         } returns true
@@ -238,13 +231,6 @@ class UtbetalingsoppdragGeneratorTest {
                 vedtaksdato = LocalDate.now(),
                 opphørAlleKjederFra = null,
             )
-
-        every {
-            unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
-                behandlingId = any(),
-            )
-        } returns true
 
         every {
             unleashNextMedContextService.isEnabled(

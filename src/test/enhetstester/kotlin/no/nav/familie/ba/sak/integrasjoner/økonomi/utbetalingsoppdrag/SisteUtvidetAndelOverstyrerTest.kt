@@ -94,7 +94,6 @@ class SisteUtvidetAndelOverstyrerTest {
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag,
-                skalBrukeNyKlassekodeForUtvidetBarnetrygd = true,
             )
 
         // Assert
@@ -106,7 +105,7 @@ class SisteUtvidetAndelOverstyrerTest {
             sisteAndelPerKjede.entries
                 .single { it.key.type == YtelsetypeBA.ORDINÆR_BARNETRYGD }
                 .value
-                .tilAndelDataLongId(true),
+                .tilAndelDataLongId(),
         )
     }
 
@@ -142,11 +141,10 @@ class SisteUtvidetAndelOverstyrerTest {
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = emptyList(),
-                skalBrukeNyKlassekodeForUtvidetBarnetrygd = true,
             )
 
         // Assert
-        assertThat(sisteAndelPerKjedeMedOverstyrtUtvidetAndel).isEqualTo(sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(true) })
+        assertThat(sisteAndelPerKjedeMedOverstyrtUtvidetAndel).isEqualTo(sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() })
     }
 
     @Test
@@ -213,11 +211,10 @@ class SisteUtvidetAndelOverstyrerTest {
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag,
-                skalBrukeNyKlassekodeForUtvidetBarnetrygd = true,
             )
 
         // Assert
-        assertThat(sisteAndelPerKjedeMedOverstyrtUtvidetAndel).isEqualTo(sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(true) })
+        assertThat(sisteAndelPerKjedeMedOverstyrtUtvidetAndel).isEqualTo(sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() })
     }
 
     @Test
@@ -284,7 +281,6 @@ class SisteUtvidetAndelOverstyrerTest {
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag,
-                skalBrukeNyKlassekodeForUtvidetBarnetrygd = true,
             )
         }
     }

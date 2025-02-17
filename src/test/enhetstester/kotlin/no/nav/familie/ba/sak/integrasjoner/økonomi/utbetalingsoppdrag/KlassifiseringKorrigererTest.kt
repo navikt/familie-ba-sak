@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -21,39 +20,6 @@ class KlassifiseringKorrigererTest {
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             unleashNextMedContextService = unleashNextMedContextService,
         )
-
-    @Test
-    fun `skal returnere originalt utbetalingsoppdrag dersom toggle er av for fagsak`() {
-        // Arrange
-        val behandling = lagBehandling()
-        val beregnetUtbetalingsoppdragLongId =
-            lagBeregnetUtbetalingsoppdragLongId(
-                utbetalingsperioder =
-                    listOf(
-                        lagUtbetalingsperiode(
-                            behandlingId = behandling.id,
-                            periodeId = 0,
-                            forrigePeriodeId = null,
-                            ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD,
-                            fom = LocalDate.now().førsteDagIInneværendeMåned(),
-                            tom = LocalDate.now().sisteDagIMåned(),
-                        ),
-                    ),
-                andeler = emptyList(),
-            )
-
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns false
-
-        // Act
-        val justertUtbetalingsoppdrag =
-            klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
-                beregnetUtbetalingsoppdrag = beregnetUtbetalingsoppdragLongId,
-                behandling = behandling,
-            )
-
-        // Assert
-        assertThat(justertUtbetalingsoppdrag).isEqualTo(beregnetUtbetalingsoppdragLongId)
-    }
 
     @Test
     fun `skal returnere originalt utbetalingsoppdrag dersom fagsak er over på ny klassekode`() {
@@ -75,7 +41,6 @@ class KlassifiseringKorrigererTest {
                 andeler = emptyList(),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns true
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns true
 
         // Act
@@ -109,7 +74,6 @@ class KlassifiseringKorrigererTest {
                 andeler = emptyList(),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns true
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
 
         // Act
@@ -172,7 +136,6 @@ class KlassifiseringKorrigererTest {
                     ),
             )
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD, behandling.id) } returns true
         every { tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(behandling.fagsak.id) } returns false
 
         // Act

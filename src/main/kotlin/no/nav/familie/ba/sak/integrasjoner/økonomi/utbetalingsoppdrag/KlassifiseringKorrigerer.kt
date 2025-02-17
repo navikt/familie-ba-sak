@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -16,15 +15,6 @@ class KlassifiseringKorrigerer(
         beregnetUtbetalingsoppdrag: BeregnetUtbetalingsoppdragLongId,
         behandling: Behandling,
     ): BeregnetUtbetalingsoppdragLongId {
-        // For fagsaker vi ikke har skrudd på ny klassekode for, returnerer vi det originale utbetalingsoppdraget.
-        if (!unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
-                behandlingId = behandling.id,
-            )
-        ) {
-            return beregnetUtbetalingsoppdrag
-        }
-
         val erFagsakOverPåNyKlassekodeForUtvidetBarnetrygd =
             tilkjentYtelseRepository.harFagsakTattIBrukNyKlassekodeForUtvidetBarnetrygd(
                 fagsakId = behandling.fagsak.id,
