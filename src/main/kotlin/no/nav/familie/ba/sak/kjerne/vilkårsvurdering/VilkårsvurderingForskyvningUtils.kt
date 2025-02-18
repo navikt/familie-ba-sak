@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFamilieFellesTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
-import no.nav.familie.tidslinje.utvidelser.konverterTilDag
 import java.time.LocalDate
 import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
@@ -114,7 +113,7 @@ object VilkårsvurderingForskyvningUtils {
                     vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
                     else -> innholdFørsteDagDenneMåned
                 }
-            }.konverterTilDag()
+            }
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinje(
         vilkår: Vilkår,
