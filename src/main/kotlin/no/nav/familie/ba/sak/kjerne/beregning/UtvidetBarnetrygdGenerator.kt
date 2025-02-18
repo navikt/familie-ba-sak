@@ -2,19 +2,18 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
-import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedKunVerdi
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerKunVerdiMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullOgIkkeTom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.Tidslinje
 
 data class UtvidetBarnetrygdGenerator(
     val behandlingId: Long,
@@ -23,7 +22,7 @@ data class UtvidetBarnetrygdGenerator(
     fun lagUtvidetBarnetrygdAndeler(
         utvidetVilkår: List<VilkårResultat>,
         andelerBarna: List<AndelTilkjentYtelse>,
-        perioderBarnaBorMedSøkerTidslinje: Map<Aktør, Tidslinje<Boolean, Måned>>,
+        perioderBarnaBorMedSøkerTidslinje: Map<Aktør, Tidslinje<Boolean>>,
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
@@ -32,7 +31,7 @@ data class UtvidetBarnetrygdGenerator(
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
         val barnasAndelerFiltrertForPerioderBarnaBorMedSøker =
-            andelerBarna.tilSeparateTidslinjerForBarna().filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            andelerBarna.tilSeparateFamilieFellesTidslinjerForBarna().familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
 
         val størsteProsentTidslinje =
             barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values
@@ -40,9 +39,9 @@ data class UtvidetBarnetrygdGenerator(
 
         val utvidetAndeler =
             utvidetVilkårTidslinje
-                .kombinerMedKunVerdi(
+                .kombinerKunVerdiMed(
                     størsteProsentTidslinje,
-                    satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
+                    satstypeFamilieFellesTidslinje(SatsType.UTVIDET_BARNETRYGD),
                 ) { _, prosent, sats ->
                     val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
                     AndelTilkjentYtelseForTidslinje(

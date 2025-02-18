@@ -18,8 +18,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.tidslinje.tilTidslinje
 import java.time.LocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
+import no.nav.familie.tidslinje.Periode as FamilieFellesTidslinjePeriode
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -103,6 +105,17 @@ fun satstypeTidslinje(satsType: SatsType) =
                 )
             }
     }
+
+fun satstypeFamilieFellesTidslinje(satsType: SatsType) =
+    SatsService
+        .finnAlleSatserFor(satsType)
+        .map {
+            FamilieFellesTidslinjePeriode(
+                verdi = it.beløp,
+                fom = it.gyldigFom.takeUnless { it == LocalDate.MIN },
+                tom = it.gyldigTom.takeUnless { it == LocalDate.MAX },
+            )
+        }.tilTidslinje()
 
 fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
     val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)

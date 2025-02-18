@@ -157,6 +157,24 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(
             )
         }
 
+fun FamilieFellesTidslinje<AndelTilkjentYtelseForTidslinje>.tilAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) =
+    tilPerioderIkkeNull()
+        .map {
+            AndelTilkjentYtelse(
+                behandlingId = tilkjentYtelse.behandling.id,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = it.verdi.aktør,
+                type = it.verdi.ytelseType,
+                kalkulertUtbetalingsbeløp = it.verdi.beløp,
+                nasjonaltPeriodebeløp = it.verdi.nasjonaltPeriodebeløp,
+                differanseberegnetPeriodebeløp = it.verdi.differanseberegnetPeriodebeløp,
+                sats = it.verdi.sats,
+                prosent = it.verdi.prosent,
+                stønadFom = it.fom?.toYearMonth() ?: MIN_MÅNED,
+                stønadTom = it.tom?.toYearMonth() ?: MAX_MÅNED,
+            )
+        }
+
 /**
  * Lager tidslinje med AndelTilkjentYtelseForTidslinje-objekter, som derfor er "trygg" mtp DB-endringer
  */
