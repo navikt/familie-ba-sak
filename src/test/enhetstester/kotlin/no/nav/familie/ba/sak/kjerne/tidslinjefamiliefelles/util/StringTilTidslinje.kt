@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.UtdypendeVilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -41,10 +42,12 @@ fun String.tilUtdypendeVilkårRegelverkResultatTidslinje(
 }
 
 fun String.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(start: YearMonth) =
-    this.tilCharTidslinje(start).mapVerdiNullable {
-        when (it?.lowercaseChar()) {
-            '+' -> true
-            '-' -> false
-            else -> null
-        }
-    }
+    this
+        .tilCharTidslinje(start)
+        .mapVerdiNullable {
+            when (it?.lowercaseChar()) {
+                '+' -> true
+                '-' -> false
+                else -> null
+            }
+        }.tilMåned { it.single() }

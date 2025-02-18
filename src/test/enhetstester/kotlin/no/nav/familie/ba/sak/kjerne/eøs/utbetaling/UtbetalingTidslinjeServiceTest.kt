@@ -157,16 +157,20 @@ class UtbetalingTidslinjeServiceTest {
         // Assert
         assertEquals(1, resultatMap.size)
 
-        val tidslinjeForBarn = resultatMap[barn.aktør]
-        val perioderForBarn = tidslinjeForBarn?.tilPerioder() ?: emptyList()
+        val perioderForBarn = resultatMap[barn.aktør]!!.tilPerioder()
 
-        assertEquals(1, perioderForBarn.size)
+        assertEquals(2, perioderForBarn.size)
 
-        val periode = perioderForBarn.first()
+        val førstePeriode = perioderForBarn.first()
 
-        assertEquals(fomEndretUtbetaling, periode.fom?.toYearMonth())
-        assertEquals(tomEndretUtbetaling, periode.tom?.toYearMonth())
-        assertTrue(periode.verdi!!)
+        assertEquals(fomEndretUtbetaling.minusMonths(1), førstePeriode.tom?.toYearMonth())
+        assertFalse(førstePeriode.verdi!!)
+
+        val periodeUtenUtbetaling = perioderForBarn.last()
+
+        assertEquals(fomEndretUtbetaling, periodeUtenUtbetaling.fom?.toYearMonth())
+        assertEquals(tomEndretUtbetaling, periodeUtenUtbetaling.tom?.toYearMonth())
+        assertTrue(periodeUtenUtbetaling.verdi!!)
     }
 
     @Nested

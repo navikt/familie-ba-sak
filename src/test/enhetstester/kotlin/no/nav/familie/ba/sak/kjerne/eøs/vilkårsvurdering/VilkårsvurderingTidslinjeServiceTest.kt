@@ -19,8 +19,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
-import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
-import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -173,10 +171,11 @@ internal class VilkårsvurderingTidslinjeServiceTest {
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vilkårsvurdering
 
         val faktiskTidslinje =
-            vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
-                behandlingId = BehandlingId(behandling.id),
-            )
-        val forventetTidslinje = "++ +++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023)).filtrerIkkeNull()
-        assertThat(faktiskTidslinje.tilPerioder()).isEqualTo(forventetTidslinje.tilPerioder())
+            vilkårsvurderingTidslinjeService
+                .hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = BehandlingId(behandling.id))
+
+        val forventetTidslinje = "++ +++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
+
+        assertThat(faktiskTidslinje).isEqualTo(forventetTidslinje)
     }
 }
