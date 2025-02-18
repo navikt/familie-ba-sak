@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -83,7 +82,7 @@ class OppdaterTilkjentYtelseService(
         val andelerPåId = andelerMedPeriodeId.associateBy { it.id }
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
-        if (tilkjentYtelse.behandling.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE) {
+        if (tilkjentYtelse.behandling.erOppdaterUtvidetKlassekode()) {
             if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size && andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size + 1) {
                 throw IllegalStateException(
                     "Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt eller ha en andel mer enn andelene med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0",

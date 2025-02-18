@@ -18,8 +18,6 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
-import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.OppdaterUtvidetKlassekodeTask
-import no.nav.familie.ba.sak.kjerne.autovedtak.oppdaterutvidetklassekode.PopulerOppdaterUtvidetKlassekodeKjøringTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -459,32 +457,6 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok(hentAlleIdenterTilPsysTask.hentAlleIdenterMedBarnetrygd(aar.toInt(), UUID.randomUUID()))
-    }
-
-    @PostMapping("/opprett-populer-tabell-for-oppdater-utvidet-klassekode-task")
-    fun opprettPopulerTabellForOppdaterUtvidetKlassekodeTask(): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Populer tabell for kjøring av migrering til ny klassekode for utvidet barnetrygd",
-        )
-
-        val task = taskService.save(PopulerOppdaterUtvidetKlassekodeKjøringTask.lagTask())
-
-        return ResponseEntity.ok(task.callId)
-    }
-
-    @PostMapping("/opprett-oppdater-utvidet-klassekode-task/{fagsakId}")
-    fun opprettOppdaterUtvidetKlassekodeTask(
-        @PathVariable fagsakId: Long,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett task for å kjøre migrering av fagsak til ny klassekode for utvidet barnetrygd",
-        )
-
-        val task = taskService.save(OppdaterUtvidetKlassekodeTask.lagTask(fagsakId))
-
-        return ResponseEntity.ok(task.callId)
     }
 
     @PostMapping("/hent-fagsak-id-for-journalpost")
