@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
@@ -21,58 +20,60 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 
-@ExtendWith(MockKExtension::class)
 class BehandlingServiceEnhetstest {
-    @MockK
-    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
 
-    @MockK
-    private lateinit var behandlingstemaService: BehandlingstemaService
+    private val behandlingstemaService: BehandlingstemaService = mockk()
 
-    @MockK
-    private lateinit var behandlingSøknadsinfoService: BehandlingSøknadsinfoService
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
 
-    @MockK
-    private lateinit var behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository = mockk()
 
-    @MockK
-    private lateinit var behandlingMetrikker: BehandlingMetrikker
+    private val behandlingMetrikker: BehandlingMetrikker = mockk()
 
-    @MockK
-    private lateinit var saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher = mockk()
 
-    @MockK
-    private lateinit var fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository = mockk()
 
-    @MockK
-    private lateinit var vedtakRepository: VedtakRepository
+    private val vedtakRepository: VedtakRepository = mockk()
 
-    @MockK
-    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
 
-    @MockK
-    private lateinit var loggService: LoggService
+    private val loggService: LoggService = mockk()
 
-    @MockK
-    private lateinit var arbeidsfordelingService: ArbeidsfordelingService
+    private val arbeidsfordelingService: ArbeidsfordelingService = mockk()
 
-    @MockK
-    private lateinit var infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService = mockk()
 
-    @MockK
-    private lateinit var vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService = mockk()
 
-    @MockK
-    private lateinit var taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper = mockk()
 
-    @MockK
-    private lateinit var vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService = mockk()
 
-    @InjectMockKs
-    private lateinit var behandlingService: BehandlingService
+    private val unleashService: UnleashNextMedContextService = mockk()
+
+    private val behandlingService: BehandlingService =
+        BehandlingService(
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingstemaService = behandlingstemaService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
+            behandlingMetrikker = behandlingMetrikker,
+            saksstatistikkEventPublisher = saksstatistikkEventPublisher,
+            fagsakRepository = fagsakRepository,
+            vedtakRepository = vedtakRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            loggService = loggService,
+            arbeidsfordelingService = arbeidsfordelingService,
+            infotrygdService = infotrygdService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            taskRepository = taskRepository,
+            vilkårsvurderingService = vilkårsvurderingService,
+            unleashService = unleashService,
+        )
 
     @Test
     fun `erLøpende - skal returnere true dersom det finnes andeler i en behandling hvor tom er etter YearMonth now`() {

@@ -187,8 +187,7 @@ class OppdragSteg {
         every {
             andelTilkjentYtelseRepository.hentSisteAndelPerIdentOgType(any())
         } answers {
-            val skalBrukeNyKlassekodeForUtvidetBarnetrygd = toggles[tilkjentYtelse.behandling.id]?.get(FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD.navn) ?: false
-            sisteAndelPerIdentNy(tidligereTilkjenteYtelser, skalBrukeNyKlassekodeForUtvidetBarnetrygd).values.toList()
+            sisteAndelPerIdentNy(tidligereTilkjenteYtelser).values.toList()
         }
         every {
             behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(any())
@@ -218,7 +217,6 @@ class OppdragSteg {
                 Utbetalingsgenerator(),
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
-                    unleashNextMedContextService,
                 ),
                 unleashNextMedContextService,
                 BehandlingsinformasjonUtleder(

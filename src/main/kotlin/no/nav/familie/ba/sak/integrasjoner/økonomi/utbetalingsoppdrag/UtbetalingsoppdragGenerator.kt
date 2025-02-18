@@ -43,16 +43,10 @@ class UtbetalingsoppdragGenerator(
                 erSimulering,
             )
 
-        val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
-            unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
-                behandlingId = vedtak.behandling.id,
-            )
-
         val forrigeAndeler =
-            forrigeTilkjentYtelse?.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd) ?: emptyList()
+            forrigeTilkjentYtelse?.tilAndelData() ?: emptyList()
 
-        val nyeAndeler = tilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
+        val nyeAndeler = tilkjentYtelse.tilAndelData()
 
         val beregnetUtbetalingsoppdrag =
             utbetalingsgenerator.lagUtbetalingsoppdrag(
@@ -71,16 +65,10 @@ class UtbetalingsoppdragGenerator(
     private fun hentSisteAndelTilkjentYtelse(
         behandling: Behandling,
     ): Map<IdentOgType, AndelDataLongId> {
-        val skalBrukeNyKlassekodeForUtvidetBarnetrygd =
-            unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD,
-                behandlingId = behandling.id,
-            )
-
         val sisteAndelPerKjede =
             andelTilkjentYtelseRepository
                 .hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
-                .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd)) }
+                .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
 
         val tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(behandling.fagsak.id)
 
@@ -88,10 +76,9 @@ class UtbetalingsoppdragGenerator(
             SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
                 sisteAndelPerKjede = sisteAndelPerKjede,
                 tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag,
-                skalBrukeNyKlassekodeForUtvidetBarnetrygd = skalBrukeNyKlassekodeForUtvidetBarnetrygd,
             )
         } else {
-            sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
+            sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() }
         }
     }
 
@@ -101,16 +88,16 @@ class UtbetalingsoppdragGenerator(
             ?.let { tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandlingId = it.id) }
 }
 
-fun TilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): List<AndelDataLongId> = this.andelerTilkjentYtelse.map { it.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd) }
+fun TilkjentYtelse.tilAndelData(): List<AndelDataLongId> = this.andelerTilkjentYtelse.map { it.tilAndelDataLongId() }
 
-fun AndelTilkjentYtelse.tilAndelDataLongId(skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean): AndelDataLongId =
+fun AndelTilkjentYtelse.tilAndelDataLongId(): AndelDataLongId =
     AndelDataLongId(
         id = id,
         fom = periode.fom,
         tom = periode.tom,
         beløp = kalkulertUtbetalingsbeløp,
         personIdent = aktør.aktivFødselsnummer(),
-        type = type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd),
+        type = type.tilYtelseType(),
         periodeId = periodeOffset,
         forrigePeriodeId = forrigePeriodeOffset,
         kildeBehandlingId = kildeBehandlingId,
