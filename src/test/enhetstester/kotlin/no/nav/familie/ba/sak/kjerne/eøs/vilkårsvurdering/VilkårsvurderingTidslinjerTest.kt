@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -107,7 +106,7 @@ internal class VilkårsvurderingTidslinjerTest {
             )
         }
 
-        assertThrows<Tidslinje.Companion.TidslinjeFeilException> {
+        assertThrows<IllegalStateException> {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn =

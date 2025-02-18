@@ -1,8 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.klipp
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
 
 /**
@@ -82,3 +86,16 @@ fun <V> Tidslinje<V>.beskjærTilOgMed(
 fun <K, V> Map<K, Tidslinje<V>>.beskjærTilOgMed(
     tilOgMed: LocalDate,
 ): Map<K, Tidslinje<V>> = this.mapValues { (_, tidslinje) -> tidslinje.beskjærTilOgMed(tilOgMed) }
+
+fun <T : Any> Tidslinje<T>.forlengFremtidTilUendelig(tidspunktForUendelighet: LocalDate): Tidslinje<T> {
+    val tom = this.tilPerioderIkkeNull().mapNotNull { it.tom }.maxOrNull()
+    return if (tom != null && tom >= tidspunktForUendelighet) {
+        this
+            .tilPerioderIkkeNull()
+            .filter { it.fom != null && it.fom!! < tidspunktForUendelighet }
+            .replaceLast { Periode(verdi = it.verdi, fom = it.fom, tom = null) }
+            .tilTidslinje()
+    } else {
+        this.tilPerioderIkkeNull().tilTidslinje()
+    }
+}

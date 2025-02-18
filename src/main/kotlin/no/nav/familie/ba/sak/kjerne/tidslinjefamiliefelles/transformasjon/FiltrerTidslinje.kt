@@ -13,7 +13,7 @@ fun <V> Tidslinje<V>.filtrerIkkeNull(filter: (V) -> Boolean): Tidslinje<V> = fil
  * Det vil finnes perioder som tilsvarer periodene fra kilde-tidslinjen,
  * men innholdet blir null hvis den boolske tidslinjen er false
  */
-fun <V> Tidslinje<V>.filtrerMed(boolskTidslinje: Tidslinje<Boolean?>): Tidslinje<V> =
+fun <V> Tidslinje<V>.filtrerMed(boolskTidslinje: Tidslinje<Boolean>): Tidslinje<V> =
     this
         .kombinerMed(boolskTidslinje) { verdi, erSann ->
             when (erSann) {

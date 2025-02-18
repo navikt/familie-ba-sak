@@ -1,3 +1,5 @@
+package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
+
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -8,14 +10,11 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurderingMedOverstyrendeRe
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erTom
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -172,10 +171,11 @@ internal class VilkårsvurderingTidslinjeServiceTest {
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vilkårsvurdering
 
         val faktiskTidslinje =
-            vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(
-                behandlingId = BehandlingId(behandling.id),
-            )
-        val forventetTidslinje = "++ +++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023)).filtrerIkkeNull()
+            vilkårsvurderingTidslinjeService
+                .hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = BehandlingId(behandling.id))
+
+        val forventetTidslinje = "++ +++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(feb(2023))
+
         assertThat(faktiskTidslinje).isEqualTo(forventetTidslinje)
     }
 }
