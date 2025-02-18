@@ -24,7 +24,6 @@ class UtbetalingsoppdragGenerator(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder: AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder,
 ) {
     fun lagUtbetalingsoppdrag(
         saksbehandlerId: String,
@@ -51,13 +50,7 @@ class UtbetalingsoppdragGenerator(
             )
 
         val forrigeAndeler =
-            if (forrigeTilkjentYtelse == null) {
-                emptyList()
-            } else if (!vedtak.behandling.erOppdaterUtvidetKlassekode()) {
-                forrigeTilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
-            } else {
-                andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder.finnForrigeAndelerForOppdaterUtvidetKlassekodeBehandling(forrigeTilkjentYtelse, skalBrukeNyKlassekodeForUtvidetBarnetrygd)
-            }
+            forrigeTilkjentYtelse?.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd) ?: emptyList()
 
         val nyeAndeler = tilkjentYtelse.tilAndelData(skalBrukeNyKlassekodeForUtvidetBarnetrygd)
 

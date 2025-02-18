@@ -10,14 +10,12 @@ import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockOppdaterUtvidetKlassekodeKjøringRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.BehandlingsinformasjonUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.EndretMigreringsdatoUtleder
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.KlassifiseringKorrigerer
@@ -79,6 +77,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -135,8 +134,8 @@ class CucumberMock(
     val mockPåVentService = mockk<SettPåVentService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
+    val mockkUnleash = mockk<UnleashService>()
     val brevmottakerService = mockk<BrevmottakerService>()
-    val oppdaterUtvidetKlassekodeKjøringRepository = mockOppdaterUtvidetKlassekodeKjøringRepository()
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
 
     init {
@@ -269,6 +268,7 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
+            unleashService = unleashNextMedContextService,
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =
@@ -419,7 +419,6 @@ class CucumberMock(
                     clockProvider,
                 ),
             utbetalingsgenerator = Utbetalingsgenerator(),
-            andelDataForOppdaterUtvidetKlassekodeBehandlingUtleder = AndelDataForOppdaterUtvidetKlassekodeBehandlingUtleder(clockProvider),
         )
 
     val oppdaterTilkjentYtelseService =
@@ -538,7 +537,6 @@ class CucumberMock(
             behandlingMetrikker = behandlingMetrikker,
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
-            oppdaterUtvidetKlassekodeKjøringRepository = oppdaterUtvidetKlassekodeKjøringRepository,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
