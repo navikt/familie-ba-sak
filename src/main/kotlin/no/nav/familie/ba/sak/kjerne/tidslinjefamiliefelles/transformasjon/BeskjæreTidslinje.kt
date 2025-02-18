@@ -87,16 +87,15 @@ fun <K, V> Map<K, Tidslinje<V>>.beskjærTilOgMed(
     tilOgMed: LocalDate,
 ): Map<K, Tidslinje<V>> = this.mapValues { (_, tidslinje) -> tidslinje.beskjærTilOgMed(tilOgMed) }
 
-fun <T : Any> Tidslinje<T>.forlengFremtidTilUendelig(senesteEndeligeTidspunkt: LocalDate): Tidslinje<T> {
-    val bareTommePerioder = this.tilPerioderIkkeNull().isEmpty()
-    return when {
-        kalkulerSluttTidspunkt() < senesteEndeligeTidspunkt -> this
-        bareTommePerioder -> tomTidslinje()
-        else ->
-            this
-                .beskjærTilOgMed(senesteEndeligeTidspunkt)
-                .tilPerioderIkkeNull()
-                .replaceLast { Periode(verdi = it.verdi, fom = it.fom, tom = null) }
-                .tilTidslinje()
+fun <T : Any> Tidslinje<T>.forlengFremtidTilUendelig(tidspunktForUendelighet: LocalDate): Tidslinje<T> {
+    val tom = this.tilPerioderIkkeNull().mapNotNull { it.tom }.maxOrNull()
+    return if (tom != null && tom >= tidspunktForUendelighet) {
+        this
+            .tilPerioderIkkeNull()
+            .filter { it.fom != null && it.fom!! < tidspunktForUendelighet }
+            .replaceLast { Periode(verdi = it.verdi, fom = it.fom, tom = null) }
+            .tilTidslinje()
+    } else {
+        this.tilPerioderIkkeNull().tilTidslinje()
     }
 }
