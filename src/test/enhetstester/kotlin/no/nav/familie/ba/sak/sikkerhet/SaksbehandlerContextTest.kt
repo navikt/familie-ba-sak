@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.containsExactly
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
@@ -16,7 +15,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class SaksbehandlerContextTest {
-
     private val mockIntegrasjonClient = mockk<IntegrasjonClient>()
     private val kode6GruppeId = "kode6GruppeId"
 
@@ -65,13 +63,14 @@ class SaksbehandlerContextTest {
         @Test
         fun `skal returnere navn fra integrasjoner`() {
             // Arrange
-            val saksbehandler = Saksbehandler(
-                azureId = UUID.randomUUID(),
-                navIdent = "navIdent",
-                fornavn = "fornavn",
-                etternavn = "etternavn",
-                enhet = "enhet",
-            )
+            val saksbehandler =
+                Saksbehandler(
+                    azureId = UUID.randomUUID(),
+                    navIdent = "navIdent",
+                    fornavn = "fornavn",
+                    etternavn = "etternavn",
+                    enhet = "enhet",
+                )
 
             every { SikkerhetContext.hentGrupper() } returns emptyList()
             every { mockIntegrasjonClient.hentSaksbehandler(any()) } returns saksbehandler
