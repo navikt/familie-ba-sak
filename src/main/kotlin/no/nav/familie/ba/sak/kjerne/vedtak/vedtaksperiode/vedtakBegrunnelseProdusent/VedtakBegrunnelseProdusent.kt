@@ -423,8 +423,9 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForrigePeriode,
         )
 
-    return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn || erUtbetalingPåSøkerIPeriode) {
-        val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
+    val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
+
+    return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
         val erØkingIAndel =
             erØkningIAndelMellomPerioder(
                 begrunnelseGrunnlagForPeriode,
@@ -451,6 +452,7 @@ private fun hentResultaterForPeriode(
         )
     } else {
         listOfNotNull(
+            if (erUtbetalingPåSøkerIPeriode && erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             SanityPeriodeResultat.IKKE_INNVILGET,
         )
