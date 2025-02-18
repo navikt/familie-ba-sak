@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 class VilkårResultatTidslinje(
     private val vilkårResultater: Collection<VilkårResultat>,
@@ -20,3 +22,13 @@ class VilkårResultatTidslinje(
 }
 
 fun List<VilkårResultat>.tilTidslinje() = VilkårResultatTidslinje(this)
+
+fun Collection<VilkårResultat>.tilFamilieFellesTidslinje() =
+    this
+        .map {
+            FamilieFellesPeriode(
+                verdi = it,
+                fom = it.periodeFom,
+                tom = it.periodeTom,
+            )
+        }.tilTidslinje()

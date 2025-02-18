@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
 import no.nav.familie.ba.sak.common.ClockProvider
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelerOppdatertAbonnent
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -8,29 +9,24 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.familieFellesTidslinjerTilSkjemaer
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilForrigeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forlengFremtidTilUendelig
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.leftJoin
+import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrer
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -122,9 +118,9 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
 
 fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
-    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
-    utbetalesIkkeOrdinærEllerUtvidetTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
-    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
+    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat>>,
+    utbetalesIkkeOrdinærEllerUtvidetTidslinjer: Map<Aktør, Tidslinje<Boolean>>,
+    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean> = tomTidslinje(),
     inneværendeMåned: YearMonth,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer =
@@ -136,23 +132,20 @@ fun tilpassKompetanserTilRegelverk(
                     else -> regelverk
                 }
             }.mapValues { (_, tidslinjer) ->
-                tidslinjer.forlengFremtidTilUendelig(MånedTidspunkt.nå())
+                tidslinjer.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
             }
 
     return gjeldendeKompetanser
-        .tilSeparateTidslinjerForBarna()
+        .tilSeparateFamilieFellesTidslinjerForBarna()
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, eøsRegelverk ->
             eøsRegelverk?.let { kompetanse ?: Kompetanse.NULL }
         }.mapValues { (_, value) ->
             value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
-        }.mapValues { (_, value) ->
-            val nåMåned = inneværendeMåned.tilTidspunkt()
-            value
-                .beskjærTilOgMed(nåMåned)
-                .forlengFremtidTilUendelig(senesteEndeligeTidspunkt = nåMåned.tilForrigeMåned())
-        }.tilSkjemaer()
+        }.mapValues { (_, tidslinje) ->
+            tidslinje.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+        }.familieFellesTidslinjerTilSkjemaer()
 }
 
 fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: BehandlingId) =
@@ -163,10 +156,10 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
             tidslinjer.regelverkResultatTidslinje
         }
 
-private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer(): Map<Aktør, Tidslinje<Regelverk, Måned>> =
+private fun Map<Aktør, Tidslinje<RegelverkResultat>>.tilBarnasEøsRegelverkTidslinjer(): Map<Aktør, Tidslinje<Regelverk>> =
     this.mapValues { (_, regelverkResultatTidslinje) ->
         regelverkResultatTidslinje
-            .map { it?.regelverk }
+            .mapVerdiNullable { it?.regelverk }
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
     }

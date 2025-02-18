@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.TidslinjePeriodeMedDato
 import no.nav.familie.tidslinje.tilTidslinje
@@ -37,5 +36,4 @@ fun String.tilCharTidslinje(startTidspunkt: YearMonth): Tidslinje<Char> {
                 tom = if (index == sisteIndeks && erUendeligLengeTil) null else startTidspunkt.plusMonths(index.toLong()).sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
-        .tilMåned { it.first() }
 }

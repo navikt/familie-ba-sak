@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
-import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -152,7 +151,10 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {
-            val vilkårsvurdering = lagVilkårsvurdering(aktørId, behandling, resultat)
+            val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!.kopier().apply {
+                    personResultater.first { it.erSøkersResultater() }.vilkårResultater.forEach { it.resultat = Resultat.IKKE_OPPFYLT }
+                }
 
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)

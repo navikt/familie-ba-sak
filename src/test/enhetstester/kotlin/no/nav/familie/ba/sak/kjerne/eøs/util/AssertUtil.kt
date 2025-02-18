@@ -13,7 +13,7 @@ fun <T> assertEqualsUnordered(
     )
     Assertions.assertTrue(
         expected.containsAll(actual),
-        "Forvantet liste inneholder ikke alle elementene fra faktisk liste",
+        "Forventet liste inneholder ikke alle elementene fra faktisk liste",
     )
     Assertions.assertTrue(
         actual.containsAll(expected),

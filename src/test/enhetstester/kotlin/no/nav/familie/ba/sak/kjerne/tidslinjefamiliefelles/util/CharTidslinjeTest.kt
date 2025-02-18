@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util
 
 import no.nav.familie.ba.sak.common.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,7 +12,7 @@ class CharTidslinjeTest {
     @Test
     fun testEnkelCharTidsline() {
         val tegn = "---------------"
-        val charTidslinje = tegn.tilCharTidslinje(jan(2020))
+        val charTidslinje = tegn.tilCharTidslinje(jan(2020)).tilMåned { it.single() }
 
         assertEquals(1.jan(2020), charTidslinje.startsTidspunkt)
         assertEquals(tegn.length, charTidslinje.innhold.sumOf { it.lengde })
@@ -40,7 +41,7 @@ class CharTidslinjeTest {
     @Test
     fun testSammensattTidsline() {
         val tegn = "aabbbbcdddddda"
-        val charTidslinje = tegn.tilCharTidslinje(jan(2020))
+        val charTidslinje = tegn.tilCharTidslinje(jan(2020)).tilMåned { it.single() }
 
         assertEquals(1.jan(2020), charTidslinje.startsTidspunkt)
         assertEquals(tegn.length, charTidslinje.innhold.sumOf { it.lengde })

@@ -3,46 +3,38 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.ikkeOppfyltVilkår
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
-import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogTidligere
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.periode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class VilkårsresultatMånedTidslinjeTest {
     @Test
     fun `Virkningstidspunkt fra vilkårsvurdering er måneden etter at normalt vilkår er oppfylt`() {
-        val dagTidslinje = (15.apr(2022)..14.apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+        val dagTidslinje = periode(oppfyltVilkår(BOSATT_I_RIKET), 15.apr(2022), 14.apr(2040)).tilTidslinje()
         val faktiskMånedTidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
-        val forventetMånedTidslinje = (mai(2022)..apr(2040)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+        val forventetMånedTidslinje =
+            periode(oppfyltVilkår(BOSATT_I_RIKET), mai(2022), apr(2040)).tilTidslinje().tilMåned { it.first() }
 
-        assertEquals(
-            forventetMånedTidslinje,
-            faktiskMånedTidslinje,
-        )
+        assertEquals(forventetMånedTidslinje, faktiskMånedTidslinje)
     }
 
     @Test
     fun `Back to back perioder i månedsskiftet gir sammenhengende perioder`() {
-        val periodeFom = LocalDate.of(2022, 4, 15)
-        val periodeFom2 = LocalDate.of(2022, 7, 1)
-        val vilkårsresultatMånedTidslinje =
+        val periodeFom = 15.apr(2022)
+        val periodeFom2 = 1.jul(2022)
+        val faktiskMånedTidslinje =
             listOf(
                 lagVilkårResultat(
                     vilkårType = BOSATT_I_RIKET,
@@ -57,70 +49,67 @@ class VilkårsresultatMånedTidslinjeTest {
             ).tilVilkårRegelverkResultatTidslinje()
                 .tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
-        val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
-            (mai(2022)..aug(2022).somUendeligLengeTil()).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+        val forventetMånedTidslinje =
+            periode(oppfyltVilkår(BOSATT_I_RIKET), mai(2022), null).tilTidslinje().tilMåned { it.first() }
 
-        assertEquals(forventetMånedstidslinje, vilkårsresultatMånedTidslinje)
+        assertEquals(forventetMånedTidslinje, faktiskMånedTidslinje)
     }
 
     @Test
     fun `Siste dag fom-måned og første dag i tom-måned gir oppfylt fra neste måned`() {
-        val dagvilkårtidslinje: Tidslinje<VilkårRegelverkResultat, Dag> =
-            (29.feb(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+        val dagTidslinje = periode(oppfyltVilkår(BOSATT_I_RIKET), 29.feb(2020), 1.mai(2020)).tilTidslinje()
+        val faktiskMånedstidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+        val forventetMånedTidslinje =
+            periode(oppfyltVilkår(BOSATT_I_RIKET), mar(2020), mai(2020)).tilTidslinje().tilMåned { it.first() }
 
-        val forventetMånedstidslinje: Tidslinje<VilkårRegelverkResultat, Måned> =
-            (mar(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
-
-        val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
-        assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
+        assertEquals(forventetMånedTidslinje, faktiskMånedstidslinje)
     }
 
     @Test
     fun `Bytte av regelverk innen en måned skal gi kontinuerlig oppfylt tidslinje`() {
         val dagvilkårtidslinje =
             konkatenerTidslinjer(
-                (26.feb(2020)..7.mar(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-                (21.mar(2020)..13.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), 26.feb(2020), 7.mar(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), 21.mar(2020), 13.mai(2020)).tilTidslinje(),
             )
+
+        val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
         val forventetMånedstidslinje =
             konkatenerTidslinjer(
-                mar(2020).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-                (apr(2020)..mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-            )
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), mar(2020), mar(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), apr(2020), mai(2020)).tilTidslinje(),
+            ).tilMåned { it.first() }
 
-        val faktiskMånedstidslinje =
-            dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 
     @Test
     fun `Hvis vilkåret er oppfylt siste dag i måneden, skal kun gi oppfylt frem til og med den måneden`() {
-        val dagTidslinje = (15.apr(2022)..30.nov(2022)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+        val dagTidslinje = periode(oppfyltVilkår(BOSATT_I_RIKET), 15.apr(2022), 30.nov(2022)).tilTidslinje()
         val faktiskMånedTidslinje = dagTidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
-        val forventetMånedTidslinje = (mai(2022)..nov(2022)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET) }
+        val forventetMånedTidslinje =
+            periode(oppfyltVilkår(BOSATT_I_RIKET), mai(2022), nov(2022)).tilTidslinje().tilMåned { it.first() }
 
-        assertEquals(
-            forventetMånedTidslinje,
-            faktiskMånedTidslinje,
-        )
+        assertEquals(forventetMånedTidslinje, faktiskMånedTidslinje)
     }
 
     @Test
     fun `Hvis regelverk byttes i månedskiftet, skal det være kontinuerlig oppfylt vilkår`() {
         val dagvilkårtidslinje =
             konkatenerTidslinjer(
-                31.mar(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-                1.apr(2020).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-            )
-
-        val forventetMånedstidslinje =
-            konkatenerTidslinjer(
-                mar(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-                apr(2020).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), null, 31.mar(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), 1.apr(2020), null).tilTidslinje(),
             )
 
         val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+
+        val forventetMånedstidslinje =
+            konkatenerTidslinjer(
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), null, mar(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), apr(2020), null).tilTidslinje(),
+            ).tilMåned { it.first() }
+
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 
@@ -128,16 +117,17 @@ class VilkårsresultatMånedTidslinjeTest {
     fun `Hvis det byttes fra oppfylt til ikke oppfylt i månedskiftet, skal kun gi oppfylt til og med denne måneden`() {
         val dagvilkårtidslinje =
             konkatenerTidslinjer(
-                31.mar(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-                1.apr(2020).ogSenere().tilTidslinje { ikkeOppfyltVilkår(BOSATT_I_RIKET) },
-            )
-
-        val forventetMånedstidslinje =
-            konkatenerTidslinjer(
-                mar(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), null, 31.mar(2020)).tilTidslinje(),
+                periode(ikkeOppfyltVilkår(BOSATT_I_RIKET), 1.apr(2020), null).tilTidslinje(),
             )
 
         val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
+
+        val forventetMånedstidslinje =
+            periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), null, mar(2020))
+                .tilTidslinje()
+                .tilMåned { it.first() }
+
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
     }
 
@@ -145,15 +135,15 @@ class VilkårsresultatMånedTidslinjeTest {
     fun `Hvis regelverk byttes dagen før månedskiftet, skal det være kontinuerlig oppfylt vilkår`() {
         val dagvilkårtidslinje =
             konkatenerTidslinjer(
-                29.apr(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-                30.apr(2020).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), null, 29.apr(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), 30.apr(2020), null).tilTidslinje(),
             )
 
         val forventetMånedstidslinje =
             konkatenerTidslinjer(
-                apr(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-                mai(2020).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-            )
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), null, apr(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), mai(2020), null).tilTidslinje(),
+            ).tilMåned { it.first() }
 
         val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
         assertEquals(forventetMånedstidslinje, faktiskMånedstidslinje)
