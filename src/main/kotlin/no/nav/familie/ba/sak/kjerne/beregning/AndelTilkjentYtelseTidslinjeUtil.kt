@@ -25,17 +25,11 @@ import java.time.YearMonth
 import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
-fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> =
+fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> =
     this
         .filter { !it.erSøkersAndel() }
         .groupBy { it.aktør }
-        .mapValues { (_, andeler) -> tidslinje { andeler.map { it.tilPeriode() } } }
-
-fun Iterable<AndelTilkjentYtelse>.tilSeparateFamilieFellesTidslinjerForBarna(): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> =
-    this
-        .filter { !it.erSøkersAndel() }
-        .groupBy { it.aktør }
-        .mapValues { (_, andeler) -> andeler.map { it.tilFamilieFellesPeriode() }.tilTidslinje() }
+        .mapValues { (_, andeler) -> andeler.map { it.tilPeriode() }.tilTidslinje() }
 
 fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.values.flatMap { it.tilAndelTilkjentYtelse() }
 
@@ -62,15 +56,8 @@ fun FamilieFellesTidslinje<AndelTilkjentYtelse>.tilAndelTilkjentYtelse(): List<A
         }
 
 fun AndelTilkjentYtelse.tilPeriode() =
-    Periode(
-        this.stønadFom.tilTidspunkt(),
-        this.stønadTom.tilTidspunkt(),
-        // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
-        this.medPeriode(null, null),
-    )
-
-fun AndelTilkjentYtelse.tilFamilieFellesPeriode() =
     FamilieFellesPeriode(
+        // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
         verdi = this.medPeriode(null, null),
         fom = this.stønadFom.førsteDagIInneværendeMåned(),
         tom = this.stønadTom.sisteDagIInneværendeMåned(),

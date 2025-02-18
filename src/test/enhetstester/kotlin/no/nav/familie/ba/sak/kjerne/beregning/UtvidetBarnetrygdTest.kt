@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -33,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.tidslinje.mapVerdi
-import no.nav.familie.tidslinje.utvidelser.map
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -277,7 +275,7 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
-                        .tilSeparateFamilieFellesTidslinjerForBarna()
+                        .tilSeparateTidslinjerForBarna()
                         .mapValues { it.value.mapVerdi { true } },
             )
 
@@ -290,7 +288,7 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
-                        .tilSeparateFamilieFellesTidslinjerForBarna()
+                        .tilSeparateTidslinjerForBarna()
                         .mapValues { it.value.mapVerdi { andel -> andel?.prosent == BigDecimal(50) } },
             )
 
@@ -1048,7 +1046,7 @@ internal class UtvidetBarnetrygdTest {
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
-                    barnasAndeler.tilSeparateFamilieFellesTidslinjerForBarna().mapValues { it.value.mapVerdi { true } },
+                    barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.mapVerdi { true } },
             )
         }
     }
@@ -1097,7 +1095,7 @@ internal class UtvidetBarnetrygdTest {
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
-                        .tilSeparateFamilieFellesTidslinjerForBarna()
+                        .tilSeparateTidslinjerForBarna()
                         .mapValues { it.value.mapVerdi { true } },
             ).sortedBy { it.stønadFom }
 

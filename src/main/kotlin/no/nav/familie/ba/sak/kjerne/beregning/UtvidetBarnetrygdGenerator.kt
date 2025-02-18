@@ -31,7 +31,7 @@ data class UtvidetBarnetrygdGenerator(
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
         val barnasAndelerFiltrertForPerioderBarnaBorMedSøker =
-            andelerBarna.tilSeparateFamilieFellesTidslinjerForBarna().familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            andelerBarna.tilSeparateTidslinjerForBarna().familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
 
         val størsteProsentTidslinje =
             barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values

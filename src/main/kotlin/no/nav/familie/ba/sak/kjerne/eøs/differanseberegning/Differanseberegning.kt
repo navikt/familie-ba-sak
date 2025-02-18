@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.kunAndelerTilOgMed3År
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilFamilieFellesTidslinjeForSøkersYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
@@ -47,7 +47,7 @@ fun beregnDifferanse(
 ): List<AndelTilkjentYtelse> {
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateFamilieFellesTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateFamilieFellesTidslinjerForBarna()
-    val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateFamilieFellesTidslinjerForBarna()
+    val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
 
     val barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer =
         utenlandskePeriodebeløpTidslinjer.outerJoin(valutakursTidslinjer) { upb, valutakurs ->
@@ -88,7 +88,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
             .tilFamilieFellesTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
             .utenDifferanseberegning()
 
-    val barnasAndelerTidslinjer = this.tilSeparateFamilieFellesTidslinjerForBarna()
+    val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
     val perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje()
 
