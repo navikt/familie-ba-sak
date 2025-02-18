@@ -101,9 +101,16 @@ fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
             ?.vilkårResultater
             ?.singleOrNull { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
+    val erUtbetalingPåSøkerIPeriode =
+        begrunnelseGrunnlagForSøkerIPeriode
+            ?.dennePerioden
+            ?.andeler
+            ?.sumOf { it.kalkulertUtbetalingsbeløp }
+            ?.let { it > 0 } ?: false
+
     return begrunnelseGrunnlagPerPerson.mapValues { (person, begrunnelseGrunnlag) ->
         val relevantePeriodeResultater =
-            hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode)
+            hentResultaterForPeriode(begrunnelseGrunnlag.dennePerioden, begrunnelseGrunnlag.forrigePeriode, erUtbetalingPåSøkerIPeriode)
 
         val temaSomPeriodeErVurdertEtter = hentTemaSomPeriodeErVurdertEtter(begrunnelseGrunnlag)
 
@@ -399,6 +406,7 @@ internal fun hentResultaterForForrigePeriode(
 private fun hentResultaterForPeriode(
     begrunnelseGrunnlagForPeriode: BegrunnelseGrunnlagForPersonIPeriode,
     begrunnelseGrunnlagForrigePeriode: BegrunnelseGrunnlagForPersonIPeriode?,
+    erUtbetalingPåSøkerIPeriode: Boolean,
 ): List<SanityPeriodeResultat> {
     val erAndelerPåPersonHvisBarn =
         begrunnelseGrunnlagForPeriode.person.type != PersonType.BARN ||
@@ -415,8 +423,9 @@ private fun hentResultaterForPeriode(
             begrunnelseGrunnlagForrigePeriode,
         )
 
+    val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
+
     return if (erInnvilgetEtterVilkårOgEndretUtbetaling && erAndelerPåPersonHvisBarn) {
-        val erEøs = begrunnelseGrunnlagForPeriode.kompetanse != null
         val erØkingIAndel =
             erØkningIAndelMellomPerioder(
                 begrunnelseGrunnlagForPeriode,
@@ -443,6 +452,7 @@ private fun hentResultaterForPeriode(
         )
     } else {
         listOfNotNull(
+            if (erUtbetalingPåSøkerIPeriode && erEøs) SanityPeriodeResultat.INNVILGET_ELLER_ØKNING else null,
             if (erReduksjonIAndel) SanityPeriodeResultat.REDUKSJON else null,
             SanityPeriodeResultat.IKKE_INNVILGET,
         )

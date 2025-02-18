@@ -402,3 +402,123 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.07.2019 til 28.02.2023
       | Begrunnelse     | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Beløp | Søkers rett til utvidet |
       | INNVILGET_SKILT | STANDARD | Ja            | 23.06.16             | 1           | juni 2019                            | 2 108 | SØKER_FÅR_UTVIDET       |
+
+
+  Scenario: I perioder med endret utbetaling men der søker fortsatt får utbetalt så skal det være mulig å bruke standard innvilgelse begrunnelser
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype | Status  |
+      | 1        | NORMAL     | LØPENDE |
+
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak         | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | FORTSATT_INNVILGET         | MÅNEDLIG_VALUTAJUSTERING | Ja                        | EØS                 | AVSLUTTET         |
+      | 2            | 1        | 1                   | DELVIS_INNVILGET_OG_ENDRET | SØKNAD                   | Nei                       | EØS                 | UTREDES           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 01.08.1998  |              |
+      | 1            | 2       | BARN       | 30.04.2019  |              |
+      | 2            | 1       | SØKER      | 01.08.1998  |              |
+      | 2            | 2       | BARN       | 30.04.2019  |              |
+
+
+    Og dagens dato er 17.02.2025
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 2            | 2       |
+      | 2            | 1       |
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår           | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET   | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 01.08.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD   |                                             | 01.08.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+      | 2       | GIFT_PARTNERSKAP |                                             | 30.04.2019 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR      |                                             | 30.04.2019 | 29.04.2037 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET   | BARN_BOR_I_EØS                              | 01.08.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD   |                                             | 01.08.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOR_MED_SØKER    | BARN_BOR_I_EØS_MED_SØKER                    | 01.08.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår             | Utdypende vilkår                            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET     | ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING | 01.03.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | LOVLIG_OPPHOLD     |                                             | 01.03.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 1       | UTVIDET_BARNETRYGD |                                             | 21.03.2024 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 2       | GIFT_PARTNERSKAP   |                                             | 30.04.2019 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR        |                                             | 30.04.2019 | 29.04.2037 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER      | BARN_BOR_I_EØS_MED_SØKER                    | 01.03.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | LOVLIG_OPPHOLD     |                                             | 01.03.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+      | 2       | BOSATT_I_RIKET     | BARN_BOR_I_EØS                              | 01.03.2024 |            | OPPFYLT  | Nei                  |                      | EØS_FORORDNINGEN |
+
+    Og med kompetanser
+      | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet            | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
+      | 2       | 01.09.2024 |            | NORGE_ER_SEKUNDÆRLAND | 1            | I_ARBEID         | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | PL                    | NO                             | PL                  |
+      | 2       | 01.04.2024 | 31.05.2024 | NORGE_ER_SEKUNDÆRLAND | 2            | I_ARBEID         | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | PL                    | NO                             | PL                  |
+      | 2       | 01.06.2024 | 31.07.2024 | NORGE_ER_PRIMÆRLAND   | 2            | INAKTIV          | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | PL                    | NO                             | PL                  |
+      | 2       | 01.08.2024 |            | NORGE_ER_SEKUNDÆRLAND | 2            | I_ARBEID         | MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN | PL                    | NO                             | PL                  |
+
+    Og med utenlandsk periodebeløp
+      | AktørId | Fra måned | Til måned | BehandlingId | Beløp | Valuta kode | Intervall | Utbetalingsland |
+      | 2       | 09.2024   |           | 1            | 800   | PLN         | MÅNEDLIG  | PL              |
+      | 2       | 04.2024   | 05.2024   | 2            | 800   | PLN         | MÅNEDLIG  | PL              |
+      | 2       | 08.2024   |           | 2            | 800   | PLN         | MÅNEDLIG  | PL              |
+
+    Og med valutakurser
+      | AktørId | Fra dato   | Til dato   | BehandlingId | Valutakursdato | Valuta kode | Kurs         | Vurderingsform |
+      | 2       | 01.09.2024 | 30.09.2024 | 1            | 2024-08-30     | PLN         | 2.7271239155 | AUTOMATISK     |
+      | 2       | 01.10.2024 | 31.10.2024 | 1            | 2024-09-30     | PLN         | 2.7494858372 | AUTOMATISK     |
+      | 2       | 01.11.2024 | 30.11.2024 | 1            | 2024-10-31     | PLN         | 2.7439781190 | AUTOMATISK     |
+      | 2       | 01.12.2024 | 31.12.2024 | 1            | 2024-11-29     | PLN         | 2.7189245810 | AUTOMATISK     |
+      | 2       | 01.01.2025 | 31.01.2025 | 1            | 2024-12-31     | PLN         | 2.7590643275 | AUTOMATISK     |
+      | 2       | 01.02.2025 |            | 1            | 2025-01-31     | PLN         | 2.7859719915 | AUTOMATISK     |
+      | 2       | 01.04.2024 | 31.05.2024 | 2            | 2024-12-31     | PLN         | 2.7590643275 | MANUELL        |
+      | 2       | 01.09.2024 | 30.09.2024 | 2            | 2024-08-30     | PLN         | 2.7271239155 | AUTOMATISK     |
+      | 2       | 01.10.2024 | 31.10.2024 | 2            | 2024-09-30     | PLN         | 2.7494858372 | AUTOMATISK     |
+      | 2       | 01.11.2024 | 30.11.2024 | 2            | 2024-10-31     | PLN         | 2.7439781190 | AUTOMATISK     |
+      | 2       | 01.12.2024 | 31.12.2024 | 2            | 2024-11-29     | PLN         | 2.7189245810 | AUTOMATISK     |
+      | 2       | 01.01.2025 | 31.01.2025 | 2            | 2024-12-31     | PLN         | 2.7590643275 | AUTOMATISK     |
+      | 2       | 01.02.2025 |            | 2            | 2025-01-31     | PLN         | 2.7859719915 | AUTOMATISK     |
+      | 2       | 01.08.2024 | 31.08.2024 | 2            | 2024-07-31     | PLN         | 2.7541484106 | AUTOMATISK     |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 2       | 2            | 01.04.2024 | 31.08.2024 | ALLEREDE_UTBETALT | 0       | 01.08.2024       |                             |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.09.2024 | 30.09.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.10.2024 | 31.10.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.11.2024 | 30.11.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.12.2024 | 31.12.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.01.2025 | 31.01.2025 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.02.2025 | 31.03.2037 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+
+      | 1       | 2            | 01.04.2024 | 31.05.2024 | 309   | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.06.2024 | 31.07.2024 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.08.2024 | 31.08.2024 | 313   | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.09.2024 | 30.09.2024 | 2101  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.10.2024 | 31.10.2024 | 2083  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.11.2024 | 30.11.2024 | 2087  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.12.2024 | 31.12.2024 | 2107  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.01.2025 | 31.01.2025 | 2075  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.02.2025 | 31.03.2037 | 2054  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 2       | 2            | 01.04.2024 | 31.05.2024 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 2       | 2            | 01.06.2024 | 31.07.2024 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 2       | 2            | 01.08.2024 | 31.08.2024 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 2       | 2            | 01.09.2024 | 30.09.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.10.2024 | 31.10.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.11.2024 | 30.11.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.12.2024 | 31.12.2024 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.01.2025 | 31.01.2025 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.02.2025 | 31.03.2037 | 0     | ORDINÆR_BARNETRYGD | 100     | 1766 |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                                 | Ugyldige begrunnelser |
+      | 01.04.2024 | 31.05.2024 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_SEKUNDÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE |                       |
+      | 01.06.2024 | 31.07.2024 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE   |                       |
+      | 01.08.2024 | 31.08.2024 | UTBETALING         | EØS_FORORDNINGEN               | INNVILGET_SEKUNDÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE |                       |
