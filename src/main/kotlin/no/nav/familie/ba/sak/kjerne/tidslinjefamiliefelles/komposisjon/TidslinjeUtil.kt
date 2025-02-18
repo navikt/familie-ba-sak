@@ -51,9 +51,9 @@ fun opprettBooleanTidslinje(
     tilDato: LocalDate,
 ) = listOf(Periode(verdi = true, fom = fraDato, tom = tilDato)).tilTidslinje()
 
-fun <V> Tidslinje<V>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.tilPerioder().verdiPåidspunkt(tidspunkt)
+fun <V> Tidslinje<V>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.tilPerioder().verdiPåTidspunkt(tidspunkt)
 
-fun <V> Collection<Periode<V>>.verdiPåidspunkt(tidspunkt: LocalDate): V? = this.firstOrNull { it.omfatter(tidspunkt) }?.verdi
+fun <V> Collection<Periode<V>>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.firstOrNull { it.omfatter(tidspunkt) }?.verdi
 
 private fun <V> Periode<V>.omfatter(tidspunkt: LocalDate) =
     when {
