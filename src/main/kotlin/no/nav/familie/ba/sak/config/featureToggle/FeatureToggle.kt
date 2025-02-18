@@ -20,9 +20,6 @@ enum class FeatureToggle(
     // NAV-23955
     BYTT_VALUTAJUSTERING_DATO("familie-ba-sak.behandling.valutajustering_dato"),
 
-    // NAV-22995
-    SKAL_BRUKE_NY_KLASSEKODE_FOR_UTVIDET_BARNETRYGD("familie-ba-sak.skal-bruke-ny-klassekode-for-utvidet-barnetrygd"),
-
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
 

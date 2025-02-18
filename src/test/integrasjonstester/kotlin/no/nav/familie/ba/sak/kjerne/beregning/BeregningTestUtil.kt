@@ -7,10 +7,9 @@ import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 object BeregningTestUtil {
     fun sisteAndelPerIdentNy(
         tilkjenteYtelser: List<TilkjentYtelse>,
-        skalBrukeNyKlassekodeForUtvidetBarnetrygd: Boolean,
     ): Map<IdentOgType, AndelTilkjentYtelse> =
         tilkjenteYtelser
             .flatMap { it.andelerTilkjentYtelse }
-            .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType(skalBrukeNyKlassekodeForUtvidetBarnetrygd)) }
+            .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
             .mapValues { it.value.maxBy { it.periodeOffset ?: 0 } }
 }

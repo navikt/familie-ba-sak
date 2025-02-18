@@ -240,7 +240,7 @@ class BehandlingsinformasjonUtlederTest {
 
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("1", YtelsetypeBA.ORDINÆR_BARNETRYGD) to andelTilkjentYtelse.tilAndelDataLongId(true),
+                IdentOgType("1", YtelsetypeBA.ORDINÆR_BARNETRYGD) to andelTilkjentYtelse.tilAndelDataLongId(),
             )
 
         every {
@@ -311,7 +311,7 @@ class BehandlingsinformasjonUtlederTest {
 
         val sisteAndelPerKjede =
             mapOf(
-                IdentOgType("1", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse.tilAndelDataLongId(true),
+                IdentOgType("1", YtelsetypeBA.ORDINÆR_BARNETRYGD) to lagAndelTilkjentYtelse.tilAndelDataLongId(),
             )
 
         every {
