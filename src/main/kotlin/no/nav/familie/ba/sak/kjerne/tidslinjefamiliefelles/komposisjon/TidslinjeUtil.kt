@@ -8,12 +8,10 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import no.nav.familie.tidslinje.utvidelser.trim
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -64,5 +62,3 @@ private fun <V> Periode<V>.omfatter(tidspunkt: LocalDate) =
     }
 
 fun <V> Periode<V>.tilTidslinje(): Tidslinje<V> = listOf(this).tilTidslinje()
-
-fun <V> Tidslinje<V>.trimNull(): Tidslinje<V> = trim(Null())

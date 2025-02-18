@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.trimNull
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -40,12 +39,8 @@ class UtbetalingTidslinjeService(
                 val utbetalesIkkeOrdinærEllerUtvidetTidslinje =
                     ordinærSkalIkkeUtbetalesTidslinje
                         .kombinerMed(utvidetTidslinje) { ordinærSkalIkkeUtbetales, utvidetAndel ->
-                            if (ordinærSkalIkkeUtbetales == null && utvidetAndel == null) {
-                                null
-                            } else {
-                                ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
-                            }
-                        }.trimNull()
+                            ordinærSkalIkkeUtbetales == true && (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
+                        }
                 utbetalesIkkeOrdinærEllerUtvidetTidslinje
             }
     }

@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.trimNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.tidslinje.Tidslinje
@@ -133,7 +132,7 @@ fun tilpassKompetanserTilRegelverk(
                     else -> regelverk
                 }
             }.mapValues { (_, tidslinjer) ->
-                tidslinjer.trimNull().forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+                tidslinjer.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
             }
 
     return gjeldendeKompetanser
@@ -145,7 +144,7 @@ fun tilpassKompetanserTilRegelverk(
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
         }.mapValues { (_, tidslinje) ->
-            tidslinje.trimNull().forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+            tidslinje.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
         }.familieFellesTidslinjerTilSkjemaer()
 }
 
