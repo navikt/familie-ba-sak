@@ -238,6 +238,21 @@ class ForvalterController(
         return ResponseEntity.ok("ok")
     }
 
+    @PatchMapping("/patch-fagsaker-uten-behandling-med-ny-ident")
+    fun patchFagsakerUtenBehandlingMedNyIdent(
+        @RequestBody fagsakIder: Set<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Patch merget ident",
+        )
+
+        fagsakIder.forEach { fagsakId ->
+            opprettTaskService.opprettTaskForÅPatcheIdentPåFagsakUtenBehandling(fagsakId)
+        }
+        return ResponseEntity.ok("ok")
+    }
+
     @PostMapping("/behandling/{behandlingId}/manuell-kvittering")
     @ApiResponses(
         value = [
