@@ -40,7 +40,7 @@ object UtvidetBarnetrygdUtil {
                 perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
             )
 
-        return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+        return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
             endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
         )

@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -551,7 +551,7 @@ internal class TilkjentYtelseUtilsTest {
             )
 
         val andelerTIlkjentYtelse =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
                 utbetalinsandeler,
                 endretUtbetalingAndeler,
             )
@@ -610,7 +610,7 @@ internal class TilkjentYtelseUtilsTest {
             )
 
         val andelerTIlkjentYtelse =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
                 utbetalinsandeler,
                 endretUtbetalingAndeler,
             )

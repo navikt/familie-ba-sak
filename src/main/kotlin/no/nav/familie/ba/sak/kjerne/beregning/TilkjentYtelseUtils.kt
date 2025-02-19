@@ -72,7 +72,7 @@ object TilkjentYtelseUtils {
                 }
 
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                 endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
             )
@@ -117,7 +117,7 @@ object TilkjentYtelseUtils {
             }
 
         val andelerTilkjentYtelseBarnaMedAlleEndringer =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                 endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
             )
@@ -132,7 +132,7 @@ object TilkjentYtelseUtils {
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
-    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
+    fun oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
