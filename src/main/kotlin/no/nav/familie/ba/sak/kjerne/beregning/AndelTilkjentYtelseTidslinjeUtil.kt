@@ -170,14 +170,10 @@ fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: 
     this
         .filter { it.erSøkersAndel() }
         .filter { it.type == ytelseType }
-        .let {
-            tidslinje {
-                it.map {
-                    Periode(
-                        it.stønadFom.tilTidspunkt(),
-                        it.stønadTom.tilTidspunkt(),
-                        it.tilpassTilTidslinje(),
-                    )
-                }
-            }
-        }
+        .map {
+            FamilieFellesPeriode(
+                verdi = it.tilpassTilTidslinje(),
+                fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                tom = it.stønadTom.sisteDagIInneværendeMåned(),
+            )
+        }.tilTidslinje()
