@@ -36,6 +36,8 @@ fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.tilAndelerTilkjentY
 
 fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.flatMap { it.tilAndelTilkjentYtelse() }
 
+fun Iterable<FamilieFellesTidslinje<AndelTilkjentYtelse>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.flatMap { it.tilAndelTilkjentYtelse() }
+
 fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> =
     this
         .perioder()
