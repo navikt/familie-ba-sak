@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isBetween
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -18,8 +20,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.tidslinje.tilTidslinje
 import java.time.LocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
+import no.nav.familie.tidslinje.Periode as FamilieFellesTidslinjePeriode
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -103,6 +107,19 @@ fun satstypeTidslinje(satsType: SatsType) =
                 )
             }
     }
+
+fun satstypeFamilieFellesTidslinje(satsType: SatsType) =
+    SatsService
+        .finnAlleSatserFor(satsType)
+        .map {
+            val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.førsteDagIInneværendeMåned()
+            val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.sisteDagIMåned()
+            FamilieFellesTidslinjePeriode(
+                verdi = it.beløp,
+                fom = fom,
+                tom = tom,
+            )
+        }.tilTidslinje()
 
 fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
     val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)

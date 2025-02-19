@@ -2,15 +2,14 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.tidslinje.Tidslinje
 import org.springframework.stereotype.Service
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår as lagForskjøvetTidslinjeForOppfylteVilkår
 
 @Service
 class VilkårsvurderingTidslinjeService(
@@ -36,7 +35,7 @@ class VilkårsvurderingTidslinjeService(
         }
     }
 
-    fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean, Måned> {
+    fun hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean> {
         val søker = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id).søker
         val søkerPersonresultater =
             vilkårsvurderingService
@@ -47,8 +46,7 @@ class VilkårsvurderingTidslinjeService(
         val erAnnenForelderOmfattetAvNorskLovgivingTidslinje =
             søkerPersonresultater.vilkårResultater
                 .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOSATT_I_RIKET)
-                .map { it?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) }
-
+                .mapVerdiNullable { it?.utdypendeVilkårsvurderinger?.contains(UtdypendeVilkårsvurdering.ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING) }
         return erAnnenForelderOmfattetAvNorskLovgivingTidslinje
     }
 }

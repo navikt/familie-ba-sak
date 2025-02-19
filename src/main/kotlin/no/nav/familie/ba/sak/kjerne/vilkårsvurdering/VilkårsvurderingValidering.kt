@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker

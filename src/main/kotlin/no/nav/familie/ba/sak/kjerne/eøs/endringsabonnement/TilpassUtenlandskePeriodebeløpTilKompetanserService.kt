@@ -1,12 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
 import no.nav.familie.ba.sak.common.ClockProvider
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -14,14 +15,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilForrigeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forlengFremtidTilUendelig
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.filtrer
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -82,11 +79,11 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer =
         gjeldendeKompetanser
-            .tilSeparateTidslinjerForBarna()
+            .tilSeparateFamilieFellesTidslinjerForBarna()
             .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp
-        .tilSeparateTidslinjerForBarna()
+        .tilSeparateFamilieFellesTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
             val utbetalingsland = kompetanse?.utbetalingsland()
             when {
@@ -96,12 +93,12 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 
                 else -> upb
             }
-        }.mapValues { (_, value) ->
-            val nåMåned = inneværendeMåned.tilTidspunkt()
-            value
-                .beskjærTilOgMed(nåMåned)
-                .forlengFremtidTilUendelig(senesteEndeligeTidspunkt = nåMåned.tilForrigeMåned())
+        }.mapValues { (_, tidslinje) ->
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
         }.tilSkjemaer()
 }
 
-fun Map<Aktør, Tidslinje<Kompetanse, Måned>>.filtrerSekundærland() = this.mapValues { (_, tidslinje) -> tidslinje.filtrer { it?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND } }
+private fun Map<Aktør, Tidslinje<Kompetanse>>.filtrerSekundærland() =
+    this.mapValues { (_, tidslinje) ->
+        tidslinje.filtrer { it?.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+    }

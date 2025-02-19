@@ -6,14 +6,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTi
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.sep
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.somBoolskTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilRegelverkResultatTidslinje
+import no.nav.familie.tidslinje.Tidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -36,7 +36,7 @@ class TilpassKompetanserTilRegelverkTest {
             "++++-----++++++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(jan2020)
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse(
                     "---      ",
                     barn1,
@@ -64,11 +64,11 @@ class TilpassKompetanserTilRegelverkTest {
     @Test
     fun testTilpassKompetanserUtenEøsPerioder() {
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SSSSSSS", barn1)
                 .byggKompetanser()
 
-        val eøsPerioder = emptyMap<Aktør, Tidslinje<RegelverkResultat, Måned>>()
+        val eøsPerioder = emptyMap<Aktør, Tidslinje<RegelverkResultat>>()
 
         val forventedeKompetanser = emptyList<Kompetanse>()
 
@@ -86,7 +86,7 @@ class TilpassKompetanserTilRegelverkTest {
     @Test
     fun testTilpassKompetanserMotEøsEttBarn() {
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SSSSSSS", barn1)
                 .byggKompetanser()
 
@@ -96,7 +96,7 @@ class TilpassKompetanserTilRegelverkTest {
             )
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SSS  SS--", barn1)
                 .byggKompetanser()
 
@@ -114,7 +114,7 @@ class TilpassKompetanserTilRegelverkTest {
     @Test
     fun testTilpassKompetanserMotEøsToBarn() {
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SS--SSSS", barn1, barn2)
                 .byggKompetanser()
 
@@ -125,7 +125,7 @@ class TilpassKompetanserTilRegelverkTest {
             )
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SS-   SS-", barn1, barn2)
                 .medKompetanse("     S", barn1)
                 .medKompetanse("   - ", barn2)
@@ -150,7 +150,7 @@ class TilpassKompetanserTilRegelverkTest {
         // "-SSSSSS", barn3
 
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse(" SS  SS", barn1, barn2, barn3)
                 .medKompetanse("S      ", barn1, barn2)
                 .medKompetanse("   SS  ", barn1, barn3)
@@ -170,7 +170,7 @@ class TilpassKompetanserTilRegelverkTest {
         // -SSSSSS--, barn3
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse(" SS      ", barn1, barn2, barn3)
                 .medKompetanse("S        ", barn1, barn2)
                 .medKompetanse("     SS--", barn1, barn3)
@@ -200,7 +200,7 @@ class TilpassKompetanserTilRegelverkTest {
             )
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("--", barn1)
                 .medKompetanse("  ->", barn1, barn2)
                 .byggKompetanser()
@@ -224,7 +224,7 @@ class TilpassKompetanserTilRegelverkTest {
         // "-SSSSSS", barn3
 
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse(" SS  SS", barn1, barn2, barn3)
                 .medKompetanse("S      ", barn1, barn2)
                 .medKompetanse("   SS  ", barn1, barn3)
@@ -243,7 +243,7 @@ class TilpassKompetanserTilRegelverkTest {
         // SSS      , barn2
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SSS      ", barn1, barn2)
                 .medKompetanse("     SS--", barn1)
                 .byggKompetanser()
@@ -263,7 +263,7 @@ class TilpassKompetanserTilRegelverkTest {
     @Test
     fun `tilpass kompetanser mot eøs for to barn, der ett barn har etterbetaling 3 år`() {
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("SS--SSSS", barn1, barn2)
                 .byggKompetanser()
 
@@ -279,7 +279,7 @@ class TilpassKompetanserTilRegelverkTest {
             )
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("      SS-", barn1, barn2)
                 .medKompetanse("     S", barn1)
                 .medKompetanse("SS-- ", barn2)
@@ -300,7 +300,7 @@ class TilpassKompetanserTilRegelverkTest {
     @Test
     fun `skal klippe kompetansene basert på endret utbetaling som fører til stans av utbetaling`() {
         val kompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("->", barn1, barn2)
                 .byggKompetanser()
 
@@ -324,7 +324,7 @@ class TilpassKompetanserTilRegelverkTest {
             ).sortedBy { it.fom }
 
         val forventedeKompetanser =
-            KompetanseBuilder(jan2020)
+            KompetanseBuilder(jan2020.tilTidspunkt())
                 .medKompetanse("-----", barn1, barn2)
                 .medKompetanse("     ----", barn2)
                 .byggKompetanser()
@@ -339,7 +339,7 @@ class TilpassKompetanserTilRegelverkTest {
         val sep2024 = sep(2024)
 
         val kompetanser =
-            KompetanseBuilder(sep2024)
+            KompetanseBuilder(sep2024.tilTidspunkt())
                 .medKompetanse("----", barn1, barn2)
                 .medKompetanse("    --", barn1)
                 .medKompetanse("      ->", barn1, barn2)
@@ -366,7 +366,7 @@ class TilpassKompetanserTilRegelverkTest {
             )
 
         val forventedeKompetanser =
-            KompetanseBuilder(sep2024)
+            KompetanseBuilder(sep2024.tilTidspunkt())
                 .medKompetanse("->", barn1, barn2)
                 .byggKompetanser()
 

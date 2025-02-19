@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -65,6 +66,7 @@ class UtvidetBehandlingService(
     private val brevmottakerService: BrevmottakerService,
     private val refusjonEøsService: RefusjonEøsService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -102,6 +104,7 @@ class UtvidetBehandlingService(
         val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
+        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -157,6 +160,7 @@ class UtvidetBehandlingService(
             brevmottakere = brevmottakere,
             refusjonEøs = refusjonEøs,
             vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
+            søknadMottattDato = søknadMottattDato,
         )
     }
 }

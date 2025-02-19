@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.tidslinje.Tidslinje
 
 /**
  * Extension-funksjon som konverterer en dag-basert tidslinje til en måned-basert tidslinje med VilkårRegelverkResultat
@@ -19,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMåneds
  * Ikke oppfylt | Oppfylt EØS   -> <Tomt>
  * Ikke oppfylt | Oppfylt Nasj  -> <Tomt>
  */
-fun Tidslinje<VilkårRegelverkResultat, Dag>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() =
+fun Tidslinje<VilkårRegelverkResultat>.tilMånedsbasertTidslinjeForVilkårRegelverkResultat() =
     this
         .tilMånedFraMånedsskifteIkkeNull { sisteDagForrigeMåned, førsteDagDenneMåned ->
             if (sisteDagForrigeMåned.erOppfylt() && førsteDagDenneMåned.erOppfylt()) førsteDagDenneMåned else null

@@ -141,3 +141,14 @@ fun <V, R> Collection<Tidslinje<V>>.kombinerNullableKombinator(listeKombinator: 
             is Udefinert -> Udefinert()
         }
     }
+
+fun <V, R> Tidslinje<V>.mapVerdiNullable(mapper: (V?) -> R?): Tidslinje<R> =
+    this.map { periodeVerdi ->
+        when (periodeVerdi) {
+            is Verdi,
+            is Null,
+            -> mapper(periodeVerdi.verdi)?.let { Verdi(it) } ?: Null()
+
+            is Udefinert -> Udefinert()
+        }
+    }
