@@ -95,8 +95,8 @@ fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     forrigeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
     nyeSmåbarnstilleggAndeler: List<AndelTilkjentYtelse>,
 ): Pair<List<MånedPeriode>, List<MånedPeriode>> {
-    val forrigeAndelerTidslinje = forrigeSmåbarnstilleggAndeler.tilFamilieFellesTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
-    val andelerTidslinje = nyeSmåbarnstilleggAndeler.tilFamilieFellesTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+    val forrigeAndelerTidslinje = forrigeSmåbarnstilleggAndeler.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+    val andelerTidslinje = nyeSmåbarnstilleggAndeler.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
 
     val nyeSmåbarnstilleggPerioder =
         forrigeAndelerTidslinje.kombinerMed(andelerTidslinje) { gammel, ny -> ny.takeIf { gammel == null } }

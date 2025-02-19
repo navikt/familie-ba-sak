@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.tilFamilieFellesTidslinjeForSøkersYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -32,7 +32,7 @@ class UtbetalingTidslinjeService(
         val utvidetTidslinje =
             beregningService
                 .hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
-                .tilFamilieFellesTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+                .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
 
         return barnasSkalIkkeUtbetalesTidslinjer
             .mapValues { (_, ordinærSkalIkkeUtbetalesTidslinje) ->
