@@ -38,24 +38,21 @@ class PatchIdentFagsakUtenBehandling(
         val fagsakId = objectMapper.readValue(task.payload, Long::class.java)
 
         // Valider at fagsak ikke har behandlinger
-
         val behandlingerPåFagsak = behandlingRepository.finnBehandlinger(fagsakId)
         if (behandlingerPåFagsak.isNotEmpty()) {
             throw IllegalArgumentException("Fagsak $fagsakId har behandlinger og burde patches på en annen måte")
         }
 
-        // Finn ut om identen på fagsaken er utdatert
-        val fagsak =
-            fagsakRepository.finnFagsak(fagsakId)
-                ?: throw IllegalArgumentException("Fagsak $fagsakId eksisterer ikke")
-        val aktivPersonIdent =
-            fagsak.aktør.personidenter.singleOrNull { it.aktiv }
-                ?: throw IllegalStateException("Aktør ${fagsak.aktør} har ingen eller flere aktive personidenter")
+        // Valider at identen på fagsaken er utdatert
+        val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: throw IllegalArgumentException("Fagsak $fagsakId eksisterer ikke")
+        val aktivPersonIdent = fagsak.aktør.aktivFødselsnummer()
 
-        val identInformasjonFraPdl = pdlIdentRestClient.hentIdenter(personIdent = aktivPersonIdent.fødselsnummer, historikk = true)
-        if (identInformasjonFraPdl.none { identFraPdl -> identFraPdl.ident == aktivPersonIdent.fødselsnummer && identFraPdl.historisk }) {
+        val identInformasjonFraPdl = pdlIdentRestClient.hentIdenter(personIdent = aktivPersonIdent, historikk = true)
+        val erAktivPersonIdentHistoriskAvEnNyIdent = identInformasjonFraPdl.none { identFraPdl -> identFraPdl.ident == aktivPersonIdent && identFraPdl.historisk }
+        if (erAktivPersonIdentHistoriskAvEnNyIdent) {
             return
         }
+
         secureLogger.info("Patcher aktør med id ${fagsak.aktør.aktørId} på fagsak $fagsakId")
         val nyPersonIdent = identInformasjonFraPdl.hentAktivFødselsnummer()
 
