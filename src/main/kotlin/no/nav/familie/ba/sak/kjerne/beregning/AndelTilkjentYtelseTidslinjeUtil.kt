@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -157,8 +158,8 @@ fun FamilieFellesTidslinje<AndelTilkjentYtelseForTidslinje>.tilAndelerTilkjentYt
                 differanseberegnetPeriodebeløp = it.verdi.differanseberegnetPeriodebeløp,
                 sats = it.verdi.sats,
                 prosent = it.verdi.prosent,
-                stønadFom = it.fom?.toYearMonth() ?: error("Fra og med-dato kan ikke være null i AndelTilkjentYtelse"),
-                stønadTom = it.tom?.toYearMonth() ?: error("Til og med-dato kan ikke være null i AndelTilkjentYtelse"),
+                stønadFom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null i AndelTilkjentYtelse"),
+                stønadTom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null i AndelTilkjentYtelse"),
             )
         }
 
