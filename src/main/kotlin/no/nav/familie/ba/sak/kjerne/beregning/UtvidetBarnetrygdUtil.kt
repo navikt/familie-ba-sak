@@ -15,12 +15,16 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.leftJoin
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object UtvidetBarnetrygdUtil {
     internal fun beregnTilkjentYtelseUtvidet(
@@ -37,7 +41,7 @@ object UtvidetBarnetrygdUtil {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer.map { it.andel },
-                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
+                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje(),
             )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
@@ -62,7 +66,31 @@ object UtvidetBarnetrygdUtil {
                     }
         }
 
+    fun Set<PersonResultat>.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje(): Map<Aktør, FamilieFellesTidslinje<Boolean>> =
+        this.associate { personResultat ->
+            personResultat.aktør to
+                personResultat.vilkårResultater
+                    .lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
+                    .mapVerdiNullable { vilkårResultat ->
+                        vilkårResultat?.utdypendeVilkårsvurderinger?.none {
+                            it in
+                                listOf(
+                                    UtdypendeVilkårsvurdering.BARN_BOR_I_EØS_MED_ANNEN_FORELDER,
+                                    UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_ANNEN_FORELDER,
+                                )
+                        }
+                    }
+        }
+
     fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje: Map<Aktør, Tidslinje<Boolean, Måned>>): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> =
+        this.leftJoin(perioderBarnaBorMedSøkerTidslinje) { andel, barnBorMedSøker ->
+            when (barnBorMedSøker) {
+                true -> andel
+                else -> null
+            }
+        }
+
+    fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje: Map<Aktør, FamilieFellesTidslinje<Boolean>>): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> =
         this.leftJoin(perioderBarnaBorMedSøkerTidslinje) { andel, barnBorMedSøker ->
             when (barnBorMedSøker) {
                 true -> andel

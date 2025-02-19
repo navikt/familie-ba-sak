@@ -46,4 +46,5 @@ data class RestUtvidetBehandling(
     val brevmottakere: List<RestBrevmottaker>,
     val refusjonEøs: List<RestRefusjonEøs>,
     val vurderingsstrategiForValutakurser: VurderingsstrategiForValutakurser? = VurderingsstrategiForValutakurser.AUTOMATISK,
+    val søknadMottattDato: LocalDateTime?,
 )
