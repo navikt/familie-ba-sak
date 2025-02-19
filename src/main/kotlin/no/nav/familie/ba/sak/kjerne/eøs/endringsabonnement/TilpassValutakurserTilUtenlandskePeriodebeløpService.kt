@@ -83,6 +83,6 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
                 else -> valutakurs
             }
         }.mapValues { (_, tidslinje) ->
-            tidslinje.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
         }.tilSkjemaer()
 }

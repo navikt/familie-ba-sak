@@ -132,7 +132,7 @@ fun tilpassKompetanserTilRegelverk(
                     else -> regelverk
                 }
             }.mapValues { (_, tidslinjer) ->
-                tidslinjer.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+                tidslinjer.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
             }
 
     return gjeldendeKompetanser
@@ -144,7 +144,7 @@ fun tilpassKompetanserTilRegelverk(
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
         }.mapValues { (_, tidslinje) ->
-            tidslinje.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
         }.tilSkjemaer()
 }
 

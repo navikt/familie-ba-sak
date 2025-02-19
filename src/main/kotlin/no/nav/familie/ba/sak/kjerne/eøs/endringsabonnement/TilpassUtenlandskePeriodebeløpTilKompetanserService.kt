@@ -94,7 +94,7 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
                 else -> upb
             }
         }.mapValues { (_, tidslinje) ->
-            tidslinje.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
         }.tilSkjemaer()
 }
 
