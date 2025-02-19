@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
@@ -62,7 +61,6 @@ class FagsakService(
     private val institusjonService: InstitusjonService,
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val pdlIdentRestClient: PdlIdentRestClient,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
