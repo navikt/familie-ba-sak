@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
-import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
@@ -93,7 +92,8 @@ fun <T : Any> Tidslinje<T>.forlengFremtidTilUendelig(tidspunktForUendelighet: Lo
         this
             .tilPerioderIkkeNull()
             .filter { it.fom != null && it.fom!! < tidspunktForUendelighet }
-            .replaceLast { Periode(verdi = it.verdi, fom = it.fom, tom = null) }
+            .ifEmpty { return tomTidslinje() }
+            .replaceLast { it.copy(tom = null) }
             .tilTidslinje()
     } else {
         this.tilPerioderIkkeNull().tilTidslinje()
