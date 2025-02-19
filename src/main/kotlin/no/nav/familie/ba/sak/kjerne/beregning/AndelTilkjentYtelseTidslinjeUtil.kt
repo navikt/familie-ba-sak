@@ -157,8 +157,8 @@ fun FamilieFellesTidslinje<AndelTilkjentYtelseForTidslinje>.tilAndelerTilkjentYt
                 differanseberegnetPeriodebeløp = it.verdi.differanseberegnetPeriodebeløp,
                 sats = it.verdi.sats,
                 prosent = it.verdi.prosent,
-                stønadFom = it.fom?.toYearMonth() ?: MIN_MÅNED,
-                stønadTom = it.tom?.toYearMonth() ?: MAX_MÅNED,
+                stønadFom = it.fom?.toYearMonth() ?: error("Fra og med-dato kan ikke være null i AndelTilkjentYtelse"),
+                stønadTom = it.tom?.toYearMonth() ?: error("Til og med-dato kan ikke være null i AndelTilkjentYtelse"),
             )
         }
 
