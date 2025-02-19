@@ -38,8 +38,10 @@ import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTi
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
+import no.nav.familie.tidslinje.Periode
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -494,4 +496,13 @@ class ForvalterController(
 
         return ResponseEntity.ok(opprettetTask.id)
     }
+
+    @PostMapping("/hent-kjeder-for-fagsak/{fagsakId}")
+    @Operation(
+        summary = "Henter utbetalingskjedene i en fagsak",
+        description = "Test",
+    )
+    fun hentKjederForFagsak(
+        @PathVariable("fagsakId") fagsakId: Long,
+    ): ResponseEntity<Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>>> = ResponseEntity.ok(forvalterService.lagUtbetalingsoppdragTidslinje(fagsakId))
 }

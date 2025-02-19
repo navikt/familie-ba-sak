@@ -18,15 +18,23 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
@@ -46,6 +54,7 @@ class ForvalterService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -210,6 +219,30 @@ class ForvalterService(
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
     }
+
+    fun lagUtbetalingsoppdragTidslinje(fagsakId: Long): Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>> =
+        tilkjentYtelseRepository
+            .findByFagsak(fagsakId)
+            .fold(mutableMapOf<Long, List<Tidslinje<Utbetalingsperiode>>>()) { kjederForFagsak, tilkjentYtelse ->
+                val kjederForUtbetalingsperioder =
+                    tilkjentYtelse
+                        .utbetalingsperioder()
+                        .sortedBy { it.periodeId }
+                        .fold(mutableMapOf<Long, MutableList<Periode<Utbetalingsperiode>>>()) { kjeder, utbetalingsperiode ->
+                            kjeder.apply {
+                                val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, utbetalingsperiode.vedtakdatoTom)
+                                put(utbetalingsperiode.periodeId, kjede.toMutableList())
+                                remove(utbetalingsperiode.forrigePeriodeId)
+                            }
+                        }.mapValues { (_, kjede) -> Pair(kjede.tilTidslinje(), kjede.minOf { it.verdi.periodeId }) }
+                kjederForFagsak.apply {
+                    kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId) ->
+                        val kjedeForFagsak = kjederForFagsak.getOrDefault(forrigePeriodeId, mutableListOf()) + tidslinje
+                        put(periodeId, kjedeForFagsak.toMutableList())
+                        remove(forrigePeriodeId)
+                    }
+                }
+            }.mapValues { (_, test) -> test.kombiner().tilPerioderIkkeNull() }
 }
 
 interface FagsakMedFlereMigreringer {
