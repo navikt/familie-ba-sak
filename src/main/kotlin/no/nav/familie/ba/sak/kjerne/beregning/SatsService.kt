@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isBetween
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -110,10 +112,12 @@ fun satstypeFamilieFellesTidslinje(satsType: SatsType) =
     SatsService
         .finnAlleSatserFor(satsType)
         .map {
+            val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.førsteDagIInneværendeMåned()
+            val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.sisteDagIMåned()
             FamilieFellesTidslinjePeriode(
                 verdi = it.beløp,
-                fom = it.gyldigFom.takeUnless { it == LocalDate.MIN },
-                tom = it.gyldigTom.takeUnless { it == LocalDate.MAX },
+                fom = fom,
+                tom = tom,
             )
         }.tilTidslinje()
 
