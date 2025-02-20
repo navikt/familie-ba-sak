@@ -27,10 +27,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.ZipPadding
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.zipMedNeste
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
@@ -230,7 +234,7 @@ object TilkjentYtelseUtils {
         }
     }
 
-    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) = this.tilPerioderIkkeNull().map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
+    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje?>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) = this.tilPerioderIkkeNull().map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
 
     private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
         andelerForPerson: List<AndelTilkjentYtelse>,
@@ -259,8 +263,23 @@ object TilkjentYtelseUtils {
                 }
             }
 
-        return andelerMedEndringerTidslinje.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
+        return andelerMedEndringerTidslinje
+            .slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel()
+            .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
     }
+
+    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel() =
+        this
+            .zipMedNeste(ZipPadding.FØR)
+            .mapVerdi {
+                val forrigeAndelMedEndring = it?.first
+                val nåværendeAndelMedEndring = it?.second
+
+                val forrigeOgNåværendeAndelEr0kr = forrigeAndelMedEndring?.prosent == BigDecimal.ZERO && nåværendeAndelMedEndring?.prosent == BigDecimal.ZERO
+                val forrigeOgNåværendeAndelErPåvirketAvSammeEndring = forrigeAndelMedEndring?.endretUtbetalingAndel?.endretUtbetalingAndel == nåværendeAndelMedEndring?.endretUtbetalingAndel?.endretUtbetalingAndel && nåværendeAndelMedEndring?.endretUtbetalingAndel != null
+
+                if (forrigeOgNåværendeAndelEr0kr && forrigeOgNåværendeAndelErPåvirketAvSammeEndring) forrigeAndelMedEndring else nåværendeAndelMedEndring
+            }.filtrerIkkeNull()
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
