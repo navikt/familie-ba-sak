@@ -210,8 +210,9 @@ class BeregningService(
     }
 
     // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
-// Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
-// Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    @Transactional
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
