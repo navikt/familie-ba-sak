@@ -1,29 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
-import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
-import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.satstypeFamilieFellesTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder18ÅrVilkårTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.beskjærEtter
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.utvidelser.filtrer
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -57,7 +58,7 @@ class TilkjentYtelseBuilder(
         differanse = differanse,
         nasjonalt = nasjonalt,
     ) {
-        satstypeTidslinje(SatsType.SMA)
+        satstypeFamilieFellesTidslinje(SatsType.SMA)
     }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medUtvidet(
@@ -72,7 +73,7 @@ class TilkjentYtelseBuilder(
         nasjonalt = nasjonalt,
         differanse = differanse,
     ) {
-        satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
+        satstypeFamilieFellesTidslinje(SatsType.UTVIDET_BARNETRYGD)
     }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medOrdinær(
@@ -89,9 +90,9 @@ class TilkjentYtelseBuilder(
         differanse,
         kalkulert,
     ) {
-        val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
+        val orbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.ORBA)
         val tilleggOrbaTidslinje =
-            satstypeTidslinje(SatsType.TILLEGG_ORBA)
+            satstypeFamilieFellesTidslinje(SatsType.TILLEGG_ORBA)
                 .filtrerMed(erUnder6ÅrTidslinje(it))
         orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
     }
@@ -103,16 +104,16 @@ class TilkjentYtelseBuilder(
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it },
-        satsTidslinje: (Person) -> Tidslinje<Int, Måned>,
+        satsTidslinje: (Person) -> Tidslinje<Int>,
     ): TilkjentYtelseBuilder {
         val andeler =
             gjeldendePersoner
                 .map { person ->
                     val andelTilkjentYtelseTidslinje =
                         s
-                            .tilCharTidslinje(startMåned)
+                            .tilCharTidslinje(startMåned.tilYearMonth())
                             .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
-                            .map {
+                            .mapVerdi {
                                 AndelTilkjentYtelse(
                                     behandlingId = behandling.id,
                                     tilkjentYtelse = tilkjentYtelse,

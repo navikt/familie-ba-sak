@@ -11,42 +11,26 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.joinIkkeNull
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
-fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> =
+fun Iterable<AndelTilkjentYtelse>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<AndelTilkjentYtelse>> =
     this
         .filter { !it.erSøkersAndel() }
         .groupBy { it.aktør }
         .mapValues { (_, andeler) -> andeler.map { it.tilPeriode() }.tilTidslinje() }
 
-fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.values.flatMap { it.tilAndelTilkjentYtelse() }
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.values.flatMap { it.tilAndelTilkjentYtelse() }
 
-fun Iterable<Tidslinje<AndelTilkjentYtelse, Måned>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.flatMap { it.tilAndelTilkjentYtelse() }
+fun Iterable<Tidslinje<AndelTilkjentYtelse>>.tilAndelerTilkjentYtelse(): List<AndelTilkjentYtelse> = this.flatMap { it.tilAndelTilkjentYtelse() }
 
-fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> =
-    this
-        .perioder()
-        .map {
-            it.innhold?.medPeriode(
-                it.fraOgMed.tilYearMonth(),
-                it.tilOgMed.tilYearMonth(),
-            )
-        }.filterNotNull()
-
-fun FamilieFellesTidslinje<AndelTilkjentYtelse>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> =
+fun Tidslinje<AndelTilkjentYtelse>.tilAndelTilkjentYtelse(): List<AndelTilkjentYtelse> =
     this
         .tilPerioderIkkeNull()
         .map {
@@ -57,7 +41,7 @@ fun FamilieFellesTidslinje<AndelTilkjentYtelse>.tilAndelTilkjentYtelse(): List<A
         }
 
 fun AndelTilkjentYtelse.tilPeriode() =
-    FamilieFellesPeriode(
+    Periode(
         // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
         verdi = this.medPeriode(null, null),
         fom = this.stønadFom.førsteDagIInneværendeMåned(),
@@ -80,25 +64,15 @@ fun Iterable<AndelTilkjentYtelse>.tilTidslinjeForSøkersYtelse(ytelseType: Ytels
     this
         .filter { it.erSøkersAndel() }
         .filter { it.type == ytelseType }
-        .let {
-            tidslinje {
-                it.map { Periode(it.stønadFom.tilTidspunkt(), it.stønadTom.tilTidspunkt(), it) }
-            }
-        }
-
-fun Iterable<AndelTilkjentYtelse>.tilFamilieFellesTidslinjeForSøkersYtelse(ytelseType: YtelseType) =
-    this
-        .filter { it.erSøkersAndel() }
-        .filter { it.type == ytelseType }
         .map {
-            FamilieFellesPeriode(
+            Periode(
                 verdi = it,
                 fom = it.stønadFom.førsteDagIInneværendeMåned(),
                 tom = it.stønadTom.sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
 
-fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.kunAndelerTilOgMed3År(barna: List<Person>): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> {
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse>>.kunAndelerTilOgMed3År(barna: List<Person>): Map<Aktør, Tidslinje<AndelTilkjentYtelse>> {
     val barnasErInntil3ÅrTidslinjer = barna.associate { it.aktør to erTilogMed3ÅrTidslinje(it.fødselsdato) }
 
     // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
@@ -126,26 +100,7 @@ fun AndelTilkjentYtelse.tilpassTilTidslinje() =
         differanseberegnetPeriodebeløp = this.differanseberegnetPeriodebeløp,
     )
 
-fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) =
-    perioder()
-        .filter { it.innhold != null }
-        .map {
-            AndelTilkjentYtelse(
-                behandlingId = tilkjentYtelse.behandling.id,
-                tilkjentYtelse = tilkjentYtelse,
-                aktør = it.innhold!!.aktør,
-                type = it.innhold.ytelseType,
-                kalkulertUtbetalingsbeløp = it.innhold.beløp,
-                nasjonaltPeriodebeløp = it.innhold.nasjonaltPeriodebeløp,
-                differanseberegnetPeriodebeløp = it.innhold.differanseberegnetPeriodebeløp,
-                sats = it.innhold.sats,
-                prosent = it.innhold.prosent,
-                stønadFom = it.fraOgMed.tilYearMonth(),
-                stønadTom = it.tilOgMed.tilYearMonth(),
-            )
-        }
-
-fun FamilieFellesTidslinje<AndelTilkjentYtelseForTidslinje>.tilAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) =
+fun Tidslinje<AndelTilkjentYtelseForTidslinje>.tilAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) =
     tilPerioderIkkeNull()
         .map {
             AndelTilkjentYtelse(
@@ -170,14 +125,10 @@ fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: 
     this
         .filter { it.erSøkersAndel() }
         .filter { it.type == ytelseType }
-        .let {
-            tidslinje {
-                it.map {
-                    Periode(
-                        it.stønadFom.tilTidspunkt(),
-                        it.stønadTom.tilTidspunkt(),
-                        it.tilpassTilTidslinje(),
-                    )
-                }
-            }
-        }
+        .map {
+            Periode(
+                verdi = it.tilpassTilTidslinje(),
+                fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                tom = it.stønadTom.sisteDagIInneværendeMåned(),
+            )
+        }.tilTidslinje()
