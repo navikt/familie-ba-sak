@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
@@ -290,7 +290,7 @@ internal class KompetanseServiceTest {
             )
 
         val tilkjentYtelse =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
                 fagsakType = FagsakType.NORMAL,
@@ -352,7 +352,7 @@ internal class KompetanseServiceTest {
             )
 
         val tilkjentYtelse =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
                 fagsakType = FagsakType.NORMAL,
@@ -409,7 +409,7 @@ internal class KompetanseServiceTest {
             )
 
         val tilkjentYtelse =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
                 fagsakType = FagsakType.NORMAL,
