@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -10,14 +12,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.YearMonth
 
 object BehandlingsresultatValideringUtils {
@@ -79,8 +81,8 @@ object BehandlingsresultatValideringUtils {
         nåMåned: YearMonth,
     ) {
         val forrigeMåned = nåMåned.minusMonths(1)
-        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
-        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.tilTidspunkt())
+        val andelerIFortidenTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.sisteDagIInneværendeMåned())
+        val andelerIFortidenForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(forrigeMåned.sisteDagIInneværendeMåned())
 
         val endringerIAndelerTilbakeITidTidslinjer =
             andelerIFortidenTidslinje.outerJoin(andelerIFortidenForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
@@ -113,16 +115,19 @@ object BehandlingsresultatValideringUtils {
         endringISatsTidslinjer.kastFeilOgLoggVedEndringerIAndeler()
     }
 
-    private fun Map<Pair<Aktør, YtelseType>, Tidslinje<EndringIAndel, Måned>>.kastFeilOgLoggVedEndringerIAndeler() {
+    private fun Map<Pair<Aktør, YtelseType>, Tidslinje<EndringIAndel>>.kastFeilOgLoggVedEndringerIAndeler() {
         this.forEach { (aktør, ytelsetype), endringIAndelTidslinje ->
-            endringIAndelTidslinje.perioder().forEach {
-                if (it.innhold is ErEndringIAndel) {
+            endringIAndelTidslinje.tilPerioderIkkeNull().forEach {
+                if (it.verdi is ErEndringIAndel) {
+                    val erEndringIAndel = it.verdi as ErEndringIAndel
+                    val fom = it.fom?.toYearMonth() ?: MIN_MÅNED
+                    val tom = it.tom?.toYearMonth() ?: MAX_MÅNED
                     secureLogger.info(
-                        "Det er en uforventet endring i $ytelsetype-andel for $aktør i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}.\n" +
-                            "Andel denne behandlingen: ${it.innhold.andelDenneBehandlingen}\n" +
-                            "Andel forrige behandling: ${it.innhold.andelForrigeBehandling}",
+                        "Det er en uforventet endring i $ytelsetype-andel for $aktør i perioden $fom til $tom.\n" +
+                            "Andel denne behandlingen: ${erEndringIAndel.andelDenneBehandlingen}\n" +
+                            "Andel forrige behandling: ${erEndringIAndel.andelForrigeBehandling}",
                     )
-                    throw Feil("Det er en uforventet endring i andel. Gjelder andel i perioden ${it.fraOgMed.tilYearMonth()} til ${it.tilOgMed.tilYearMonth()}. Se secure log for mer detaljer.")
+                    throw Feil("Det er en uforventet endring i andel. Gjelder andel i perioden $fom til $tom. Se secure log for mer detaljer.")
                 }
             }
         }

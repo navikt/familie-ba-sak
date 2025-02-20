@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -11,15 +9,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class SanityServiceTest {
-    @MockK
-    private lateinit var sanityKlient: SanityKlient
+    private val sanityKlient = mockk<SanityKlient>()
 
-    @InjectMockKs
-    private lateinit var sanityService: SanityService
+    private val sanityService = SanityService(sanityKlient)
 
     @Test
     fun `hentSanityBegrunnelser - skal hente standardbegrunnelser`() {

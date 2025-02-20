@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
+import no.nav.familie.tidslinje.tilTidslinje
 
 class AndelTilkjentYtelseTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
@@ -20,6 +21,8 @@ class AndelTilkjentYtelseTidslinje(
             )
         }
 }
+
+fun List<AndelTilkjentYtelse>.tilTidslinje() = this.map { it.tilPeriode() }.tilTidslinje()
 
 class AndelTilkjentYtelseForVedtaksperioderTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,

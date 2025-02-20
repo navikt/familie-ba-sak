@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.internal
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -35,44 +33,34 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import kotlin.random.Random
 
-@ExtendWith(MockKExtension::class)
 class ForvalterServiceTest {
-    @MockK
-    lateinit var persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    private val økonomiService = mockk<ØkonomiService>()
+    private val vedtakService = mockk<VedtakService>()
+    private val beregningService = mockk<BeregningService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    private val fagsakRepository = mockk<FagsakRepository>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
+    private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
 
-    @MockK
-    lateinit var økonomiService: ØkonomiService
-
-    @MockK
-    lateinit var vedtakService: VedtakService
-
-    @MockK
-    lateinit var beregningService: BeregningService
-
-    @MockK
-    lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-
-    @MockK
-    lateinit var vilkårsvurderingService: VilkårsvurderingService
-
-    @MockK
-    lateinit var fagsakRepository: FagsakRepository
-
-    @MockK
-    lateinit var behandlingRepository: BehandlingRepository
-
-    @MockK
-    lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
-
-    @MockK
-    lateinit var arbeidsfordelingService: ArbeidsfordelingService
-
-    @InjectMockKs
-    lateinit var forvalterService: ForvalterService
+    private val forvalterService =
+        ForvalterService(
+            økonomiService = økonomiService,
+            vedtakService = vedtakService,
+            beregningService = beregningService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            fagsakRepository = fagsakRepository,
+            behandlingRepository = behandlingRepository,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+            arbeidsfordelingService = arbeidsfordelingService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            persongrunnlagService = persongrunnlagService,
+        )
 
     @Test
     fun `Skal endre periodeFom på vilkårresultat når den er før fødselsdato på person`() {

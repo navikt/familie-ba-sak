@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.EnvService
@@ -15,24 +13,19 @@ import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class PubliserVedtakV2TaskTest {
-    @MockK(relaxed = true)
-    private lateinit var taskRepositoryMock: TaskRepositoryWrapper
+    private val taskRepositoryMock = mockk<TaskRepositoryWrapper>()
+    private val kafkaProducerMock = mockk<KafkaProducer>()
+    private val env = mockk<EnvService>()
+    private val stønadsstatistikkService = mockk<StønadsstatistikkService>(relaxed = true)
 
-    @MockK(relaxed = true)
-    private lateinit var kafkaProducerMock: KafkaProducer
-
-    @MockK(relaxed = true)
-    private lateinit var stønadsstatistikkService: StønadsstatistikkService
-
-    @MockK
-    private lateinit var env: EnvService
-
-    @InjectMockKs
-    private lateinit var publiserVedtakV2Task: PubliserVedtakV2Task
+    private val publiserVedtakV2Task =
+        PubliserVedtakV2Task(
+            kafkaProducer = kafkaProducerMock,
+            stønadsstatistikkService = stønadsstatistikkService,
+            env = env,
+        )
 
     @BeforeEach
     fun initMocks() {
