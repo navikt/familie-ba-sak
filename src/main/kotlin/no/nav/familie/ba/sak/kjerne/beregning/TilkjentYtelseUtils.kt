@@ -42,6 +42,7 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
         fagsakType: FagsakType,
+        skalBrukeNyVersjonAvOppdaterAndelerMedEndringer: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val tilkjentYtelse =
@@ -77,10 +78,18 @@ object TilkjentYtelseUtils {
                 }
 
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
-            )
+            if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
+                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+            } else {
+                oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
+                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
+                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
+                )
+            }
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer =
             UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet(
@@ -89,6 +98,7 @@ object TilkjentYtelseUtils {
                 andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                 endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
                 personResultater = vilkårsvurdering.personResultater,
+                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = skalBrukeNyVersjonAvOppdaterAndelerMedEndringer
             )
 
         val småbarnstilleggErMulig =
@@ -122,10 +132,18 @@ object TilkjentYtelseUtils {
             }
 
         val andelerTilkjentYtelseBarnaMedAlleEndringer =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
-            )
+            if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
+                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+            } else {
+                oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
+                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
+                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
+                )
+            }
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })
 
