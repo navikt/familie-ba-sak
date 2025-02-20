@@ -2,23 +2,23 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object OrdinærBarnetrygdUtil {
     internal fun beregnAndelerTilkjentYtelseForBarna(
@@ -33,14 +33,12 @@ object OrdinærBarnetrygdUtil {
             val satsTidslinje = lagOrdinærTidslinje(barn)
             val satsProsentTidslinje = kombinerProsentOgSatsTidslinjer(tidslinjeMedRettTilProsentForBarn, satsTidslinje)
 
-            satsProsentTidslinje.perioder().map {
-                val innholdIPeriode =
-                    it.innhold
-                        ?: throw Feil("Finner ikke sats og prosent i periode (${it.fraOgMed} - ${it.tilOgMed}) ved generering av andeler tilkjent ytelse")
+            satsProsentTidslinje.tilPerioderIkkeNull().map {
+                val innholdIPeriode = it.verdi
                 BeregnetAndel(
                     person = barn,
-                    stønadFom = it.fraOgMed.tilYearMonth(),
-                    stønadTom = it.tilOgMed.tilYearMonth(),
+                    stønadFom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
+                    stønadTom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
                     beløp = innholdIPeriode.sats.avrundetHeltallAvProsent(innholdIPeriode.prosent),
                     sats = innholdIPeriode.sats,
                     prosent = innholdIPeriode.prosent,
@@ -50,8 +48,8 @@ object OrdinærBarnetrygdUtil {
     }
 
     private fun kombinerProsentOgSatsTidslinjer(
-        tidslinjeMedRettTilProsentForBarn: Tidslinje<BigDecimal, Måned>,
-        satsTidslinje: Tidslinje<Int, Måned>,
+        tidslinjeMedRettTilProsentForBarn: FamilieFellesTidslinje<BigDecimal>,
+        satsTidslinje: FamilieFellesTidslinje<Int>,
     ) = tidslinjeMedRettTilProsentForBarn
         .kombinerMed(satsTidslinje) { rettTilProsent, sats ->
             when {
@@ -59,7 +57,7 @@ object OrdinærBarnetrygdUtil {
                 sats == null -> throw Feil("Finner ikke sats i periode med rett til utbetaling")
                 else -> SatsProsent(sats, rettTilProsent)
             }
-        }.slåSammenLike()
+        }.slåSammenLikePerioder()
         .filtrerIkkeNull()
 
     private data class SatsProsent(
@@ -70,7 +68,7 @@ object OrdinærBarnetrygdUtil {
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         fagsakType: FagsakType,
-    ): Map<Person, Tidslinje<BigDecimal, Måned>> {
+    ): Map<Person, FamilieFellesTidslinje<BigDecimal>> {
         val tidslinjerPerPerson = lagTidslinjerMedRettTilProsentPerPerson(personopplysningGrunnlag, fagsakType)
 
         if (tidslinjerPerPerson.isEmpty()) return emptyMap()
@@ -82,8 +80,8 @@ object OrdinærBarnetrygdUtil {
     }
 
     private fun kombinerSøkerMedHvertBarnSinTidslinje(
-        barnasTidslinjer: Map<Person, Tidslinje<BigDecimal, Måned>>,
-        søkerTidslinje: Tidslinje<BigDecimal, Måned>,
+        barnasTidslinjer: Map<Person, FamilieFellesTidslinje<BigDecimal>>,
+        søkerTidslinje: FamilieFellesTidslinje<BigDecimal>,
     ) = barnasTidslinjer.mapValues { (_, barnTidslinje) ->
         barnTidslinje
             .kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
@@ -91,7 +89,7 @@ object OrdinærBarnetrygdUtil {
                     barnProsent == null || søkerProsent == null -> null
                     else -> barnProsent
                 }
-            }.slåSammenLike()
+            }.slåSammenLikePerioder()
             .filtrerIkkeNull()
     }
 
@@ -112,10 +110,10 @@ object OrdinærBarnetrygdUtil {
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
         person: Person,
         fagsakType: FagsakType,
-    ): Tidslinje<BigDecimal, Måned> {
+    ): FamilieFellesTidslinje<BigDecimal> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
-        return tidslinjer.kombiner { it.mapTilProsentEllerNull(person.type, fagsakType) }.slåSammenLike().filtrerIkkeNull()
+        return tidslinjer.kombiner { it.mapTilProsentEllerNull(person.type, fagsakType) }.slåSammenLikePerioder().filtrerIkkeNull()
     }
 
     internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(

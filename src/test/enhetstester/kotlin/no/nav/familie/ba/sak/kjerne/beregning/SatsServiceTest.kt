@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -15,7 +16,7 @@ class SatsServiceTest {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2017, 4, 6))
 
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
-        val ordinærePerioder = ordinærTidslinje.perioder().toList()
+        val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
         Assertions.assertEquals(10, ordinærePerioder.size)
 
@@ -33,17 +34,17 @@ class SatsServiceTest {
 
     private fun assertPeriode(
         forventet: TestKrPeriode,
-        faktisk: no.nav.familie.ba.sak.kjerne.tidslinje.Periode<Int, Måned>,
+        faktisk: Periode<Int>,
     ) {
-        Assertions.assertEquals(forventet.beløp, faktisk.innhold, "Forskjell i beløp")
+        Assertions.assertEquals(forventet.beløp, faktisk.verdi, "Forskjell i beløp")
         Assertions.assertEquals(
             forventet.fom?.let { årMnd(it) },
-            faktisk.fraOgMed.tilYearMonthEllerNull(),
+            faktisk.fom?.toYearMonth(),
             "Forskjell i fra-og-med",
         )
         Assertions.assertEquals(
             forventet.tom?.let { årMnd(it) },
-            faktisk.tilOgMed.tilYearMonthEllerNull(),
+            faktisk.tom?.toYearMonth(),
             "Forskjell i til-og-med",
         )
     }
