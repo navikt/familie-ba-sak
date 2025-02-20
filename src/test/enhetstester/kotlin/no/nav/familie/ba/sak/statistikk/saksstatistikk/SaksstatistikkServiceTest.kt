@@ -6,7 +6,6 @@ import com.worldturner.medeia.api.jackson.MedeiaJacksonApi
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.config.tilAktør
@@ -64,7 +63,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.LocalDate.now
@@ -75,7 +73,6 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextBoolean
 import kotlin.random.Random.Default.nextInt
 
-@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class SaksstatistikkServiceTest(
     @MockK(relaxed = true)

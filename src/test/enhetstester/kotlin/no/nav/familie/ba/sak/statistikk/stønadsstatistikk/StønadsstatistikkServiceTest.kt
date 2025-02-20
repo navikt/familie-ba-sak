@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -37,13 +36,11 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import java.lang.reflect.Field
 import java.math.BigDecimal
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(MockKExtension::class)
 internal class StønadsstatistikkServiceTest(
     @MockK(relaxed = true)
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,

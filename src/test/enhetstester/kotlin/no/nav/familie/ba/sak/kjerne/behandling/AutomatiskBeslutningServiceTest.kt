@@ -1,26 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
-@ExtendWith(MockKExtension::class)
 class AutomatiskBeslutningServiceTest {
-    @MockK
-    private lateinit var simuleringService: SimuleringService
-
-    @InjectMockKs
-    private lateinit var automatiskBeslutningService: AutomatiskBeslutningService
+    private val simuleringService = mockk<SimuleringService>()
+    private val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
 
     @Test
     fun `behandlingSkalAutomatiskBesluttes - skal returnere true dersom behandling er helmanuell migrering med avvik innenfor beløpsgrenser og det ikke finnes manuelle posteringer`() {

@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import io.mockk.MockKException
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.justRun
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
@@ -18,33 +16,27 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-@ExtendWith(MockKExtension::class)
 class ValutakursControllerTest {
-    @MockK
-    private lateinit var valutakursService: ValutakursService
+    private val valutakursService = mockk<ValutakursService>()
+    private val personidentService = mockk<PersonidentService>()
+    private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
+    private val ecbService = mockk<ECBService>()
+    private val tilgangService = mockk<TilgangService>()
+    private val automatiskOppdaterValutakursService = mockk<AutomatiskOppdaterValutakursService>()
 
-    @MockK
-    private lateinit var personidentService: PersonidentService
-
-    @MockK
-    private lateinit var utvidetBehandlingService: UtvidetBehandlingService
-
-    @MockK
-    private lateinit var ecbService: ECBService
-
-    @MockK
-    private lateinit var tilgangService: TilgangService
-
-    @MockK
-    private lateinit var automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService
-
-    @InjectMockKs
-    private lateinit var valutakursController: ValutakursController
+    private val valutakursController =
+        ValutakursController(
+            tilgangService = tilgangService,
+            valutakursService = valutakursService,
+            personidentService = personidentService,
+            utvidetBehandlingService = utvidetBehandlingService,
+            ecbService = ecbService,
+            automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+        )
 
     private val barnId = "12345678910"
 

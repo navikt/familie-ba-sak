@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -15,23 +13,20 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClientResponseException
 
-@ExtendWith(MockKExtension::class)
 internal class DokumentDistribueringServiceTest {
-    @MockK(relaxed = true)
-    private lateinit var taskService: TaskService
+    private val taskService = mockk<TaskService>(relaxed = true)
+    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val loggService = mockk<LoggService>()
 
-    @MockK
-    private lateinit var integrasjonClient: IntegrasjonClient
-
-    @MockK(relaxed = true)
-    private lateinit var loggService: LoggService
-
-    @InjectMockKs
-    private lateinit var dokumentDistribueringService: DokumentDistribueringService
+    private val dokumentDistribueringService =
+        DokumentDistribueringService(
+            taskService = taskService,
+            integrasjonClient = integrasjonClient,
+            loggService = loggService,
+        )
 
     @Test
     fun `Skal kalle 'loggBrevIkkeDistribuertUkjentAdresse' ved 400 kode og 'Mottaker har ukjent adresse' melding`() {

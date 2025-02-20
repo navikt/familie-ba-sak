@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -14,20 +12,14 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import org.hamcrest.CoreMatchers.`is` as Is
 
-@ExtendWith(MockKExtension::class)
 internal class VilkårsvurderingServiceTest {
-    @MockK
-    private lateinit var sanityService: SanityService
+    private val sanityService = mockk<SanityService>()
+    private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
 
-    @MockK
-    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-
-    @InjectMockKs
-    private lateinit var vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService = VilkårsvurderingService(vilkårsvurderingRepository, sanityService)
 
     @Test
     fun `oppdaterVilkårVedDødsfall skal sette tom dato til dødsfallsdato dersom dødsfallsdato er tidligere enn nåværende tom`() {

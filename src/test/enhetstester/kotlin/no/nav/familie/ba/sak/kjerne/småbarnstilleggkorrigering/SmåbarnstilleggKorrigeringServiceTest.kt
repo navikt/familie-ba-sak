@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -17,20 +14,15 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.YearMonth
 import org.hamcrest.CoreMatchers.`is` as Is
 
-@ExtendWith(MockKExtension::class)
 internal class SmåbarnstilleggKorrigeringServiceTest {
-    @MockK
-    private lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    @MockK(relaxed = true)
-    private lateinit var loggService: LoggService
+    private val loggService = mockk<LoggService>()
 
-    @InjectMockKs
-    private lateinit var småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService
+    private val småbarnstilleggKorrigeringService = SmåbarnstilleggKorrigeringService(tilkjentYtelseRepository, loggService)
 
     @Test
     fun `leggTilSmåbarnstilleggPåBehandling skal legge til småbarnstillegg på behandling som en AndelTilkjentYtelse`() {
