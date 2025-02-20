@@ -385,7 +385,7 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
         )
 
-    val saksbehandlerContext = SaksbehandlerContext("")
+    val saksbehandlerContext = SaksbehandlerContext("", mockk())
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
     val tilkjentYtelseValideringService =
