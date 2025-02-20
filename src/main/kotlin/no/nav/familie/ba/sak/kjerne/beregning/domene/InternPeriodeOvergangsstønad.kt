@@ -4,8 +4,8 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.LocalDate
 
 data class InternPeriodeOvergangsstønad(
@@ -67,10 +67,9 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
 ): List<InternPeriodeOvergangsstønad> {
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(dagensDato) }
     val framtidigePerioder = this.minus(tidligerePerioder)
-    val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
+    val nyeOvergangsstønadTidslinje = framtidigePerioder.tilTidslinje()
 
-    val gammelOvergangsstønadTidslinje =
-        InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
+    val gammelOvergangsstønadTidslinje = overgangsstønadPerioderFraForrigeBehandling.tilTidslinje()
 
     val oppsplittedeFramtigigePerioder =
         gammelOvergangsstønadTidslinje

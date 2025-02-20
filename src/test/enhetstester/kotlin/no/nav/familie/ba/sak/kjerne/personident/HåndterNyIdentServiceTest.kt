@@ -245,6 +245,7 @@ internal class HåndterNyIdentServiceTest {
                 aktørIdRepository = aktørIdRepository,
                 pdlIdentRestClient = pdlIdentRestClient,
                 taskRepository = taskRepositoryMock,
+                fagsakRepository = mockk(),
             )
 
         private val håndterNyIdentService =
