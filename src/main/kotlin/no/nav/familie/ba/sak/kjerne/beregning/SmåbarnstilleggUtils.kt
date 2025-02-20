@@ -12,8 +12,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erTilogMed3ÅrTidslinje
@@ -107,7 +105,13 @@ fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     return Pair(nyeSmåbarnstilleggPerioder.tilMånedPerioder(), fjernedeSmåbarnstilleggPerioder.tilMånedPerioder())
 }
 
-private fun Tidslinje<AndelTilkjentYtelse>.tilMånedPerioder() = this.tilPerioderIkkeNull().map { MånedPeriode(fom = it.fom?.toYearMonth() ?: MIN_MÅNED, tom = it.tom?.toYearMonth() ?: MAX_MÅNED) }
+private fun Tidslinje<AndelTilkjentYtelse>.tilMånedPerioder() =
+    this.tilPerioderIkkeNull().map {
+        MånedPeriode(
+            fom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
+            tom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
+        )
+    }
 
 fun kanAutomatiskIverksetteSmåbarnstillegg(
     innvilgedeMånedPerioder: List<MånedPeriode>,
