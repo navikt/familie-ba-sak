@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.finnUtvidetVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -22,16 +23,16 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -185,7 +186,7 @@ object TilkjentYtelseUtils {
         return oppdaterteAndeler
     }
 
-    data class AndelMedEndretUtbetalingForTidslinje(
+    private data class AndelMedEndretUtbetalingForTidslinje(
         val aktør: Aktør,
         val beløp: Int,
         val sats: Int,
@@ -194,33 +195,34 @@ object TilkjentYtelseUtils {
         val endretUtbetalingAndel: EndretUtbetalingAndelMedAndelerTilkjentYtelse?,
     )
 
-    private fun List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>.tilTidslinje() =
+    private fun Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse>.tilTidslinje(): Tidslinje<EndretUtbetalingAndelMedAndelerTilkjentYtelse> =
         this
             .map {
                 Periode(
-                    fraOgMed = it.fom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen fom-dato: $it"),
-                    tilOgMed = it.tom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen tom-dato: $it"),
-                    innhold = it,
+                    verdi = it,
+                    fom = it.fom?.førsteDagIInneværendeMåned(),
+                    tom = it.tom?.sisteDagIInneværendeMåned(),
                 )
             }.tilTidslinje()
 
-    private fun Periode<AndelMedEndretUtbetalingForTidslinje, Måned>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
+
+    private fun Periode<AndelMedEndretUtbetalingForTidslinje>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
         val andelTilkjentYtelse =
             AndelTilkjentYtelse(
                 behandlingId = tilkjentYtelse.behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
-                aktør = this.innhold!!.aktør,
-                type = this.innhold.ytelseType,
-                kalkulertUtbetalingsbeløp = this.innhold.beløp,
-                nasjonaltPeriodebeløp = this.innhold.beløp,
+                aktør = this.verdi.aktør,
+                type = this.verdi.ytelseType,
+                kalkulertUtbetalingsbeløp = this.verdi.beløp,
+                nasjonaltPeriodebeløp = this.verdi.beløp,
                 differanseberegnetPeriodebeløp = null,
-                sats = this.innhold.sats,
-                prosent = this.innhold.prosent,
-                stønadFom = this.fraOgMed.tilYearMonth(),
-                stønadTom = this.tilOgMed.tilYearMonth(),
+                sats = this.verdi.sats,
+                prosent = this.verdi.prosent,
+                stønadFom = this.fom?.toYearMonth() ?: throw Feil("Fra og med-dato ikke satt"),
+                stønadTom = this.tom?.toYearMonth() ?: throw Feil("Til og med-dato ikke satt"),
             )
 
-        val endretUtbetalingAndel = this.innhold.endretUtbetalingAndel
+        val endretUtbetalingAndel = this.verdi.endretUtbetalingAndel
 
         return if (endretUtbetalingAndel == null) {
             AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
@@ -229,14 +231,14 @@ object TilkjentYtelseUtils {
         }
     }
 
-    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje, Måned>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) = this.perioder().filter { it.innhold != null }.map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
+    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) = this.tilPerioderIkkeNull().map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
 
     private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
         andelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        val andelerTidslinje = AndelTilkjentYtelseTidslinje(andelerForPerson)
+        val andelerTidslinje = andelerForPerson.map { it.tilPeriode() }.tilTidslinje()
         val endretUtbetalingTidslinje = endretUtbetalingAndelerForPerson.tilTidslinje()
 
         val andelerMedEndringerTidslinje =
