@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.ecb
 
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -26,8 +26,7 @@ import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ECBIntegrationTest : AbstractSpringIntegrationTest() {
-    @MockK
-    private lateinit var ecbClient: ValutakursRestClient
+    private val ecbClient = mockk<ValutakursRestClient>()
 
     @Autowired
     private lateinit var ecbService: ECBService
