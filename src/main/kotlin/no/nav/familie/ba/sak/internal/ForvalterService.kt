@@ -10,7 +10,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -18,6 +20,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -34,13 +38,17 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import no.nav.familie.tidslinje.verdier
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -55,6 +63,7 @@ class ForvalterService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -220,30 +229,135 @@ class ForvalterService(
         }
     }
 
-    fun lagUtbetalingsoppdragTidslinje(fagsakId: Long): Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>> =
-        tilkjentYtelseRepository
-            .findByFagsak(fagsakId)
-            .fold(mutableMapOf<Long, List<Tidslinje<Utbetalingsperiode>>>()) { kjederForFagsak, tilkjentYtelse ->
-                val kjederForUtbetalingsperioder =
-                    tilkjentYtelse
-                        .utbetalingsperioder()
-                        .sortedBy { it.periodeId }
-                        .fold(mutableMapOf<Long, MutableList<Periode<Utbetalingsperiode>>>()) { kjeder, utbetalingsperiode ->
-                            kjeder.apply {
-                                val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, utbetalingsperiode.vedtakdatoTom)
-                                put(utbetalingsperiode.periodeId, kjede.toMutableList())
-                                remove(utbetalingsperiode.forrigePeriodeId)
-                            }
-                        }.mapValues { (_, kjede) -> Pair(kjede.tilTidslinje(), kjede.minOf { it.verdi.periodeId }) }
-                kjederForFagsak.apply {
-                    kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId) ->
-                        val kjedeForFagsak = kjederForFagsak.getOrDefault(forrigePeriodeId, mutableListOf()) + tidslinje
-                        put(periodeId, kjedeForFagsak.toMutableList())
-                        remove(forrigePeriodeId)
+    @Transactional
+    fun patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsaker(
+        fagsaker: List<Long>,
+        dryRun: Boolean,
+    ): List<AndelKorreksjonResultat> = fagsaker.map { fagsak -> patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsak, dryRun) }
+
+    @Transactional
+    fun patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(
+        fagsakId: Long,
+        dryRun: Boolean,
+    ): AndelKorreksjonResultat {
+        val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: throw Feil("Finner ikke siste iverksatte behandling for fagsak $fagsakId")
+        val perioderForKjeder =
+            tilkjentYtelseRepository
+                .findByFagsak(fagsakId)
+                .fold(mutableMapOf<Long, List<Tidslinje<Utbetalingsperiode>>>()) { kjederForFagsak, tilkjentYtelse ->
+                    val kjederForUtbetalingsperioder =
+                        tilkjentYtelse
+                            .utbetalingsperioder()
+                            .sortedBy { it.periodeId }
+                            .fold(mutableMapOf<Long, MutableList<Periode<Utbetalingsperiode>>>()) { kjeder, utbetalingsperiode ->
+                                kjeder.apply {
+                                    val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, utbetalingsperiode.vedtakdatoTom)
+                                    put(utbetalingsperiode.periodeId, kjede.toMutableList())
+                                    remove(utbetalingsperiode.forrigePeriodeId)
+                                }
+                            }.mapValues { (_, kjede) -> Pair(kjede.tilTidslinje(), kjede.minOf { it.verdi.forrigePeriodeId ?: 0 }) }
+                    kjederForFagsak.apply {
+                        kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId) ->
+                            val kjedeForFagsak = kjederForFagsak.getOrDefault(forrigePeriodeId, mutableListOf()) + tidslinje
+                            put(periodeId, kjedeForFagsak.toMutableList())
+                            remove(forrigePeriodeId)
+                        }
                     }
+                }.mapValues { (_, tidslinjerForKjede) ->
+                    tidslinjerForKjede.kombiner().tilPerioderIkkeNull()
                 }
-            }.mapValues { (_, test) -> test.kombiner().tilPerioderIkkeNull() }
+
+        // Tidslinje per kjede med gjeldende/siste periodeId for hver periode
+        val gjeldeneTidslinjePerKjede =
+            perioderForKjeder.mapValues { (_, perioder) ->
+                perioder
+                    .map { periode -> Periode(periode.verdi.maxBy { utbetalingsperiode -> utbetalingsperiode.periodeId }, periode.fom, periode.tom) }
+                    .tilTidslinje()
+            }
+
+        // Alle periodeId'er per kjede. Inneholder alle periodeId'er og ikke bare gjeldende/siste for hver periode
+        val kjedeIderPerKjede =
+            perioderForKjeder.mapValues { (_, perioder) ->
+                perioder
+                    .flatMap { periode -> periode.verdi.map { utbetalingsperiode -> utbetalingsperiode.periodeId } }
+                    .toSet()
+                    .sorted()
+            }
+
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
+        val andelTidslinjer =
+            andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }.mapNotNull { (_, andeler) ->
+                val perioder = andeler.map { Periode(it, it.stønadFom.førsteDagIInneværendeMåned(), it.stønadTom.sisteDagIInneværendeMåned()) }
+                val sistePeriodeId = perioder.maxOf { it.verdi.periodeOffset ?: 0 }
+                if (sistePeriodeId != 0L) {
+                    sistePeriodeId to perioder.tilTidslinje()
+                } else {
+                    null
+                }
+            }
+
+        val andelerMedFeilPeriodeIdEllerKildeBehandlingId =
+            andelTidslinjer.flatMap { (periodeId, andelTidslinje) ->
+                // Finner ut hvilken kjede andelene tilhører.
+                val sistePeriodeIdIKjedenTilAndeler = kjedeIderPerKjede.entries.single { it.value.contains(periodeId) }.key
+                andelTidslinje
+                    .kombinerMed(gjeldeneTidslinjePerKjede.getOrDefault(sistePeriodeIdIKjedenTilAndeler, tomTidslinje())) { andel, utbetalingsperiode ->
+                        // Dersom det finnes en andel for perioden, ta med andelen og utbetalingsperioden dersom andelen ikke har korrekt periodeId og kildeBehandlingId.
+                        if (andel != null && utbetalingsperiode != null && (andel.periodeOffset != utbetalingsperiode.periodeId || andel.kildeBehandlingId != utbetalingsperiode.behandlingId)) {
+                            Pair(andel, utbetalingsperiode)
+                        } else {
+                            null
+                        }
+                    }.tilPerioderIkkeNull()
+                    .verdier()
+            }
+
+        val nyeAndeler =
+            andelerMedFeilPeriodeIdEllerKildeBehandlingId.map { (andel, utbetalingsperiode) ->
+                andel.copy(
+                    id = 0,
+                    periodeOffset = utbetalingsperiode.periodeId,
+                    forrigePeriodeOffset = utbetalingsperiode.forrigePeriodeId,
+                    kildeBehandlingId = utbetalingsperiode.behandlingId,
+                )
+            }
+
+        val andelerSomSkalSlettes = andelerMedFeilPeriodeIdEllerKildeBehandlingId.map { (andel, _) -> andel }
+
+        if (andelerSomSkalSlettes.size != nyeAndeler.size) throw Feil("Det må være like mange nye/korrigerte andeler som det er andeler vi sletter")
+
+        if (!dryRun) {
+            andelTilkjentYtelseRepository.deleteAll(andelerSomSkalSlettes)
+            andelTilkjentYtelseRepository.saveAll(nyeAndeler)
+        }
+
+        return AndelKorreksjonResultat(andelerSomSkalSlettes.tilAndelTilkjentYtelseDto(), nyeAndeler.tilAndelTilkjentYtelseDto())
+    }
 }
+
+fun Collection<AndelTilkjentYtelse>.tilAndelTilkjentYtelseDto(): List<AndelTilkjentYtelseDto> =
+    this.map {
+        AndelTilkjentYtelseDto(
+            fom = it.stønadFom,
+            tom = it.stønadTom,
+            periodeId = it.periodeOffset,
+            forrigePeriodeId = it.forrigePeriodeOffset,
+            kildeBehandlingId = it.kildeBehandlingId,
+        )
+    }
+
+data class AndelTilkjentYtelseDto(
+    val fom: YearMonth,
+    val tom: YearMonth?,
+    val periodeId: Long?,
+    val forrigePeriodeId: Long?,
+    val kildeBehandlingId: Long?,
+)
+
+data class AndelKorreksjonResultat(
+    val andelerSomSlettes: List<AndelTilkjentYtelseDto>,
+    val andelerSomOppretets: List<AndelTilkjentYtelseDto>,
+)
 
 interface FagsakMedFlereMigreringer {
     val fagsakId: Long

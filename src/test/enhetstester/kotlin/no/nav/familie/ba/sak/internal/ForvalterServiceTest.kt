@@ -8,9 +8,15 @@ import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.lagUtbetalingsperiode
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -19,6 +25,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -31,12 +40,14 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.time.YearMonth
 import kotlin.random.Random
 
 @ExtendWith(MockKExtension::class)
@@ -70,6 +81,12 @@ class ForvalterServiceTest {
 
     @MockK
     lateinit var arbeidsfordelingService: ArbeidsfordelingService
+
+    @MockK
+    lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
+
+    @MockK
+    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @InjectMockKs
     lateinit var forvalterService: ForvalterService
@@ -308,6 +325,181 @@ class ForvalterServiceTest {
                     assertTrue(vilkårResultat.periodeFom?.isSameOrAfter(barn.fødselsdato) ?: false)
                 }
             }
+    }
+
+    @Test
+    fun `skal oppdatere andeler fra siste iverksatte behandling som har feil periodeId, forrigePeriodeId og kildeBehandlingId`() {
+        val fagsak = lagFagsak()
+        val behandling1 = lagBehandling(fagsak)
+        val behandling2 = lagBehandling(fagsak)
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN)
+        val utbetalingsoppdrag1 =
+            lagUtbetalingsoppdrag(
+                listOf(
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling1.id,
+                        periodeId = 1,
+                        forrigePeriodeId = null,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = LocalDate.of(2023, 7, 1),
+                        tom = LocalDate.of(2024, 5, 31),
+                        opphør = null,
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling1.id,
+                        periodeId = 2,
+                        forrigePeriodeId = 1,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = LocalDate.of(2024, 6, 1),
+                        tom = LocalDate.of(2035, 5, 31),
+                        opphør = null,
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling1.id,
+                        periodeId = 3,
+                        forrigePeriodeId = null,
+                        ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD,
+                        fom = LocalDate.of(2023, 7, 1),
+                        tom = LocalDate.of(2024, 5, 31),
+                        opphør = null,
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling1.id,
+                        periodeId = 4,
+                        forrigePeriodeId = 3,
+                        ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD,
+                        fom = LocalDate.of(2024, 6, 1),
+                        tom = LocalDate.of(2035, 5, 31),
+                        opphør = null,
+                    ),
+                ),
+            )
+
+        val utbetalingsoppdrag2 =
+            lagUtbetalingsoppdrag(
+                listOf(
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling2.id,
+                        periodeId = 5,
+                        forrigePeriodeId = 2,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = LocalDate.of(2023, 7, 1),
+                        tom = LocalDate.of(2024, 5, 31),
+                        opphør = null,
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling2.id,
+                        periodeId = 6,
+                        forrigePeriodeId = 5,
+                        ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                        fom = LocalDate.of(2024, 6, 1),
+                        tom = LocalDate.of(2035, 5, 31),
+                        opphør = null,
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling2.id,
+                        periodeId = 7,
+                        forrigePeriodeId = 4,
+                        ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD,
+                        fom = LocalDate.of(2023, 7, 1),
+                        tom = LocalDate.of(2024, 5, 31),
+                        opphør = null,
+                    ),
+                    lagUtbetalingsperiode(
+                        behandlingId = behandling2.id,
+                        periodeId = 8,
+                        forrigePeriodeId = 7,
+                        ytelseTypeBa = YtelsetypeBA.UTVIDET_BARNETRYGD,
+                        fom = LocalDate.of(2024, 6, 1),
+                        tom = LocalDate.of(2035, 5, 31),
+                        opphør = null,
+                    ),
+                ),
+            )
+
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    behandling = behandling2,
+                    kildeBehandlingId = behandling1.id,
+                    fom = YearMonth.of(2023, 7),
+                    tom = YearMonth.of(2024, 5),
+                    person = søker,
+                    periodeIdOffset = 1,
+                    forrigeperiodeIdOffset = null,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    behandling = behandling2,
+                    kildeBehandlingId = behandling1.id,
+                    fom = YearMonth.of(2024, 6),
+                    tom = YearMonth.of(2035, 5),
+                    person = søker,
+                    periodeIdOffset = 2,
+                    forrigeperiodeIdOffset = 1,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    behandling = behandling2,
+                    kildeBehandlingId = behandling1.id,
+                    fom = YearMonth.of(2023, 7),
+                    tom = YearMonth.of(2024, 5),
+                    person = barn,
+                    periodeIdOffset = 3,
+                    forrigeperiodeIdOffset = null,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                ),
+                lagAndelTilkjentYtelse(
+                    behandling = behandling2,
+                    kildeBehandlingId = behandling1.id,
+                    fom = YearMonth.of(2024, 6),
+                    tom = YearMonth.of(2035, 5),
+                    person = barn,
+                    periodeIdOffset = 4,
+                    forrigeperiodeIdOffset = 3,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                ),
+            )
+        val tilkjentYtelse1 = lagTilkjentYtelse(behandling1, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag1))
+        val tilkjentYtelse2 = lagTilkjentYtelse(behandling2, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag2))
+
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) } returns behandling2
+        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(tilkjentYtelse1, tilkjentYtelse2)
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling2.id) } returns andelerTilkjentYtelse
+
+        val andelerMedFeilOgKorrigerteAndeler = forvalterService.patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsak.id, true)
+
+        val sorterteAndelerMedFeil = andelerMedFeilOgKorrigerteAndeler.first.sortedBy { it.periodeId }
+        val sorterteNyeAndeler = andelerMedFeilOgKorrigerteAndeler.second.sortedBy { it.periodeId }
+
+        assertThat(sorterteAndelerMedFeil).hasSize(4)
+        assertThat(sorterteAndelerMedFeil[0].periodeId).isEqualTo(1)
+        assertThat(sorterteAndelerMedFeil[0].forrigePeriodeId).isEqualTo(null)
+        assertThat(sorterteAndelerMedFeil[0].kildeBehandlingId).isEqualTo(behandling1.id)
+        assertThat(sorterteAndelerMedFeil[1].periodeId).isEqualTo(2)
+        assertThat(sorterteAndelerMedFeil[1].forrigePeriodeId).isEqualTo(1)
+        assertThat(sorterteAndelerMedFeil[1].kildeBehandlingId).isEqualTo(behandling1.id)
+        assertThat(sorterteAndelerMedFeil[2].periodeId).isEqualTo(3)
+        assertThat(sorterteAndelerMedFeil[2].forrigePeriodeId).isEqualTo(null)
+        assertThat(sorterteAndelerMedFeil[2].kildeBehandlingId).isEqualTo(behandling1.id)
+        assertThat(sorterteAndelerMedFeil[3].periodeId).isEqualTo(4)
+        assertThat(sorterteAndelerMedFeil[3].forrigePeriodeId).isEqualTo(3)
+        assertThat(sorterteAndelerMedFeil[3].kildeBehandlingId).isEqualTo(behandling1.id)
+
+        assertThat(sorterteNyeAndeler).hasSize(4)
+        assertThat(sorterteNyeAndeler[0].periodeId).isEqualTo(5)
+        assertThat(sorterteNyeAndeler[0].forrigePeriodeId).isEqualTo(2)
+        assertThat(sorterteNyeAndeler[0].kildeBehandlingId).isEqualTo(behandling2.id)
+        assertThat(sorterteNyeAndeler[1].periodeId).isEqualTo(6)
+        assertThat(sorterteNyeAndeler[1].forrigePeriodeId).isEqualTo(5)
+        assertThat(sorterteNyeAndeler[1].kildeBehandlingId).isEqualTo(behandling2.id)
+        assertThat(sorterteNyeAndeler[2].periodeId).isEqualTo(7)
+        assertThat(sorterteNyeAndeler[2].forrigePeriodeId).isEqualTo(4)
+        assertThat(sorterteNyeAndeler[2].kildeBehandlingId).isEqualTo(behandling2.id)
+        assertThat(sorterteNyeAndeler[3].periodeId).isEqualTo(8)
+        assertThat(sorterteNyeAndeler[3].forrigePeriodeId).isEqualTo(7)
+        assertThat(sorterteNyeAndeler[3].kildeBehandlingId).isEqualTo(behandling2.id)
     }
 
     private fun personTilPersonEnkel(barn: Person) =
