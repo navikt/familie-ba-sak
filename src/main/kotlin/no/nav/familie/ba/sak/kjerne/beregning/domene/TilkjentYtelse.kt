@@ -64,7 +64,7 @@ data class TilkjentYtelse(
 
 fun TilkjentYtelse.tilTidslinjeMedAndeler() =
     this.andelerTilkjentYtelse
-        .tilFamilieFellesTidslinjerPerAktørOgType()
+        .tilTidslinjerPerAktørOgType()
         .values
         .kombiner()
 

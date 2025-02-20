@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilFamilieFellesTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -132,7 +132,7 @@ class StønadsstatistikkService(
         val utbetalingsPerioder =
             andelerMedEndringer
                 .map { it.andel }
-                .tilFamilieFellesTidslinjerPerAktørOgType()
+                .tilTidslinjerPerAktørOgType()
                 .values
                 .kombiner { it }
         val søkerOgBarn = persongrunnlag.søkerOgBarn

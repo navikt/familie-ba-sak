@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilFamilieFellesTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
@@ -49,7 +49,7 @@ class SendVedtakTilInfotrygdTask(
         val førsteUtbetalingsperiode =
             andelerMedEndringer
                 .map { it.andel }
-                .tilFamilieFellesTidslinjerPerAktørOgType()
+                .tilTidslinjerPerAktørOgType()
                 .values
                 .kombiner { it }
                 .tilPerioderIkkeNull()
