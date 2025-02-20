@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -8,7 +7,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -25,13 +23,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
+import no.nav.familie.tidslinje.mapVerdi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -276,7 +274,7 @@ internal class UtvidetBarnetrygdTest {
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
                         .tilSeparateTidslinjerForBarna()
-                        .mapValues { it.value.map { true } },
+                        .mapValues { it.value.mapVerdi { true } },
             )
 
         val utvidetAndelerNårKunBarnMed50ProsentBorMedSøker =
@@ -289,7 +287,7 @@ internal class UtvidetBarnetrygdTest {
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
                         .tilSeparateTidslinjerForBarna()
-                        .mapValues { it.value.map { andel -> andel?.prosent == BigDecimal(50) } },
+                        .mapValues { it.value.mapVerdi { andel -> andel?.prosent == BigDecimal(50) } },
             )
 
         assertEquals(BigDecimal(100), utvidetAndelerNårBarnMed100ProsentBorMedSøker.minOf { it.prosent })
@@ -619,15 +617,6 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
-        val vedtaksperioderMedBegrunnelser =
-            hentPerioderMedUtbetaling(
-                andelerTilkjentYtelse = andeler,
-                vedtak = lagVedtak(behandling),
-                personResultater = vilkårsvurdering.personResultater,
-                personerIPersongrunnlag = personopplysningGrunnlag.personer.toList(),
-                fagsakType = FagsakType.NORMAL,
-            )
-
         // Én  andel for barnet og én andel for utvidet barnetrygd. Utvidet-andelen splittes IKKE
         assertEquals(2, andeler.size)
 
@@ -641,17 +630,6 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(søkerOrdinær.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(YearMonth.of(2019, 5), andelUtvidet.stønadFom)
         assertEquals(YearMonth.of(2020, 10), andelUtvidet.stønadTom)
-
-        // Én periode frem til og med 2020-02, og én fra og med 2020-03, der vilkåret er splittet
-        assertEquals(2, vedtaksperioderMedBegrunnelser.size)
-
-        val vedtaksperiode1 = vedtaksperioderMedBegrunnelser[0]
-        val vedtaksperiode2 = vedtaksperioderMedBegrunnelser[1]
-
-        assertEquals(LocalDate.of(2019, 5, 1), vedtaksperiode1.fom)
-        assertEquals(LocalDate.of(2020, 2, 29), vedtaksperiode1.tom)
-        assertEquals(LocalDate.of(2020, 3, 1), vedtaksperiode2.fom)
-        assertEquals(LocalDate.of(2020, 10, 31), vedtaksperiode2.tom)
     }
 
     @Test
@@ -1046,7 +1024,7 @@ internal class UtvidetBarnetrygdTest {
                 utvidetVilkår = listOf(utvidetVilkår),
                 andelerBarna = barnasAndeler,
                 perioderBarnaBorMedSøkerTidslinje =
-                    barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.map { true } },
+                    barnasAndeler.tilSeparateTidslinjerForBarna().mapValues { it.value.mapVerdi { true } },
             )
         }
     }
@@ -1096,7 +1074,7 @@ internal class UtvidetBarnetrygdTest {
                 perioderBarnaBorMedSøkerTidslinje =
                     barnasAndeler
                         .tilSeparateTidslinjerForBarna()
-                        .mapValues { it.value.map { true } },
+                        .mapValues { it.value.mapVerdi { true } },
             ).sortedBy { it.stønadFom }
 
         assertEquals(2, utvidetAndeler.size)

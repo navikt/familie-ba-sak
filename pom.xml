@@ -23,7 +23,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250205080941_29def62</prosessering.version>
+        <prosessering.version>2.20250219093533_62416e5</prosessering.version>
         <felles.version>3.20250122103549_5bcb4dc</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250113155636_bb71360</felles-kontrakter.version>
@@ -33,7 +33,7 @@
         <cucumber.version>7.21.1</cucumber.version>
         <mockk.version>1.13.16</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
-        <token-validation-spring.version>5.0.16</token-validation-spring.version>
+        <token-validation-spring.version>5.0.17</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.5</springdoc.version>
         <sentry.version>8.2.0</sentry.version>
@@ -52,7 +52,7 @@
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
-        <confluent.version>7.8.1</confluent.version>
+        <confluent.version>7.9.0</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.sources>src/main</sonar.sources>

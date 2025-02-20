@@ -1,16 +1,13 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.impl.annotations.SpyK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -18,47 +15,24 @@ import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.http.HttpStatus
 
-@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InfotrygdControllerTest {
-    @MockK
-    lateinit var personopplysningerService: PersonopplysningerService
+    private val systemOnlyPdlRestClient = mockk<SystemOnlyPdlRestClient>()
+    private val cacheManager = spyk(ConcurrentMapCacheManager())
+    private val familieIntegrasjonerTilgangskontrollClient = mockk<FamilieIntegrasjonerTilgangskontrollClient>()
 
-    @MockK
-    lateinit var systemOnlyPdlRestClient: SystemOnlyPdlRestClient
+    private val familieIntegrasjonerTilgangskontrollService = FamilieIntegrasjonerTilgangskontrollService(familieIntegrasjonerTilgangskontrollClient, cacheManager, systemOnlyPdlRestClient)
 
-    @SpyK
-    var cacheManager = ConcurrentMapCacheManager()
-
-    @MockK
-    lateinit var familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
-
-    @InjectMockKs
-    lateinit var familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService
-
-    @MockK
-    lateinit var infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient
-
-    @MockK
-    lateinit var personidentService: PersonidentService
-
-    @InjectMockKs
-    lateinit var infotrygdService: InfotrygdService
-
-    lateinit var infotrygdController: InfotrygdController
-
-    @BeforeAll
-    fun init() {
-        infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, personidentService, infotrygdService)
-    }
+    private val infotrygdBarnetrygdClient = mockk<InfotrygdBarnetrygdClient>()
+    private val personidentService = mockk<PersonidentService>()
+    private val infotrygdService: InfotrygdService = InfotrygdService(infotrygdBarnetrygdClient, familieIntegrasjonerTilgangskontrollService, personidentService)
+    private val infotrygdController = InfotrygdController(infotrygdBarnetrygdClient, personidentService, infotrygdService)
 
     @BeforeEach
     fun setUp() {

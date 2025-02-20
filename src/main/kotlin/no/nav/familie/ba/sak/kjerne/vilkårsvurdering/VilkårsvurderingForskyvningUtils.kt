@@ -85,10 +85,10 @@ object VilkårsvurderingForskyvningUtils {
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)
     }
 
-    fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> {
         if (vilkår == Vilkår.UNDER_18_ÅR) throw Feil("Funksjonen skal ikke brukes for under 18 vilkåret")
 
-        return this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
+        return this.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår(vilkår)
     }
 
     fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> =
