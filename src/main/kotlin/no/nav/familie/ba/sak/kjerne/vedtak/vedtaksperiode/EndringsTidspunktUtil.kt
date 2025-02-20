@@ -1,15 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksobjekt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.BehandlingsGrunnlagForVedtaksperioder
@@ -18,7 +12,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenomTom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.tidslinje.utvidelser.outerJoin
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import java.time.LocalDate
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
@@ -62,24 +60,16 @@ private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<Person
     }.toSet()
 
 private fun loggEndringstidspunktOgEndringer(
-    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<VedtaksperiodeGrunnlagForPerson>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<VedtaksperiodeGrunnlagForPerson>>,
     aktørMedFørsteForandring: AktørOgRolleBegrunnelseGrunnlag?,
     datoTidligsteForskjell: LocalDate,
 ) {
     val grunnlagDenneBehandlingen = grunnlagTidslinjePerPerson[aktørMedFørsteForandring]
     val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørMedFørsteForandring]
 
-    val grunnlagIPeriodeMedEndring =
-        grunnlagDenneBehandlingen
-            ?.innholdForTidspunkt(
-                datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
-            )?.innhold
-    val grunnlagIPeriodeMedEndringForrigeBehanlding =
-        grunnlagForrigeBehandling
-            ?.innholdForTidspunkt(
-                datoTidligsteForskjell.toYearMonth().tilTidspunktEllerUendeligSent(),
-            )?.innhold
+    val grunnlagIPeriodeMedEndring = grunnlagDenneBehandlingen?.verdiPåTidspunkt(datoTidligsteForskjell)
+    val grunnlagIPeriodeMedEndringForrigeBehanlding = grunnlagForrigeBehandling?.verdiPåTidspunkt(datoTidligsteForskjell)
 
     val endringer = mutableListOf<String>()
 
@@ -131,14 +121,14 @@ private fun loggEndringstidspunktOgEndringer(
     secureLogger.info("Ved endringstidspunktet $datoTidligsteForskjell er det endring for $aktørMedFørsteForandring")
 }
 
-private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() =
+private fun Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<Boolean>>.finnTidligsteForskjell() =
     this
         .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
             val førsteEndringForAktør =
                 erPeriodeLikTidslinje
-                    .perioder()
-                    .filter { it.innhold == false }
-                    .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
+                    .tilPerioder()
+                    .filter { it.verdi == false }
+                    .minOfOrNull { it.fom?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN }
                     ?: TIDENES_ENDE
 
             aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
