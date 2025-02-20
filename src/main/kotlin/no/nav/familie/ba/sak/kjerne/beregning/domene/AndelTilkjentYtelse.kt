@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -209,13 +208,6 @@ private fun regelverkAvhengigeVilkår() =
         Vilkår.BOSATT_I_RIKET,
         Vilkår.LOVLIG_OPPHOLD,
     )
-
-fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
-    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
-        AndelTilkjentYtelseTidslinje(
-            andelerTilkjentYtelsePåPerson,
-        )
-    }
 
 fun Collection<AndelTilkjentYtelse>.tilFamilieFellesTidslinjerPerAktørOgType() =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
