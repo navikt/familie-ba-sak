@@ -205,7 +205,6 @@ object TilkjentYtelseUtils {
                 )
             }.tilTidslinje()
 
-
     private fun Periode<AndelMedEndretUtbetalingForTidslinje>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
         val andelTilkjentYtelse =
             AndelTilkjentYtelse(
