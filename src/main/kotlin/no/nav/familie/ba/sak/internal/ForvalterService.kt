@@ -255,7 +255,7 @@ class ForvalterService(
                                     put(utbetalingsperiode.periodeId, kjede.toMutableList())
                                     remove(utbetalingsperiode.forrigePeriodeId)
                                 }
-                            }.mapValues { (_, kjede) -> Pair(kjede.tilTidslinje(), kjede.minOf { it.verdi.forrigePeriodeId ?: 0 }) }
+                            }.mapValues { (_, kjede) -> Pair(kjede.tilTidslinje(), kjede.minOfOrNull { it.verdi.forrigePeriodeId ?: -1 }) }
                     kjederForFagsak.apply {
                         kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId) ->
                             val kjedeForFagsak = kjederForFagsak.getOrDefault(forrigePeriodeId, mutableListOf()) + tidslinje
@@ -288,8 +288,8 @@ class ForvalterService(
         val andelTidslinjer =
             andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }.mapNotNull { (_, andeler) ->
                 val perioder = andeler.map { Periode(it, it.stønadFom.førsteDagIInneværendeMåned(), it.stønadTom.sisteDagIInneværendeMåned()) }
-                val sistePeriodeId = perioder.maxOf { it.verdi.periodeOffset ?: 0 }
-                if (sistePeriodeId != 0L) {
+                val sistePeriodeId = perioder.maxOf { it.verdi.periodeOffset ?: -1 }
+                if (sistePeriodeId != -1L) {
                     sistePeriodeId to perioder.tilTidslinje()
                 } else {
                     null
