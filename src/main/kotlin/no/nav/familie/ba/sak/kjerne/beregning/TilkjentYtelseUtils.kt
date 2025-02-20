@@ -190,52 +190,6 @@ object TilkjentYtelseUtils {
         return oppdaterteAndeler
     }
 
-    private data class AndelMedEndretUtbetalingForTidslinje(
-        val aktør: Aktør,
-        val beløp: Int,
-        val sats: Int,
-        val ytelseType: YtelseType,
-        val prosent: BigDecimal,
-        val endretUtbetalingAndel: EndretUtbetalingAndelMedAndelerTilkjentYtelse?,
-    )
-
-    private fun Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse>.tilTidslinje(): Tidslinje<EndretUtbetalingAndelMedAndelerTilkjentYtelse> =
-        this
-            .map {
-                Periode(
-                    verdi = it,
-                    fom = it.fom?.førsteDagIInneværendeMåned(),
-                    tom = it.tom?.sisteDagIInneværendeMåned(),
-                )
-            }.tilTidslinje()
-
-    private fun Periode<AndelMedEndretUtbetalingForTidslinje>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
-        val andelTilkjentYtelse =
-            AndelTilkjentYtelse(
-                behandlingId = tilkjentYtelse.behandling.id,
-                tilkjentYtelse = tilkjentYtelse,
-                aktør = this.verdi.aktør,
-                type = this.verdi.ytelseType,
-                kalkulertUtbetalingsbeløp = this.verdi.beløp,
-                nasjonaltPeriodebeløp = this.verdi.beløp,
-                differanseberegnetPeriodebeløp = null,
-                sats = this.verdi.sats,
-                prosent = this.verdi.prosent,
-                stønadFom = this.fom?.toYearMonth() ?: throw Feil("Fra og med-dato ikke satt"),
-                stønadTom = this.tom?.toYearMonth() ?: throw Feil("Til og med-dato ikke satt"),
-            )
-
-        val endretUtbetalingAndel = this.verdi.endretUtbetalingAndel
-
-        return if (endretUtbetalingAndel == null) {
-            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
-        } else {
-            andelTilkjentYtelse.medEndring(endretUtbetalingAndel)
-        }
-    }
-
-    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje?>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) = this.tilPerioderIkkeNull().map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
-
     private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
         andelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
@@ -266,6 +220,45 @@ object TilkjentYtelseUtils {
         return andelerMedEndringerTidslinje
             .slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel()
             .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
+    }
+
+    private data class AndelMedEndretUtbetalingForTidslinje(
+        val aktør: Aktør,
+        val beløp: Int,
+        val sats: Int,
+        val ytelseType: YtelseType,
+        val prosent: BigDecimal,
+        val endretUtbetalingAndel: EndretUtbetalingAndelMedAndelerTilkjentYtelse?,
+    )
+
+    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje?>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) =
+        this
+            .tilPerioderIkkeNull()
+            .map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
+
+    private fun Periode<AndelMedEndretUtbetalingForTidslinje>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
+        val andelTilkjentYtelse =
+            AndelTilkjentYtelse(
+                behandlingId = tilkjentYtelse.behandling.id,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = this.verdi.aktør,
+                type = this.verdi.ytelseType,
+                kalkulertUtbetalingsbeløp = this.verdi.beløp,
+                nasjonaltPeriodebeløp = this.verdi.beløp,
+                differanseberegnetPeriodebeløp = null,
+                sats = this.verdi.sats,
+                prosent = this.verdi.prosent,
+                stønadFom = this.fom?.toYearMonth() ?: throw Feil("Fra og med-dato ikke satt"),
+                stønadTom = this.tom?.toYearMonth() ?: throw Feil("Til og med-dato ikke satt"),
+            )
+
+        val endretUtbetalingAndel = this.verdi.endretUtbetalingAndel
+
+        return if (endretUtbetalingAndel == null) {
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
+        } else {
+            andelTilkjentYtelse.medEndring(endretUtbetalingAndel)
+        }
     }
 
     private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel() =
