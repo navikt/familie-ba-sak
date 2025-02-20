@@ -22,8 +22,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -131,6 +136,112 @@ object TilkjentYtelseUtils {
         utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
+
+    fun oppdaterAndelerMedEndretUtbetalingAndeler(
+        andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+        tilkjentYtelse: TilkjentYtelse,
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        if (endretUtbetalingAndeler.isEmpty()) {
+            return andelTilkjentYtelserUtenEndringer
+                .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it.copy()) }
+        }
+
+        val andelerPerAktørOgType = andelTilkjentYtelserUtenEndringer.groupBy { Pair(it.aktør, it.type) }
+        val endringerPerAktør = endretUtbetalingAndeler.groupBy { it.person?.aktør ?: throw Feil("Endret utbetaling andel ${it.endretUtbetalingAndel.id} er ikke knyttet til en person") }
+
+        val oppdaterteAndeler =
+            andelerPerAktørOgType.flatMap { (aktørOgType, andelerForPerson) ->
+                val aktør = aktørOgType.first
+                val ytelseType = aktørOgType.second
+
+                when (ytelseType) {
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    -> oppdaterAndelerForPersonMedEndretUtbetalingAndeler(andelerForPerson = andelerForPerson, endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()), tilkjentYtelse = tilkjentYtelse)
+                    // Ønsker aldri å overstyre småbarnstillegg, så returnerer samme andeler som tidligere
+                    YtelseType.SMÅBARNSTILLEGG -> andelerForPerson.map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it) }
+                }
+            }
+
+        return oppdaterteAndeler
+    }
+
+    data class AndelMedEndretUtbetalingForTidslinje(
+        val aktør: Aktør,
+        val beløp: Int,
+        val sats: Int,
+        val ytelseType: YtelseType,
+        val prosent: BigDecimal,
+        val endretUtbetalingAndel: EndretUtbetalingAndelMedAndelerTilkjentYtelse?,
+    )
+
+    private fun List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>.tilTidslinje() =
+        this
+            .map {
+                Periode(
+                    fraOgMed = it.fom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen fom-dato: $it"),
+                    tilOgMed = it.tom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen tom-dato: $it"),
+                    innhold = it,
+                )
+            }.tilTidslinje()
+
+    private fun Periode<AndelMedEndretUtbetalingForTidslinje, Måned>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
+        val andelTilkjentYtelse =
+            AndelTilkjentYtelse(
+                behandlingId = tilkjentYtelse.behandling.id,
+                tilkjentYtelse = tilkjentYtelse,
+                aktør = this.innhold!!.aktør,
+                type = this.innhold.ytelseType,
+                kalkulertUtbetalingsbeløp = this.innhold.beløp,
+                nasjonaltPeriodebeløp = this.innhold.beløp,
+                differanseberegnetPeriodebeløp = null,
+                sats = this.innhold.sats,
+                prosent = this.innhold.prosent,
+                stønadFom = this.fraOgMed.tilYearMonth(),
+                stønadTom = this.tilOgMed.tilYearMonth(),
+            )
+
+        val endretUtbetalingAndel = this.innhold.endretUtbetalingAndel
+
+        return if (endretUtbetalingAndel == null) {
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
+        } else {
+            andelTilkjentYtelse.medEndring(endretUtbetalingAndel)
+        }
+    }
+
+    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje, Måned>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse: TilkjentYtelse) = this.perioder().filter { it.innhold != null }.map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
+
+    private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+        andelerForPerson: List<AndelTilkjentYtelse>,
+        endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
+        tilkjentYtelse: TilkjentYtelse,
+    ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        val andelerTidslinje = AndelTilkjentYtelseTidslinje(andelerForPerson)
+        val endretUtbetalingTidslinje = endretUtbetalingAndelerForPerson.tilTidslinje()
+
+        val andelerMedEndringerTidslinje =
+            andelerTidslinje.kombinerMed(endretUtbetalingTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
+                if (andelTilkjentYtelse == null) {
+                    null
+                } else {
+                    val nyttBeløp = if (endretUtbetalingAndel != null) andelTilkjentYtelse.sats.avrundetHeltallAvProsent(endretUtbetalingAndel.prosent!!) else andelTilkjentYtelse.kalkulertUtbetalingsbeløp
+                    val prosent = if (endretUtbetalingAndel != null) endretUtbetalingAndel.prosent!! else andelTilkjentYtelse.prosent
+
+                    AndelMedEndretUtbetalingForTidslinje(
+                        aktør = andelTilkjentYtelse.aktør,
+                        beløp = nyttBeløp,
+                        sats = andelTilkjentYtelse.sats,
+                        ytelseType = andelTilkjentYtelse.type,
+                        prosent = prosent,
+                        endretUtbetalingAndel = endretUtbetalingAndel,
+                    )
+                }
+            }
+
+        return andelerMedEndringerTidslinje.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
+    }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
