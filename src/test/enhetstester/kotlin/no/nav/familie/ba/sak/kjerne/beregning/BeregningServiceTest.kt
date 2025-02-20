@@ -113,7 +113,7 @@ class BeregningServiceTest {
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                 småbarnstilleggService = småbarnstilleggService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                unleashNextMedContextService = unleashNextMedContextService
+                unleashNextMedContextService = unleashNextMedContextService,
             )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs

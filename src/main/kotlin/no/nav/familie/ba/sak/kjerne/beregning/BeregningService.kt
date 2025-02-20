@@ -194,7 +194,7 @@ class BeregningService(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
-                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER)
+                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER),
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,

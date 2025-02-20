@@ -98,7 +98,7 @@ object TilkjentYtelseUtils {
                 andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                 endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
                 personResultater = vilkårsvurdering.personResultater,
-                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = skalBrukeNyVersjonAvOppdaterAndelerMedEndringer
+                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = skalBrukeNyVersjonAvOppdaterAndelerMedEndringer,
             )
 
         val småbarnstilleggErMulig =

@@ -195,7 +195,7 @@ class CucumberMock(
             småbarnstilleggService = småbarnstilleggService,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            unleashNextMedContextService = unleashNextMedContextService
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
