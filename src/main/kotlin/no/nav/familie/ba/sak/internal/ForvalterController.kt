@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
@@ -87,7 +86,6 @@ class ForvalterController(
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
-    private val personidentService: PersonidentService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -238,34 +236,6 @@ class ForvalterController(
 
         opprettTaskService.opprettTaskForÅPatcheMergetIdent(patchMergetIdentDto)
         return ResponseEntity.ok("ok")
-    }
-
-    @PatchMapping("/patch-fagsaker-uten-behandling-med-ny-ident")
-    fun patchFagsakerUtenBehandlingMedNyIdent(
-        @RequestBody fagsakIder: Set<Long>,
-    ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Patch merget ident",
-        )
-
-        fagsakIder.forEach { fagsakId ->
-            opprettTaskService.opprettTaskForÅPatcheIdentPåFagsakUtenBehandling(fagsakId)
-        }
-        return ResponseEntity.ok("ok")
-    }
-
-    @GetMapping("/hent-fagsaker-uten-behandling-med-utdatert-ident")
-    fun hentFagsakerUtenBehandlingMedUtdatertIdent(): ResponseEntity<Set<Long>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Patch merget ident",
-        )
-
-        val fagsakerSomMåOppdateres =
-            personidentService.finnFagsakerUtenBehandlingMedUtdatertIdent()
-
-        return ResponseEntity.ok(fagsakerSomMåOppdateres.toSet())
     }
 
     @PostMapping("/behandling/{behandlingId}/manuell-kvittering")

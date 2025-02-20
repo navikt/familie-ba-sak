@@ -41,7 +41,6 @@ internal class PersonidentServiceTest {
             aktørIdRepository = aktørIdRepository,
             pdlIdentRestClient = pdlIdentRestClient,
             taskRepository = taskRepositoryMock,
-            fagsakRepository = mockk(),
         )
 
     @BeforeAll

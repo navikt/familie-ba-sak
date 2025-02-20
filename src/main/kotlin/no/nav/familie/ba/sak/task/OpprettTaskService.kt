@@ -193,19 +193,6 @@ class OpprettTaskService(
     )
 
     @Transactional
-    fun opprettTaskForÅPatcheIdentPåFagsakUtenBehandling(fagsakId: Long) =
-        taskRepository.save(
-            Task(
-                type = PatchIdentFagsakUtenBehandling.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(fagsakId),
-                properties =
-                    Properties().apply {
-                        this["fagsakId"] = fagsakId.toString()
-                    },
-            ),
-        )
-
-    @Transactional
     fun opprettTaskForÅPatcheVilkårFom(
         dto: PatchFomPåVilkårTilFødselsdato,
     ) {

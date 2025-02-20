@@ -222,14 +222,4 @@ WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
         nativeQuery = true,
     )
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
-
-    @Query(
-        """
-        SELECT f 
-            FROM Fagsak f where not exists(select 1
-                 from Behandling b
-                 where b.fagsak.id = f.id)
-    """,
-    )
-    fun finnFagsakerUtenBehandling(): Set<Fagsak>
 }
