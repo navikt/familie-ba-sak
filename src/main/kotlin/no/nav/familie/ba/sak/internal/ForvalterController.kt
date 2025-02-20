@@ -495,7 +495,7 @@ class ForvalterController(
         return ResponseEntity.ok(opprettetTask.id)
     }
 
-    @PostMapping("/korriger-andeler-med-feil-periodeId-eller-kildebehandlingId/{fagsakId}")
+    @PostMapping("/korriger-andeler-med-feil-periodeId-eller-kildebehandlingId-for-fagsak/{fagsakId}")
     @Operation(
         summary = "Korrigerer andeler med feil periodeId og/eller kildeBehandlingId",
         description = "Finner og korrigerer andeler i siste iverksatte behandling for fagsak med feil periodeId og/eller kildeBehandlingId",
@@ -506,7 +506,7 @@ class ForvalterController(
     ): ResponseEntity<AndelKorreksjonResultat> =
         ResponseEntity.ok(forvalterService.patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsakId = fagsakId, dryRun = dryRun))
 
-    @PostMapping("/korriger-andeler-med-feil-periodeId-eller-kildebehandlingId/{fagsakId}")
+    @PostMapping("/korriger-andeler-med-feil-periodeId-eller-kildebehandlingId-for-fagsaker")
     @Operation(
         summary = "Korrigerer andeler med feil periodeId og/eller kildeBehandlingId",
         description = "Finner og korrigerer andeler i siste iverksatte behandling for fagsaker med feil periodeId og/eller kildeBehandlingId",
