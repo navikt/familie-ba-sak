@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.YearMonth
 
 object EndringIUtbetalingUtil {
@@ -26,7 +25,7 @@ object EndringIUtbetalingUtil {
     internal fun lagEndringIUtbetalingTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
-    ): Tidslinje<Boolean, Måned> {
+    ): Tidslinje<Boolean> {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
 
         val endringstidslinjePerPersonOgType =
@@ -55,9 +54,9 @@ object EndringIUtbetalingUtil {
     private fun lagEndringIUtbetalingForPersonOgTypeTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
-    ): Tidslinje<Boolean, Måned> {
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+    ): Tidslinje<Boolean> {
+        val nåværendeTidslinje = nåværendeAndeler.tilTidslinje()
+        val forrigeTidslinje = forrigeAndeler.tilTidslinje()
 
         val endringIBeløpTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
@@ -73,9 +72,9 @@ object EndringIUtbetalingUtil {
     internal fun lagEtterbetalingstidslinjeForPersonOgType(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
-    ): Tidslinje<Boolean, Måned> {
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+    ): Tidslinje<Boolean> {
+        val nåværendeTidslinje = nåværendeAndeler.tilTidslinje()
+        val forrigeTidslinje = forrigeAndeler.tilTidslinje()
 
         val etterbetaling =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
