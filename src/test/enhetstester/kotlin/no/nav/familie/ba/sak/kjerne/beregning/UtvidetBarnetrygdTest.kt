@@ -103,7 +103,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -196,7 +196,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -353,7 +353,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -435,7 +435,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -517,7 +517,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -608,7 +608,7 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -723,7 +723,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -836,7 +836,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -948,7 +948,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseUtils
+            TilkjentYtelseGenerator
                 .beregnTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,

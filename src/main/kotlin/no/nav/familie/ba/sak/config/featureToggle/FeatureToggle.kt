@@ -23,6 +23,9 @@ enum class FeatureToggle(
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
 
+    // NAV-22696
+    SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER("familie-ba-sak.ny-versjon-oppdater-andeler-med-endringer"),
+
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task
     SATSENDRING_ENABLET("familie-ba-sak.satsendring-enablet"),
