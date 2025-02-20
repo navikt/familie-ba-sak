@@ -18,6 +18,8 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -26,9 +28,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Valutakurs")
@@ -158,6 +162,16 @@ fun List<UtfyltValutakurs>.tilTidslinje() =
                 fraOgMed = it.fom.tilTidspunkt(),
                 tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
                 innhold = it,
+            )
+        }.tilTidslinje()
+
+fun List<UtfyltValutakurs>.tilFamilieFellesTidslinje() =
+    this
+        .map {
+            FamilieFellesPeriode(
+                verdi = it,
+                fom = it.fom.førsteDagIInneværendeMåned(),
+                tom = it.tom?.sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
 
