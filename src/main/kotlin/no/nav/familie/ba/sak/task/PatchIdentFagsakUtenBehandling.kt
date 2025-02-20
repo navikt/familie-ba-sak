@@ -48,8 +48,11 @@ class PatchIdentFagsakUtenBehandling(
         val aktivPersonIdent = fagsak.aktør.aktivFødselsnummer()
 
         val identInformasjonFraPdl = pdlIdentRestClient.hentIdenter(personIdent = aktivPersonIdent, historikk = true)
-        val erAktivPersonIdentHistoriskAvEnNyIdent = identInformasjonFraPdl.none { identFraPdl -> identFraPdl.ident == aktivPersonIdent && identFraPdl.historisk }
-        if (erAktivPersonIdentHistoriskAvEnNyIdent) {
+        val erIdentPåFagsakAjourMedPdl =
+            identInformasjonFraPdl.none { identFraPdl ->
+                identFraPdl.historisk && identFraPdl.ident == aktivPersonIdent
+            }
+        if (erIdentPåFagsakAjourMedPdl) {
             return
         }
 
