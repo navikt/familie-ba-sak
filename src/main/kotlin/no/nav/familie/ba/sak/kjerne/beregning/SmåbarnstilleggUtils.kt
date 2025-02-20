@@ -86,7 +86,7 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.førerTilEndringIUtb
             forrigeAndeler = forrigeAndeler.map { it.andel },
         )
 
-    return endringstidslinje.perioder().any { it.innhold == true }
+    return endringstidslinje.tilPerioder().any { it.verdi == true }
 }
 
 fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(

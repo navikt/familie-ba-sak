@@ -1,10 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -57,12 +58,12 @@ class EndringIUtbetalingUtilTest {
                 .lagEndringIUtbetalingTidslinje(
                     nåværendeAndeler = nåværendeAndeler,
                     forrigeAndeler = forrigeAndeler,
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(sep22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(des22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(sep22, perioderMedEndring.single().fom?.toYearMonth())
+        Assertions.assertEquals(des22, perioderMedEndring.single().tom?.toYearMonth())
 
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
@@ -99,8 +100,8 @@ class EndringIUtbetalingUtilTest {
                 .lagEndringIUtbetalingTidslinje(
                     nåværendeAndeler = andeler,
                     forrigeAndeler = andeler,
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
@@ -163,12 +164,12 @@ class EndringIUtbetalingUtilTest {
                 .lagEndringIUtbetalingTidslinje(
                     nåværendeAndeler = nåværendeAndeler,
                     forrigeAndeler = forrigeAndeler,
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(mai22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(mai22, perioderMedEndring.single().fom?.toYearMonth())
+        Assertions.assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
 
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
@@ -204,12 +205,12 @@ class EndringIUtbetalingUtilTest {
                 .lagEndringIUtbetalingTidslinje(
                     nåværendeAndeler = listOf(andelBarn2),
                     forrigeAndeler = listOf(andelBarn2, andelBarn1),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
+        Assertions.assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
 
         val endringstidspunkt =
             EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
@@ -245,8 +246,8 @@ class EndringIUtbetalingUtilTest {
                 .lagEndringIUtbetalingTidslinje(
                     nåværendeAndeler = listOf(andelBarn2),
                     forrigeAndeler = listOf(andelBarn2, andelBarn1),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 

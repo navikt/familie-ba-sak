@@ -2,11 +2,13 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
@@ -14,14 +16,12 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.YearMonth
 
 internal enum class Endringsresultat {
@@ -170,8 +170,8 @@ private fun erEndringIBeløpForPersonOgType(
     erFremstiltKravForPerson: Boolean,
     nåMåned: YearMonth,
 ): Boolean {
-    val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
-    val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+    val nåværendeTidslinje = nåværendeAndeler.tilTidslinje()
+    val forrigeTidslinje = forrigeAndeler.tilTidslinje()
 
     val endringIBeløpTidslinje =
         nåværendeTidslinje
@@ -195,16 +195,16 @@ private fun erEndringIBeløpForPersonOgType(
             }.fjernPerioderEtterOpphørsdato(opphørstidspunktForBehandling)
             .fjernPerioderLengreEnnEnMånedFramITid(nåMåned)
 
-    return endringIBeløpTidslinje.perioder().any { it.innhold == true }
+    return endringIBeløpTidslinje.tilPerioder().any { it.verdi == true }
 }
 
 private fun Int?.erStørreEnn0(): Boolean = this != null && this > 0
 
 private fun Int?.er0EllerNull(): Boolean = this == null || this == 0
 
-private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) = this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.forrigeMåned().tilTidspunkt())
+private fun Tidslinje<Boolean>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) = this.beskjærTilOgMed(opphørstidspunkt.forrigeMåned().sisteDagIInneværendeMåned())
 
-private fun Tidslinje<Boolean, Måned>.fjernPerioderLengreEnnEnMånedFramITid(nåMåned: YearMonth) = this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = nåMåned.plusMonths(1).tilTidspunkt())
+private fun Tidslinje<Boolean>.fjernPerioderLengreEnnEnMånedFramITid(nåMåned: YearMonth) = this.beskjærTilOgMed(nåMåned.nesteMåned().sisteDagIInneværendeMåned())
 
 internal fun erEndringIKompetanseForPerson(
     nåværendeKompetanserForPerson: List<Kompetanse>,
@@ -248,5 +248,5 @@ internal fun erEndringIEndretUtbetalingAndelerForPerson(
             forrigeEndretAndelerForPerson = forrigeEndretAndelerForPerson,
         )
 
-    return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
+    return endringIEndretUtbetalingAndelTidslinje.tilPerioder().any { it.verdi == true }
 }
