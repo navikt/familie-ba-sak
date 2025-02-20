@@ -5,14 +5,14 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 
 internal enum class Søknadsresultat {
     INNVILGET,
@@ -94,9 +94,9 @@ object BehandlingsresultatSøknadUtils {
         nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>,
     ): List<Søknadsresultat> {
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerForPerson)
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndelerForPerson)
-        val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerForPerson)
+        val forrigeTidslinje = forrigeAndelerForPerson.tilTidslinje()
+        val nåværendeTidslinje = nåværendeAndelerForPerson.tilTidslinje()
+        val endretUtbetalingTidslinje = endretUtbetalingAndelerForPerson.tilTidslinje()
 
         val resultatTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje, endretUtbetalingTidslinje) { nåværende, forrige, endretUtbetalingAndel ->
@@ -136,7 +136,7 @@ object BehandlingsresultatSøknadUtils {
                 }
             }
 
-        return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
+        return resultatTidslinje.tilPerioderIkkeNull().map { it.verdi }.distinct()
     }
 
     private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
