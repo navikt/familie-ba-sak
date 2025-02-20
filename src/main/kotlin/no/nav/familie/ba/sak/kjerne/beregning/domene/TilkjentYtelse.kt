@@ -16,9 +16,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -64,9 +62,9 @@ data class TilkjentYtelse(
     val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf(),
 )
 
-fun TilkjentYtelse.tilTidslinjeMedAndeler(): Tidslinje<Iterable<AndelTilkjentYtelse>, Måned> =
+fun TilkjentYtelse.tilTidslinjeMedAndeler() =
     this.andelerTilkjentYtelse
-        .tilTidslinjerPerAktørOgType()
+        .tilFamilieFellesTidslinjerPerAktørOgType()
         .values
         .kombiner()
 
