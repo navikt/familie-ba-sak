@@ -19,7 +19,7 @@ import org.springframework.web.client.RestClientResponseException
 internal class DokumentDistribueringServiceTest {
     private val taskService = mockk<TaskService>(relaxed = true)
     private val integrasjonClient = mockk<IntegrasjonClient>()
-    private val loggService = mockk<LoggService>()
+    private val loggService = mockk<LoggService>(relaxed = true)
 
     private val dokumentDistribueringService =
         DokumentDistribueringService(

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
 import io.mockk.MockKAnnotations
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -41,22 +41,15 @@ import java.math.BigDecimal
 import java.time.YearMonth
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class StønadsstatistikkServiceTest(
-    @MockK(relaxed = true)
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    @MockK
-    private val persongrunnlagService: PersongrunnlagService,
-    @MockK
-    private val vedtakService: VedtakService,
-    @MockK
-    private val personopplysningerService: PersonopplysningerService,
-    @MockK
-    private val kompetanseService: KompetanseService,
-    @MockK
-    private val vedtakRepository: VedtakRepository,
-    @MockK
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-) {
+internal class StønadsstatistikkServiceTest {
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
+    private val vedtakService = mockk<VedtakService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val kompetanseService = mockk<KompetanseService>()
+    private val vedtakRepository = mockk<VedtakRepository>()
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
+
     private val stønadsstatistikkService =
         StønadsstatistikkService(
             behandlingHentOgPersisterService,

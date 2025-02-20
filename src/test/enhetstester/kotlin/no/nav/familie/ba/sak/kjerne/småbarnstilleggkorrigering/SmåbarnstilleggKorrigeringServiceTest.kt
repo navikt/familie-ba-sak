@@ -20,7 +20,7 @@ import org.hamcrest.CoreMatchers.`is` as Is
 internal class SmåbarnstilleggKorrigeringServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
 
-    private val loggService = mockk<LoggService>()
+    private val loggService = mockk<LoggService>(relaxed = true)
 
     private val småbarnstilleggKorrigeringService = SmåbarnstilleggKorrigeringService(tilkjentYtelseRepository, loggService)
 

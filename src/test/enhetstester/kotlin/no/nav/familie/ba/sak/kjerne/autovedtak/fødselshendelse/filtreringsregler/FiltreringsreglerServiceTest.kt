@@ -38,14 +38,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
 import java.time.LocalDate
 import java.time.YearMonth
 
 class FiltreringsreglerServiceTest {
     private val personopplysningerService = mockk<PersonopplysningerService>()
     private val personidentService = mockk<PersonidentService>()
-    private val personopplysningGrunnlagRepository = mock<PersonopplysningGrunnlagRepository>()
+    private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     private val localDateService = mockk<LocalDateService>()
     private val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
