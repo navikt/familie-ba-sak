@@ -46,7 +46,7 @@ object UtvidetBarnetrygdUtil {
             )
 
         return if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
-            TilkjentYtelseUtils.oppdaterAndelerMedEndretUtbetalingAndeler(
+            AndelTilkjentYtelseGenerator.oppdaterAndelerMedEndretUtbetalingAndeler(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
                 endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
                 tilkjentYtelse = tilkjentYtelse,

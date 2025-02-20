@@ -6,7 +6,6 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
@@ -22,7 +21,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.beregnTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -58,113 +56,6 @@ internal class TilkjentYtelseUtilsTest {
     @AfterEach
     fun etterHverTest() {
         unmockkObject(SatsTidspunkt)
-    }
-
-    @Test
-    fun `endret utbetalingsandel skal overstyre andel`() {
-        val person = lagPerson()
-        val behandling = lagBehandling()
-        val fom = YearMonth.of(2018, 1)
-        val tom = YearMonth.of(2019, 1)
-        val utbetalingsandeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = fom,
-                    tom = tom,
-                    person = person,
-                    behandling = behandling,
-                ),
-            )
-
-        val endretProsent = BigDecimal.ZERO
-
-        val endretUtbetalingAndeler =
-            listOf(
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                    person = person,
-                    fom = fom,
-                    tom = tom,
-                    prosent = endretProsent,
-                    behandlingId = behandling.id,
-                ),
-            )
-
-        val andelerTIlkjentYtelse =
-            oppdaterAndelerMedEndretUtbetalingAndeler(
-                utbetalingsandeler,
-                endretUtbetalingAndeler,
-                utbetalingsandeler.first().tilkjentYtelse,
-            )
-
-        assertEquals(1, andelerTIlkjentYtelse.size)
-        assertEquals(endretProsent, andelerTIlkjentYtelse.single().prosent)
-        assertEquals(1, andelerTIlkjentYtelse.single().endreteUtbetalinger.size)
-    }
-
-    @Test
-    fun `endret utbetalingsandel koble endrede andeler til riktig endret utbetalingandel`() {
-        val person = lagPerson()
-        val behandling = lagBehandling()
-        val fom1 = YearMonth.of(2018, 1)
-        val tom1 = YearMonth.of(2018, 11)
-
-        val fom2 = YearMonth.of(2019, 1)
-        val tom2 = YearMonth.of(2019, 11)
-
-        val utbetalingsandeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = fom1,
-                    tom = tom1,
-                    person = person,
-                    behandling = behandling,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = fom2,
-                    tom = tom2,
-                    person = person,
-                    behandling = behandling,
-                ),
-            )
-
-        val endretProsent = BigDecimal.ZERO
-
-        val endretUtbetalingAndel =
-            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                person = person,
-                fom = fom1,
-                tom = tom2,
-                prosent = endretProsent,
-                behandlingId = behandling.id,
-            )
-
-        val endretUtbetalingAndeler =
-            listOf(
-                endretUtbetalingAndel,
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                    person = person,
-                    fom = tom2.nesteMåned(),
-                    prosent = endretProsent,
-                    behandlingId = behandling.id,
-                ),
-            )
-
-        val andelerTIlkjentYtelse =
-            oppdaterAndelerMedEndretUtbetalingAndeler(
-                utbetalingsandeler,
-                endretUtbetalingAndeler,
-                utbetalingsandeler.first().tilkjentYtelse,
-            )
-
-        assertEquals(2, andelerTIlkjentYtelse.size)
-        andelerTIlkjentYtelse.forEach { assertEquals(endretProsent, it.prosent) }
-        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endreteUtbetalinger.size) }
-        andelerTIlkjentYtelse.forEach {
-            assertEquals(
-                endretUtbetalingAndel.id,
-                it.endreteUtbetalinger.single().id,
-            )
-        }
     }
 
     val søker = lagPerson(type = PersonType.SØKER)
