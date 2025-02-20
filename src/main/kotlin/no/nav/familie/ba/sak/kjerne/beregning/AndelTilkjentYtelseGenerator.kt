@@ -84,7 +84,7 @@ object AndelTilkjentYtelseGenerator {
             .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
     }
 
-    private data class AndelMedEndretUtbetalingForTidslinje(
+    internal data class AndelMedEndretUtbetalingForTidslinje(
         val aktør: Aktør,
         val beløp: Int,
         val sats: Int,
@@ -123,7 +123,7 @@ object AndelTilkjentYtelseGenerator {
         }
     }
 
-    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel() =
+    internal fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel() =
         this
             .zipMedNeste(ZipPadding.FØR)
             .mapVerdi {

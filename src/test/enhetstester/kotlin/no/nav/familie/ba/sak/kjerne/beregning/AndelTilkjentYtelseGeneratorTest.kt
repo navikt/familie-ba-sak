@@ -1,14 +1,26 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.oppdaterAndelerMedEndretUtbetalingAndeler
-import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 class AndelTilkjentYtelseGeneratorTest {
@@ -48,9 +60,9 @@ class AndelTilkjentYtelseGeneratorTest {
                 utbetalingsandeler.first().tilkjentYtelse,
             )
 
-        assertEquals(1, andelerTIlkjentYtelse.size)
-        assertEquals(endretProsent, andelerTIlkjentYtelse.single().prosent)
-        assertEquals(1, andelerTIlkjentYtelse.single().endreteUtbetalinger.size)
+        assertThat(andelerTIlkjentYtelse.size).isEqualTo(1)
+        assertThat(andelerTIlkjentYtelse.single().prosent).isEqualTo(endretProsent)
+        assertThat(andelerTIlkjentYtelse.single().endreteUtbetalinger.size).isEqualTo(1)
     }
 
     @Test
@@ -108,14 +120,155 @@ class AndelTilkjentYtelseGeneratorTest {
                 utbetalingsandeler.first().tilkjentYtelse,
             )
 
-        assertEquals(2, andelerTIlkjentYtelse.size)
-        andelerTIlkjentYtelse.forEach { assertEquals(endretProsent, it.prosent) }
-        andelerTIlkjentYtelse.forEach { assertEquals(1, it.endreteUtbetalinger.size) }
+        assertThat(andelerTIlkjentYtelse.size).isEqualTo(2)
+        andelerTIlkjentYtelse.forEach { assertThat(it.prosent).isEqualTo(endretProsent) }
+        andelerTIlkjentYtelse.forEach { assertThat(it.endreteUtbetalinger.size).isEqualTo(1) }
         andelerTIlkjentYtelse.forEach {
-            assertEquals(
-                endretUtbetalingAndel.id,
+            assertThat(
                 it.endreteUtbetalinger.single().id,
-            )
+            ).isEqualTo(endretUtbetalingAndel.id)
         }
+    }
+
+    @Test
+    fun `skal ikke slå sammen etterfølgende 0kr-andeler hvis de ikke skyldes samme endret utbetaling andel`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val andeler = listOf(
+            Periode(
+                fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 0,
+                    sats = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal.ZERO,
+                    endretUtbetalingAndel = EndretUtbetalingAndelMedAndelerTilkjentYtelse(andeler = emptyList(), endretUtbetalingAndel = lagEndretUtbetalingAndel(person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ETTERBETALING_3MND)),
+                ),
+            ),
+            Periode(
+                fom = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 0,
+                    sats = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal.ZERO,
+                    endretUtbetalingAndel = EndretUtbetalingAndelMedAndelerTilkjentYtelse(andeler = emptyList(), endretUtbetalingAndel = lagEndretUtbetalingAndel(person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT)),
+                ),
+            ),
+        )
+
+        val perioderEtterSammenslåing = andeler.tilTidslinje().slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel().tilPerioderIkkeNull()
+
+        assertThat(perioderEtterSammenslåing.size).isEqualTo(2)
+    }
+
+    @Test
+    fun `skal ikke slå sammen 0kr-andeler som har tom periode mellom seg`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT)
+        val andeler = listOf(
+            Periode(
+                fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 0,
+                    sats = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal.ZERO,
+                    endretUtbetalingAndel = EndretUtbetalingAndelMedAndelerTilkjentYtelse(andeler = emptyList(), endretUtbetalingAndel = endretUtbetalingAndel),
+                ),
+            ),
+            Periode(
+                fom = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 0,
+                    sats = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal.ZERO,
+                    endretUtbetalingAndel = EndretUtbetalingAndelMedAndelerTilkjentYtelse(andeler = emptyList(), endretUtbetalingAndel = endretUtbetalingAndel),
+                ),
+            ),
+        )
+
+        val perioderEtterSammenslåing = andeler.tilTidslinje().slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel().tilPerioderIkkeNull()
+
+        assertThat(perioderEtterSammenslåing.size).isEqualTo(2)
+    }
+
+    @Test
+    fun `skal ikke slå sammen etterfølgende andeler med 100 prosent utbetaling av ulik sats`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val andeler = listOf(
+            Periode(
+                fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 1054,
+                    sats = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal(100),
+                    endretUtbetalingAndel = null,
+                ),
+            ),
+            Periode(
+                fom = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 1766,
+                    sats = 1766,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal(100),
+                    endretUtbetalingAndel = null,
+                ),
+            ),
+        )
+
+        val perioderEtterSammenslåing = andeler.tilTidslinje().slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel().tilPerioderIkkeNull()
+
+        assertThat(perioderEtterSammenslåing.size).isEqualTo(2)
+    }
+
+    @Test
+    fun `skal slå sammen etterfølgende 0kr-andeler som skyldes samme endret andel, men er splittet pga satsendring`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(person = barn, prosent = BigDecimal.ZERO, årsak = Årsak.ALLEREDE_UTBETALT, fom = YearMonth.now().minusMonths(9), tom = YearMonth.now())
+        val andeler = listOf(
+            Periode(
+                fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 0,
+                    sats = 1054,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal.ZERO,
+                    endretUtbetalingAndel = EndretUtbetalingAndelMedAndelerTilkjentYtelse(andeler = emptyList(), endretUtbetalingAndel = endretUtbetalingAndel),
+                ),
+            ),
+            Periode(
+                fom = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
+                tom = LocalDate.now().sisteDagIMåned(),
+                verdi = AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                    aktør = barn.aktør,
+                    beløp = 0,
+                    sats = 1766,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    prosent = BigDecimal.ZERO,
+                    endretUtbetalingAndel = EndretUtbetalingAndelMedAndelerTilkjentYtelse(andeler = emptyList(), endretUtbetalingAndel = endretUtbetalingAndel),
+                ),
+            ),
+        )
+
+        val perioderEtterSammenslåing = andeler.tilTidslinje().slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel().tilPerioderIkkeNull()
+
+        assertThat(perioderEtterSammenslåing.size).isEqualTo(1)
     }
 }
