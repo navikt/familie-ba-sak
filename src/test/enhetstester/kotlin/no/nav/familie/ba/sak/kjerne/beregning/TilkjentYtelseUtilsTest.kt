@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -527,7 +527,7 @@ internal class TilkjentYtelseUtilsTest {
         val behandling = lagBehandling()
         val fom = YearMonth.of(2018, 1)
         val tom = YearMonth.of(2019, 1)
-        val utbetalinsandeler =
+        val utbetalingsandeler =
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = fom,
@@ -551,9 +551,10 @@ internal class TilkjentYtelseUtilsTest {
             )
 
         val andelerTIlkjentYtelse =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                utbetalinsandeler,
+            oppdaterAndelerMedEndretUtbetalingAndeler(
+                utbetalingsandeler,
                 endretUtbetalingAndeler,
+                utbetalingsandeler.first().tilkjentYtelse,
             )
 
         assertEquals(1, andelerTIlkjentYtelse.size)
@@ -571,7 +572,7 @@ internal class TilkjentYtelseUtilsTest {
         val fom2 = YearMonth.of(2019, 1)
         val tom2 = YearMonth.of(2019, 11)
 
-        val utbetalinsandeler =
+        val utbetalingsandeler =
             listOf(
                 lagAndelTilkjentYtelse(
                     fom = fom1,
@@ -610,9 +611,10 @@ internal class TilkjentYtelseUtilsTest {
             )
 
         val andelerTIlkjentYtelse =
-            oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                utbetalinsandeler,
+            oppdaterAndelerMedEndretUtbetalingAndeler(
+                utbetalingsandeler,
                 endretUtbetalingAndeler,
+                utbetalingsandeler.first().tilkjentYtelse,
             )
 
         assertEquals(2, andelerTIlkjentYtelse.size)
