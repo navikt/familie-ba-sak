@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
@@ -22,7 +21,6 @@ class PersonidentService(
     private val aktørIdRepository: AktørIdRepository,
     private val pdlIdentRestClient: PdlIdentRestClient,
     private val taskRepository: TaskRepositoryWrapper,
-    private val fagsakRepository: FagsakRepository,
 ) {
     fun hentIdenter(
         personIdent: String,
@@ -159,18 +157,6 @@ class PersonidentService(
             if (lagreNyAktør) aktørIdRepository.saveAndFlush(aktør)
         }
         return aktør
-    }
-
-    fun finnFagsakerUtenBehandlingMedUtdatertIdent(): Set<Long> {
-        val fagsaker = fagsakRepository.finnFagsakerUtenBehandling()
-        val fagsakerSomMåOppdateres =
-            fagsaker
-                .filter { fagsak ->
-                    val identerFraPdl = pdlIdentRestClient.hentIdenter(fagsak.aktør.aktivFødselsnummer(), historikk = true)
-                    val aktivIdentFraPdl = identerFraPdl.hentAktivFødselsnummer()
-                    aktivIdentFraPdl != fagsak.aktør.aktivFødselsnummer()
-                }.map { it.id }
-        return fagsakerSomMåOppdateres.toSet()
     }
 
     companion object {
