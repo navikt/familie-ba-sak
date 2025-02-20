@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.Ytelsetyp
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -214,6 +215,11 @@ fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Akt
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson,
         )
+    }
+
+fun Collection<AndelTilkjentYtelse>.tilFamilieFellesTidslinjerPerAktørOgType() =
+    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+        andelerTilkjentYtelsePåPerson.tilTidslinje()
     }
 
 fun List<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
