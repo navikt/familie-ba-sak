@@ -29,12 +29,14 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
+import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -113,7 +115,7 @@ object TilkjentYtelseValidering {
                     else -> false
                 }
             }.values
-            .map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
+            .map { it.tilPerioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
     }
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
@@ -180,7 +182,7 @@ object TilkjentYtelseValidering {
 
         val fagsakType = tilkjentYtelse.behandling.fagsak.type
 
-        tidslinjeMedAndeler.perioder().mapNotNull { it.innhold }.forEach {
+        tidslinjeMedAndeler.tilPerioderIkkeNull().map { it.verdi }.forEach {
             val søkersAndeler = hentSøkersAndeler(it, søker)
             val barnasAndeler = hentBarnasAndeler(it, barna)
 
