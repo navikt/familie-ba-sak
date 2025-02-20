@@ -3,32 +3,22 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class TilpassArbeidsfordelingServiceTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService =
         TilpassArbeidsfordelingService(
             integrasjonClient = mockedIntegrasjonClient,
-            unleashService = unleashService,
         )
-
-    @BeforeEach
-    fun oppsett() {
-        every { unleashService.isEnabled(FeatureToggle.TILLAT_OPPRETT_AV_BEHANDLING_PÅ_VIKAFOSSEN, false) } returns true
-    }
 
     @Nested
     inner class TilpassArbeidsfordelingTilSaksbehandler {
