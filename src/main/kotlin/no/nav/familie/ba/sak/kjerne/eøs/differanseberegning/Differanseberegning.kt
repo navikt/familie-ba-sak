@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.kunAndelerTilOgMed3År
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.tilFamilieFellesTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
@@ -80,12 +80,12 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
     val utvidetBarnetrygdTidslinje =
         this
-            .tilFamilieFellesTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+            .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
             .utenDifferanseberegning()
 
     val småbarnstilleggTidslinje =
         this
-            .tilFamilieFellesTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+            .tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
             .utenDifferanseberegning()
 
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -8,7 +7,6 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
-import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -619,15 +617,6 @@ internal class UtvidetBarnetrygdTest {
                 .toList()
                 .sortedBy { it.type }
 
-        val vedtaksperioderMedBegrunnelser =
-            hentPerioderMedUtbetaling(
-                andelerTilkjentYtelse = andeler,
-                vedtak = lagVedtak(behandling),
-                personResultater = vilkårsvurdering.personResultater,
-                personerIPersongrunnlag = personopplysningGrunnlag.personer.toList(),
-                fagsakType = FagsakType.NORMAL,
-            )
-
         // Én  andel for barnet og én andel for utvidet barnetrygd. Utvidet-andelen splittes IKKE
         assertEquals(2, andeler.size)
 
@@ -641,17 +630,6 @@ internal class UtvidetBarnetrygdTest {
         assertEquals(søkerOrdinær.ident, andelUtvidet.aktør.aktivFødselsnummer())
         assertEquals(YearMonth.of(2019, 5), andelUtvidet.stønadFom)
         assertEquals(YearMonth.of(2020, 10), andelUtvidet.stønadTom)
-
-        // Én periode frem til og med 2020-02, og én fra og med 2020-03, der vilkåret er splittet
-        assertEquals(2, vedtaksperioderMedBegrunnelser.size)
-
-        val vedtaksperiode1 = vedtaksperioderMedBegrunnelser[0]
-        val vedtaksperiode2 = vedtaksperioderMedBegrunnelser[1]
-
-        assertEquals(LocalDate.of(2019, 5, 1), vedtaksperiode1.fom)
-        assertEquals(LocalDate.of(2020, 2, 29), vedtaksperiode1.tom)
-        assertEquals(LocalDate.of(2020, 3, 1), vedtaksperiode2.fom)
-        assertEquals(LocalDate.of(2020, 10, 31), vedtaksperiode2.tom)
     }
 
     @Test

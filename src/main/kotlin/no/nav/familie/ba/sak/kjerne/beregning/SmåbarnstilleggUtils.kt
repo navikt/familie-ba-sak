@@ -2,35 +2,34 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
-import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erTilogMed3ÅrTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.beskjærEtter
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -106,7 +105,13 @@ fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     return Pair(nyeSmåbarnstilleggPerioder.tilMånedPerioder(), fjernedeSmåbarnstilleggPerioder.tilMånedPerioder())
 }
 
-private fun Tidslinje<AndelTilkjentYtelse, Måned>.tilMånedPerioder() = this.perioder().filter { it.innhold != null }.map { MånedPeriode(fom = it.fraOgMed.tilYearMonth(), tom = it.tilOgMed.tilYearMonth()) }
+private fun Tidslinje<AndelTilkjentYtelse>.tilMånedPerioder() =
+    this.tilPerioderIkkeNull().map {
+        MånedPeriode(
+            fom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
+            tom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
+        )
+    }
 
 fun kanAutomatiskIverksetteSmåbarnstillegg(
     innvilgedeMånedPerioder: List<MånedPeriode>,
@@ -190,9 +195,9 @@ fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
 fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
-): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> {
+): Tidslinje<BarnSinRettTilSmåbarnstillegg> {
     val barnasAndelerTidslinjer =
-        barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(it.value) }
+        barnasAndeler.groupBy { it.aktør }.mapValues { it.value.tilTidslinje() }
 
     val barnasAndelerUnder3ÅrTidslinje =
         barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
@@ -216,15 +221,15 @@ data class SmåbarnstilleggPeriode(
 )
 
 fun kombinerAlleTidslinjerTilProsentTidslinje(
-    perioderMedFullOvergangsstønadTidslinje: InternPeriodeOvergangsstønadTidslinje,
-    utvidetBarnetrygdTidslinje: AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje,
-    barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>,
-): Tidslinje<SmåbarnstilleggPeriode, Måned> =
+    perioderMedFullOvergangsstønadTidslinje: Tidslinje<InternPeriodeOvergangsstønad>,
+    utvidetBarnetrygdTidslinje: Tidslinje<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg>,
+): Tidslinje<SmåbarnstilleggPeriode> =
     perioderMedFullOvergangsstønadTidslinje
         .tilMåned { kombinatorInternPeriodeOvergangsstønadDagTilMåned(it) }
         .kombinerMed(
-            tidslinjeB = utvidetBarnetrygdTidslinje,
-            tidslinjeC = barnSomGirRettTilSmåbarnstilleggTidslinje,
+            tidslinje2 = utvidetBarnetrygdTidslinje,
+            tidslinje3 = barnSomGirRettTilSmåbarnstilleggTidslinje,
         ) { overgangsstønad, utvidet, under3År ->
             if (overgangsstønad == null || utvidet == null || under3År == null) {
                 null
@@ -294,12 +299,10 @@ fun erEndringIOvergangsstønadFramITid(
             }
         }
 
-    val endringsperioder = endringTidslinje.perioder().filter { it.innhold != Endring.INGEN_ENDRING }
-    val erEndringFramITid = endringsperioder.all { it.fraOgMed.tilYearMonth().isAfter(dagensDato.toYearMonth().plusMonths(1)) }
+    val endringsperioder = endringTidslinje.tilPerioder().filter { it.verdi != Endring.INGEN_ENDRING }
+    val erEndringFramITid = endringsperioder.all { it.fom != null && it.fom!!.toYearMonth().isAfter(dagensDato.toYearMonth().plusMonths(1)) }
     return erEndringFramITid
 }
 
 @JvmName("tilTidslinjeEksternPeriode")
-private fun List<EksternPeriode>.tilTidslinje(): Tidslinje<EksternPeriode, Dag> = map { periodeAv(fraOgMed = it.fomDato, tilOgMed = it.tomDato, it) }.tilTidslinje()
-
-private fun List<InternPeriodeOvergangsstønad>.tilTidslinje(): Tidslinje<InternPeriodeOvergangsstønad, Dag> = map { periodeAv(fraOgMed = it.fomDato, tilOgMed = it.tomDato, it) }.tilTidslinje()
+private fun List<EksternPeriode>.tilTidslinje(): Tidslinje<EksternPeriode> = map { Periode(verdi = it, fom = it.fomDato, tom = it.tomDato) }.tilTidslinje()
