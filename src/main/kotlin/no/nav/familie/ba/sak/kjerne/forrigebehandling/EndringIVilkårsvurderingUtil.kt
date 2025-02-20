@@ -1,19 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import java.time.YearMonth
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object EndringIVilkårsvurderingUtil {
     fun lagEndringIVilkårsvurderingTidslinje(
@@ -22,7 +21,7 @@ object EndringIVilkårsvurderingUtil {
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
         tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
-    ): Tidslinje<Boolean, Måned> {
+    ): FamilieFellesTidslinje<Boolean> {
         val tidslinjePerVilkår =
             Vilkår.entries.map { vilkår ->
                 val vilkårTidslinje =
@@ -39,7 +38,7 @@ object EndringIVilkårsvurderingUtil {
                         personIBehandling = personIBehandling,
                         personIForrigeBehandling = personIForrigeBehandling,
                     )
-                vilkårTidslinje.beskjærFraOgMed(fraOgMed = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering.tilTidspunkt())
+                vilkårTidslinje.beskjærFraOgMed(fraOgMed = tidligsteRelevanteFomDatoForPersonIVilkårsvurdering.førsteDagIInneværendeMåned())
             }
 
         return tidslinjePerVilkår.kombiner { finnesMinstEnEndringIPeriode(it) }
@@ -59,7 +58,7 @@ object EndringIVilkårsvurderingUtil {
         vilkår: Vilkår,
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
-    ): Tidslinje<Boolean, Måned> {
+    ): FamilieFellesTidslinje<Boolean> {
         val nåværendeVilkårResultatTidslinje =
             nåværendeOppfylteVilkårResultaterForPerson
                 .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)
