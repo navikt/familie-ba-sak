@@ -131,8 +131,6 @@ fun tilpassKompetanserTilRegelverk(
                     true -> null // ta bort regelverk dersom det verken utbetales ordinær på barnet eller utvidet for søker
                     else -> regelverk
                 }
-            }.mapValues { (_, tidslinjer) ->
-                tidslinjer.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
             }
 
     return gjeldendeKompetanser
