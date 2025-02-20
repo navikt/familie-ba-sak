@@ -251,7 +251,9 @@ class ForvalterService(
                             .sortedBy { it.periodeId }
                             .fold(mutableMapOf<Long, MutableList<Periode<Utbetalingsperiode>>>()) { kjeder, utbetalingsperiode ->
                                 kjeder.apply {
-                                    val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, utbetalingsperiode.vedtakdatoTom)
+                                    // Derom kjede er opphørt forkorter vi perioden til opphørsdato. Ellers bruker vi utbetalingsperiodens vedtakdatoTom
+                                    val periodeTom = utbetalingsperiode.opphør?.opphørDatoFom ?: utbetalingsperiode.vedtakdatoTom
+                                    val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, periodeTom)
                                     put(utbetalingsperiode.periodeId, kjede.toMutableList())
                                     remove(utbetalingsperiode.forrigePeriodeId)
                                 }
