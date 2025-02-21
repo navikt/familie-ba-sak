@@ -26,9 +26,6 @@ enum class FeatureToggle(
     // NAV-22696
     SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER("familie-ba-sak.ny-versjon-oppdater-andeler-med-endringer"),
 
-    // NAV-24196
-    TILLAT_OPPRETT_AV_BEHANDLING_PÅ_VIKAFOSSEN("familie-ba-sak.tillatt_opprett_av_behandling_paa_vikafossen"),
-
     // NAV-24034
     BRUK_NY_SAKSBEHANDLER_NAVN_FORMAT_I_SIGNATUR("familie-ba-sak.bruk-ny-saksbehandler-navn-format-i-signatur"),
 
