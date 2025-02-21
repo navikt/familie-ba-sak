@@ -75,6 +75,11 @@ object AndelTilkjentYtelseGenerator {
             throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler")
         }
 
+        if (endretUtbetalingAndelerForPerson.isEmpty()) {
+            return andelerForPerson
+                .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it.copy()) }
+        }
+
         val andelerTidslinje = andelerForPerson.map { it.tilPeriode() }.tilTidslinje()
         val endretUtbetalingTidslinje = endretUtbetalingAndelerForPerson.tilTidslinje()
 

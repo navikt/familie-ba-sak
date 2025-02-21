@@ -36,6 +36,225 @@ class AndelTilkjentYtelseGeneratorTest {
     @Nested
     inner class OppdaterAndelerMedEndringer {
         @Test
+        fun `skal returnere tom liste hvis det ikke finnes noen andeler`() {
+            // Arrange
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = lagBehandling(),
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    andelTilkjentYtelserUtenEndringer = emptyList(),
+                    endretUtbetalingAndeler = emptyList(),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere eksisterende andeler uten endringer hvis det ikke finnes noen endret utbetalinger`() {
+            // Arrange
+            val barn1 = lagPerson(type = PersonType.BARN)
+            val barn2 = lagPerson(type = PersonType.BARN)
+            val behandling = lagBehandling()
+
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = behandling,
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            val andel1 =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().minusMonths(5),
+                    person = barn1,
+                    behandling = behandling,
+                    beløp = 1000,
+                    sats = 1000,
+                )
+
+            val andel2 =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now(),
+                    person = barn2,
+                    behandling = behandling,
+                    beløp = 1500,
+                    sats = 1500,
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
+                    endretUtbetalingAndeler = emptyList(),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler.size).isEqualTo(2)
+
+            val førsteAndelMedEndring = oppdaterteAndeler.minBy { it.stønadFom }
+            assertThat(førsteAndelMedEndring.andel).isEqualTo(andel1)
+            assertThat(førsteAndelMedEndring.endreteUtbetalinger).isEmpty()
+
+            val sisteAndelMedEndring = oppdaterteAndeler.maxBy { it.stønadFom }
+            assertThat(sisteAndelMedEndring.andel).isEqualTo(andel2)
+            assertThat(sisteAndelMedEndring.endreteUtbetalinger).isEmpty()
+        }
+
+        @Test
+        fun `skal oppdatere andeler for riktig person med endret utbetaling`() {
+            // Arrange
+            val barn1 = lagPerson(type = PersonType.BARN)
+            val barn2 = lagPerson(type = PersonType.BARN)
+            val behandling = lagBehandling()
+
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = behandling,
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            val fom = YearMonth.now().minusMonths(10)
+            val tom = YearMonth.now().minusMonths(5)
+
+            val andel1 =
+                lagAndelTilkjentYtelse(
+                    fom = fom,
+                    tom = tom,
+                    person = barn1,
+                    behandling = behandling,
+                    beløp = 1000,
+                    sats = 1000,
+                )
+
+            val andel2 =
+                lagAndelTilkjentYtelse(
+                    fom = fom,
+                    tom = tom,
+                    person = barn2,
+                    behandling = behandling,
+                    beløp = 1500,
+                    sats = 1500,
+                )
+
+            val endretUtbetalingAndelForBarn1 =
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    person = barn1,
+                    prosent = BigDecimal.ZERO,
+                    årsak = Årsak.ALLEREDE_UTBETALT,
+                    fom = fom,
+                    tom = tom,
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
+                    endretUtbetalingAndeler = listOf(endretUtbetalingAndelForBarn1),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler.size).isEqualTo(2)
+
+            assertThat(oppdaterteAndeler[0].kalkulertUtbetalingsbeløp).isEqualTo(0)
+            assertThat(oppdaterteAndeler[0].prosent).isEqualTo(BigDecimal.ZERO)
+            assertThat(oppdaterteAndeler[0].endreteUtbetalinger.size).isEqualTo(1)
+            assertThat(oppdaterteAndeler[0].endreteUtbetalinger.single()).isEqualTo(endretUtbetalingAndelForBarn1.endretUtbetalingAndel)
+
+            assertThat(oppdaterteAndeler[1].andel).isEqualTo(andel2)
+            assertThat(oppdaterteAndeler[1].endreteUtbetalinger).isEmpty()
+        }
+
+        @Test
+        fun `skal overstyre utvidet andeler, men ikke småbarnstillegg ved endret utbetaling på søker`() {
+            // Arrange
+            val barn1 = lagPerson(type = PersonType.BARN)
+            val søker = lagPerson(type = PersonType.SØKER)
+            val behandling = lagBehandling()
+
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = behandling,
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            val fom = YearMonth.now().minusMonths(10)
+            val tom = YearMonth.now().minusMonths(5)
+
+            val andelBarn =
+                lagAndelTilkjentYtelse(
+                    fom = fom,
+                    tom = tom,
+                    person = barn1,
+                    behandling = behandling,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                )
+
+            val andelUtvidet =
+                lagAndelTilkjentYtelse(
+                    fom = fom,
+                    tom = tom,
+                    person = søker,
+                    behandling = behandling,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                )
+
+            val andelSmåbarnstillegg =
+                lagAndelTilkjentYtelse(
+                    fom = fom,
+                    tom = tom,
+                    person = søker,
+                    behandling = behandling,
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                )
+
+            val endretUtbetalingAndelForSøker =
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    person = søker,
+                    prosent = BigDecimal.ZERO,
+                    årsak = Årsak.ETTERBETALING_3MND,
+                    fom = fom,
+                    tom = tom,
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    andelTilkjentYtelserUtenEndringer = listOf(andelBarn, andelUtvidet, andelSmåbarnstillegg),
+                    endretUtbetalingAndeler = listOf(endretUtbetalingAndelForSøker),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler.size).isEqualTo(3)
+
+            assertThat(oppdaterteAndeler.map { it.andel }).contains(andelBarn, andelSmåbarnstillegg)
+            assertThat(
+                oppdaterteAndeler.any {
+                    it.kalkulertUtbetalingsbeløp == 0 &&
+                        it.prosent == BigDecimal.ZERO &&
+                        it.endreteUtbetalinger.size == 1 &&
+                        it.endreteUtbetalinger.single() == endretUtbetalingAndelForSøker.endretUtbetalingAndel
+                },
+            ).isTrue()
+        }
+
+        @Test
         fun `endret utbetalingsandel skal overstyre andel`() {
             val person = lagPerson()
             val behandling = lagBehandling()
