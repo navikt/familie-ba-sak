@@ -1,14 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 
 object EndringUtil {
-    internal fun Tidslinje<Boolean, Måned>.tilFørsteEndringstidspunkt() =
+    internal fun Tidslinje<Boolean>.tilFørsteEndringstidspunkt() =
         this
-            .perioder()
-            .filter { it.innhold == true }
-            .minOfOrNull { it.fraOgMed }
-            ?.tilYearMonth()
+            .tilPerioder()
+            .filter { it.verdi == true }
+            .mapNotNull { it.fom }
+            .minOfOrNull { it }
+            ?.toYearMonth()
 }

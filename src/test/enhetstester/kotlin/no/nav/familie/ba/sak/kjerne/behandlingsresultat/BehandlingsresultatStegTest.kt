@@ -47,11 +47,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.somBoolskTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -282,10 +278,7 @@ class BehandlingsresultatStegTest {
     @Test
     fun `skal kaste feil om det er endring etter migreringsdatoen til første behandling`() {
         val startdato = YearMonth.of(2023, 2)
-        val endringTidslinje =
-            "TTTFFFF".tilBoolskTidslinje(
-                startdato,
-            )
+        val endringTidslinje = "TTTFFFF".somBoolskTidslinje(startdato)
 
         assertThrows<FunksjonellFeil> {
             endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandling())
@@ -297,10 +290,7 @@ class BehandlingsresultatStegTest {
         val startdato = YearMonth.of(2023, 2)
         val treMånederEtterStartdato = startdato.plusMonths(3)
 
-        val endringTidslinje =
-            "TTTFFFF".tilBoolskTidslinje(
-                startdato,
-            )
+        val endringTidslinje = "TTTFFFF".somBoolskTidslinje(startdato)
 
         assertDoesNotThrow {
             endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
@@ -602,21 +592,6 @@ class BehandlingsresultatStegTest {
                 .hentAndelerFraForrigeIverksattebehandling(behandling)
         } returns emptyList()
     }
-
-    fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> =
-        tidslinje {
-            this.mapIndexed { index, it ->
-                Periode(
-                    startdato.plusMonths(index.toLong()).tilTidspunkt(),
-                    startdato.plusMonths(index.toLong()).tilTidspunkt(),
-                    when (it) {
-                        'T' -> true
-                        'F' -> false
-                        else -> throw Feil("Klarer ikke å konvertere \"$it\" til Boolean")
-                    },
-                )
-            }
-        }
 
     private fun endretBehandlingsresultat() =
         listOf(
