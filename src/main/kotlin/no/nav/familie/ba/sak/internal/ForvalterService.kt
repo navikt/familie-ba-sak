@@ -286,9 +286,9 @@ class ForvalterService(
                     .sorted()
             }
 
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
+        val andelerTilkjentYtelseMedUtbetalinger = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id).filter { it.erAndelSomSkalSendesTilOppdrag() }
         val andelTidslinjer =
-            andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }.mapNotNull { (_, andeler) ->
+            andelerTilkjentYtelseMedUtbetalinger.groupBy { Pair(it.aktør, it.type) }.mapNotNull { (_, andeler) ->
                 val perioder = andeler.map { Periode(it, it.stønadFom.førsteDagIInneværendeMåned(), it.stønadTom.sisteDagIInneværendeMåned()) }
                 val sistePeriodeId = perioder.maxOf { it.verdi.periodeOffset ?: -1 }
                 if (sistePeriodeId != -1L) {
