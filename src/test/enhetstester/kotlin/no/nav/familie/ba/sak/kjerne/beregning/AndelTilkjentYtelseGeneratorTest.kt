@@ -33,109 +33,112 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class AndelTilkjentYtelseGeneratorTest {
-    @Test
-    fun `endret utbetalingsandel skal overstyre andel`() {
-        val person = lagPerson()
-        val behandling = lagBehandling()
-        val fom = YearMonth.of(2018, 1)
-        val tom = YearMonth.of(2019, 1)
-        val utbetalingsandeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = fom,
-                    tom = tom,
-                    person = person,
-                    behandling = behandling,
-                ),
-            )
+    @Nested
+    inner class OppdaterAndelerMedEndringer {
+        @Test
+        fun `endret utbetalingsandel skal overstyre andel`() {
+            val person = lagPerson()
+            val behandling = lagBehandling()
+            val fom = YearMonth.of(2018, 1)
+            val tom = YearMonth.of(2019, 1)
+            val utbetalingsandeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = fom,
+                        tom = tom,
+                        person = person,
+                        behandling = behandling,
+                    ),
+                )
 
-        val endretProsent = BigDecimal.ZERO
+            val endretProsent = BigDecimal.ZERO
 
-        val endretUtbetalingAndeler =
-            listOf(
+            val endretUtbetalingAndeler =
+                listOf(
+                    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                        person = person,
+                        fom = fom,
+                        tom = tom,
+                        prosent = endretProsent,
+                        behandlingId = behandling.id,
+                    ),
+                )
+
+            val andelerTilkjentYtelse =
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    utbetalingsandeler,
+                    endretUtbetalingAndeler,
+                    utbetalingsandeler.first().tilkjentYtelse,
+                )
+
+            assertThat(andelerTilkjentYtelse.size).isEqualTo(1)
+            assertThat(andelerTilkjentYtelse.single().prosent).isEqualTo(endretProsent)
+            assertThat(andelerTilkjentYtelse.single().endreteUtbetalinger.size).isEqualTo(1)
+        }
+
+        @Test
+        fun `endret utbetalingsandel kobler endrede andeler til riktig endret utbetalingandel`() {
+            val person = lagPerson()
+            val behandling = lagBehandling()
+            val fom1 = YearMonth.of(2018, 1)
+            val tom1 = YearMonth.of(2018, 11)
+
+            val fom2 = YearMonth.of(2019, 1)
+            val tom2 = YearMonth.of(2019, 11)
+
+            val utbetalingsandeler =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = fom1,
+                        tom = tom1,
+                        person = person,
+                        behandling = behandling,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = fom2,
+                        tom = tom2,
+                        person = person,
+                        behandling = behandling,
+                    ),
+                )
+
+            val endretProsent = BigDecimal.ZERO
+
+            val endretUtbetalingAndel =
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     person = person,
-                    fom = fom,
-                    tom = tom,
-                    prosent = endretProsent,
-                    behandlingId = behandling.id,
-                ),
-            )
-
-        val andelerTilkjentYtelse =
-            oppdaterAndelerMedEndretUtbetalingAndeler(
-                utbetalingsandeler,
-                endretUtbetalingAndeler,
-                utbetalingsandeler.first().tilkjentYtelse,
-            )
-
-        assertThat(andelerTilkjentYtelse.size).isEqualTo(1)
-        assertThat(andelerTilkjentYtelse.single().prosent).isEqualTo(endretProsent)
-        assertThat(andelerTilkjentYtelse.single().endreteUtbetalinger.size).isEqualTo(1)
-    }
-
-    @Test
-    fun `endret utbetalingsandel kobler endrede andeler til riktig endret utbetalingandel`() {
-        val person = lagPerson()
-        val behandling = lagBehandling()
-        val fom1 = YearMonth.of(2018, 1)
-        val tom1 = YearMonth.of(2018, 11)
-
-        val fom2 = YearMonth.of(2019, 1)
-        val tom2 = YearMonth.of(2019, 11)
-
-        val utbetalingsandeler =
-            listOf(
-                lagAndelTilkjentYtelse(
                     fom = fom1,
-                    tom = tom1,
-                    person = person,
-                    behandling = behandling,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = fom2,
                     tom = tom2,
-                    person = person,
-                    behandling = behandling,
-                ),
-            )
-
-        val endretProsent = BigDecimal.ZERO
-
-        val endretUtbetalingAndel =
-            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                person = person,
-                fom = fom1,
-                tom = tom2,
-                prosent = endretProsent,
-                behandlingId = behandling.id,
-            )
-
-        val endretUtbetalingAndeler =
-            listOf(
-                endretUtbetalingAndel,
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                    person = person,
-                    fom = tom2.nesteMåned(),
                     prosent = endretProsent,
                     behandlingId = behandling.id,
-                ),
-            )
+                )
 
-        val andelerTilkjentYtelse =
-            oppdaterAndelerMedEndretUtbetalingAndeler(
-                utbetalingsandeler,
-                endretUtbetalingAndeler,
-                utbetalingsandeler.first().tilkjentYtelse,
-            )
+            val endretUtbetalingAndeler =
+                listOf(
+                    endretUtbetalingAndel,
+                    lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                        person = person,
+                        fom = tom2.nesteMåned(),
+                        prosent = endretProsent,
+                        behandlingId = behandling.id,
+                    ),
+                )
 
-        assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
-        andelerTilkjentYtelse.forEach { assertThat(it.prosent).isEqualTo(endretProsent) }
-        andelerTilkjentYtelse.forEach { assertThat(it.endreteUtbetalinger.size).isEqualTo(1) }
-        andelerTilkjentYtelse.forEach {
-            assertThat(
-                it.endreteUtbetalinger.single().id,
-            ).isEqualTo(endretUtbetalingAndel.id)
+            val andelerTilkjentYtelse =
+                oppdaterAndelerMedEndretUtbetalingAndeler(
+                    utbetalingsandeler,
+                    endretUtbetalingAndeler,
+                    utbetalingsandeler.first().tilkjentYtelse,
+                )
+
+            assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
+            andelerTilkjentYtelse.forEach { assertThat(it.prosent).isEqualTo(endretProsent) }
+            andelerTilkjentYtelse.forEach { assertThat(it.endreteUtbetalinger.size).isEqualTo(1) }
+            andelerTilkjentYtelse.forEach {
+                assertThat(
+                    it.endreteUtbetalinger.single().id,
+                ).isEqualTo(endretUtbetalingAndel.id)
+            }
         }
     }
 
@@ -306,7 +309,7 @@ class AndelTilkjentYtelseGeneratorTest {
                     tom = YearMonth.now().minusMonths(5),
                     person = barn,
                     behandling = behandling,
-                    ytelseType = YtelseType.SMÅBARNSTILLEGG
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 )
 
             // Act & Assert
