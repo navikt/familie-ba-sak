@@ -10,11 +10,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.ZipPadding
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.zipMedNeste
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
@@ -115,14 +115,14 @@ object AndelTilkjentYtelseGenerator {
         val endretUtbetalingAndel: EndretUtbetalingAndelMedAndelerTilkjentYtelse?,
     )
 
-    private fun Tidslinje<AndelMedEndretUtbetalingForTidslinje?>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(
+    internal fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(
         tilkjentYtelse: TilkjentYtelse,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> =
         this
             .tilPerioderIkkeNull()
             .map { it.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse) }
 
-    private fun Periode<AndelMedEndretUtbetalingForTidslinje>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(
+    internal fun Periode<AndelMedEndretUtbetalingForTidslinje>.tilAndelTilkjentYtelseMedEndreteUtbetalinger(
         tilkjentYtelse: TilkjentYtelse,
     ): AndelTilkjentYtelseMedEndreteUtbetalinger {
         val andelTilkjentYtelse =
@@ -152,7 +152,7 @@ object AndelTilkjentYtelseGenerator {
     internal fun Tidslinje<AndelMedEndretUtbetalingForTidslinje>.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel() =
         this
             .zipMedNeste(ZipPadding.FØR)
-            .mapVerdi {
+            .mapVerdiNullable {
                 val forrigeAndelMedEndring = it?.first
                 val nåværendeAndelMedEndring = it?.second
 
