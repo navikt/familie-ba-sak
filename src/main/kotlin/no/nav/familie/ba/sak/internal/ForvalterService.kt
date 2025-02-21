@@ -233,14 +233,34 @@ class ForvalterService(
     fun patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsaker(
         fagsaker: List<Long>,
         dryRun: Boolean,
-    ): List<AndelKorreksjonResultat> = fagsaker.map { fagsak -> patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsak, dryRun) }
+    ): AndelKorreksjonResultatOppsummeringDto {
+        val fagsakerKlareForKorreksjon = mutableListOf<Long>()
+        val fagsakerMedFeil = mutableListOf<Long>()
+        val andelKorreksjonResultater = mutableListOf<AndelKorreksjonResultatDto>()
+
+        fagsaker.forEach { fagsak ->
+            val andelKorreksjonResultatDto = patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsak, dryRun)
+            andelKorreksjonResultater.add(patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsak, dryRun))
+            if (andelKorreksjonResultatDto.feil != null) {
+                fagsakerMedFeil.add(fagsak)
+            } else {
+                fagsakerKlareForKorreksjon.add(fagsak)
+            }
+        }
+        return AndelKorreksjonResultatOppsummeringDto(
+            korrigerteFagsaker = fagsakerKlareForKorreksjon,
+            fagsakerMedFeil = fagsakerMedFeil,
+            andelKorreksjonResultater = andelKorreksjonResultater,
+        )
+    }
 
     @Transactional
     fun patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(
         fagsakId: Long,
         dryRun: Boolean,
-    ): AndelKorreksjonResultat {
+    ): AndelKorreksjonResultatDto {
         val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: throw Feil("Finner ikke siste iverksatte behandling for fagsak $fagsakId")
+
         val perioderForKjeder =
             tilkjentYtelseRepository
                 .findByFagsak(fagsakId)
@@ -320,7 +340,7 @@ class ForvalterService(
                     .verdier()
             }
 
-        val nyeAndeler =
+        val andelerSomSkalOpprettes =
             andelerMedFeilPeriodeIdEllerKildeBehandlingId.map { (andel, utbetalingsperiode) ->
                 andel.copy(
                     id = 0,
@@ -332,14 +352,27 @@ class ForvalterService(
 
         val andelerSomSkalSlettes = andelerMedFeilPeriodeIdEllerKildeBehandlingId.map { (andel, _) -> andel }
 
-        if (andelerSomSkalSlettes.size != nyeAndeler.size) throw Feil("Det må være like mange nye/korrigerte andeler som det er andeler vi sletter")
+        if (andelerSomSkalSlettes.map { it.periodeOffset }.toSet().size != andelerSomSkalSlettes.size) {
+            return AndelKorreksjonResultatDto(
+                slettedeAndeler = andelerSomSkalSlettes.tilAndelTilkjentYtelseDto(),
+                opprettedeAndeler = andelerSomSkalOpprettes.tilAndelTilkjentYtelseDto(),
+                feil = "Andeler som skal slettes inneholder duplikate andeler. Dette skyldes at andelenes splitt ikke er reflektert i utbetalingsoppdragene oversendt til Oppdrag.",
+            )
+        }
+        if (andelerSomSkalSlettes.map { it.periodeOffset }.toSet().size != andelerSomSkalOpprettes.size) {
+            return AndelKorreksjonResultatDto(
+                slettedeAndeler = andelerSomSkalSlettes.tilAndelTilkjentYtelseDto(),
+                opprettedeAndeler = andelerSomSkalOpprettes.tilAndelTilkjentYtelseDto(),
+                feil = "Det må være like mange nye/korrigerte andeler som det er unike andeler vi sletter",
+            )
+        }
 
         if (!dryRun) {
             andelTilkjentYtelseRepository.deleteAll(andelerSomSkalSlettes)
-            andelTilkjentYtelseRepository.saveAll(nyeAndeler)
+            andelTilkjentYtelseRepository.saveAll(andelerSomSkalOpprettes)
         }
 
-        return AndelKorreksjonResultat(andelerSomSkalSlettes.tilAndelTilkjentYtelseDto(), nyeAndeler.tilAndelTilkjentYtelseDto())
+        return AndelKorreksjonResultatDto(andelerSomSkalSlettes.tilAndelTilkjentYtelseDto(), andelerSomSkalOpprettes.tilAndelTilkjentYtelseDto())
     }
 }
 
@@ -364,9 +397,16 @@ data class AndelTilkjentYtelseDto(
     val kildeBehandlingId: Long?,
 )
 
-data class AndelKorreksjonResultat(
-    val andelerSomSlettes: List<AndelTilkjentYtelseDto>,
-    val andelerSomOpprettes: List<AndelTilkjentYtelseDto>,
+data class AndelKorreksjonResultatDto(
+    val slettedeAndeler: List<AndelTilkjentYtelseDto>,
+    val opprettedeAndeler: List<AndelTilkjentYtelseDto>,
+    val feil: String? = null,
+)
+
+data class AndelKorreksjonResultatOppsummeringDto(
+    val korrigerteFagsaker: List<Long>,
+    val fagsakerMedFeil: List<Long>,
+    val andelKorreksjonResultater: List<AndelKorreksjonResultatDto>,
 )
 
 interface FagsakMedFlereMigreringer {

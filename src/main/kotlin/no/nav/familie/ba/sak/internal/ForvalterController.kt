@@ -503,7 +503,7 @@ class ForvalterController(
     fun korrigerAndelerMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(
         @PathVariable("fagsakId") fagsakId: Long,
         @RequestParam("dryRun") dryRun: Boolean = true,
-    ): ResponseEntity<AndelKorreksjonResultat> =
+    ): ResponseEntity<AndelKorreksjonResultatDto> =
         ResponseEntity.ok(forvalterService.patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsakId = fagsakId, dryRun = dryRun))
 
     @PostMapping("/korriger-andeler-med-feil-periodeId-eller-kildebehandlingId-for-fagsaker")
@@ -514,6 +514,6 @@ class ForvalterController(
     fun korrigerAndelerMedFeilPeriodeIdEllerKildeBehandlingIdForFagsaker(
         @RequestBody fagsaker: List<Long>,
         @RequestParam("dryRun") dryRun: Boolean = true,
-    ): ResponseEntity<List<AndelKorreksjonResultat>> =
+    ): ResponseEntity<AndelKorreksjonResultatOppsummeringDto> =
         ResponseEntity.ok(forvalterService.patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsaker(fagsaker = fagsaker, dryRun = dryRun))
 }
