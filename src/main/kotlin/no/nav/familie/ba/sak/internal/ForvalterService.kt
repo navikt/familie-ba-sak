@@ -274,7 +274,13 @@ class ForvalterService(
             perioderForKjeder.mapValues { (_, perioder) ->
                 perioder
                     .map { periode -> Periode(periode.verdi.maxBy { utbetalingsperiode -> utbetalingsperiode.periodeId }, periode.fom, periode.tom) }
-                    .tilTidslinje()
+                    .fold(mutableListOf<Periode<Utbetalingsperiode>>()) { acc, periode ->
+                        // Fjerner perioder med lavere periodeId enn foregående periode
+                        if (acc.isEmpty() || periode.verdi.periodeId >= acc.last().verdi.periodeId) {
+                            acc.add(periode)
+                        }
+                        acc
+                    }.tilTidslinje()
             }
 
         // Alle periodeId'er per kjede. Inneholder alle periodeId'er og ikke bare gjeldende/siste for hver periode
