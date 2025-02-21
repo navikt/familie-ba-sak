@@ -80,6 +80,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
@@ -529,8 +530,8 @@ private fun skalIverksettesMotOppdrag(
 ): Boolean =
     EndringIUtbetalingUtil
         .lagEndringIUtbetalingTidslinje(nåværendeAndeler, forrigeAndeler)
-        .perioder()
-        .any { it.innhold == true }
+        .tilPerioder()
+        .any { it.verdi == true }
 
 private fun TilkjentYtelse.oppdaterMedUtbetalingsoppdrag(
     dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition,

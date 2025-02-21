@@ -2,24 +2,24 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.YearMonth
 
-fun Tidslinje<Boolean, Måned>.kastFeilVedEndringEtter(
+fun Tidslinje<Boolean>.kastFeilVedEndringEtter(
     migreringsdatoForrigeIverksatteBehandling: YearMonth,
     behandling: Behandling,
 ) {
     val endringIUtbetalingEtterDato =
-        perioder()
-            .filter { it.tilOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
+        tilPerioder()
+            .filter { it.tom == null || it.tom!!.toYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
 
-    val erEndringIUtbetalingEtterMigreringsdato = endringIUtbetalingEtterDato.any { it.innhold == true }
+    val erEndringIUtbetalingEtterMigreringsdato = endringIUtbetalingEtterDato.any { it.verdi == true }
 
     if (erEndringIUtbetalingEtterMigreringsdato) {
-        BehandlingsresultatSteg.logger.warn("Feil i behandling $behandling.\n\nEndring i måned ${endringIUtbetalingEtterDato.first { it.innhold == true }.fraOgMed.tilYearMonth()}.")
+        BehandlingsresultatSteg.logger.warn("Feil i behandling $behandling.\n\nEndring i måned ${endringIUtbetalingEtterDato.first { it.verdi == true }.fom?.toYearMonth()}.")
         throw FunksjonellFeil(
             "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
                 "Det skal ikke skje for endre migreringsdatobehandlinger." +
