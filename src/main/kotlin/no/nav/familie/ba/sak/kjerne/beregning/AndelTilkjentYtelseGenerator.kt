@@ -66,11 +66,15 @@ object AndelTilkjentYtelseGenerator {
         return oppdaterteAndeler
     }
 
-    private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+    internal fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
         andelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+        if (andelerForPerson.any { it.type == YtelseType.SMÅBARNSTILLEGG }) {
+            throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler")
+        }
+
         val andelerTidslinje = andelerForPerson.map { it.tilPeriode() }.tilTidslinje()
         val endretUtbetalingTidslinje = endretUtbetalingAndelerForPerson.tilTidslinje()
 

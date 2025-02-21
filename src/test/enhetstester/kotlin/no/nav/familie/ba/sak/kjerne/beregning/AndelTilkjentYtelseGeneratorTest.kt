@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -9,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.oppdaterAndelerForPersonMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.oppdaterAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.tilAndelTilkjentYtelseMedEndreteUtbetalinger
@@ -25,6 +27,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -59,20 +62,20 @@ class AndelTilkjentYtelseGeneratorTest {
                 ),
             )
 
-        val andelerTIlkjentYtelse =
+        val andelerTilkjentYtelse =
             oppdaterAndelerMedEndretUtbetalingAndeler(
                 utbetalingsandeler,
                 endretUtbetalingAndeler,
                 utbetalingsandeler.first().tilkjentYtelse,
             )
 
-        assertThat(andelerTIlkjentYtelse.size).isEqualTo(1)
-        assertThat(andelerTIlkjentYtelse.single().prosent).isEqualTo(endretProsent)
-        assertThat(andelerTIlkjentYtelse.single().endreteUtbetalinger.size).isEqualTo(1)
+        assertThat(andelerTilkjentYtelse.size).isEqualTo(1)
+        assertThat(andelerTilkjentYtelse.single().prosent).isEqualTo(endretProsent)
+        assertThat(andelerTilkjentYtelse.single().endreteUtbetalinger.size).isEqualTo(1)
     }
 
     @Test
-    fun `endret utbetalingsandel koble endrede andeler til riktig endret utbetalingandel`() {
+    fun `endret utbetalingsandel kobler endrede andeler til riktig endret utbetalingandel`() {
         val person = lagPerson()
         val behandling = lagBehandling()
         val fom1 = YearMonth.of(2018, 1)
@@ -119,20 +122,201 @@ class AndelTilkjentYtelseGeneratorTest {
                 ),
             )
 
-        val andelerTIlkjentYtelse =
+        val andelerTilkjentYtelse =
             oppdaterAndelerMedEndretUtbetalingAndeler(
                 utbetalingsandeler,
                 endretUtbetalingAndeler,
                 utbetalingsandeler.first().tilkjentYtelse,
             )
 
-        assertThat(andelerTIlkjentYtelse.size).isEqualTo(2)
-        andelerTIlkjentYtelse.forEach { assertThat(it.prosent).isEqualTo(endretProsent) }
-        andelerTIlkjentYtelse.forEach { assertThat(it.endreteUtbetalinger.size).isEqualTo(1) }
-        andelerTIlkjentYtelse.forEach {
+        assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
+        andelerTilkjentYtelse.forEach { assertThat(it.prosent).isEqualTo(endretProsent) }
+        andelerTilkjentYtelse.forEach { assertThat(it.endreteUtbetalinger.size).isEqualTo(1) }
+        andelerTilkjentYtelse.forEach {
             assertThat(
                 it.endreteUtbetalinger.single().id,
             ).isEqualTo(endretUtbetalingAndel.id)
+        }
+    }
+
+    @Nested
+    inner class OppdaterAndelerMedEndringerForPerson {
+        @Test
+        fun `skal returnere tom liste hvis person ikke har noen andeler`() {
+            // Arrange
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = lagBehandling(),
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+                    andelerForPerson = emptyList(),
+                    endretUtbetalingAndelerForPerson = emptyList(),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere eksisterende andeler uten endringer hvis det ikke er noen endringer for person`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barn = lagPerson(type = PersonType.BARN)
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = behandling,
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            val andel1 =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().minusMonths(5),
+                    person = barn,
+                    behandling = behandling,
+                    beløp = 1000,
+                    sats = 1000,
+                )
+
+            val andel2 =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now(),
+                    person = barn,
+                    behandling = behandling,
+                    beløp = 1500,
+                    sats = 1500,
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+                    andelerForPerson = listOf(andel1, andel2),
+                    endretUtbetalingAndelerForPerson = emptyList(),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler.size).isEqualTo(2)
+
+            val førsteAndelMedEndring = oppdaterteAndeler.minBy { it.stønadFom }
+            assertThat(førsteAndelMedEndring.andel).isEqualTo(andel1)
+            assertThat(førsteAndelMedEndring.endreteUtbetalinger).isEmpty()
+
+            val sisteAndelMedEndring = oppdaterteAndeler.maxBy { it.stønadFom }
+            assertThat(sisteAndelMedEndring.andel).isEqualTo(andel2)
+            assertThat(sisteAndelMedEndring.endreteUtbetalinger).isEmpty()
+        }
+
+        @Test
+        fun `skal oppdatere andeler med endring som går på tvers av andeler`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barn = lagPerson(type = PersonType.BARN)
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = behandling,
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            val andel1 =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().minusMonths(5),
+                    person = barn,
+                    behandling = behandling,
+                    beløp = 1000,
+                    sats = 1000,
+                )
+
+            val andel2 =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now(),
+                    person = barn,
+                    behandling = behandling,
+                    beløp = 1500,
+                    sats = 1500,
+                )
+
+            val endretUtbetalingAndel =
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    person = barn,
+                    prosent = BigDecimal.ZERO,
+                    årsak = Årsak.ALLEREDE_UTBETALT,
+                    fom = YearMonth.now().minusMonths(7),
+                    tom = YearMonth.now().minusMonths(2),
+                )
+
+            // Act
+            val oppdaterteAndeler =
+                oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+                    andelerForPerson = listOf(andel1, andel2),
+                    endretUtbetalingAndelerForPerson = listOf(endretUtbetalingAndel),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+
+            // Assert
+            assertThat(oppdaterteAndeler.size).isEqualTo(3)
+
+            assertThat(oppdaterteAndeler[0].kalkulertUtbetalingsbeløp).isEqualTo(andel1.kalkulertUtbetalingsbeløp)
+            assertThat(oppdaterteAndeler[0].prosent).isEqualTo(andel1.prosent)
+            assertThat(oppdaterteAndeler[0].stønadFom).isEqualTo(andel1.stønadFom)
+            assertThat(oppdaterteAndeler[0].stønadTom).isEqualTo(endretUtbetalingAndel.fom?.minusMonths(1))
+            assertThat(oppdaterteAndeler[0].endreteUtbetalinger).isEmpty()
+
+            assertThat(oppdaterteAndeler[1].kalkulertUtbetalingsbeløp).isEqualTo(0)
+            assertThat(oppdaterteAndeler[1].prosent).isEqualTo(endretUtbetalingAndel.prosent)
+            assertThat(oppdaterteAndeler[1].stønadFom).isEqualTo(endretUtbetalingAndel.fom)
+            assertThat(oppdaterteAndeler[1].stønadTom).isEqualTo(endretUtbetalingAndel.tom)
+            assertThat(oppdaterteAndeler[1].endreteUtbetalinger.size).isEqualTo(1)
+            assertThat(oppdaterteAndeler[1].endreteUtbetalinger.single()).isEqualTo(endretUtbetalingAndel.endretUtbetalingAndel)
+
+            assertThat(oppdaterteAndeler[2].kalkulertUtbetalingsbeløp).isEqualTo(andel2.kalkulertUtbetalingsbeløp)
+            assertThat(oppdaterteAndeler[2].prosent).isEqualTo(andel2.prosent)
+            assertThat(oppdaterteAndeler[2].stønadFom).isEqualTo(endretUtbetalingAndel.tom?.plusMonths(1))
+            assertThat(oppdaterteAndeler[2].stønadTom).isEqualTo(andel2.stønadTom)
+            assertThat(oppdaterteAndeler[2].endreteUtbetalinger).isEmpty()
+        }
+
+        @Test
+        fun `skal kaste feil om man prøver å oppdatere småbarnstillegg-andeler med endringer`() {
+            // Arrange
+            val behandling = lagBehandling()
+            val barn = lagPerson(type = PersonType.BARN)
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = behandling,
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
+
+            val andel =
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.now().minusMonths(10),
+                    tom = YearMonth.now().minusMonths(5),
+                    person = barn,
+                    behandling = behandling,
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG
+                )
+
+            // Act & Assert
+            assertThrows<Feil> {
+                oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+                    andelerForPerson = listOf(andel),
+                    endretUtbetalingAndelerForPerson = emptyList(),
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+            }
         }
     }
 
@@ -359,24 +543,26 @@ class AndelTilkjentYtelseGeneratorTest {
             val barn = lagPerson(type = PersonType.BARN)
             val fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned()
             val tom = LocalDate.now().minusMonths(5).sisteDagIMåned()
-            val periode = Periode(
-                fom = fom,
-                tom = tom,
-                verdi =
-                    AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
-                        aktør = barn.aktør,
-                        beløp = 1054,
-                        sats = 1054,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        prosent = BigDecimal(100),
-                        endretUtbetalingAndel = null,
-                    )
-            )
-            val tilkjentYtelse = TilkjentYtelse(
-                behandling = lagBehandling(),
-                endretDato = LocalDate.now(),
-                opprettetDato = LocalDate.now().minusMonths(9)
-            )
+            val periode =
+                Periode(
+                    fom = fom,
+                    tom = tom,
+                    verdi =
+                        AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            aktør = barn.aktør,
+                            beløp = 1054,
+                            sats = 1054,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            prosent = BigDecimal(100),
+                            endretUtbetalingAndel = null,
+                        ),
+                )
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = lagBehandling(),
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
 
             // Act
             val andel = periode.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
@@ -401,33 +587,35 @@ class AndelTilkjentYtelseGeneratorTest {
             val barn = lagPerson(type = PersonType.BARN)
             val fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned()
             val tom = LocalDate.now().minusMonths(5).sisteDagIMåned()
-            val periode = Periode(
-                fom = fom,
-                tom = tom,
-                verdi =
-                    AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
-                        aktør = barn.aktør,
-                        beløp = 0,
-                        sats = 1054,
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        prosent = BigDecimal.ZERO,
-                        endretUtbetalingAndel =
-                            EndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                                andeler = emptyList(),
-                                endretUtbetalingAndel =
-                                    lagEndretUtbetalingAndel(
-                                        person = barn,
-                                        prosent = BigDecimal.ZERO,
-                                        årsak = Årsak.ETTERBETALING_3MND,
-                                    ),
-                            ),
-                    )
-            )
-            val tilkjentYtelse = TilkjentYtelse(
-                behandling = lagBehandling(),
-                endretDato = LocalDate.now(),
-                opprettetDato = LocalDate.now().minusMonths(9)
-            )
+            val periode =
+                Periode(
+                    fom = fom,
+                    tom = tom,
+                    verdi =
+                        AndelTilkjentYtelseGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            aktør = barn.aktør,
+                            beløp = 0,
+                            sats = 1054,
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                            prosent = BigDecimal.ZERO,
+                            endretUtbetalingAndel =
+                                EndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                                    andeler = emptyList(),
+                                    endretUtbetalingAndel =
+                                        lagEndretUtbetalingAndel(
+                                            person = barn,
+                                            prosent = BigDecimal.ZERO,
+                                            årsak = Årsak.ETTERBETALING_3MND,
+                                        ),
+                                ),
+                        ),
+                )
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = lagBehandling(),
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
 
             // Act
             val andel = periode.tilAndelTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
@@ -493,11 +681,12 @@ class AndelTilkjentYtelseGeneratorTest {
                     ),
                 )
 
-            val tilkjentYtelse = TilkjentYtelse(
-                behandling = lagBehandling(),
-                endretDato = LocalDate.now(),
-                opprettetDato = LocalDate.now().minusMonths(9)
-            )
+            val tilkjentYtelse =
+                TilkjentYtelse(
+                    behandling = lagBehandling(),
+                    endretDato = LocalDate.now(),
+                    opprettetDato = LocalDate.now().minusMonths(9),
+                )
 
             // Act
             val tidslinje = perioder.tilTidslinje()
