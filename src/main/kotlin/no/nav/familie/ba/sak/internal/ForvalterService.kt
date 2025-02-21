@@ -346,6 +346,7 @@ class ForvalterService(
 fun Collection<AndelTilkjentYtelse>.tilAndelTilkjentYtelseDto(): List<AndelTilkjentYtelseDto> =
     this.map {
         AndelTilkjentYtelseDto(
+            id = it.id,
             fom = it.stønadFom,
             tom = it.stønadTom,
             periodeId = it.periodeOffset,
@@ -355,6 +356,7 @@ fun Collection<AndelTilkjentYtelse>.tilAndelTilkjentYtelseDto(): List<AndelTilkj
     }
 
 data class AndelTilkjentYtelseDto(
+    val id: Long,
     val fom: YearMonth,
     val tom: YearMonth?,
     val periodeId: Long?,
@@ -364,7 +366,7 @@ data class AndelTilkjentYtelseDto(
 
 data class AndelKorreksjonResultat(
     val andelerSomSlettes: List<AndelTilkjentYtelseDto>,
-    val andelerSomOppretets: List<AndelTilkjentYtelseDto>,
+    val andelerSomOpprettes: List<AndelTilkjentYtelseDto>,
 )
 
 interface FagsakMedFlereMigreringer {
