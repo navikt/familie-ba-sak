@@ -73,7 +73,7 @@ dev-gcp-clusteret ved å gjøre følgende:
 
 BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til`AZURE_APP_CLIENT_SECRET`
 
-Se `.deploy/nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-familie-ba-sak-lokal`
+Se `.nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-familie-ba-sak-lokal`
 
 Til slutt skal miljøvariablene se slik ut:
 
