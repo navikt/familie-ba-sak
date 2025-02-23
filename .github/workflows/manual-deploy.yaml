@@ -1,0 +1,41 @@
+name: Manual deploy
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      skip-tests:
+        description: 'Skip tests?'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    name: Build
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@main
+    with:
+      skip-tests: ${{ inputs.skip-tests }}
+      build-image: true
+      push-image: true
+    secrets: inherit
+  deploy-with-new-image:
+    name: Deploy with new image
+    permissions:
+      id-token: write
+    needs: [ build ]
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@main
+    with:
+      image: ${{ needs.build.outputs.image }}
+      cluster: ${{ inputs.environment }}-gcp
+      resource: .nais/app-${{ inputs.environment }}.yaml
+    secrets: inherit
