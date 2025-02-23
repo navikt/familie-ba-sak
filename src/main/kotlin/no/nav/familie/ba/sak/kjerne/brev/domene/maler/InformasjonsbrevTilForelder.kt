@@ -16,16 +16,16 @@ data class InformasjonsbrevTilForelderData(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-        val barnSoktFor: Flettefelt,
+        val relevanteBarn: Flettefelt,
     ) : FlettefelterForDokument {
         constructor(
             navn: String,
             fodselsnummer: String,
-            barnSøktFor: List<String>,
+            relevanteBarn: List<String>,
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
-            barnSoktFor = flettefelt(barnSøktFor),
+            relevanteBarn = flettefelt(relevanteBarn),
         )
     }
 
