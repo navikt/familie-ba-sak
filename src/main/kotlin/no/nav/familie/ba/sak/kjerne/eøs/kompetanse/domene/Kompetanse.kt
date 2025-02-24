@@ -17,15 +17,20 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.YearMonth
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Kompetanse")
@@ -241,6 +246,16 @@ fun List<UtfyltKompetanse>.tilTidslinje() =
             )
         }.tilTidslinje()
 
+fun List<UtfyltKompetanse>.tilFamilieFellesTidslinje() =
+    this
+        .map {
+            FamilieFellesPeriode(
+                verdi = it,
+                fom = it.fom.førsteDagIInneværendeMåned(),
+                tom = it.tom?.sisteDagIInneværendeMåned(),
+            )
+        }.tilTidslinje()
+
 fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt: MånedTidspunkt): Map<Aktør, List<UtfyltKompetanse>> {
     val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
 
@@ -252,10 +267,10 @@ fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(e
     return alleBarnAktørIder.associateWith { aktør ->
         utfylteKompetanser
             .filter { it.barnAktører.contains(aktør) }
-            .tilTidslinje()
-            .beskjærFraOgMed(endringstidspunkt)
-            .perioder()
-            .mapNotNull { it.innhold }
+            .tilFamilieFellesTidslinje()
+            .beskjærFraOgMed(endringstidspunkt.tilYearMonth().førsteDagIInneværendeMåned())
+            .tilPerioder()
+            .mapNotNull { it.verdi }
     }
 }
 
