@@ -8,9 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.felles.utenPeriode
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.tidslinje.tilTidslinje
@@ -30,27 +28,6 @@ internal fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinje() =
             )
         }
     }
-
-fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<S, Måned>> {
-    val skjemaer = this
-    if (skjemaer.toList().isEmpty()) return emptyMap()
-
-    val alleBarnAktørIder = skjemaer.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
-
-    return alleBarnAktørIder.associateWith { aktør ->
-        tidslinje {
-            skjemaer
-                .filter { it.barnAktører.contains(aktør) }
-                .map {
-                    Periode(
-                        fraOgMed = it.fom.tilTidspunktEllerUendeligTidlig(it.tom),
-                        tilOgMed = it.tom.tilTidspunktEllerUendeligSent(it.fom),
-                        innhold = it.kopier(fom = null, tom = null, barnAktører = setOf(aktør)),
-                    )
-                }
-        }
-    }
-}
 
 fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateFamilieFellesTidslinjerForBarna(): Map<Aktør, FamilieFellesTidslinje<S>> {
     val skjemaer = this

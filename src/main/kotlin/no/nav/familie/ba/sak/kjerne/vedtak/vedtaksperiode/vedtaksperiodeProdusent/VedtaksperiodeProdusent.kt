@@ -13,9 +13,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.ZipPadding
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.zipMedNeste
@@ -509,7 +506,3 @@ fun lagPeriodeForOmregningsbehandling(
         ),
     )
 }
-
-private fun <T> Periode<T, Måned>.periodeInneholder(
-    nåDato: LocalDate,
-) = this.fraOgMed.tilYearMonth() <= nåDato.toYearMonth() && this.tilOgMed.tilYearMonth() >= nåDato.toYearMonth()

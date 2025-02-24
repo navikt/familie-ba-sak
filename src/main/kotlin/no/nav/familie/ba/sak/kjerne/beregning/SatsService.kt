@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerMed
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.LocalDate
@@ -126,8 +125,3 @@ fun lagOrdinærTidslinje(barn: Person): FamilieFellesTidslinje<Int> {
         .kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
         .beskjærFraOgMed(fraOgMed = barn.fødselsdato.førsteDagIInneværendeMåned())
 }
-
-private fun FamilieFellesTidslinje<Int>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) =
-    this
-        .beskjærFraOgMed(fraOgMed = fødselsdato.førsteDagIInneværendeMåned())
-        .forlengFremtidTilUendelig(tidspunktForUendelighet = fødselsdato.sisteDagIMåned())

@@ -23,10 +23,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
@@ -154,16 +150,6 @@ fun Valutakurs.tilIValutakurs(): IValutakurs =
             behandlingId = this.behandlingId,
         )
     }
-
-fun List<UtfyltValutakurs>.tilTidslinje() =
-    this
-        .map {
-            Periode(
-                fraOgMed = it.fom.tilTidspunkt(),
-                tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
-                innhold = it,
-            )
-        }.tilTidslinje()
 
 fun List<UtfyltValutakurs>.tilFamilieFellesTidslinje() =
     this

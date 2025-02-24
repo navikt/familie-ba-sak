@@ -24,6 +24,7 @@ import java.time.LocalDate
 import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object VilkårsvurderingForskyvningUtils {
+    // TODO: Slett denne, bare brukt i test
     fun Set<PersonResultat>.tilTidslinjeForSplitt(
         personerIPersongrunnlag: List<Person>,
         fagsakType: FagsakType,
@@ -88,18 +89,6 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> =
-        this
-            .filter { it.vilkårType == vilkår && it.erOppfylt() }
-            .tilFamilieFellesTidslinje()
-            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
-                when {
-                    !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
-                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
-                    else -> innholdFørsteDagDenneMåned
-                }
-            }
-
-    fun Collection<VilkårResultat>.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> =
         this
             .filter { it.vilkårType == vilkår && it.erOppfylt() }
             .tilFamilieFellesTidslinje()
