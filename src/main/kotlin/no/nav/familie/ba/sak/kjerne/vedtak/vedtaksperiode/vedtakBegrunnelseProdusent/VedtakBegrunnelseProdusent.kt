@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -16,22 +20,11 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilPersonType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.mapInnhold
-import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilNesteMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFramtid
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentBrevPeriodeType
@@ -44,9 +37,17 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 fun VedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     grunnlagForBegrunnelser: GrunnlagForBegrunnelse,
@@ -243,19 +244,17 @@ private fun VedtaksperiodeMedBegrunnelser.hentAvslagsbegrunnelserPerPerson(
                 .tilForskjøvedeVilkårTidslinjer(person.fødselsdato)
                 .filtrerKunEksplisittAvslagsPerioder()
 
-        val avslagsbegrunnelserMedPeriode = avslagsbegrunnelserMedPeriodeTidslinjer.flatMap { it.perioder() }.filter { it.fraOgMed.tilYearMonthEllerNull() == this.fom?.toYearMonth() }.flatMap { it.innhold?.standardbegrunnelser ?: emptyList() }
+        val avslagsbegrunnelserMedPeriode = avslagsbegrunnelserMedPeriodeTidslinjer.flatMap { it.tilPerioder() }.filter { it.fom?.toYearMonth() == this.fom?.toYearMonth() }.flatMap { it.verdi?.standardbegrunnelser ?: emptyList() }
 
         (generelleAvslagsbegrunnelser + avslagsbegrunnelserMedPeriode).toSet()
     }
 
-private fun List<Tidslinje<VilkårResultat, Måned>>.filtrerKunEksplisittAvslagsPerioder(): List<Tidslinje<VilkårResultat, Måned>> =
+private fun List<FamilieFellesTidslinje<VilkårResultat>>.filtrerKunEksplisittAvslagsPerioder(): List<FamilieFellesTidslinje<VilkårResultat>> =
     this.map { tidslinjeForVilkår ->
-        val eksplisittAvslagsPerioder =
-            tidslinjeForVilkår
-                .perioder()
-                .filter { it.innhold?.erEksplisittAvslagPåSøknad == true }
-
-        tidslinje { eksplisittAvslagsPerioder }
+        tidslinjeForVilkår
+            .tilPerioderIkkeNull()
+            .filter { it.verdi.erEksplisittAvslagPåSøknad == true }
+            .tilTidslinje()
     }
 
 internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
@@ -550,14 +549,14 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
             )
 
         val begrunnelseperioderIVedtaksperiode =
-            grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }
+            grunnlagMedForrigePeriodeOgBehandlingTidslinje.tilPerioder().mapNotNull { it.verdi }
 
         when (this.type) {
             Vedtaksperiodetype.OPPHØR -> begrunnelseperioderIVedtaksperiode.first()
             Vedtaksperiodetype.FORTSATT_INNVILGET ->
                 if (this.fom == null && this.tom == null) {
-                    val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder()
-                    perioder.single { grunnlag.nåDato.toYearMonth() in it.fraOgMed.tilYearMonthEllerUendeligFortid()..it.tilOgMed.tilYearMonthEllerUendeligFramtid() }.innhold!!
+                    val perioder = grunnlagMedForrigePeriodeOgBehandlingTidslinje.tilPerioder()
+                    perioder.single { grunnlag.nåDato.toYearMonth() in (it.fom?.toYearMonth() ?: MIN_MÅNED)..(it.tom?.toYearMonth() ?: MAX_MÅNED) }.verdi!!
                 } else {
                     begrunnelseperioderIVedtaksperiode.first()
                 }
@@ -567,14 +566,14 @@ fun VedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     }
 }
 
-private fun Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
-    grunnlagTidslinje: Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>>?,
+private fun FamilieFellesTidslinje<VedtaksperiodeMedBegrunnelser>.lagTidslinjeGrunnlagDennePeriodenForrigePeriodeOgPeriodeForrigeBehandling(
+    grunnlagTidslinje: FamilieFellesTidslinje<BegrunnelseGrunnlagForPersonIPeriode>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, FamilieFellesTidslinje<BegrunnelseGrunnlagForPersonIPeriode>>?,
     person: Person,
-): Tidslinje<IBegrunnelseGrunnlagForPeriode, Måned> {
+): FamilieFellesTidslinje<IBegrunnelseGrunnlagForPeriode> {
     val grunnlagMedForrigePeriodeTidslinje = grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje(this)
 
-    val grunnlagForrigeBehandlingTidslinje = grunnlagTidslinjePerPersonForrigeBehandling?.get(person) ?: TomTidslinje()
+    val grunnlagForrigeBehandlingTidslinje = grunnlagTidslinjePerPersonForrigeBehandling?.get(person) ?: tomTidslinje()
 
     return this.kombinerMed(
         grunnlagMedForrigePeriodeTidslinje,
@@ -595,12 +594,12 @@ private fun Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>.lagTidslinjeGrunnla
     }
 }
 
-private fun VedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<VedtaksperiodeMedBegrunnelser, Måned> =
+private fun VedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): FamilieFellesTidslinje<VedtaksperiodeMedBegrunnelser> =
     listOf(
-        månedPeriodeAv(
-            fraOgMed = this.fom?.toYearMonth(),
-            tilOgMed = this.tom?.toYearMonth(),
-            innhold = this,
+        FamilieFellesPeriode(
+            verdi = this,
+            fom = this.fom?.førsteDagIInneværendeMåned(),
+            tom = this.tom?.sisteDagIMåned(),
         ),
     ).tilTidslinje()
 
@@ -609,21 +608,25 @@ data class ForrigeOgDennePerioden(
     val denne: BegrunnelseGrunnlagForPersonIPeriode?,
 )
 
-private fun Tidslinje<BegrunnelseGrunnlagForPersonIPeriode, Måned>.tilForrigeOgNåværendePeriodeTidslinje(
-    vedtaksperiodeTidslinje: Tidslinje<VedtaksperiodeMedBegrunnelser, Måned>,
-): Tidslinje<ForrigeOgDennePerioden, Måned> {
+private fun FamilieFellesTidslinje<BegrunnelseGrunnlagForPersonIPeriode>.tilForrigeOgNåværendePeriodeTidslinje(
+    vedtaksperiodeTidslinje: FamilieFellesTidslinje<VedtaksperiodeMedBegrunnelser>,
+): FamilieFellesTidslinje<ForrigeOgDennePerioden> {
     val grunnlagPerioderSplittetPåVedtaksperiode =
         kombinerMed(vedtaksperiodeTidslinje) { grunnlag, periode ->
             Pair(grunnlag, periode)
-        }.perioder().mapInnhold { it?.first }
+        }.tilPerioder().map { FamilieFellesPeriode(it.verdi?.first, it.fom, it.tom) }
 
     return (
         listOf(
-            månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
+            FamilieFellesPeriode(
+                verdi = null,
+                fom = YearMonth.now().førsteDagIInneværendeMåned(),
+                tom = YearMonth.now().sisteDagIInneværendeMåned(),
+            ),
         ) + grunnlagPerioderSplittetPåVedtaksperiode
     ).zipWithNext { forrige, denne ->
-        val innholdForrigePeriode = if (forrige.tilOgMed.tilNesteMåned() == denne.fraOgMed) forrige.innhold else null
-        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(innholdForrigePeriode, denne.innhold))
+        val innholdForrigePeriode = if (forrige.tom?.nesteMåned() == denne.fom?.toYearMonth()) forrige.verdi else null
+        FamilieFellesPeriode(ForrigeOgDennePerioden(innholdForrigePeriode, denne.verdi), denne.fom, denne.tom)
     }.tilTidslinje()
 }
 
