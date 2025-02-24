@@ -1,6 +1,7 @@
 # Full pipeline on push to main. Build, test, and deploy to dev + prod
 name: Main
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'main'
