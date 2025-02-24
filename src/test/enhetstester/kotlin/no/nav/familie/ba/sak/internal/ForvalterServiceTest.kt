@@ -328,7 +328,7 @@ class ForvalterServiceTest {
     }
 
     @Test
-    fun `skal oppdatere andeler fra siste iverksatte behandling som har feil periodeId, forrigePeriodeId og kildeBehandlingId`() {
+    fun `skal oppdatere andeler fra siste iverksatte behandling som bruker utdaterte periodeId'er fra forrige behandling`() {
         val fagsak = lagFagsak()
         val behandling1 = lagBehandling(fagsak)
         val behandling2 = lagBehandling(fagsak)
@@ -470,8 +470,8 @@ class ForvalterServiceTest {
 
         val andelerMedFeilOgKorrigerteAndeler = forvalterService.patchAndelerISisteIverksatteBehandlingMedFeilPeriodeIdEllerKildeBehandlingIdForFagsak(fagsak.id, true)
 
-        val sorterteAndelerMedFeil = andelerMedFeilOgKorrigerteAndeler.first.sortedBy { it.periodeId }
-        val sorterteNyeAndeler = andelerMedFeilOgKorrigerteAndeler.second.sortedBy { it.periodeId }
+        val sorterteAndelerMedFeil = andelerMedFeilOgKorrigerteAndeler.slettedeAndeler.sortedBy { it.periodeId }
+        val sorterteNyeAndeler = andelerMedFeilOgKorrigerteAndeler.opprettedeAndeler.sortedBy { it.periodeId }
 
         assertThat(sorterteAndelerMedFeil).hasSize(4)
         assertThat(sorterteAndelerMedFeil[0].periodeId).isEqualTo(1)

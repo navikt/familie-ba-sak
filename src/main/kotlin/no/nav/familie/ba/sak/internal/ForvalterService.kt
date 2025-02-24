@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -271,18 +272,23 @@ class ForvalterService(
                             .sortedBy { it.periodeId }
                             .fold(mutableMapOf<Long, MutableList<Periode<Utbetalingsperiode>>>()) { kjeder, utbetalingsperiode ->
                                 kjeder.apply {
-                                    // Derom kjede er opphørt forkorter vi perioden til opphørsdato. Ellers bruker vi utbetalingsperiodens vedtakdatoTom
-                                    val periodeTom = utbetalingsperiode.opphør?.opphørDatoFom ?: utbetalingsperiode.vedtakdatoTom
-                                    val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, periodeTom)
+                                    val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, utbetalingsperiode.vedtakdatoTom)
                                     put(utbetalingsperiode.periodeId, kjede.toMutableList())
                                     remove(utbetalingsperiode.forrigePeriodeId)
                                 }
-                            }.mapValues { (_, kjede) -> Pair(kjede.tilTidslinje(), kjede.minOfOrNull { it.verdi.forrigePeriodeId ?: -1 }) }
+                            }.mapValues { (_, kjede) ->
+                                val opphørPeriode = kjede.singleOrNull { it.verdi.opphør != null }
+                                val forrigePeriodeId =
+                                    opphørPeriode?.verdi?.periodeId ?: kjede.minOfOrNull { it.verdi.forrigePeriodeId ?: -1 }
+                                Pair(kjede.tilTidslinje(), forrigePeriodeId)
+                            }
                     kjederForFagsak.apply {
                         kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId) ->
                             val kjedeForFagsak = kjederForFagsak.getOrDefault(forrigePeriodeId, mutableListOf()) + tidslinje
                             put(periodeId, kjedeForFagsak.toMutableList())
-                            remove(forrigePeriodeId)
+                            if (periodeId != forrigePeriodeId) {
+                                remove(forrigePeriodeId)
+                            }
                         }
                     }
                 }.mapValues { (_, tidslinjerForKjede) ->
@@ -293,13 +299,26 @@ class ForvalterService(
         val gjeldeneTidslinjePerKjede =
             perioderForKjeder.mapValues { (_, perioder) ->
                 perioder
-                    .map { periode -> Periode(periode.verdi.maxBy { utbetalingsperiode -> utbetalingsperiode.periodeId }, periode.fom, periode.tom) }
-                    .fold(mutableListOf<Periode<Utbetalingsperiode>>()) { acc, periode ->
+                    .map { periode ->
+                        Periode(
+                            periode.verdi.maxWith(
+                                compareBy<Utbetalingsperiode> { it.periodeId }
+                                    .thenBy { it.opphør != null }
+                                    .thenBy { it.opphør?.opphørDatoFom },
+                            ),
+                            periode.fom,
+                            periode.tom,
+                        )
+                    }.fold(mutableListOf<Periode<Utbetalingsperiode>>()) { gjeldendePerioder, periode ->
                         // Fjerner perioder med lavere periodeId enn foregående periode
-                        if (acc.isEmpty() || periode.verdi.periodeId >= acc.last().verdi.periodeId) {
-                            acc.add(periode)
+                        if (gjeldendePerioder.isEmpty() || periode.verdi.periodeId >= gjeldendePerioder.last().verdi.periodeId) {
+                            val erOpphørsPeriode = periode.verdi.opphør != null
+                            if (erOpphørsPeriode) {
+                                return@fold beskjærPerioderIHenholdTilOpphør(periode, gjeldendePerioder)
+                            }
+                            gjeldendePerioder.add(periode)
                         }
-                        acc
+                        gjeldendePerioder
                     }.tilTidslinje()
             }
 
@@ -374,6 +393,19 @@ class ForvalterService(
 
         return AndelKorreksjonResultatDto(andelerSomSkalSlettes.tilAndelTilkjentYtelseDto(), andelerSomSkalOpprettes.tilAndelTilkjentYtelseDto())
     }
+
+    private fun beskjærPerioderIHenholdTilOpphør(
+        opphørsPeriode: Periode<Utbetalingsperiode>,
+        gjeldendePerioder: MutableList<Periode<Utbetalingsperiode>>,
+    ): MutableList<Periode<Utbetalingsperiode>> =
+        (gjeldendePerioder + opphørsPeriode)
+            .tilTidslinje()
+            .beskjærTilOgMed(
+                opphørsPeriode.verdi.opphør!!
+                    .opphørDatoFom
+                    .minusDays(1),
+            ).tilPerioderIkkeNull()
+            .toMutableList()
 }
 
 fun Collection<AndelTilkjentYtelse>.tilAndelTilkjentYtelseDto(): List<AndelTilkjentYtelseDto> =
