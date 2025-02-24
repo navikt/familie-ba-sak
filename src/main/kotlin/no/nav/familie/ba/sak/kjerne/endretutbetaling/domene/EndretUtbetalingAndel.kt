@@ -17,7 +17,9 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -25,9 +27,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "EndretUtbetalingAndel")
@@ -240,5 +244,15 @@ fun List<IUtfyltEndretUtbetalingAndel>.tilTidslinje() =
                 fraOgMed = betalingAndel.fom.tilTidspunkt(),
                 tilOgMed = betalingAndel.tom.tilTidspunkt(),
                 innhold = betalingAndel,
+            )
+        }.tilTidslinje()
+
+fun List<IUtfyltEndretUtbetalingAndel>.tilFamilieFellesTidslinje() =
+    this
+        .map { betalingAndel ->
+            FamilieFellesPeriode(
+                verdi = betalingAndel,
+                fom = betalingAndel.fom.førsteDagIInneværendeMåned(),
+                tom = betalingAndel.tom.sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
