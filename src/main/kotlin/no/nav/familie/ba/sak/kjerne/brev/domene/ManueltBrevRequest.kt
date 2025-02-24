@@ -232,7 +232,7 @@ fun ManueltBrevRequest.tilBrev(
                             InformasjonsbrevTilForelderData.Flettefelter(
                                 navn = mottakerNavn,
                                 fodselsnummer = mottakerIdent,
-                                relevanteBarn = this.multiselectVerdier,
+                                barnIBrev = this.multiselectVerdier,
                             ),
                     ),
             )
