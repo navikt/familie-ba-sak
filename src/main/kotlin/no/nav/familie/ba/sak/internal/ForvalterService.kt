@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -339,7 +340,7 @@ class ForvalterService(
                 val perioder = andeler.map { Periode(it, it.stønadFom.førsteDagIInneværendeMåned(), it.stønadTom.sisteDagIInneværendeMåned()) }
                 val sistePeriodeId = perioder.maxOf { it.verdi.periodeOffset ?: -1 }
                 if (sistePeriodeId != -1L) {
-                    sistePeriodeId to perioder.tilTidslinje()
+                    sistePeriodeId to perioder.tilTidslinje().beskjærFraOgMed(LocalDate.of(2025, 2, 1))
                 } else {
                     null
                 }
