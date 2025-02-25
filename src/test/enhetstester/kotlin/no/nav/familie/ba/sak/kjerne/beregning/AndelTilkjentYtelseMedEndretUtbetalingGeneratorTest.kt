@@ -10,11 +10,11 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.oppdaterAndelerForPersonMedEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.lagAndelerMedEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.tilAndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.oppdaterAndelerForPersonMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.tilAndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -32,7 +32,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
+class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
     @Nested
     inner class OppdaterAndelerMedEndringer {
         @Test
@@ -554,7 +554,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1054,
@@ -576,7 +576,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1054,
@@ -616,7 +616,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1054,
@@ -633,7 +633,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1054,
@@ -666,7 +666,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 1054,
                                 sats = 1054,
@@ -679,7 +679,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 1766,
                                 sats = 1766,
@@ -716,7 +716,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1054,
@@ -733,7 +733,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1766,
@@ -770,7 +770,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                     fom = fom,
                     tom = tom,
                     verdi =
-                        AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                        AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 1054,
                             sats = 1054,
@@ -814,7 +814,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                     fom = fom,
                     tom = tom,
                     verdi =
-                        AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                        AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
                             sats = 1054,
@@ -870,7 +870,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(9).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().minusMonths(5).sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
                                 sats = 1054,
@@ -892,7 +892,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerGeneratorTest {
                         fom = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
                         tom = LocalDate.now().sisteDagIMåned(),
                         verdi =
-                            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.AndelMedEndretUtbetalingForTidslinje(
+                            AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 1054,
                                 sats = 1054,
