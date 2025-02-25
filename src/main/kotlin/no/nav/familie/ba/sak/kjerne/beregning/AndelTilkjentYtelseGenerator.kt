@@ -22,7 +22,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 
 object AndelTilkjentYtelseGenerator {
-    fun oppdaterAndelerMedEndretUtbetalingAndeler(
+    fun lagAndelerMedEndretUtbetalingAndeler(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,

@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.oppdaterAndelerForPersonMedEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.oppdaterAndelerMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.lagAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.tilAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.tilAndelerTilkjentYtelseMedEndreteUtbetalinger
@@ -47,7 +47,7 @@ class AndelTilkjentYtelseGeneratorTest {
 
             // Act
             val oppdaterteAndeler =
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     andelTilkjentYtelserUtenEndringer = emptyList(),
                     endretUtbetalingAndeler = emptyList(),
                     tilkjentYtelse = tilkjentYtelse,
@@ -93,7 +93,7 @@ class AndelTilkjentYtelseGeneratorTest {
 
             // Act
             val oppdaterteAndeler =
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
                     endretUtbetalingAndeler = emptyList(),
                     tilkjentYtelse = tilkjentYtelse,
@@ -160,7 +160,7 @@ class AndelTilkjentYtelseGeneratorTest {
 
             // Act
             val oppdaterteAndeler =
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
                     endretUtbetalingAndeler = listOf(endretUtbetalingAndelForBarn1),
                     tilkjentYtelse = tilkjentYtelse,
@@ -234,7 +234,7 @@ class AndelTilkjentYtelseGeneratorTest {
 
             // Act
             val oppdaterteAndeler =
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     andelTilkjentYtelserUtenEndringer = listOf(andelBarn, andelUtvidet, andelSmåbarnstillegg),
                     endretUtbetalingAndeler = listOf(endretUtbetalingAndelForSøker),
                     tilkjentYtelse = tilkjentYtelse,
@@ -284,7 +284,7 @@ class AndelTilkjentYtelseGeneratorTest {
                 )
 
             val andelerTilkjentYtelse =
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     utbetalingsandeler,
                     endretUtbetalingAndeler,
                     utbetalingsandeler.first().tilkjentYtelse,
@@ -344,7 +344,7 @@ class AndelTilkjentYtelseGeneratorTest {
                 )
 
             val andelerTilkjentYtelse =
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     utbetalingsandeler,
                     endretUtbetalingAndeler,
                     utbetalingsandeler.first().tilkjentYtelse,

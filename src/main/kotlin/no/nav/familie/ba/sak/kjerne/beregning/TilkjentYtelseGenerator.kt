@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.oppdaterAndelerMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator.lagAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.finnUtvidetVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -61,7 +61,7 @@ object TilkjentYtelseGenerator {
 
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
             if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                     endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
                     tilkjentYtelse = tilkjentYtelse,
@@ -115,7 +115,7 @@ object TilkjentYtelseGenerator {
 
         val andelerTilkjentYtelseBarnaMedAlleEndringer =
             if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
-                oppdaterAndelerMedEndretUtbetalingAndeler(
+                lagAndelerMedEndretUtbetalingAndeler(
                     andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                     endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
                     tilkjentYtelse = tilkjentYtelse,
