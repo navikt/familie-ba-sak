@@ -43,7 +43,7 @@ object TilkjentYtelseGenerator {
                     personResultater = vilkårsvurdering.personResultater,
                     fagsakType = fagsakType,
                 ).map {
-                    if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}")
+                    if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}. Forventet ${PersonType.BARN}")
 
                     AndelTilkjentYtelse(
                         behandlingId = vilkårsvurdering.behandling.id,
