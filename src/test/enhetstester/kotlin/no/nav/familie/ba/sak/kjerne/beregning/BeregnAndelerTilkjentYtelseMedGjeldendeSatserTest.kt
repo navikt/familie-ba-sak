@@ -352,8 +352,8 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
 
 private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
-    return TilkjentYtelseUtils
-        .beregnTilkjentYtelse(
+    return TilkjentYtelseGenerator
+        .genererTilkjentYtelse(
             vilkårsvurdering = this.byggVilkårsvurdering(),
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,

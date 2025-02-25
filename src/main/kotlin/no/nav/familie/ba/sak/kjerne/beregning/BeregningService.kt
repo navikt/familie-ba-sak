@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -38,6 +40,7 @@ class BeregningService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository
@@ -186,11 +189,12 @@ class BeregningService(
                 ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
+                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER),
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
@@ -206,8 +210,9 @@ class BeregningService(
     }
 
     // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
-// Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
-// Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    @Transactional
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
