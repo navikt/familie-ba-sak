@@ -47,7 +47,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskj√
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.utils.splitPerM√•ned
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import tilLandNavn
 import java.time.LocalDate

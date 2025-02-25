@@ -21,12 +21,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiN
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.leftJoin
-import no.nav.familie.tidslinje.outerJoin
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.leftJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth

@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.tidslinje.leftJoin
+import no.nav.familie.tidslinje.utvidelser.leftJoin
 import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object UtvidetBarnetrygdUtil {
