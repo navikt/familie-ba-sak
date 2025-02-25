@@ -1,15 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilPeriodeVerdi
 import no.nav.familie.tidslinje.utvidelser.konverterTilDag
 import no.nav.familie.tidslinje.utvidelser.konverterTilMåned
-import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.trim
-import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 
 /**
  * Extension-metode for å konvertere fra dag-basert tidslinje til måned-basert tidslinje
@@ -33,20 +29,22 @@ fun <V> Tidslinje<V>.tilMåned(mapper: (List<V?>) -> V?): Tidslinje<V> =
  */
 fun <V> Tidslinje<V>.tilMånedFraMånedsskifteIkkeNull(
     mapper: (innholdSisteDagForrigeMåned: V, innholdFørsteDagDenneMåned: V) -> V?,
-): Tidslinje<V> {
-    val perioder = this.tilPerioder()
-    return this
-        .konverterTilMåned { dato, _ ->
-            val verdiForrigeMåned = perioder.verdiPåTidspunkt(dato.sisteDagIForrigeMåned())
-            val verdiDenneMåned = perioder.verdiPåTidspunkt(dato.førsteDagIInneværendeMåned())
+): Tidslinje<V> =
+    if (this.erTom()) {
+        this
+    } else {
+        this
+            .konverterTilMåned(antallMndBakoverITid = 1) { _, (forrigeMåned, inneværendeMåned) ->
+                val verdiForrigeMåned = forrigeMåned.lastOrNull()?.periodeVerdi?.verdi
+                val verdiDenneMåned = inneværendeMåned.firstOrNull()?.periodeVerdi?.verdi
 
-            if (verdiForrigeMåned == null || verdiDenneMåned == null) {
-                Null()
-            } else {
-                mapper(verdiForrigeMåned, verdiDenneMåned).tilPeriodeVerdi()
-            }
-        }.trim(Null())
-}
+                if (verdiForrigeMåned == null || verdiDenneMåned == null) {
+                    Null()
+                } else {
+                    mapper(verdiForrigeMåned, verdiDenneMåned).tilPeriodeVerdi()
+                }
+            }.trim(Null())
+    }
 
 /**
  * Extention-metode som konverterer en dag-basert tidslinje til en måned-basert tidslinje.
@@ -59,23 +57,17 @@ fun <V> Tidslinje<V>.tilMånedFraMånedsskifteIkkeNull(
 fun <V> Tidslinje<V>.tilMånedFraMånedsskifte(
     mapper: (innholdSisteDagForrigeMåned: V?, innholdFørsteDagDenneMåned: V?) -> V?,
 ): Tidslinje<V> =
-    this
-        .konverterTilMåned(antallMndBakoverITid = 1) { dato, måneder ->
-            val sisteDagForrigeMåned =
-                måneder
-                    .first()
-                    .lastOrNull()
-                    ?.periodeVerdi
-                    ?.verdi
-            val førsteDagDenneMåned =
-                måneder
-                    .last()
-                    .firstOrNull()
-                    ?.periodeVerdi
-                    ?.verdi
+    if (this.erTom()) {
+        this
+    } else {
+        this
+            .konverterTilMåned(antallMndBakoverITid = 1) { _, (forrigeMåned, inneværendeMåned) ->
+                val verdiForrigeMåned = forrigeMåned.lastOrNull()?.periodeVerdi?.verdi
+                val verdiDenneMåned = inneværendeMåned.firstOrNull()?.periodeVerdi?.verdi
 
-            mapper(sisteDagForrigeMåned, førsteDagDenneMåned).tilPeriodeVerdi()
-        }
+                mapper(verdiForrigeMåned, verdiDenneMåned).tilPeriodeVerdi()
+            }.trim(Null())
+    }
 
 /**
  * Extension-metode for å konvertere fra Måned-tidslinje til Dag-tidslinje

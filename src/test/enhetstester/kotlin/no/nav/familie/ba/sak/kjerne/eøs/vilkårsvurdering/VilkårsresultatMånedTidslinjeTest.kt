@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.datagenerator.ikkeOppfyltVilkår
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.periode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.tilTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -106,7 +108,7 @@ class VilkårsresultatMånedTidslinjeTest {
 
         val forventetMånedstidslinje =
             konkatenerTidslinjer(
-                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), null, mar(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), PRAKTISK_TIDLIGSTE_DAG.nesteMåned(), mar(2020)).tilTidslinje(),
                 periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), apr(2020), null).tilTidslinje(),
             ).tilMåned { it.first() }
 
@@ -124,7 +126,7 @@ class VilkårsresultatMånedTidslinjeTest {
         val faktiskMånedstidslinje = dagvilkårtidslinje.tilMånedsbasertTidslinjeForVilkårRegelverkResultat()
 
         val forventetMånedstidslinje =
-            periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), null, mar(2020))
+            periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), PRAKTISK_TIDLIGSTE_DAG.nesteMåned(), mar(2020))
                 .tilTidslinje()
                 .tilMåned { it.first() }
 
@@ -141,7 +143,7 @@ class VilkårsresultatMånedTidslinjeTest {
 
         val forventetMånedstidslinje =
             konkatenerTidslinjer(
-                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), null, apr(2020)).tilTidslinje(),
+                periode(oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER), PRAKTISK_TIDLIGSTE_DAG.nesteMåned(), apr(2020)).tilTidslinje(),
                 periode(oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN), mai(2020), null).tilTidslinje(),
             ).tilMåned { it.first() }
 
