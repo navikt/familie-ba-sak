@@ -313,6 +313,7 @@
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
+            <version>3.20250225132203_a548ba4</version> <!-- Slett linje så straks tidslinjer er fikset -->
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
