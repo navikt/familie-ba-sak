@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResul
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMedEtter
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilDag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Tidslinje
@@ -35,7 +34,7 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                         vilkårTidslinjer =
                             it.value.vilkårsresultatTidslinjer.map {
                                 it
-                                    .beskjærEtter(erUnder18årTidslinje.tilDag())
+                                    .beskjærEtter(erUnder18årTidslinje)
                                     .tilRestTidslinje()
                             },
                         oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
@@ -56,7 +55,7 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                 vilkårTidslinjer =
                     søkersTidslinje.vilkårsresultatTidslinjer.map {
                         it
-                            .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje.tilDag())
+                            .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
                             .tilRestTidslinje()
                     },
                 oppfyllerEgneVilkårTidslinje =

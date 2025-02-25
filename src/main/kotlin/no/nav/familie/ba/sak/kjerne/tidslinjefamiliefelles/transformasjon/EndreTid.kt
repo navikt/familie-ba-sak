@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilPeriodeVerdi
-import no.nav.familie.tidslinje.utvidelser.konverterTilDag
 import no.nav.familie.tidslinje.utvidelser.konverterTilMåned
 import no.nav.familie.tidslinje.utvidelser.trim
 
@@ -68,10 +67,3 @@ fun <V> Tidslinje<V>.tilMånedFraMånedsskifte(
                 mapper(verdiForrigeMåned, verdiDenneMåned).tilPeriodeVerdi()
             }.trim(Null())
     }
-
-/**
- * Extension-metode for å konvertere fra Måned-tidslinje til Dag-tidslinje
- * Første dag i fra-og-med-måneden brukes som første dag i perioden
- * Siste dag i til-og-med-måneden brukes som siste dag i perioden
- */
-fun <V> Tidslinje<V>.tilDag(): Tidslinje<V> = this.konverterTilDag()
