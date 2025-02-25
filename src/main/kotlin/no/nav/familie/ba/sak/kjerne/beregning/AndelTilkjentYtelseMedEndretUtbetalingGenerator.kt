@@ -40,7 +40,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
             }
 
         val oppdaterteAndeler =
-            andelerPerAktørOgType.flatMap { (aktørOgType, andelerForPerson) ->
+            andelerPerAktørOgType.flatMap { (aktørOgType, andelerForAktørOgType) ->
                 val aktør = aktørOgType.first
                 val ytelseType = aktørOgType.second
 
@@ -49,7 +49,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                     YtelseType.UTVIDET_BARNETRYGD,
                     ->
                         oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
-                            andelerForPerson = andelerForPerson,
+                            andelerAvTypeForPerson = andelerForAktørOgType,
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
                         )
@@ -61,21 +61,17 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         return oppdaterteAndeler
     }
 
-    internal fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
-        andelerForPerson: List<AndelTilkjentYtelse>,
+    private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+        andelerAvTypeForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        if (andelerForPerson.any { it.type == YtelseType.SMÅBARNSTILLEGG }) {
-            throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler")
-        }
-
         if (endretUtbetalingAndelerForPerson.isEmpty()) {
-            return andelerForPerson
+            return andelerAvTypeForPerson
                 .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it.copy()) }
         }
 
-        val andelerTidslinje = andelerForPerson.map { it.tilPeriode() }.tilTidslinje()
+        val andelerTidslinje = andelerAvTypeForPerson.map { it.tilPeriode() }.tilTidslinje()
         val endretUtbetalingTidslinje = endretUtbetalingAndelerForPerson.tilTidslinje()
 
         val andelerMedEndringerTidslinje =
