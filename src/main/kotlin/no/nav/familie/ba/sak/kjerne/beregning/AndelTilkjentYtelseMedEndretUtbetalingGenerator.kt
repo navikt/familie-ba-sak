@@ -53,13 +53,8 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
                         )
-                    // Ønsker aldri å overstyre småbarnstillegg, så returnerer samme andeler som tidligere
                     YtelseType.SMÅBARNSTILLEGG ->
-                        andelerForPerson.map {
-                            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(
-                                it,
-                            )
-                        }
+                        throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler")
                 }
             }
 
