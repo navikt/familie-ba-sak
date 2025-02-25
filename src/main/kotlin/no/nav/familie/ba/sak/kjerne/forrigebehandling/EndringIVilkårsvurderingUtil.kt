@@ -10,9 +10,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object EndringIVilkårsvurderingUtil {
     fun lagEndringIVilkårsvurderingTidslinje(
@@ -21,7 +21,7 @@ object EndringIVilkårsvurderingUtil {
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
         tidligsteRelevanteFomDatoForPersonIVilkårsvurdering: YearMonth,
-    ): FamilieFellesTidslinje<Boolean> {
+    ): Tidslinje<Boolean> {
         val tidslinjePerVilkår =
             Vilkår.entries.map { vilkår ->
                 val vilkårTidslinje =
@@ -58,7 +58,7 @@ object EndringIVilkårsvurderingUtil {
         vilkår: Vilkår,
         personIBehandling: Person?,
         personIForrigeBehandling: Person?,
-    ): FamilieFellesTidslinje<Boolean> {
+    ): Tidslinje<Boolean> {
         val nåværendeVilkårResultatTidslinje =
             nåværendeOppfylteVilkårResultaterForPerson
                 .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)

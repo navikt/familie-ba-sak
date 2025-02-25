@@ -24,10 +24,10 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Kompetanse")
@@ -233,10 +233,10 @@ fun Kompetanse.tilIKompetanse(): IKompetanse =
         )
     }
 
-fun List<UtfyltKompetanse>.tilFamilieFellesTidslinje() =
+fun List<UtfyltKompetanse>.tilTidslinje() =
     this
         .map {
-            FamilieFellesPeriode(
+            Periode(
                 verdi = it,
                 fom = it.fom.førsteDagIInneværendeMåned(),
                 tom = it.tom?.sisteDagIInneværendeMåned(),
@@ -254,7 +254,7 @@ fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(e
     return alleBarnAktørIder.associateWith { aktør ->
         utfylteKompetanser
             .filter { it.barnAktører.contains(aktør) }
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .beskjærFraOgMed(endringstidspunkt.tilYearMonth().førsteDagIInneværendeMåned())
             .tilPerioder()
             .mapNotNull { it.verdi }

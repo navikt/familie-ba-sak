@@ -14,21 +14,21 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.beskjærEtter
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import java.time.LocalDate
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object VilkårsvurderingForskyvningUtils {
     // TODO: Slett denne, bare brukt i test
     fun Set<PersonResultat>.tilTidslinjeForSplitt(
         personerIPersongrunnlag: List<Person>,
         fagsakType: FagsakType,
-    ): FamilieFellesTidslinje<List<VilkårResultat>> {
+    ): Tidslinje<List<VilkårResultat>> {
         val tidslinjerPerPerson =
             this.map { personResultat ->
                 val person =
@@ -43,7 +43,7 @@ object VilkårsvurderingForskyvningUtils {
     fun PersonResultat.tilTidslinjeForSplittForPerson(
         person: Person,
         fagsakType: FagsakType,
-    ): FamilieFellesTidslinje<List<VilkårResultat>> {
+    ): Tidslinje<List<VilkårResultat>> {
         val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
         return tidslinjer
@@ -61,12 +61,12 @@ object VilkårsvurderingForskyvningUtils {
      * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
      * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
      * */
-    fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<FamilieFellesTidslinje<VilkårResultat>> =
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat>> =
         this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
             vilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, fødselsdato)
         }
 
-    fun Collection<VilkårResultat>.tilForskjøvedeVilkårTidslinjer(fødselsdato: LocalDate): List<FamilieFellesTidslinje<VilkårResultat>> =
+    fun Collection<VilkårResultat>.tilForskjøvedeVilkårTidslinjer(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat>> =
         this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
             vilkårResultater.tilForskjøvetTidslinje(vilkår, fødselsdato)
         }
@@ -74,7 +74,7 @@ object VilkårsvurderingForskyvningUtils {
     fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(
         vilkår: Vilkår,
         fødselsdato: LocalDate?,
-    ): FamilieFellesTidslinje<VilkårResultat> {
+    ): Tidslinje<VilkårResultat> {
         if (this.isEmpty()) return tomTidslinje()
 
         val tidslinje = this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
@@ -82,16 +82,16 @@ object VilkårsvurderingForskyvningUtils {
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)
     }
 
-    fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> {
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(vilkår: Vilkår): Tidslinje<VilkårResultat> {
         if (vilkår == Vilkår.UNDER_18_ÅR) throw Feil("Funksjonen skal ikke brukes for under 18 vilkåret")
 
         return this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
     }
 
-    fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> =
+    fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat> =
         this
             .filter { it.vilkårType == vilkår && it.erOppfylt() }
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
                     !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
@@ -103,16 +103,16 @@ object VilkårsvurderingForskyvningUtils {
     fun Collection<VilkårResultat>.tilForskjøvetTidslinje(
         vilkår: Vilkår,
         fødselsdato: LocalDate,
-    ): FamilieFellesTidslinje<VilkårResultat> {
+    ): Tidslinje<VilkårResultat> {
         val tidslinje = this.lagForskjøvetTidslinje(vilkår)
 
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)
     }
 
-    private fun Collection<VilkårResultat>.lagForskjøvetTidslinje(vilkår: Vilkår): FamilieFellesTidslinje<VilkårResultat> =
+    private fun Collection<VilkårResultat>.lagForskjøvetTidslinje(vilkår: Vilkår): Tidslinje<VilkårResultat> =
         this
             .filter { it.vilkårType == vilkår }
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .tilMånedFraMånedsskifte { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 if (innholdFørsteDagDenneMåned != null && innholdSisteDagForrigeMåned != null) {
                     when {
@@ -133,17 +133,17 @@ object VilkårsvurderingForskyvningUtils {
             this.periodeFom != null &&
             this.periodeFom!!.toYearMonth() == this.periodeTom?.toYearMonth()
 
-    private fun FamilieFellesTidslinje<VilkårResultat>.beskjærPå18ÅrHvisUnder18ÅrVilkår(
+    private fun Tidslinje<VilkårResultat>.beskjærPå18ÅrHvisUnder18ÅrVilkår(
         vilkår: Vilkår,
         fødselsdato: LocalDate?,
-    ): FamilieFellesTidslinje<VilkårResultat> =
+    ): Tidslinje<VilkårResultat> =
         if (vilkår == Vilkår.UNDER_18_ÅR) {
             this.beskjærPå18År(fødselsdato = fødselsdato ?: throw Feil("Mangler fødselsdato, men prøver å beskjære på 18-år vilkåret"))
         } else {
             this
         }
 
-    internal fun FamilieFellesTidslinje<VilkårResultat>.beskjærPå18År(fødselsdato: LocalDate): FamilieFellesTidslinje<VilkårResultat> {
+    internal fun Tidslinje<VilkårResultat>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat> {
         val erUnder18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
         return this.beskjærEtter(erUnder18Tidslinje)
     }

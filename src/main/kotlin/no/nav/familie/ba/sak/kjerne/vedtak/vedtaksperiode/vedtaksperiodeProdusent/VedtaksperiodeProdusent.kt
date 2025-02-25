@@ -24,6 +24,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledEndringstidspunkt
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
@@ -35,8 +37,6 @@ import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 fun genererVedtaksperioder(
     grunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
@@ -132,7 +132,7 @@ fun finnPerioderSomSkalBegrunnes(
     grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>,
     endringstidspunkt: LocalDate,
     personerFremstiltKravFor: List<Aktør>,
-): List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
+): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
     val gjeldendeOgForrigeGrunnlagKombinert =
         kombinerGjeldendeOgForrigeGrunnlag(
             grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson.mapValues { it.value.vedtaksperiodeGrunnlagForPerson },
@@ -155,10 +155,10 @@ fun finnPerioderSomSkalBegrunnes(
         .leggTilUendelighetPåSisteOpphørsPeriode(personerFremstiltKravFor)
 }
 
-fun List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.slåSammenSammenhengendeOpphørsperioder(): List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
+fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.slåSammenSammenhengendeOpphørsperioder(): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
     val sortertePerioder = this.sortedWith(compareBy({ it.fom }, { it.tom }))
 
-    return sortertePerioder.fold(emptyList()) { acc: List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>, dennePerioden ->
+    return sortertePerioder.fold(emptyList()) { acc: List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>, dennePerioden ->
         val forrigePeriode = acc.lastOrNull()
 
         if (forrigePeriode != null &&
@@ -172,7 +172,7 @@ fun List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.sl
     }
 }
 
-fun List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.leggTilUendelighetPåSisteOpphørsPeriode(personerFremstiltKravFor: List<Aktør>): List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
+fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.leggTilUendelighetPåSisteOpphørsPeriode(personerFremstiltKravFor: List<Aktør>): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
     val sortertePerioder = this.sortedWith(compareBy({ it.fom }, { it.tom }))
 
     val sistePeriode = sortertePerioder.lastOrNull()
@@ -187,7 +187,7 @@ fun List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.le
     }
 }
 
-private fun FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.erPersonMedInnvilgedeVilkårIPeriode() = verdi.any { it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget }
+private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.erPersonMedInnvilgedeVilkårIPeriode() = verdi.any { it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget }
 
 private fun Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>.lagOverlappendeGenerelleAvslagsPerioder() =
     map {
@@ -202,11 +202,11 @@ private fun Map<AktørOgRolleBegrunnelseGrunnlag, GrunnlagForPersonTidslinjerSpl
             }.toList()
     }.tilPerioderIkkeNull()
 
-private fun Collection<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.filtrerPåEndringstidspunkt(
+private fun Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.filtrerPåEndringstidspunkt(
     endringstidspunkt: LocalDate,
 ) = this.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
 
-private fun List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.slåSammenUtenEksplisitteAvslag(personerFremstiltKravFor: List<Aktør>): Collection<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
+private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.slåSammenUtenEksplisitteAvslag(personerFremstiltKravFor: List<Aktør>): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
     val kombinerteAvslagOgReduksjonsperioder =
         this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
             grunnlagForDenneOgForrigeBehandlingTidslinje.filtrerIkkeNull {
@@ -225,7 +225,7 @@ private fun List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>
         }.tilPerioderIkkeNull()
 }
 
-private fun List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.utledEksplisitteAvslagsperioder(personerFremstiltKravFor: List<Aktør>): Collection<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
+private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>>.utledEksplisitteAvslagsperioder(personerFremstiltKravFor: List<Aktør>): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>> {
     val avslagsperioderPerPerson =
         this
             .map { it.filtrerErAvslagsperiode(personerFremstiltKravFor) }
@@ -240,7 +240,7 @@ private fun List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>
 
     return avslagsperioderMedSammeFomOgTom
         .map { (fomTomPar, avslagMedSammeFomOgTom) ->
-            FamilieFellesPeriode(
+            Periode(
                 verdi = avslagMedSammeFomOgTom.mapNotNull { it.verdi },
                 fom = fomTomPar.first,
                 tom = fomTomPar.second,
@@ -248,14 +248,14 @@ private fun List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>
         }
 }
 
-private fun FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.splittVilkårPerPerson(): List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>> =
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.splittVilkårPerPerson(): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>> =
     tilPerioderIkkeNull()
         .mapNotNull { it.splittOppTilVilkårPerPerson() }
         .flatten()
         .groupBy({ it.first }, { it.second })
         .map { it.value.tilTidslinje() }
 
-private fun FamilieFellesPeriode<GrunnlagForGjeldendeOgForrigeBehandling>.splittOppTilVilkårPerPerson(): List<Pair<AktørId, FamilieFellesPeriode<GrunnlagForGjeldendeOgForrigeBehandling>>>? {
+private fun Periode<GrunnlagForGjeldendeOgForrigeBehandling>.splittOppTilVilkårPerPerson(): List<Pair<AktørId, Periode<GrunnlagForGjeldendeOgForrigeBehandling>>>? {
     if (verdi.gjeldende == null) return null
 
     val vilkårPerPerson = verdi.gjeldende!!.vilkårResultaterForVedtaksperiode.groupBy { it.aktørId }
@@ -274,7 +274,7 @@ private fun FamilieFellesPeriode<GrunnlagForGjeldendeOgForrigeBehandling>.splitt
     }
 }
 
-private fun FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.filtrerErAvslagsperiode(personerFremstiltKravFor: List<Aktør>) = filtrer { it?.gjeldende?.erEksplisittAvslag(personerFremstiltKravFor) == true }
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.filtrerErAvslagsperiode(personerFremstiltKravFor: List<Aktør>) = filtrer { it?.gjeldende?.erEksplisittAvslag(personerFremstiltKravFor) == true }
 
 private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteAvslag(): GrunnlagForGjeldendeOgForrigeBehandling =
     copy(
@@ -292,10 +292,10 @@ private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteA
  * ikke er det.
  **/
 private fun kombinerGjeldendeOgForrigeGrunnlag(
-    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<VedtaksperiodeGrunnlagForPerson>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<VedtaksperiodeGrunnlagForPerson>>,
+    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson>>,
     personerFremstiltKravFor: List<Aktør>,
-): List<FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>> =
+): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>> =
     grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
 
@@ -363,11 +363,11 @@ private fun erReduksjonFraForrigeBehandlingPåMinstEnYtelsestype(
         }
     }
 
-private fun FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.slåSammenSammenhengendeOpphørsperioder(personerFremstiltKravFor: List<Aktør>): FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling> {
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.slåSammenSammenhengendeOpphørsperioder(personerFremstiltKravFor: List<Aktør>): Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling> {
     val perioder = this.tilPerioderIkkeNull().sortedBy { it.fom }.toList()
 
     return perioder
-        .fold(emptyList()) { acc: List<FamilieFellesPeriode<GrunnlagForGjeldendeOgForrigeBehandling>>, periode ->
+        .fold(emptyList()) { acc: List<Periode<GrunnlagForGjeldendeOgForrigeBehandling>>, periode ->
             val sistePeriode = acc.lastOrNull()
 
             val erVilkårInnvilgetForrigePeriode = sistePeriode?.verdi?.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget
@@ -387,7 +387,7 @@ private fun FamilieFellesTidslinje<GrunnlagForGjeldendeOgForrigeBehandling>.slå
         }.tilTidslinje()
 }
 
-fun FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.tilVedtaksperiodeMedBegrunnelser(
+fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.tilVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak,
     personerFremstiltKravFor: List<Aktør>,
 ): VedtaksperiodeMedBegrunnelser =
@@ -427,7 +427,7 @@ private fun VedtaksperiodeGrunnlagForPerson.finnVilkårResultaterSomGjelderPerso
         this.vilkårResultaterForVedtaksperiode.filter { !it.erEksplisittAvslagPåSøknad }
     }
 
-private fun FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.tilVedtaksperiodeType(personerFremstiltKravFor: List<Aktør>): Vedtaksperiodetype {
+private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>.tilVedtaksperiodeType(personerFremstiltKravFor: List<Aktør>): Vedtaksperiodetype {
     val erUtbetalingsperiode = this.verdi.any { it.gjeldende?.erInnvilget() == true }
     val erAvslagsperiode = this.verdi.all { it.gjeldende?.erEksplisittAvslag(personerFremstiltKravFor) == true }
 
@@ -451,7 +451,7 @@ data class GrupperingskriterierForVedtaksperioder(
     val periodeInneholderInnvilgelse: Boolean,
 )
 
-private fun List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom() =
+private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>>>.slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom() =
     this
         .groupBy { periode ->
             GrupperingskriterierForVedtaksperioder(
@@ -460,7 +460,7 @@ private fun List<FamilieFellesPeriode<List<GrunnlagForGjeldendeOgForrigeBehandli
                 periodeInneholderInnvilgelse = periode.verdi.any { it.gjeldende is VedtaksperiodeGrunnlagForPersonVilkårInnvilget },
             )
         }.map { (grupperingskriterier, verdi) ->
-            FamilieFellesPeriode(
+            Periode(
                 verdi = verdi.map { periode -> periode.verdi }.flatten(),
                 fom = grupperingskriterier.fom,
                 tom = grupperingskriterier.tom,
@@ -484,7 +484,7 @@ fun lagPeriodeForOmregningsbehandling(
     andelTilkjentYtelser: List<AndelTilkjentYtelse>,
     nåDato: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
-    val andelerTidslinje: FamilieFellesTidslinje<List<AndelForVedtaksperiode>> =
+    val andelerTidslinje: Tidslinje<List<AndelForVedtaksperiode>> =
         andelTilkjentYtelser.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType().values.kombiner { it.toList() }
 
     val nesteEndringITilkjentYtelse =

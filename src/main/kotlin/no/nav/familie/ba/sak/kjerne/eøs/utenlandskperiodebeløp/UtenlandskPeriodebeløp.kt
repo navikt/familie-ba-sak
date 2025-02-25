@@ -29,10 +29,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "UtenlandskPeriodebeløp")
@@ -155,10 +155,10 @@ fun UtenlandskPeriodebeløp.tilIUtenlandskPeriodebeløp(): IUtenlandskPeriodebel
         )
     }
 
-fun List<UtfyltUtenlandskPeriodebeløp>.tilFamilieFellesTidslinje() =
+fun List<UtfyltUtenlandskPeriodebeløp>.tilTidslinje() =
     this
         .map {
-            FamilieFellesPeriode(
+            Periode(
                 verdi = it,
                 fom = it.fom.førsteDagIInneværendeMåned(),
                 tom = it.tom?.sisteDagIInneværendeMåned(),

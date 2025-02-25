@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VedtaksperiodeGrunnlagForPersonVilkårInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.erLikUtenomTom
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 import java.time.LocalDate
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 fun utledEndringstidspunkt(
     behandlingsGrunnlagForVedtaksperioder: BehandlingsGrunnlagForVedtaksperioder,
@@ -60,8 +60,8 @@ private fun Set<PersonResultat>.beholdKunOppfylteVilkårResultater(): Set<Person
     }.toSet()
 
 private fun loggEndringstidspunktOgEndringer(
-    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<VedtaksperiodeGrunnlagForPerson>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<VedtaksperiodeGrunnlagForPerson>>,
+    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<VedtaksperiodeGrunnlagForPerson>>,
     aktørMedFørsteForandring: AktørOgRolleBegrunnelseGrunnlag?,
     datoTidligsteForskjell: LocalDate,
 ) {
@@ -121,7 +121,7 @@ private fun loggEndringstidspunktOgEndringer(
     secureLogger.info("Ved endringstidspunktet $datoTidligsteForskjell er det endring for $aktørMedFørsteForandring")
 }
 
-private fun Map<AktørOgRolleBegrunnelseGrunnlag, FamilieFellesTidslinje<Boolean>>.finnTidligsteForskjell() =
+private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean>>.finnTidligsteForskjell() =
     this
         .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
             val førsteEndringForAktør =

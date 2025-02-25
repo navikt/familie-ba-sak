@@ -18,13 +18,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 class OrdinærBarnetrygdUtilTest {
     @Test
@@ -237,7 +237,7 @@ class OrdinærBarnetrygdUtilTest {
         forventetFom: YearMonth,
         forventetTom: YearMonth,
         forventetProsent: BigDecimal,
-        faktisk: FamilieFellesPeriode<BigDecimal>,
+        faktisk: Periode<BigDecimal>,
     ) {
         assertEquals(forventetFom, faktisk.fom?.toYearMonth())
         assertEquals(forventetTom, faktisk.tom?.toYearMonth())

@@ -24,11 +24,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "EndretUtbetalingAndel")
@@ -234,10 +234,10 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
         }
     }
 
-fun List<IUtfyltEndretUtbetalingAndel>.tilFamilieFellesTidslinje() =
+fun List<IUtfyltEndretUtbetalingAndel>.tilTidslinje() =
     this
         .map { betalingAndel ->
-            FamilieFellesPeriode(
+            Periode(
                 verdi = betalingAndel,
                 fom = betalingAndel.fom.førsteDagIInneværendeMåned(),
                 tom = betalingAndel.tom.sisteDagIInneværendeMåned(),

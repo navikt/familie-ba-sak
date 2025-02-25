@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
-fun Collection<VilkårResultat>.tilFamilieFellesTidslinje() =
+fun Collection<VilkårResultat>.tilTidslinje() =
     this
         .map {
-            FamilieFellesPeriode(
+            Periode(
                 verdi = it,
                 fom = it.periodeFom,
                 tom = it.periodeTom,

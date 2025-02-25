@@ -12,13 +12,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object OrdinærBarnetrygdUtil {
     internal fun beregnAndelerTilkjentYtelseForBarna(
@@ -48,8 +48,8 @@ object OrdinærBarnetrygdUtil {
     }
 
     private fun kombinerProsentOgSatsTidslinjer(
-        tidslinjeMedRettTilProsentForBarn: FamilieFellesTidslinje<BigDecimal>,
-        satsTidslinje: FamilieFellesTidslinje<Int>,
+        tidslinjeMedRettTilProsentForBarn: Tidslinje<BigDecimal>,
+        satsTidslinje: Tidslinje<Int>,
     ) = tidslinjeMedRettTilProsentForBarn
         .kombinerMed(satsTidslinje) { rettTilProsent, sats ->
             when {
@@ -68,7 +68,7 @@ object OrdinærBarnetrygdUtil {
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         fagsakType: FagsakType,
-    ): Map<Person, FamilieFellesTidslinje<BigDecimal>> {
+    ): Map<Person, Tidslinje<BigDecimal>> {
         val tidslinjerPerPerson = lagTidslinjerMedRettTilProsentPerPerson(personopplysningGrunnlag, fagsakType)
 
         if (tidslinjerPerPerson.isEmpty()) return emptyMap()
@@ -80,8 +80,8 @@ object OrdinærBarnetrygdUtil {
     }
 
     private fun kombinerSøkerMedHvertBarnSinTidslinje(
-        barnasTidslinjer: Map<Person, FamilieFellesTidslinje<BigDecimal>>,
-        søkerTidslinje: FamilieFellesTidslinje<BigDecimal>,
+        barnasTidslinjer: Map<Person, Tidslinje<BigDecimal>>,
+        søkerTidslinje: Tidslinje<BigDecimal>,
     ) = barnasTidslinjer.mapValues { (_, barnTidslinje) ->
         barnTidslinje
             .kombinerMed(søkerTidslinje) { barnProsent, søkerProsent ->
@@ -110,7 +110,7 @@ object OrdinærBarnetrygdUtil {
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
         person: Person,
         fagsakType: FagsakType,
-    ): FamilieFellesTidslinje<BigDecimal> {
+    ): Tidslinje<BigDecimal> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(person.type, fagsakType) }.slåSammenLikePerioder().filtrerIkkeNull()

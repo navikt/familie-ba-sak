@@ -3,11 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProd
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilFamilieFellesTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilFamilieFellesTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
@@ -26,6 +26,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusen
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvedeVilkårTidslinjer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.Companion.hentOrdinæreVilkårFor
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
@@ -33,8 +35,6 @@ import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import java.math.BigDecimal
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 data class BegrunnelseGrunnlagForPersonIPeriode(
     val person: Person,
@@ -65,11 +65,11 @@ data class BegrunnelseGrunnlagForPersonIPeriode(
     }
 }
 
-fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Map<Person, FamilieFellesTidslinje<BegrunnelseGrunnlagForPersonIPeriode>> = this.persongrunnlag.personer.associateWith { this.lagBegrunnelseGrunnlagForPersonTidslinje(it) }
+fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagTidslinjer(): Map<Person, Tidslinje<BegrunnelseGrunnlagForPersonIPeriode>> = this.persongrunnlag.personer.associateWith { this.lagBegrunnelseGrunnlagForPersonTidslinje(it) }
 
 fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslinje(
     person: Person,
-): FamilieFellesTidslinje<BegrunnelseGrunnlagForPersonIPeriode> {
+): Tidslinje<BegrunnelseGrunnlagForPersonIPeriode> {
     val vilkårResultaterForPerson =
         this.personResultater.singleOrNull { it.aktør == person.aktør }?.vilkårResultater ?: emptyList()
 
@@ -85,25 +85,25 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
     val kompetanseTidslinje =
         this.utfylteKompetanser
             .filtrerPåAktør(person.aktør)
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
     val utenlandskPeriodebeløpTidslinje =
         utfylteUtenlandskPeriodebeløp
             .filtrerPåAktør(person.aktør)
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .mapIkkeNull { UtenlandskPeriodebeløpForVedtaksperiode(it) }
 
     val valutakursTidslinje =
         utfylteValutakurs
             .filtrerPåAktør(person.aktør)
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .mapIkkeNull { ValutakursForVedtaksperiode(it) }
 
     val endredeUtbetalingerTidslinje =
         this.utfylteEndredeUtbetalinger
             .filtrerPåAktør(person.aktør)
-            .tilFamilieFellesTidslinje()
+            .tilTidslinje()
             .mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksperiode() }
 
     val andelerTilkjentYtelseTidslinje =
@@ -151,11 +151,11 @@ fun BehandlingsGrunnlagForVedtaksperioder.lagBegrunnelseGrunnlagForPersonTidslin
 }
 
 private fun lagTidslinjeForEksplisitteAvslag(
-    forskjøvedeVilkårMedPeriode: List<FamilieFellesTidslinje<VilkårResultatForVedtaksperiode>>,
+    forskjøvedeVilkårMedPeriode: List<Tidslinje<VilkårResultatForVedtaksperiode>>,
     generelleAvslag: List<VilkårResultat>,
-): FamilieFellesTidslinje<List<VilkårResultatForVedtaksperiode>> {
+): Tidslinje<List<VilkårResultatForVedtaksperiode>> {
     val forskjøvedeEksplisitteAvslagMedPerioder = forskjøvedeVilkårMedPeriode.map { tidslinje -> tidslinje.filtrer { it?.erEksplisittAvslagPåSøknad == true } }.kombiner { it.toList() }
-    val eksplisitteAvslagUtenPeriode = generelleAvslag.map { genereltAvslag -> FamilieFellesPeriode(genereltAvslag, null, null).tilTidslinje().mapVerdi { it?.let { VilkårResultatForVedtaksperiode(it) } } }.kombiner { it.toList() }
+    val eksplisitteAvslagUtenPeriode = generelleAvslag.map { genereltAvslag -> Periode(genereltAvslag, null, null).tilTidslinje().mapVerdi { it?.let { VilkårResultatForVedtaksperiode(it) } } }.kombiner { it.toList() }
 
     val eksplisitteAvslagTidslinje =
         forskjøvedeEksplisitteAvslagMedPerioder.kombinerMed(eksplisitteAvslagUtenPeriode) { avslagMedPeriode, avslagUtenPeriode ->
@@ -168,7 +168,7 @@ private fun lagTidslinjeForEksplisitteAvslag(
     return eksplisitteAvslagTidslinje
 }
 
-fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksbegrunnelseTidslinje(): FamilieFellesTidslinje<Iterable<AndelForVedtaksbegrunnelse>> =
+fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksbegrunnelseTidslinje(): Tidslinje<Iterable<AndelForVedtaksbegrunnelse>> =
     this
         .tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType()
         .values

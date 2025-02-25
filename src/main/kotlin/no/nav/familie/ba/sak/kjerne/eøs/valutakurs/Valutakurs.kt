@@ -24,11 +24,11 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Valutakurs")
@@ -151,10 +151,10 @@ fun Valutakurs.tilIValutakurs(): IValutakurs =
         )
     }
 
-fun List<UtfyltValutakurs>.tilFamilieFellesTidslinje() =
+fun List<UtfyltValutakurs>.tilTidslinje() =
     this
         .map {
-            FamilieFellesPeriode(
+            Periode(
                 verdi = it,
                 fom = it.fom.førsteDagIInneværendeMåned(),
                 tom = it.tom?.sisteDagIInneværendeMåned(),

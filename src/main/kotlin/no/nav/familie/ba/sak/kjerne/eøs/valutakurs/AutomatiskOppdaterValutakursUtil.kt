@@ -17,12 +17,12 @@ fun finnFørsteEndringIValutakurs(
         valutakurserDenneBehandling
             .filtrerUtfylteValutakurser()
             .groupBy { it.barnAktører }
-            .mapValues { (_, valutakurser) -> valutakurser.tilFamilieFellesTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) } }
+            .mapValues { (_, valutakurser) -> valutakurser.tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) } }
     val valutakurserForrigeBehandlingTidslinje =
         valutakurserForrigeBehandling
             .filtrerUtfylteValutakurser()
             .groupBy { it.barnAktører }
-            .mapValues { (_, valutakurser) -> valutakurser.tilFamilieFellesTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) } }
+            .mapValues { (_, valutakurser) -> valutakurser.tilTidslinje().mapIkkeNull { ValutakursForVedtaksperiode(it) } }
 
     val erEndringIValutakursTidslinje =
         valutakurserDenneBehandlingTidslinje

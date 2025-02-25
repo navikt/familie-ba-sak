@@ -17,9 +17,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.utvidelser.leftJoin
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object UtvidetBarnetrygdUtil {
     internal fun beregnTilkjentYtelseUtvidet(
@@ -37,7 +37,7 @@ object UtvidetBarnetrygdUtil {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer.map { it.andel },
-                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje(),
+                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
             )
 
         return if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
@@ -54,7 +54,7 @@ object UtvidetBarnetrygdUtil {
         }
     }
 
-    fun Set<PersonResultat>.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje(): Map<Aktør, FamilieFellesTidslinje<Boolean>> =
+    fun Set<PersonResultat>.tilPerioderBarnaBorMedSøkerTidslinje(): Map<Aktør, Tidslinje<Boolean>> =
         this.associate { personResultat ->
             personResultat.aktør to
                 personResultat.vilkårResultater
@@ -70,7 +70,7 @@ object UtvidetBarnetrygdUtil {
                     }
         }
 
-    fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje: Map<Aktør, FamilieFellesTidslinje<Boolean>>): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> =
+    fun Map<Aktør, Tidslinje<AndelTilkjentYtelse>>.filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje: Map<Aktør, Tidslinje<Boolean>>): Map<Aktør, Tidslinje<AndelTilkjentYtelse>> =
         this.leftJoin(perioderBarnaBorMedSøkerTidslinje) { andel, barnBorMedSøker ->
             when (barnBorMedSøker) {
                 true -> andel
