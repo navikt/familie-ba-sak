@@ -21,7 +21,7 @@ import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 
-object AndelTilkjentYtelseGenerator {
+object AndelTilkjentYtelseMedEndreteUtbetalingerGenerator {
     fun lagAndelerMedEndretUtbetalingAndeler(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,

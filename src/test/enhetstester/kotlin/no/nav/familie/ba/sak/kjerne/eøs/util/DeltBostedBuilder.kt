@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseGenerator
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -60,7 +60,7 @@ data class DeltBosted(
 
 fun DeltBostedBuilder.oppdaterTilkjentYtelse(): TilkjentYtelse {
     val andelerTilkjentYtelserEtterEUA =
-        AndelTilkjentYtelseGenerator.lagAndelerMedEndretUtbetalingAndeler(
+        AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.lagAndelerMedEndretUtbetalingAndeler(
             tilkjentYtelse.andelerTilkjentYtelse.toList(),
             bygg().tilEndreteUtebetalingAndeler(),
             tilkjentYtelse,

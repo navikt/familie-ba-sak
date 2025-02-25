@@ -94,7 +94,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             }
 
         val andelerTilkjentYtelserEtterEUA =
-            AndelTilkjentYtelseGenerator.lagAndelerMedEndretUtbetalingAndeler(
+            AndelTilkjentYtelseMedEndreteUtbetalingerGenerator.lagAndelerMedEndretUtbetalingAndeler(
                 (andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2),
                 endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2,
                 tilkjentYtelse,
