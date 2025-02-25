@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.datagenerator.ikkeOppfyltVilkår
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
@@ -16,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.periode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.tidslinje.tilTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
