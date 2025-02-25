@@ -2,14 +2,13 @@ package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
@@ -52,13 +51,5 @@ fun opprettBooleanTidslinje(
 fun <V> Tidslinje<V>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.tilPerioder().verdiPåTidspunkt(tidspunkt)
 
 fun <V> Collection<Periode<V>>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.firstOrNull { it.omfatter(tidspunkt) }?.verdi
-
-private fun <V> Periode<V>.omfatter(tidspunkt: LocalDate) =
-    when {
-        fom == null && tom == null -> true
-        fom == null -> tom!!.isSameOrAfter(tidspunkt)
-        tom == null -> fom!!.isSameOrBefore(tidspunkt)
-        else -> fom!!.isSameOrBefore(tidspunkt) && tom!!.isSameOrAfter(tidspunkt)
-    }
 
 fun <V> Periode<V>.tilTidslinje(): Tidslinje<V> = listOf(this).tilTidslinje()
