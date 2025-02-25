@@ -36,7 +36,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         val endringerPerAktør =
             endretUtbetalingAndeler.groupBy {
                 it.person?.aktør
-                    ?: throw Feil("Endret utbetaling andel ${it.endretUtbetalingAndel.id} er ikke knyttet til en person")
+                    ?: throw Feil("Endret utbetaling andel ${it.endretUtbetalingAndel.id} i behandling ${tilkjentYtelse.behandling.id} er ikke knyttet til en person")
             }
 
         val oppdaterteAndeler =
@@ -54,7 +54,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                             tilkjentYtelse = tilkjentYtelse,
                         )
                     YtelseType.SMÅBARNSTILLEGG ->
-                        throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler")
+                        throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
                 }
             }
 
