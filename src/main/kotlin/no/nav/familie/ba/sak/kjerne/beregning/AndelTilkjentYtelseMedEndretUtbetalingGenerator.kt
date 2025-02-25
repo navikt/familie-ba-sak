@@ -48,7 +48,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                     YtelseType.ORDINÆR_BARNETRYGD,
                     YtelseType.UTVIDET_BARNETRYGD,
                     ->
-                        oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+                        lagAndelerForPersonMedEndretUtbetalingAndeler(
                             andelerAvTypeForPerson = andelerForAktørOgType,
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
@@ -61,7 +61,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         return oppdaterteAndeler
     }
 
-    private fun oppdaterAndelerForPersonMedEndretUtbetalingAndeler(
+    private fun lagAndelerForPersonMedEndretUtbetalingAndeler(
         andelerAvTypeForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
