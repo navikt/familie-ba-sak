@@ -189,7 +189,7 @@ class BeregningService(
                 ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,

@@ -290,7 +290,7 @@ internal class KompetanseServiceTest {
             )
 
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
                 fagsakType = FagsakType.NORMAL,
@@ -352,7 +352,7 @@ internal class KompetanseServiceTest {
             )
 
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
                 fagsakType = FagsakType.NORMAL,
@@ -409,7 +409,7 @@ internal class KompetanseServiceTest {
             )
 
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
                 fagsakType = FagsakType.NORMAL,

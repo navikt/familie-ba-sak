@@ -20,7 +20,7 @@ import no.nav.familie.ba.sak.datagenerator.årMnd
 import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.beregnTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.genererTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -874,7 +874,7 @@ internal class TilkjentYtelseUtilsTest {
             }
 
         val tilkjentYtelse =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag =
                     lagPersonopplysningsgrunnlag(

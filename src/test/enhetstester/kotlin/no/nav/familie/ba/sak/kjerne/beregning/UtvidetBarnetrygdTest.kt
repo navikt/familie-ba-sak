@@ -104,7 +104,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -197,7 +197,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -354,7 +354,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -436,7 +436,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -518,7 +518,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -609,7 +609,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -724,7 +724,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -837,7 +837,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
@@ -949,7 +949,7 @@ internal class UtvidetBarnetrygdTest {
 
         val andeler =
             TilkjentYtelseGenerator
-                .beregnTilkjentYtelse(
+                .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,

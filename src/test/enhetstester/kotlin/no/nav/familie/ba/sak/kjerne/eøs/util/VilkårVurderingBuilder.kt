@@ -140,7 +140,7 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer(
 fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
-    TilkjentYtelseGenerator.beregnTilkjentYtelse(
+    TilkjentYtelseGenerator.genererTilkjentYtelse(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         fagsakType = FagsakType.NORMAL,

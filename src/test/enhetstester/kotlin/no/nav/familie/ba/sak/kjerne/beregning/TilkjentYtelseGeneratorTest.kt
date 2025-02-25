@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.beregnTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.genererTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -59,7 +59,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -93,7 +93,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -131,7 +131,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -164,7 +164,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -195,7 +195,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -256,7 +256,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -299,7 +299,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = oppdatertVilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -333,7 +333,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            beregnTilkjentYtelse(
+            genererTilkjentYtelse(
                 vilkårsvurdering = oppdatertVilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
