@@ -218,6 +218,7 @@ fun ManueltBrevRequest.tilBrev(
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER,
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL,
         Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HENTER_IKKE_REGISTEROPPLYSNINGER,
+        Brevmal.INFORMASJONSBREV_KAN_HA_RETT_TIL_PENGESTØTTE_FRA_NAV,
         ->
             InformasjonsbrevTilForelderBrev(
                 mal = this.brevmal,
@@ -231,7 +232,7 @@ fun ManueltBrevRequest.tilBrev(
                             InformasjonsbrevTilForelderData.Flettefelter(
                                 navn = mottakerNavn,
                                 fodselsnummer = mottakerIdent,
-                                barnSøktFor = this.multiselectVerdier,
+                                barnIBrev = this.multiselectVerdier,
                             ),
                     ),
             )
