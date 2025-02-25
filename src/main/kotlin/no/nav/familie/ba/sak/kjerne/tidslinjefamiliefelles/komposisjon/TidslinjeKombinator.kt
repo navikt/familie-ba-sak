@@ -2,13 +2,11 @@ package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon
 
 import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.Udefinert
 import no.nav.familie.tidslinje.Verdi
 import no.nav.familie.tidslinje.tilPeriodeVerdi
 import no.nav.familie.tidslinje.utvidelser.biFunksjon
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
-import no.nav.familie.tidslinje.utvidelser.map
 import no.nav.familie.tidslinje.utvidelser.trim
 
 /**
@@ -120,15 +118,4 @@ fun <V, H> Tidslinje<V>.kombinerMedNullable(
         kombinerMed(høyreTidslinje, kombinator)
     } else {
         this
-    }
-
-fun <V, R> Tidslinje<V>.mapVerdiNullable(mapper: (V?) -> R?): Tidslinje<R> =
-    this.map { periodeVerdi ->
-        when (periodeVerdi) {
-            is Verdi,
-            is Null,
-            -> mapper(periodeVerdi.verdi)?.let { Verdi(it) } ?: Null()
-
-            is Udefinert -> Udefinert()
-        }
     }

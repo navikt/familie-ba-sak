@@ -4,17 +4,17 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.IKKE_OP
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.UtdypendeVilkårRegelverkResultat
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.tidslinje.mapVerdi
 import java.time.LocalDate
 import java.time.YearMonth
 
 fun String.tilRegelverkResultatTidslinje(start: YearMonth) =
-    this.tilCharTidslinje(start).mapVerdiNullable {
+    this.tilCharTidslinje(start).mapVerdi {
         when (it?.lowercaseChar()) {
             'e' -> RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
             'n' -> RegelverkResultat.OPPFYLT_NASJONALE_REGLER
@@ -29,7 +29,7 @@ fun String.tilRegelverkResultatTidslinje(start: YearMonth) =
 fun String.tilUtdypendeVilkårRegelverkResultatTidslinje(
     vilkår: Vilkår,
     start: LocalDate,
-) = this.tilCharTidslinje(start).mapVerdiNullable {
+) = this.tilCharTidslinje(start).mapVerdi {
     when (it?.lowercaseChar()) {
         '+' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null)
         'n' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, NASJONALE_REGLER)
@@ -44,7 +44,7 @@ fun String.tilUtdypendeVilkårRegelverkResultatTidslinje(
 fun String.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(start: YearMonth) =
     this
         .tilCharTidslinje(start)
-        .mapVerdiNullable {
+        .mapVerdi {
             when (it?.lowercaseChar()) {
                 '+' -> true
                 '-' -> false

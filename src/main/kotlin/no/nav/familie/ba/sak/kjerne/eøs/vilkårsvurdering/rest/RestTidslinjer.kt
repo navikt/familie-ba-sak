@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNull
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMedEtter
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilDag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -14,6 +13,7 @@ import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.beskjærEtter
 import no.nav.familie.tidslinje.filtrerIkkeNull
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
 
@@ -41,12 +41,12 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                         oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje =
                             it.value
                                 .regelverkResultatTidslinje
-                                .mapVerdiNullable { it?.resultat }
+                                .mapVerdi { it?.resultat }
                                 .beskjærEtter(erUnder18årTidslinje)
                                 .tilRestTidslinje(),
                         regelverkTidslinje =
                             it.value.regelverkResultatTidslinje
-                                .mapVerdiNullable { it?.regelverk }
+                                .mapVerdi { it?.regelverk }
                                 .beskjærEtter(erUnder18årTidslinje)
                                 .tilRestTidslinje(),
                     )
@@ -62,7 +62,7 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                 oppfyllerEgneVilkårTidslinje =
                     søkersTidslinje
                         .regelverkResultatTidslinje
-                        .mapVerdiNullable { it?.resultat }
+                        .mapVerdi { it?.resultat }
                         .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
                         .tilRestTidslinje(),
             ),
