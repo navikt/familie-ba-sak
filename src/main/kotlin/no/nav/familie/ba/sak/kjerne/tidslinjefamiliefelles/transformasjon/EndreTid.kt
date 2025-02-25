@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.verdiPåTidspunkt
 import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilPeriodeVerdi
@@ -10,6 +9,7 @@ import no.nav.familie.tidslinje.utvidelser.konverterTilDag
 import no.nav.familie.tidslinje.utvidelser.konverterTilMåned
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.trim
+import no.nav.familie.tidslinje.utvidelser.verdiPåTidspunkt
 
 /**
  * Extension-metode for å konvertere fra dag-basert tidslinje til måned-basert tidslinje

@@ -8,9 +8,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
-import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -47,7 +45,3 @@ fun opprettBooleanTidslinje(
     fraDato: LocalDate,
     tilDato: LocalDate,
 ) = listOf(Periode(verdi = true, fom = fraDato, tom = tilDato)).tilTidslinje()
-
-fun <V> Tidslinje<V>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.tilPerioder().verdiPåTidspunkt(tidspunkt)
-
-fun <V> Collection<Periode<V>>.verdiPåTidspunkt(tidspunkt: LocalDate): V? = this.firstOrNull { it.omfatter(tidspunkt) }?.verdi
