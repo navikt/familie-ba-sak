@@ -4,7 +4,7 @@
 # secret kan hentes fra cluster med "kubectl -n teamfamilie get secret azuread-familie-ba-sak-lokal -o json | jq '.data | map_values(@base64d)'"
 #
 # Kjøres en gang eller ved endringer med
-# kubectl apply -f .deploy/azure-ad-app-lokal.yaml
+# kubectl apply -f .nais/azure-ad-app-lokal.yaml
 ###
 apiVersion: nais.io/v1
 kind: AzureAdApplication

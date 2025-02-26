@@ -1,8 +1,6 @@
-name: Build-Deploy-Prod-GCP
+name: Gammel-Build-Deploy-Prod-GCP
 on:
-  push:
-    branches:
-      - 'main'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -62,7 +60,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: dev-gcp
-          RESOURCE: .deploy/nais/app-preprod.yaml
+          RESOURCE: .nais/app-dev.yaml
           VAR: image=${{ needs.bygg.outputs.image }}
 
   deploy-to-prod:
@@ -81,7 +79,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
-          RESOURCE: .deploy/nais/app-prod.yaml
+          RESOURCE: .nais/app-prod.yaml
           IMAGE: ${{ needs.bygg.outputs.image }}
 
   loggfeil:
