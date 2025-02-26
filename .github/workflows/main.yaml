@@ -20,9 +20,9 @@ concurrency:
 jobs:
   build:
     name: Build
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
-      packages: write
       id-token: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@main
     with:
