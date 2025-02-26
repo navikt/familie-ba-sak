@@ -17,6 +17,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKalkulertMånedligBeløp
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetaltFraAnnetLand
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -26,11 +28,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -159,9 +159,9 @@ fun List<UtfyltUtenlandskPeriodebeløp>.tilTidslinje() =
     this
         .map {
             Periode(
-                fraOgMed = it.fom.tilTidspunkt(),
-                tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
-                innhold = it,
+                verdi = it,
+                fom = it.fom.førsteDagIInneværendeMåned(),
+                tom = it.tom?.sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
 

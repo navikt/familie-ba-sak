@@ -1,34 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Uendelighet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import org.junit.jupiter.api.Assertions
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.YearMonth
 
 class EndringIVilkårsvurderingUtilTest {
-    private val jan22 = YearMonth.of(2022, 1)
-    private val feb22 = YearMonth.of(2022, 2)
-    private val mai22 = YearMonth.of(2022, 5)
-    private val jun22 = YearMonth.of(2022, 6)
-
     @Test
     fun `Endring i vilkårsvurdering - skal ikke lage periode med endring dersom vilkårresultatene er helt like`() {
         val fødselsdato = LocalDate.of(2015, 1, 1)
@@ -77,16 +73,16 @@ class EndringIVilkårsvurderingUtilTest {
                     forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
-                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-                ).perioder()
-                .filter { it.innhold == true }
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
-        Assertions.assertTrue(perioderMedEndring.isEmpty())
+        assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere periode med endring dersom det har vært endringer i regelverk`() {
-        val fødselsdato = jan22.førsteDagIInneværendeMåned()
+        val fødselsdato = 1.jan(2022)
         val nåværendeVilkårResultat =
             setOf(
                 VilkårResultat(
@@ -94,7 +90,7 @@ class EndringIVilkårsvurderingUtilTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = fødselsdato,
-                    periodeTom = mai22.sisteDagIInneværendeMåned(),
+                    periodeTom = 31.mai(2022),
                     begrunnelse = "begrunnelse",
                     sistEndretIBehandlingId = 0,
                     utdypendeVilkårsvurderinger =
@@ -113,7 +109,7 @@ class EndringIVilkårsvurderingUtilTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = fødselsdato,
-                    periodeTom = mai22.sisteDagIInneværendeMåned(),
+                    periodeTom = 31.mai(2022),
                     begrunnelse = "begrunnelse",
                     sistEndretIBehandlingId = 0,
                     utdypendeVilkårsvurderinger =
@@ -135,18 +131,18 @@ class EndringIVilkårsvurderingUtilTest {
                     forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
-                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-                ).perioder()
-                .filter { it.innhold == true }
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
-        Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(feb22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        assertEquals(1, perioderMedEndring.size)
+        assertEquals(1.feb(2022), perioderMedEndring.single().fom)
+        assertEquals(31.mai(2022), perioderMedEndring.single().tom)
     }
 
     @Test
     fun `Endring i vilkårsvurdering - skal ikke bry seg om endringer utført før relevant fom dato`() {
-        val fødselsdato = jan22.førsteDagIInneværendeMåned()
+        val fødselsdato = 1.jan(2022)
         val nåværendeVilkårResultat =
             setOf(
                 VilkårResultat(
@@ -154,7 +150,7 @@ class EndringIVilkårsvurderingUtilTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = fødselsdato,
-                    periodeTom = mai22.sisteDagIInneværendeMåned(),
+                    periodeTom = 31.mai(2022),
                     begrunnelse = "begrunnelse",
                     sistEndretIBehandlingId = 0,
                     utdypendeVilkårsvurderinger =
@@ -173,7 +169,7 @@ class EndringIVilkårsvurderingUtilTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = fødselsdato,
-                    periodeTom = mai22.sisteDagIInneværendeMåned(),
+                    periodeTom = 31.mai(2022),
                     begrunnelse = "begrunnelse",
                     sistEndretIBehandlingId = 0,
                     utdypendeVilkårsvurderinger =
@@ -195,16 +191,16 @@ class EndringIVilkårsvurderingUtilTest {
                     forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
-                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = jun22,
-                ).perioder()
-                .filter { it.innhold == true }
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = jun(2022),
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
-        Assertions.assertEquals(0, perioderMedEndring.size)
+        assertEquals(0, perioderMedEndring.size)
     }
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere periode med endring dersom det har oppstått splitt i vilkårsvurderingen`() {
-        val fødselsdato = jan22.førsteDagIInneværendeMåned()
+        val fødselsdato = 1.jan(2022)
         val forrigeVilkårResultat =
             setOf(
                 VilkårResultat(
@@ -227,7 +223,7 @@ class EndringIVilkårsvurderingUtilTest {
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     resultat = Resultat.OPPFYLT,
                     periodeFom = fødselsdato,
-                    periodeTom = mai22.atDay(7),
+                    periodeTom = 7.mai(2022),
                     begrunnelse = "",
                     sistEndretIBehandlingId = 0,
                     utdypendeVilkårsvurderinger = listOf(),
@@ -237,7 +233,7 @@ class EndringIVilkårsvurderingUtilTest {
                     personResultat = null,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     resultat = Resultat.OPPFYLT,
-                    periodeFom = mai22.atDay(8),
+                    periodeFom = 8.mai(2022),
                     periodeTom = null,
                     begrunnelse = "",
                     sistEndretIBehandlingId = 0,
@@ -256,13 +252,13 @@ class EndringIVilkårsvurderingUtilTest {
                     forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
-                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-                ).perioder()
-                .filter { it.innhold == true }
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
-        Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(jun22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(Uendelighet.FREMTID, perioderMedEndring.single().tilOgMed.uendelighet)
+        assertEquals(1, perioderMedEndring.size)
+        assertEquals(1.jun(2022), perioderMedEndring.single().fom)
+        assertNull(perioderMedEndring.single().tom)
     }
 
     @Test
@@ -316,11 +312,11 @@ class EndringIVilkårsvurderingUtilTest {
                     forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
-                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-                ).perioder()
-                .filter { it.innhold == true }
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
-        Assertions.assertTrue(perioderMedEndring.isEmpty())
+        assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
@@ -369,11 +365,11 @@ class EndringIVilkårsvurderingUtilTest {
                     forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
                     personIBehandling = person,
                     personIForrigeBehandling = person,
-                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = TIDENES_MORGEN.toYearMonth(),
-                ).perioder()
-                .filter { it.innhold == true }
+                    tidligsteRelevanteFomDatoForPersonIVilkårsvurdering = MIN_MÅNED,
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
-        Assertions.assertTrue(perioderMedEndring.isEmpty())
+        assertTrue(perioderMedEndring.isEmpty())
     }
 
     private fun lagPersonResultatFraVilkårResultater(

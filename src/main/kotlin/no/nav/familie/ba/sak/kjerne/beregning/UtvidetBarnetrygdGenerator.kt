@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
-import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -31,7 +31,7 @@ data class UtvidetBarnetrygdGenerator(
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 
         val barnasAndelerFiltrertForPerioderBarnaBorMedSøker =
-            andelerBarna.tilSeparateTidslinjerForBarna().familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            andelerBarna.tilSeparateTidslinjerForBarna().filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
 
         val størsteProsentTidslinje =
             barnasAndelerFiltrertForPerioderBarnaBorMedSøker.values

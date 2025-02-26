@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.ValutakursForVedtaksperiode
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.outerJoin
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.YearMonth
 
 fun finnFørsteEndringIValutakurs(
@@ -34,8 +34,8 @@ fun finnFørsteEndringIValutakurs(
             }
 
     return erEndringIValutakursTidslinje
-        .perioder()
-        .firstOrNull { it.innhold == true }
-        ?.fraOgMed
-        ?.tilYearMonth() ?: TIDENES_ENDE.toYearMonth()
+        .tilPerioder()
+        .firstOrNull { it.verdi == true }
+        ?.fom
+        ?.toYearMonth() ?: TIDENES_ENDE.toYearMonth()
 }

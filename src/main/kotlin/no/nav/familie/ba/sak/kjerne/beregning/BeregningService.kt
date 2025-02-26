@@ -21,12 +21,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 @Service
 class BeregningService(
@@ -127,7 +127,7 @@ class BeregningService(
         return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
 
-    fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling: Behandling): FamilieFellesTidslinje<Boolean> {
+    fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling: Behandling): Tidslinje<Boolean> {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = hentAndelerFraForrigeIverksattebehandling(behandling)
 

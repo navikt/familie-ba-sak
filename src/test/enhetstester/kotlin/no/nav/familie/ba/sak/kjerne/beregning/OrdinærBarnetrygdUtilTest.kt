@@ -13,14 +13,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.OrdinærBarnetrygdUtil.mapTilProse
 import no.nav.familie.ba.sak.kjerne.beregning.OrdinærBarnetrygdUtil.tilTidslinjeMedRettTilProsentForPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -98,7 +97,7 @@ class OrdinærBarnetrygdUtilTest {
                 fagsakType = FagsakType.NORMAL,
             )
 
-        val perioder = tidslinje.perioder().toList()
+        val perioder = tidslinje.tilPerioderIkkeNull().toList()
 
         assertEquals(3, perioder.size)
 
@@ -238,10 +237,10 @@ class OrdinærBarnetrygdUtilTest {
         forventetFom: YearMonth,
         forventetTom: YearMonth,
         forventetProsent: BigDecimal,
-        faktisk: Periode<BigDecimal, Måned>,
+        faktisk: Periode<BigDecimal>,
     ) {
-        assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
-        assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
-        assertEquals(forventetProsent, faktisk.innhold)
+        assertEquals(forventetFom, faktisk.fom?.toYearMonth())
+        assertEquals(forventetTom, faktisk.tom?.toYearMonth())
+        assertEquals(forventetProsent, faktisk.verdi)
     }
 }

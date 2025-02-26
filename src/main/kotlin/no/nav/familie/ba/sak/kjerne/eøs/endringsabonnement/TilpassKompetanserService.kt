@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -134,7 +134,7 @@ fun tilpassKompetanserTilRegelverk(
             }
 
     return gjeldendeKompetanser
-        .tilSeparateFamilieFellesTidslinjerForBarna()
+        .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, eøsRegelverk ->
             eøsRegelverk?.let { kompetanse ?: Kompetanse.NULL }
         }.mapValues { (_, value) ->

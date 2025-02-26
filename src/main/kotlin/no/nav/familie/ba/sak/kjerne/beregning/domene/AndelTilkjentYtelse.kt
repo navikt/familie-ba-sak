@@ -21,16 +21,19 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseForVedtaksperioderTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.tilAndelForVedtaksbegrunnelseTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.tilAndelForVedtaksperiodeTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Tidslinje
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -209,21 +212,17 @@ private fun regelverkAvhengigeVilkår() =
         Vilkår.LOVLIG_OPPHOLD,
     )
 
-fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType() =
+fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelTilkjentYtelse>> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         andelerTilkjentYtelsePåPerson.tilTidslinje()
     }
 
-fun List<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksperioderTidslinje> =
+fun List<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelForVedtaksperiode>> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
-        AndelTilkjentYtelseForVedtaksperioderTidslinje(
-            andelerTilkjentYtelsePåPerson,
-        )
+        andelerTilkjentYtelsePåPerson.tilAndelForVedtaksperiodeTidslinje()
     }
 
-fun List<AndelTilkjentYtelse>.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje> =
+fun List<AndelTilkjentYtelse>.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelForVedtaksbegrunnelse>> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
-        AndelTilkjentYtelseForVedtaksbegrunnelserTidslinje(
-            andelerTilkjentYtelsePåPerson,
-        )
+        andelerTilkjentYtelsePåPerson.tilAndelForVedtaksbegrunnelseTidslinje()
     }
