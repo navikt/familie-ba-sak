@@ -1,11 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsperioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -18,15 +18,24 @@ class UtbetalingsTidslinjeService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun genererUtbetalingsTidslinjerForFagsak(fagsakId: Long): List<UtbetalingsTidslinje> {
-        val tilkjenteYtelser = tilkjentYtelseRepository.findByFagsak(fagsakId = fagsakId)
-        val utbetalingsperioderPerKjede = genererUtbetalingsperioderPerKjede(tilkjenteYtelser = tilkjenteYtelser)
+        val iverksatteUtbetalingsoppdrag =
+            tilkjentYtelseRepository
+                .findByFagsak(fagsakId = fagsakId)
+                .mapNotNull { it.utbetalingsoppdrag() }
+                .sortedBy { it.avstemmingTidspunkt }
+
+        val utbetalingsperioderPerKjede =
+            genererUtbetalingsperioderPerKjede(iverksatteUtbetalingsoppdrag = iverksatteUtbetalingsoppdrag)
+
         val tidslinjePerKjede = genererTidslinjePerKjede(utbetalingsperioderPerKjede = utbetalingsperioderPerKjede)
 
         return tidslinjePerKjede.keys.map { sistePeriodeIdIKjede ->
             val utbetalingsperioder =
                 utbetalingsperioderPerKjede[sistePeriodeIdIKjede]?.flatMap { it.verdi }?.toSet()
                     ?: throw Feil("Finner ikke perioder tilknyttet periodeId: $sistePeriodeIdIKjede")
-            val tidslinje = tidslinjePerKjede[sistePeriodeIdIKjede] ?: throw Feil("Finner ikke tidslinje tilknyttet periodeId: $sistePeriodeIdIKjede")
+            val tidslinje =
+                tidslinjePerKjede[sistePeriodeIdIKjede]
+                    ?: throw Feil("Finner ikke tidslinje tilknyttet periodeId: $sistePeriodeIdIKjede")
 
             UtbetalingsTidslinje(
                 utbetalingsperioder = utbetalingsperioder,
@@ -67,18 +76,25 @@ class UtbetalingsTidslinjeService(
                 }.tilTidslinje()
         }
 
-    private fun genererUtbetalingsperioderPerKjede(tilkjenteYtelser: List<TilkjentYtelse>): Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>> =
-        tilkjenteYtelser
-            .fold(mutableMapOf<Long, List<Tidslinje<Utbetalingsperiode>>>()) { kjederForFagsak, tilkjentYtelse ->
+    private fun genererUtbetalingsperioderPerKjede(iverksatteUtbetalingsoppdrag: List<Utbetalingsoppdrag>): Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>> =
+        iverksatteUtbetalingsoppdrag
+            .fold(mutableMapOf<Long, List<Tidslinje<Utbetalingsperiode>>>()) { kjederForFagsak, utbetalingsoppdrag ->
                 val kjederForUtbetalingsperioder =
-                    tilkjentYtelse
-                        .utbetalingsperioder()
+                    utbetalingsoppdrag
+                        .utbetalingsperiode
                         .sortedBy { it.periodeId }
                         .fold(mutableMapOf<Long, MutableList<Periode<Utbetalingsperiode>>>()) { kjeder, utbetalingsperiode ->
                             kjeder.apply {
                                 // Derom kjede er opphørt forkorter vi perioden til opphørsdato. Ellers bruker vi utbetalingsperiodens vedtakdatoTom
-                                val periodeTom = utbetalingsperiode.opphør?.opphørDatoFom ?: utbetalingsperiode.vedtakdatoTom
-                                val kjede = getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) + Periode(utbetalingsperiode, utbetalingsperiode.vedtakdatoFom, periodeTom)
+                                val periodeTom =
+                                    utbetalingsperiode.opphør?.opphørDatoFom ?: utbetalingsperiode.vedtakdatoTom
+                                val kjede =
+                                    getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) +
+                                        Periode(
+                                            utbetalingsperiode,
+                                            utbetalingsperiode.vedtakdatoFom,
+                                            periodeTom,
+                                        )
                                 put(utbetalingsperiode.periodeId, kjede.toMutableList())
                                 remove(utbetalingsperiode.forrigePeriodeId)
                             }
