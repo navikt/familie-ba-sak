@@ -16,12 +16,8 @@ open class Feil(
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
-    var callId: String? = null,
-) : RuntimeException(message) {
-    init {
-        callId = MDC.get(MDCConstants.MDC_CALL_ID)
-    }
-}
+    val callId: String? = MDC.get(MDCConstants.MDC_CALL_ID) // Fetch at declaration for immutability
+) : RuntimeException(message)
 
 open class FunksjonellFeil(
     open val melding: String,
@@ -29,12 +25,8 @@ open class FunksjonellFeil(
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
-    var callId: String? = null,
-) : RuntimeException(melding) {
-    init {
-        callId = MDC.get(MDCConstants.MDC_CALL_ID)
-    }
-}
+    val callId: String? = MDC.get(MDCConstants.MDC_CALL_ID) // Fetch at declaration for immutability
+) : RuntimeException(melding)
 
 class VilkårFeil(
     melding: String,
