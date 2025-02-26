@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.tidslinje.Periode
@@ -65,12 +64,16 @@ class UtbetalingsTidslinjeService(
                     )
                 }.fold(mutableListOf<Periode<Utbetalingsperiode>>()) { gjeldendePerioder, periode ->
                     // Fjerner perioder med lavere periodeId enn foregående periode
-                    if (gjeldendePerioder.isEmpty() || periode.verdi.periodeId > gjeldendePerioder.last().verdi.periodeId) {
-                        val erOpphørsPeriode = periode.verdi.opphør != null
-                        if (erOpphørsPeriode) {
-                            return@fold beskjærPerioderIHenholdTilOpphør(periode, gjeldendePerioder)
-                        }
+                    val forrigePeriode = gjeldendePerioder.lastOrNull()
+                    if (forrigePeriode == null || periode.verdi.periodeId > forrigePeriode.verdi.periodeId) {
                         gjeldendePerioder.add(periode)
+                    } else if (forrigePeriode.verdi.periodeId == periode.verdi.periodeId) {
+                        // Slår sammen etterfølgende perioder med samme periodeId dersom forrige periode ikke var en opphørsperiode
+                        val forrigePeriodeErOpphørsperiode = forrigePeriode.verdi.opphør != null
+                        if (!forrigePeriodeErOpphørsperiode) {
+                            gjeldendePerioder.remove(forrigePeriode)
+                            gjeldendePerioder.add(periode.copy(fom = forrigePeriode.fom))
+                        }
                     }
                     gjeldendePerioder
                 }.tilTidslinje()
@@ -87,7 +90,8 @@ class UtbetalingsTidslinjeService(
                             kjeder.apply {
                                 // Derom kjede er opphørt forkorter vi perioden til opphørsdato. Ellers bruker vi utbetalingsperiodens vedtakdatoTom
                                 val periodeTom =
-                                    utbetalingsperiode.opphør?.opphørDatoFom ?: utbetalingsperiode.vedtakdatoTom
+                                    utbetalingsperiode.opphør?.opphørDatoFom?.minusDays(1)
+                                        ?: utbetalingsperiode.vedtakdatoTom
                                 val kjede =
                                     getOrDefault(utbetalingsperiode.forrigePeriodeId, mutableListOf()) +
                                         Periode(
@@ -116,17 +120,4 @@ class UtbetalingsTidslinjeService(
             }.mapValues { (_, tidslinjerForKjede) ->
                 tidslinjerForKjede.kombiner().tilPerioderIkkeNull()
             }
-
-    private fun beskjærPerioderIHenholdTilOpphør(
-        opphørsPeriode: Periode<Utbetalingsperiode>,
-        gjeldendePerioder: MutableList<Periode<Utbetalingsperiode>>,
-    ): MutableList<Periode<Utbetalingsperiode>> =
-        (gjeldendePerioder + opphørsPeriode)
-            .tilTidslinje()
-            .beskjærTilOgMed(
-                opphørsPeriode.verdi.opphør!!
-                    .opphørDatoFom
-                    .minusDays(1),
-            ).tilPerioderIkkeNull()
-            .toMutableList()
 }

@@ -25,6 +25,7 @@ class UtbetalingsTidslinje(
                 forrigePeriodeId = it.verdi.forrigePeriodeId,
                 beløp = it.verdi.sats,
                 klassifisering = it.verdi.klassifisering,
+                kildeBehandlingId = it.verdi.behandlingId,
             )
         }
 }
@@ -36,4 +37,5 @@ data class UtbetalingsperiodeDto(
     val forrigePeriodeId: Long?,
     val beløp: BigDecimal,
     val klassifisering: String,
+    val kildeBehandlingId: Long,
 )
