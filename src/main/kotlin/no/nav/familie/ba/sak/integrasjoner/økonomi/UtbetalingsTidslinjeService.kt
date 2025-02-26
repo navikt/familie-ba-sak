@@ -65,7 +65,7 @@ class UtbetalingsTidslinjeService(
                     )
                 }.fold(mutableListOf<Periode<Utbetalingsperiode>>()) { gjeldendePerioder, periode ->
                     // Fjerner perioder med lavere periodeId enn foregående periode
-                    if (gjeldendePerioder.isEmpty() || periode.verdi.periodeId >= gjeldendePerioder.last().verdi.periodeId) {
+                    if (gjeldendePerioder.isEmpty() || periode.verdi.periodeId > gjeldendePerioder.last().verdi.periodeId) {
                         val erOpphørsPeriode = periode.verdi.opphør != null
                         if (erOpphørsPeriode) {
                             return@fold beskjærPerioderIHenholdTilOpphør(periode, gjeldendePerioder)
