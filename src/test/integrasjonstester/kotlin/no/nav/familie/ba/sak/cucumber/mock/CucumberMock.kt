@@ -195,6 +195,7 @@ class CucumberMock(
             småbarnstilleggService = småbarnstilleggService,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
@@ -385,7 +386,7 @@ class CucumberMock(
             localDateProvider = mockedDateProvider,
         )
 
-    val saksbehandlerContext = SaksbehandlerContext("")
+    val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockUnleashNextMedContextService())
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
     val tilkjentYtelseValideringService =

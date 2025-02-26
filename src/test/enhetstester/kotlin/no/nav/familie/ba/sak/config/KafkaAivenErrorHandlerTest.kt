@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.MockKAnnotations
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -13,14 +12,10 @@ import org.springframework.kafka.listener.MessageListenerContainer
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaAivenErrorHandlerTest {
-    @MockK(relaxed = true)
-    lateinit var container: MessageListenerContainer
+    private val container = mockk<MessageListenerContainer>(relaxed = true)
+    private val consumer = mockk<Consumer<String, String>>(relaxed = true)
 
-    @MockK(relaxed = true)
-    lateinit var consumer: Consumer<*, *>
-
-    @InjectMockKs
-    lateinit var errorHandler: KafkaAivenErrorHandler
+    private val errorHandler = KafkaAivenErrorHandler()
 
     @BeforeEach
     internal fun setUp() {

@@ -43,6 +43,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
+import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -112,6 +113,29 @@ class IntegrasjonClient(
             formål = "Hent behandlende enhet",
         ) {
             postForEntity(uri, mapOf("ident" to ident))
+        }
+    }
+
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
+    )
+    @Cacheable("saksbehandler", cacheManager = "shortCache")
+    fun hentSaksbehandler(id: String): Saksbehandler {
+        val uri =
+            UriComponentsBuilder
+                .fromUri(integrasjonUri)
+                .pathSegment("saksbehandler", id)
+                .build()
+                .toUri()
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "saksbehandler",
+            uri = uri,
+            formål = "Hent saksbehandler",
+        ) {
+            getForEntity(uri)
         }
     }
 

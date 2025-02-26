@@ -2,13 +2,11 @@ package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon
 
 import no.nav.familie.tidslinje.Null
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.Udefinert
 import no.nav.familie.tidslinje.Verdi
 import no.nav.familie.tidslinje.tilPeriodeVerdi
 import no.nav.familie.tidslinje.utvidelser.biFunksjon
+import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
-import no.nav.familie.tidslinje.utvidelser.map
-import no.nav.familie.tidslinje.utvidelser.slåSammen
 import no.nav.familie.tidslinje.utvidelser.trim
 
 /**
@@ -44,7 +42,7 @@ fun <V, H, R> Tidslinje<V>.kombinerUtenNullMed(
  */
 fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNull(
     listeKombinator: (Iterable<V>) -> R?,
-): Tidslinje<R> = kombinerNullableKombinator { it.filterNotNull().let(listeKombinator) }
+): Tidslinje<R> = kombiner { it.filterNotNull().let(listeKombinator) }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
@@ -57,7 +55,7 @@ fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNull(
  */
 fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNullOgIkkeTom(
     listeKombinator: (Iterable<V>) -> R?,
-): Tidslinje<R> = kombinerNullableKombinator { it.filterNotNull().takeIf { it.isNotEmpty() }?.let(listeKombinator) }
+): Tidslinje<R> = kombiner { it.filterNotNull().takeIf { it.isNotEmpty() }?.let(listeKombinator) }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
@@ -65,7 +63,7 @@ fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNullOgIkkeTom(
  * Verdien V må være av samme type
  * Resultatet er en tidslinje med verdi Iterable<V>
  */
-fun <V> Collection<Tidslinje<V>>.kombiner() = this.kombinerNullableKombinator { if (it.toList().isNotEmpty()) it else null }
+fun <V> Collection<Tidslinje<V>>.kombiner() = this.kombiner { if (it.toList().isNotEmpty()) it else null }
 
 /**
  * Extension-metode for å kombinere en nøkkel-verdi-map'er der verdiene er tidslinjer, med en enkelt tidslinje
@@ -120,35 +118,4 @@ fun <V, H> Tidslinje<V>.kombinerMedNullable(
         kombinerMed(høyreTidslinje, kombinator)
     } else {
         this
-    }
-
-/**
- * Extension-metode for å kombinere liste av tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene fra alle tidslinjene
- * Verdi (V) må være av samme type
- * Kombintor-funksjonen tar inn Iterable<V> og returner (nullable) R
- * Resultatet er en tidslinje med verdi R
- */
-fun <V, R> Collection<Tidslinje<V>>.kombinerNullableKombinator(listeKombinator: (Iterable<V>) -> R?): Tidslinje<R> =
-    this.slåSammen().map {
-        when (it) {
-            is Verdi -> {
-                val resultat = listeKombinator(it.verdi)
-                if (resultat != null) Verdi(resultat) else Null()
-            }
-
-            is Null -> Null()
-            is Udefinert -> Udefinert()
-        }
-    }
-
-fun <V, R> Tidslinje<V>.mapVerdiNullable(mapper: (V?) -> R?): Tidslinje<R> =
-    this.map { periodeVerdi ->
-        when (periodeVerdi) {
-            is Verdi,
-            is Null,
-            -> mapper(periodeVerdi.verdi)?.let { Verdi(it) } ?: Null()
-
-            is Udefinert -> Udefinert()
-        }
     }

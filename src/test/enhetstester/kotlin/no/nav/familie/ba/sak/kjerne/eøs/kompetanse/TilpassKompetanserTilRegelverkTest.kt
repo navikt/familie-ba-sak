@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.sep
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.somBoolskTidslinje
@@ -369,6 +370,24 @@ class TilpassKompetanserTilRegelverkTest {
             KompetanseBuilder(sep2024.tilTidspunkt())
                 .medKompetanse("->", barn1, barn2)
                 .byggKompetanser()
+
+        assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
+    }
+
+    @Test
+    fun `skal ikke generere kompetanser hvis eøs-regelverk er frem i tid`() {
+        val barnaRegelverkTidslinjer =
+            mapOf(barn1.aktør to "EEE".tilRegelverkResultatTidslinje(jan(2025)))
+
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(
+                gjeldendeKompetanser = emptyList(),
+                barnaRegelverkTidslinjer = barnaRegelverkTidslinjer,
+                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                inneværendeMåned = des(2024),
+            )
+
+        val forventedeKompetanser = emptyList<Kompetanse>()
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

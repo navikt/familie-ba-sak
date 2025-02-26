@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.korrigertvedtak
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -12,20 +9,14 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
 
-@ExtendWith(MockKExtension::class)
 internal class KorrigertVedtakServiceTest {
-    @MockK
-    private lateinit var korrigertVedtakRepository: KorrigertVedtakRepository
+    private val korrigertVedtakRepository = mockk<KorrigertVedtakRepository>()
+    private val loggService = mockk<LoggService>()
 
-    @MockK
-    private lateinit var loggService: LoggService
-
-    @InjectMockKs
-    private lateinit var korrigertVedtakService: KorrigertVedtakService
+    private val korrigertVedtakService = KorrigertVedtakService(korrigertVedtakRepository, loggService)
 
     @Test
     fun `finnAktivtKorrigertVedtakPåBehandling skal hente aktivt korrigert vedtak fra repository hvis det finnes`() {

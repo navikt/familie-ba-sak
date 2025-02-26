@@ -5,12 +5,10 @@ import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.medPeriode
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrer
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.math.BigDecimal
 
 fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
@@ -81,7 +79,7 @@ private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse =
  * sammenfaller med splitt pga differanseberegning, og blir fjernet
  * Det beste hadde vært om andelene IKKE inneholdt splitter av denne typen, men at ekstra splitter ble utledet der de trengs
  */
-fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() =
+fun Tidslinje<AndelTilkjentYtelse>.utenDifferanseberegning() =
     mapIkkeNull {
         when {
             it.differanseberegnetPeriodebeløp != null -> it.medPeriode(null, null)
@@ -89,9 +87,9 @@ fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() 
         }
     }.mapIkkeNull { it.utenDifferanseberegning() }
 
-fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
-    utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal, Måned>,
-): Tidslinje<AndelTilkjentYtelse, Måned> =
+fun Tidslinje<AndelTilkjentYtelse>.oppdaterDifferanseberegning(
+    utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal>,
+): Tidslinje<AndelTilkjentYtelse> =
     this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
         andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
     }
@@ -103,7 +101,7 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
  * AndelTilkjentYtelse{ differanseberegnetPeriodebeløp: 200 } => null
  * AndelTilkjentYtelse{ differanseberegnetPeriodebeløp: null } => null
  */
-fun <K, T : Tidsenhet> Map<K, Tidslinje<AndelTilkjentYtelse, T>>.tilUnderskuddPåDifferanseberegningen(): Map<K, Tidslinje<BigDecimal, T>> =
+fun <K> Map<K, Tidslinje<AndelTilkjentYtelse>>.tilUnderskuddPåDifferanseberegningen(): Map<K, Tidslinje<BigDecimal>> =
     mapValues { (_, tidslinje) ->
         tidslinje
             .mapIkkeNull { innhold -> innhold.differanseberegnetPeriodebeløp }

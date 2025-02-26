@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
@@ -72,24 +71,10 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateFamilieFellesTidslinjerF
     }
 }
 
-fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, Tidslinje<S, Måned>>.tilSkjemaer() =
+fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, FamilieFellesTidslinje<S>>.tilSkjemaer() =
     this
         .flatMap { (aktør, tidslinjer) -> tidslinjer.tilSkjemaer(aktør) }
         .slåSammen()
-
-fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, FamilieFellesTidslinje<S>>.familieFellesTidslinjerTilSkjemaer() =
-    this
-        .flatMap { (aktør, tidslinjer) -> tidslinjer.tilSkjemaer(aktør) }
-        .slåSammen()
-
-private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør: Aktør) =
-    this.perioder().mapNotNull { periode ->
-        periode.innhold?.kopier(
-            fom = periode.fraOgMed.tilYearMonthEllerNull(),
-            tom = periode.tilOgMed.tilYearMonthEllerNull(),
-            barnAktører = setOf(aktør),
-        )
-    }
 
 private fun <S : PeriodeOgBarnSkjema<S>> FamilieFellesTidslinje<S>.tilSkjemaer(aktør: Aktør) =
     this.tilPerioder().mapNotNull { periode ->

@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.matematikk
 
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.join
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullOgIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.join
 import java.math.BigDecimal
 import java.math.RoundingMode
 

@@ -15,7 +15,7 @@ class CharTidslinjeTest {
         val charTidslinje = tegn.tilCharTidslinje(jan(2020)).tilMåned { it.single() }
 
         assertEquals(1.jan(2020), charTidslinje.startsTidspunkt)
-        assertEquals(tegn.length, charTidslinje.innhold.sumOf { it.lengde })
+        assertEquals(tegn.length.toLong(), charTidslinje.innhold.sumOf { it.lengde })
 
         val periode = charTidslinje.tilPerioder().single()
 
@@ -44,7 +44,7 @@ class CharTidslinjeTest {
         val charTidslinje = tegn.tilCharTidslinje(jan(2020)).tilMåned { it.single() }
 
         assertEquals(1.jan(2020), charTidslinje.startsTidspunkt)
-        assertEquals(tegn.length, charTidslinje.innhold.sumOf { it.lengde })
+        assertEquals(tegn.length.toLong(), charTidslinje.innhold.sumOf { it.lengde })
 
         val perioder = charTidslinje.tilPerioder()
         assertEquals(5, perioder.size)

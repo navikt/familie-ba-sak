@@ -9,24 +9,24 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.familieFellesTidslinjerTilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.leftJoin
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.leftJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -131,8 +131,6 @@ fun tilpassKompetanserTilRegelverk(
                     true -> null // ta bort regelverk dersom det verken utbetales ordinær på barnet eller utvidet for søker
                     else -> regelverk
                 }
-            }.mapValues { (_, tidslinjer) ->
-                tidslinjer.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
             }
 
     return gjeldendeKompetanser
@@ -144,8 +142,8 @@ fun tilpassKompetanserTilRegelverk(
                 kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
         }.mapValues { (_, tidslinje) ->
-            tidslinje.forlengFremtidTilUendelig(inneværendeMåned.sisteDagIInneværendeMåned())
-        }.familieFellesTidslinjerTilSkjemaer()
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
+        }.tilSkjemaer()
 }
 
 fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(behandlingId: BehandlingId) =
@@ -159,7 +157,7 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
 private fun Map<Aktør, Tidslinje<RegelverkResultat>>.tilBarnasEøsRegelverkTidslinjer(): Map<Aktør, Tidslinje<Regelverk>> =
     this.mapValues { (_, regelverkResultatTidslinje) ->
         regelverkResultatTidslinje
-            .mapVerdiNullable { it?.regelverk }
+            .mapVerdi { it?.regelverk }
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
     }

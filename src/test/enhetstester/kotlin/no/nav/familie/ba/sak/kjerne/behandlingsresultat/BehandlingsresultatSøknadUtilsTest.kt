@@ -101,7 +101,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     ),
                 personerFremstiltKravFor = listOf(barn1Aktør),
                 endretUtbetalingAndeler = emptyList(),
-            )
+            ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         assertThat(søknadsResultat.size, Is(1))
         assertThat(søknadsResultat[0], Is(Søknadsresultat.INNVILGET))
@@ -167,7 +167,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     ),
                 personerFremstiltKravFor = listOf(barn1Aktør),
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
-            )
+            ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         assertThat(søknadsResultat.size, Is(1))
         assertThat(søknadsResultat[0], Is(Søknadsresultat.INNVILGET))
@@ -209,7 +209,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     ),
                 personerFremstiltKravFor = listOf(barn1Aktør),
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
-            )
+            ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         assertThat(søknadsResultat.size, Is(1))
         assertThat(søknadsResultat[0], Is(Søknadsresultat.AVSLÅTT))
@@ -283,7 +283,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     ),
                 personerFremstiltKravFor = listOf(barn1Aktør),
                 endretUtbetalingAndeler = emptyList(),
-            )
+            ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         assertThat(søknadsResultat.size, Is(1))
         assertThat(søknadsResultat[0], Is(Søknadsresultat.INNVILGET))
@@ -336,7 +336,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 nåværendeAndeler = nåværendeAndeler,
                 personerFremstiltKravFor = listOf(barn1Aktør, barn2Aktør),
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
-            )
+            ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         assertThat(søknadsResultat.size, Is(2))
         assertThat(

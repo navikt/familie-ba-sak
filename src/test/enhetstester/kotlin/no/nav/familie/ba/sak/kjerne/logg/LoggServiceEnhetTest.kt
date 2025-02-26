@@ -1,26 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 internal class LoggServiceEnhetTest {
-    @MockK
-    private lateinit var loggRepository: LoggRepository
+    private val loggRepository = mockk<LoggRepository>()
+    private val rolleConfig = mockk<RolleConfig>()
 
-    @MockK
-    private lateinit var rolleConfig: RolleConfig
-
-    @InjectMockKs
-    private lateinit var loggService: LoggService
+    private val loggService = LoggService(loggRepository, rolleConfig)
 
     @Test
     fun `loggSammensattKontrollsakLagtTil skal lagre ned logg på at sammensatt kontrollsak er opprettet`() {

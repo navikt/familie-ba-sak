@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -17,9 +18,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.filtrerGjeldendeNå
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
@@ -37,6 +35,8 @@ import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -134,25 +134,19 @@ class StønadsstatistikkService(
                 .map { it.andel }
                 .tilTidslinjerPerAktørOgType()
                 .values
-                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
+                .kombiner { it }
         val søkerOgBarn = persongrunnlag.søkerOgBarn
 
         return utbetalingsPerioder
-            .perioder()
-            .mapNotNull { periode ->
-                val andelerIPeriode = periode.innhold
-
-                if (andelerIPeriode != null) {
-                    mapTilUtbetalingsperiodeV2(
-                        fom = periode.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned(),
-                        tom = periode.tilOgMed.tilYearMonth().sisteDagIInneværendeMåned(),
-                        andelerForSegment = andelerIPeriode,
-                        behandling = behandling,
-                        søkerOgBarn = søkerOgBarn,
-                    )
-                } else {
-                    null
-                }
+            .tilPerioderIkkeNull()
+            .map { periode ->
+                mapTilUtbetalingsperiodeV2(
+                    fom = periode.fom?.førsteDagIInneværendeMåned() ?: throw Feil("Fra og med-dato kan ikke være null"),
+                    tom = periode.tom?.sisteDagIMåned() ?: throw Feil("Til og med-dato kan ikke være null"),
+                    andelerForSegment = periode.verdi,
+                    behandling = behandling,
+                    søkerOgBarn = søkerOgBarn,
+                )
             }
     }
 

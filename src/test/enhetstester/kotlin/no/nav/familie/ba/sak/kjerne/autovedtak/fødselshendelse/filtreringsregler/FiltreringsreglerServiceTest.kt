@@ -3,9 +3,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregl
 import io.mockk.CapturingSlot
 import io.mockk.clearMocks
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.slot
@@ -41,44 +38,34 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
 import java.time.YearMonth
 
-@ExtendWith(MockKExtension::class)
 class FiltreringsreglerServiceTest {
-    @MockK
-    private lateinit var personopplysningerService: PersonopplysningerService
+    private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val personidentService = mockk<PersonidentService>()
+    private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
+    private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val localDateService = mockk<LocalDateService>()
+    private val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>()
+    private val behandlingService = mockk<BehandlingService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val tilkjentYtelseValideringService = mockk<TilkjentYtelseValideringService>()
+    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
 
-    @MockK
-    private lateinit var personidentService: PersonidentService
-
-    @MockK
-    private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
-
-    @MockK
-    private lateinit var vilkårsvurderingRepository: VilkårsvurderingRepository
-
-    @MockK
-    private lateinit var localDateService: LocalDateService
-
-    @MockK
-    private lateinit var fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository
-
-    @MockK
-    private lateinit var behandlingService: BehandlingService
-
-    @MockK
-    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-
-    @MockK
-    private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
-
-    @InjectMockKs
-    private lateinit var filtreringsreglerService: FiltreringsreglerService
-
-    @MockK
-    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val filtreringsreglerService =
+        FiltreringsreglerService(
+            personopplysningerService = personopplysningerService,
+            personidentService = personidentService,
+            personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
+            vilkårsvurderingRepository = vilkårsvurderingRepository,
+            localDateService = localDateService,
+            fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
+            behandlingService = behandlingService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            tilkjentYtelseValideringService = tilkjentYtelseValideringService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+        )
 
     @Test
     fun `kjørFiltreringsregler - skal gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {

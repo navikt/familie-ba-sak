@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -59,14 +58,14 @@ class UtbetalingssikkerhetTest {
         )
 
         val feil =
-            assertThrows<Tidslinje.Companion.TidslinjeFeilException> {
+            assertThrows<IllegalStateException> {
                 TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                     tilkjentYtelse,
                     listOf(person.tilPersonEnkel()),
                 )
             }
 
-        assertTrue(feil.message?.contains("OVERLAPPER_ETTERFØLGENDE_PERIODE") == true)
+        assertEquals("Feil med tidslinje. Overlapp på periode", feil.message)
     }
 
     @Test

@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.oppgave
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.just
+import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
@@ -22,35 +20,28 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.http.HttpStatus
 
-@ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveControllerTest {
-    @MockK
-    lateinit var oppgaveService: OppgaveService
+    private val oppgaveService = mockk<OppgaveService>()
+    private val personopplysningerService = mockk<PersonopplysningerService>()
+    private val personidentService = mockk<PersonidentService>()
+    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val fagsakService = mockk<FagsakService>()
+    private val innkommendeJournalføringService = mockk<InnkommendeJournalføringService>()
+    private val tilgangService = mockk<TilgangService>()
 
-    @MockK
-    lateinit var personopplysningerService: PersonopplysningerService
-
-    @MockK
-    lateinit var personidentService: PersonidentService
-
-    @MockK
-    lateinit var integrasjonClient: IntegrasjonClient
-
-    @MockK
-    lateinit var fagsakService: FagsakService
-
-    @MockK
-    lateinit var innkommendeJournalføringService: InnkommendeJournalføringService
-
-    @MockK
-    lateinit var tilgangService: TilgangService
-
-    @InjectMockKs
-    lateinit var oppgaveController: OppgaveController
+    private val oppgaveController =
+        OppgaveController(
+            oppgaveService = oppgaveService,
+            fagsakService = fagsakService,
+            personidentService = personidentService,
+            integrasjonClient = integrasjonClient,
+            personopplysningerService = personopplysningerService,
+            tilgangService = tilgangService,
+            innkommendeJournalføringService = innkommendeJournalføringService,
+        )
 
     @BeforeAll
     fun init() {

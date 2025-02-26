@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -19,30 +16,22 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.hamcrest.CoreMatchers.`is` as Is
 
-@ExtendWith(MockKExtension::class)
 internal class SøknadGrunnlagServiceTest {
-    @MockK
-    private lateinit var søknadGrunnlagRepository: SøknadGrunnlagRepository
+    private val søknadGrunnlagRepository = mockk<SøknadGrunnlagRepository>()
+    private val personidentService = mockk<PersonidentService>()
+    private val persongrunnlagService = mockk<PersongrunnlagService>()
 
-    @MockK
-    private lateinit var personidentService: PersonidentService
-
-    @MockK
-    private lateinit var persongrunnlagService: PersongrunnlagService
-
-    @MockK
-    private lateinit var vilkårsvurderingService: VilkårsvurderingService
-
-    @InjectMockKs
-    private lateinit var søknadGrunnlagService: SøknadGrunnlagService
+    private val søknadGrunnlagService =
+        SøknadGrunnlagService(
+            søknadGrunnlagRepository = søknadGrunnlagRepository,
+            personidentService = personidentService,
+            persongrunnlagService = persongrunnlagService,
+        )
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
@@ -78,7 +67,6 @@ internal class SøknadGrunnlagServiceTest {
                 endringAvOpplysningerBegrunnelse = "",
             )
 
-        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
         val personerFramstiltForKrav =
@@ -111,7 +99,6 @@ internal class SøknadGrunnlagServiceTest {
                 endringAvOpplysningerBegrunnelse = "",
             )
 
-        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 
@@ -256,7 +243,6 @@ internal class SøknadGrunnlagServiceTest {
                 endringAvOpplysningerBegrunnelse = "",
             )
 
-        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
         every { søknadGrunnlagService.hentAktivSøknadDto(behandling.id) } returns søknadDto
 

@@ -3,32 +3,23 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class TilpassArbeidsfordelingServiceTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService =
         TilpassArbeidsfordelingService(
             integrasjonClient = mockedIntegrasjonClient,
-            unleashService = unleashService,
         )
-
-    @BeforeEach
-    fun oppsett() {
-        every { unleashService.isEnabled(FeatureToggle.TILLAT_OPPRETT_AV_BEHANDLING_PÅ_VIKAFOSSEN, false) } returns true
-    }
 
     @Nested
     inner class TilpassArbeidsfordelingTilSaksbehandler {
@@ -49,7 +40,7 @@ class TilpassArbeidsfordelingServiceTest {
                         navIdent = null,
                     )
                 }
-            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident")
+            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} om man mangler NAV-ident.")
         }
 
         @Test
@@ -69,7 +60,7 @@ class TilpassArbeidsfordelingServiceTest {
                         navIdent = NavIdent(SYSTEM_FORKORTELSE),
                     )
                 }
-            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger")
+            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger.")
         }
 
         @Test
@@ -91,13 +82,13 @@ class TilpassArbeidsfordelingServiceTest {
 
             // Act & assert
             val exception =
-                assertThrows<Feil> {
+                assertThrows<FunksjonellFeil> {
                     tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
                         arbeidsfordelingsenhet = arbeidsfordelingsenhet,
                         navIdent = navIdent,
                     )
                 }
-            assertThat(exception.message).isEqualTo("NAV-ident $navIdent har ikke tilgang til noen enheter")
+            assertThat(exception.message).isEqualTo("Nav-Ident har ikke tilgang til noen enheter.")
         }
 
         @Test
@@ -199,7 +190,7 @@ class TilpassArbeidsfordelingServiceTest {
                         navIdent = null,
                     )
                 }
-            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident")
+            assertThat(exception.message).isEqualTo("Kan ikke håndtere ${BarnetrygdEnhet.VIKAFOSSEN} om man mangler NAV-ident.")
         }
 
         @Test
@@ -323,13 +314,13 @@ class TilpassArbeidsfordelingServiceTest {
 
             // Act & assert
             val exception =
-                assertThrows<Feil> {
+                assertThrows<FunksjonellFeil> {
                     tilpassArbeidsfordelingService.tilpassArbeidsfordelingsenhetTilSaksbehandler(
                         arbeidsfordelingsenhet = arbeidsfordelingsenhet,
                         navIdent = navIdent,
                     )
                 }
-            assertThat(exception.message).isEqualTo("NAV-ident $navIdent har ikke tilgang til noen enheter")
+            assertThat(exception.message).isEqualTo("Nav-Ident har ikke tilgang til noen enheter.")
         }
 
         @Test

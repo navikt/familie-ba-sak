@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -18,13 +20,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
+import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 @Service
 class BeregningService(
@@ -38,6 +40,7 @@ class BeregningService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository
@@ -118,17 +121,17 @@ class BeregningService(
     fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
         val endringerIUtbetaling =
             hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling)
-                .perioder()
-                .any { it.innhold == true }
+                .tilPerioder()
+                .any { it.verdi == true }
 
         return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
 
-    fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling: Behandling): Tidslinje<Boolean, Måned> {
+    fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling: Behandling): FamilieFellesTidslinje<Boolean> {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
         val forrigeAndeler = hentAndelerFraForrigeIverksattebehandling(behandling)
 
-        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return TomTidslinje()
+        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return tomTidslinje()
 
         return EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
@@ -186,11 +189,12 @@ class BeregningService(
                 ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse =
-            TilkjentYtelseUtils.beregnTilkjentYtelse(
+            TilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
+                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER),
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
@@ -206,8 +210,9 @@ class BeregningService(
     }
 
     // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
-// Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
-// Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    @Transactional
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,

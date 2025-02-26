@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilStringTidslinje
+import no.nav.familie.tidslinje.utvidelser.join
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.replaceLast
-import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
@@ -20,11 +19,7 @@ import java.time.LocalDate
 fun <I> Tidslinje<I>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*>): Tidslinje<I> =
     when {
         tidslinje.erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = startsTidspunkt,
-                sluttTidspunkt = tidslinje.kalkulerSluttTidspunkt(),
-            )
+        else -> klipp(sluttTidspunkt = tidslinje.kalkulerSluttTidspunkt())
     }
 
 /**
@@ -40,11 +35,7 @@ fun <V> Tidslinje<V>.beskjær(
 ): Tidslinje<V> =
     when {
         erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = fraOgMed,
-                sluttTidspunkt = tilOgMed,
-            )
+        else -> klipp(startTidspunkt = fraOgMed, sluttTidspunkt = tilOgMed)
     }
 
 /**
@@ -56,11 +47,7 @@ fun <V> Tidslinje<V>.beskjærFraOgMed(
 ): Tidslinje<V> =
     when {
         erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = fraOgMed,
-                sluttTidspunkt = kalkulerSluttTidspunkt(),
-            )
+        else -> klipp(startTidspunkt = fraOgMed)
     }
 
 /**
@@ -72,11 +59,7 @@ fun <V> Tidslinje<V>.beskjærTilOgMed(
 ): Tidslinje<V> =
     when {
         erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = startsTidspunkt,
-                sluttTidspunkt = tilOgMed,
-            )
+        else -> klipp(sluttTidspunkt = tilOgMed)
     }
 
 /**
@@ -93,7 +76,8 @@ fun <T : Any> Tidslinje<T>.forlengFremtidTilUendelig(tidspunktForUendelighet: Lo
         this
             .tilPerioderIkkeNull()
             .filter { it.fom != null && it.fom!! < tidspunktForUendelighet }
-            .replaceLast { Periode(verdi = it.verdi, fom = it.fom, tom = null) }
+            .ifEmpty { return tomTidslinje() }
+            .replaceLast { it.copy(tom = null) }
             .tilTidslinje()
     } else {
         this.tilPerioderIkkeNull().tilTidslinje()

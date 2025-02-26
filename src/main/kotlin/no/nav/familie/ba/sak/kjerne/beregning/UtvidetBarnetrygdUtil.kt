@@ -11,16 +11,15 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetTidslinjeForOppfylteVilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.utvidelser.leftJoin
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object UtvidetBarnetrygdUtil {
     internal fun beregnTilkjentYtelseUtvidet(
@@ -29,6 +28,7 @@ object UtvidetBarnetrygdUtil {
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         personResultater: Set<PersonResultat>,
+        skalBrukeNyVersjonAvOppdaterAndelerMedEndringer: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val andelerTilkjentYtelseUtvidet =
             UtvidetBarnetrygdGenerator(
@@ -37,21 +37,29 @@ object UtvidetBarnetrygdUtil {
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer.map { it.andel },
-                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
+                perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje(),
             )
 
-        return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
-            endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
-        )
+        return if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
+            AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler(
+                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
+                endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
+                tilkjentYtelse = tilkjentYtelse,
+            )
+        } else {
+            TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
+                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
+                endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
+            )
+        }
     }
 
-    fun Set<PersonResultat>.tilPerioderBarnaBorMedSøkerTidslinje(): Map<Aktør, Tidslinje<Boolean, Måned>> =
+    fun Set<PersonResultat>.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje(): Map<Aktør, FamilieFellesTidslinje<Boolean>> =
         this.associate { personResultat ->
             personResultat.aktør to
                 personResultat.vilkårResultater
-                    .lagForskjøvetTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
-                    .map { vilkårResultat ->
+                    .lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
+                    .mapVerdi { vilkårResultat ->
                         vilkårResultat?.utdypendeVilkårsvurderinger?.none {
                             it in
                                 listOf(
@@ -62,7 +70,7 @@ object UtvidetBarnetrygdUtil {
                     }
         }
 
-    fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje: Map<Aktør, Tidslinje<Boolean, Måned>>): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> =
+    fun Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>>.familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje: Map<Aktør, FamilieFellesTidslinje<Boolean>>): Map<Aktør, FamilieFellesTidslinje<AndelTilkjentYtelse>> =
         this.leftJoin(perioderBarnaBorMedSøkerTidslinje) { andel, barnBorMedSøker ->
             when (barnBorMedSøker) {
                 true -> andel

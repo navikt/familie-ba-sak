@@ -3,15 +3,14 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
-import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullMed
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import java.time.LocalDate
 
 data class SmåbarnstilleggBarnetrygdGenerator(
@@ -30,10 +29,9 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
         val søkerAktør = utvidetAndeler.first().aktør
 
-        val perioderMedFullOvergangsstønadTidslinje =
-            InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
+        val perioderMedFullOvergangsstønadTidslinje = perioderMedFullOvergangsstønad.tilTidslinje()
 
-        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(andelerTilkjentYtelse = utvidetAndeler)
+        val utvidetBarnetrygdTidslinje = utvidetAndeler.tilTidslinje()
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje =
             lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
@@ -53,11 +51,11 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         )
     }
 
-    private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
+    private fun Tidslinje<SmåbarnstilleggPeriode>.lagSmåbarnstilleggAndeler(
         søkerAktør: Aktør,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> =
         this
-            .kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
+            .kombinerUtenNullMed(satstypeFamilieFellesTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
                 val prosentIPeriode = småbarnstilleggPeriode.prosent
                 val beløpIPeriode = sats.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 

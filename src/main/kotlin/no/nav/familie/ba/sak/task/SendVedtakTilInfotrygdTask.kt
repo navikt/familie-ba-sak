@@ -1,22 +1,21 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -52,13 +51,12 @@ class SendVedtakTilInfotrygdTask(
                 .map { it.andel }
                 .tilTidslinjerPerAktørOgType()
                 .values
-                .kombiner<AndelTilkjentYtelse, Iterable<AndelTilkjentYtelse>?, Måned> { it }
-                .perioder()
-                .filterNot { it.innhold == null }
+                .kombiner { it }
+                .tilPerioderIkkeNull()
                 .firstOrNull()
 
         return if (førsteUtbetalingsperiode != null) {
-            førsteUtbetalingsperiode.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned()
+            førsteUtbetalingsperiode.fom?.førsteDagIInneværendeMåned() ?: throw Feil("Fra og med-dato kan ikke være null")
         } else {
             error("Finner ikke første utbetalingsperiode")
         }

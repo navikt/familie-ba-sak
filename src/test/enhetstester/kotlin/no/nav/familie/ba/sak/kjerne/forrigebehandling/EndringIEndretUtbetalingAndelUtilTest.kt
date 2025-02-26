@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -38,12 +39,12 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
                     forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
                     nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         assertEquals(1, perioderMedEndring.size)
-        assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
+        assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
     }
 
     @Test
@@ -67,8 +68,8 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
                     forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
                     nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         assertTrue(perioderMedEndring.isEmpty())
     }
@@ -106,12 +107,12 @@ class EndringIEndretUtbetalingAndelUtilTest {
                         forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.person == it },
                         nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.person == it },
                     )
-                }.flatMap { it.perioder() }
-                .filter { it.innhold == true }
+                }.flatMap { it.tilPerioder() }
+                .filter { it.verdi == true }
 
         assertEquals(1, perioderMedEndring.size)
-        assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
+        assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
     }
 
     @Test
@@ -135,12 +136,12 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
                     forrigeEndretAndelerForPerson = listOf(forrigeEndretAndel),
                     nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         assertEquals(1, perioderMedEndring.size)
-        assertEquals(sep22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        assertEquals(des22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        assertEquals(sep22, perioderMedEndring.single().fom?.toYearMonth())
+        assertEquals(des22, perioderMedEndring.single().tom?.toYearMonth())
     }
 
     @Test
@@ -162,11 +163,11 @@ class EndringIEndretUtbetalingAndelUtilTest {
                 .lagEndringIEndretUbetalingAndelPerPersonTidslinje(
                     forrigeEndretAndelerForPerson = emptyList(),
                     nåværendeEndretAndelerForPerson = listOf(nåværendeEndretAndel),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         assertEquals(1, perioderMedEndring.size)
-        assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
+        assertEquals(aug22, perioderMedEndring.single().tom?.toYearMonth())
     }
 }
