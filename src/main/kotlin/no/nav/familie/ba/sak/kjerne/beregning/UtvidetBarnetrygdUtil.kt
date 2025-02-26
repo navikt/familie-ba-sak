@@ -11,14 +11,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.familie.tidslinje.leftJoin
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.utvidelser.leftJoin
 import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object UtvidetBarnetrygdUtil {
@@ -59,7 +59,7 @@ object UtvidetBarnetrygdUtil {
             personResultat.aktør to
                 personResultat.vilkårResultater
                     .lagForskjøvetFamilieFellesTidslinjeForOppfylteVilkår(Vilkår.BOR_MED_SØKER)
-                    .mapVerdiNullable { vilkårResultat ->
+                    .mapVerdi { vilkårResultat ->
                         vilkårResultat?.utdypendeVilkårsvurderinger?.none {
                             it in
                                 listOf(
