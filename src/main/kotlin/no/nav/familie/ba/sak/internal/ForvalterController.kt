@@ -15,6 +15,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinje
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
@@ -86,6 +88,7 @@ class ForvalterController(
     private val stønadsstatistikkService: StønadsstatistikkService,
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
+    private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -494,4 +497,9 @@ class ForvalterController(
 
         return ResponseEntity.ok(opprettetTask.id)
     }
+
+    @GetMapping("/hent-utbetalingstidslinjer-for-fagsak/{fagsakId}")
+    fun hentUtbetalingsTidslinjerForFagsak(
+        @PathVariable("fagsakId") fagsakId: Long,
+    ): ResponseEntity<List<UtbetalingsTidslinje>> = ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId))
 }
