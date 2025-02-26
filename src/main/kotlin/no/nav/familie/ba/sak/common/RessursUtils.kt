@@ -90,7 +90,7 @@ object RessursUtils {
             Ressurs.failure(
                 frontendFeilmelding = feil.frontendFeilmelding,
                 errorMessage = feil.message.toString(),
-                callId = feil.callId
+                callId = feil.callId,
             ),
         )
     }

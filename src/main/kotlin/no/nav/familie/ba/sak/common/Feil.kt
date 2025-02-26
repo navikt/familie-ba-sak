@@ -22,6 +22,7 @@ open class Feil(
         callId = MDC.get(MDCConstants.MDC_CALL_ID)
     }
 }
+
 open class FunksjonellFeil(
     open val melding: String,
     open val frontendFeilmelding: String? = melding,
@@ -34,6 +35,7 @@ open class FunksjonellFeil(
         callId = MDC.get(MDCConstants.MDC_CALL_ID)
     }
 }
+
 class VilkårFeil(
     melding: String,
     frontendFeilmelding: String? = melding,
