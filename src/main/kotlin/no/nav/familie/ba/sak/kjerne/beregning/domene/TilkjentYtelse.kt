@@ -68,6 +68,6 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler() =
         .values
         .kombiner()
 
-fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? = objectMapper.readValue(this.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? = this.utbetalingsoppdrag?.let { objectMapper.readValue(it, Utbetalingsoppdrag::class.java) }
 
 fun TilkjentYtelse.utbetalingsperioder() = this.utbetalingsoppdrag()?.utbetalingsperiode ?: emptyList()
