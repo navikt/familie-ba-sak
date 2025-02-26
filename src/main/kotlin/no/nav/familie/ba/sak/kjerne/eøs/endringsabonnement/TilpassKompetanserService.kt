@@ -17,16 +17,16 @@ import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.mapVerdiNullable
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.leftJoin
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.leftJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -157,7 +157,7 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
 private fun Map<Aktør, Tidslinje<RegelverkResultat>>.tilBarnasEøsRegelverkTidslinjer(): Map<Aktør, Tidslinje<Regelverk>> =
     this.mapValues { (_, regelverkResultatTidslinje) ->
         regelverkResultatTidslinje
-            .mapVerdiNullable { it?.regelverk }
+            .mapVerdi { it?.regelverk }
             .filtrer { it == Regelverk.EØS_FORORDNINGEN }
             .filtrerIkkeNull()
     }

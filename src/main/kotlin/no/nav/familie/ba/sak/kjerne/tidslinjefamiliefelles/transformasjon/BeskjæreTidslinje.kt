@@ -19,11 +19,7 @@ import java.time.LocalDate
 fun <I> Tidslinje<I>.beskjærTilOgMedEtter(tidslinje: Tidslinje<*>): Tidslinje<I> =
     when {
         tidslinje.erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = startsTidspunkt,
-                sluttTidspunkt = tidslinje.kalkulerSluttTidspunkt(),
-            )
+        else -> klipp(sluttTidspunkt = tidslinje.kalkulerSluttTidspunkt())
     }
 
 /**
@@ -39,11 +35,7 @@ fun <V> Tidslinje<V>.beskjær(
 ): Tidslinje<V> =
     when {
         erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = fraOgMed,
-                sluttTidspunkt = tilOgMed,
-            )
+        else -> klipp(startTidspunkt = fraOgMed, sluttTidspunkt = tilOgMed)
     }
 
 /**
@@ -55,11 +47,7 @@ fun <V> Tidslinje<V>.beskjærFraOgMed(
 ): Tidslinje<V> =
     when {
         erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = fraOgMed,
-                sluttTidspunkt = kalkulerSluttTidspunkt(),
-            )
+        else -> klipp(startTidspunkt = fraOgMed)
     }
 
 /**
@@ -71,11 +59,7 @@ fun <V> Tidslinje<V>.beskjærTilOgMed(
 ): Tidslinje<V> =
     when {
         erTom() -> tomTidslinje()
-        else ->
-            klipp(
-                startsTidspunkt = startsTidspunkt,
-                sluttTidspunkt = tilOgMed,
-            )
+        else -> klipp(sluttTidspunkt = tilOgMed)
     }
 
 /**
