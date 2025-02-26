@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinje
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
@@ -501,5 +501,5 @@ class ForvalterController(
     @GetMapping("/hent-utbetalingstidslinjer-for-fagsak/{fagsakId}")
     fun hentUtbetalingsTidslinjerForFagsak(
         @PathVariable("fagsakId") fagsakId: Long,
-    ): ResponseEntity<List<UtbetalingsTidslinje>> = ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId))
+    ): ResponseEntity<List<List<UtbetalingsperiodeDto>>> = ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
 }
