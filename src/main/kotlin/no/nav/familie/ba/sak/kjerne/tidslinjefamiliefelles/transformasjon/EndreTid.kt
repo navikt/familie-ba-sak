@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon
 
 import no.nav.familie.tidslinje.Null
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.TidslinjePeriodeMedDato
 import no.nav.familie.tidslinje.tilPeriodeVerdi
@@ -68,7 +69,11 @@ fun <V> Tidslinje<V>.tilMånedFraMånedsskifte(
                 val verdiForrigeMåned = forrigeMåned.lastOrNull()?.periodeVerdi?.verdi
                 val verdiInneværendeMåned = inneværendeMåned.firstOrNull()?.periodeVerdi?.verdi
 
-                mapper(verdiForrigeMåned, verdiInneværendeMåned).tilPeriodeVerdi()
+                if (dato == PRAKTISK_TIDLIGSTE_DAG) {
+                    verdiInneværendeMåned.tilPeriodeVerdi()
+                } else {
+                    mapper(verdiForrigeMåned, verdiInneværendeMåned).tilPeriodeVerdi()
+                }
             }.trim(Null())
     }
 
