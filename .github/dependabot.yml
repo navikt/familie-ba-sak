@@ -22,6 +22,7 @@ updates:
         patterns:
           - "org.springframework*"
           - "no.nav.security*"
+          - "org.springdoc*"
       prod-avhengigheter:
         dependency-type: "production"
         exclude-patterns:
