@@ -13,13 +13,15 @@ fun sats(ytelseType: YtelseType) =
         YtelseType.SMÅBARNSTILLEGG -> 660
     }
 
-fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) =
-    Utbetalingsoppdrag(
-        kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-        fagSystem = "BA",
-        saksnummer = "",
-        aktoer = UUID.randomUUID().toString(),
-        saksbehandlerId = "",
-        avstemmingTidspunkt = LocalDateTime.now(),
-        utbetalingsperiode = utbetalingsperiode,
-    )
+fun lagUtbetalingsoppdrag(
+    utbetalingsperiode: List<Utbetalingsperiode>,
+    avstemmingTidspunkt: LocalDateTime = LocalDateTime.now(),
+) = Utbetalingsoppdrag(
+    kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+    fagSystem = "BA",
+    saksnummer = "",
+    aktoer = UUID.randomUUID().toString(),
+    saksbehandlerId = "",
+    avstemmingTidspunkt = avstemmingTidspunkt,
+    utbetalingsperiode = utbetalingsperiode,
+)
