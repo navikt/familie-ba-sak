@@ -501,5 +501,5 @@ class ForvalterController(
     @GetMapping("/hent-utbetalingstidslinjer-for-fagsak/{fagsakId}")
     fun hentUtbetalingsTidslinjerForFagsak(
         @PathVariable("fagsakId") fagsakId: Long,
-    ): ResponseEntity<List<List<UtbetalingsperiodeDto>>> = ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
+    ): ResponseEntity<List<List<UtbetalingsperiodeDto>>> = ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
 }

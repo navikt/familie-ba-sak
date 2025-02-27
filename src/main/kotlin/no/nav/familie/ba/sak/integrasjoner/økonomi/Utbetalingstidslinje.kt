@@ -6,7 +6,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 
-class UtbetalingsTidslinje(
+class Utbetalingstidslinje(
     private val utbetalingsperioder: Set<Utbetalingsperiode>,
     val tidslinje: Tidslinje<Utbetalingsperiode>,
 ) {

@@ -40,7 +40,7 @@ class UtbetalingsTidslinjeServiceTest {
             every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(tilkjentYtelse)
 
             // Act
-            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId = fagsak.id)
+            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
             val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(1, utbetalingstidslinjer)
             val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
 
@@ -84,7 +84,7 @@ class UtbetalingsTidslinjeServiceTest {
                 )
 
             // Act
-            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId = fagsak.id)
+            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
             val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(3, utbetalingstidslinjer)
             val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
 
@@ -130,7 +130,7 @@ class UtbetalingsTidslinjeServiceTest {
                 )
 
             // Act
-            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingsTidslinjerForFagsak(fagsakId = fagsak.id)
+            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
             val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(3, utbetalingstidslinjer)
             val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
 

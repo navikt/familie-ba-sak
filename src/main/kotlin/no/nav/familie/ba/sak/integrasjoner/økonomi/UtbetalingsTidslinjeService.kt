@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 class UtbetalingsTidslinjeService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
-    fun genererUtbetalingsTidslinjerForFagsak(fagsakId: Long): List<UtbetalingsTidslinje> {
+    fun genererUtbetalingstidslinjerForFagsak(fagsakId: Long): List<Utbetalingstidslinje> {
         val iverksatteUtbetalingsoppdrag =
             tilkjentYtelseRepository
                 .findByFagsak(fagsakId = fagsakId)
@@ -36,7 +36,7 @@ class UtbetalingsTidslinjeService(
                 tidslinjePerKjede[sistePeriodeIdIKjede]
                     ?: throw Feil("Finner ikke tidslinje tilknyttet periodeId: $sistePeriodeIdIKjede")
 
-            UtbetalingsTidslinje(
+            Utbetalingstidslinje(
                 utbetalingsperioder = utbetalingsperioder,
                 tidslinje = tidslinje,
             )
@@ -45,8 +45,8 @@ class UtbetalingsTidslinjeService(
 
     fun finnUtbetalingsTidslinjeForPeriodeId(
         periodeId: Long,
-        utbetalingsTidslinjer: List<UtbetalingsTidslinje>,
-    ): UtbetalingsTidslinje = utbetalingsTidslinjer.single { it.erTidslinjeForPeriodeId(periodeId) }
+        utbetalingstidslinjer: List<Utbetalingstidslinje>,
+    ): Utbetalingstidslinje = utbetalingstidslinjer.single { it.erTidslinjeForPeriodeId(periodeId) }
 
     private fun genererTidslinjePerKjede(utbetalingsperioderPerKjede: Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>>): Map<Long, Tidslinje<Utbetalingsperiode>> =
         utbetalingsperioderPerKjede.mapValues { (_, perioder) ->
