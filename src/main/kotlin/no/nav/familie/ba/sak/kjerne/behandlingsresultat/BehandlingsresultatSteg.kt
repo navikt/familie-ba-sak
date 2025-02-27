@@ -25,6 +25,9 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -58,6 +61,7 @@ class BehandlingsresultatSteg(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
     private val localDateProvider: LocalDateProvider,
+    private val kompetanseRepository: KompetanseRepository,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -89,6 +93,8 @@ class BehandlingsresultatSteg(
                 andelerTilkjentYtelseOgEndreteUtbetalingerService
                     .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
             endreteUtbetalingerMedAndeler.validerEndredeUtbetalingsandeler(tilkjentYtelse, vilkårService.hentVilkårsvurdering(behandling.id))
+
+            validerKompetanse(behandling.id)
         }
 
         if (behandling.erMånedligValutajustering()) {
@@ -241,6 +247,26 @@ class BehandlingsresultatSteg(
 
         if (utenlandskePeriodeBeløp.any { !it.erObligatoriskeFelterSatt() } || valutakurser.any { !it.erObligatoriskeFelterSatt() }) {
             throw FunksjonellFeil("Kan ikke fullføre behandlingsresultat-steg før utbetalt i det andre landet og valutakurs er fylt ut for alle barn og perioder")
+        }
+    }
+
+    private fun validerKompetanse(behandlingId: Long) {
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
+
+        validerAtAktivitetslandOgBostedIkkeErNorgeHvisNorgeErSekundærland(kompetanser)
+    }
+
+    private fun validerAtAktivitetslandOgBostedIkkeErNorgeHvisNorgeErSekundærland(kompetanser: Collection<Kompetanse>) {
+        kompetanser.forEach { kompetanse ->
+            val erNorgeSekundærland = kompetanse.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND
+
+            if (!erNorgeSekundærland) return@forEach
+
+            if (setOf(kompetanse.søkersAktivitetsland, kompetanse.annenForeldersAktivitetsland, kompetanse.barnetsBostedsland)
+                    .all { it == "NO" }
+            ) {
+                throw FunksjonellFeil("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
+            }
         }
     }
 

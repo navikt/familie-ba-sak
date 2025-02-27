@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Periode
-import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isBetween
 import no.nav.familie.ba.sak.common.sisteDagIMåned
@@ -10,20 +9,18 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerMed
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.LocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
 import no.nav.familie.tidslinje.Periode as FamilieFellesTidslinjePeriode
+import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -121,16 +118,10 @@ fun satstypeFamilieFellesTidslinje(satsType: SatsType) =
             )
         }.tilTidslinje()
 
-fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
-    val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
-    val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
+fun lagOrdinærTidslinje(barn: Person): FamilieFellesTidslinje<Int> {
+    val orbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.ORBA)
+    val tilleggOrbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
     return orbaTidslinje
         .kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
-        .klippBortPerioderFørBarnetBleFødt(fødselsdato = barn.fødselsdato)
+        .beskjærFraOgMed(fraOgMed = barn.fødselsdato.førsteDagIInneværendeMåned())
 }
-
-private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) =
-    this.beskjær(
-        fraOgMed = fødselsdato.tilMånedTidspunkt(),
-        tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()),
-    )

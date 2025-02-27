@@ -384,6 +384,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
             localDateProvider = mockedDateProvider,
+            kompetanseRepository = kompetanseRepository,
         )
 
     val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockUnleashNextMedContextService())
