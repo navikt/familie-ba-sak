@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker
-import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
+import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.tilPerioderBarnaBorMedSøkerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.kunAndelerTilOgMed3År
@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat.NORGE_ER_SEKUNDÆRLAND
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
@@ -45,8 +45,8 @@ fun beregnDifferanse(
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     valutakurser: Collection<Valutakurs>,
 ): List<AndelTilkjentYtelse> {
-    val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateFamilieFellesTidslinjerForBarna()
-    val valutakursTidslinjer = valutakurser.tilSeparateFamilieFellesTidslinjerForBarna()
+    val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
+    val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
     val andelTilkjentYtelseTidslinjer = andelerTilkjentYtelse.tilSeparateTidslinjerForBarna()
 
     val barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer =
@@ -90,13 +90,13 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
-    val perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerFamilieFellesTidslinje()
+    val perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje()
 
     // Finn alle andelene frem til barna er 18 år. Det vil i praksis være ALLE andelene
     // Bruk bare andelene som kvalifiserer for differanseberegning mot søkers ytelser
     val barnasRelevanteAndelerInntil18År =
         barnasAndelerTidslinjer
-            .familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
             .kunReneSekundærlandsperioder(kompetanser)
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
@@ -137,7 +137,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     val barnasRelevanteAndelerInntil3ÅrTidslinjer =
         barnasAndelerTidslinjer
             .kunAndelerTilOgMed3År(barna)
-            .familieFellesTidslinjeFiltrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
+            .filtrertForPerioderBarnaBorMedSøker(perioderBarnaBorMedSøkerTidslinje)
             .kunReneSekundærlandsperioder(kompetanser)
 
     // Vi finner hvor mye hvert barn skal ha som andel av småbarnstillegget på hvert tidspunkt.
@@ -174,7 +174,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse>>.kunReneSekundærlandsperioder(
     kompetanser: Collection<Kompetanse>,
 ): Map<Aktør, Tidslinje<AndelTilkjentYtelse>> {
-    val barnasKompetanseTidslinjer = kompetanser.tilSeparateFamilieFellesTidslinjerForBarna()
+    val barnasKompetanseTidslinjer = kompetanser.tilSeparateTidslinjerForBarna()
 
     val barnasErSekundærlandTidslinjer =
         this.leftJoin(barnasKompetanseTidslinjer) { andel, kompetanse ->

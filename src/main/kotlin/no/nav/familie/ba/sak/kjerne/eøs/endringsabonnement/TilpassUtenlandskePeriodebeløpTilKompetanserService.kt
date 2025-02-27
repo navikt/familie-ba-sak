@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepositor
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -79,11 +79,11 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer =
         gjeldendeKompetanser
-            .tilSeparateFamilieFellesTidslinjerForBarna()
+            .tilSeparateTidslinjerForBarna()
             .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp
-        .tilSeparateFamilieFellesTidslinjerForBarna()
+        .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
             val utbetalingsland = kompetanse?.utbetalingsland()
             when {
