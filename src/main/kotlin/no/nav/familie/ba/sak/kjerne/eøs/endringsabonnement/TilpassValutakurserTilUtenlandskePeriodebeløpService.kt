@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepositor
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -70,10 +70,10 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
 ): Collection<Valutakurs> {
     val barnasUtenlandskePeriodebeløpTidslinjer =
         gjeldendeUtenlandskePeriodebeløp
-            .tilSeparateFamilieFellesTidslinjerForBarna()
+            .tilSeparateTidslinjerForBarna()
 
     return forrigeValutakurser
-        .tilSeparateFamilieFellesTidslinjerForBarna()
+        .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasUtenlandskePeriodebeløpTidslinjer) { valutakurs, utenlandskPeriodebeløp ->
             when {
                 utenlandskPeriodebeløp == null -> null

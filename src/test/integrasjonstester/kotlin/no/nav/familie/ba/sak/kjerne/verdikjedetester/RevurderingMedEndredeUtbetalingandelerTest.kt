@@ -139,7 +139,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                 behandlingRevurdering.id,
             )
-        val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
+        val andelPåvirketAvEndringer = andelerTilkjentYtelse.minBy { it.stønadFom }
 
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
 

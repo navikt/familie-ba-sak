@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.YearMonth
 

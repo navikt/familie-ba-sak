@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepositor
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSkjemaer
 import no.nav.familie.ba.sak.kjerne.eøs.felles.medBehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -17,8 +17,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.outerJoin
 import no.nav.familie.tidslinje.utvidelser.filtrer
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.YearMonth
@@ -79,11 +79,11 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer =
         gjeldendeKompetanser
-            .tilSeparateFamilieFellesTidslinjerForBarna()
+            .tilSeparateTidslinjerForBarna()
             .filtrerSekundærland()
 
     return forrigeUtenlandskePeriodebeløp
-        .tilSeparateFamilieFellesTidslinjerForBarna()
+        .tilSeparateTidslinjerForBarna()
         .outerJoin(barnasKompetanseTidslinjer) { upb, kompetanse ->
             val utbetalingsland = kompetanse?.utbetalingsland()
             when {

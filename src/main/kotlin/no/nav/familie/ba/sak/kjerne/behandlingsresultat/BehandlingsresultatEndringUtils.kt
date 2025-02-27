@@ -235,7 +235,7 @@ internal fun erEndringIVilkårsvurderingForPerson(
             personIForrigeBehandling = personIForrigeBehandling,
         )
 
-    return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
+    return endringIVilkårsvurderingTidslinje.tilPerioder().any { it.verdi == true }
 }
 
 internal fun erEndringIEndretUtbetalingAndelerForPerson(

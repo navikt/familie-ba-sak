@@ -29,7 +29,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingE
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.UtbetalingMndEøsOppsummering
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateFamilieFellesTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -47,7 +47,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskj�
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.utils.splitPerMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import tilLandNavn
 import java.time.LocalDate
@@ -120,7 +120,7 @@ fun skalHenteUtbetalingerEøs(
 
     val valutakurserEtterEndringtidspunktet =
         valutakurser
-            .tilSeparateFamilieFellesTidslinjerForBarna()
+            .tilSeparateTidslinjerForBarna()
             .mapValues { (_, valutakursTidslinjeForBarn) -> valutakursTidslinjeForBarn.beskjærFraOgMed(endringstidspunkt.førsteDagIInneværendeMåned()) }
 
     return valutakurserEtterEndringtidspunktet.any { it.value.erIkkeTom() }
@@ -165,8 +165,8 @@ fun hentUtbetalingerPerMndEøs(
     val andelerForVedtaksperioderPerAktørOgTypeAvgrensetTilVedtaksperioder =
         andelerForVedtaksperioderPerAktørOgType.mapValues { (_, andelForVedtaksperiode) -> andelForVedtaksperiode.beskjærFraOgMed(endringstidspunkt.førsteDagIInneværendeMåned()) }
 
-    val utenlandskePeriodebeløpTidslinjerForBarna = utenlandskePeriodebeløp.tilSeparateFamilieFellesTidslinjerForBarna().mapKeys { entry -> Pair(entry.key, YtelseType.ORDINÆR_BARNETRYGD) }
-    val valutakursTidslinjerForBarna = valutakurser.tilSeparateFamilieFellesTidslinjerForBarna().mapKeys { entry -> Pair(entry.key, YtelseType.ORDINÆR_BARNETRYGD) }
+    val utenlandskePeriodebeløpTidslinjerForBarna = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna().mapKeys { entry -> Pair(entry.key, YtelseType.ORDINÆR_BARNETRYGD) }
+    val valutakursTidslinjerForBarna = valutakurser.tilSeparateTidslinjerForBarna().mapKeys { entry -> Pair(entry.key, YtelseType.ORDINÆR_BARNETRYGD) }
 
     return andelerForVedtaksperioderPerAktørOgTypeAvgrensetTilVedtaksperioder
         // Kombinerer tidslinjene for andeler, utenlandskPeriodebeløp og valutakurser per aktørOgYtelse

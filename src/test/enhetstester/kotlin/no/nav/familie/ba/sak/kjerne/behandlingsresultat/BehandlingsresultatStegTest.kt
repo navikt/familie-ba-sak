@@ -368,7 +368,7 @@ class BehandlingsresultatStegTest {
         }
 
         @Test
-        fun `Skal ikke kaste feil dersom det ikke finnes kompetanser der Norge er sekundærland men aktivitetsland og bosted er satt til Norge`() {
+        fun `Skal ikke kaste feil dersom det ikke finnes kompetanser der Norge er sekundærland med aktivitetsland og bosted som er satt til Norge`() {
             // Arrange
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
             val søker = lagPerson(type = PersonType.SØKER)
