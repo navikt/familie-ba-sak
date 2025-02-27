@@ -24,22 +24,6 @@ import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import java.time.LocalDate
 
 object VilkårsvurderingForskyvningUtils {
-    // TODO: Slett denne, bare brukt i test
-    fun Set<PersonResultat>.tilTidslinjeForSplitt(
-        personerIPersongrunnlag: List<Person>,
-        fagsakType: FagsakType,
-    ): Tidslinje<List<VilkårResultat>> {
-        val tidslinjerPerPerson =
-            this.map { personResultat ->
-                val person =
-                    personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
-                        ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
-                personResultat.tilTidslinjeForSplittForPerson(person = person, fagsakType = fagsakType)
-            }
-
-        return tidslinjerPerPerson.kombiner { it.flatten() }.filtrerIkkeNull().slåSammenLikePerioder()
-    }
-
     fun PersonResultat.tilTidslinjeForSplittForPerson(
         person: Person,
         fagsakType: FagsakType,
