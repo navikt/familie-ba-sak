@@ -326,7 +326,7 @@ class BehandlingsresultatStegTest {
     @Nested
     inner class PreValiderStegTest {
         @Test
-        fun `Skal kaste feil dersom det finnes kompetanser der Norge er sekundærland men aktivitetsland eller bosted er satt til Norge`() {
+        fun `Skal kaste feil dersom det finnes kompetanser der Norge er sekundærland men aktivitetsland og bosted er satt til Norge`() {
             // Arrange
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
             val søker = lagPerson(type = PersonType.SØKER)
@@ -341,8 +341,8 @@ class BehandlingsresultatStegTest {
                     behandlingId = behandling.id,
                     kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
                     søkersAktivitetsland = "NO",
-                    barnetsBostedsland = "SE",
-                    annenForeldersAktivitetsland = "SE",
+                    barnetsBostedsland = "NO",
+                    annenForeldersAktivitetsland = "NO",
                     barnAktører = setOf(barn.aktør),
                 )
 
@@ -368,7 +368,7 @@ class BehandlingsresultatStegTest {
         }
 
         @Test
-        fun `Skal kaste ikke feil dersom det ikke finnes kompetanser der Norge er sekundærland men aktivitetsland eller bosted er satt til Norge`() {
+        fun `Skal ikke kaste feil dersom det ikke finnes kompetanser der Norge er sekundærland men aktivitetsland og bosted er satt til Norge`() {
             // Arrange
             val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
             val søker = lagPerson(type = PersonType.SØKER)
@@ -382,9 +382,9 @@ class BehandlingsresultatStegTest {
                 lagKompetanse(
                     behandlingId = behandling.id,
                     kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                    søkersAktivitetsland = "SE",
+                    søkersAktivitetsland = "NO",
                     barnetsBostedsland = "SE",
-                    annenForeldersAktivitetsland = "SE",
+                    annenForeldersAktivitetsland = "NO",
                     barnAktører = setOf(barn.aktør),
                 )
 
