@@ -274,7 +274,7 @@ internal class KompetanseServiceTest {
                 .byggPerson()
 
         val forventedeKompetanser =
-            KompetanseBuilder(treMånederSiden.neste(), behandlingId)
+            KompetanseBuilder(treMånederSiden.nesteMåned(), behandlingId)
                 .medKompetanse("->", barn1, barn2)
                 .byggKompetanser()
 
@@ -335,7 +335,7 @@ internal class KompetanseServiceTest {
                 .byggPerson()
 
         val forventedeKompetanser =
-            KompetanseBuilder(seksMånederSiden.neste(), behandlingId)
+            KompetanseBuilder(seksMånederSiden.nesteMåned(), behandlingId)
                 .medKompetanse("--", barn1, barn2) // Begge barna har 3 mnd EØS-regelverk før nå-tidspunktet
                 .medKompetanse("  ->", barn1) // Bare barn 1 har EØS-regelverk etter nå-tidspunktet
                 .byggKompetanser()
@@ -520,14 +520,14 @@ internal class KompetanseServiceTest {
 }
 
 fun kompetanse(
-    tidspunkt: Tidspunkt<Måned>,
+    tidspunkt: YearMonth,
     behandlingId: BehandlingId,
     s: String,
     vararg barn: Person,
 ) = KompetanseBuilder(tidspunkt, behandlingId).medKompetanse(s, *barn).byggKompetanser().first()
 
 fun kompetanse(
-    tidspunkt: Tidspunkt<Måned>,
+    tidspunkt: YearMonth,
     s: String,
     vararg barn: Person,
 ) = KompetanseBuilder(tidspunkt).medKompetanse(s, *barn).byggKompetanser().first()
