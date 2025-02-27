@@ -27,6 +27,9 @@ class UtbetalingsTidslinjeServiceTest {
 
     private val utbetalingsTidslinjeService = UtbetalingsTidslinjeService(tilkjentYtelseRepository = tilkjentYtelseRepository)
 
+    private val førstePeriodeIdKjede1 = 0L
+    private val førstePeriodeIdKjede2 = 2L
+
     @Nested
     inner class GenererUtbetalingsTidslinjerForFagsak {
         @Test
@@ -41,8 +44,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             // Act
             val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
-            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(1, utbetalingstidslinjer)
-            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede2, utbetalingstidslinjer)
 
             // Assert
             assertThat(utbetalingstidslinjer).hasSize(2)
@@ -85,8 +88,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             // Act
             val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
-            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(3, utbetalingstidslinjer)
-            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede2, utbetalingstidslinjer)
 
             // Assert
             assertThat(utbetalingstidslinjer).hasSize(2)
@@ -131,8 +134,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             // Act
             val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
-            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(3, utbetalingstidslinjer)
-            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede2, utbetalingstidslinjer)
 
             // Assert
             assertThat(utbetalingstidslinjer).hasSize(2)
@@ -175,8 +178,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             // Act
             val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
-            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(1, utbetalingstidslinjer)
-            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede2, utbetalingstidslinjer)
 
             // Assert
             assertThat(utbetalingstidslinjer).hasSize(2)
@@ -214,8 +217,8 @@ class UtbetalingsTidslinjeServiceTest {
 
             // Act
             val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
-            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(3, utbetalingstidslinjer)
-            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede2, utbetalingstidslinjer)
 
             // Assert
             assertThat(utbetalingstidslinjer).hasSize(2)
@@ -243,122 +246,122 @@ class UtbetalingsTidslinjeServiceTest {
             assertThat(perioderIAndreTidslinje[0].verdi.forrigePeriodeId).isEqualTo(null)
         }
     }
+
+    private fun lagUtbetalingsoppdragFørstegangsbehandling(behandlingId: Long): Utbetalingsoppdrag =
+        lagUtbetalingsoppdrag(
+            avstemmingTidspunkt = LocalDateTime.of(2025, 1, 1, 0, 0, 0),
+            utbetalingsperiode =
+                listOf(
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2024, 10).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2025, 1).sisteDagIInneværendeMåned(),
+                        periodeId = førstePeriodeIdKjede1,
+                        forrigePeriodeId = null,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(1000L),
+                    ),
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                        periodeId = 1,
+                        forrigePeriodeId = 0,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(500L),
+                    ),
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2023, 4).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 3).sisteDagIInneværendeMåned(),
+                        periodeId = førstePeriodeIdKjede2,
+                        forrigePeriodeId = null,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(1000L),
+                    ),
+                ),
+        )
+
+    private fun lagUtbetalingsoppdragFørsteRevurdering(behandlingId: Long): Utbetalingsoppdrag =
+        lagUtbetalingsoppdrag(
+            avstemmingTidspunkt = LocalDateTime.of(2025, 2, 1, 0, 0, 0),
+            utbetalingsperiode =
+                listOf(
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2024, 12).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                        periodeId = 3,
+                        forrigePeriodeId = 1,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(500L),
+                    ),
+                ),
+        )
+
+    private fun lagUtbetalingsoppdragAndreRevurdering(behandlingId: Long): Utbetalingsoppdrag =
+        lagUtbetalingsoppdrag(
+            avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
+            utbetalingsperiode =
+                listOf(
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2023, 4).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 3).sisteDagIInneværendeMåned(),
+                        periodeId = 2,
+                        forrigePeriodeId = null,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(1000L),
+                        opphør = Opphør(YearMonth.of(2025, 2).førsteDagIInneværendeMåned()),
+                    ),
+                ),
+        )
+
+    private fun lagUtbetalingsoppdragMedOpphørFraFørPeriodeFom(behandlingId: Long): Utbetalingsoppdrag =
+        lagUtbetalingsoppdrag(
+            avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
+            utbetalingsperiode =
+                listOf(
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                        periodeId = 1,
+                        forrigePeriodeId = 0,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(500L),
+                        opphør = Opphør(YearMonth.of(2024, 11).førsteDagIInneværendeMåned()),
+                    ),
+                ),
+        )
+
+    private fun lagUtbetalingsoppdragMedOpphørFraFørPeriodeFomOgHullFørNyePerioder(behandlingId: Long): Utbetalingsoppdrag =
+        lagUtbetalingsoppdrag(
+            avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
+            utbetalingsperiode =
+                listOf(
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                        periodeId = 1,
+                        forrigePeriodeId = 0,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(500L),
+                        opphør = Opphør(YearMonth.of(2024, 11).førsteDagIInneværendeMåned()),
+                    ),
+                    lagUtbetalingsperiode(
+                        fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                        tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                        periodeId = 3,
+                        forrigePeriodeId = 1,
+                        behandlingId = behandlingId,
+                        klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                        beløp = BigDecimal.valueOf(1000L),
+                    ),
+                ),
+        )
 }
-
-private fun lagUtbetalingsoppdragFørstegangsbehandling(behandlingId: Long): Utbetalingsoppdrag =
-    lagUtbetalingsoppdrag(
-        avstemmingTidspunkt = LocalDateTime.of(2025, 1, 1, 0, 0, 0),
-        utbetalingsperiode =
-            listOf(
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2024, 10).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2025, 1).sisteDagIInneværendeMåned(),
-                    periodeId = 0,
-                    forrigePeriodeId = null,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(1000L),
-                ),
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
-                    periodeId = 1,
-                    forrigePeriodeId = 0,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(500L),
-                ),
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2023, 4).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 3).sisteDagIInneværendeMåned(),
-                    periodeId = 2,
-                    forrigePeriodeId = null,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(1000L),
-                ),
-            ),
-    )
-
-private fun lagUtbetalingsoppdragFørsteRevurdering(behandlingId: Long): Utbetalingsoppdrag =
-    lagUtbetalingsoppdrag(
-        avstemmingTidspunkt = LocalDateTime.of(2025, 2, 1, 0, 0, 0),
-        utbetalingsperiode =
-            listOf(
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2024, 12).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
-                    periodeId = 3,
-                    forrigePeriodeId = 1,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(500L),
-                ),
-            ),
-    )
-
-private fun lagUtbetalingsoppdragAndreRevurdering(behandlingId: Long): Utbetalingsoppdrag =
-    lagUtbetalingsoppdrag(
-        avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
-        utbetalingsperiode =
-            listOf(
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2023, 4).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 3).sisteDagIInneværendeMåned(),
-                    periodeId = 2,
-                    forrigePeriodeId = null,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(1000L),
-                    opphør = Opphør(YearMonth.of(2025, 2).førsteDagIInneværendeMåned()),
-                ),
-            ),
-    )
-
-private fun lagUtbetalingsoppdragMedOpphørFraFørPeriodeFom(behandlingId: Long): Utbetalingsoppdrag =
-    lagUtbetalingsoppdrag(
-        avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
-        utbetalingsperiode =
-            listOf(
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
-                    periodeId = 1,
-                    forrigePeriodeId = 0,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(500L),
-                    opphør = Opphør(YearMonth.of(2024, 11).førsteDagIInneværendeMåned()),
-                ),
-            ),
-    )
-
-private fun lagUtbetalingsoppdragMedOpphørFraFørPeriodeFomOgHullFørNyePerioder(behandlingId: Long): Utbetalingsoppdrag =
-    lagUtbetalingsoppdrag(
-        avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
-        utbetalingsperiode =
-            listOf(
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
-                    periodeId = 1,
-                    forrigePeriodeId = 0,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(500L),
-                    opphør = Opphør(YearMonth.of(2024, 11).førsteDagIInneværendeMåned()),
-                ),
-                lagUtbetalingsperiode(
-                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
-                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
-                    periodeId = 3,
-                    forrigePeriodeId = 1,
-                    behandlingId = behandlingId,
-                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
-                    beløp = BigDecimal.valueOf(1000L),
-                ),
-            ),
-    )
 
 private fun lagUtbetalingsperiode(
     fom: LocalDate,
