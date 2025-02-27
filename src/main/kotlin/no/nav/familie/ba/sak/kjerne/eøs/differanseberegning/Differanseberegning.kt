@@ -29,8 +29,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.matematikk.sum
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerHverKunVerdi
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.leftJoin
-import no.nav.familie.tidslinje.outerJoin
+import no.nav.familie.tidslinje.utvidelser.leftJoin
+import no.nav.familie.tidslinje.utvidelser.outerJoin
 import java.math.BigDecimal
 import java.math.MathContext
 
