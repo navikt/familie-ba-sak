@@ -29,7 +29,7 @@ class BehandlingStegUtilsKtTest {
 
             val endringTidslinje = "TTTFFFF".somBoolskTidslinje(startdato)
 
-           assertDoesNotThrow {
+            assertDoesNotThrow {
                 endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
             }
         }
