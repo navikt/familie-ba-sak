@@ -1,0 +1,27 @@
+name: Manual deploy with image
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      image:
+        required: true
+        type: string
+        description: 'Image tag to deploy (ex: 2025.02.14-14.40-70a41ds)'
+jobs:
+  deploy-with-existing-image:
+    name: Deploy with existing image
+    if: inputs.image != ''
+    permissions:
+      id-token: write
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy-with-tag.yaml@main
+    with:
+      image-tag: ${{ inputs.image }}
+      cluster: ${{ inputs.environment }}-gcp
+      resource: .nais/app-${{ inputs.environment }}.yaml
+    secrets: inherit

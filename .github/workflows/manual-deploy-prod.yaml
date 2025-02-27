@@ -1,0 +1,34 @@
+name: Manual deploy to prod (from main)
+on:
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        description: 'Skip tests?'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    name: Build
+    if: github.ref == 'refs/heads/main' # Only deploy to prod from main branch
+    permissions:
+      contents: read
+      id-token: write
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@main
+    with:
+      skip-tests: ${{ inputs.skip-tests }}
+      build-image: true
+      push-image: true
+    secrets: inherit
+  deploy-with-new-image:
+    name: Deploy with new image
+    permissions:
+      id-token: write
+    needs: [ build ]
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@main
+    with:
+      image: ${{ needs.build.outputs.image }}
+      cluster: prod-gcp
+      resource: .nais/app-prod.yaml
+    secrets: inherit
