@@ -15,7 +15,6 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -281,8 +280,7 @@ fun IUtfyltKompetanse.utbetalingsland(): String {
     return when (utbetalingsland) {
         "NO" ->
             // Unntak. Finner landet som er registrert på kompetansen som ikke er Norge.
-            setOf(this.søkersAktivitetsland, this.annenForeldersAktivitetsland, this.barnetsBostedsland).filterNotNull().singleOrNull { it != "NO" }
-                ?: throw FunksjonellFeil(melding = "Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge.")
+            setOf(this.søkersAktivitetsland, this.annenForeldersAktivitetsland, this.barnetsBostedsland).filterNotNull().singleOrNull { it != "NO" } ?: utbetalingsland
 
         else -> utbetalingsland
     }
