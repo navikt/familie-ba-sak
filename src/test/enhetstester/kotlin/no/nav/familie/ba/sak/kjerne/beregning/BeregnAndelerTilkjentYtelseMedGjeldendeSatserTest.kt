@@ -94,7 +94,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 26.jan(2018)..uendelig) der
                 barn2 har
                 (UNDER_18_ÅR oppfylt barn2.under18år()) og
-                (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 1.jun(2013)..uendelig)
+                (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 1.mai(2013)..uendelig)
 
         val forventedeAndeler =
             listOf(
