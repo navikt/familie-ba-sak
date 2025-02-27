@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -9,23 +10,19 @@ import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
-import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggVilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilRegelverkResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
@@ -45,15 +42,15 @@ internal class TidslinjerTest {
     fun `lag en søker med to barn og mye kompleksitet i vilkårsvurderingen`() {
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
         val behandling = lagBehandling()
-        val startMåned = barnsFødselsdato.tilInneværendeMåned()
-        val startMånedRegelverk = startMåned.måned.nesteMåned()
+        val startMåned = barnsFødselsdato.toYearMonth()
+        val startMånedRegelverk = startMåned.nesteMåned()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
+            VilkårsvurderingBuilder(behandling)
                 .forPerson(søker, startMåned)
                 .medVilkår("EEEEEEEENNEEEEEEEEEEE", BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEENNEEEEEEEEEEE", LOVLIG_OPPHOLD)
@@ -95,14 +92,14 @@ internal class TidslinjerTest {
     fun `lag en søker med ett barn og søker går fra EØS-regelverk til nasjonalt`() {
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
         val behandling = lagBehandling()
-        val startMåned = barnsFødselsdato.tilInneværendeMåned()
-        val startMånedRegelverk = startMåned.måned.nesteMåned()
+        val startMåned = barnsFødselsdato.toYearMonth()
+        val startMånedRegelverk = startMåned.nesteMåned()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
+            VilkårsvurderingBuilder(behandling)
                 .forPerson(søker, startMåned)
                 .medVilkår("EEEEEEEEEEEEENNNNNNNN", BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEEEENNNNNNNN", LOVLIG_OPPHOLD)
@@ -132,12 +129,12 @@ internal class TidslinjerTest {
     @Test
     fun `Virkningstidspunkt for vilkårsvurdering varer frem til måneden før barnet fyller 18 år`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val behandling = lagBehandling()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
+            VilkårsvurderingBuilder(behandling)
                 .forPerson(søker, jan(2020))
                 .medVilkår("+>", BOSATT_I_RIKET)
                 .medVilkår("+>", LOVLIG_OPPHOLD)
@@ -174,10 +171,10 @@ internal class TidslinjerTest {
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS i månedsskiftet`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val vilkårsvurderingTidslinjer =
-            VilkårsvurderingBuilder<Dag>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
                 .medVilkår("NE", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                 .forPerson(barn1, 30.apr(2020))
@@ -193,10 +190,10 @@ internal class TidslinjerTest {
     @Test
     fun `Sjekk overgang fra oppfylt EØS til oppfylt nasjonalt i månedsskiftet`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val vilkårsvurderingTidslinjer =
-            VilkårsvurderingBuilder<Dag>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
                 .medVilkår("EN", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                 .forPerson(barn1, 30.apr(2020))
@@ -212,10 +209,10 @@ internal class TidslinjerTest {
     @Test
     fun `Sjekk overgang fra oppfylt EØS til oppfylt blandet i månedsskiftet`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val vilkårsvurderingTidslinjer =
-            VilkårsvurderingBuilder<Dag>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
                 .medVilkår("EE", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                 .forPerson(barn1, 30.apr(2020))
@@ -233,7 +230,7 @@ internal class TidslinjerTest {
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen før siste dag i måneden`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val giftPartnerskap =
             (26.jan(2020)..30.nov(2021)).tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
@@ -256,7 +253,7 @@ internal class TidslinjerTest {
             )
 
         val barnaRegelverkTidslinjer =
-            VilkårsvurderingBuilder<Dag>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, 26.jan(2020))
                 .medVilkår(bosattBarnOgSøker)
                 .medVilkår(lovligOppholdBarnOgSøker)
@@ -285,7 +282,7 @@ internal class TidslinjerTest {
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen andre dag i måneden`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val giftPartnerskap =
             (26.jan(2020)..30.nov(2021)).tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
@@ -308,7 +305,7 @@ internal class TidslinjerTest {
             )
 
         val barnaRegelverkTidslinjer =
-            VilkårsvurderingBuilder<Dag>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, 26.jan(2020))
                 .medVilkår(bosattBarnOgSøker)
                 .medVilkår(lovligOppholdBarnOgSøker)
@@ -341,30 +338,30 @@ internal class TidslinjerTest {
     @Test
     fun `Sjekk overgang fra oppfylt nasjonalt til oppfylt EØS dagen før siste dag i måneden, der siste periode er uendelig`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019).tilLocalDate())
+        val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
         val giftPartnerskap =
-            26.jan(2020).ogSenere().tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
+            (26.jan(2020)..uendelig).tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
         val under18 =
-            26.jan(2020).ogSenere().tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
+            (26.jan(2020)..uendelig).tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
         val bosattBarnOgSøker =
             konkatenerTidslinjer(
                 (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-                30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
+                (30.apr(2021)..uendelig).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
             )
         val lovligOppholdBarnOgSøker =
             konkatenerTidslinjer(
                 (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, NASJONALE_REGLER) },
-                30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
+                (30.apr(2021)..uendelig).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
             )
         val borMedSøker =
             konkatenerTidslinjer(
                 (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
-                30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
+                (30.apr(2021)..uendelig).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
             )
 
         val barnaRegelverkTidslinjer =
-            VilkårsvurderingBuilder<Dag>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, 26.jan(2020))
                 .medVilkår(bosattBarnOgSøker)
                 .medVilkår(lovligOppholdBarnOgSøker)

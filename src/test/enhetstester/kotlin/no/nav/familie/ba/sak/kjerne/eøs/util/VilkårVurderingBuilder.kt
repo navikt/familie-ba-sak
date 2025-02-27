@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
@@ -12,22 +14,23 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTids
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilUtdypendeVilkårRegelverkResultatTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import java.time.LocalDate
+import java.time.YearMonth
 
-data class VilkårsvurderingBuilder<T : Tidsenhet>(
+data class VilkårsvurderingBuilder(
     val behandling: Behandling = lagBehandling(),
     private val vilkårsvurdering: Vilkårsvurdering = Vilkårsvurdering(behandling = behandling),
 ) {
@@ -36,8 +39,13 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
     fun forPerson(
         person: Person,
-        startTidspunkt: Tidspunkt<T>,
-    ): PersonResultatBuilder<T> = PersonResultatBuilder(this, startTidspunkt, person)
+        startTidspunkt: LocalDate,
+    ): PersonResultatBuilder = PersonResultatBuilder(this, startTidspunkt, person)
+
+    fun forPerson(
+        person: Person,
+        startTidspunkt: YearMonth,
+    ): PersonResultatBuilder = PersonResultatBuilder(this, startTidspunkt.førsteDagIInneværendeMåned(), person)
 
     fun byggVilkårsvurdering(): Vilkårsvurdering {
         vilkårsvurdering.personResultater = personresultater
@@ -46,30 +54,30 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
     fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
 
-    data class PersonResultatBuilder<T : Tidsenhet>(
-        val vilkårsvurderingBuilder: VilkårsvurderingBuilder<T>,
-        val startTidspunkt: Tidspunkt<T>,
+    data class PersonResultatBuilder(
+        val vilkårsvurderingBuilder: VilkårsvurderingBuilder,
+        val startTidspunkt: LocalDate,
         private val person: Person = tilfeldigPerson(),
-        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<UtdypendeVilkårRegelverkResultat, T>> = mutableListOf(),
+        private val vilkårsresultatTidslinjer: MutableList<Tidslinje<UtdypendeVilkårRegelverkResultat>> = mutableListOf(),
     ) {
         fun medVilkår(
             v: String,
             vararg vilkår: Vilkår,
-        ): PersonResultatBuilder<T> {
+        ): PersonResultatBuilder {
             vilkårsresultatTidslinjer.addAll(
-                vilkår.map { v.tilUtdypendeVilkårRegelverkResultatTidslinje(it, startTidspunkt) },
+                vilkår.map { v.tilUtdypendeVilkårRegelverkResultatTidslinje(it, startTidspunkt.toYearMonth()) },
             )
             return this
         }
 
-        fun medVilkår(tidslinje: Tidslinje<VilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
+        fun medVilkår(tidslinje: Tidslinje<VilkårRegelverkResultat>): PersonResultatBuilder {
             vilkårsresultatTidslinjer.add(
                 tidslinje.mapIkkeNull { UtdypendeVilkårRegelverkResultat(it.vilkår, it.resultat, it.regelverk) },
             )
             return this
         }
 
-        fun medUtdypendeVilkår(tidslinje: Tidslinje<UtdypendeVilkårRegelverkResultat, T>): PersonResultatBuilder<T> {
+        fun medUtdypendeVilkår(tidslinje: Tidslinje<UtdypendeVilkårRegelverkResultat>): PersonResultatBuilder {
             vilkårsresultatTidslinjer.add(tidslinje)
             return this
         }
@@ -78,9 +86,9 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
             v: String,
             vilkår: Vilkår,
             utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
-        ): PersonResultatBuilder<T> {
+        ): PersonResultatBuilder {
             vilkårsresultatTidslinjer.add(
-                v.tilCharTidslinje(startTidspunkt).map {
+                v.tilCharTidslinje(startTidspunkt).mapVerdi {
                     UtdypendeVilkårRegelverkResultat(vilkår, Resultat.OPPFYLT, Regelverk.EØS_FORORDNINGEN, utdypendeVilkårsvurdering)
                 },
             )
@@ -89,14 +97,19 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
 
         fun forPerson(
             person: Person,
-            startTidspunkt: Tidspunkt<T>,
-        ): PersonResultatBuilder<T> = byggPerson().forPerson(person, startTidspunkt)
+            startTidspunkt: LocalDate,
+        ): PersonResultatBuilder = byggPerson().forPerson(person, startTidspunkt)
+
+        fun forPerson(
+            person: Person,
+            startTidspunkt: YearMonth,
+        ): PersonResultatBuilder = byggPerson().forPerson(person, startTidspunkt)
 
         fun byggVilkårsvurdering(): Vilkårsvurdering = byggPerson().byggVilkårsvurdering()
 
         fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag = byggPerson().byggPersonopplysningGrunnlag()
 
-        fun byggPerson(): VilkårsvurderingBuilder<T> {
+        fun byggPerson(): VilkårsvurderingBuilder {
             val personResultat =
                 PersonResultat(
                     vilkårsvurdering = vilkårsvurderingBuilder.vilkårsvurdering,
@@ -106,8 +119,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
             val vilkårresultater =
                 vilkårsresultatTidslinjer.flatMap {
                     it
-                        .perioder()
-                        .filter { it.innhold != null }
+                        .tilPerioderIkkeNull()
                         .flatMap { periode -> periode.tilVilkårResultater(personResultat) }
                 }
 
@@ -120,26 +132,26 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     }
 }
 
-internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> =
+internal fun Periode<UtdypendeVilkårRegelverkResultat>.tilVilkårResultater(personResultat: PersonResultat): Collection<VilkårResultat> =
     listOf(
         VilkårResultat(
             personResultat = personResultat,
-            vilkårType = this.innhold?.vilkår!!,
-            resultat = this.innhold?.resultat!!,
-            vurderesEtter = this.innhold?.regelverk,
-            periodeFom = this.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
-            periodeTom = this.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull(),
+            vilkårType = this.verdi.vilkår,
+            resultat = this.verdi.resultat!!,
+            vurderesEtter = this.verdi.regelverk,
+            periodeFom = this.fom,
+            periodeTom = this.tom,
             begrunnelse = "En begrunnelse",
             sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList(),
+            utdypendeVilkårsvurderinger = this.verdi.utdypendeVilkårsvurderinger,
         ),
     )
 
-fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() = VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag().tilPersonEnkelSøkerOgBarn())
+fun VilkårsvurderingBuilder.byggVilkårsvurderingTidslinjer() = VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag().tilPersonEnkelSøkerOgBarn())
 
-fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
+fun VilkårsvurderingBuilder.PersonResultatBuilder.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
-fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
+fun VilkårsvurderingBuilder.byggTilkjentYtelse() =
     TilkjentYtelseGenerator.genererTilkjentYtelse(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),

@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -23,20 +25,16 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.tidslinje.tomTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.YearMonth
 
 internal class KompetanseServiceTest {
     val mockKompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse> = mockPeriodeBarnSkjemaRepository()
@@ -251,13 +249,13 @@ internal class KompetanseServiceTest {
     fun `kompetanse skal vare uendelig når til regelverk-tidslinjer fortsetter etter nåtidspunktet`() {
         val behandlingId = BehandlingId(10L)
 
-        val treMånederSiden = MånedTidspunkt.nå().flytt(-3)
+        val treMånederSiden = YearMonth.now().minusMonths(3)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.toLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = treMånederSiden.toLocalDate())
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, treMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
                 .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
@@ -312,13 +310,13 @@ internal class KompetanseServiceTest {
     fun `kompetanse skal ha sluttdato når til regelverk-tidslinjer avsluttes før nåtidspunktet`() {
         val behandlingId = BehandlingId(10L)
 
-        val seksMånederSiden = MånedTidspunkt.nå().flytt(-6)
+        val seksMånederSiden = YearMonth.now().minusMonths(6)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = seksMånederSiden.tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = seksMånederSiden.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = seksMånederSiden.toLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = seksMånederSiden.toLocalDate())
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, seksMånederSiden) // Regelverk-tidslinje avslutter ETTER nå-tidspunkt
                 .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
@@ -375,9 +373,9 @@ internal class KompetanseServiceTest {
         val behandlingId = BehandlingId(10L)
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
-        val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
 
         KompetanseBuilder(jan(2020), behandlingId)
             .medKompetanse("SS   SS", barn1)
@@ -386,7 +384,7 @@ internal class KompetanseServiceTest {
             .lagreTil(mockKompetanseRepository)
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>()
+            VilkårsvurderingBuilder()
                 .forPerson(søker, jan(2020))
                 .medVilkår("EEEEEEEEEEE", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
                 .forPerson(barn1, jan(2020))
