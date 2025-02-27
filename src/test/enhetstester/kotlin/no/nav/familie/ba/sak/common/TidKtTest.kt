@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.common
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 import java.time.YearMonth
 
 internal class TidKtTest {
@@ -34,5 +35,20 @@ internal class TidKtTest {
     @Test
     fun `Test YearMonth range med tidligere sluttmåned og null som steg`() {
         assertThrows<IllegalStateException> { (YearMonth.of(2021, 1)..YearMonth.of(2020, 11) step 0).toList() }
+    }
+
+    @Test
+    fun `Test LocalDate range over flere dager`() {
+        assertEquals(4, (LocalDate.of(2021, 1, 1)..LocalDate.of(2021, 1, 4)).toList().size)
+    }
+
+    @Test
+    fun `Test LocalDate range med én dag`() {
+        assertEquals(1, (LocalDate.of(2021, 1, 1)..LocalDate.of(2021, 1, 1)).toList().size)
+    }
+
+    @Test
+    fun `Test LocalDate range med tidligere sluttdag`() {
+        assertEquals(0, (LocalDate.of(2021, 1, 2)..LocalDate.of(2020, 1, 1)).toList().size)
     }
 }
