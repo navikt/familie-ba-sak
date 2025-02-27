@@ -21,7 +21,7 @@ jobs:
       id-token: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy-with-tag.yaml@main
     with:
-      image: ${{ inputs.image }}
+      image-tag: ${{ inputs.image }}
       cluster: ${{ inputs.environment }}-gcp
       resource: .nais/app-${{ inputs.environment }}.yaml
     secrets: inherit
