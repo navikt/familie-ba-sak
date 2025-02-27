@@ -263,7 +263,7 @@ class BehandlingsresultatSteg(
             if (!erNorgeSekundærland) return@forEach
 
             if (setOf(kompetanse.søkersAktivitetsland, kompetanse.annenForeldersAktivitetsland, kompetanse.barnetsBostedsland)
-                    .any { it == "NO" }
+                    .all { it == "NO" }
             ) {
                 throw FunksjonellFeil("Dersom Norge er sekundærland, må søkers aktivitetsland, annen forelders aktivitetsland eller barnets bostedsland være satt til noe annet enn Norge")
             }
