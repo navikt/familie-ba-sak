@@ -12,7 +12,7 @@ class Utbetalingstidslinje(
 ) {
     fun erTidslinjeForPeriodeId(periodeId: Long): Boolean = utbetalingsperioder.any { it.periodeId == periodeId }
 
-    fun sisteUtbetalingsperiode(): Utbetalingsperiode = tidslinje.tilPerioderIkkeNull().last().verdi
+    fun sisteUtbetalingsperiode(): Utbetalingsperiode = utbetalingsperioder.maxBy { it.periodeId }
 
     fun tilUtbetalingsperioder(): List<UtbetalingsperiodeDto> =
         tidslinje.tilPerioderIkkeNull().map {

@@ -159,6 +159,89 @@ class UtbetalingsTidslinjeServiceTest {
             assertThat(perioderIAndreTidslinje[0].verdi.periodeId).isEqualTo(2)
             assertThat(perioderIAndreTidslinje[0].verdi.forrigePeriodeId).isEqualTo(null)
         }
+
+        @Test
+        fun `skal generere utbetalingstidslinjer for revurdering med opphør på 1 kjede med ordinær barnetrygd hvor opphørsdato er før periodens fom`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val førstegangsbehandling = lagBehandling(fagsak)
+            val revurderingOpphør = lagBehandling(fagsak)
+
+            every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
+                listOf(
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling(førstegangsbehandling.id))),
+                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragMedOpphørFraFørPeriodeFom(revurderingOpphør.id))),
+                )
+
+            // Act
+            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+
+            // Assert
+            assertThat(utbetalingstidslinjer).hasSize(2)
+            assertThat(førsteTidslinje.tidslinje).isNotNull
+            val perioderIFørsteTidslinje = førsteTidslinje.tidslinje.tilPerioderIkkeNull()
+            assertThat(perioderIFørsteTidslinje).hasSize(1)
+            assertThat(perioderIFørsteTidslinje[0].fom).isEqualTo(YearMonth.of(2024, 10).førsteDagIInneværendeMåned())
+            assertThat(perioderIFørsteTidslinje[0].tom).isEqualTo(YearMonth.of(2024, 10).sisteDagIInneværendeMåned())
+            assertThat(perioderIFørsteTidslinje[0].verdi.behandlingId).isEqualTo(førstegangsbehandling.id)
+            assertThat(perioderIFørsteTidslinje[0].verdi.periodeId).isEqualTo(0)
+            assertThat(perioderIFørsteTidslinje[0].verdi.forrigePeriodeId).isEqualTo(null)
+
+            assertThat(andreTidslinje.tidslinje).isNotNull
+            val perioderIAndreTidslinje = andreTidslinje.tidslinje.tilPerioderIkkeNull()
+            assertThat(perioderIAndreTidslinje).hasSize(1)
+            assertThat(perioderIAndreTidslinje[0].fom).isEqualTo(YearMonth.of(2023, 4).førsteDagIInneværendeMåned())
+            assertThat(perioderIAndreTidslinje[0].tom).isEqualTo(YearMonth.of(2040, 3).sisteDagIInneværendeMåned())
+            assertThat(perioderIAndreTidslinje[0].verdi.behandlingId).isEqualTo(førstegangsbehandling.id)
+            assertThat(perioderIAndreTidslinje[0].verdi.periodeId).isEqualTo(2)
+            assertThat(perioderIAndreTidslinje[0].verdi.forrigePeriodeId).isEqualTo(null)
+        }
+
+        @Test
+        fun `skal generere utbetalingstidslinjer for revurdering med opphør og hull før nye andeler`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val førstegangsbehandling = lagBehandling(fagsak)
+            val revurderingOpphør = lagBehandling(fagsak)
+
+            every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
+                listOf(
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling(førstegangsbehandling.id))),
+                    lagTilkjentYtelse(behandling = revurderingOpphør, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragMedOpphørFraFørPeriodeFomOgHullFørNyePerioder(revurderingOpphør.id))),
+                )
+
+            // Act
+            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(3, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(2, utbetalingstidslinjer)
+
+            // Assert
+            assertThat(utbetalingstidslinjer).hasSize(2)
+            assertThat(førsteTidslinje.tidslinje).isNotNull
+            val perioderIFørsteTidslinje = førsteTidslinje.tidslinje.tilPerioderIkkeNull()
+            assertThat(perioderIFørsteTidslinje).hasSize(2)
+            assertThat(perioderIFørsteTidslinje[0].fom).isEqualTo(YearMonth.of(2024, 10).førsteDagIInneværendeMåned())
+            assertThat(perioderIFørsteTidslinje[0].tom).isEqualTo(YearMonth.of(2024, 10).sisteDagIInneværendeMåned())
+            assertThat(perioderIFørsteTidslinje[0].verdi.behandlingId).isEqualTo(førstegangsbehandling.id)
+            assertThat(perioderIFørsteTidslinje[0].verdi.periodeId).isEqualTo(0)
+            assertThat(perioderIFørsteTidslinje[0].verdi.forrigePeriodeId).isEqualTo(null)
+            assertThat(perioderIFørsteTidslinje[1].fom).isEqualTo(YearMonth.of(2025, 2).førsteDagIInneværendeMåned())
+            assertThat(perioderIFørsteTidslinje[1].tom).isEqualTo(YearMonth.of(2040, 9).sisteDagIInneværendeMåned())
+            assertThat(perioderIFørsteTidslinje[1].verdi.behandlingId).isEqualTo(revurderingOpphør.id)
+            assertThat(perioderIFørsteTidslinje[1].verdi.periodeId).isEqualTo(3)
+            assertThat(perioderIFørsteTidslinje[1].verdi.forrigePeriodeId).isEqualTo(1)
+
+            assertThat(andreTidslinje.tidslinje).isNotNull
+            val perioderIAndreTidslinje = andreTidslinje.tidslinje.tilPerioderIkkeNull()
+            assertThat(perioderIAndreTidslinje).hasSize(1)
+            assertThat(perioderIAndreTidslinje[0].fom).isEqualTo(YearMonth.of(2023, 4).førsteDagIInneværendeMåned())
+            assertThat(perioderIAndreTidslinje[0].tom).isEqualTo(YearMonth.of(2040, 3).sisteDagIInneværendeMåned())
+            assertThat(perioderIAndreTidslinje[0].verdi.behandlingId).isEqualTo(førstegangsbehandling.id)
+            assertThat(perioderIAndreTidslinje[0].verdi.periodeId).isEqualTo(2)
+            assertThat(perioderIAndreTidslinje[0].verdi.forrigePeriodeId).isEqualTo(null)
+        }
     }
 }
 
@@ -228,6 +311,51 @@ private fun lagUtbetalingsoppdragAndreRevurdering(behandlingId: Long): Utbetalin
                     klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
                     beløp = BigDecimal.valueOf(1000L),
                     opphør = Opphør(YearMonth.of(2025, 2).førsteDagIInneværendeMåned()),
+                ),
+            ),
+    )
+
+private fun lagUtbetalingsoppdragMedOpphørFraFørPeriodeFom(behandlingId: Long): Utbetalingsoppdrag =
+    lagUtbetalingsoppdrag(
+        avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
+        utbetalingsperiode =
+            listOf(
+                lagUtbetalingsperiode(
+                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                    periodeId = 1,
+                    forrigePeriodeId = 0,
+                    behandlingId = behandlingId,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal.valueOf(500L),
+                    opphør = Opphør(YearMonth.of(2024, 11).førsteDagIInneværendeMåned()),
+                ),
+            ),
+    )
+
+private fun lagUtbetalingsoppdragMedOpphørFraFørPeriodeFomOgHullFørNyePerioder(behandlingId: Long): Utbetalingsoppdrag =
+    lagUtbetalingsoppdrag(
+        avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
+        utbetalingsperiode =
+            listOf(
+                lagUtbetalingsperiode(
+                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                    periodeId = 1,
+                    forrigePeriodeId = 0,
+                    behandlingId = behandlingId,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal.valueOf(500L),
+                    opphør = Opphør(YearMonth.of(2024, 11).førsteDagIInneværendeMåned()),
+                ),
+                lagUtbetalingsperiode(
+                    fom = YearMonth.of(2025, 2).førsteDagIInneværendeMåned(),
+                    tom = YearMonth.of(2040, 9).sisteDagIInneværendeMåned(),
+                    periodeId = 3,
+                    forrigePeriodeId = 1,
+                    behandlingId = behandlingId,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal.valueOf(1000L),
                 ),
             ),
     )
