@@ -46,8 +46,7 @@ class UtbetalingsTidslinjeService(
     fun finnUtbetalingsTidslinjeForPeriodeId(
         periodeId: Long,
         utbetalingsTidslinjer: List<UtbetalingsTidslinje>,
-    ): UtbetalingsTidslinje =
-        utbetalingsTidslinjer.single { it.erTidslinjeForPeriodeId(periodeId) }
+    ): UtbetalingsTidslinje = utbetalingsTidslinjer.single { it.erTidslinjeForPeriodeId(periodeId) }
 
     private fun genererTidslinjePerKjede(utbetalingsperioderPerKjede: Map<Long, List<Periode<Iterable<Utbetalingsperiode>>>>): Map<Long, Tidslinje<Utbetalingsperiode>> =
         utbetalingsperioderPerKjede.mapValues { (_, perioder) ->

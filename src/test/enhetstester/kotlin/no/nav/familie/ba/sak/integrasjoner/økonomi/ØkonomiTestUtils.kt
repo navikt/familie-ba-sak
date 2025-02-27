@@ -16,13 +16,12 @@ fun sats(ytelseType: YtelseType) =
 fun lagUtbetalingsoppdrag(
     utbetalingsperiode: List<Utbetalingsperiode>,
     avstemmingTidspunkt: LocalDateTime = LocalDateTime.now(),
-) =
-    Utbetalingsoppdrag(
-        kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
-        fagSystem = "BA",
-        saksnummer = "",
-        aktoer = UUID.randomUUID().toString(),
-        saksbehandlerId = "",
-        avstemmingTidspunkt = avstemmingTidspunkt,
-        utbetalingsperiode = utbetalingsperiode,
-    )
+) = Utbetalingsoppdrag(
+    kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+    fagSystem = "BA",
+    saksnummer = "",
+    aktoer = UUID.randomUUID().toString(),
+    saksbehandlerId = "",
+    avstemmingTidspunkt = avstemmingTidspunkt,
+    utbetalingsperiode = utbetalingsperiode,
+)

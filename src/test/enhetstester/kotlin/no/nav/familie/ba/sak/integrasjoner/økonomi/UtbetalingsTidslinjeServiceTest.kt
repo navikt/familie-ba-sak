@@ -241,18 +241,17 @@ private fun lagUtbetalingsperiode(
     klassifisering: String,
     beløp: BigDecimal,
     opphør: Opphør? = null,
-) =
-    Utbetalingsperiode(
-        vedtakdatoFom = fom,
-        vedtakdatoTom = tom,
-        erEndringPåEksisterendePeriode = false,
-        periodeId = periodeId,
-        forrigePeriodeId = forrigePeriodeId,
-        behandlingId = behandlingId,
-        datoForVedtak = LocalDate.now(),
-        klassifisering = klassifisering,
-        sats = beløp,
-        satsType = Utbetalingsperiode.SatsType.MND,
-        utbetalesTil = "",
-        opphør = opphør,
-    )
+) = Utbetalingsperiode(
+    vedtakdatoFom = fom,
+    vedtakdatoTom = tom,
+    erEndringPåEksisterendePeriode = false,
+    periodeId = periodeId,
+    forrigePeriodeId = forrigePeriodeId,
+    behandlingId = behandlingId,
+    datoForVedtak = LocalDate.now(),
+    klassifisering = klassifisering,
+    sats = beløp,
+    satsType = Utbetalingsperiode.SatsType.MND,
+    utbetalesTil = "",
+    opphør = opphør,
+)
