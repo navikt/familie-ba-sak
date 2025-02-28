@@ -11,19 +11,14 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.årMnd
-import no.nav.familie.ba.sak.ekstern.restDomene.RestYtelsePeriode
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.genererTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -35,7 +30,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import org.assertj.core.api.Assertions
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -755,86 +749,6 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
-    }
-
-    @Test
-    fun `Skal slå sammen etterfølgende andeler med samme kalkulert utbetalingsbeløp, ytelsetype og prosent`() {
-        val aktør = randomAktør()
-
-        val andeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = årMnd("2020-03"),
-                    tom = årMnd("2020-12"),
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    beløp = 1234,
-                    prosent = BigDecimal.valueOf(100),
-                    aktør = aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = årMnd("2021-01"),
-                    tom = årMnd("2021-12"),
-                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                    beløp = 1234,
-                    prosent = BigDecimal.valueOf(100),
-                    aktør = aktør,
-                ),
-            )
-
-        val restYtelsePerioder = andeler.tilRestYtelsePerioder()
-        val forventetRestYtelsePeriode = listOf(RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.ORDINÆR_BARNETRYGD, skalUtbetales = true))
-        Assertions.assertThat(restYtelsePerioder).containsAll(forventetRestYtelsePeriode).hasSize(forventetRestYtelsePeriode.size)
-    }
-
-    @Test
-    fun `Skal ikke slå sammen etterfølgende andeler med forskjellig kalkulert utbetalingsbeløp, ytelsetype eller prosent`() {
-        val aktør = randomAktør()
-
-        val andeler =
-            listOf(
-                lagAndelTilkjentYtelse(
-                    fom = årMnd("2020-03"),
-                    tom = årMnd("2020-12"),
-                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
-                    beløp = 1234,
-                    prosent = BigDecimal.valueOf(100),
-                    aktør = aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = årMnd("2021-01"),
-                    tom = årMnd("2021-12"),
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    beløp = 1234,
-                    prosent = BigDecimal.valueOf(100),
-                    aktør = aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = årMnd("2022-01"),
-                    tom = årMnd("2022-12"),
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    beløp = 0,
-                    prosent = BigDecimal.valueOf(100),
-                    aktør = aktør,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = årMnd("2023-01"),
-                    tom = årMnd("2023-12"),
-                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                    beløp = 0,
-                    prosent = BigDecimal.valueOf(0),
-                    aktør = aktør,
-                ),
-            )
-
-        val restYtelsePerioder = andeler.tilRestYtelsePerioder()
-        val forventetRestYtelsePerioder =
-            listOf(
-                RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2020-03"), stønadTom = årMnd("2020-12"), ytelseType = YtelseType.SMÅBARNSTILLEGG, skalUtbetales = true),
-                RestYtelsePeriode(beløp = 1234, stønadFom = årMnd("2021-01"), stønadTom = årMnd("2021-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
-                RestYtelsePeriode(beløp = 0, stønadFom = årMnd("2022-01"), stønadTom = årMnd("2022-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = true),
-                RestYtelsePeriode(beløp = 0, stønadFom = årMnd("2023-01"), stønadTom = årMnd("2023-12"), ytelseType = YtelseType.UTVIDET_BARNETRYGD, skalUtbetales = false),
-            )
-        Assertions.assertThat(restYtelsePerioder).containsAll(forventetRestYtelsePerioder).hasSize(forventetRestYtelsePerioder.size)
     }
 
     private data class EndretAndel(
