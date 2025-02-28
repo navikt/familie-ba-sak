@@ -173,13 +173,35 @@ internal class TidslinjerTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
+        val giftPartnerskap = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
+        val under18 = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
+        val bosattBarnOgSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
+            )
+        val lovligOppholdBarnOgSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, NASJONALE_REGLER) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
+            )
+        val borMedSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
+            )
+
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
-                .medVilkår("NE", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                .medVilkår(bosattBarnOgSøker)
+                .medVilkår(lovligOppholdBarnOgSøker)
                 .forPerson(barn1, 30.apr(2020))
-                .medVilkår("++", UNDER_18_ÅR, GIFT_PARTNERSKAP)
-                .medVilkår("NE", BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
+                .medVilkår(bosattBarnOgSøker)
+                .medVilkår(lovligOppholdBarnOgSøker)
+                .medVilkår(giftPartnerskap)
+                .medVilkår(under18)
+                .medVilkår(borMedSøker)
                 .byggVilkårsvurderingTidslinjer()
 
         val barn1Result = "E".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
@@ -192,13 +214,35 @@ internal class TidslinjerTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
+        val giftPartnerskap = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
+        val under18 = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
+        val bosattBarnOgSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
+            )
+        val lovligOppholdBarnOgSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, NASJONALE_REGLER) },
+            )
+        val borMedSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
+            )
+
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
-                .medVilkår("EN", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                .medVilkår(bosattBarnOgSøker)
+                .medVilkår(lovligOppholdBarnOgSøker)
                 .forPerson(barn1, 30.apr(2020))
-                .medVilkår("++", UNDER_18_ÅR, GIFT_PARTNERSKAP)
-                .medVilkår("EN", BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
+                .medVilkår(bosattBarnOgSøker)
+                .medVilkår(lovligOppholdBarnOgSøker)
+                .medVilkår(under18)
+                .medVilkår(giftPartnerskap)
+                .medVilkår(borMedSøker)
                 .byggVilkårsvurderingTidslinjer()
 
         val barn1Result = "N".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
@@ -211,15 +255,27 @@ internal class TidslinjerTest {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = 14.des(2019))
 
+        val giftPartnerskap = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(GIFT_PARTNERSKAP) }
+        val under18 = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
+        val bosattBarnOgSøker = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) }
+        val lovligOppholdBarnOgSøker = (30.apr(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) }
+        val borMedSøker =
+            konkatenerTidslinjer(
+                (30.apr(2020)..30.apr(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
+                (1.mai(2020)..1.mai(2020)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
+            )
+
         val vilkårsvurderingTidslinjer =
             VilkårsvurderingBuilder()
                 .forPerson(søker, 30.apr(2020))
-                .medVilkår("EE", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                .medVilkår(bosattBarnOgSøker)
+                .medVilkår(lovligOppholdBarnOgSøker)
                 .forPerson(barn1, 30.apr(2020))
-                .medVilkår("++", UNDER_18_ÅR, GIFT_PARTNERSKAP)
-                .medVilkår("EE", BOSATT_I_RIKET)
-                .medVilkår("EE", LOVLIG_OPPHOLD)
-                .medVilkår("EN", BOR_MED_SØKER)
+                .medVilkår(bosattBarnOgSøker)
+                .medVilkår(lovligOppholdBarnOgSøker)
+                .medVilkår(giftPartnerskap)
+                .medVilkår(under18)
+                .medVilkår(borMedSøker)
                 .byggVilkårsvurderingTidslinjer()
 
         val barn1Result = "!".tilRegelverkResultatTidslinje(YearMonth.of(2020, 5))
