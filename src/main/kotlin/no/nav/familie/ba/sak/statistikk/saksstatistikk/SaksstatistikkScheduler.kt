@@ -6,24 +6,26 @@ import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationListener
+import org.springframework.context.event.ContextClosedEvent
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
 class SaksstatistikkScheduler(
     val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     val kafkaProducer: KafkaProducer,
     val leaderClientService: LeaderClientService,
-) {
+) : ApplicationListener<ContextClosedEvent> {
+    @Volatile private var isShuttingDown = false
+
     @Scheduled(fixedDelay = 60000)
     fun sendKafkameldinger() {
-        if (leaderClientService.isLeader()) {
+        if (!isShuttingDown && leaderClientService.isLeader()) {
             sendSaksstatistikk()
         }
     }
 
-    @Transactional
     fun sendSaksstatistikk() {
         val meldinger = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
 
@@ -47,5 +49,9 @@ class SaksstatistikkScheduler(
 
     companion object {
         private val logger = LoggerFactory.getLogger(SaksstatistikkScheduler::class.java)
+    }
+
+    override fun onApplicationEvent(event: ContextClosedEvent) {
+        isShuttingDown = true
     }
 }
