@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.common
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
+import no.nav.familie.log.mdc.MDCConstants
+import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 import kotlin.contracts.ExperimentalContracts
@@ -14,6 +16,7 @@ open class Feil(
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
+    open val callId: String? = MDC.get(MDCConstants.MDC_CALL_ID),
 ) : RuntimeException(message)
 
 open class FunksjonellFeil(
@@ -22,6 +25,7 @@ open class FunksjonellFeil(
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
     override val cause: Throwable? = throwable,
+    open val callId: String? = MDC.get(MDCConstants.MDC_CALL_ID),
 ) : RuntimeException(melding)
 
 class VilkårFeil(

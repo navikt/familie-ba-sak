@@ -1,12 +1,6 @@
 name: Manual deploy to prod (from main)
 on:
   workflow_dispatch:
-    inputs:
-      skip-tests:
-        description: 'Skip tests?'
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   build:
@@ -17,9 +11,9 @@ jobs:
       id-token: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@main
     with:
-      skip-tests: ${{ inputs.skip-tests }}
       build-image: true
       push-image: true
+      skip-tests: true
     secrets: inherit
   deploy-with-new-image:
     name: Deploy with new image
