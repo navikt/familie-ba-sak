@@ -28,7 +28,6 @@ object UtvidetBarnetrygdUtil {
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         personResultater: Set<PersonResultat>,
-        skalBrukeNyVersjonAvOppdaterAndelerMedEndringer: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val andelerTilkjentYtelseUtvidet =
             UtvidetBarnetrygdGenerator(
@@ -40,18 +39,11 @@ object UtvidetBarnetrygdUtil {
                 perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
             )
 
-        return if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
-            AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler(
-                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
-                endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
-                tilkjentYtelse = tilkjentYtelse,
-            )
-        } else {
-            TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
-                endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
-            )
-        }
+        return AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler(
+            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
+            endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
+            tilkjentYtelse = tilkjentYtelse,
+        )
     }
 
     fun Set<PersonResultat>.tilPerioderBarnaBorMedSøkerTidslinje(): Map<Aktør, Tidslinje<Boolean>> =

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.finnUtvidetVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -24,7 +23,6 @@ object TilkjentYtelseGenerator {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
         fagsakType: FagsakType,
-        skalBrukeNyVersjonAvOppdaterAndelerMedEndringer: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val tilkjentYtelse =
@@ -60,18 +58,11 @@ object TilkjentYtelseGenerator {
                 }
 
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
-            if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
-                lagAndelerMedEndretUtbetalingAndeler(
-                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
-                    tilkjentYtelse = tilkjentYtelse,
-                )
-            } else {
-                oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
-                )
-            }
+            lagAndelerMedEndretUtbetalingAndeler(
+                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
+                endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
+                tilkjentYtelse = tilkjentYtelse,
+            )
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer =
             UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet(
@@ -80,7 +71,6 @@ object TilkjentYtelseGenerator {
                 andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                 endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
                 personResultater = vilkårsvurdering.personResultater,
-                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = skalBrukeNyVersjonAvOppdaterAndelerMedEndringer,
             )
 
         val småbarnstilleggErMulig =
@@ -114,18 +104,11 @@ object TilkjentYtelseGenerator {
             }
 
         val andelerTilkjentYtelseBarnaMedAlleEndringer =
-            if (skalBrukeNyVersjonAvOppdaterAndelerMedEndringer) {
-                lagAndelerMedEndretUtbetalingAndeler(
-                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
-                    tilkjentYtelse = tilkjentYtelse,
-                )
-            } else {
-                oppdaterTilkjentYtelseMedEndretUtbetalingAndelerGammel(
-                    andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                    endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
-                )
-            }
+            lagAndelerMedEndretUtbetalingAndeler(
+                andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
+                endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
+                tilkjentYtelse = tilkjentYtelse,
+            )
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })
 
