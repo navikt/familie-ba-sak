@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMedEtter
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.tidslinje.Periode
@@ -87,7 +88,11 @@ class UtbetalingsTidslinjeService(
                     }
                 kjederForFagsak.apply {
                     kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId, opphørsperiode) ->
-                        val gjeldendeTidslinje = kjederForFagsak.getOrDefault(forrigePeriodeId, tomTidslinje()).beskjærOgKorrigerPerioderVedOpphør(opphørsperiode)
+                        val gjeldendeTidslinje =
+                            kjederForFagsak
+                                .getOrDefault(forrigePeriodeId, tomTidslinje())
+                                .beskjærOgKorrigerPerioderVedOpphør(opphørsperiode)
+                                .beskjærTilOgMedEtterIkkeTomTidslinje(tidslinje)
 
                         // Sørger for at vi alltid tar med den siste perioden dersom det er overlapp.
                         val nyGjeldendeTidslinje =
@@ -125,4 +130,11 @@ class UtbetalingsTidslinjeService(
                 // Beskjærer tidslinje slik at alt etter opphørsdato forsvinner
                 .beskjærTilOgMed(opphørsperiode.opphør!!.opphørDatoFom.minusDays(1))
         }
+
+    private fun Tidslinje<Utbetalingsperiode>.beskjærTilOgMedEtterIkkeTomTidslinje(tidslinje: Tidslinje<Utbetalingsperiode>): Tidslinje<Utbetalingsperiode> {
+        if (tidslinje.erTom()) {
+            return this
+        }
+        return this.beskjærTilOgMedEtter(tidslinje)
+    }
 }

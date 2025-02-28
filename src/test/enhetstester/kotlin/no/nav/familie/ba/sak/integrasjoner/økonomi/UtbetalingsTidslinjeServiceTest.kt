@@ -332,6 +332,65 @@ class UtbetalingsTidslinjeServiceTest {
             assertThat(perioderIAndreTidslinje[0].verdi.periodeId).isEqualTo(førstegangsbehandlingPeriode1Kjede2.periodeId)
             assertThat(perioderIAndreTidslinje[0].verdi.forrigePeriodeId).isEqualTo(førstegangsbehandlingPeriode1Kjede2.forrigePeriodeId)
         }
+
+        @Test
+        fun `skal generere utbetalingstidslinjer for revurdering med opphør som følge av overskrevet andel`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val førstegangsbehandling = lagBehandling(fagsak)
+            val revurdering = lagBehandling(fagsak)
+
+            val revurderingPeriode3Kjede1 =
+                lagUtbetalingsperiode(
+                    fom = førstegangsBehandlingPeriode1Kjede1.vedtakdatoFom,
+                    tom = førstegangsBehandlingPeriode1Kjede1.vedtakdatoTom.plusMonths(1),
+                    periodeId = 3,
+                    forrigePeriodeId = 1,
+                    behandlingId = revurdering.id,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal.valueOf(500L),
+                )
+
+            val utbetalingsoppdragRevurderingOpphørVedOverskriving =
+                lagUtbetalingsoppdrag(
+                    avstemmingTidspunkt = LocalDateTime.of(2025, 3, 1, 0, 0, 0),
+                    utbetalingsperiode =
+                        listOf(
+                            revurderingPeriode3Kjede1,
+                        ),
+                )
+
+            every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns
+                listOf(
+                    lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling())),
+                    lagTilkjentYtelse(behandling = revurdering, utbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdragRevurderingOpphørVedOverskriving)),
+                )
+
+            // Act
+            val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id)
+            val førsteTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede1, utbetalingstidslinjer)
+            val andreTidslinje = utbetalingsTidslinjeService.finnUtbetalingsTidslinjeForPeriodeId(førstePeriodeIdKjede2, utbetalingstidslinjer)
+
+            // Assert
+            assertThat(utbetalingstidslinjer).hasSize(2)
+            assertThat(førsteTidslinje.tidslinje).isNotNull
+            val perioderIFørsteTidslinje = førsteTidslinje.tidslinje.tilPerioderIkkeNull()
+            assertThat(perioderIFørsteTidslinje).hasSize(1)
+            assertThat(perioderIFørsteTidslinje[0].fom).isEqualTo(revurderingPeriode3Kjede1.vedtakdatoFom)
+            assertThat(perioderIFørsteTidslinje[0].tom).isEqualTo(revurderingPeriode3Kjede1.vedtakdatoTom)
+            assertThat(perioderIFørsteTidslinje[0].verdi.behandlingId).isEqualTo(revurderingPeriode3Kjede1.behandlingId)
+            assertThat(perioderIFørsteTidslinje[0].verdi.periodeId).isEqualTo(revurderingPeriode3Kjede1.periodeId)
+            assertThat(perioderIFørsteTidslinje[0].verdi.forrigePeriodeId).isEqualTo(revurderingPeriode3Kjede1.forrigePeriodeId)
+
+            assertThat(andreTidslinje.tidslinje).isNotNull
+            val perioderIAndreTidslinje = andreTidslinje.tidslinje.tilPerioderIkkeNull()
+            assertThat(perioderIAndreTidslinje).hasSize(1)
+            assertThat(perioderIAndreTidslinje[0].fom).isEqualTo(førstegangsbehandlingPeriode1Kjede2.vedtakdatoFom)
+            assertThat(perioderIAndreTidslinje[0].tom).isEqualTo(førstegangsbehandlingPeriode1Kjede2.vedtakdatoTom)
+            assertThat(perioderIAndreTidslinje[0].verdi.behandlingId).isEqualTo(førstegangsbehandlingPeriode1Kjede2.behandlingId)
+            assertThat(perioderIAndreTidslinje[0].verdi.periodeId).isEqualTo(førstegangsbehandlingPeriode1Kjede2.periodeId)
+            assertThat(perioderIAndreTidslinje[0].verdi.forrigePeriodeId).isEqualTo(førstegangsbehandlingPeriode1Kjede2.forrigePeriodeId)
+        }
     }
 
     private val førstegangsBehandlingPeriode1Kjede1 =
