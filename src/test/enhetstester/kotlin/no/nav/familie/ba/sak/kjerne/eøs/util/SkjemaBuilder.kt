@@ -1,19 +1,19 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import java.time.YearMonth
 
 abstract class SkjemaBuilder<S, B>(
-    private val startMåned: Tidspunkt<Måned> = jan(2020),
+    private val startMåned: YearMonth = jan(2020),
     private val behandlingId: BehandlingId,
 ) where S : PeriodeOgBarnSkjemaEntitet<S>, B : SkjemaBuilder<S, B> {
     private val skjemaer: MutableList<S> = mutableListOf()
@@ -26,16 +26,15 @@ abstract class SkjemaBuilder<S, B>(
         val tidslinje =
             k
                 .tilCharTidslinje(startMåned)
-                .map(mapChar)
-                .slåSammenLike()
+                .mapVerdi(mapChar)
+                .slåSammenLikePerioder()
 
         tidslinje
-            .perioder()
-            .filter { it.innhold != null }
+            .tilPerioderIkkeNull()
             .map {
-                it.innhold!!.kopier(
-                    fom = it.fraOgMed.tilYearMonthEllerNull(),
-                    tom = it.tilOgMed.tilYearMonthEllerNull(),
+                it.verdi.kopier(
+                    fom = it.fom?.toYearMonth(),
+                    tom = it.tom?.toYearMonth(),
                     barnAktører = barn.map { person -> person.aktør }.toSet(),
                 )
             }.all { skjemaer.add(it) }

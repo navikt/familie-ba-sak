@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -10,11 +11,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.oppdaterTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.GIFT_PARTNERSKAP
@@ -33,15 +32,15 @@ class TilkjentYtelseDifferanseberegningTest {
     fun `skal gjøre differanseberegning på en tilkjent ytelse med endringsperioder`() {
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
         val behandling = lagBehandling()
         val behandlingId = BehandlingId(behandling.id)
-        val startMåned = barnsFødselsdato.tilInneværendeMåned()
+        val startMåned = barnsFødselsdato.toYearMonth()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
+            VilkårsvurderingBuilder(behandling)
                 .forPerson(søker, startMåned)
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEE", BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEE", LOVLIG_OPPHOLD)
@@ -110,14 +109,14 @@ class TilkjentYtelseDifferanseberegningTest {
     fun `skal fjerne differanseberegning når utenlandsk periodebeløp eller valutakurs nullstilles`() {
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
         val behandling = lagBehandling()
         val behandlingId = BehandlingId(behandling.id)
-        val startMåned = barnsFødselsdato.tilInneværendeMåned()
+        val startMåned = barnsFødselsdato.toYearMonth()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
+            VilkårsvurderingBuilder(behandling)
                 .forPerson(søker, startMåned)
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEE", BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEE", LOVLIG_OPPHOLD)

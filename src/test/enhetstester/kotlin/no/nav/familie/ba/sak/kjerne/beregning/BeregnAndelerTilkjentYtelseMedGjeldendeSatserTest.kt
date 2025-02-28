@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
@@ -17,21 +18,19 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.under18år
 import no.nav.familie.ba.sak.kjerne.eøs.util.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.okt
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.okt
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.sep
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -95,7 +94,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 26.jan(2018)..uendelig) der
                 barn2 har
                 (UNDER_18_ÅR oppfylt barn2.under18år()) og
-                (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 1.jun(2013)..uendelig)
+                (GIFT_PARTNERSKAP og BOR_MED_SØKER og BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 1.mai(2013)..uendelig)
 
         val forventedeAndeler =
             listOf(
@@ -350,7 +349,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
     }
 }
 
-private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
+private fun VilkårsvurderingBuilder.PersonResultatBuilder.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
     return TilkjentYtelseGenerator
         .genererTilkjentYtelse(
@@ -370,14 +369,14 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
         }
 }
 
-internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
+internal fun VilkårsvurderingBuilder.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         personResultater = this.byggVilkårsvurdering().personResultater,
         fagsakType = FagsakType.NORMAL,
     )
 
-internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
+internal fun VilkårsvurderingBuilder.PersonResultatBuilder.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         personResultater = this.byggVilkårsvurdering().personResultater,

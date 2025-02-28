@@ -1,18 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -22,13 +21,13 @@ internal class RestTidslinjerTest {
     fun `når barnet har løpende vilkår, skal likevel rest-tidslinjene for regelverk og oppfylt vilkår være avsluttet ved 18 år`() {
         val barnsFødselsdato = 13.jan(2020)
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato.tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
         val behandling = lagBehandling()
-        val startMåned = barnsFødselsdato.tilInneværendeMåned()
+        val startMåned = barnsFødselsdato.toYearMonth()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
+            VilkårsvurderingBuilder(behandling)
                 .forPerson(søker, startMåned)
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEEEE", Vilkår.BOSATT_I_RIKET)
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEEEE", Vilkår.LOVLIG_OPPHOLD)
@@ -52,18 +51,18 @@ internal class RestTidslinjerTest {
 
         // Stopper ved søkers siste til-og-med-dato fordi Regelverk er <null> etter det, som filtreres bort
         assertEquals(
-            31.jan(2022).tilLocalDate(),
+            31.jan(2022),
             barnetsTidslinjer.regelverkTidslinje.last().tilOgMed,
         )
         assertEquals(
-            31.jan(2022).tilLocalDate(),
+            31.jan(2022),
             barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed,
         )
 
         // Alle vilkårene til barnet kuttes ved siste dag i måneden før barnet fyller 18 år
         barnetsTidslinjer.vilkårTidslinjer.forEach {
             assertEquals(
-                31.des(2037).tilLocalDate(),
+                31.des(2037),
                 it.last().tilOgMed,
             )
         }
@@ -74,24 +73,24 @@ internal class RestTidslinjerTest {
         val søkersFødselsdato = 3.feb(1995)
         val barn1Fødselsdato = 13.jan(2020)
         val barn2Fødselsdato = 27.des(2021)
-        val søker = tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = søkersFødselsdato.tilLocalDate())
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barn1Fødselsdato.tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barn2Fødselsdato.tilLocalDate())
+        val søker = tilfeldigPerson(personType = PersonType.SØKER, fødselsdato = søkersFødselsdato)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barn1Fødselsdato)
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barn2Fødselsdato)
 
         val behandling = lagBehandling()
 
         val vilkårsvurderingBygger =
-            VilkårsvurderingBuilder<Måned>(behandling)
-                .forPerson(søker, søkersFødselsdato.tilInneværendeMåned())
+            VilkårsvurderingBuilder(behandling)
+                .forPerson(søker, søkersFødselsdato.toYearMonth())
                 .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
                 .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
-                .forPerson(barn1, barn1Fødselsdato.tilInneværendeMåned())
+                .forPerson(barn1, barn1Fødselsdato.toYearMonth())
                 .medVilkår("+>", Vilkår.UNDER_18_ÅR)
                 .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
                 .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
                 .medVilkår("E>", Vilkår.BOR_MED_SØKER)
                 .medVilkår("+>", Vilkår.GIFT_PARTNERSKAP)
-                .forPerson(barn2, barn2Fødselsdato.tilInneværendeMåned())
+                .forPerson(barn2, barn2Fødselsdato.toYearMonth())
                 .medVilkår("+>", Vilkår.UNDER_18_ÅR)
                 .medVilkår("E>", Vilkår.BOSATT_I_RIKET)
                 .medVilkår("E>", Vilkår.LOVLIG_OPPHOLD)
@@ -112,13 +111,13 @@ internal class RestTidslinjerTest {
         // Stopper ved siste dag i måneden før yngste barn fyller 18 år
         søkersTidslinjer.vilkårTidslinjer.forEach {
             assertEquals(
-                30.nov(2039).tilLocalDate(),
+                30.nov(2039),
                 it.last().tilOgMed,
             )
         }
 
         assertEquals(
-            30.nov(2039).tilLocalDate(),
+            30.nov(2039),
             søkersTidslinjer.oppfyllerEgneVilkårTidslinje.last().tilOgMed,
         )
     }

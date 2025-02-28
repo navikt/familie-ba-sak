@@ -12,9 +12,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullMed
@@ -27,9 +24,10 @@ import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 class TilkjentYtelseBuilder(
-    private val startMåned: Tidspunkt<Måned>,
+    private val startMåned: YearMonth,
     private val behandling: Behandling = lagBehandling(),
 ) {
     private val tilkjentYtelse =
@@ -111,7 +109,7 @@ class TilkjentYtelseBuilder(
                 .map { person ->
                     val andelTilkjentYtelseTidslinje =
                         s
-                            .tilCharTidslinje(startMåned.tilYearMonth())
+                            .tilCharTidslinje(startMåned)
                             .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
                             .mapVerdi {
                                 AndelTilkjentYtelse(

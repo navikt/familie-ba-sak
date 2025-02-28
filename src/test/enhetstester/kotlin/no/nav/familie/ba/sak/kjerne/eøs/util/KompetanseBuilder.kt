@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.util.SkjemaBuilder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import java.time.YearMonth
 
 class KompetanseBuilder(
-    startMåned: Tidspunkt<Måned> = jan(2020),
+    startMåned: YearMonth = jan(2020),
     behandlingId: BehandlingId = BehandlingId(1),
 ) : SkjemaBuilder<Kompetanse, KompetanseBuilder>(startMåned, behandlingId) {
     fun medKompetanse(

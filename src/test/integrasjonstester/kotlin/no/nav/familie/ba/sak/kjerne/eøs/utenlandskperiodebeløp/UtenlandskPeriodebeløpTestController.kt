@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -7,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.context.annotation.Profile
@@ -53,7 +53,7 @@ private fun Map<LocalDate, String>.tilUtenlandskePeriodebeløp(
     this
         .map { (dato, tidslinje) ->
             val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }
-            UtenlandskPeriodebeløpBuilder(dato.tilMånedTidspunkt(), behandlingId)
+            UtenlandskPeriodebeløpBuilder(dato.toYearMonth(), behandlingId)
                 .medBeløp(tidslinje, "EUR", "fr", person)
                 .bygg()
         }.flatten()
