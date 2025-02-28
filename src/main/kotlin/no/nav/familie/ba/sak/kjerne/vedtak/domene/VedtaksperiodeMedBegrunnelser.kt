@@ -20,30 +20,29 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.time.LocalDate
 import java.time.YearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
+import no.nav.familie.tidslinje.Periode as TidslinjePeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtaksperiode")
@@ -135,11 +134,11 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val løpendeUtbetalingsperiode =
                 utbetalingsperiodeDetaljer
-                    .perioder()
-                    .lastOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid() <= inneværendeMåned() }
-                    ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
+                    .tilPerioder()
+                    .lastOrNull { (it.fom?.toYearMonth() ?: MIN_MÅNED) <= inneværendeMåned() }
+                    ?: utbetalingsperiodeDetaljer.tilPerioder().firstOrNull()
 
-            løpendeUtbetalingsperiode?.innhold?.toList()
+            løpendeUtbetalingsperiode?.verdi?.toList()
                 ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
         }
 
@@ -158,24 +157,24 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljer(
 }
 
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForVedtaksperiode(
-    utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
+    utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>>,
 ): Iterable<UtbetalingsperiodeDetalj>? =
     utbetalingsperiodeDetaljer
-        .beskjær((this.fom ?: TIDENES_MORGEN).tilMånedTidspunkt(), (this.tom ?: TIDENES_ENDE).tilMånedTidspunkt())
-        .perioder()
-        .firstNotNullOfOrNull { it.innhold }
+        .beskjær(this.fom ?: TIDENES_MORGEN, this.tom ?: TIDENES_ENDE)
+        .tilPerioder()
+        .firstNotNullOfOrNull { it.verdi }
 
 private fun VedtaksperiodeMedBegrunnelser.finnUtbetalingsperioderRelevantForOpphørVedtaksperiode(
-    utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>, Måned>,
+    utbetalingsperiodeDetaljer: Tidslinje<Iterable<UtbetalingsperiodeDetalj>>,
 ): Iterable<UtbetalingsperiodeDetalj>? {
-    val innhold =
+    val verdi =
         utbetalingsperiodeDetaljer
-            .perioder()
+            .tilPerioder()
             .find { andelerVertikal ->
-                andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate() == this.fom
-            }?.innhold
+                andelerVertikal.fom?.førsteDagIInneværendeMåned() == this.fom
+            }?.verdi
 
-    return innhold
+    return verdi
 }
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
@@ -185,9 +184,9 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
         andelerForAktørOgType
             .map {
                 TidslinjePeriode(
-                    fraOgMed = it.stønadFom.tilTidspunkt(),
-                    tilOgMed = it.stønadTom.tilTidspunkt(),
-                    innhold =
+                    fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                    tom = it.stønadTom.sisteDagIInneværendeMåned(),
+                    verdi =
                         UtbetalingsperiodeDetalj(
                             andel = it,
                             personopplysningGrunnlag = personopplysningGrunnlag,
@@ -195,7 +194,7 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
                 )
             }.tilTidslinje()
     }.kombiner { it.takeIf { it.toList().isNotEmpty() } }
-    .slåSammenLike()
+    .slåSammenLikePerioder()
 
 fun hentBrevPeriodeType(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
