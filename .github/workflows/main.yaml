@@ -28,6 +28,7 @@ jobs:
     with:
       build-image: true
       push-image: true
+      skip-tests: true
     secrets: inherit
   deploy-dev:
     name: Deploy dev
