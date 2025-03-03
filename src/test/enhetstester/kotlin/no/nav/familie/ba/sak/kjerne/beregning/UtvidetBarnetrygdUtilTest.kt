@@ -103,6 +103,7 @@ class UtvidetBarnetrygdUtilTest {
                 resultat = Resultat.OPPFYLT,
                 periodeFom = LocalDate.of(2021, 10, 1),
                 periodeTom = LocalDate.of(2022, 2, 28),
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD
             )
 
         val personResultatBarn =
@@ -115,21 +116,11 @@ class UtvidetBarnetrygdUtilTest {
                 vilkårType = Vilkår.BOR_MED_SØKER,
             )
 
-        val utvidetVilkår =
-            lagVilkårResultat(
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                periodeFom = LocalDate.of(2021, 10, 1),
-                periodeTom = LocalDate.of(2022, 2, 28),
-                resultat = Resultat.OPPFYLT,
-                personResultat = personResultatSøker,
-            )
-
         fun med(utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering) =
             utdypendeVilkårsvurdering.let {
                 personResultatBarn.vilkårResultater.first().utdypendeVilkårsvurderinger = listOf(utdypendeVilkårsvurdering)
 
                 beregnTilkjentYtelseUtvidet(
-                    utvidetVilkår = listOf(utvidetVilkår),
                     tilkjentYtelse = tilkjentYtelse,
                     andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer =
                         listOf(
@@ -140,7 +131,7 @@ class UtvidetBarnetrygdUtilTest {
                             ),
                         ),
                     endretUtbetalingAndelerSøker = emptyList(),
-                    personResultater = setOf(personResultatBarn),
+                    personResultater = setOf(personResultatBarn, personResultatSøker),
                 )
             }
     }

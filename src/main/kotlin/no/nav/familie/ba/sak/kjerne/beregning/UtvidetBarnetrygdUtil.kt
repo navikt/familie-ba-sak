@@ -16,14 +16,12 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.utvidelser.leftJoin
 
 object UtvidetBarnetrygdUtil {
     internal fun beregnTilkjentYtelseUtvidet(
-        utvidetVilkår: List<VilkårResultat>,
         andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
@@ -34,7 +32,7 @@ object UtvidetBarnetrygdUtil {
                 behandlingId = tilkjentYtelse.behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
             ).lagUtvidetBarnetrygdAndeler(
-                utvidetVilkår = utvidetVilkår,
+                utvidetVilkår = personResultater.finnUtvidetVilkår(),
                 andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer.map { it.andel },
                 perioderBarnaBorMedSøkerTidslinje = personResultater.tilPerioderBarnaBorMedSøkerTidslinje(),
             )
@@ -70,9 +68,9 @@ object UtvidetBarnetrygdUtil {
             }
         }
 
-    internal fun finnUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering): List<VilkårResultat> {
+    private fun Set<PersonResultat>.finnUtvidetVilkår(): List<VilkårResultat> {
         val utvidetVilkårResultater =
-            vilkårsvurdering.personResultater
+            this
                 .flatMap { it.vilkårResultater }
                 .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
 
