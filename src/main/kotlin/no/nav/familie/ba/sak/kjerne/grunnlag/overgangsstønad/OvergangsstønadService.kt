@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.vedtakOmOvergangsstønadPåvirkerFagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -133,7 +134,7 @@ class OvergangsstønadService(
 
         secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
 
-        return no.nav.familie.ba.sak.kjerne.beregning.vedtakOmOvergangsstønadPåvirkerFagsak(
+        return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggGenerator =
                 SmåbarnstilleggGenerator(
                     tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling,

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.Endring
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
@@ -21,6 +20,11 @@ fun List<InternPeriodeOvergangsstønad>.splittOgSlåSammen(
     .slåSammenTidligerePerioder(dagensDato)
     .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, dagensDato)
 
+private enum class Endring {
+    INGEN_ENDRING,
+    MISTET_PERIODE,
+    FÅTT_PERIODE,
+}
 
 fun erEndringIOvergangsstønadFramITid(
     perioderMedFullOvergangsstønadForrigeBehandling: List<InternPeriodeOvergangsstønad>,

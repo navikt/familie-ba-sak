@@ -262,9 +262,3 @@ fun validerUtvidetOgBarnasAndeler(
     if (utvidetAndeler.any { !it.erUtvidet() }) throw Feil("Det finnes andre ytelser enn utvidet blandt utvidet-andelene")
     if (barnasAndeler.any { it.erSøkersAndel() }) throw Feil("Finner andeler for søker blandt barnas andeler")
 }
-
-enum class Endring {
-    INGEN_ENDRING,
-    MISTET_PERIODE,
-    FÅTT_PERIODE,
-}
