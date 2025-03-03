@@ -34,9 +34,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
-    private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
 
     @BeforeEach
     fun førHverTest() {
@@ -95,8 +95,8 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
         val faktiskTilkjentYtelse =
@@ -163,8 +163,8 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
             if (småbarnstilleggTestPeriode != null) {
                 listOf(
                     InternPeriodeOvergangsstønad(
@@ -246,8 +246,8 @@ class VilkårTilTilkjentYtelseTest {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
-        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
         every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
         val faktiskTilkjentYtelse =

@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.beregning.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPe
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -46,7 +45,7 @@ class AutovedtakSmåbarnstilleggService(
     private val vedtakService: VedtakService,
     private val behandlingService: BehandlingService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val overgangsstønadService: OvergangsstønadService,
     private val taskService: TaskService,
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
@@ -55,7 +54,6 @@ class AutovedtakSmåbarnstilleggService(
     private val localDateProvider: LocalDateProvider,
     private val påVentService: SettPåVentService,
     private val stegService: StegService,
-    private val opprettTaskService: OpprettTaskService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall", "aarsak", "ikke_relevant", "beskrivelse", "ikke_relevant")
@@ -88,7 +86,7 @@ class AutovedtakSmåbarnstilleggService(
 
     override fun skalAutovedtakBehandles(behandlingsdata: SmåbarnstilleggData): Boolean {
         val fagsak = fagsakService.hentNormalFagsak(aktør = behandlingsdata.aktør) ?: return false
-        val påvirkerFagsak = småbarnstilleggService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
+        val påvirkerFagsak = overgangsstønadService.vedtakOmOvergangsstønadPåvirkerFagsak(fagsak)
         return if (!påvirkerFagsak) {
             antallVedtakOmOvergangsstønadPåvirkerIkkeFagsak.increment()
 
@@ -108,8 +106,8 @@ class AutovedtakSmåbarnstilleggService(
             fagsakService.hentNormalFagsak(aktør)
                 ?: throw Feil(message = "Fant ikke fagsak av typen NORMAL for aktør ${aktør.aktørId}")
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id)
-        val perioderMedFullOvergangsstønadForrigeBehandling = forrigeBehandling?.let { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(forrigeBehandling) } ?: emptyList()
-        val perioderMedFullOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(aktør)
+        val perioderMedFullOvergangsstønadForrigeBehandling = forrigeBehandling?.let { overgangsstønadService.hentPerioderMedFullOvergangsstønad(forrigeBehandling) } ?: emptyList()
+        val perioderMedFullOvergangsstønad = overgangsstønadService.hentPerioderMedFullOvergangsstønad(aktør)
 
         val erEndringIOvergangsstønadFramITid =
             erEndringIOvergangsstønadFramITid(

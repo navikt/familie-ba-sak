@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -81,7 +81,7 @@ class VedtaksperiodeService(
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val overgangsstønadService: OvergangsstønadService,
     private val refusjonEøsRepository: RefusjonEøsRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val valutakursRepository: ValutakursRepository,
@@ -329,7 +329,7 @@ class VedtaksperiodeService(
             utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(this.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
-            perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(this),
+            perioderOvergangsstønad = overgangsstønadService.hentPerioderMedFullOvergangsstønad(this),
             uregistrerteBarn =
                 søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentUregistrerteBarn()
                     ?: emptyList(),

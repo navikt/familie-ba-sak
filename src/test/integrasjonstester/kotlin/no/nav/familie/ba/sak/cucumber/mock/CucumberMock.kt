@@ -36,7 +36,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
@@ -75,7 +75,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
@@ -132,7 +131,6 @@ class CucumberMock(
     val unleashNextMedContextService = mockUnleashNextMedContextService()
     val unleashService = mockUnleashService()
     val mockPåVentService = mockk<SettPåVentService>()
-    val opprettTaskService = mockk<OpprettTaskService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
@@ -157,8 +155,8 @@ class CucumberMock(
             clockProvider = clockProvider,
         )
 
-    val småbarnstilleggService =
-        SmåbarnstilleggService(
+    val overgangsstønadService =
+        OvergangsstønadService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             efSakRestClient = efSakRestClientMock,
             periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
@@ -194,7 +192,7 @@ class CucumberMock(
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService, vilkårsvurderingService),
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
@@ -242,7 +240,7 @@ class CucumberMock(
             feilutbetaltValutaRepository = mockk(),
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vilkårsvurderingService = vilkårsvurderingService,
-            småbarnstilleggService = småbarnstilleggService,
+            overgangsstønadService = overgangsstønadService,
             refusjonEøsRepository = mockk(),
             integrasjonClient = mockk(),
             valutakursRepository = valutakursRepository,
@@ -604,7 +602,7 @@ class CucumberMock(
             vedtakService = vedtakService,
             behandlingService = behandlingService,
             vedtaksperiodeService = vedtaksperiodeService,
-            småbarnstilleggService = småbarnstilleggService,
+            overgangsstønadService = overgangsstønadService,
             taskService = taskService,
             beregningService = beregningService,
             autovedtakService = autovedtakService,
@@ -612,7 +610,6 @@ class CucumberMock(
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
             localDateProvider = mockedDateProvider,
             påVentService = mockPåVentService,
-            opprettTaskService = opprettTaskService,
             stegService = stegService,
         )
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)

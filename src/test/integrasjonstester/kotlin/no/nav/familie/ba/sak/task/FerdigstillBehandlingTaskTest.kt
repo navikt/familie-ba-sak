@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -99,7 +99,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
     @Autowired
-    lateinit var småbarnstilleggService: SmåbarnstilleggService
+    lateinit var overgangsstønadService: OvergangsstønadService
 
     @Autowired
     lateinit var taskService: TaskService
@@ -122,9 +122,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var settPåVentService: SettPåVentService
 
-    @Autowired
-    lateinit var opprettTaskService: OpprettTaskService
-
     private val fnr = randomFnr()
 
     @BeforeEach
@@ -133,7 +130,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     }
 
     private fun kjørSteg(resultat: Resultat): Behandling {
-        val aktørId = personidentService.hentAktør(fnr)
         val fnrBarn = leggTilPersonInfo(randomBarnFnr())
 
         val behandling =
@@ -235,7 +231,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 vedtakService = vedtakService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                småbarnstilleggService = småbarnstilleggService,
+                overgangsstønadService = overgangsstønadService,
                 taskService = taskService,
                 beregningService = beregningService,
                 autovedtakService = autovedtakService,
@@ -243,7 +239,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
                 localDateProvider = localDateProvider,
                 påVentService = settPåVentService,
-                opprettTaskService = opprettTaskService,
                 stegService = stegService,
             )
 

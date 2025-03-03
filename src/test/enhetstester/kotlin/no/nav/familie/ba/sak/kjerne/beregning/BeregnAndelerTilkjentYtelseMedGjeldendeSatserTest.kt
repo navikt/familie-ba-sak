@@ -359,12 +359,12 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
     val vilkårsvurdering = this.byggVilkårsvurdering()
 
-    val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
 
-    every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-    every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+    every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
     return tilkjentYtelseGenerator

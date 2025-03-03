@@ -72,7 +72,7 @@ class BeregningServiceTest {
     private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
-    private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
+    private val overgangsstønadService = mockk<OvergangsstønadService>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             andelTilkjentYtelseRepository,
@@ -111,7 +111,7 @@ class BeregningServiceTest {
                 behandlingRepository = behandlingRepository,
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService, vilkårsvurderingService),
+                tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService),
             )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -1418,8 +1418,8 @@ class BeregningServiceTest {
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
-        every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
-        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+        every { overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
+        every { overgangsstønadService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
             listOf(
                 InternPeriodeOvergangsstønad(
                     personIdent = søker.aktør.aktivFødselsnummer(),

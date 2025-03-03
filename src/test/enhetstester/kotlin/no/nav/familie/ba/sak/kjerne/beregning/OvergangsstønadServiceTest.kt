@@ -29,7 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
-class SmåbarnstilleggServiceTest {
+class OvergangsstønadServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val efSakRestClient = mockk<EfSakRestClient>()
     private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
@@ -39,12 +39,12 @@ class SmåbarnstilleggServiceTest {
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     private val localDateProvider = mockk<LocalDateProvider>()
 
-    private lateinit var småbarnstilleggService: SmåbarnstilleggService
+    private lateinit var overgangsstønadService: OvergangsstønadService
 
     @BeforeEach
     fun setUp() {
-        småbarnstilleggService =
-            SmåbarnstilleggService(
+        overgangsstønadService =
+            OvergangsstønadService(
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 efSakRestClient = efSakRestClient,
                 periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
@@ -103,7 +103,7 @@ class SmåbarnstilleggServiceTest {
         val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
         every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0
 
-        småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
+        overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søker.aktør,
             behandling = behandling,
         )
@@ -142,7 +142,7 @@ class SmåbarnstilleggServiceTest {
         val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
         every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0
 
-        småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
+        overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søker.aktør,
             behandling = behandling,
         )

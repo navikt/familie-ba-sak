@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
@@ -147,12 +147,12 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkå
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse(): TilkjentYtelse {
     val vilkårsvurdering = this.byggVilkårsvurdering()
 
-    val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
 
-    every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-    every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+    every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
     return tilkjentYtelseGenerator.genererTilkjentYtelse(

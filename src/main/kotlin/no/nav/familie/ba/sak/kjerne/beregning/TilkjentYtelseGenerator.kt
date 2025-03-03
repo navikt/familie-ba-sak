@@ -19,7 +19,7 @@ import java.time.LocalDate
 
 @Component
 class TilkjentYtelseGenerator(
-    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val overgangsstønadService: OvergangsstønadService,
     private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
     fun genererTilkjentYtelse(
@@ -122,12 +122,12 @@ class TilkjentYtelseGenerator(
         søkerAktør: Aktør,
         behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
+        overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søkerAktør,
             behandling = behandling,
         )
 
-        return småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
+        return overgangsstønadService.hentPerioderMedFullOvergangsstønad(behandling)
     }
 
     private fun erSmåbarnstilleggMulig(

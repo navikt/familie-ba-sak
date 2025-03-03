@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -39,7 +39,7 @@ class VedtaksperiodeServiceTest {
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val småbarnstilleggService: SmåbarnstilleggService = mockk()
+    private val overgangsstønadService: OvergangsstønadService = mockk()
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
     private val integrasjonClient = mockk<IntegrasjonClient>()
     private val kompetanseRepository = mockk<KompetanseRepository>()
@@ -60,7 +60,7 @@ class VedtaksperiodeServiceTest {
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 feilutbetaltValutaRepository = feilutbetaltValutaRepository,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-                småbarnstilleggService = småbarnstilleggService,
+                overgangsstønadService = overgangsstønadService,
                 refusjonEøsRepository = refusjonEøsRepository,
                 integrasjonClient = integrasjonClient,
                 valutakursRepository = mockk(),
@@ -111,7 +111,7 @@ class VedtaksperiodeServiceTest {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
-        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } returns emptyList()
+        every { overgangsstønadService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } returns emptyList()
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
         every { integrasjonClient.hentLandkoderISO2() } returns mapOf(Pair("NO", "NORGE"))
     }

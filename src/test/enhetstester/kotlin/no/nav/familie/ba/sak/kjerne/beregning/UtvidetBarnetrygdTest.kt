@@ -47,14 +47,14 @@ internal class UtvidetBarnetrygdTest {
     private val fødselsdatoOver6År = LocalDate.of(2014, 1, 1)
     private val fødselsdatoUnder6År = LocalDate.of(2021, 1, 15)
 
-    private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
 
     @BeforeEach
     fun setup() {
-        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     }
 
     @Test

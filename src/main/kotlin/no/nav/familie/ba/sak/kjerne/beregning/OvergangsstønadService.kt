@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class SmåbarnstilleggService(
+class OvergangsstønadService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val efSakRestClient: EfSakRestClient,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,

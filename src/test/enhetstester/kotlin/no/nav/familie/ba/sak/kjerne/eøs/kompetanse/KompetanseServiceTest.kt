@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -47,9 +47,9 @@ internal class KompetanseServiceTest {
     val utbetalingTidslinjeService: UtbetalingTidslinjeService = mockk()
     val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
-    val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
     val clockProvider = TestClockProvider()
 
     val kompetanseService =
@@ -71,8 +71,8 @@ internal class KompetanseServiceTest {
     @BeforeEach
     fun init() {
         mockKompetanseRepository.deleteAll()
-        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     }
 
     @Test

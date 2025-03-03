@@ -53,9 +53,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class TilkjentYtelseGeneratorTest {
-    private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
+    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
 
     @BeforeEach
     fun førHverTest() {
@@ -1246,8 +1246,8 @@ class TilkjentYtelseGeneratorTest {
         barna: List<Person>,
         overgangsstønadPerioder: List<MånedPeriode>,
     ): TilkjentYtelse {
-        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
-        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
             lagOvergangsstønadPerioder(
                 perioder = overgangsstønadPerioder,
                 søkerIdent = søker.aktør.aktivFødselsnummer(),
