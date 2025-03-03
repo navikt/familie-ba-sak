@@ -1,12 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.årMnd
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.ORBA
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.SMA
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.TILLEGG_ORBA
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.UTVIDET_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.plus
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.sep
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilTidslinje
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -18,7 +36,7 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        Assertions.assertEquals(10, ordinærePerioder.size)
+        assertEquals(10, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 970, fom = "2017-04", tom = "2019-02"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-03", tom = "2020-08"), ordinærePerioder[1])
@@ -36,13 +54,13 @@ class SatsServiceTest {
         forventet: TestKrPeriode,
         faktisk: Periode<Int>,
     ) {
-        Assertions.assertEquals(forventet.beløp, faktisk.verdi, "Forskjell i beløp")
-        Assertions.assertEquals(
+        assertEquals(forventet.beløp, faktisk.verdi, "Forskjell i beløp")
+        assertEquals(
             forventet.fom?.let { årMnd(it) },
             faktisk.fom?.toYearMonth(),
             "Forskjell i fra-og-med",
         )
-        Assertions.assertEquals(
+        assertEquals(
             forventet.tom?.let { årMnd(it) },
             faktisk.tom?.toYearMonth(),
             "Forskjell i til-og-med",
@@ -54,4 +72,63 @@ class SatsServiceTest {
         val fom: String?,
         val tom: String?,
     )
+
+    @Nested
+    inner class SatstypeTidslinje {
+        @Test
+        fun `Skal gi riktig sats for ordinær barnetrygd, 6 til 18 år`() {
+            val forventet =
+                (uendelig..feb(2019)).tilTidslinje { 970 } +
+                    (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
+                    (mar(2023)..jun(2023)).tilTidslinje { 1083 } +
+                    (jul(2023)..des(2023)).tilTidslinje { 1310 } +
+                    (jan(2024)..aug(2024)).tilTidslinje { 1510 } +
+                    (sep(2024)..uendelig).tilTidslinje { 1766 }
+
+            val faktisk = satstypeFamilieFellesTidslinje(ORBA)
+
+            assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
+        }
+
+        @Test
+        fun `Skal gi riktig sats for tillegg ordinær barnetrygd, 0 til 6 år`() {
+            val forventet =
+                (uendelig..feb(2019)).tilTidslinje { 970 } +
+                    (mar(2019)..aug(2020)).tilTidslinje { 1054 } +
+                    (sep(2020)..aug(2021)).tilTidslinje { 1354 } +
+                    (sep(2021)..des(2021)).tilTidslinje { 1654 } +
+                    (jan(2022)..feb(2023)).tilTidslinje { 1676 } +
+                    (mar(2023)..jun(2023)).tilTidslinje { 1723 } +
+                    (jul(2023)..uendelig).tilTidslinje { 1766 }
+
+            val faktisk = satstypeFamilieFellesTidslinje(TILLEGG_ORBA)
+
+            assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
+        }
+
+        @Test
+        fun `Skal gi riktig sats for småbarnstillegg`() {
+            val forventet =
+                (uendelig..feb(2023)).tilTidslinje { 660 } +
+                    (mar(2023)..jun(2023)).tilTidslinje { 678 } +
+                    (jul(2023)..uendelig).tilTidslinje { 696 }
+
+            val faktisk = satstypeFamilieFellesTidslinje(SMA)
+
+            assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
+        }
+
+        @Test
+        fun `Skal gi riktig sats for utvidet barnetrygd`() {
+            val forventet =
+                (uendelig..feb(2019)).tilTidslinje { 970 } +
+                    (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
+                    (mar(2023)..jun(2023)).tilTidslinje { 2489 } +
+                    (jul(2023)..uendelig).tilTidslinje { 2516 }
+
+            val faktisk = satstypeFamilieFellesTidslinje(UTVIDET_BARNETRYGD)
+
+            assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
+        }
+    }
 }
