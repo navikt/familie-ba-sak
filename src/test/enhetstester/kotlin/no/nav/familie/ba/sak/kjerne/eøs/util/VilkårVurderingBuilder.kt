@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPe
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -145,14 +146,18 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer(
 fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse(): TilkjentYtelse {
+    val vilkårsvurdering = this.byggVilkårsvurdering()
+
     val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+    val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
 
     every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
     every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
     return tilkjentYtelseGenerator.genererTilkjentYtelse(
-        vilkårsvurdering = this.byggVilkårsvurdering(),
+        behandling = vilkårsvurdering.behandling,
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         fagsakType = FagsakType.NORMAL,
     )

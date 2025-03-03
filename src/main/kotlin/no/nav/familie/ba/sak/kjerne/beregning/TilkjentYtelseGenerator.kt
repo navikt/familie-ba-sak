@@ -15,20 +15,23 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
 class TilkjentYtelseGenerator(
     private val småbarnstilleggService: SmåbarnstilleggService,
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
     fun genererTilkjentYtelse(
-        vilkårsvurdering: Vilkårsvurdering,
+        behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
         fagsakType: FagsakType,
     ): TilkjentYtelse {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+
         val tilkjentYtelse =
             TilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,

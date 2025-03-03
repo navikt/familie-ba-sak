@@ -190,12 +190,11 @@ class CucumberMock(
             fagsakService = fagsakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            vilkårsvurderingRepository = vilkårsvurderingRepository,
             behandlingRepository = mockk(),
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService),
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService, vilkårsvurderingService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)

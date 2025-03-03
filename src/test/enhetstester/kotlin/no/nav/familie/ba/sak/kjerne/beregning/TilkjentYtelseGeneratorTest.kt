@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfallFraPdl
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -53,7 +54,8 @@ import java.time.YearMonth
 
 class TilkjentYtelseGeneratorTest {
     private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
-    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+    private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
 
     @BeforeEach
     fun førHverTest() {
@@ -99,9 +101,11 @@ class TilkjentYtelseGeneratorTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )
@@ -133,9 +137,11 @@ class TilkjentYtelseGeneratorTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )
@@ -171,9 +177,11 @@ class TilkjentYtelseGeneratorTest {
                 under18ÅrVilkårOppfyltTom = barnDødsfallsDato,
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )
@@ -204,9 +212,11 @@ class TilkjentYtelseGeneratorTest {
                 under18ÅrVilkårOppfyltTom = barnDødsfallsDato,
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )
@@ -235,10 +245,12 @@ class TilkjentYtelseGeneratorTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -297,10 +309,12 @@ class TilkjentYtelseGeneratorTest {
                 under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -341,10 +355,12 @@ class TilkjentYtelseGeneratorTest {
                 backToBackFom = LocalDate.of(2019, 9, 2),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns oppdatertVilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = oppdatertVilkårsvurdering,
+                    behandling = oppdatertVilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -376,10 +392,12 @@ class TilkjentYtelseGeneratorTest {
                 backToBackFom = LocalDate.of(2019, 9, 2),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns oppdatertVilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = oppdatertVilkårsvurdering,
+                    behandling = oppdatertVilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -1253,6 +1271,7 @@ class TilkjentYtelseGeneratorTest {
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
 
+
         val endretUtbetalingAndeler =
             endretAndeler.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
@@ -1265,9 +1284,11 @@ class TilkjentYtelseGeneratorTest {
                 )
             }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag =
                     lagPersonopplysningsgrunnlag(
                         personer = barna.plus(søker),

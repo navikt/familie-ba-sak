@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.tidslinje.tomTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -48,7 +49,8 @@ internal class KompetanseServiceTest {
     val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+    val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
     val clockProvider = TestClockProvider()
 
     val kompetanseService =
@@ -296,9 +298,11 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
                 fagsakType = FagsakType.NORMAL,
             )
@@ -358,9 +362,11 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
                 fagsakType = FagsakType.NORMAL,
             )
@@ -415,9 +421,11 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
                 fagsakType = FagsakType.NORMAL,
             )

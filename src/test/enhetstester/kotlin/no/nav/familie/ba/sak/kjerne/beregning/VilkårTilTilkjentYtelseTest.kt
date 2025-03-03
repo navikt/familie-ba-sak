@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -35,7 +36,8 @@ import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
     private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
-    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+    private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
 
     @BeforeEach
     fun førHverTest() {
@@ -96,10 +98,11 @@ class VilkårTilTilkjentYtelseTest {
 
         every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
         every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
         val faktiskTilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )
@@ -176,10 +179,11 @@ class VilkårTilTilkjentYtelseTest {
                 emptyList()
             }
         }
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
         val faktiskTilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )
@@ -247,10 +251,11 @@ class VilkårTilTilkjentYtelseTest {
 
         every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
         every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
         val faktiskTilkjentYtelse =
             tilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
             )

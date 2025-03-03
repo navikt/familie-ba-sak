@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -47,7 +48,8 @@ internal class UtvidetBarnetrygdTest {
     private val fødselsdatoUnder6År = LocalDate.of(2021, 1, 15)
 
     private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
-    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+    private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
 
     @BeforeEach
     fun setup() {
@@ -116,10 +118,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søker, barnA, barnB).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -209,10 +213,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søker, oppfyltBarn).lagGrunnlagPersoner(this, fødselsdatoUnder6År))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -366,10 +372,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -448,10 +456,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -530,10 +540,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -621,10 +633,13 @@ internal class UtvidetBarnetrygdTest {
                 .apply {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
+
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -736,10 +751,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -849,10 +866,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
@@ -961,10 +980,12 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
             tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse

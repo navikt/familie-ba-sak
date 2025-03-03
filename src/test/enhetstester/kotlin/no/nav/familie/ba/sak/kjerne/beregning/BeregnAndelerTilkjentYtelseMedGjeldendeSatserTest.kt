@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.okt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -356,15 +357,19 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
 
 private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelse(): List<BeregnetAndel> {
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
+    val vilkårsvurdering = this.byggVilkårsvurdering()
+
     val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+    val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock, vilkårsvurderingServiceMock)
 
     every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
     every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
     return tilkjentYtelseGenerator
         .genererTilkjentYtelse(
-            vilkårsvurdering = this.byggVilkårsvurdering(),
+            behandling = vilkårsvurdering.behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
             fagsakType = FagsakType.NORMAL,
         ).andelerTilkjentYtelse

@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -64,6 +65,7 @@ import java.time.YearMonth
 class BeregningServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingRepository = mockk<BehandlingRepository>()
@@ -106,11 +108,10 @@ class BeregningServiceTest {
                 fagsakService = fagsakService,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
-                vilkårsvurderingRepository = vilkårsvurderingRepository,
                 behandlingRepository = behandlingRepository,
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService),
+                tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService, vilkårsvurderingService),
             )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
