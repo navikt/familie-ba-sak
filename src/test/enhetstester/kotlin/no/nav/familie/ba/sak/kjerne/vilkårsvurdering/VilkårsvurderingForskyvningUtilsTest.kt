@@ -124,7 +124,7 @@ class VilkårsvurderingForskyvningUtilsTest {
         val fullPeriode = borMedSøkerPerioder.last()
 
         assertEquals(fom.plusMonths(1), deltBostedPeriode.fom)
-        assertEquals(deltBostedTom.plusMonths(1), deltBostedPeriode.tom)
+        assertEquals(deltBostedTom.plusMonths(1).sisteDagIMåned(), deltBostedPeriode.tom)
         assertEquals(deltBostedTom.plusMonths(2).førsteDagIInneværendeMåned(), fullPeriode.fom)
         assertNull(fullPeriode.tom)
 
