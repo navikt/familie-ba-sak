@@ -48,6 +48,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -82,6 +83,7 @@ class BehandlingsresultatStegTest {
     private val valutakursRepository: ValutakursRepository = mockk()
     private val valutakursService = mockk<ValutakursService>()
     private val kompetanseRepository = mockk<KompetanseRepository>()
+    private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
@@ -100,6 +102,7 @@ class BehandlingsresultatStegTest {
             valutakursRepository = valutakursRepository,
             localDateProvider = RealDateProvider(),
             kompetanseRepository = kompetanseRepository,
+            småbarnstilleggService = småbarnstilleggService
         )
 
     private val behandling =
@@ -315,7 +318,7 @@ class BehandlingsresultatStegTest {
 
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns lagBehandling()
 
-            every { beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(any(), any()) } returns true
+            every { småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(any(), any()) } returns true
 
             every { behandlingService.oppdaterStatusPåBehandling(any(), any()) } returns lagBehandling()
 

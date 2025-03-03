@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
+package no.nav.familie.ba.sak.kjerne.småbarnstillegg
 
 import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres

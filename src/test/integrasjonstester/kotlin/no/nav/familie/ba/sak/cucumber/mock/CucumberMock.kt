@@ -57,6 +57,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPerio
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BeslutteVedtak
 import no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling
 import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
@@ -134,6 +135,7 @@ class CucumberMock(
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
+    val småbarnstilleggService = mockk<SmåbarnstilleggService>()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -382,6 +384,7 @@ class CucumberMock(
             valutakursRepository = valutakursRepository,
             localDateProvider = mockedDateProvider,
             kompetanseRepository = kompetanseRepository,
+            småbarnstilleggService = småbarnstilleggService,
         )
 
     val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockUnleashNextMedContextService())
