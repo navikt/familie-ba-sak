@@ -5,20 +5,15 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isBetween
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerMed
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.LocalDate
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
 import no.nav.familie.tidslinje.Periode as FamilieFellesTidslinjePeriode
 import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
 
@@ -89,21 +84,6 @@ object SatsService {
         oppdatertBeløp: Int,
     ): LocalDate? = hentAllesatser().find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
 }
-
-fun satstypeTidslinje(satsType: SatsType) =
-    tidslinje {
-        SatsService
-            .finnAlleSatserFor(satsType)
-            .map {
-                val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
-                val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
-                TidslinjePeriode(
-                    fraOgMed = fom.tilTidspunktEllerUendeligTidlig(tom),
-                    tilOgMed = tom.tilTidspunktEllerUendeligSent(fom),
-                    it.beløp,
-                )
-            }
-    }
 
 fun satstypeFamilieFellesTidslinje(satsType: SatsType) =
     SatsService
