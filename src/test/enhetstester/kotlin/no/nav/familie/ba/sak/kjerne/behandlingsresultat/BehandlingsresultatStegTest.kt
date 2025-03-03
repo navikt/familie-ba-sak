@@ -102,7 +102,7 @@ class BehandlingsresultatStegTest {
             valutakursRepository = valutakursRepository,
             localDateProvider = RealDateProvider(),
             kompetanseRepository = kompetanseRepository,
-            småbarnstilleggService = småbarnstilleggService
+            småbarnstilleggService = småbarnstilleggService,
         )
 
     private val behandling =

@@ -16,7 +16,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class OvergangsstønadUtilsTest {
-
     @Test
     fun `Skal svare true om at nye perioder med full OS påvirker behandling`() {
         val personIdent = randomFnr()

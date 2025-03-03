@@ -16,11 +16,11 @@ class VedtaksperiodefinnerSmåbarnstilleggFeil(
     override val httpStatus: HttpStatus = HttpStatus.OK,
     override val throwable: Throwable? = null,
 ) : Feil(
-    melding,
-    frontendFeilmelding,
-    httpStatus,
-    throwable,
-)
+        melding,
+        frontendFeilmelding,
+        httpStatus,
+        throwable,
+    )
 
 @Throws(VedtaksperiodefinnerSmåbarnstilleggFeil::class)
 internal fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(

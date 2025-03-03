@@ -18,9 +18,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
-import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.erEndringIOvergangsstønadFramITid
 import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -174,7 +173,7 @@ class AutovedtakSmåbarnstilleggService(
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
             småbarnstilleggService.finnInnvilgedeOgReduserteAndelerSmåbarnstillegg(
                 behandling = behandlingEtterBehandlingsresultat,
-                sistIverksatteBehandling = sistIverksatteBehandling
+                sistIverksatteBehandling = sistIverksatteBehandling,
             )
 
         vedtaksperiodeHentOgPersisterService.lagre(

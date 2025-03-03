@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
 class SmåbarnstilleggUtilsTest {
-
     @Test
     fun `Skal kunne automatisk iverksette småbarnstillegg når endringer i OS kun er frem i tid`() {
         val forrigeAndeler =

@@ -63,7 +63,7 @@ class BehandlingsresultatSteg(
     private val valutakursRepository: ValutakursRepository,
     private val localDateProvider: LocalDateProvider,
     private val kompetanseRepository: KompetanseRepository,
-    private val småbarnstilleggService: SmåbarnstilleggService
+    private val småbarnstilleggService: SmåbarnstilleggService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,

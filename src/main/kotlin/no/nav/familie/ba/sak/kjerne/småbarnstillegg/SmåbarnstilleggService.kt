@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 class SmåbarnstilleggService(
     private val beregningService: BeregningService,
 ) {
-
     fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
         behandling: Behandling,
         sistIverksatteBehandling: Behandling?,
@@ -28,23 +27,28 @@ class SmåbarnstilleggService(
         )
     }
 
-    fun finnInnvilgedeOgReduserteAndelerSmåbarnstillegg(sistIverksatteBehandling: Behandling?, behandling: Behandling): Pair<List<MånedPeriode>, List<MånedPeriode>> {
+    fun finnInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+        sistIverksatteBehandling: Behandling?,
+        behandling: Behandling,
+    ): Pair<List<MånedPeriode>, List<MånedPeriode>> {
         val forrigeSmåbarnstilleggAndeler =
             if (sistIverksatteBehandling == null) {
                 emptyList()
             } else {
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id,
-                ).filter { it.erSmåbarnstillegg() }
+                beregningService
+                    .hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                        behandlingId = sistIverksatteBehandling.id,
+                    ).filter { it.erSmåbarnstillegg() }
             }
 
         val nyeSmåbarnstilleggAndeler =
             if (sistIverksatteBehandling == null) {
                 emptyList()
             } else {
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = behandling.id,
-                ).filter { it.erSmåbarnstillegg() }
+                beregningService
+                    .hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                        behandlingId = behandling.id,
+                    ).filter { it.erSmåbarnstillegg() }
             }
 
         return hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
@@ -52,5 +56,4 @@ class SmåbarnstilleggService(
             nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
         )
     }
-
 }

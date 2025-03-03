@@ -6,10 +6,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory

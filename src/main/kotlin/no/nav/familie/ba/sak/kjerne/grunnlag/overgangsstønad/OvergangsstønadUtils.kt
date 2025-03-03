@@ -40,7 +40,6 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     )
 }
 
-
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.førerTilEndringIUtbetalingFraForrigeBehandling(
     forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): Boolean {
