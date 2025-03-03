@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -14,10 +13,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.beskjærEtter
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
@@ -114,57 +109,6 @@ fun kanAutomatiskIverksetteSmåbarnstillegg(
                 YearMonth.now(),
             )
         }
-
-@Throws(VedtaksperiodefinnerSmåbarnstilleggFeil::class)
-fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(
-    innvilgetMånedPeriode: MånedPeriode?,
-    redusertMånedPeriode: MånedPeriode?,
-    vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-): VedtaksperiodeMedBegrunnelser {
-    val vedtaksperiodeSomSkalOppdateresOgBegrunnelse: Pair<VedtaksperiodeMedBegrunnelser?, Standardbegrunnelse>? =
-        when {
-            innvilgetMånedPeriode == null && redusertMånedPeriode == null -> null
-            innvilgetMånedPeriode != null && redusertMånedPeriode == null -> {
-                Pair(
-                    vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == innvilgetMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
-                    Standardbegrunnelse.INNVILGET_SMÅBARNSTILLEGG,
-                )
-            }
-
-            innvilgetMånedPeriode == null && redusertMånedPeriode != null -> {
-                Pair(
-                    vedtaksperioderMedBegrunnelser.find { it.fom?.toYearMonth() == redusertMånedPeriode.fom && it.type == Vedtaksperiodetype.UTBETALING },
-                    Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
-                )
-            }
-
-            else -> null
-        }
-
-    val vedtaksperiodeSomSkalOppdateres = vedtaksperiodeSomSkalOppdateresOgBegrunnelse?.first
-    if (vedtaksperiodeSomSkalOppdateres == null) {
-        secureLogger.info(
-            "Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg.\n" +
-                "Innvilget periode: $innvilgetMånedPeriode.\n" +
-                "Redusert periode: $redusertMånedPeriode.\n" +
-                "Perioder: ${vedtaksperioderMedBegrunnelser.map { "Periode(type=${it.type}, fom=${it.fom}, tom=${it.tom})" }}",
-        )
-
-        throw VedtaksperiodefinnerSmåbarnstilleggFeil("Finner ikke aktuell periode å begrunne ved autovedtak småbarnstillegg. Se securelogger for å periodene som ble generert.")
-    }
-
-    vedtaksperiodeSomSkalOppdateres.settBegrunnelser(
-        vedtaksperiodeSomSkalOppdateres.begrunnelser.toList() +
-            listOf(
-                Vedtaksbegrunnelse(
-                    vedtaksperiodeMedBegrunnelser = vedtaksperiodeSomSkalOppdateres,
-                    standardbegrunnelse = vedtaksperiodeSomSkalOppdateresOgBegrunnelse.second,
-                ),
-            ),
-    )
-
-    return vedtaksperiodeSomSkalOppdateres
-}
 
 fun kombinerBarnasTidslinjerTilUnder3ÅrResultat(
     alleAndelerForBarnUnder3År: Iterable<AndelTilkjentYtelseMedEndreteUtbetalinger>,
