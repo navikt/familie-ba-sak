@@ -1,13 +1,26 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import org.springframework.http.HttpStatus
+
+class VedtaksperiodefinnerSmåbarnstilleggFeil(
+    melding: String,
+    override val frontendFeilmelding: String? = null,
+    override val httpStatus: HttpStatus = HttpStatus.OK,
+    override val throwable: Throwable? = null,
+) : Feil(
+    melding,
+    frontendFeilmelding,
+    httpStatus,
+    throwable,
+)
 
 @Throws(VedtaksperiodefinnerSmåbarnstilleggFeil::class)
 internal fun finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse(

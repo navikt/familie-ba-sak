@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.småbarnstillegg
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
-import no.nav.familie.ba.sak.kjerne.beregning.kanAutomatiskIverksetteSmåbarnstillegg
 import org.springframework.stereotype.Service
 
 @Service
