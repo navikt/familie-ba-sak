@@ -34,6 +34,9 @@ private fun settClientIdOgSecret() {
     val process = ProcessBuilder(cmd).start()
 
     if (process.waitFor() == 1) {
+        val inputStream = BufferedReader(InputStreamReader(process.inputStream))
+        inputStream.lines().forEach { println(it) }
+        inputStream.close()
         error("Klarte ikke hente variabler fra Nais. Er du logget på Naisdevice og gcloud?")
     }
 
