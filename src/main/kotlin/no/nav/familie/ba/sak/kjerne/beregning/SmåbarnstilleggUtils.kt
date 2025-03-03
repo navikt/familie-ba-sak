@@ -9,9 +9,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
-import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erTilogMed3ÅrTidslinje
@@ -21,11 +18,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
-import no.nav.familie.kontrakter.felles.ef.EksternPeriode
-import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.beskjærEtter
-import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
@@ -34,13 +28,6 @@ import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-
-fun List<InternPeriodeOvergangsstønad>.splittOgSlåSammen(
-    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
-    dagensDato: LocalDate,
-) = this
-    .slåSammenTidligerePerioder(dagensDato)
-    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling, dagensDato)
 
 class VedtaksperiodefinnerSmåbarnstilleggFeil(
     melding: String,
@@ -281,28 +268,3 @@ enum class Endring {
     MISTET_PERIODE,
     FÅTT_PERIODE,
 }
-
-fun erEndringIOvergangsstønadFramITid(
-    perioderMedFullOvergangsstønadForrigeBehandling: List<InternPeriodeOvergangsstønad>,
-    perioderMedFullOvergangsstønad: List<EksternPeriode>,
-    dagensDato: LocalDate,
-): Boolean {
-    val overgangsstønadForrigeBehandlingTidslinje = perioderMedFullOvergangsstønadForrigeBehandling.tilTidslinje()
-    val overgangsstønadTidslinje = perioderMedFullOvergangsstønad.tilTidslinje()
-
-    val endringTidslinje =
-        overgangsstønadForrigeBehandlingTidslinje.kombinerMed(overgangsstønadTidslinje) { overgangsstønadFraForrigeBehandling, overgangsstønad ->
-            when {
-                overgangsstønadFraForrigeBehandling == null && overgangsstønad != null -> Endring.FÅTT_PERIODE
-                overgangsstønadFraForrigeBehandling != null && overgangsstønad == null -> Endring.MISTET_PERIODE
-                else -> Endring.INGEN_ENDRING
-            }
-        }
-
-    val endringsperioder = endringTidslinje.tilPerioder().filter { it.verdi != Endring.INGEN_ENDRING }
-    val erEndringFramITid = endringsperioder.all { it.fom != null && it.fom!!.toYearMonth().isAfter(dagensDato.toYearMonth().plusMonths(1)) }
-    return erEndringFramITid
-}
-
-@JvmName("tilTidslinjeEksternPeriode")
-private fun List<EksternPeriode>.tilTidslinje(): Tidslinje<EksternPeriode> = map { Periode(verdi = it, fom = it.fomDato, tom = it.tomDato) }.tilTidslinje()
