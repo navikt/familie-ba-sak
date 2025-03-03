@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.satstypeFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
@@ -56,7 +56,7 @@ class TilkjentYtelseBuilder(
         differanse = differanse,
         nasjonalt = nasjonalt,
     ) {
-        satstypeFamilieFellesTidslinje(SatsType.SMA)
+        satstypeTidslinje(SatsType.SMA)
     }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medUtvidet(
@@ -71,7 +71,7 @@ class TilkjentYtelseBuilder(
         nasjonalt = nasjonalt,
         differanse = differanse,
     ) {
-        satstypeFamilieFellesTidslinje(SatsType.UTVIDET_BARNETRYGD)
+        satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
     }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medOrdinær(
@@ -88,9 +88,9 @@ class TilkjentYtelseBuilder(
         differanse,
         kalkulert,
     ) {
-        val orbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.ORBA)
+        val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
         val tilleggOrbaTidslinje =
-            satstypeFamilieFellesTidslinje(SatsType.TILLEGG_ORBA)
+            satstypeTidslinje(SatsType.TILLEGG_ORBA)
                 .filtrerMed(erUnder6ÅrTidslinje(it))
         orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
     }

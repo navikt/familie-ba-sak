@@ -85,7 +85,7 @@ class SatsServiceTest {
                     (jan(2024)..aug(2024)).tilTidslinje { 1510 } +
                     (sep(2024)..uendelig).tilTidslinje { 1766 }
 
-            val faktisk = satstypeFamilieFellesTidslinje(ORBA)
+            val faktisk = satstypeTidslinje(ORBA)
 
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
@@ -101,7 +101,7 @@ class SatsServiceTest {
                     (mar(2023)..jun(2023)).tilTidslinje { 1723 } +
                     (jul(2023)..uendelig).tilTidslinje { 1766 }
 
-            val faktisk = satstypeFamilieFellesTidslinje(TILLEGG_ORBA)
+            val faktisk = satstypeTidslinje(TILLEGG_ORBA)
 
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
@@ -113,7 +113,7 @@ class SatsServiceTest {
                     (mar(2023)..jun(2023)).tilTidslinje { 678 } +
                     (jul(2023)..uendelig).tilTidslinje { 696 }
 
-            val faktisk = satstypeFamilieFellesTidslinje(SMA)
+            val faktisk = satstypeTidslinje(SMA)
 
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }
@@ -126,7 +126,7 @@ class SatsServiceTest {
                     (mar(2023)..jun(2023)).tilTidslinje { 2489 } +
                     (jul(2023)..uendelig).tilTidslinje { 2516 }
 
-            val faktisk = satstypeFamilieFellesTidslinje(UTVIDET_BARNETRYGD)
+            val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD)
 
             assertEquals(forventet.tilPerioder(), faktisk.tilPerioder())
         }

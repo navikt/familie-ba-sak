@@ -11,11 +11,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerMed
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.LocalDate
-import no.nav.familie.tidslinje.Periode as FamilieFellesTidslinjePeriode
-import no.nav.familie.tidslinje.Tidslinje as FamilieFellesTidslinje
+import no.nav.familie.tidslinje.Periode as TidslinjePeriode
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -85,22 +85,22 @@ object SatsService {
     ): LocalDate? = hentAllesatser().find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
 }
 
-fun satstypeFamilieFellesTidslinje(satsType: SatsType) =
+fun satstypeTidslinje(satsType: SatsType) =
     SatsService
         .finnAlleSatserFor(satsType)
         .map {
             val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.førsteDagIInneværendeMåned()
             val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.sisteDagIMåned()
-            FamilieFellesTidslinjePeriode(
+            TidslinjePeriode(
                 verdi = it.beløp,
                 fom = fom,
                 tom = tom,
             )
         }.tilTidslinje()
 
-fun lagOrdinærTidslinje(barn: Person): FamilieFellesTidslinje<Int> {
-    val orbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.ORBA)
-    val tilleggOrbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
+fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int> {
+    val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
+    val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
     return orbaTidslinje
         .kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
         .beskjærFraOgMed(fraOgMed = barn.fødselsdato.førsteDagIInneværendeMåned())

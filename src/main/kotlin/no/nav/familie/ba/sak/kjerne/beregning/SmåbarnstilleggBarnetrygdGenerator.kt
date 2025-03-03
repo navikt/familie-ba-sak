@@ -55,7 +55,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         søkerAktør: Aktør,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> =
         this
-            .kombinerUtenNullMed(satstypeFamilieFellesTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
+            .kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
                 val prosentIPeriode = småbarnstilleggPeriode.prosent
                 val beløpIPeriode = sats.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 
