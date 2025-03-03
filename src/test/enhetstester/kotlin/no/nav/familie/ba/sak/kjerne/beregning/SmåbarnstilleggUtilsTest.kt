@@ -310,9 +310,8 @@ class SmåbarnstilleggUtilsTest {
 
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
-                småbarnstilleggBarnetrygdGenerator =
-                    SmåbarnstilleggBarnetrygdGenerator(
-                        behandlingId = 1L,
+                småbarnstilleggGenerator =
+                    SmåbarnstilleggGenerator(
                         tilkjentYtelse = lagInitiellTilkjentYtelse(),
                     ),
                 nyePerioderMedFullOvergangsstønad =
@@ -357,9 +356,8 @@ class SmåbarnstilleggUtilsTest {
 
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
-                småbarnstilleggBarnetrygdGenerator =
-                    SmåbarnstilleggBarnetrygdGenerator(
-                        behandlingId = 1L,
+                småbarnstilleggGenerator =
+                    SmåbarnstilleggGenerator(
                         tilkjentYtelse = lagInitiellTilkjentYtelse(),
                     ),
                 nyePerioderMedFullOvergangsstønad =
@@ -407,9 +405,8 @@ class SmåbarnstilleggUtilsTest {
 
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
-                småbarnstilleggBarnetrygdGenerator =
-                    SmåbarnstilleggBarnetrygdGenerator(
-                        behandlingId = 1L,
+                småbarnstilleggGenerator =
+                    SmåbarnstilleggGenerator(
                         tilkjentYtelse = lagInitiellTilkjentYtelse(),
                     ),
                 nyePerioderMedFullOvergangsstønad =
@@ -476,9 +473,8 @@ class SmåbarnstilleggUtilsTest {
 
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
-                småbarnstilleggBarnetrygdGenerator =
-                    SmåbarnstilleggBarnetrygdGenerator(
-                        behandlingId = 1L,
+                småbarnstilleggGenerator =
+                    SmåbarnstilleggGenerator(
                         tilkjentYtelse = lagInitiellTilkjentYtelse(),
                     ),
                 nyePerioderMedFullOvergangsstønad =
@@ -531,9 +527,8 @@ class SmåbarnstilleggUtilsTest {
 
         val påvirkerFagsak =
             vedtakOmOvergangsstønadPåvirkerFagsak(
-                småbarnstilleggBarnetrygdGenerator =
-                    SmåbarnstilleggBarnetrygdGenerator(
-                        behandlingId = 1L,
+                småbarnstilleggGenerator =
+                    SmåbarnstilleggGenerator(
                         tilkjentYtelse = lagInitiellTilkjentYtelse(),
                     ),
                 nyePerioderMedFullOvergangsstønad =

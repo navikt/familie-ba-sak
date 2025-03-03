@@ -136,9 +136,8 @@ class SmåbarnstilleggService(
         secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
-            småbarnstilleggBarnetrygdGenerator =
-                SmåbarnstilleggBarnetrygdGenerator(
-                    behandlingId = sistIverksatteBehandling.id,
+            småbarnstilleggGenerator =
+                SmåbarnstilleggGenerator(
                     tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling,
                 ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,

@@ -20,7 +20,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-class SmåbarnstilleggBarnetrygdGeneratorTest {
+class SmåbarnstilleggGeneratorTest {
     val søker = lagPerson(type = PersonType.SØKER)
     val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(3).minusMonths(1))
     val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(2).minusMonths(1))
@@ -74,7 +74,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
@@ -140,7 +140,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
@@ -203,7 +203,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
@@ -270,7 +270,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggGenerator(tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,

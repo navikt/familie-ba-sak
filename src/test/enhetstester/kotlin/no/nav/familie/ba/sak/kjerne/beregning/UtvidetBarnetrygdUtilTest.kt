@@ -103,7 +103,7 @@ class UtvidetBarnetrygdUtilTest {
                 resultat = Resultat.OPPFYLT,
                 periodeFom = LocalDate.of(2021, 10, 1),
                 periodeTom = LocalDate.of(2022, 2, 28),
-                vilkårType = Vilkår.UTVIDET_BARNETRYGD
+                vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             )
 
         val personResultatBarn =

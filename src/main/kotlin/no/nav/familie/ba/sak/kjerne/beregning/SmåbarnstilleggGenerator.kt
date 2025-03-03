@@ -13,8 +13,7 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import java.time.LocalDate
 
-data class SmåbarnstilleggBarnetrygdGenerator(
-    val behandlingId: Long,
+data class SmåbarnstilleggGenerator(
     val tilkjentYtelse: TilkjentYtelse,
 ) {
     fun lagSmåbarnstilleggAndeler(

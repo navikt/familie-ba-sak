@@ -84,8 +84,7 @@ class TilkjentYtelseGenerator(
 
         val andelerTilkjentYtelseSmåbarnstillegg =
             if (småbarnstilleggErMulig) {
-                SmåbarnstilleggBarnetrygdGenerator(
-                    behandlingId = behandling.id,
+                SmåbarnstilleggGenerator(
                     tilkjentYtelse = tilkjentYtelse,
                 ).lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad =

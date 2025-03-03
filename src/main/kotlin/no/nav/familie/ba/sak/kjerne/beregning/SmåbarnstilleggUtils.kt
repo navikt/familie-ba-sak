@@ -55,7 +55,7 @@ class VedtaksperiodefinnerSmåbarnstilleggFeil(
     )
 
 fun vedtakOmOvergangsstønadPåvirkerFagsak(
-    småbarnstilleggBarnetrygdGenerator: SmåbarnstilleggBarnetrygdGenerator,
+    småbarnstilleggGenerator: SmåbarnstilleggGenerator,
     nyePerioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
@@ -65,7 +65,7 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
     val (forrigeUtvidetAndeler, forrigeBarnasAndeler) = forrigeAndelerIkkeSmåbarnstillegg.partition { it.erUtvidet() }
 
     val nyeSmåbarnstilleggAndeler =
-        småbarnstilleggBarnetrygdGenerator.lagSmåbarnstilleggAndeler(
+        småbarnstilleggGenerator.lagSmåbarnstilleggAndeler(
             perioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
             barnasAndeler = forrigeBarnasAndeler,
             utvidetAndeler = forrigeUtvidetAndeler,
