@@ -182,4 +182,11 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         behandlingId: Long,
         fomVedtaksperiode: LocalDate,
     ): List<String>
+
+    @Query(
+        """
+            SELECT b.fagsak.id FROM Behandling b WHERE b.id in (:behandlingIder)
+        """,
+    )
+    fun finnFagsakIderForBehandlinger(behandlingIder: List<Long>): List<Long>
 }

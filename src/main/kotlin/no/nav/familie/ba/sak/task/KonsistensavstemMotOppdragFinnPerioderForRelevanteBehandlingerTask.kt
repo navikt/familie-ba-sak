@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
@@ -22,6 +24,7 @@ import java.util.Properties
 class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val avstemmingService: AvstemmingService,
     val taskService: TaskService,
+    val unleashNextMedContextService: UnleashNextMedContextService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val taskDto =
@@ -40,10 +43,17 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
         }
 
         val perioderTilAvstemming =
-            avstemmingService.hentDataForKonsistensavstemming(
-                taskDto.avstemmingsdato,
-                taskDto.relevanteBehandlinger,
-            )
+            if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING)) {
+                avstemmingService.hentDataForKonsistensavstemmingNy(
+                    taskDto.avstemmingsdato,
+                    taskDto.relevanteBehandlinger,
+                )
+            } else {
+                avstemmingService.hentDataForKonsistensavstemming(
+                    taskDto.avstemmingsdato,
+                    taskDto.relevanteBehandlinger,
+                )
+            }
 
         logger.info("Finner perioder til avstemming for transaksjonsId ${taskDto.transaksjonsId} og chunk ${taskDto.chunkNr} med ${perioderTilAvstemming.size} løpende saker")
         val konsistensavstemmingDataTask =

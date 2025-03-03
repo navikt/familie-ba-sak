@@ -28,6 +28,7 @@ class AvstemmingService(
     private val taskService: TaskService,
     private val batchRepository: BatchRepository,
     private val dataChunkRepository: DataChunkRepository,
+    private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
 ) {
     fun grensesnittavstemOppdrag(
         fraDato: LocalDateTime,
@@ -160,6 +161,43 @@ class AvstemmingService(
             ).medTriggerTid(triggerTid)
         taskService.save(task)
     }
+
+    fun hentDataForKonsistensavstemmingNy(
+        avstemmingstidspunkt: LocalDateTime,
+        relevanteBehandlinger: List<Long>,
+    ): List<PerioderForBehandling> =
+        relevanteBehandlinger
+            .chunked(1000)
+            .map { chunk ->
+                val relevantePerioder = utbetalingsTidslinjeService.genererUtbetalingsperioderForBehandlingerEtterDato(chunk, avstemmingstidspunkt.toLocalDate())
+
+                val aktiveFødselsnummere =
+                    behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
+                        relevantePerioder.map { it.verdi.behandlingId },
+                    )
+
+                val tssEksternIdForBehandlinger =
+                    behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(
+                        relevantePerioder.map { it.verdi.behandlingId },
+                    )
+
+                relevantePerioder
+                    .groupBy { it.verdi.behandlingId }
+                    .map { (behandlingId, perioder) ->
+                        PerioderForBehandling(
+                            behandlingId = behandlingId.toString(),
+                            aktivFødselsnummer =
+                                aktiveFødselsnummere[behandlingId]
+                                    ?: error("Finnes ikke et aktivt fødselsnummer for behandling $behandlingId"),
+                            perioder =
+                                perioder
+                                    .map {
+                                        it.verdi.periodeId
+                                    }.toSet(),
+                            utebetalesTil = tssEksternIdForBehandlinger[behandlingId],
+                        )
+                    }
+            }.flatten()
 
     fun hentDataForKonsistensavstemming(
         avstemmingstidspunkt: LocalDateTime,
