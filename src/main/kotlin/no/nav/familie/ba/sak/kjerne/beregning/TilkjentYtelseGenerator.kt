@@ -32,7 +32,7 @@ class TilkjentYtelseGenerator(
 
         val tilkjentYtelse =
             TilkjentYtelse(
-                behandling = vilkårsvurdering.behandling,
+                behandling = behandling,
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now(),
             )
@@ -49,7 +49,7 @@ class TilkjentYtelseGenerator(
                     if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}. Forventet ${PersonType.BARN}")
 
                     AndelTilkjentYtelse(
-                        behandlingId = vilkårsvurdering.behandling.id,
+                        behandlingId = behandling.id,
                         tilkjentYtelse = tilkjentYtelse,
                         aktør = it.person.aktør,
                         stønadFom = it.stønadFom,
@@ -87,13 +87,13 @@ class TilkjentYtelseGenerator(
         val andelerTilkjentYtelseSmåbarnstillegg =
             if (småbarnstilleggErMulig) {
                 SmåbarnstilleggBarnetrygdGenerator(
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = behandling.id,
                     tilkjentYtelse = tilkjentYtelse,
                 ).lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad =
                         hentPerioderMedFullOvergangsstønad(
-                            personopplysningGrunnlag.søker.aktør,
-                            vilkårsvurdering.behandling,
+                            søkerAktør = personopplysningGrunnlag.søker.aktør,
+                            behandling = behandling,
                         ),
                     utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
                     barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
