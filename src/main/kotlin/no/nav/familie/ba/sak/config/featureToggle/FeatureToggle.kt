@@ -46,4 +46,7 @@ enum class FeatureToggle(
     SATSENDRING_LØRDAG("familie-ba-sak.satsendring-lordag"),
 
     BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING("familie-ba-sak.ulovfestet-motregning"),
+
+    // NAV-24534
+    VALIDER_IKKE_AVREGNING("familie-ba-sak.valider-ikke-avregning"),
 }
