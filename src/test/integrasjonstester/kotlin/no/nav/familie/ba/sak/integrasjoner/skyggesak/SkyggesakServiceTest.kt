@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DbContainerInitializer
-import no.nav.familie.ba.sak.config.MockLeaderClientService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
@@ -23,25 +22,21 @@ import java.time.LocalDateTime
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
-@ActiveProfiles("postgres", "integrasjonstest", "mock-leader-client")
+@ActiveProfiles("postgres", "integrasjonstest")
 @Tag("integration")
-class SkyggesakSchedulerTest {
+class SkyggesakServiceTest {
     @Autowired
     lateinit var skyggesakRepository: SkyggesakRepository
 
-    @Autowired
-    lateinit var mockLeaderClientService: MockLeaderClientService
-
-    lateinit var skyggesakScheduler: SkyggesakScheduler
+    lateinit var skyggesakService: SkyggesakService
 
     @BeforeEach
     fun init() {
-        skyggesakScheduler =
-            SkyggesakScheduler(
+        skyggesakService =
+            SkyggesakService(
                 skyggesakRepository = skyggesakRepository,
                 fagsakRepository = mockk(),
                 integrasjonClient = mockk(relaxed = true),
-                leaderClientService = mockLeaderClientService,
             )
         skyggesakRepository.deleteAll()
     }
@@ -53,12 +48,12 @@ class SkyggesakSchedulerTest {
             sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(fagsakId = i.toLong(), sendtTidspunkt = tid) },
         )
 
-        every { skyggesakScheduler.fagsakRepository.finnFagsak(any()) } returns Fagsak(aktør = Aktør("1234567890123"))
+        every { skyggesakService.fagsakRepository.finnFagsak(any()) } returns Fagsak(aktør = Aktør("1234567890123"))
 
-        skyggesakScheduler.sendSkyggesaker()
+        skyggesakService.sendSkyggesaker()
 
         verify(exactly = 1) {
-            skyggesakScheduler.integrasjonClient.opprettSkyggesak(Aktør("1234567890123"), 0)
+            skyggesakService.integrasjonClient.opprettSkyggesak(Aktør("1234567890123"), 0)
         }
         Assertions.assertEquals(0, skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged()).size)
     }
@@ -73,7 +68,7 @@ class SkyggesakSchedulerTest {
         )
 
         Assertions.assertEquals(2, skyggesakRepository.finnSkyggesakerSomErSendt().size)
-        skyggesakScheduler.fjernGamleSkyggesakInnslag()
+        skyggesakService.fjernGamleSkyggesakInnslag()
 
         // Sjekker at usendt skyggesak ikke er slettet, samt skyggesak sendt for mindre enn 14 dager siden
         Assertions.assertEquals(
