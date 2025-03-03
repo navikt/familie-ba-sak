@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg
+package no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

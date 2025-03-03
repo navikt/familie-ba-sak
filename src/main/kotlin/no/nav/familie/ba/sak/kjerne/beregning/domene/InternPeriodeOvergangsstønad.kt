@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.time.LocalDate
