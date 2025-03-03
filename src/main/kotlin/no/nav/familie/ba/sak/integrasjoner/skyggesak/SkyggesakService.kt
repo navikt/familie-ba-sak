@@ -27,7 +27,7 @@ class SkyggesakService(
             try {
                 MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
                 val fagsak = fagsakRepository.finnFagsak(skyggesak.fagsakId)!!
-                logger.info("Opprettet skyggesak for fagsak ${fagsak.id}")
+                logger.info("Oppretter skyggesak for fagsak ${fagsak.id}")
                 integrasjonClient.opprettSkyggesak(fagsak.aktør, fagsak.id)
                 skyggesakRepository.save(skyggesak.copy(sendtTidspunkt = LocalDateTime.now()))
             } catch (e: Exception) {
@@ -43,10 +43,10 @@ class SkyggesakService(
     fun fjernGamleSkyggesakInnslag() {
         skyggesakRepository
             .finnSkyggesakerSomErSendt()
-            .filter { it.sendtTidspunkt!!.isBefore(LocalDateTime.now().minusDays(SKYGGESAK_RETENTION.toLong())) }
+            .filter { it.sendtTidspunkt!!.isBefore(LocalDateTime.now().minusDays(SKYGGESAK_RETENTION_DAGER.toLong())) }
             .run {
-                logger.info("Fjerner ${this.size} rader fra Skyggesak, sendt for mer enn $SKYGGESAK_RETENTION dager siden")
-                secureLogger.info("Fjerner følgende rader eldre enn $SKYGGESAK_RETENTION fra Skyggesak:\n$this ")
+                logger.info("Fjerner ${this.size} rader fra Skyggesak, sendt for mer enn $SKYGGESAK_RETENTION_DAGER dager siden")
+                secureLogger.info("Fjerner følgende rader eldre enn $SKYGGESAK_RETENTION_DAGER fra Skyggesak:\n$this ")
                 skyggesakRepository.deleteAll(this)
             }
     }
@@ -56,8 +56,8 @@ class SkyggesakService(
     }
 
     companion object {
-        private const val SKYGGESAK_RETENTION = 14
+        private const val SKYGGESAK_RETENTION_DAGER = 14
 
-        private val logger = LoggerFactory.getLogger(SkyggesakScheduler::class.java)
+        private val logger = LoggerFactory.getLogger(SkyggesakService::class.java)
     }
 }
