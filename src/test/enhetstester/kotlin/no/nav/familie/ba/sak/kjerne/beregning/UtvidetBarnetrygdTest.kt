@@ -125,7 +125,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -220,7 +219,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -379,7 +377,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -463,7 +460,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -547,7 +543,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -641,7 +636,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -758,7 +752,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -873,7 +866,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -987,7 +979,6 @@ internal class UtvidetBarnetrygdTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }

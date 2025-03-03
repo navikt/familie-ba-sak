@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -28,7 +27,6 @@ class TilkjentYtelseGenerator(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
-        fagsakType: FagsakType,
     ): TilkjentYtelse {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
@@ -46,7 +44,7 @@ class TilkjentYtelseGenerator(
                 .beregnAndelerTilkjentYtelseForBarna(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     personResultater = vilkårsvurdering.personResultater,
-                    fagsakType = fagsakType,
+                    fagsakType = behandling.fagsak.type,
                 ).map {
                     if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}. Forventet ${PersonType.BARN}")
 

@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -104,7 +103,6 @@ class VilkårTilTilkjentYtelseTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         Assertions.assertEquals(
@@ -185,7 +183,6 @@ class VilkårTilTilkjentYtelseTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         Assertions.assertEquals(
@@ -257,7 +254,6 @@ class VilkårTilTilkjentYtelseTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         Assertions.assertEquals(

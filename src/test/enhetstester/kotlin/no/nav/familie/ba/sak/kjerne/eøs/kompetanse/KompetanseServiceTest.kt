@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -304,7 +303,6 @@ internal class KompetanseServiceTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
-                fagsakType = FagsakType.NORMAL,
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -368,7 +366,6 @@ internal class KompetanseServiceTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
-                fagsakType = FagsakType.NORMAL,
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -427,7 +424,6 @@ internal class KompetanseServiceTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
-                fagsakType = FagsakType.NORMAL,
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer

@@ -371,7 +371,6 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
         .genererTilkjentYtelse(
             behandling = vilkårsvurdering.behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL,
         ).andelerTilkjentYtelse
         .map {
             BeregnetAndel(

@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -159,7 +158,6 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse(): TilkjentYt
     return tilkjentYtelseGenerator.genererTilkjentYtelse(
         behandling = vilkårsvurdering.behandling,
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
-        fagsakType = FagsakType.NORMAL,
     )
 }
 

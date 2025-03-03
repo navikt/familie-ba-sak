@@ -107,7 +107,6 @@ class TilkjentYtelseGeneratorTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -143,7 +142,6 @@ class TilkjentYtelseGeneratorTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -183,7 +181,6 @@ class TilkjentYtelseGeneratorTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -218,7 +215,6 @@ class TilkjentYtelseGeneratorTest {
             tilkjentYtelseGenerator.genererTilkjentYtelse(
                 behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -252,7 +248,6 @@ class TilkjentYtelseGeneratorTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
@@ -316,7 +311,6 @@ class TilkjentYtelseGeneratorTest {
                 .genererTilkjentYtelse(
                     behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
@@ -362,7 +356,6 @@ class TilkjentYtelseGeneratorTest {
                 .genererTilkjentYtelse(
                     behandling = oppdatertVilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
@@ -399,7 +392,6 @@ class TilkjentYtelseGeneratorTest {
                 .genererTilkjentYtelse(
                     behandling = oppdatertVilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
@@ -1271,7 +1263,6 @@ class TilkjentYtelseGeneratorTest {
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
 
-
         val endretUtbetalingAndeler =
             endretAndeler.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
@@ -1295,7 +1286,6 @@ class TilkjentYtelseGeneratorTest {
                         behandlingId = vilkårsvurdering.behandling.id,
                     ),
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
-                fagsakType = FagsakType.NORMAL,
             )
         return tilkjentYtelse
     }

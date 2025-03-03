@@ -185,7 +185,6 @@ class BeregningService(
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
-                fagsakType = behandling.fagsak.type,
             )
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
