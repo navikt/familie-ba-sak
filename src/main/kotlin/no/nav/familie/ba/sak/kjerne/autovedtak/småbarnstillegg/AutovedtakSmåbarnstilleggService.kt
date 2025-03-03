@@ -18,12 +18,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
-import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.erEndringIOvergangsstønadFramITid
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -46,13 +45,13 @@ class AutovedtakSmåbarnstilleggService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val overgangsstønadService: OvergangsstønadService,
     private val taskService: TaskService,
-    private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val localDateProvider: LocalDateProvider,
     private val påVentService: SettPåVentService,
     private val stegService: StegService,
+    private val småbarnstilleggService: SmåbarnstilleggService,
 ) : AutovedtakBehandlingService<SmåbarnstilleggData> {
     private val antallVedtakOmOvergangsstønad: Counter =
         Metrics.counter("behandling", "saksbehandling", "hendelse", "smaabarnstillegg", "antall", "aarsak", "ikke_relevant", "beskrivelse", "ikke_relevant")
@@ -171,30 +170,11 @@ class AutovedtakSmåbarnstilleggService(
     ) {
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
-        val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) {
-                emptyList()
-            } else {
-                beregningService
-                    .hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                        behandlingId = sistIverksatteBehandling.id,
-                    ).filter { it.erSmåbarnstillegg() }
-            }
-
-        val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) {
-                emptyList()
-            } else {
-                beregningService
-                    .hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                        behandlingId = behandlingEtterBehandlingsresultat.id,
-                    ).filter { it.erSmåbarnstillegg() }
-            }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
-            hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
-                forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-                nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
+            småbarnstilleggService.finnInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+                behandling = behandlingEtterBehandlingsresultat,
+                sistIverksatteBehandling = sistIverksatteBehandling
             )
 
         vedtaksperiodeHentOgPersisterService.lagre(

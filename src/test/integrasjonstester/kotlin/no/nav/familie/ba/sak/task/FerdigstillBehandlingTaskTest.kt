@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -100,6 +101,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var overgangsstønadService: OvergangsstønadService
+
+    @Autowired
+    lateinit var småbarnstilleggService: SmåbarnstilleggService
 
     @Autowired
     lateinit var taskService: TaskService
@@ -233,13 +237,13 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 vedtaksperiodeService = vedtaksperiodeService,
                 overgangsstønadService = overgangsstønadService,
                 taskService = taskService,
-                beregningService = beregningService,
                 autovedtakService = autovedtakService,
                 oppgaveService = oppgaveService,
                 vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
                 localDateProvider = localDateProvider,
                 påVentService = settPåVentService,
                 stegService = stegService,
+                småbarnstilleggService = småbarnstilleggService
             )
 
         @Test

@@ -607,13 +607,13 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             overgangsstønadService = overgangsstønadService,
             taskService = taskService,
-            beregningService = beregningService,
             autovedtakService = autovedtakService,
             oppgaveService = oppgaveService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
             localDateProvider = mockedDateProvider,
             påVentService = mockPåVentService,
             stegService = stegService,
+            småbarnstilleggService = småbarnstilleggService
         )
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)
