@@ -15,3 +15,5 @@ fun <I, T : Tidsenhet> konkatenerTidslinjer(vararg tidslinje: Tidslinje<I, T>): 
 operator fun <I, T : Tidsenhet> Tidslinje<I, T>.plus(tidslinje: Tidslinje<I, T>): Tidslinje<I, T> = konkatenerTidslinjer(this, tidslinje)
 
 fun <V> konkatenerTidslinjer(vararg tidslinje: FamilieFellesTidslinje<V>): FamilieFellesTidslinje<V> = tidslinje.toList().kombinerUtenNullOgIkkeTom { it.single() }
+
+operator fun <V> FamilieFellesTidslinje<V>.plus(tidslinje: FamilieFellesTidslinje<V>): FamilieFellesTidslinje<V> = konkatenerTidslinjer(this, tidslinje)

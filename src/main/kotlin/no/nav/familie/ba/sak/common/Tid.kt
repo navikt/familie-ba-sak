@@ -276,7 +276,7 @@ class YearMonthProgression(
     infix fun step(måneder: Long) = YearMonthProgression(start, endInclusive, måneder)
 }
 
-operator fun YearMonth.rangeTo(andre: YearMonth) = YearMonthProgression(this, andre)
+operator fun YearMonth?.rangeTo(andre: YearMonth?) = YearMonthProgression(this ?: PRAKTISK_TIDLIGSTE_DAG.toYearMonth(), andre ?: PRAKTISK_SENESTE_DAG.toYearMonth())
 
 class LocalDateIterator(
     private var currentDate: LocalDate,
