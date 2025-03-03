@@ -184,6 +184,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -265,6 +266,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -345,6 +347,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -375,8 +378,7 @@ class BeregningServiceTest {
                 ),
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
-            andelTilkjentYtelser
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns andelTilkjentYtelser
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
@@ -433,6 +435,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -547,6 +550,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -1185,6 +1189,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -1418,6 +1423,7 @@ class BeregningServiceTest {
             )
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
         every { overgangsstønadService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
