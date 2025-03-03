@@ -1,12 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -139,12 +144,19 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer(
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
-fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
-    TilkjentYtelseGenerator.genererTilkjentYtelse(
+fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse(): TilkjentYtelse {
+    val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+
+    every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+    every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+
+    return tilkjentYtelseGenerator.genererTilkjentYtelse(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         fagsakType = FagsakType.NORMAL,
     )
+}
 
 data class UtdypendeVilkårRegelverkResultat(
     val vilkår: Vilkår,

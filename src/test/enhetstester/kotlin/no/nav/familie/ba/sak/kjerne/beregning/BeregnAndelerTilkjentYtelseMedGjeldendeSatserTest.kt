@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
@@ -346,13 +350,19 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 søker får 2516 i jul(2023)..nov(2036),
             )
 
-        assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYteldse())
+        assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelse())
     }
 }
 
-private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
+private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelse(): List<BeregnetAndel> {
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
-    return TilkjentYtelseGenerator
+    val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+
+    every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+    every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+
+    return tilkjentYtelseGenerator
         .genererTilkjentYtelse(
             vilkårsvurdering = this.byggVilkårsvurdering(),
             personopplysningGrunnlag = personopplysningGrunnlag,

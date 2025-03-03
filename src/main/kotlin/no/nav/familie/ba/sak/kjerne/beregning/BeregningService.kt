@@ -35,9 +35,9 @@ class BeregningService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository
@@ -186,19 +186,12 @@ class BeregningService(
                 ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
-            ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
-                    søkerAktør = søkerAktør,
-                    behandling = behandling,
-                )
-
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
-            }
+            )
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }

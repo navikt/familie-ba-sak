@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.MånedPeriode
@@ -21,8 +22,8 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator.genererTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -51,6 +52,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class TilkjentYtelseGeneratorTest {
+    private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -96,7 +100,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -130,7 +134,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -168,7 +172,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -201,7 +205,7 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val tilkjentYtelse =
-            genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -232,11 +236,12 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            ).andelerTilkjentYtelse
+            tilkjentYtelseGenerator
+                .genererTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
 
@@ -293,11 +298,12 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            ).andelerTilkjentYtelse
+            tilkjentYtelseGenerator
+                .genererTilkjentYtelse(
+                    vilkårsvurdering = vilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
 
@@ -336,11 +342,12 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            genererTilkjentYtelse(
-                vilkårsvurdering = oppdatertVilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            ).andelerTilkjentYtelse
+            tilkjentYtelseGenerator
+                .genererTilkjentYtelse(
+                    vilkårsvurdering = oppdatertVilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
 
@@ -370,11 +377,12 @@ class TilkjentYtelseGeneratorTest {
             )
 
         val andeler =
-            genererTilkjentYtelse(
-                vilkårsvurdering = oppdatertVilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            ).andelerTilkjentYtelse
+            tilkjentYtelseGenerator
+                .genererTilkjentYtelse(
+                    vilkårsvurdering = oppdatertVilkårsvurdering,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    fagsakType = FagsakType.NORMAL,
+                ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.stønadFom }
 
@@ -1228,6 +1236,14 @@ class TilkjentYtelseGeneratorTest {
         barna: List<Person>,
         overgangsstønadPerioder: List<MånedPeriode>,
     ): TilkjentYtelse {
+        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+            lagOvergangsstønadPerioder(
+                perioder = overgangsstønadPerioder,
+                søkerIdent = søker.aktør.aktivFødselsnummer(),
+            )
+        }
+
         val vilkårsvurdering =
             lagVilkårsvurdering(
                 søker = søker,
@@ -1250,7 +1266,7 @@ class TilkjentYtelseGeneratorTest {
             }
 
         val tilkjentYtelse =
-            genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag =
                     lagPersonopplysningsgrunnlag(
@@ -1259,13 +1275,7 @@ class TilkjentYtelseGeneratorTest {
                     ),
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
                 fagsakType = FagsakType.NORMAL,
-            ) { (_) ->
-                lagOvergangsstønadPerioder(
-                    perioder = overgangsstønadPerioder,
-                    søkerIdent = søker.aktør.aktivFødselsnummer(),
-                )
-            }
-
+            )
         return tilkjentYtelse
     }
 

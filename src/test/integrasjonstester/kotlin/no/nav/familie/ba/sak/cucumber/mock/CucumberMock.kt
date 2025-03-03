@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatServi
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -192,10 +193,9 @@ class CucumberMock(
             vilkårsvurderingRepository = vilkårsvurderingRepository,
             behandlingRepository = mockk(),
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-            småbarnstilleggService = småbarnstilleggService,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            unleashNextMedContextService = unleashNextMedContextService,
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)

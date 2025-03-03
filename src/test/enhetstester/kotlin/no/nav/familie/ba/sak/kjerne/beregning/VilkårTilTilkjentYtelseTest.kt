@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -33,6 +34,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
+    private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -90,8 +94,11 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
+        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+
         val faktiskTilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
@@ -155,24 +162,27 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
+        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+            if (småbarnstilleggTestPeriode != null) {
+                listOf(
+                    InternPeriodeOvergangsstønad(
+                        personIdent = søker.aktør.aktivFødselsnummer(),
+                        fomDato = småbarnstilleggTestPeriode.fraOgMed,
+                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
+                    ),
+                )
+            } else {
+                emptyList()
+            }
+        }
+
         val faktiskTilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,
-            ) { aktør ->
-                if (småbarnstilleggTestPeriode != null) {
-                    listOf(
-                        InternPeriodeOvergangsstønad(
-                            personIdent = aktør.aktivFødselsnummer(),
-                            fomDato = småbarnstilleggTestPeriode.fraOgMed,
-                            tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
-                        ),
-                    )
-                } else {
-                    emptyList()
-                }
-            }
+            )
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -235,8 +245,11 @@ class VilkårTilTilkjentYtelseTest {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
+        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+
         val faktiskTilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 fagsakType = FagsakType.NORMAL,

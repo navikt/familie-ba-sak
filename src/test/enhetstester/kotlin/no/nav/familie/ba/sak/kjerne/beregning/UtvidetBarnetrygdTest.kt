@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -13,6 +16,7 @@ import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -31,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.tidslinje.mapVerdi
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -40,6 +45,15 @@ import java.time.YearMonth
 internal class UtvidetBarnetrygdTest {
     private val fødselsdatoOver6År = LocalDate.of(2014, 1, 1)
     private val fødselsdatoUnder6År = LocalDate.of(2021, 1, 15)
+
+    private val småbarnstilleggServiceMock: SmåbarnstilleggService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(småbarnstilleggServiceMock)
+
+    @BeforeEach
+    fun setup() {
+        every { småbarnstilleggServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { småbarnstilleggServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    }
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
@@ -103,7 +117,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -196,7 +210,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -353,7 +367,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -435,7 +449,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -517,7 +531,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -608,7 +622,7 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -723,7 +737,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -836,7 +850,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
@@ -948,7 +962,7 @@ internal class UtvidetBarnetrygdTest {
                 }
 
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
                     vilkårsvurdering = vilkårsvurdering,
                     personopplysningGrunnlag = personopplysningGrunnlag,
