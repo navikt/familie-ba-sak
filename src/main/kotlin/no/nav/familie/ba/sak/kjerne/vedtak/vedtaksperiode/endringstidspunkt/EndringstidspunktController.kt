@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.endringstidspunkt
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
