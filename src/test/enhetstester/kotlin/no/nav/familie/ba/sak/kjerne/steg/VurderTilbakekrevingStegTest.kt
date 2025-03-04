@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,9 +20,10 @@ import org.junit.jupiter.api.assertDoesNotThrow
 class VurderTilbakekrevingStegTest {
     private val tilbakekrevingService: TilbakekrevingService = mockk()
     private val simuleringService: SimuleringService = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
-        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
+        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService, unleashService = unleashService)
 
     private val behandling: Behandling =
         lagBehandling(
