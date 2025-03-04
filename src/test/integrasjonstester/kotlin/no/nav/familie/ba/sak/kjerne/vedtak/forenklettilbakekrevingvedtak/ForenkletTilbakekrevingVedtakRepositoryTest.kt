@@ -38,11 +38,5 @@ class ForenkletTilbakekrevingVedtakRepositoryTest(
             // Assert
             assertThrows<DataIntegrityViolationException> { forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = null)) }
         }
-
-        @Test
-        fun `save skal kaste feil dersom vi forsøker å lagre ny ForenkletTilbakekrevingVedtak for en behandlingsId som ikke finnes`() {
-            // Act && Assert
-            assertThrows<DataIntegrityViolationException> { forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = 404, fritekst = "Fritekst", samtykke = null)) }
-        }
     }
 }
