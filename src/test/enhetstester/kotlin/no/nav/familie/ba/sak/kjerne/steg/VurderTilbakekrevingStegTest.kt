@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 
 class VurderTilbakekrevingStegTest {
     private val tilbakekrevingService: TilbakekrevingService = mockk()
@@ -43,6 +46,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
+        every { simuleringService.hentEtterbetaling(any(classifier = Long::class)) } returns BigDecimal.ZERO
+        every { unleashService.isEnabled(toggle = any()) } returns true
     }
 
     @Test
@@ -72,5 +77,38 @@ class VurderTilbakekrevingStegTest {
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         verify(exactly = 0) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
         verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }
+    }
+
+    @Test
+    fun `kaster FunksjonellFeil hvis behandling både har etterbetaling og feilutbetaling`() {
+        every { simuleringService.hentEtterbetaling(any(classifier = Long::class)) } returns BigDecimal(100)
+        every { simuleringService.hentFeilutbetaling(any(classifier = Long::class)) } returns BigDecimal(100)
+
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                    behandling,
+                    restTilbakekreving,
+                )
+            }
+
+        assertTrue { funksjonellFeil.melding == "Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre." }
+    }
+
+    @Test
+    fun `kaster FunksjonellFeil hvis behandling både har etterbetaling og fagsak har åpen tilbakekreving`() {
+        every { simuleringService.hentEtterbetaling(any(classifier = Long::class)) } returns BigDecimal(100)
+        every { simuleringService.hentFeilutbetaling(any(classifier = Long::class)) } returns BigDecimal.ZERO
+        every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any(classifier = Long::class)) } returns true
+
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                    behandling,
+                    restTilbakekreving,
+                )
+            }
+
+        assertTrue { funksjonellFeil.melding == "Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre." }
     }
 }
