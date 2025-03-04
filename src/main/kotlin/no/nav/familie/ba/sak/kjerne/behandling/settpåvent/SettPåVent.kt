@@ -42,4 +42,5 @@ enum class SettPåVentÅrsak(
     val visningsnavn: String,
 ) {
     AVVENTER_DOKUMENTASJON("Avventer dokumentasjon"),
+    AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING("Avventer samtykke om ulovfestet motregning etter unntaksregel"),
 }
