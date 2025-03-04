@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -92,7 +93,7 @@ class VurderTilbakekrevingStegTest {
                 )
             }
 
-        assertTrue { funksjonellFeil.melding == "Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre." }
+        assertThat(funksjonellFeil.melding).isEqualTo("Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre.")
     }
 
     @Test
@@ -109,6 +110,6 @@ class VurderTilbakekrevingStegTest {
                 )
             }
 
-        assertTrue { funksjonellFeil.melding == "Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre." }
+        assertThat(funksjonellFeil.melding).isEqualTo("Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre.")
     }
 }
