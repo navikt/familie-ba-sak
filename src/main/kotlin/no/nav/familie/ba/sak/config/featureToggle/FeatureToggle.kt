@@ -44,4 +44,6 @@ enum class FeatureToggle(
 
     // Kjører satsendring lørdag
     SATSENDRING_LØRDAG("familie-ba-sak.satsendring-lordag"),
+
+    BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING("familie-ba-sak.ulovfestet-motregning"),
 }
