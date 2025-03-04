@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.common
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.tidslinje.PRAKTISK_SENESTE_DAG
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.YearMonth
@@ -274,4 +276,27 @@ class YearMonthProgression(
     infix fun step(måneder: Long) = YearMonthProgression(start, endInclusive, måneder)
 }
 
-operator fun YearMonth.rangeTo(andre: YearMonth) = YearMonthProgression(this, andre)
+operator fun YearMonth?.rangeTo(andre: YearMonth?) = YearMonthProgression(this ?: PRAKTISK_TIDLIGSTE_DAG.toYearMonth(), andre ?: PRAKTISK_SENESTE_DAG.toYearMonth())
+
+class LocalDateIterator(
+    private var currentDate: LocalDate,
+    private val endInclusive: LocalDate,
+) : Iterator<LocalDate> {
+    override fun hasNext() = currentDate <= endInclusive
+
+    override fun next(): LocalDate {
+        val next = currentDate
+        currentDate = currentDate.plusDays(1)
+        return next
+    }
+}
+
+class LocalDateProgression(
+    override val start: LocalDate,
+    override val endInclusive: LocalDate,
+) : Iterable<LocalDate>,
+    ClosedRange<LocalDate> {
+    override fun iterator(): Iterator<LocalDate> = LocalDateIterator(start, endInclusive)
+}
+
+operator fun LocalDate?.rangeTo(andre: LocalDate?) = LocalDateProgression(this ?: PRAKTISK_TIDLIGSTE_DAG, andre ?: PRAKTISK_SENESTE_DAG)

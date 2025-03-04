@@ -4,9 +4,6 @@ import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -48,8 +45,8 @@ internal infix fun BeregnetAndel.av(sats: Int) =
         beløp = sats.avrundetHeltallAvProsent(prosent),
     )
 
-internal infix fun BeregnetAndel.i(tidsrom: TidspunktClosedRange<Måned>) =
+internal infix fun BeregnetAndel.i(tidsrom: ClosedRange<YearMonth>) =
     this.copy(
-        stønadFom = tidsrom.start.tilYearMonth(),
-        stønadTom = tidsrom.endInclusive.tilYearMonth(),
+        stønadFom = tidsrom.start,
+        stønadTom = tidsrom.endInclusive,
     )

@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.oppdaterTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.satstypeFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilTryggTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -45,7 +45,7 @@ class SmåbarnstilleggKorrigeringService(
 
         val nyeSmåbarnstillegg =
             skalOpprettesTidslinje
-                .kombinerUtenNullMed(satstypeFamilieFellesTidslinje(SatsType.SMA)) { _, sats ->
+                .kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { _, sats ->
                     AndelTilkjentYtelseForTidslinje(
                         aktør = behandling.fagsak.aktør,
                         ytelseType = YtelseType.SMÅBARNSTILLEGG,

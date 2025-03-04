@@ -4,12 +4,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import java.time.YearMonth
 
 class ValutakursBuilder(
-    startMåned: Tidspunkt<Måned> = jan(2020),
+    startMåned: YearMonth = jan(2020),
     behandlingId: BehandlingId = BehandlingId(1),
 ) : SkjemaBuilder<Valutakurs, ValutakursBuilder>(startMåned, behandlingId) {
     fun medKurs(

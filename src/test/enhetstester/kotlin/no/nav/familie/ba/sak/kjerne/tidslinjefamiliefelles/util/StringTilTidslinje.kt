@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.tidslinje.mapVerdi
-import java.time.LocalDate
 import java.time.YearMonth
 
 fun String.tilRegelverkResultatTidslinje(start: YearMonth) =
@@ -28,7 +27,7 @@ fun String.tilRegelverkResultatTidslinje(start: YearMonth) =
 
 fun String.tilUtdypendeVilkårRegelverkResultatTidslinje(
     vilkår: Vilkår,
-    start: LocalDate,
+    start: YearMonth,
 ) = this.tilCharTidslinje(start).mapVerdi {
     when (it?.lowercaseChar()) {
         '+' -> UtdypendeVilkårRegelverkResultat(vilkår, OPPFYLT, null)
