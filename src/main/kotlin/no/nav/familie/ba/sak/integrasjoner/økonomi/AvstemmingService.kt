@@ -162,7 +162,7 @@ class AvstemmingService(
         taskService.save(task)
     }
 
-    fun hentDataForKonsistensavstemmingNy(
+    fun hentDataForKonsistensavstemmingVedHjelpAvUtbetalingstidslinjer(
         avstemmingstidspunkt: LocalDateTime,
         relevanteBehandlinger: List<Long>,
     ): List<PerioderForBehandling> =

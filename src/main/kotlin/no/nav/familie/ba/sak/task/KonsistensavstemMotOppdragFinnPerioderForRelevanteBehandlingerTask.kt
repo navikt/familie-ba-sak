@@ -44,7 +44,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
 
         val perioderTilAvstemming =
             if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false)) {
-                avstemmingService.hentDataForKonsistensavstemmingNy(
+                avstemmingService.hentDataForKonsistensavstemmingVedHjelpAvUtbetalingstidslinjer(
                     taskDto.avstemmingsdato,
                     taskDto.relevanteBehandlinger,
                 )
