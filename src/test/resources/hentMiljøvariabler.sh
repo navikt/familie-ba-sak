@@ -13,7 +13,7 @@
  fi
 
 kubectl config use-context dev-gcp
-AZURE_SECRET=$(kubectl -n teamfamilie get secrets | grep azure-familie-ba-sak | grep -v "frontend" |  sed 's/^\([a-zA-Z0-9-]*\).*/\1/');
+AZURE_SECRET=$(kubectl -n teamfamilie get secrets | grep azure-familie-ba-sak | grep -v "frontend" |  sed 's/^\([a-zA-Z0-9-]*\).*/\1/'| head -n 1);
 
 PODVARIABLER="$(kubectl -n teamfamilie get secret "$AZURE_SECRET" -o json | jq '.data | map_values(@base64d)')"
 UNLEASH_VARIABLER="$(kubectl -n teamfamilie get secret familie-ba-sak-unleash-api-token -o json | jq '.data | map_values(@base64d)')"
