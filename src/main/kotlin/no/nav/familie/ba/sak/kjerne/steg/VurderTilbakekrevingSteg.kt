@@ -46,8 +46,13 @@ class VurderTilbakekrevingSteg(
                 tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)
             }
 
-            if (brukerHarFeilutbetaling) throw FunksjonellFeil(melding = "Kan ikke ha etterbetaling og feilutbetaling samtidig")
-            if (brukerHarÅpenTilbakekreving) throw FunksjonellFeil(melding = "Kan ikke ha etterbetaling og åpen tilbakekreving samtidig")
+            if (brukerHarFeilutbetaling || brukerHarÅpenTilbakekreving) {
+                throw FunksjonellFeil(
+                    melding =
+                        "Løsningen i dag legger opp til automatisk avregning der feilutbetalinger trekkes mot etterbetalinger. " +
+                            "Dette har vi ikke hjemmel for. Du må derfor splitte saken for å gå videre.",
+                )
+            }
         }
     }
 }
