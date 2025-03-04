@@ -6,15 +6,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.satstypeFamilieFellesTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullMed
@@ -27,9 +24,10 @@ import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 class TilkjentYtelseBuilder(
-    private val startMåned: Tidspunkt<Måned>,
+    private val startMåned: YearMonth,
     private val behandling: Behandling = lagBehandling(),
 ) {
     private val tilkjentYtelse =
@@ -58,7 +56,7 @@ class TilkjentYtelseBuilder(
         differanse = differanse,
         nasjonalt = nasjonalt,
     ) {
-        satstypeFamilieFellesTidslinje(SatsType.SMA)
+        satstypeTidslinje(SatsType.SMA)
     }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medUtvidet(
@@ -73,7 +71,7 @@ class TilkjentYtelseBuilder(
         nasjonalt = nasjonalt,
         differanse = differanse,
     ) {
-        satstypeFamilieFellesTidslinje(SatsType.UTVIDET_BARNETRYGD)
+        satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
     }.also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medOrdinær(
@@ -90,9 +88,9 @@ class TilkjentYtelseBuilder(
         differanse,
         kalkulert,
     ) {
-        val orbaTidslinje = satstypeFamilieFellesTidslinje(SatsType.ORBA)
+        val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
         val tilleggOrbaTidslinje =
-            satstypeFamilieFellesTidslinje(SatsType.TILLEGG_ORBA)
+            satstypeTidslinje(SatsType.TILLEGG_ORBA)
                 .filtrerMed(erUnder6ÅrTidslinje(it))
         orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
     }
@@ -111,7 +109,7 @@ class TilkjentYtelseBuilder(
                 .map { person ->
                     val andelTilkjentYtelseTidslinje =
                         s
-                            .tilCharTidslinje(startMåned.tilYearMonth())
+                            .tilCharTidslinje(startMåned)
                             .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
                             .mapVerdi {
                                 AndelTilkjentYtelse(

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
@@ -16,10 +17,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
@@ -56,9 +54,9 @@ internal class ValutakursServiceTest {
     fun `skal tilpasse utenlandsk periodebeløp til endrede kompetanser`() {
         val behandlingId = BehandlingId(10L)
 
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
-        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
-        val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).tilLocalDate())
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
+        val barn2 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
+        val barn3 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = jan(2020).toLocalDate())
 
         ValutakursBuilder(jan(2020), behandlingId)
             .medKurs("4444   555 666", "EUR", barn1, barn2, barn3)
@@ -173,7 +171,7 @@ internal class ValutakursServiceTest {
 }
 
 fun valutakurs(
-    tidspunkt: Tidspunkt<Måned>,
+    tidspunkt: YearMonth,
     s: String,
     valutakode: String,
     vararg barn: Person,
