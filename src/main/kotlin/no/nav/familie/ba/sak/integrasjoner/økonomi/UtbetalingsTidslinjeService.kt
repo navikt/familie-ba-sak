@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMedEtter
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -13,11 +16,27 @@ import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class UtbetalingsTidslinjeService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val behandlingRepository: BehandlingRepository,
 ) {
+    fun genererUtbetalingsperioderForBehandlingerEtterDato(
+        behandlinger: List<Long>,
+        dato: LocalDate,
+    ): List<Periode<Utbetalingsperiode>> {
+        val fagsakerIder = behandlingRepository.finnFagsakIderForBehandlinger(behandlinger).toSet()
+        return fagsakerIder
+            .flatMap { fagsakId ->
+                genererUtbetalingstidslinjerForFagsak(fagsakId)
+                    .flatMap { utbetalingstidslinje ->
+                        utbetalingstidslinje.tidslinje.beskjærFraOgMed(dato.førsteDagIInneværendeMåned()).tilPerioderIkkeNull()
+                    }
+            }
+    }
+
     fun genererUtbetalingstidslinjerForFagsak(fagsakId: Long): List<Utbetalingstidslinje> {
         val iverksatteUtbetalingsoppdrag =
             tilkjentYtelseRepository

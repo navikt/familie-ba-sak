@@ -74,6 +74,26 @@ class BehandlingRepositoryTest(
         }
     }
 
+    @Nested
+    inner class FinnFagsakIderForBehandlinger {
+        @Test
+        fun `skal finne fagsakIder relatert til behandlingsIder`() {
+            val fagsak1 = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson().aktør.aktivFødselsnummer())
+            val fagsak2 = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson().aktør.aktivFødselsnummer())
+
+            // Arrange
+            val behandling1 = opprettBehandling(fagsak1, AVSLUTTET)
+            val behandling2 = opprettBehandling(fagsak2, AVSLUTTET)
+
+            // Act
+            val fagsakIder = behandlingRepository.finnFagsakIderForBehandlinger(listOf(behandling1.id, behandling2.id))
+
+            // Assert
+            assertThat(fagsakIder).hasSize(2)
+            assertThat(fagsakIder).containsExactlyInAnyOrder(fagsak1.id, fagsak2.id)
+        }
+    }
+
     private fun opprettBehandling(
         fagsak: Fagsak,
         behandlingStatus: BehandlingStatus,
