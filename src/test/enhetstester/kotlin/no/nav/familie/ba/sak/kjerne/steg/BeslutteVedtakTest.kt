@@ -47,6 +47,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 
 class BeslutteVedtakTest {
@@ -326,8 +328,9 @@ class BeslutteVedtakTest {
             assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket")
         }
 
-        @Test
-        fun `Skal kaste feil dersom feilutbetaling ikke lenger finnes og det er valgt å opprette en `() {
+        @ParameterizedTest
+        @EnumSource(Tilbakekrevingsvalg::class, names = ["OPPRETT_TILBAKEKREVING_MED_VARSEL", "OPPRETT_TILBAKEKREVING_UTEN_VARSEL", "OPPRETT_TILBAKEKREVING_AUTOMATISK"], mode = EnumSource.Mode.INCLUDE)
+        fun `Skal kaste feil dersom feilutbetaling ikke lenger finnes og det er valgt å opprette en tilbakekrevingssak`(tilbakekrevingsvalg: Tilbakekrevingsvalg) {
             // Arrange
             val behandling = lagBehandling()
             behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -345,7 +348,7 @@ class BeslutteVedtakTest {
                 listOf(
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
-            every { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) } returns Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
+            every { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) } returns tilbakekrevingsvalg
 
             // Act && Assert
             val feilmelding =

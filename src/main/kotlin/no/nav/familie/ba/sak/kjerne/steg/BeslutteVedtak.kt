@@ -171,7 +171,7 @@ class BeslutteVedtak(
             throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
         }
 
-        if (feilutbetaling == BigDecimal.ZERO && tilbakekrevingsvalg !in listOf(null, Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING)) {
+        if (feilutbetaling == BigDecimal.ZERO && tilbakekrevingsvalg in listOf(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)) {
             throw FunksjonellFeil("Det er valgt å opprette tilbakekrevingssak men det er ikke lenger feilutbetalt beløp. Behandlingen må underkjennes, og saksbehandler må gå tilbake til behandlingsresultatet og trykke neste og fullføre behandlingen på nytt.")
         }
     }
