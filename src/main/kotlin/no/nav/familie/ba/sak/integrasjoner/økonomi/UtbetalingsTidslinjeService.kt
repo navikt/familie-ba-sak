@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
@@ -30,10 +31,15 @@ class UtbetalingsTidslinjeService(
         val fagsakerIder = behandlingRepository.finnFagsakIderForBehandlinger(behandlinger).toSet()
         return fagsakerIder
             .flatMap { fagsakId ->
-                genererUtbetalingstidslinjerForFagsak(fagsakId)
-                    .flatMap { utbetalingstidslinje ->
-                        utbetalingstidslinje.tidslinje.beskjærFraOgMed(dato.førsteDagIInneværendeMåned()).tilPerioderIkkeNull()
-                    }
+                try {
+                    genererUtbetalingstidslinjerForFagsak(fagsakId)
+                        .flatMap { utbetalingstidslinje ->
+                            utbetalingstidslinje.tidslinje.beskjærFraOgMed(dato.førsteDagIInneværendeMåned()).tilPerioderIkkeNull()
+                        }
+                } catch (e: Exception) {
+                    secureLogger.error("Feil ved generering av utbetalingsperioder for fagsak=$fagsakId", e)
+                    throw e
+                }
             }
     }
 
