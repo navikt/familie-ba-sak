@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -188,7 +189,7 @@ class AvstemmingService(
                             behandlingId = behandlingId.toString(),
                             aktivFødselsnummer =
                                 aktiveFødselsnummere[behandlingId]
-                                    ?: error("Finnes ikke et aktivt fødselsnummer for behandling $behandlingId"),
+                                    ?: throw Feil("Finnes ikke et aktivt fødselsnummer for behandling $behandlingId"),
                             perioder =
                                 perioder
                                     .map {
