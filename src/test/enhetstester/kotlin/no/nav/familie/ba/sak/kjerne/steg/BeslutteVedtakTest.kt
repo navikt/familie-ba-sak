@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -40,12 +39,15 @@ import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 
 class BeslutteVedtakTest {
     private val toTrinnKontrollService = mockk<TotrinnskontrollService>()
@@ -60,7 +62,6 @@ class BeslutteVedtakTest {
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
     private val loggService = mockk<LoggService>()
     private val automatiskOppdaterValutakursService = mockk<AutomatiskOppdaterValutakursService>()
-    private val valutakursRepository = mockk<ValutakursRepository>()
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val brevmottakerService = mockk<BrevmottakerService>()
@@ -78,7 +79,6 @@ class BeslutteVedtakTest {
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
-            valutakursRepository = valutakursRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
             brevmottakerService = brevmottakerService,
@@ -88,7 +88,6 @@ class BeslutteVedtakTest {
 
     @BeforeEach
     fun setUp() {
-        every { valutakursRepository.finnFraBehandlingId(any()) } returns emptyList()
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every {
             toTrinnKontrollService.besluttTotrinnskontroll(
@@ -111,214 +110,280 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
         every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any<BehandlingId>()) } just runs
+        every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
+        every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns null
+        every { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(any()) } returns BigDecimal.ZERO
     }
 
-    @Test
-    fun `Skal ferdigstille Godkjenne vedtak-oppgave ved Godkjent vedtak`() {
-        val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+    @Nested
+    inner class UtførStegOgAngiNesteTest {
+        @Test
+        fun `Skal ferdigstille Godkjenne vedtak-oppgave ved Godkjent vedtak`() {
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
-        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
-        mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id),
-            )
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
 
-        val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
-        Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
-    }
-
-    @Test
-    fun `Skal ferdigstille Godkjenne vedtak-oppgave og opprette Behandle Underkjent Vedtak-oppgave ved Underkjent vedtak`() {
-        val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
-
-        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgaver.Companion)
-        mockkObject(OpprettOppgaveTask.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every {
-            OpprettOppgaveTask.opprettTask(
-                any(),
-                any(),
-                any(),
-                any(),
-                any(),
-            )
-        } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
-
-        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id),
-            )
-
-        val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-
-        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
-        verify(exactly = 1) {
-            OpprettOppgaveTask.opprettTask(
-                behandling.id,
-                Oppgavetype.BehandleUnderkjentVedtak,
-                any(),
-                any(),
-                any(),
-            )
+            verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+            Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
         }
-        Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
-    }
 
-    @Test
-    fun `Skal ikke iverksette hvis det ikke er forskjell i utbetaling mellom nåværende og forrige andeler`() {
-        val behandling = lagBehandling()
-        val vedtak = lagVedtak(behandling)
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+        @Test
+        fun `Skal ferdigstille Godkjenne vedtak-oppgave og opprette Behandle Underkjent Vedtak-oppgave ved Underkjent vedtak`() {
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
 
-        every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            mockkObject(FerdigstillOppgaver.Companion)
+            mockkObject(OpprettOppgaveTask.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every {
+                OpprettOppgaveTask.opprettTask(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
-        mockkObject(JournalførVedtaksbrevTask.Companion)
-        every {
-            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
-                any(),
-                any(),
-                any(),
-            )
-        } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
 
-        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id),
-            )
+            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-
-        verify(exactly = 1) { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) }
-
-        verify(exactly = 1) {
-            JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
-                personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                behandlingId = behandling.id,
-                vedtakId = vedtak.id,
-            )
-        }
-        Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
-    }
-
-    @Test
-    fun `Skal initiere nytt vedtak når vedtak ikke er godkjent`() {
-        val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
-
-        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgaver.Companion)
-        mockkObject(OpprettOppgaveTask.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns
-            Task(
-                OpprettOppgaveTask.TASK_STEP_TYPE,
-                "",
-            )
-
-        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
-
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id),
-            )
-
-        beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
-        verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
-    }
-
-    @Test
-    fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-        every {
-            unleashService.isEnabled(
-                FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
-                any<Long>(),
-            )
-        } returns false
-
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
-
-        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
-            Task(
-                type = FerdigstillOppgaver.TASK_STEP_TYPE,
-                payload = "",
-            )
-
-        assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
-    }
-
-    @Test
-    fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
-
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
-
-        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
-            Task(
-                type = FerdigstillOppgaver.TASK_STEP_TYPE,
-                payload = "",
-            )
-
-        assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
-    }
-
-    @Test
-    fun `Skal feile ferdigstilling av Godkjenne vedtak-oppgave ved Godkjent vedtak når brevmottakerne er ugyldige`() {
-        // Arrange
-        val behandling = lagBehandling()
-        behandling.status = BehandlingStatus.FATTER_VEDTAK
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
-        val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
-
-        every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
-        mockkObject(FerdigstillOppgaver.Companion)
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
-
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
-            listOf(
-                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
-                lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
-            )
-
-        // Act & assert
-        val exception =
-            assertThrows<FunksjonellFeil> {
-                beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+            verify(exactly = 1) {
+                OpprettOppgaveTask.opprettTask(
+                    behandling.id,
+                    Oppgavetype.BehandleUnderkjentVedtak,
+                    any(),
+                    any(),
+                    any(),
+                )
             }
+            Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
+        }
 
-        assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket")
+        @Test
+        fun `Skal ikke iverksette hvis det ikke er forskjell i utbetaling mellom nåværende og forrige andeler`() {
+            val behandling = lagBehandling()
+            val vedtak = lagVedtak(behandling)
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+
+            mockkObject(JournalførVedtaksbrevTask.Companion)
+            every {
+                JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                    any(),
+                    any(),
+                    any(),
+                )
+            } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
+
+            val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+
+            verify(exactly = 1) { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) }
+
+            verify(exactly = 1) {
+                JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
+                    personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                    behandlingId = behandling.id,
+                    vedtakId = vedtak.id,
+                )
+            }
+            Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
+        }
+
+        @Test
+        fun `Skal initiere nytt vedtak når vedtak ikke er godkjent`() {
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.UNDERKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            mockkObject(FerdigstillOppgaver.Companion)
+            mockkObject(OpprettOppgaveTask.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns
+                Task(
+                    OpprettOppgaveTask.TASK_STEP_TYPE,
+                    "",
+                )
+
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
+
+            beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+            verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true) }
+        }
+
+        @Test
+        fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
+            every {
+                unleashService.isEnabled(
+                    FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV,
+                    any<Long>(),
+                )
+            } returns false
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
+                Task(
+                    type = FerdigstillOppgaver.TASK_STEP_TYPE,
+                    payload = "",
+                )
+
+            assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+        }
+
+        @Test
+        fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
+            every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, any<Long>()) } returns false
+
+            val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns
+                Task(
+                    type = FerdigstillOppgaver.TASK_STEP_TYPE,
+                    payload = "",
+                )
+
+            assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
+        }
+
+        @Test
+        fun `Skal feile ferdigstilling av Godkjenne vedtak-oppgave ved Godkjent vedtak når brevmottakerne er ugyldige`() {
+            // Arrange
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"),
+                    lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"),
+                )
+
+            // Act & assert
+            val exception =
+                assertThrows<FunksjonellFeil> {
+                    beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+                }
+
+            assertThat(exception.message).isEqualTo("Det finnes ugyldige brevmottakere, vi kan ikke beslutte vedtaket")
+        }
+
+        @Test
+        fun `Skal kaste feil dersom feilutbetaling ikke lenger finnes og det er valgt å opprette en `() {
+            // Arrange
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
+            every { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) } returns Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+                }.melding
+
+            assertThat(feilmelding).isEqualTo("Det er valgt å opprette tilbakekrevingssak men det er ikke lenger feilutbetalt beløp. Behandlingen må underkjennes, og saksbehandler må gå tilbake til behandlingsresultatet og trykke neste og fullføre behandlingen på nytt.")
+        }
+
+        @Test
+        fun `Skal kaste feil dersom det er feilutbetalt beløp men det er ikke valgt å opprette tilbakekrevingssak`() {
+            // Arrange
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
+            every { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(any()) } returns BigDecimal.valueOf(100000)
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+                }.melding
+
+            assertThat(feilmelding).isEqualTo("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
+        }
     }
 }

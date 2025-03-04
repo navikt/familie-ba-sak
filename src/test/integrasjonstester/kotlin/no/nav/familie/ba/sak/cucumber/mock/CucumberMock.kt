@@ -553,7 +553,6 @@ class CucumberMock(
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
-            valutakursRepository = valutakursRepository,
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
             brevmottakerService = brevmottakerService,
