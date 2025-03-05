@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalfør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Tema
@@ -31,6 +32,7 @@ class OppgaveControllerTest {
     private val fagsakService = mockk<FagsakService>()
     private val innkommendeJournalføringService = mockk<InnkommendeJournalføringService>()
     private val tilgangService = mockk<TilgangService>()
+    private val klageService = mockk<KlageService>()
 
     private val oppgaveController =
         OppgaveController(
@@ -41,6 +43,7 @@ class OppgaveControllerTest {
             personopplysningerService = personopplysningerService,
             tilgangService = tilgangService,
             innkommendeJournalføringService = innkommendeJournalføringService,
+            klageService = klageService,
         )
 
     @BeforeAll

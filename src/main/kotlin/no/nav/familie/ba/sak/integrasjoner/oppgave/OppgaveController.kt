@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalf
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -42,6 +43,7 @@ class OppgaveController(
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
+    private val klageService: KlageService,
 ) {
     private val logger = LoggerFactory.getLogger(OppgaveController::class.java)
 
@@ -108,6 +110,10 @@ class OppgaveController(
 
         val journalpost = if (oppgave.journalpostId != null) integrasjonClient.hentJournalpost(oppgave.journalpostId!!) else throw Feil("Oppgave har ingen journalpost knyttet til seg")
 
+        val minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null
+
+        val klagebehandlinger = if (minimalFagsak != null) klageService.hentKlagebehandlingerPåFagsak(minimalFagsak.id) else emptyList()
+
         val dataForManuellJournalføring =
             DataForManuellJournalføring(
                 oppgave = oppgave,
@@ -118,7 +124,8 @@ class OppgaveController(
                             .hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                             .tilRestPersonInfo(it.aktivFødselsnummer())
                     },
-                minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null,
+                minimalFagsak = minimalFagsak,
+                klagebehandlinger = klagebehandlinger,
             )
 
         return ResponseEntity.ok(
