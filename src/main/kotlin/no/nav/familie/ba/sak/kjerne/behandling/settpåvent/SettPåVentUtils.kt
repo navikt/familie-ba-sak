@@ -8,11 +8,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak.AVV
 import no.nav.familie.tidslinje.diffIDager
 import java.time.LocalDate
 
-const val FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING = 5L
+const val DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING = 5L
 
 fun validerBehandlingKanSettesPåVent(
     gammelSettPåVent: SettPåVent?,
-    nyÅrsak: SettPåVentÅrsak,
+    årsak: SettPåVentÅrsak,
     frist: LocalDate,
     behandling: Behandling,
     kanBrukeUlovfestetMotregning: Boolean,
@@ -25,7 +25,7 @@ fun validerBehandlingKanSettesPåVent(
     }
 
     validerFristErFremITiden(behandling, frist)
-    if (nyÅrsak == AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
+    if (årsak == AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
         if (kanBrukeUlovfestetMotregning) {
             validerFristForUlovfestetMotregning(behandling, frist)
         } else {
@@ -64,10 +64,10 @@ fun validerFristForUlovfestetMotregning(
     frist: LocalDate,
 ) {
     val fristDager = LocalDate.now().diffIDager(frist)
-    if (fristDager == FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
+    if (fristDager == DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
         throw Feil(
             "Uventet frist for SettPåVent med årsak $AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}." +
-                "Forventet frist er $FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING dager, faktisk frist er $fristDager dager.",
+                "Forventet frist er $DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING dager, faktisk frist er $fristDager dager.",
         )
     }
 }

@@ -47,7 +47,7 @@ class SettPåVentService(
         val gammelSettPåVent: SettPåVent? = finnAktivSettPåVentPåBehandling(behandlingId)
         validerBehandlingKanSettesPåVent(
             gammelSettPåVent = gammelSettPåVent,
-            nyÅrsak = årsak,
+            årsak = årsak,
             frist = frist,
             behandling = behandling,
             kanBrukeUlovfestetMotregning = unleashService.isEnabled(BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING),
