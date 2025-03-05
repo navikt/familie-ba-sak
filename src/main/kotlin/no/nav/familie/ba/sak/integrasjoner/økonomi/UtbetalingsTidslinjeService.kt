@@ -57,7 +57,13 @@ class UtbetalingsTidslinjeService(
 
         return tidslinjePerKjede.keys.map { sistePeriodeIdIKjede ->
             Utbetalingstidslinje(
-                utbetalingsperioder = utbetalingsperioderPerKjede.values.single { it.any { utbetalingsperiode -> utbetalingsperiode.periodeId == sistePeriodeIdIKjede } },
+                utbetalingsperioder =
+                    try {
+                        utbetalingsperioderPerKjede.values.single { it.any { utbetalingsperiode -> utbetalingsperiode.periodeId == sistePeriodeIdIKjede } }
+                    } catch (e: Exception) {
+                        secureLogger.error("SistePeriodeIdIKjede=$sistePeriodeIdIKjede finnes i flere forskjellige kjeder. utbetalingsperioderPerKjede=${utbetalingsperioderPerKjede.values}", e)
+                        throw e
+                    },
                 tidslinje = tidslinjePerKjede[sistePeriodeIdIKjede]!!,
             )
         }
