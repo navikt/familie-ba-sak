@@ -17,8 +17,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.ManuellBrevmottaker
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerValidering
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
-import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -53,7 +51,6 @@ class BeslutteVedtak(
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val saksbehandlerContext: SaksbehandlerContext,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
-    private val valutakursRepository: ValutakursRepository,
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val brevmottakerService: BrevmottakerService,
@@ -66,9 +63,7 @@ class BeslutteVedtak(
             throw FunksjonellFeil("Behandlingen er allerede sendt til oppdrag og venter på kvittering")
         } else if (behandling.status == BehandlingStatus.AVSLUTTET) {
             throw FunksjonellFeil("Behandlingen er allerede avsluttet")
-        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV &&
-            !unleashService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)
-        ) {
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV && !unleashService.isEnabled(FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV, behandling.id)) {
             throw FunksjonellFeil(
                 melding = "Årsak ${BehandlingÅrsak.KORREKSJON_VEDTAKSBREV.visningsnavn} og toggle ${FeatureToggle.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV.navn} false",
                 frontendFeilmelding = "Du har ikke tilgang til å beslutte for denne behandlingen. Ta kontakt med teamet dersom dette ikke stemmer.",
@@ -89,15 +84,11 @@ class BeslutteVedtak(
         val feilutbetaling by lazy { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(behandling.id) }
         val erÅpenTilbakekrevingPåFagsak by lazy { tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id) }
         val tilbakekrevingsvalg by lazy { tilbakekrevingService.hentTilbakekrevingsvalg(behandling.id) }
-        val valutakurser by lazy { valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id) }
 
-        val behandlingSkalAutomatiskBesluttes =
-            automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)
+        val behandlingSkalAutomatiskBesluttes = automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)
 
-        val beslutter =
-            if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
-        val beslutterId =
-            if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+        val beslutter = if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+        val beslutterId = if (behandlingSkalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
         val totrinnskontroll =
             totrinnskontrollService.besluttTotrinnskontroll(
@@ -115,14 +106,11 @@ class BeslutteVedtak(
         )
 
         return if (data.beslutning.erGodkjent()) {
-            val erAutomatiskeValutakurserPåBehandling = valutakurser.any { it.vurderingsform == Vurderingsform.AUTOMATISK }
-            if (erAutomatiskeValutakurserPåBehandling && !erÅpenTilbakekrevingPåFagsak) {
+            if (!erÅpenTilbakekrevingPåFagsak) {
                 validerErTilbakekrevingHvisFeilutbetaling(feilutbetaling, tilbakekrevingsvalg)
             }
 
-            val vedtak =
-                vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                    ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
@@ -153,9 +141,7 @@ class BeslutteVedtak(
             }
             nesteSteg
         } else {
-            val vilkårsvurdering =
-                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-                    ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
+            val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
             val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
 
@@ -184,6 +170,10 @@ class BeslutteVedtak(
         if (feilutbetaling != BigDecimal.ZERO && tilbakekrevingsvalg == null) {
             throw FunksjonellFeil("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
         }
+
+        if (feilutbetaling == BigDecimal.ZERO && tilbakekrevingsvalg in listOf(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_AUTOMATISK, Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_UTEN_VARSEL)) {
+            throw FunksjonellFeil("Det er valgt å opprette tilbakekrevingssak men det er ikke lenger feilutbetalt beløp. Behandlingen må underkjennes, og saksbehandler må gå tilbake til behandlingsresultatet og trykke neste og fullføre behandlingen på nytt.")
+        }
     }
 
     override fun postValiderSteg(behandling: Behandling) {
@@ -193,8 +183,7 @@ class BeslutteVedtak(
     override fun stegType(): StegType = StegType.BESLUTTE_VEDTAK
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        val endringerIUtbetaling =
-            beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
+        val endringerIUtbetaling = beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
 
         return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
@@ -221,8 +210,7 @@ class BeslutteVedtak(
         )
 
         if (!behandling.erManuellMigrering() || !behandlingErAutomatiskBesluttet) {
-            val ferdigstillGodkjenneVedtakTask =
-                FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+            val ferdigstillGodkjenneVedtakTask = FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
             taskRepository.save(ferdigstillGodkjenneVedtakTask)
         }
     }
