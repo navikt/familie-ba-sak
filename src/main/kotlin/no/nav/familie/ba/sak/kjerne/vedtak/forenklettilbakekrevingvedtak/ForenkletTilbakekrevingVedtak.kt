@@ -26,8 +26,8 @@ data class ForenkletTilbakekrevingVedtak(
     val id: Long = 0,
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
-    @Column(name = "samtykke", nullable = true, updatable = true)
-    var samtykke: Boolean?,
+    @Column(name = "samtykke", nullable = false, updatable = true)
+    var samtykke: Boolean,
     @Column(name = "fritekst", nullable = false, updatable = true)
     var fritekst: String,
 ) : BaseEntitet()

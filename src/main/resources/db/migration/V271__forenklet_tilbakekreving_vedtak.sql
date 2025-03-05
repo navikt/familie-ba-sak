@@ -1,9 +1,9 @@
 CREATE TABLE forenklet_tilbakekreving_vedtak
 (
     id               BIGINT PRIMARY KEY,
-    fk_behandling_id BIGINT NOT NULL,
+    fk_behandling_id BIGINT                              NOT NULL,
     samtykke         BOOLEAN,
-    fritekst         VARCHAR,
+    fritekst         VARCHAR      DEFAULT false          NOT NULL,
     versjon          BIGINT       DEFAULT 0              NOT NULL,
     opprettet_av     VARCHAR      DEFAULT 'VL'           NOT NULL,
     opprettet_tid    TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,

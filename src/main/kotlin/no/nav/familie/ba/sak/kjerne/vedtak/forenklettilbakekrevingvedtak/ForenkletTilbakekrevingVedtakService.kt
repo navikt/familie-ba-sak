@@ -20,7 +20,7 @@ class ForenkletTilbakekrevingVedtakService(
             forenkletTilbakekrevingVedtakRepository.save(
                 ForenkletTilbakekrevingVedtak(
                     behandlingId = behandlingId,
-                    samtykke = null,
+                    samtykke = false,
                     fritekst = STANDARD_TEKST_FORENKLET_TILBAKEKREVING_VEDTAK,
                 ),
             )
@@ -68,8 +68,7 @@ class ForenkletTilbakekrevingVedtakService(
             ?: throw FunksjonellFeil("Forenklet tilbakekreving vedtak finnes ikke for behandling $behandlingId. Oppdater fanen og prøv igjen.")
 
     companion object {
-        private const val STANDARD_TEKST_FORENKLET_TILBAKEKREVING_VEDTAK = """
-            TEKST
-        """
+        //TODO: Denne endres på senere når det er klart hva standard tekst skal være
+        private const val STANDARD_TEKST_FORENKLET_TILBAKEKREVING_VEDTAK = "TEKST"
     }
 }

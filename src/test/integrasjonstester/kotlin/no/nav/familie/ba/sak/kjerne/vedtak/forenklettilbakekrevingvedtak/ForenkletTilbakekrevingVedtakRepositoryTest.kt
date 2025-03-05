@@ -33,10 +33,10 @@ class ForenkletTilbakekrevingVedtakRepositoryTest(
             val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
             // Act
-            forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = null))
+            forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = false))
 
             // Assert
-            assertThrows<DataIntegrityViolationException> { forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = null)) }
+            assertThrows<DataIntegrityViolationException> { forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = false)) }
         }
     }
 }

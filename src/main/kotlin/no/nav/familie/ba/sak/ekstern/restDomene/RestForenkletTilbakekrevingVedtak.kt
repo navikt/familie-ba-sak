@@ -4,7 +4,7 @@ data class RestForenkletTilbakekrevingVedtak(
     val id: Long,
     val behandlingId: Long,
     val fritekst: String,
-    val samtykke: Boolean?,
+    val samtykke: Boolean,
 )
 
 data class RestOppdaterForenkletTilbakekrevingVedtakFritekst(

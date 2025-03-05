@@ -43,7 +43,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
         fun `skal returner forenklet tilbakekreving vedtak hvis det finnes for behandling`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = null, fritekst = "fritekst")
+            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = false, fritekst = "fritekst")
 
             every { forenkletTilbakekrevingVedtakRepository.finnForenkletTilbakekrevingVedtakForBehandling(behandling.id) } returns eksisterendeForenkletTilbakekrevingVedtak
 
@@ -61,7 +61,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
         fun `Skal returnere eksisterende forenklet tilbakekreving vedtak dersom det allerede finnes`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = null, fritekst = "fritekst")
+            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = false, fritekst = "fritekst")
 
             every { forenkletTilbakekrevingVedtakRepository.finnForenkletTilbakekrevingVedtakForBehandling(behandling.id) } returns eksisterendeForenkletTilbakekrevingVedtak
 
@@ -87,6 +87,9 @@ class ForenkletTilbakekrevingVedtakServiceTest {
 
             // Assert
             assertThat(forenkletTilbakekrevingVedtak.behandlingId).isEqualTo(behandling.id)
+            assertThat(forenkletTilbakekrevingVedtak.fritekst).isEqualTo("TEKST")
+            assertThat(forenkletTilbakekrevingVedtak.samtykke).isFalse()
+
             verify(exactly = 1) { forenkletTilbakekrevingVedtakRepository.save(forenkletTilbakekrevingVedtak) }
             verify(exactly = 1) { loggService.loggForenkletTilbakekrevingVedtakOpprettet(behandling.id) }
         }
@@ -98,7 +101,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
         fun `Skal oppdatere samtykke på eksisterende forenklet tilbakekreving vedtak og opprette logg på dette`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = null, fritekst = "fritekst")
+            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = false, fritekst = "fritekst")
 
             every { forenkletTilbakekrevingVedtakRepository.finnForenkletTilbakekrevingVedtakForBehandling(behandling.id) } returns eksisterendeForenkletTilbakekrevingVedtak
             every { loggService.loggForenkletTilbakekrevingVedtakOppdatertSamtykke(behandling.id) } returns mockk()
@@ -136,7 +139,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
         fun `Skal oppdatere fritekst på eksisterende forenklet tilbakekreving vedtak og opprette logg på dette`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = null, fritekst = "")
+            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = false, fritekst = "")
 
             every { forenkletTilbakekrevingVedtakRepository.finnForenkletTilbakekrevingVedtakForBehandling(behandling.id) } returns eksisterendeForenkletTilbakekrevingVedtak
             every { loggService.loggForenkletTilbakekrevingVedtakOppdatertFritekst(behandling.id) } returns mockk()
@@ -174,7 +177,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
         fun `Skal slette forenklet tilbakekreving vedtak hvis det finnes`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = null, fritekst = "")
+            val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = false, fritekst = "")
 
             every { forenkletTilbakekrevingVedtakRepository.finnForenkletTilbakekrevingVedtakForBehandling(behandling.id) } returns eksisterendeForenkletTilbakekrevingVedtak
             every { loggService.loggForenkletTilbakekrevingVedtakSlettet(behandling.id) } returns mockk()
