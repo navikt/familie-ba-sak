@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-data class RestForenkletTilbakekrevingVedtak(
+data class RestForenkletTilbakekrevingsvedtak(
     val id: Long,
     val behandlingId: Long,
     val fritekst: String,
     val samtykke: Boolean,
 )
 
-data class RestOppdaterForenkletTilbakekrevingVedtakFritekst(
+data class RestOppdaterForenkletTilbakekrevingsvedtakFritekst(
     val fritekst: String,
 )
 
-data class RestOppdaterForenkletTilbakekrevingVedtakSamtykke(
+data class RestOppdaterForenkletTilbakekrevingsvedtakSamtykke(
     val samtykke: Boolean,
 )

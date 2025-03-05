@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingvedtak
+package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 
-class ForenkletTilbakekrevingVedtakRepositoryTest(
+class ForenkletTilbakekrevingsvedtakRepositoryTest(
     @Autowired
     private val aktørIdRepository: AktørIdRepository,
     @Autowired
@@ -21,22 +21,22 @@ class ForenkletTilbakekrevingVedtakRepositoryTest(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
-    private val forenkletTilbakekrevingVedtakRepository: ForenkletTilbakekrevingVedtakRepository,
+    private val forenkletTilbakekrevingsvedtakRepository: ForenkletTilbakekrevingsvedtakRepository,
 ) : AbstractSpringIntegrationTest() {
     @Nested
     inner class SaveTest {
         @Test
-        fun `save skal kaste feil dersom det forsøkes å lagre ny ForenkletTilbakekrevingVedtak når det allerede finnes en for behandlingen`() {
+        fun `save skal kaste feil dersom det forsøkes å lagre ny ForenkletTilbakekrevingsvedtak når det allerede finnes en for behandlingen`() {
             // Arrange
             val søker = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(Fagsak(aktør = søker))
             val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
             // Act
-            forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = false))
+            forenkletTilbakekrevingsvedtakRepository.saveAndFlush(ForenkletTilbakekrevingsvedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = false))
 
             // Assert
-            assertThrows<DataIntegrityViolationException> { forenkletTilbakekrevingVedtakRepository.saveAndFlush(ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = false)) }
+            assertThrows<DataIntegrityViolationException> { forenkletTilbakekrevingsvedtakRepository.saveAndFlush(ForenkletTilbakekrevingsvedtak(behandlingId = behandling.id, fritekst = "Fritekst", samtykke = false)) }
         }
     }
 }

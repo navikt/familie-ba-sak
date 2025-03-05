@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingvedtak
+package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -9,18 +9,18 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.ekstern.restDomene.RestForenkletTilbakekrevingVedtak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestForenkletTilbakekrevingsvedtak
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "ForenkletTilbakekrevingVedtak")
-@Table(name = "forenklet_tilbakekreving_vedtak")
-data class ForenkletTilbakekrevingVedtak(
+@Entity(name = "ForenkletTilbakekrevingsvedtak")
+@Table(name = "forenklet_tilbakekrevingsvedtak")
+data class ForenkletTilbakekrevingsvedtak(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "forenklet_tilbakekreving_vedtak_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "forenklet_tilbakekrevingsvedtak_seq_generator")
     @SequenceGenerator(
-        name = "forenklet_tilbakekreving_vedtak_seq_generator",
-        sequenceName = "forenklet_tilbakekreving_vedtak_seq",
+        name = "forenklet_tilbakekrevingsvedtak_seq_generator",
+        sequenceName = "forenklet_tilbakekrevingsvedtak_seq",
         allocationSize = 50,
     )
     val id: Long = 0,
@@ -32,8 +32,8 @@ data class ForenkletTilbakekrevingVedtak(
     var fritekst: String,
 ) : BaseEntitet()
 
-fun ForenkletTilbakekrevingVedtak.tilRestForenkletTilbakekrevingVedtak() =
-    RestForenkletTilbakekrevingVedtak(
+fun ForenkletTilbakekrevingsvedtak.tilRestForenkletTilbakekrevingsvedtak() =
+    RestForenkletTilbakekrevingsvedtak(
         id = this.id,
         behandlingId = this.behandlingId,
         samtykke = this.samtykke,

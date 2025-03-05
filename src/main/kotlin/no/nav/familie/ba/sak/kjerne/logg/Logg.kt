@@ -96,8 +96,8 @@ enum class LoggType(
     SAMMENSATT_KONTROLLSAK_LAGT_TIL("Sammensatt kontrollsak lagt til"),
     SAMMENSATT_KONTROLLSAK_ENDRET("Sammensatt kontrollsak endret"),
     SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
-    FORENKLET_TILBAKEKREVING_VEDTAK_OPPRETTET("Forenklet tilbakekreving vedtak opprettet"),
-    FORENKLET_TILBAKEKREVING_VEDTAK_OPPDATERT_FRITEKST("Forenklet tilbakekreving vedtak fritekst oppdatert"),
-    FORENKLET_TILBAKEKREVING_VEDTAK_OPPDATERT_SAMTYKKE("Forenklet tilbakekreving vedtak samtykke oppdatert"),
-    FORENKLET_TILBAKEKREVING_VEDTAK_SLETTET("Forenklet tilbakekreving vedtak fjernet"),
+    FORENKLET_TILBAKEKREVINGSVEDTAK_OPPRETTET("Forenklet tilbakekrevingsvedtak opprettet"),
+    FORENKLET_TILBAKEKREVINGSVEDTAK_OPPDATERT_FRITEKST("Forenklet tilbakekrevingsvedtak fritekst oppdatert"),
+    FORENKLET_TILBAKEKREVINGSVEDTAK_OPPDATERT_SAMTYKKE("Forenklet tilbakekrevingsvedtak samtykke oppdatert"),
+    FORENKLET_TILBAKEKREVINGSVEDTAK_SLETTET("Forenklet tilbakekrevingsvedtak fjernet"),
 }

@@ -1,4 +1,4 @@
-CREATE TABLE forenklet_tilbakekreving_vedtak
+CREATE TABLE forenklet_tilbakekrevingsvedtak
 (
     id               BIGINT PRIMARY KEY,
     fk_behandling_id BIGINT                              NOT NULL,
@@ -15,5 +15,5 @@ CREATE TABLE forenklet_tilbakekreving_vedtak
     CONSTRAINT unique_fk_behandling_id UNIQUE (fk_behandling_id)
 );
 
-CREATE SEQUENCE forenklet_tilbakekreving_vedtak_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
+CREATE SEQUENCE forenklet_tilbakekrevingsvedtak_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
 
