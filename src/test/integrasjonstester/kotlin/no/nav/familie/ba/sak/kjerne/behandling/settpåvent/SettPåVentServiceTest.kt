@@ -33,7 +33,6 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -66,8 +65,9 @@ class SettPåVentServiceTest(
         databaseCleanupService.truncate()
     }
 
-    @Test
-    fun `Kan sette en behandling på vent hvis statusen er utredes`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Kan sette en behandling på vent hvis statusen er utredes`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
         val frist = LocalDate.now().plusDays(3)
 
@@ -75,26 +75,27 @@ class SettPåVentServiceTest(
             settPåVentService.settBehandlingPåVent(
                 behandling.id,
                 frist,
-                SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+                årsak,
             )
 
         assertThat(settBehandlingPåVent.behandling.id).isEqualTo(behandling.id)
         assertThat(settBehandlingPåVent.frist).isEqualTo(frist)
-        assertThat(settBehandlingPåVent.årsak).isEqualTo(SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
+        assertThat(settBehandlingPåVent.årsak).isEqualTo(årsak)
         assertThat(settBehandlingPåVent.aktiv).isTrue()
 
         assertThat(behandlingRepository.finnBehandling(behandling.id).status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
     }
 
-    @Test
-    fun `gjenopprett behandling skal sette status til utredes på nytt`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `gjenopprett behandling skal sette status til utredes på nytt`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
         val frist = LocalDate.now().plusDays(3)
 
         settPåVentService.settBehandlingPåVent(
             behandling.id,
             frist,
-            SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            årsak,
         )
         val behandlingEtterSattPåVent = behandlingRepository.finnBehandling(behandling.id).status
         val gjenopptattSettPåVent = settPåVentService.gjenopptaBehandling(behandling.id)
@@ -121,8 +122,9 @@ class SettPåVentServiceTest(
         }.hasMessageContaining("har status=$status og kan ikke settes på vent")
     }
 
-    @Test
-    fun `Kan ikke endre på behandling etter at den er satt på vent`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Kan ikke endre på behandling etter at den er satt på vent`(årsak: SettPåVentÅrsak) {
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 barnasIdenter = listOf(barnFnr),
@@ -140,7 +142,7 @@ class SettPåVentServiceTest(
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandlingId,
             frist = LocalDate.now().plusDays(21),
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            årsak = årsak,
         )
 
         assertThrows<FunksjonellFeil> {
@@ -148,8 +150,9 @@ class SettPåVentServiceTest(
         }
     }
 
-    @Test
-    fun `Kan endre på behandling etter venting er deaktivert`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Kan endre på behandling etter venting er deaktivert`(årsak: SettPåVentÅrsak) {
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 barnasIdenter = listOf(barnFnr),
@@ -166,7 +169,7 @@ class SettPåVentServiceTest(
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandlingEtterVilkårsvurderingSteg.id,
             frist = LocalDate.now().plusDays(21),
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            årsak = årsak,
         )
 
         val nå = LocalDate.now()
@@ -187,8 +190,9 @@ class SettPåVentServiceTest(
         }
     }
 
-    @Test
-    fun `Kan ikke sette ventefrist til før dagens dato`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Kan ikke sette ventefrist til før dagens dato`(årsak: SettPåVentÅrsak) {
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 barnasIdenter = listOf(barnFnr),
@@ -206,13 +210,14 @@ class SettPåVentServiceTest(
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandlingEtterVilkårsvurderingSteg.id,
                 frist = LocalDate.now().minusDays(1),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+                årsak = årsak,
             )
         }
     }
 
-    @Test
-    fun `Kan oppdatare set på vent på behandling`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Kan oppdatere sett på vent på behandling`(årsak: SettPåVentÅrsak) {
         val behandlingEtterVilkårsvurderingSteg =
             kjørStegprosessForFGB(
                 barnasIdenter = listOf(barnFnr),
@@ -235,7 +240,7 @@ class SettPåVentServiceTest(
                 SettPåVent(
                     behandling = behandlingEtterVilkårsvurderingSteg,
                     frist = frist1,
-                    årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+                    årsak = årsak,
                 ),
             )
 
@@ -249,8 +254,9 @@ class SettPåVentServiceTest(
         Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
     }
 
-    @Test
-    fun `Skal gjennopta behandlinger etter ventefristen`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Skal gjennopta behandlinger etter ventefristen`(årsak: SettPåVentÅrsak) {
         val behandling1 =
             kjørStegprosessForFGB(
                 barnasIdenter = listOf(barnFnr),
@@ -281,7 +287,7 @@ class SettPåVentServiceTest(
             .settBehandlingPåVent(
                 behandlingId = behandling1.id,
                 frist = LocalDate.now(),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+                årsak = årsak,
             ).let {
                 settPåVentRepository.save(it.copy(frist = LocalDate.now().minusDays(1)))
             }
@@ -289,7 +295,7 @@ class SettPåVentServiceTest(
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandling2.id,
             frist = LocalDate.now().plusDays(21),
-            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            årsak = årsak,
         )
 
         taBehandlingerEtterVentefristAvVentTask.doTask(
@@ -303,15 +309,16 @@ class SettPåVentServiceTest(
         Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
     }
 
-    @Test
-    fun `Skal ikke kunne gjenoppta behandlingen hvis den er satt på maskinell vent`() {
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class)
+    fun `Skal ikke kunne gjenoppta behandlingen hvis den er satt på maskinell vent`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
         val frist = LocalDate.now().plusDays(3)
 
         settPåVentService.settBehandlingPåVent(
             behandling.id,
             frist,
-            SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            årsak,
         )
         snikeIKøenService.settAktivBehandlingPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
 

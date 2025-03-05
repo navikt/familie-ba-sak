@@ -4,12 +4,18 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING
+import no.nav.familie.tidslinje.diffIDager
 import java.time.LocalDate
+
+const val DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING = 5L
 
 fun validerBehandlingKanSettesPåVent(
     gammelSettPåVent: SettPåVent?,
+    årsak: SettPåVentÅrsak,
     frist: LocalDate,
     behandling: Behandling,
+    kanBrukeUlovfestetMotregning: Boolean,
 ) {
     if (gammelSettPåVent != null) {
         throw FunksjonellFeil(
@@ -19,6 +25,13 @@ fun validerBehandlingKanSettesPåVent(
     }
 
     validerFristErFremITiden(behandling, frist)
+    if (årsak == AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
+        if (kanBrukeUlovfestetMotregning) {
+            validerFristForUlovfestetMotregning(behandling, frist)
+        } else {
+            throw FunksjonellFeil("Funksjonalitet for ulovfestet motregning er ikke tilgjengelig.")
+        }
+    }
 
     if (behandling.status != BehandlingStatus.UTREDES) {
         throw FunksjonellFeil(
@@ -42,6 +55,19 @@ fun validerFristErFremITiden(
         throw FunksjonellFeil(
             melding = "Frist for å vente på behandling ${behandling.id} er satt før dagens dato.",
             frontendFeilmelding = "Fristen er satt før dagens dato.",
+        )
+    }
+}
+
+fun validerFristForUlovfestetMotregning(
+    behandling: Behandling,
+    frist: LocalDate,
+) {
+    val fristDager = LocalDate.now().diffIDager(frist)
+    if (fristDager == DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
+        throw Feil(
+            "Uventet frist for SettPåVent med årsak $AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}." +
+                "Forventet frist er $DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING dager, faktisk frist er $fristDager dager.",
         )
     }
 }

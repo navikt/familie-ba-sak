@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -20,6 +22,7 @@ class SettPåVentService(
     private val settPåVentRepository: SettPåVentRepository,
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     fun finnAktivSettPåVentPåBehandling(behandlingId: Long): SettPåVent? = settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
 
@@ -42,7 +45,13 @@ class SettPåVentService(
     ): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val gammelSettPåVent: SettPåVent? = finnAktivSettPåVentPåBehandling(behandlingId)
-        validerBehandlingKanSettesPåVent(gammelSettPåVent, frist, behandling)
+        validerBehandlingKanSettesPåVent(
+            gammelSettPåVent = gammelSettPåVent,
+            årsak = årsak,
+            frist = frist,
+            behandling = behandling,
+            kanBrukeUlovfestetMotregning = unleashService.isEnabled(BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING),
+        )
 
         loggService.opprettSettPåVentLogg(behandling, årsak.visningsnavn)
         logger.info("Sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
