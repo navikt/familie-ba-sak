@@ -460,6 +460,7 @@ class CucumberMock(
             settPåVentRepository = mockSettPåVentRepository(),
             loggService = loggService,
             oppgaveService = oppgaveService,
+            unleashService = unleashNextMedContextService,
         )
 
     val snikeIKøenService =
