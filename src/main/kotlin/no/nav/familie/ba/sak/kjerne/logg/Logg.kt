@@ -98,6 +98,6 @@ enum class LoggType(
     SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
     FORENKLET_TILBAKEKREVING_VEDTAK_OPPRETTET("Forenklet tilbakekreving vedtak opprettet"),
     FORENKLET_TILBAKEKREVING_VEDTAK_OPPDATERT_FRITEKST("Forenklet tilbakekreving vedtak fritekst oppdatert"),
-    FORENKLET_TILBAKEKREVING_VEDTAK_SAMTYKKE_OPPDATERT("Forenklet tilbakekreving vedtak samtykke oppdatert"),
+    FORENKLET_TILBAKEKREVING_VEDTAK_OPPDATERT_SAMTYKKE("Forenklet tilbakekreving vedtak samtykke oppdatert"),
     FORENKLET_TILBAKEKREVING_VEDTAK_SLETTET("Forenklet tilbakekreving vedtak fjernet"),
 }

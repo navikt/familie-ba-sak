@@ -34,7 +34,7 @@ class ForenkletTilbakekrevingVedtakService(
         val forenkletTilbakekrevingVedtak =
             hentForenkletTilbakekrevingVedtakEllerKastFunksjonellFeil(behandlingId).apply {
                 this.samtykke = samtykke
-                loggService.loggForenkletTilbakekrevingVedtakSamtykkeOppdatert(behandlingId)
+                loggService.loggForenkletTilbakekrevingVedtakOppdatertSamtykke(behandlingId)
             }
 
         return forenkletTilbakekrevingVedtakRepository.save(forenkletTilbakekrevingVedtak)

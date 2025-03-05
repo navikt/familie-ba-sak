@@ -101,7 +101,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
             val eksisterendeForenkletTilbakekrevingVedtak = ForenkletTilbakekrevingVedtak(behandlingId = behandling.id, samtykke = null, fritekst = "fritekst")
 
             every { forenkletTilbakekrevingVedtakRepository.finnForenkletTilbakekrevingVedtakForBehandling(behandling.id) } returns eksisterendeForenkletTilbakekrevingVedtak
-            every { loggService.loggForenkletTilbakekrevingVedtakSamtykkeOppdatert(behandling.id) } returns mockk()
+            every { loggService.loggForenkletTilbakekrevingVedtakOppdatertSamtykke(behandling.id) } returns mockk()
             every { forenkletTilbakekrevingVedtakRepository.save(any()) } returnsArgument (0)
 
             // Act
@@ -109,7 +109,7 @@ class ForenkletTilbakekrevingVedtakServiceTest {
 
             // Assert
             assertThat(forenkletTilbakekrevingVedtak.samtykke).isEqualTo(true)
-            verify(exactly = 1) { loggService.loggForenkletTilbakekrevingVedtakSamtykkeOppdatert(behandling.id) }
+            verify(exactly = 1) { loggService.loggForenkletTilbakekrevingVedtakOppdatertSamtykke(behandling.id) }
             verify(exactly = 1) { forenkletTilbakekrevingVedtakRepository.save(any()) }
         }
 

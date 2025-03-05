@@ -750,11 +750,11 @@ class LoggService(
             ),
         )
 
-    fun loggForenkletTilbakekrevingVedtakSamtykkeOppdatert(behandlingId: Long) =
+    fun loggForenkletTilbakekrevingVedtakOppdatertSamtykke(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.FORENKLET_TILBAKEKREVING_VEDTAK_SAMTYKKE_OPPDATERT,
+                type = LoggType.FORENKLET_TILBAKEKREVING_VEDTAK_OPPDATERT_SAMTYKKE,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,
