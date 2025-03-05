@@ -10,7 +10,6 @@ class ForenkletTilbakekrevingsvedtakService(
     private val forenkletTilbakekrevingsvedtakRepository: ForenkletTilbakekrevingsvedtakRepository,
     private val loggService: LoggService,
 ) {
-    @Transactional(readOnly = true)
     fun finnForenkletTilbakekrevingsvedtak(behandlingId: Long) = forenkletTilbakekrevingsvedtakRepository.finnForenkletTilbakekrevingsvedtakForBehandling(behandlingId)
 
     @Transactional
