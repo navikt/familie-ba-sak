@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -20,8 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
@@ -148,12 +147,12 @@ fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
     behandling: Behandling,
     personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): Vilkårsvurdering {
-    val builder = VilkårsvurderingBuilder<Måned>(behandling)
+    val builder = VilkårsvurderingBuilder(behandling)
 
     this.entries.forEach { (startTidspunkt, vilkårsresultater) ->
         val person = personopplysningGrunnlag.personer.first { it.fødselsdato == startTidspunkt }
 
-        val personBuilder = builder.forPerson(person, startTidspunkt.tilMånedTidspunkt())
+        val personBuilder = builder.forPerson(person, startTidspunkt.toYearMonth())
         vilkårsresultater.forEach { (vilkår, tidslinje) -> personBuilder.medVilkår(tidslinje, vilkår) }
         personBuilder.byggPerson()
     }

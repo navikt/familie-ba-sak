@@ -26,6 +26,9 @@ enum class FeatureToggle(
     // NAV-24034
     BRUK_NY_SAKSBEHANDLER_NAVN_FORMAT_I_SIGNATUR("familie-ba-sak.bruk-ny-saksbehandler-navn-format-i-signatur"),
 
+    // NAV-24387
+    BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING("familie-ba-sak.bruk-utbetalingstidslinjer-ved-generering-av-perioder-til-avstemming"),
+
     // satsendring
     // Oppretter satsendring-tasker for de som ikke har fått ny task
     SATSENDRING_ENABLET("familie-ba-sak.satsendring-enablet"),
@@ -38,4 +41,9 @@ enum class FeatureToggle(
 
     // Kjører satsendring lørdag
     SATSENDRING_LØRDAG("familie-ba-sak.satsendring-lordag"),
+
+    BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING("familie-ba-sak.ulovfestet-motregning"),
+
+    // NAV-24534
+    VALIDER_IKKE_AVREGNING("familie-ba-sak.valider-ikke-avregning"),
 }

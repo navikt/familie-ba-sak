@@ -41,7 +41,7 @@ data class UtvidetBarnetrygdGenerator(
             utvidetVilkårTidslinje
                 .kombinerKunVerdiMed(
                     størsteProsentTidslinje,
-                    satstypeFamilieFellesTidslinje(SatsType.UTVIDET_BARNETRYGD),
+                    satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD),
                 ) { _, prosent, sats ->
                     val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
                     AndelTilkjentYtelseForTidslinje(

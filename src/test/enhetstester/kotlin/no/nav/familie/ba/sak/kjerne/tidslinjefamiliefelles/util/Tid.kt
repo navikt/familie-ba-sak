@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util
 
+import no.nav.familie.ba.sak.common.LocalDateProgression
 import no.nav.familie.ba.sak.common.YearMonthProgression
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -56,3 +58,7 @@ fun Int.nov(år: Int) = LocalDate.of(år, 11, this)
 fun Int.des(år: Int) = LocalDate.of(år, 12, this)
 
 fun <V> YearMonthProgression.med(verdi: V) = Periode(verdi, this.start.førsteDagIInneværendeMåned(), this.endInclusive.sisteDagIInneværendeMåned())
+
+fun <V> LocalDateProgression.tilTidslinje(verdi: () -> V) = Periode(verdi(), this.start, this.endInclusive).tilTidslinje()
+
+fun <V> YearMonthProgression.tilTidslinje(verdi: () -> V) = Periode(verdi(), this.start.førsteDagIInneværendeMåned(), this.endInclusive.sisteDagIInneværendeMåned()).tilTidslinje()

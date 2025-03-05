@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -24,13 +25,34 @@ import java.time.YearMonth
 
 class UtbetalingsTidslinjeServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
+    private val behandlingRepository = mockk<BehandlingRepository>()
 
-    private val utbetalingsTidslinjeService = UtbetalingsTidslinjeService(tilkjentYtelseRepository = tilkjentYtelseRepository)
+    private val utbetalingsTidslinjeService = UtbetalingsTidslinjeService(tilkjentYtelseRepository = tilkjentYtelseRepository, behandlingRepository = behandlingRepository)
 
     private val førstePeriodeIdKjede1 = 0L
     private val førstePeriodeIdKjede2 = 2L
     private val fagsak = lagFagsak()
     private val førstegangsbehandling = lagBehandling(fagsak)
+
+    @Nested
+    inner class GenererUtbetalingsperioderForBehandlingerEtterDato {
+        @Test
+        fun `skal generere utbetalingsperioder for behandlinger etter dato`() {
+            // Arrange
+            val tilkjentYtelse = lagTilkjentYtelse(behandling = førstegangsbehandling, utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdragFørstegangsbehandling()))
+
+            every { behandlingRepository.finnFagsakIderForBehandlinger(any<List<Long>>()) } returns listOf(fagsak.id)
+            every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(tilkjentYtelse)
+
+            // Act
+            val utbetalingsperioder = utbetalingsTidslinjeService.genererUtbetalingsperioderForBehandlingerEtterDato(listOf(førstegangsbehandling.id), LocalDate.of(2025, 2, 15))
+
+            // Assert
+            assertThat(utbetalingsperioder).hasSize(2)
+            assertThat(utbetalingsperioder[0].verdi.periodeId).isEqualTo(førstegangsbehandlingPeriode2Kjede1.periodeId)
+            assertThat(utbetalingsperioder[1].verdi.periodeId).isEqualTo(førstegangsbehandlingPeriode1Kjede2.periodeId)
+        }
+    }
 
     @Nested
     inner class GenererUtbetalingsTidslinjerForFagsak {
