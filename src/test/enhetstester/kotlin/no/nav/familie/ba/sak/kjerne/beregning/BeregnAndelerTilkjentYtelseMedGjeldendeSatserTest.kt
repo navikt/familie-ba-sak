@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.rangeTo
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import no.nav.familie.ba.sak.common.rangeTo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
