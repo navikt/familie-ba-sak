@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
@@ -155,7 +156,7 @@ fun VilkårsvurderingBuilder.byggVilkårsvurderingTidslinjer() = Vilkårsvurderi
 
 fun VilkårsvurderingBuilder.PersonResultatBuilder.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
-fun VilkårsvurderingBuilder.byggTilkjentYtelse() {
+fun VilkårsvurderingBuilder.byggTilkjentYtelse(): TilkjentYtelse {
     val vilkårsvurdering = this.byggVilkårsvurdering()
 
     val overgangsstønadServiceMock: OvergangsstønadService = mockk()
@@ -166,7 +167,7 @@ fun VilkårsvurderingBuilder.byggTilkjentYtelse() {
     every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
 
-    tilkjentYtelseGenerator.genererTilkjentYtelse(
+    return tilkjentYtelseGenerator.genererTilkjentYtelse(
         behandling = vilkårsvurdering.behandling,
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
     )
