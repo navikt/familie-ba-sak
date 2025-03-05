@@ -737,6 +737,58 @@ class LoggService(
         ),
     )
 
+    fun loggForenkletTilbakekrevingsvedtakOpprettet(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_OPPRETTET,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggForenkletTilbakekrevingsvedtakOppdatertSamtykke(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_OPPDATERT_SAMTYKKE,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggForenkletTilbakekrevingsvedtakOppdatertFritekst(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_OPPDATERT_FRITEKST,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
+    fun loggForenkletTilbakekrevingsvedtakSlettet(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_SLETTET,
+                rolle =
+                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                        rolleConfig,
+                        BehandlerRolle.SAKSBEHANDLER,
+                    ),
+            ),
+        )
+
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()
 
