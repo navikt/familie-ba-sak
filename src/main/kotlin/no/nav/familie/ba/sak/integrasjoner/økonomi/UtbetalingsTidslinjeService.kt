@@ -53,7 +53,7 @@ class UtbetalingsTidslinjeService(
         val utbetalingsperioderPerKjede =
             utbetalingsperioderPerKjede(iverksatteUtbetalingsoppdrag = iverksatteUtbetalingsoppdrag)
 
-        val tidslinjePerKjede = genererTidslinjePerKjede(iverksatteUtbetalingsoppdrag = iverksatteUtbetalingsoppdrag)
+        val tidslinjePerKjede = genererTidslinjePerKjede(iverksatteUtbetalingsoppdrag = iverksatteUtbetalingsoppdrag, utbetalingsperioderPerKjede = utbetalingsperioderPerKjede)
 
         return tidslinjePerKjede.keys.map { sistePeriodeIdIKjede ->
             Utbetalingstidslinje(
@@ -80,14 +80,16 @@ class UtbetalingsTidslinjeService(
                 val utbetalingsperidoerPerKjede =
                     utbetalingsoppdrag.tilUtbetalingsperioderPerKjede().mapValues { (_, utbetalingsperioder) ->
                         val opphørsPeriode = utbetalingsperioder.singleOrNull { it.opphør != null }
-                        val forrigePeriodeId = opphørsPeriode?.periodeId ?: utbetalingsperioder.minOfOrNull { it.forrigePeriodeId ?: -1 }
+                        val forrigePeriodeId = opphørsPeriode?.periodeId ?: utbetalingsperioder.minOfOrNull { it.forrigePeriodeId ?: -1 } ?: -1
                         Pair(utbetalingsperioder, forrigePeriodeId)
                     }
                 kjederForFagsak.apply {
                     utbetalingsperidoerPerKjede.forEach { periodeId, (utbetalingsperioder, forrigePeriodeId) ->
-                        put(periodeId, getOrDefault(forrigePeriodeId, emptySet()).plus(utbetalingsperioder))
-                        if (periodeId != forrigePeriodeId) {
-                            remove(forrigePeriodeId)
+                        val sistePeriodeIdIKjede = finnSistePeriodeIdIKjede(forrigePeriodeId, this)
+                        val nySistePeriodeIdIKjede = periodeId.takeIf { it > sistePeriodeIdIKjede } ?: sistePeriodeIdIKjede
+                        put(nySistePeriodeIdIKjede, getOrDefault(sistePeriodeIdIKjede, emptySet()).plus(utbetalingsperioder))
+                        if (nySistePeriodeIdIKjede != sistePeriodeIdIKjede) {
+                            remove(sistePeriodeIdIKjede)
                         }
                     }
                 }
@@ -107,21 +109,28 @@ class UtbetalingsTidslinjeService(
                 }
             }
 
-    private fun genererTidslinjePerKjede(iverksatteUtbetalingsoppdrag: List<Utbetalingsoppdrag>): Map<Long, Tidslinje<Utbetalingsperiode>> =
+    private fun genererTidslinjePerKjede(
+        iverksatteUtbetalingsoppdrag: List<Utbetalingsoppdrag>,
+        utbetalingsperioderPerKjede: Map<Long, Set<Utbetalingsperiode>>,
+    ): Map<Long, Tidslinje<Utbetalingsperiode>> =
         iverksatteUtbetalingsoppdrag
             .fold(mutableMapOf()) { kjederForFagsak, utbetalingsoppdrag ->
                 val kjederForUtbetalingsperioder =
                     utbetalingsoppdrag.tilUtbetalingsperioderPerKjede().mapValues { (_, kjede) ->
                         val opphørsperiode = kjede.singleOrNull { it.opphør != null }
                         val nyePerioder = kjede.filter { it.opphør == null }.map { Periode(it, fom = it.vedtakdatoFom, tom = it.vedtakdatoTom) }
-                        val forrigePeriodeId = opphørsperiode?.periodeId ?: nyePerioder.minOfOrNull { it.verdi.forrigePeriodeId ?: -1 }
+                        val forrigePeriodeId = opphørsperiode?.periodeId ?: nyePerioder.minOfOrNull { it.verdi.forrigePeriodeId ?: -1 } ?: -1
                         Triple(nyePerioder.tilTidslinje(), forrigePeriodeId, opphørsperiode)
                     }
                 kjederForFagsak.apply {
                     kjederForUtbetalingsperioder.forEach { periodeId, (tidslinje, forrigePeriodeId, opphørsperiode) ->
+                        // I noen fagsaker har man lagt inn opphør på feil periode i kjede.
+                        // Opphør skal i utgangspunktet alltid legges inn på siste periode i kjede, men i noen fagsaker har opphør blitt lagt inn på en tidligere periode i kjeden.
+                        // Sørger her for at vi ikke oppretter nye kjeder når dette skjer, men heller finner ut hvilken kjede perioden faller inn under.
+                        val sistePeriodeIdIKjede = finnSistePeriodeIdIKjede(forrigePeriodeId, this, utbetalingsperioderPerKjede)
+                        val nySistePeriodeIdIKjede = periodeId.takeIf { it > sistePeriodeIdIKjede } ?: sistePeriodeIdIKjede
                         val gjeldendeTidslinje =
-                            kjederForFagsak
-                                .getOrDefault(forrigePeriodeId, tomTidslinje())
+                            getOrDefault(sistePeriodeIdIKjede, tomTidslinje())
                                 .beskjærOgKorrigerPerioderVedOpphør(opphørsperiode)
                                 .beskjærTilOgMedEtterIkkeTomTidslinje(tidslinje)
 
@@ -132,11 +141,11 @@ class UtbetalingsTidslinjeService(
                                     nyUtbetalingsperiode ?: gjeldendeUtbetalingsperiode
                                 }.tilPerioderIkkeNull()
                                 .tilTidslinje()
-                        put(periodeId, nyGjeldendeTidslinje)
+                        put(nySistePeriodeIdIKjede, nyGjeldendeTidslinje)
 
                         // Håndtering av opphør. Da vil periodeId være lik forrigePeriodeId, og vi må sørge for at vi ikke sletter tidslinja vi akkurat har oppdatert.
-                        if (periodeId != forrigePeriodeId) {
-                            remove(forrigePeriodeId)
+                        if (nySistePeriodeIdIKjede != sistePeriodeIdIKjede) {
+                            remove(sistePeriodeIdIKjede)
                         }
                     }
                 }
@@ -168,4 +177,20 @@ class UtbetalingsTidslinjeService(
         }
         return this.beskjærTilOgMedEtter(tidslinje)
     }
+
+    private fun finnSistePeriodeIdIKjede(
+        forrigePeriodeId: Long,
+        kjederForFagsak: Map<Long, Set<Utbetalingsperiode>>,
+    ): Long = kjederForFagsak.entries.singleOrNull { (_, utbetalingsperioder) -> utbetalingsperioder.any { utbetalingsperiode -> utbetalingsperiode.periodeId == forrigePeriodeId } }?.key ?: -1
+
+    private fun finnSistePeriodeIdIKjede(
+        forrigePeriodeId: Long,
+        tidslinjerPerKjede: Map<Long, Tidslinje<Utbetalingsperiode>>,
+        utbetalingsperioderPerKjede: Map<Long, Set<Utbetalingsperiode>>,
+    ): Long =
+        tidslinjerPerKjede.keys.singleOrNull { sistePeriodeIdIKjede ->
+            val kjedeForSistePeriodeIdIKjede = utbetalingsperioderPerKjede.entries.single { (_, utbetalingsperioder) -> utbetalingsperioder.any { it.periodeId == sistePeriodeIdIKjede } }.key
+            val kjedeForForrigePeriodeId = utbetalingsperioderPerKjede.entries.singleOrNull { (_, utbetalingsperidoer) -> utbetalingsperidoer.any { it.periodeId == forrigePeriodeId } }?.key
+            kjedeForSistePeriodeIdIKjede == kjedeForForrigePeriodeId
+        } ?: -1
 }
