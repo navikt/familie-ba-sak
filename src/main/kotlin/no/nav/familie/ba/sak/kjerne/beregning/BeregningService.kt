@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -20,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
@@ -34,13 +31,11 @@ class BeregningService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val behandlingRepository: BehandlingRepository,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository
@@ -184,25 +179,13 @@ class BeregningService(
         endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
-        val vilkårsvurdering =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
-                fagsakType = behandling.fagsak.type,
-                skalBrukeNyVersjonAvOppdaterAndelerMedEndringer = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_VERSJON_AV_OPPDATERING_AV_ANDELER_MED_ENDRINGER),
-            ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
-                    søkerAktør = søkerAktør,
-                    behandling = behandling,
-                )
-
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
-            }
+            )
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
@@ -226,42 +209,6 @@ class BeregningService(
 
         // 2: Genererer andeler som også tar hensyn til endret utbetaling andeler
         return oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-    }
-
-    fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
-        behandling: Behandling,
-        sistIverksatteBehandling: Behandling?,
-    ): Boolean {
-        if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
-
-        val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) {
-                emptyList()
-            } else {
-                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id,
-                ).filter { it.erSmåbarnstillegg() }
-            }
-
-        val nyeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) {
-                emptyList()
-            } else {
-                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = behandling.id,
-                ).filter { it.erSmåbarnstillegg() }
-            }
-
-        val (innvilgedeMånedPerioder, reduserteMånedPerioder) =
-            hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
-                forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-                nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
-            )
-
-        return kanAutomatiskIverksetteSmåbarnstillegg(
-            innvilgedeMånedPerioder = innvilgedeMånedPerioder,
-            reduserteMånedPerioder = reduserteMånedPerioder,
-        )
     }
 
     /**
