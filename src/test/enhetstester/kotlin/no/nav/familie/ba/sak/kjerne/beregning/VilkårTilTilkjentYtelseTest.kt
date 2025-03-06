@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -14,9 +15,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -33,6 +35,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
+    private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
+    private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
@@ -90,11 +96,14 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val faktiskTilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         Assertions.assertEquals(
@@ -155,24 +164,27 @@ class VilkårTilTilkjentYtelseTest {
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
 
-        val faktiskTilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
-            ) { aktør ->
-                if (småbarnstilleggTestPeriode != null) {
-                    listOf(
-                        InternPeriodeOvergangsstønad(
-                            personIdent = aktør.aktivFødselsnummer(),
-                            fomDato = småbarnstilleggTestPeriode.fraOgMed,
-                            tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
-                        ),
-                    )
-                } else {
-                    emptyList()
-                }
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+            if (småbarnstilleggTestPeriode != null) {
+                listOf(
+                    InternPeriodeOvergangsstønad(
+                        personIdent = søker.aktør.aktivFødselsnummer(),
+                        fomDato = småbarnstilleggTestPeriode.fraOgMed,
+                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
+                    ),
+                )
+            } else {
+                emptyList()
             }
+        }
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
+        val faktiskTilkjentYtelse =
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = vilkårsvurdering.behandling,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+            )
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
@@ -235,11 +247,14 @@ class VilkårTilTilkjentYtelseTest {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
 
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val faktiskTilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                fagsakType = FagsakType.NORMAL,
             )
 
         Assertions.assertEquals(

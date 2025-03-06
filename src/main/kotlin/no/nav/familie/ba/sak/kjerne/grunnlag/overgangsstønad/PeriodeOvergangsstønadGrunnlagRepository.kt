@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg
+package no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying

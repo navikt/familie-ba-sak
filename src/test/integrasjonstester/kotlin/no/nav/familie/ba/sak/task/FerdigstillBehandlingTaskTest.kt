@@ -27,13 +27,14 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -99,6 +100,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
     @Autowired
+    lateinit var overgangsstønadService: OvergangsstønadService
+
+    @Autowired
     lateinit var småbarnstilleggService: SmåbarnstilleggService
 
     @Autowired
@@ -122,9 +126,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var settPåVentService: SettPåVentService
 
-    @Autowired
-    lateinit var opprettTaskService: OpprettTaskService
-
     private val fnr = randomFnr()
 
     @BeforeEach
@@ -133,7 +134,6 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     }
 
     private fun kjørSteg(resultat: Resultat): Behandling {
-        val aktørId = personidentService.hentAktør(fnr)
         val fnrBarn = leggTilPersonInfo(randomBarnFnr())
 
         val behandling =
@@ -235,16 +235,15 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 vedtakService = vedtakService,
                 vedtaksperiodeService = vedtaksperiodeService,
-                småbarnstilleggService = småbarnstilleggService,
+                overgangsstønadService = overgangsstønadService,
                 taskService = taskService,
-                beregningService = beregningService,
                 autovedtakService = autovedtakService,
                 oppgaveService = oppgaveService,
                 vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
                 localDateProvider = localDateProvider,
                 påVentService = settPåVentService,
-                opprettTaskService = opprettTaskService,
                 stegService = stegService,
+                småbarnstilleggService = småbarnstilleggService,
             )
 
         @Test

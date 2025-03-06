@@ -19,6 +19,16 @@ import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
+import java.time.YearMonth
+
+internal data class BeregnetAndel(
+    val person: Person,
+    val stønadFom: YearMonth,
+    val stønadTom: YearMonth,
+    val beløp: Int,
+    val sats: Int,
+    val prosent: BigDecimal,
+)
 
 object OrdinærBarnetrygdUtil {
     internal fun beregnAndelerTilkjentYtelseForBarna(

@@ -2,12 +2,14 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -21,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.utbetaling.UtbetalingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -29,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.tidslinje.tomTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -42,6 +45,9 @@ internal class KompetanseServiceTest {
     val utbetalingTidslinjeService: UtbetalingTidslinjeService = mockk()
     val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService = mockk()
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
+    val overgangsstønadServiceMock: OvergangsstønadService = mockk()
+    val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
     val clockProvider = TestClockProvider()
 
     val kompetanseService =
@@ -63,6 +69,8 @@ internal class KompetanseServiceTest {
     @BeforeEach
     fun init() {
         mockKompetanseRepository.deleteAll()
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     }
 
     @Test
@@ -287,11 +295,12 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
-                fagsakType = FagsakType.NORMAL,
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -349,11 +358,12 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2)),
-                fagsakType = FagsakType.NORMAL,
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -406,11 +416,12 @@ internal class KompetanseServiceTest {
                         .tilPersonEnkelSøkerOgBarn(),
             )
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val tilkjentYtelse =
-            TilkjentYtelseGenerator.genererTilkjentYtelse(
-                vilkårsvurdering = vilkårsvurdering,
+            tilkjentYtelseGenerator.genererTilkjentYtelse(
+                behandling = vilkårsvurdering.behandling,
                 personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId.id, personer = mutableSetOf(søker, barn1, barn2, barn3)),
-                fagsakType = FagsakType.NORMAL,
             )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
