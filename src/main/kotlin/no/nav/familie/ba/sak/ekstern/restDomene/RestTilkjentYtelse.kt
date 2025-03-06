@@ -87,6 +87,11 @@ private fun List<AndelTilkjentYtelse>.tilRestYtelsePeriodeUtenDatoerTidslinje() 
             månedPeriodeAv(
                 fraOgMed = it.stønadFom,
                 tilOgMed = it.stønadTom,
-                innhold = RestYtelsePeriodeUtenDatoer(kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp, it.type, it.prosent > BigDecimal.ZERO),
+                innhold =
+                    RestYtelsePeriodeUtenDatoer(
+                        kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp,
+                        ytelseType = it.type,
+                        skalUtbetales = it.prosent > BigDecimal.ZERO,
+                    ),
             )
         }.tilTidslinje()
