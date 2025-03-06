@@ -290,9 +290,9 @@ class OppdragSteg {
                 }
             try {
                 assertThat(andelerMedPeriodeId).isEqualTo(forventedeAndelerMedPeriodeId)
-            } catch (exception: Throwable) {
-                logger.error("Feilet validering av behandling $behandlingId")
-                throw exception
+            } catch (e: Exception) {
+                logger.error("Feilet validering av oppdaterte andeler for behandling $behandlingId", e)
+                throw e
             }
         }
     }
