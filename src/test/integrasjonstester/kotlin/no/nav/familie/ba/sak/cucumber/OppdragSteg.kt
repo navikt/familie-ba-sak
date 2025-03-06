@@ -8,6 +8,7 @@ import io.cucumber.java.no.Så
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
@@ -43,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningTestUtil.sisteAndelPerIde
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeId
 import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -259,6 +261,40 @@ class OppdragSteg {
                 .mapValues { it.value.utbetalingsoppdrag.tilRestUtbetalingsoppdrag() }
                 .toMutableMap(),
         )
+    }
+
+    @Så("forvent følgende oppdaterte andeler")
+    fun `forvent følgende oppdaterte andeler`(dataTable: DataTable) {
+        validerForventedeOppdaterteAndeler(dataTable, tilkjenteYtelser)
+    }
+
+    private fun validerForventedeOppdaterteAndeler(
+        dataTable: DataTable,
+        tilkjenteYtelser: MutableMap<Long, TilkjentYtelse>,
+    ) {
+        val forventedeOppdaterteAndelerPerBehandling =
+            OppdragParser.mapForventedeAndelerMedPeriodeId(
+                dataTable,
+            )
+
+        forventedeOppdaterteAndelerPerBehandling.forEach { (behandlingId, forventedeAndelerMedPeriodeId) ->
+            val tilkjentYtelse = tilkjenteYtelser[behandlingId] ?: throw Feil("Mangler TilkjentYtelse for behandling $behandlingId")
+            val andelerMedPeriodeId =
+                tilkjentYtelse.andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }.map {
+                    AndelMedPeriodeId(
+                        id = it.id.toString(),
+                        periodeId = it.periodeOffset!!,
+                        forrigePeriodeId = it.forrigePeriodeOffset,
+                        kildeBehandlingId = it.kildeBehandlingId!!.toString(),
+                    )
+                }
+            try {
+                assertThat(andelerMedPeriodeId).isEqualTo(forventedeAndelerMedPeriodeId)
+            } catch (exception: Throwable) {
+                logger.error("Feilet validering av behandling $behandlingId")
+                throw exception
+            }
+        }
     }
 
     @Så("forvent følgende simulering")
