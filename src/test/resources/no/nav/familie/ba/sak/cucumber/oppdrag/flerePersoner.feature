@@ -18,6 +18,10 @@ Egenskap: Utbetalingsoppdrag: Vedtak med flere identer
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 1          |                    | 1               |
 
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          |                    | 1               |
 
   Scenario: Revurderer og legger til en periode på en av personene
 
@@ -38,3 +42,11 @@ Egenskap: Utbetalingsoppdrag: Vedtak med flere identer
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 1          |                    | 1               |
       | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 2          | 0                  | 2               |
 
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          |                    | 1               |
+
+      | 2            | 2  | 0          |                    | 1               |
+      | 2            | 3  | 2          | 0                  | 2               |
+      | 2            | 4  | 1          |                    | 1               |
