@@ -12,13 +12,13 @@ import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
 import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.byggVilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilRegelverkResultatTidslinje

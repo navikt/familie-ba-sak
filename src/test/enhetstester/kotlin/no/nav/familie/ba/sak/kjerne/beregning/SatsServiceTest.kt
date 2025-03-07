@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.TILLEGG_ORBA
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.plus
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.aug
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
@@ -18,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jun
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.plus
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.sep
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilTidslinje
 import no.nav.familie.tidslinje.Periode

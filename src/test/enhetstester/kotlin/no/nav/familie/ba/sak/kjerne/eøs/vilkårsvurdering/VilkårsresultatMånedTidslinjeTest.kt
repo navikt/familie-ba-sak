@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.ikkeOppfyltVilkår
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.oppfyltVilkår
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.konkatenerTidslinjer
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
