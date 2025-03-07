@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -9,14 +12,16 @@ import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseGenerator
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilUtdypendeVilkårRegelverkResultatTidslinje
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -151,12 +156,22 @@ fun VilkårsvurderingBuilder.byggVilkårsvurderingTidslinjer() = Vilkårsvurderi
 
 fun VilkårsvurderingBuilder.PersonResultatBuilder.byggVilkårsvurderingTidslinjer() = this.byggPerson().byggVilkårsvurderingTidslinjer()
 
-fun VilkårsvurderingBuilder.byggTilkjentYtelse() =
-    TilkjentYtelseGenerator.genererTilkjentYtelse(
-        vilkårsvurdering = this.byggVilkårsvurdering(),
+fun VilkårsvurderingBuilder.byggTilkjentYtelse(): TilkjentYtelse {
+    val vilkårsvurdering = this.byggVilkårsvurdering()
+
+    val overgangsstønadServiceMock: OvergangsstønadService = mockk()
+    val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+
+    every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+    every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
+    return tilkjentYtelseGenerator.genererTilkjentYtelse(
+        behandling = vilkårsvurdering.behandling,
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
-        fagsakType = FagsakType.NORMAL,
     )
+}
 
 data class UtdypendeVilkårRegelverkResultat(
     val vilkår: Vilkår,

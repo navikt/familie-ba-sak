@@ -33,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -62,6 +63,7 @@ class BehandlingsresultatSteg(
     private val valutakursRepository: ValutakursRepository,
     private val localDateProvider: LocalDateProvider,
     private val kompetanseRepository: KompetanseRepository,
+    private val småbarnstilleggService: SmåbarnstilleggService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -156,7 +158,7 @@ class BehandlingsresultatSteg(
         val sistIverksatteBehandling by lazy { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandlingMedOppdatertBehandlingsresultat) }
 
         if (skalRettFraBehandlingsresultatTilIverksetting ||
-            beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+            småbarnstilleggService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                 behandling = behandlingMedOppdatertBehandlingsresultat,
                 sistIverksatteBehandling = sistIverksatteBehandling,
             )

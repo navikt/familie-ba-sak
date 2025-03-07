@@ -5,8 +5,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 
 fun mockPeriodeOvergangsstønadGrunnlagRepository(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefinition): PeriodeOvergangsstønadGrunnlagRepository {

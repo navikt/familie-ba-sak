@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import no.nav.familie.ba.sak.common.rangeTo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
@@ -17,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.eøs.util.under18år
 import no.nav.familie.ba.sak.kjerne.eøs.util.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.apr
@@ -31,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.okt
 import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.sep
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk.NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -345,17 +351,26 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
                 søker får 2516 i jul(2023)..nov(2036),
             )
 
-        assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYteldse())
+        assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelse())
     }
 }
 
-private fun VilkårsvurderingBuilder.PersonResultatBuilder.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
+private fun VilkårsvurderingBuilder.PersonResultatBuilder.beregnAndelerTilkjentYtelse(): List<BeregnetAndel> {
     val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
-    return TilkjentYtelseGenerator
+    val vilkårsvurdering = this.byggVilkårsvurdering()
+
+    val overgangsstønadServiceMock: OvergangsstønadService = mockk()
+    val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+
+    every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+    every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
+    return tilkjentYtelseGenerator
         .genererTilkjentYtelse(
-            vilkårsvurdering = this.byggVilkårsvurdering(),
+            behandling = vilkårsvurdering.behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL,
         ).andelerTilkjentYtelse
         .map {
             BeregnetAndel(
