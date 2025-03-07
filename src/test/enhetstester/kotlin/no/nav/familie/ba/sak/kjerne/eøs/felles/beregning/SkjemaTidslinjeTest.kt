@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.felles.beregning
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.tidslinje.PRAKTISK_SENESTE_DAG
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.utvidelser.tilPerioder

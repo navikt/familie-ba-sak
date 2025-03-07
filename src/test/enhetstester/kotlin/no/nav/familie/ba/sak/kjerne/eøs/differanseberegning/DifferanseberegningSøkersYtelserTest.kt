@@ -11,10 +11,10 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.født
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jul
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
