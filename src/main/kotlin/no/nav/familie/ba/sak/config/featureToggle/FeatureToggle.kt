@@ -49,4 +49,7 @@ enum class FeatureToggle(
 
     // NAV-24534
     VALIDER_IKKE_AVREGNING("familie-ba-sak.valider-ikke-avregning"),
+
+    // Tillatter behandling av klage
+    BEHANDLE_KLAGE("familie-ba-sak.klage"),
 }

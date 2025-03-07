@@ -98,36 +98,64 @@ fun lagTilgangsstyrtJournalpost(
         harTilgang = harTilgang,
     )
 
-fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
+fun lagMockRestJournalføring(
+    bruker: NavnOgIdent = NavnOgIdent("testbruker", "testIdent"),
+    datoMottatt: LocalDateTime = LocalDateTime.now().minusDays(10),
+    journalpostTittel: String = "Søknad om ordinær barnetrygd",
+    kategori: BehandlingKategori? = BehandlingKategori.NASJONAL,
+    underkategori: BehandlingUnderkategori? = BehandlingUnderkategori.ORDINÆR,
+    knyttTilFagsak: Boolean = true,
+    opprettOgKnyttTilNyBehandling: Boolean = true,
+    tilknyttedeBehandlingIder: List<String> = emptyList(),
+    dokumenter: List<RestJournalpostDokument> =
+        listOf(
+            lagRestJournalpostDokument(
+                dokumentTittel = "Søknad om barnetrygd",
+                brevkode = "mock",
+                dokumentInfoId = "1",
+                logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
+                eksisterendeLogiskeVedlegg = emptyList(),
+            ),
+            lagRestJournalpostDokument(
+                dokumentTittel = "Ekstra vedlegg",
+                brevkode = "mock",
+                dokumentInfoId = "2",
+                logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
+                eksisterendeLogiskeVedlegg = emptyList(),
+            ),
+        ),
+    navIdent: String = "09123",
+    fagsakType: FagsakType = FagsakType.NORMAL,
+    nyBehandlingstype: BehandlingType? = BehandlingType.FØRSTEGANGSBEHANDLING,
+    nyBehandlingsårsak: BehandlingÅrsak? = null,
+): RestJournalføring =
     RestJournalføring(
         avsender = bruker,
         bruker = bruker,
-        datoMottatt = LocalDateTime.now().minusDays(10),
-        journalpostTittel = "Søknad om ordinær barnetrygd",
-        kategori = BehandlingKategori.NASJONAL,
-        underkategori = BehandlingUnderkategori.ORDINÆR,
-        knyttTilFagsak = true,
-        opprettOgKnyttTilNyBehandling = true,
-        tilknyttedeBehandlingIder = emptyList(),
-        dokumenter =
-            listOf(
-                RestJournalpostDokument(
-                    dokumentTittel = "Søknad om barnetrygd",
-                    brevkode = "mock",
-                    dokumentInfoId = "1",
-                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
-                    eksisterendeLogiskeVedlegg = emptyList(),
-                ),
-                RestJournalpostDokument(
-                    dokumentTittel = "Ekstra vedlegg",
-                    brevkode = "mock",
-                    dokumentInfoId = "2",
-                    logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
-                    eksisterendeLogiskeVedlegg = emptyList(),
-                ),
-            ),
-        navIdent = "09123",
-        nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-        nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
-        fagsakType = FagsakType.NORMAL,
+        datoMottatt = datoMottatt,
+        journalpostTittel = journalpostTittel,
+        kategori = kategori,
+        underkategori = underkategori,
+        knyttTilFagsak = knyttTilFagsak,
+        opprettOgKnyttTilNyBehandling = opprettOgKnyttTilNyBehandling,
+        tilknyttedeBehandlingIder = tilknyttedeBehandlingIder,
+        dokumenter = dokumenter,
+        navIdent = navIdent,
+        nyBehandlingstype = nyBehandlingstype,
+        nyBehandlingsårsak = nyBehandlingsårsak,
+        fagsakType = fagsakType,
     )
+
+fun lagRestJournalpostDokument(
+    dokumentTittel: String? = "Søknad om barnetrygd",
+    brevkode: String = "mock",
+    dokumentInfoId: String? = "1",
+    logiskeVedlegg: List<LogiskVedlegg>? = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
+    eksisterendeLogiskeVedlegg: List<LogiskVedlegg>? = emptyList(),
+) = RestJournalpostDokument(
+    dokumentTittel,
+    brevkode,
+    dokumentInfoId,
+    logiskeVedlegg,
+    eksisterendeLogiskeVedlegg,
+)
