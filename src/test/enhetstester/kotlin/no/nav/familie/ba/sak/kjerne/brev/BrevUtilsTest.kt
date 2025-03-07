@@ -24,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
@@ -623,7 +622,7 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentLandOgStartdatoForUtbetalingstabell - skal finne alle kompetanser som gjelder etter endringstidspunktet`() {
-        val endringstidspunkt = LocalDate.now().tilMånedTidspunkt()
+        val endringstidspunkt = YearMonth.now()
 
         val kompetanser =
             listOf(
@@ -671,7 +670,7 @@ internal class BrevUtilsTest {
 
     @Test
     fun `hentLandOgStartdatoForUtbetalingstabell - skal finne korrekt utbetalingsland når hovedregelen gir Norge`() {
-        val endringstidspunkt = LocalDate.now().tilMånedTidspunkt()
+        val endringstidspunkt = YearMonth.now()
 
         val kompetanser =
             listOf(
