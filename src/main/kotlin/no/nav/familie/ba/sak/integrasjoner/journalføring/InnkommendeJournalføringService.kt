@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import jakarta.transaction.Transactional
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
@@ -128,8 +129,8 @@ class InnkommendeJournalføringService(
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
                     navIdent = request.navIdent,
-                    type = request.nyBehandlingstype,
-                    årsak = request.nyBehandlingsårsak,
+                    type = request.nyBehandlingstype ?: throw Feil("Mangler behandlingstype ved oppretting av ny behandling"),
+                    årsak = request.nyBehandlingsårsak ?: throw Feil("Mangler behandlingsårsak ved oppretting av ny behandling"),
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),

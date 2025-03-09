@@ -40,11 +40,35 @@ data class RestJournalføring(
     val dokumenter: List<RestJournalpostDokument>,
     // Saksbehandler sin ident
     val navIdent: String,
-    val nyBehandlingstype: BehandlingType,
-    val nyBehandlingsårsak: BehandlingÅrsak,
+    val nyBehandlingstype: BehandlingType?,
+    val nyBehandlingsårsak: BehandlingÅrsak?,
     val fagsakType: FagsakType,
     val institusjon: RestInstitusjon? = null,
 ) {
+    fun valider() {
+        if (opprettOgKnyttTilNyBehandling) {
+            if (nyBehandlingstype == null) {
+                throw FunksjonellFeil("Mangler behandlingstype ved oppretting av ny behandling.")
+            }
+            if (nyBehandlingsårsak == null && nyBehandlingstype == BehandlingType.REVURDERING) {
+                throw FunksjonellFeil("Mangler behandlingsårsak ved oppretting av ny revurdering.")
+            }
+            if (nyBehandlingsårsak != null && nyBehandlingstype != BehandlingType.REVURDERING) {
+                throw FunksjonellFeil("Forventer kun behandlingsårsak ved oppretting av ny revurdering.")
+            }
+        } else {
+            if (nyBehandlingstype != null) {
+                throw FunksjonellFeil("Forventet ikke behandlingstype når man ikke skal opprette en ny behandling.")
+            }
+            if (nyBehandlingsårsak != null) {
+                throw FunksjonellFeil("Forventet ikke behandlingsårsak når man ikke skal opprette en ny behandling.")
+            }
+        }
+        if (dokumenter.any { it.dokumentTittel == null || it.dokumentTittel == "" }) {
+            throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
+        }
+    }
+
     fun oppdaterMedDokumentOgSak(
         sak: Sak,
         journalpost: Journalpost,
