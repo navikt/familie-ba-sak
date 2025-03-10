@@ -1,13 +1,12 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.erAlfanummeriskPlussKolon
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -93,26 +92,6 @@ data class RestJournalføring(
             // Defaulter til ordinær inntil videre.
             else -> BehandlingUnderkategori.ORDINÆR
         }
-    }
-
-    enum class Journalføringsbehandlingstype {
-        FØRSTEGANGSBEHANDLING,
-        REVURDERING,
-        MIGRERING_FRA_INFOTRYGD,
-        TEKNISK_ENDRING,
-        KLAGE,
-        TILBAKEKREVING,
-        ;
-
-        fun tilBehandingType(): BehandlingType =
-            when (this) {
-                FØRSTEGANGSBEHANDLING -> BehandlingType.FØRSTEGANGSBEHANDLING
-                REVURDERING -> BehandlingType.REVURDERING
-                MIGRERING_FRA_INFOTRYGD -> BehandlingType.MIGRERING_FRA_INFOTRYGD
-                TEKNISK_ENDRING -> BehandlingType.TEKNISK_ENDRING
-                KLAGE -> throw Feil("Klage finnes ikke i ${BehandlingType::class.simpleName}. Behandles i ekstern applikasjon.")
-                TILBAKEKREVING -> throw Feil("Tilbakekreving finnes ikke i ${BehandlingType::class.simpleName}. Behandles i ekstern applikasjon.")
-            }
     }
 }
 

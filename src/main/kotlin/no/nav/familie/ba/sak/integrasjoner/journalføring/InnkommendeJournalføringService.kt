@@ -186,7 +186,7 @@ class InnkommendeJournalføringService(
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
                     navIdent = request.navIdent,
-                    type = request.nyBehandlingstype,
+                    type = request.nyBehandlingstype.tilBehandingType(),
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
