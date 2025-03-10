@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelMedPeriodeId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
@@ -61,6 +62,18 @@ object OppdragParser {
             rader.map { mapAndelTilkjentYtelse(it, behandling, andelId++) }.toMutableSet()
         }
     }
+
+    fun mapForventedeAndelerMedPeriodeId(dataTable: DataTable): Map<Long, List<AndelMedPeriodeId>> =
+        dataTable.groupByBehandlingId().mapValues { (_, rader) ->
+            rader.map { rad ->
+                AndelMedPeriodeId(
+                    id = parseString(Domenebegrep.ID, rad),
+                    periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
+                    forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad),
+                    kildeBehandlingId = parseString(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
+                )
+            }
+        }
 
     fun mapForventetUtbetalingsoppdrag(
         dataTable: DataTable,

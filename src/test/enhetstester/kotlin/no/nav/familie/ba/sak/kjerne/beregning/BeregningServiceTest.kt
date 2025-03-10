@@ -11,7 +11,6 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -41,12 +40,14 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -65,14 +66,14 @@ import java.time.YearMonth
 class BeregningServiceTest {
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
+    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val søknadGrunnlagService = mockk<SøknadGrunnlagService>()
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
-    private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
-    private val unleashNextMedContextService = mockUnleashNextMedContextService()
+    private val overgangsstønadService = mockk<OvergangsstønadService>()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             andelTilkjentYtelseRepository,
@@ -108,12 +109,10 @@ class BeregningServiceTest {
                 fagsakService = fagsakService,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
                 tilkjentYtelseRepository = tilkjentYtelseRepository,
-                vilkårsvurderingRepository = vilkårsvurderingRepository,
                 behandlingRepository = behandlingRepository,
                 personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
-                småbarnstilleggService = småbarnstilleggService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                unleashNextMedContextService = unleashNextMedContextService,
+                tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService),
             )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
@@ -185,6 +184,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -266,6 +266,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -346,6 +347,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -376,8 +378,7 @@ class BeregningServiceTest {
                 ),
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
-            andelTilkjentYtelser
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns andelTilkjentYtelser
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
@@ -434,6 +435,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -548,6 +550,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -1186,6 +1189,7 @@ class BeregningServiceTest {
         val slot = slot<TilkjentYtelse>()
 
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(any()) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns
             lagSøknadDTO(
@@ -1419,9 +1423,10 @@ class BeregningServiceTest {
             )
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
-        every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
-        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
+        every { overgangsstønadService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
+        every { overgangsstønadService.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers {
             listOf(
                 InternPeriodeOvergangsstønad(
                     personIdent = søker.aktør.aktivFødselsnummer(),

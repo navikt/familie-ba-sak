@@ -24,12 +24,12 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20250303103923_6d6da46</prosessering.version>
-        <felles.version>3.20250305100957_13ab5fd</felles.version>
+        <felles.version>3.20250305123143_5e4f8ca</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250304150422_c587a15</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20241209130157_6873c2d</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250206122712_9ec24df</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20250306084157_636f980</utbetalingsgenerator.version>
         <cucumber.version>7.21.1</cucumber.version>
         <mockk.version>1.13.17</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
@@ -48,7 +48,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.6</testcontainers.postgresql.version>
         <unleash.version>10.1.0</unleash.version>
-        <testcontainers.postgresql.version>1.20.5</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.20.6</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>

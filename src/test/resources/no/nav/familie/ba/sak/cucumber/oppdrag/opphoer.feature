@@ -14,9 +14,13 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    | 2               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
 
   Scenario: Iverksetter på nytt etter opphør
 
@@ -29,10 +33,16 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | KildebehandlingId |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1                 |
+      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    | 2                 |
+      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  | 3                 |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+
+      | 3            | 1  | 1          | 0                  | 3               |
 
   Scenario: Opphør en av 2 perioder
 
@@ -45,10 +55,17 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 800   | NY           | Nei        | 1          | 0                  |
-      | 2            | 04.2021  | 04.2021  | 04.2021     | 800   | ENDR         | Ja         | 1          | 0                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2021  | 04.2021  |             | 800   | NY           | Nei        | 1          | 0                  | 1               |
+      | 2            | 04.2021  | 04.2021  | 04.2021     | 800   | ENDR         | Ja         | 1          | 0                  | 2               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+
+      | 2            | 2  | 0          |                    | 1               |
 
   Scenario: Opphører en lang periode
 
@@ -60,9 +77,15 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 06.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 2            | 03.2021  | 06.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    | 2               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+
+      | 2            | 1  | 0          |                    | 2               |
 
   Scenario: Opphør en tidligere periode da vi kun har med den andre av 2 perioder
 
@@ -76,11 +99,18 @@ Egenskap: Utbetalingsoppdrag: Opphør
 
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |                 |
-      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  |                 |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  | 1               |
 
-      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  |                 |
-      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |                 |
+      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  | 2               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+
+      | 2            | 2  | 2          | 1                  | 2               |
 
   Scenario: Endrer en tidligere periode til 0-utbetaling
 
@@ -94,13 +124,19 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2021  | 04.2021  |             | 700   | NY           | Nei        | 1          | 0                  | 1               |
 
-      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
-      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
+      | 2            | 04.2021  | 04.2021  | 03.2021     | 700   | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 2            | 04.2021  | 04.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  | 2               |
 
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+
+      | 2            | 3  | 2          | 1                  | 2               |
 
   Scenario: 2 opphør etter hverendre på ulike perioder
 
@@ -116,14 +152,25 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 04.2021  |             | 800   | NY           | Nei        | 1          | 0                  |
-      | 1            | 05.2021  | 05.2021  |             | 900   | NY           | Nei        | 2          | 1                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2021  | 04.2021  |             | 800   | NY           | Nei        | 1          | 0                  | 1               |
+      | 1            | 05.2021  | 05.2021  |             | 900   | NY           | Nei        | 2          | 1                  | 1               |
 
-      | 2            | 05.2021  | 05.2021  | 05.2021     | 900   | ENDR         | Ja         | 2          | 1                  |
+      | 2            | 05.2021  | 05.2021  | 05.2021     | 900   | ENDR         | Ja         | 2          | 1                  | 2               |
 
-      | 3            | 05.2021  | 05.2021  | 04.2021     | 900   | ENDR         | Ja         | 2          | 1                  |
+      | 3            | 05.2021  | 05.2021  | 04.2021     | 900   | ENDR         | Ja         | 2          | 1                  | 3               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+      | 1            | 2  | 2          | 1                  | 1               |
+
+      | 2            | 3  | 0          |                    | 1               |
+      | 2            | 4  | 1          | 0                  | 1               |
+
+      | 3            | 5  | 0          |                    | 1               |
 
 
   Scenario: Opphør mellom 2 andeler
@@ -137,10 +184,18 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 2            | 03.2021  | 08.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    |
-      | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 2            | 03.2021  | 08.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    | 2               |
+      | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  | 2               |
+
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+
+      | 2            | 1  | 0          |                    | 2               |
+      | 2            | 2  | 1          | 0                  | 2               |
 
   Scenario: Avkorter en periode, som man sen opphører. Her må opphøret ha peiling på siste andelen med riktig tom
 
@@ -155,8 +210,18 @@ Egenskap: Utbetalingsoppdrag: Opphør
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
-      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
-      | 1            | 04.2021  | 08.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
-      | 2            | 04.2021  | 08.2021  | 06.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
-      | 3            | 04.2021  | 08.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
+      | 1            | 04.2021  | 08.2021  |             | 700   | NY           | Nei        | 1          | 0                  | 1               |
+      | 2            | 04.2021  | 08.2021  | 06.2021     | 700   | ENDR         | Ja         | 1          | 0                  | 2               |
+      | 3            | 04.2021  | 08.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  | 3               |
+
+    Så forvent følgende oppdaterte andeler
+      | BehandlingId | Id | Periode id | Forrige periode id | Kildebehandling |
+      | 1            | 0  | 0          |                    | 1               |
+      | 1            | 1  | 1          | 0                  | 1               |
+
+      | 2            | 2  | 0          |                    | 1               |
+      | 2            | 3  | 1          | 0                  | 2               |
+
+      | 3            | 4  | 0          |                    | 1               |

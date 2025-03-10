@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
+package no.nav.familie.ba.sak.kjerne.småbarnstillegg
 
 import io.mockk.every
 import io.mockk.mockk

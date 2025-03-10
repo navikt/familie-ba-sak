@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.skalAndelerSlåsSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -122,16 +121,6 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger(
     fun erAndelSomSkalSendesTilOppdrag() = andelTilkjentYtelse.erAndelSomSkalSendesTilOppdrag()
 
     fun erAndelSomharNullutbetalingPgaDifferanseberegning() = andelTilkjentYtelse.erAndelSomharNullutbetalingPgaDifferanseberegning()
-
-    fun slåSammenMed(naboAndel: AndelTilkjentYtelseMedEndreteUtbetalinger): AndelTilkjentYtelseMedEndreteUtbetalinger {
-        // Skal allerede være sjekket at disse er naboer som kan slås sammen, bla. at de eventuelt har samme endringsperiode
-        // Dermed skal en en enkel utvidelse med stønadTom fra naboen fungere
-        check(skalAndelerSlåsSammen(this, naboAndel))
-        return AndelTilkjentYtelseMedEndreteUtbetalinger(
-            andelTilkjentYtelse.copy(stønadTom = naboAndel.stønadTom),
-            endreteUtbetalinger,
-        )
-    }
 
     val stønadFom get() = andelTilkjentYtelse.stønadFom
     val stønadTom get() = andelTilkjentYtelse.stønadTom

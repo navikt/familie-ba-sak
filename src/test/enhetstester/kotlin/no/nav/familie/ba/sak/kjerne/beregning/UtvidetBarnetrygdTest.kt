@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -13,16 +16,19 @@ import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad.OvergangsstønadService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -31,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.tidslinje.mapVerdi
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -40,6 +47,16 @@ import java.time.YearMonth
 internal class UtvidetBarnetrygdTest {
     private val fødselsdatoOver6År = LocalDate.of(2014, 1, 1)
     private val fødselsdatoUnder6År = LocalDate.of(2021, 1, 15)
+
+    private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
+    private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+
+    @BeforeEach
+    fun setup() {
+        every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
+        every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+    }
 
     @Test
     fun `Utvidet andeler får høyeste beløp når det utbetales til flere barn med ulike beløp`() {
@@ -102,12 +119,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søker, barnA, barnB).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -195,12 +213,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søker, oppfyltBarn).lagGrunnlagPersoner(this, fødselsdatoUnder6År))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedWith(compareBy({ it.stønadFom }, { it.type }, { it.kalkulertUtbetalingsbeløp }))
@@ -352,12 +371,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -434,12 +454,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -516,12 +537,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -607,12 +629,14 @@ internal class UtvidetBarnetrygdTest {
                 .apply {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
+
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -722,12 +746,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -835,12 +860,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
@@ -947,12 +973,13 @@ internal class UtvidetBarnetrygdTest {
                     personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
                 }
 
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
         val andeler =
-            TilkjentYtelseGenerator
+            tilkjentYtelseGenerator
                 .genererTilkjentYtelse(
-                    vilkårsvurdering = vilkårsvurdering,
+                    behandling = vilkårsvurdering.behandling,
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    fagsakType = FagsakType.NORMAL,
                 ).andelerTilkjentYtelse
                 .toList()
                 .sortedBy { it.type }
