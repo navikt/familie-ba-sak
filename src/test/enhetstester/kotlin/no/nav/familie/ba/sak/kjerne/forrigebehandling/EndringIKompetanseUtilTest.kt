@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -40,8 +41,8 @@ class EndringIKompetanseUtilTest {
                 .lagEndringIKompetanseForPersonTidslinje(
                     nåværendeKompetanserForPerson = listOf(nåværendeKompetanse),
                     forrigeKompetanserForPerson = listOf(forrigeKompetanse),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }
@@ -75,12 +76,12 @@ class EndringIKompetanseUtilTest {
                             nåværendeKompetanse,
                         ),
                     forrigeKompetanserForPerson = listOf(forrigeKompetanse),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
+        Assertions.assertEquals(mai22, perioderMedEndring.single().tom?.toYearMonth())
     }
 
     @Test
@@ -114,8 +115,8 @@ class EndringIKompetanseUtilTest {
                             nåværendeKompetanse,
                         ),
                     forrigeKompetanserForPerson = listOf(forrigeKompetanse),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }
@@ -160,8 +161,8 @@ class EndringIKompetanseUtilTest {
                             nåværendeKompetanse,
                         ),
                     forrigeKompetanserForPerson = listOf(forrigeKompetanse),
-                ).perioder()
-                .filter { it.innhold == true }
+                ).tilPerioder()
+                .filter { it.verdi == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }

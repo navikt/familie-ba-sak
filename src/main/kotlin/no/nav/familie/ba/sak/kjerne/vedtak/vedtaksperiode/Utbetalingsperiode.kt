@@ -2,16 +2,14 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -59,31 +57,31 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
 
     val utbetalingsPerioder =
         andelerTidslinjePerAktørOgType
-            .perioder()
-            .filter { !it.innhold.isNullOrEmpty() }
+            .tilPerioderIkkeNull()
+            .filter { !it.verdi.isEmpty() }
             .map { periode ->
                 Utbetalingsperiode(
-                    periodeFom = periode.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
-                    periodeTom = periode.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDate(),
-                    ytelseTyper = periode.innhold!!.map { andelTilkjentYtelse -> andelTilkjentYtelse.type },
-                    utbetaltPerMnd = periode.innhold.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
+                    periodeFom = periode.fom ?: throw IllegalStateException("Fra og med-dato kan ikke være null"),
+                    periodeTom = periode.tom ?: throw IllegalStateException("Til og med-dato kan ikke være null"),
+                    ytelseTyper = periode.verdi.map { andelTilkjentYtelse -> andelTilkjentYtelse.type },
+                    utbetaltPerMnd = periode.verdi.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
                     antallBarn =
-                        periode.innhold
+                        periode.verdi
                             .map { it.aktør }
                             .toSet()
                             .count { aktør -> personopplysningGrunnlag.barna.any { barn -> barn.aktør == aktør } },
-                    utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag),
+                    utbetalingsperiodeDetaljer = periode.verdi.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag),
                 )
             }
 
     return utbetalingsPerioder
 }
 
-private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>> {
     val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
 
     val andelTilkjentYtelsePerPersonOgTypeTidslinjer =
-        andelTilkjentYtelsePerPersonOgType.values.map { AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(it) }
+        andelTilkjentYtelsePerPersonOgType.values.map { it.tilTidslinje() }
 
     return andelTilkjentYtelsePerPersonOgTypeTidslinjer.kombiner { it.toList() }
 }

@@ -216,7 +216,7 @@ internal fun erEndringIKompetanseForPerson(
             forrigeKompetanserForPerson = forrigeKompetanserForPerson,
         )
 
-    return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
+    return endringIKompetanseTidslinje.tilPerioder().any { it.verdi == true }
 }
 
 internal fun erEndringIVilkårsvurderingForPerson(
