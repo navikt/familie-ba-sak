@@ -41,7 +41,7 @@ data class RestJournalføring(
     val underkategori: BehandlingUnderkategori?,
     val knyttTilFagsak: Boolean,
     val opprettOgKnyttTilNyBehandling: Boolean,
-    val tilknyttedeBehandlinger: List<TilknyttetBehandling>,
+    val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
     val tilknyttedeBehandlingIder: List<String>,
     val dokumenter: List<RestJournalpostDokument>,
     // Saksbehandler sin ident
