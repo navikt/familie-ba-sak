@@ -16,7 +16,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -90,6 +92,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                 navn = scenario.søker.navn,
                                 id = scenario.søker.ident,
                             ),
+                        nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
                     ),
             )
 
@@ -270,6 +274,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                 navn = scenario.søker.navn,
                                 id = scenario.søker.ident,
                             ),
+                        nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+                        nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
                     ).copy(
                         journalpostTittel = "Søknad om utvidet barnetrygd",
                         underkategori = BehandlingUnderkategori.UTVIDET,
