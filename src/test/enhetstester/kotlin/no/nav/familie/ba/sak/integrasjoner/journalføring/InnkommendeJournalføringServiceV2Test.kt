@@ -2,11 +2,14 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -14,26 +17,36 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class InnkommendeJournalføringServiceEnhetTest {
+class InnkommendeJournalføringServiceV2Test {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
     private val mockedFagsakService: FagsakService = mockk()
     private val mockedBehandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val mockedLoggService: LoggService = mockk()
     private val mockedStegService: StegService = mockk()
-    private val mockedJournalføringMetrikk: JournalføringMetrikk = mockk()
+    private val mockedJournalføringMetrikkV2: JournalføringMetrikkV2 = mockk()
     private val mockedBehandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
-    private val innkommendeJournalføringService: InnkommendeJournalføringService =
-        InnkommendeJournalføringService(
+    private val klageService: KlageService = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
+    private val innkommendeJournalføringServiceV2: InnkommendeJournalføringServiceV2 =
+        InnkommendeJournalføringServiceV2(
             integrasjonClient = mockedIntegrasjonClient,
             fagsakService = mockedFagsakService,
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
             loggService = mockedLoggService,
             stegService = mockedStegService,
-            journalføringMetrikk = mockedJournalføringMetrikk,
+            journalføringMetrikkV2 = mockedJournalføringMetrikkV2,
             behandlingSøknadsinfoService = mockedBehandlingSøknadsinfoService,
+            klageService = klageService,
+            unleashService = unleashService,
         )
+
+    @BeforeEach
+    fun oppsett() {
+        every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE) } returns true
+    }
 
     @Test
     fun `skal hente og returnere tilgangsstyrte journalposter`() {
@@ -60,7 +73,7 @@ class InnkommendeJournalføringServiceEnhetTest {
         } returns journalposter
 
         // Act
-        val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
+        val journalposterForBruker = innkommendeJournalføringServiceV2.hentJournalposterForBruker(brukerId)
 
         // Assert
         assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.harTilgang).isTrue
