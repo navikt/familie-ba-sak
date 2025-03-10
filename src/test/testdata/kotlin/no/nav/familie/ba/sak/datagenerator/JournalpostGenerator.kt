@@ -127,7 +127,7 @@ fun lagMockRestJournalføring(
     navIdent: String = "09123",
     fagsakType: FagsakType = FagsakType.NORMAL,
     nyBehandlingstype: BehandlingType? = BehandlingType.FØRSTEGANGSBEHANDLING,
-    nyBehandlingsårsak: BehandlingÅrsak? = null,
+    nyBehandlingsårsak: BehandlingÅrsak? = BehandlingÅrsak.SØKNAD,
 ): RestJournalføring =
     RestJournalføring(
         avsender = bruker,
