@@ -4,9 +4,12 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringServiceV2
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -31,8 +34,10 @@ class OppgaveControllerTest {
     private val integrasjonClient = mockk<IntegrasjonClient>()
     private val fagsakService = mockk<FagsakService>()
     private val innkommendeJournalføringService = mockk<InnkommendeJournalføringService>()
+    private val innkommendeJournalføringServiceV2 = mockk<InnkommendeJournalføringServiceV2>()
     private val tilgangService = mockk<TilgangService>()
     private val klageService = mockk<KlageService>()
+    private val unleashService = mockk<UnleashNextMedContextService>()
 
     private val oppgaveController =
         OppgaveController(
@@ -43,12 +48,15 @@ class OppgaveControllerTest {
             personopplysningerService = personopplysningerService,
             tilgangService = tilgangService,
             innkommendeJournalføringService = innkommendeJournalføringService,
+            innkommendeJournalføringServiceV2 = innkommendeJournalføringServiceV2,
             klageService = klageService,
+            unleashService = unleashService,
         )
 
     @BeforeAll
     fun init() {
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
+        every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns true
     }
 
     @Test
