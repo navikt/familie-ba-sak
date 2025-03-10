@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalpostDokument
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -127,7 +126,7 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
                 ),
             ),
         navIdent = "09123",
-        nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
+        nyBehandlingstype = RestJournalføring.Journalføringsbehandlingstype.FØRSTEGANGSBEHANDLING,
         nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
         fagsakType = FagsakType.NORMAL,
     )
