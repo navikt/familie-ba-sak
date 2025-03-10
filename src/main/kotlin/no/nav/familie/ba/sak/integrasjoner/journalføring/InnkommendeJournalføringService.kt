@@ -130,7 +130,7 @@ class InnkommendeJournalføringService(
                     personIdent = request.bruker.id,
                     navIdent = request.navIdent,
                     type = request.nyBehandlingstype ?: throw Feil("Mangler behandlingstype ved oppretting av ny behandling"),
-                    årsak = request.nyBehandlingsårsak ?: throw Feil("Mangler behandlingsårsak ved oppretting av ny behandling"),
+                    årsak = request.finnBehandlingÅrsakForOpprettingAvNyBehandling(),
                     kategori = request.kategori,
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.erAlfanummeriskPlussKolon
 import no.nav.familie.ba.sak.common.secureLogger
@@ -116,6 +117,16 @@ data class RestJournalføring(
             // Defaulter til ordinær inntil videre.
             else -> BehandlingUnderkategori.ORDINÆR
         }
+    }
+
+    fun finnBehandlingÅrsakForOpprettingAvNyBehandling(): BehandlingÅrsak {
+        if (!opprettOgKnyttTilNyBehandling) {
+            throw Feil("Skal ikke kunne opprette ny behandling når 'opprettOgKnyttTilNyBehandling' er false.")
+        }
+        if (nyBehandlingstype == BehandlingType.REVURDERING) {
+            return nyBehandlingsårsak ?: throw Feil("Mangler behandlingsårsak ved oppretting av ny revurdering")
+        }
+        return BehandlingÅrsak.SØKNAD
     }
 }
 
