@@ -2,11 +2,14 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagTilgangsstyrtJournalpost
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -14,6 +17,7 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class InnkommendeJournalføringServiceEnhetTest {
@@ -24,6 +28,8 @@ class InnkommendeJournalføringServiceEnhetTest {
     private val mockedStegService: StegService = mockk()
     private val mockedJournalføringMetrikk: JournalføringMetrikk = mockk()
     private val mockedBehandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
+    private val klageService: KlageService = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
     private val innkommendeJournalføringService: InnkommendeJournalføringService =
         InnkommendeJournalføringService(
             integrasjonClient = mockedIntegrasjonClient,
@@ -33,7 +39,14 @@ class InnkommendeJournalføringServiceEnhetTest {
             stegService = mockedStegService,
             journalføringMetrikk = mockedJournalføringMetrikk,
             behandlingSøknadsinfoService = mockedBehandlingSøknadsinfoService,
+            klageService = klageService,
+            unleashService = unleashService,
         )
+
+    @BeforeEach
+    fun oppsett() {
+        every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE) } returns true
+    }
 
     @Test
     fun `skal hente og returnere tilgangsstyrte journalposter`() {
