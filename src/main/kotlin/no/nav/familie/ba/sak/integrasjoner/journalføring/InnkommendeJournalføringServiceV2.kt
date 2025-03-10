@@ -137,7 +137,6 @@ class InnkommendeJournalføringServiceV2(
                     institusjon = null,
                 )
             } else {
-                // TODO : Er dette riktig?
                 throw Feil("Forventet en fagsak ved journalføring")
             }
 
