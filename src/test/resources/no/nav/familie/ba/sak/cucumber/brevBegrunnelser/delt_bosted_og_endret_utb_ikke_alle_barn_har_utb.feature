@@ -474,12 +474,12 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
 
     Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
-      | 3       | 1            | 01.05.2024 | 31.01.2025 | DELT_BOSTED        | 0       | 22.01.2025       | 2024-04-02                  |
       | 1       | 1            | 01.05.2024 | 30.09.2024 | ETTERBETALING_3MND | 0       | 22.01.2025       |                             |
-      | 3       | 2            | 01.05.2024 | 31.01.2025 | DELT_BOSTED        | 0       | 22.01.2025       | 2024-04-02                  |
       | 1       | 2            | 01.05.2024 | 30.09.2024 | ETTERBETALING_3MND | 0       | 22.01.2025       |                             |
-      | 2       | 2            | 01.05.2024 | 28.02.2025 | DELT_BOSTED        | 100     | 14.02.2025       | 2024-04-02                  |
       | 1       | 2            | 01.10.2024 | 28.02.2025 | DELT_BOSTED        | 100     | 14.02.2025       | 2024-04-02                  |
+      | 2       | 2            | 01.05.2024 | 28.02.2025 | DELT_BOSTED        | 100     | 14.02.2025       | 2024-04-02                  |
+      | 3       | 1            | 01.05.2024 | 31.01.2025 | DELT_BOSTED        | 0       | 22.01.2025       | 2024-04-02                  |
+      | 3       | 2            | 01.05.2024 | 31.01.2025 | DELT_BOSTED        | 0       | 22.01.2025       | 2024-04-02                  |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
