@@ -382,9 +382,9 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
             (
                 endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED &&
                     endretUtbetalingAndelIPeriode.prosent != BigDecimal.ZERO
-                ) ||
+            ) ||
                 erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode
-            ) &&
+        ) &&
             person.type == PersonType.BARN &&
             (sumAndelerDennePeriode != sumAndelerForrigePeriode || søkerFårUtbetaltDeltUtvidetIPeriode)
     }
