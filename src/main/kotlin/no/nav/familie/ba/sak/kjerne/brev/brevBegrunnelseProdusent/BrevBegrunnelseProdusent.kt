@@ -371,12 +371,12 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
                 UtdypendeVilkårsvurdering.DELT_BOSTED in it.utdypendeVilkårsvurderinger
             }
         val andelerIPeriode = begrunnelseGrunnlag.dennePerioden.andeler
-        val erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode = deltBostedIVilkårsvurderingIPeriode && andelerIPeriode.any { it.prosent != BigDecimal.ZERO }
+        val erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode = deltBostedIVilkårsvurderingIPeriode && andelerIPeriode.any { it.prosent == BigDecimal.valueOf(50) }
 
         (
             (
                 endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED &&
-                    endretUtbetalingAndelIPeriode.prosent != BigDecimal.ZERO
+                    endretUtbetalingAndelIPeriode.prosent == BigDecimal.valueOf(50)
             ) ||
                 erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode
         ) &&
