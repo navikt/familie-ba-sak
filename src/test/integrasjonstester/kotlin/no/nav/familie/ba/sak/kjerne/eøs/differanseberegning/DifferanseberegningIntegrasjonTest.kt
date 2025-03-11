@@ -1,18 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseTestController
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpTestController
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursTestController
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingTestController
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.splittPåMåned
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -148,19 +148,13 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
     }
 }
 
-fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int {
-    val tidslinje =
-        tidslinje {
-            this.map {
-                Periode(
-                    it.periodeFom.tilMånedTidspunkt(),
-                    it.periodeTom.tilMånedTidspunkt(),
-                    it.utbetaltPerMnd,
-                )
-            }
-        }
-
-    return (tidslinje.tidsrom()).fold(0) { sum, tidspunkt ->
-        sum + (tidslinje.innholdForTidspunkt(tidspunkt).innhold ?: 0)
-    }
-}
+fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int =
+    map {
+        Periode(
+            it.utbetaltPerMnd,
+            it.periodeFom.førsteDagIInneværendeMåned(),
+            it.periodeTom.sisteDagIMåned(),
+        )
+    }.tilTidslinje()
+        .splittPåMåned()
+        .sumOf { it.single().periodeVerdi.verdi!! }
