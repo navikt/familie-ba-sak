@@ -444,7 +444,7 @@ class BrevService(
                         landkoder = integrasjonClient.hentLandkoderISO2(),
                     )
                 } catch (e: BrevBegrunnelseFeil) {
-                    secureLogger.info(
+                    secureLogger.warn(
                         "Brevbegrunnelsefeil for behandling $behandlingId, " +
                             "fagsak ${vedtak.behandling.fagsak.id} " +
                             "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +

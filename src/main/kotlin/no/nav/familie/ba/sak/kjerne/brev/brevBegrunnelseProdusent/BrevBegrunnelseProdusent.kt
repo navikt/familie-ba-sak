@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltUtvidetIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erNullPgaDifferanseberegningEllerDeltBosted
@@ -489,7 +490,8 @@ private fun ISanityBegrunnelse.validerBrevbegrunnelse(
     barnasFødselsdatoer: List<LocalDate>,
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.gjelderSatsendring && !this.erAvslagUregistrerteBarnBegrunnelse()) {
-        throw BrevBegrunnelseFeil("Ingen personer på brevbegrunnelse ${this.apiNavn}")
+        logger.warn("Ingen personer på brevbegrunnelse ${this.apiNavn}")
+        throw BrevBegrunnelseFeil("Begrunnelsen ${this.navnISystem} er ikke gyldig for denne perioden. Kontakt team BAKS hvis du mener det er feil.")
     }
 }
 
