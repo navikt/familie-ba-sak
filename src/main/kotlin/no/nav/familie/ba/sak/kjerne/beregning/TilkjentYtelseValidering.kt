@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tilTidslinje
@@ -310,7 +311,7 @@ object TilkjentYtelseValidering {
 private fun List<AndelTilkjentYtelse>.tilProsentAvYtelseUtbetaltTidslinje() =
     this
         .map {
-            no.nav.familie.tidslinje.Periode(
+            Periode(
                 verdi = it.prosent,
                 fom = it.periode.fom.førsteDagIInneværendeMåned(),
                 tom = it.periode.tom.sisteDagIInneværendeMåned(),
