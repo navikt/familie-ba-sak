@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.forrigeMåned
@@ -522,4 +523,4 @@ fun ISanityBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
 
 class BrevBegrunnelseFeil(
     melding: String,
-) : IllegalStateException(melding)
+) : FunksjonellFeil(melding)
