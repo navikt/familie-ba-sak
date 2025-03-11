@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseTestController
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpTestController
@@ -150,8 +152,8 @@ fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int =
     map {
         Periode(
             it.utbetaltPerMnd,
-            it.periodeFom,
-            it.periodeTom,
+            it.periodeFom.førsteDagIInneværendeMåned(),
+            it.periodeTom.sisteDagIMåned(),
         )
     }.tilTidslinje()
         .splittPåMåned()
