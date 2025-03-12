@@ -30,6 +30,8 @@ data class ForenkletTilbakekrevingsvedtak(
     var samtykke: Boolean,
     @Column(name = "fritekst", nullable = false, updatable = true)
     var fritekst: String,
+    @Column(name = "vedtak_pdf", nullable = true)
+    var vedtakPdf: ByteArray? = null,
 ) : BaseEntitet()
 
 fun ForenkletTilbakekrevingsvedtak.tilRestForenkletTilbakekrevingsvedtak() =
