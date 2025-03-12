@@ -137,12 +137,12 @@ class InnkommendeJournalføringServiceV2(
                     institusjon = null,
                 )
             } else {
-                throw Feil("Forventet en fagsak ved journalføring")
+                throw Feil("Forventet en fagsak ved journalføring for journalpostId $journalpostId og oppgaveId $oppgaveId.")
             }
 
         if (request.opprettOgKnyttTilNyBehandling) {
             if (kanBehandleKlage && request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
-                val kravMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt.")
+                val kravMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved journalføring for journalpostId $journalpostId og oppgaveId $oppgaveId. for fagsak ${fagsak.id}")
                 val klagebehandlingId = klageService.opprettKlage(fagsak, kravMottattDato)
                 tilknyttedeBehandlinger.add(TilknyttetBehandling(Journalføringsbehandlingstype.KLAGE, klagebehandlingId.toString()))
             } else {
@@ -226,12 +226,12 @@ class InnkommendeJournalføringServiceV2(
                     institusjon = null,
                 )
             } else {
-                throw Feil("Forventet en fagsak ved ferdigstilling av oppgave")
+                throw Feil("Forventet en fagsak ved ferdigstilling av oppgave med oppgaveId $oppgaveId for journalpostId ${request.journalpostId}.")
             }
 
         if (request.opprettOgKnyttTilNyBehandling) {
             if (kanBehandleKlage && request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
-                val kravMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt.")
+                val kravMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved ferdigstilling av opppgave med oppgaveId $oppgaveId for fagsak ${fagsak.id}")
                 val klagebehandlingId = klageService.opprettKlage(fagsak, kravMottattDato)
                 tilknyttedeBehandlinger.add(TilknyttetBehandling(Journalføringsbehandlingstype.KLAGE, klagebehandlingId.toString()))
             } else {
