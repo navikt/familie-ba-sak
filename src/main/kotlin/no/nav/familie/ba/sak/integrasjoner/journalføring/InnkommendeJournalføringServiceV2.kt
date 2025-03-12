@@ -214,7 +214,6 @@ class InnkommendeJournalføringServiceV2(
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
 
         val journalpost = hentJournalpost(request.journalpostId)
-        journalpost.sak?.fagsakId
 
         val fagsak =
             if (request.fagsakId != null) {
