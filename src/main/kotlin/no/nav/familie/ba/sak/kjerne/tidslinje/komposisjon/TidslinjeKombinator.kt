@@ -1,181 +1,119 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
-
-/**
- * Extension-metode for å kombinere to tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste fraOgMed() til største tilOgMed() fra begge tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
- * Kombintor-funksjonen tar inn (nullable) av V og H og returnerer (nullable) R
- * Kombinator-funksjonen blir ikke kalt hvis begge tidslinjene mangler innhold for tidspunktet
- * Hvis kombinator-funksjonen returner <null>, antas det at tidslinjen ikke skal ha verdi for tidspunktet
- * Resultatet er en tidslinje med tidsenhet T og innhold R
- */
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerMed(
-    høyreTidslinje: Tidslinje<H, T>,
-    kombinator: (V?, H?) -> R?,
-): Tidslinje<R, T> =
-    tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
-        val venstre = this.innholdForTidspunkt(tidspunkt)
-        val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
-
-        when {
-            !(venstre.harInnhold || høyre.harInnhold) -> Innhold.utenInnhold()
-            else -> kombinator(venstre.innhold, høyre.innhold).tilInnhold()
-        }
-    }
+import no.nav.familie.tidslinje.Null
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.Verdi
+import no.nav.familie.tidslinje.tilPeriodeVerdi
+import no.nav.familie.tidslinje.utvidelser.biFunksjon
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.trim
 
 /**
  * Extension-metode for å kombinere to tidslinjer der begge har verdi
  * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste fraOgMed til største tilOgMed fra begge tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv V og H
- * Hvis innholdet V eller H mangler innhold, så vil ikke resulterende tidslinje få innhold for det tidspunktet
+ * Hver av tidslinjene kan ha ulik type, hhv V og H
+ * Hvis V eller H mangler verdi, så vil ikke resulterende tidslinje få en verdi for det tidspunktet
  * Kombintor-funksjonen tar ellers V og H og returnerer (nullable) R
  * Hvis kombinator-funksjonen returner <null>, antas det at tidslinjen ikke skal ha verdi for tidspunktet
- * Resultatet er en tidslinje med tidsenhet T og innhold R
+ * Resultatet er en tidslinje med verdi R
  */
-fun <V, H, R, T : Tidsenhet> Tidslinje<V, T>.kombinerUtenNullMed(
-    høyreTidslinje: Tidslinje<H, T>,
-    kombinator: (V, H) -> R?,
-): Tidslinje<R, T> =
-    tidsrom(this, høyreTidslinje).tidslinjeFraTidspunkt { tidspunkt ->
-        val venstre = this.innholdForTidspunkt(tidspunkt)
-        val høyre = høyreTidslinje.innholdForTidspunkt(tidspunkt)
-
+fun <V, H, R> Tidslinje<V>.kombinerUtenNullMed(
+    høyreTidslinje: Tidslinje<H>,
+    kombineringsfunksjon: (V, H) -> R?,
+): Tidslinje<R> =
+    this.biFunksjon(høyreTidslinje) { periodeverdiVenstre, periodeverdiHøyre ->
         when {
-            venstre.harVerdi && høyre.harVerdi -> kombinator(venstre.verdi, høyre.verdi).tilVerdi()
-            else -> Innhold.utenInnhold()
+            periodeverdiVenstre is Verdi && periodeverdiHøyre is Verdi ->
+                kombineringsfunksjon(periodeverdiVenstre.verdi, periodeverdiHøyre.verdi).tilPeriodeVerdi()
+
+            else -> Null()
         }
     }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
- * Innhold (I) og tidsenhet (T) må være av samme type
- * Kombintor-funksjonen tar inn Iterable<I> og returner (nullable) R
+ * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene fra alle tidslinjene
+ * Verdi (V) må være av samme type
+ * Kombintor-funksjonen tar inn Iterable<V> og returner (nullable) R
  * Null-verdier fjernes før de sendes til kombinator-funksjonen, som betyr at en tom iterator kan bli sendt
- * Hvis reesultatet fra kombinatoren er null, tolkes det som at det ikke skal være innhold
- * Resultatet er en tidslinje med tidsenhet T og innhold R
+ * Hvis resultatet fra kombinatoren er null, tolkes det som at det ikke skal være en verdi
+ * Resultatet er en tidslinje med verdi R
  */
-fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNull(
-    listeKombinator: (Iterable<I>) -> R?,
-): Tidslinje<R, T> =
-    tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        this
-            .map { it.innholdForTidspunkt(tidspunkt) }
-            .filter { it.harVerdi }
-            .map { it.verdi }
-            .let(listeKombinator)
-            .tilVerdi()
-    }
+fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNull(
+    listeKombinator: (Iterable<V>) -> R?,
+): Tidslinje<R> = kombiner { it.filterNotNull().let(listeKombinator) }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
- * Innhold (I) og tidsenhet (T) må være av samme type
- * Kombintor-funksjonen tar inn Iterable<I> og returner (nullable) R
+ * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene fra alle tidslinjene
+ * Verdi (V) må være av samme type
+ * Kombintor-funksjonen tar inn Iterable<V> og returner (nullable) R
  * Null-verdier fjernes, og listen av verdier sendes til kombinator-funksjonen bare hvis den inneholder verdier
- * Hvis reesultatet fra kombinatoren er null, tolkes det som at det ikke skal være innhold
- * Resultatet er en tidslinje med tidsenhet T og innhold R
+ * Hvis reesultatet fra kombinatoren er null, tolkes det som at det ikke skal være en verdi
+ * Resultatet er en tidslinje med verdi R
  */
-fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombinerUtenNullOgIkkeTom(
-    listeKombinator: (Iterable<I>) -> R?,
-): Tidslinje<R, T> =
-    tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        this
-            .map { it.innholdForTidspunkt(tidspunkt) }
-            .filter { it.harVerdi }
-            .map { it.verdi }
-            .takeIf { it.isNotEmpty() }
-            ?.let(listeKombinator)
-            .tilVerdi()
-    }
+fun <V, R> Collection<Tidslinje<V>>.kombinerUtenNullOgIkkeTom(
+    listeKombinator: (Iterable<V>) -> R?,
+): Tidslinje<R> = kombiner { it.filterNotNull().takeIf { it.isNotEmpty() }?.let(listeKombinator) }
 
 /**
  * Extension-metode for å kombinere liste av tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
- * Innhold (I) og tidsenhet (T) må være av samme type
- * Kombintor-funksjonen tar inn Iterable<I> og returner (nullable) R
- * Resultatet er en tidslinje med tidsenhet T og innhold R
+ * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene fra alle tidslinjene
+ * Verdien V må være av samme type
+ * Resultatet er en tidslinje med verdi Iterable<V>
  */
-fun <I, R, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner(
-    listeKombinator: (Iterable<I>) -> R?,
-): Tidslinje<R, T> =
-    tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        this
-            .map { it.innholdForTidspunkt(tidspunkt) }
-            .filter { it.harVerdi }
-            .map { it.verdi }
-            .let { listeKombinator(it) }
-            .tilVerdi()
-    }
+fun <V> Collection<Tidslinje<V>>.kombiner() = this.kombiner { if (it.toList().isNotEmpty()) it else null }
 
 /**
- * Extension-metode for å kombinere liste av tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
- * Innhold (I) og tidsenhet (T) må være av samme type
- * Resultatet er en tidslinje med tidsenhet T og innhold Iterable<I>
+ * Extension-metode for å kombinere en nøkkel-verdi-map'er der verdiene er tidslinjer, med en enkelt tidslinje
+ * Verdien i tidslinjene i map'en på venstre side må alle være av typen V
+ * Verdien i tidslinjen på høyre side er av typen H
+ * Kombinator-funksjonen kalles for hvert tidspunkt med med verdien for det tidspunktet fra høyre tidslinje og
+ * verdien fra den enkelte av venstre tidslinjer etter tur.
+ * Kombinator-funksjonen blir IKKE kalt hvis venstre, høyre eller begge tidslinjer mangler verdi for et tidspunkt
+ * Resultatet er en ny map der nøklene er av type K, og tidslinjene har verdi av typen (nullable) R.
  */
-fun <I, T : Tidsenhet> Collection<Tidslinje<I, T>>.kombiner() = this.kombiner { if (it.toList().isNotEmpty()) it else null }
+fun <K, V, H, R> Map<K, Tidslinje<V>>.kombinerKunVerdiMed(
+    høyreTidslinje: Tidslinje<H>,
+    kombinator: (V, H) -> R?,
+): Map<K, Tidslinje<R>> {
+    val venstreTidslinjer = this
+
+    return venstreTidslinjer.mapValues { (_, venstreTidslinje) ->
+        venstreTidslinje.kombinerUtenNullMed(høyreTidslinje, kombinator)
+    }
+}
 
 /**
  * Extension-metode for å kombinere tre tidslinjer
- * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene
- * fra minste <fraOgMed()> til største <tilOgMed()> fra alle tidslinjene
- * Tidsenhet (T) må være av samme type
- * Hver av tidslinjene kan ha ulik innholdstype, hhv A, B og C
- * Kombintor-funksjonen tar inn (nullable) av A, B og C og returner (nullable) R
- * Resultatet er en tidslinje med tidsenhet T og innhold R
+ * Kombinasjonen baserer seg på å iterere gjennom alle tidspunktene fra alle tidslinjene
+ * Hver av tidslinjene kan ha ulik type, hhv A, B og C
+ * Kombintor-funksjonen tar inn av A, B og C og returner (nullable) R
+ * Resultatet er en tidslinje med verdi R
  */
-fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMed(
-    tidslinjeB: Tidslinje<B, T>,
-    tidslinjeC: Tidslinje<C, T>,
-    kombinator: (A?, B?, C?) -> R?,
-): Tidslinje<R, T> =
-    tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
-        kombinator(
-            this.innholdForTidspunkt(tidspunkt).innhold,
-            tidslinjeB.innholdForTidspunkt(tidspunkt).innhold,
-            tidslinjeC.innholdForTidspunkt(tidspunkt).innhold,
-        ).tilInnhold()
-    }
-
-fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
-    tidslinjeB: Tidslinje<B, T>,
-    tidslinjeC: Tidslinje<C, T>,
+fun <A, B, C, R> Tidslinje<A>.kombinerKunVerdiMed(
+    tidslinjeB: Tidslinje<B>,
+    tidslinjeC: Tidslinje<C>,
     kombinator: (A, B, C) -> R?,
-): Tidslinje<R, T> =
-    tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
-        val innholdA = this.innholdForTidspunkt(tidspunkt)
-        val innholdB = tidslinjeB.innholdForTidspunkt(tidspunkt)
-        val innholdC = tidslinjeC.innholdForTidspunkt(tidspunkt)
-
+): Tidslinje<R> =
+    this.kombinerMed(tidslinjeB, tidslinjeC) { a, b, c ->
         when {
-            innholdA.harVerdi && innholdB.harVerdi && innholdC.harVerdi ->
-                kombinator(innholdA.verdi, innholdB.verdi, innholdC.verdi).tilVerdi()
-
-            else -> Innhold.utenInnhold()
+            a != null && b != null && c != null -> kombinator(a, b, c)
+            else -> null
         }
     }
 
-fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H, T>) = this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
+fun <V> Tidslinje<V>.erIkkeTom() = !this.erTom()
 
-fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinje<H, T>) = !this.harOverlappMed(tidslinje)
+fun <V, H> Tidslinje<V>.harOverlappMed(tidslinje: Tidslinje<H>) = this.kombinerUtenNullMed(tidslinje) { v, h -> true }.trim(Null()).erIkkeTom()
 
-fun <V, H, T : Tidsenhet> Tidslinje<V, T>.kombinerMedNullable(
-    høyreTidslinje: Tidslinje<H, T>?,
+fun <V, H> Tidslinje<V>.harIkkeOverlappMed(tidslinje: Tidslinje<H>) = !this.harOverlappMed(tidslinje)
+
+fun <V, H> Tidslinje<V>.kombinerMedNullable(
+    høyreTidslinje: Tidslinje<H>?,
     kombinator: (V?, H?) -> V?,
-): Tidslinje<V, T> =
+): Tidslinje<V> =
     if (høyreTidslinje != null) {
         kombinerMed(høyreTidslinje, kombinator)
     } else {

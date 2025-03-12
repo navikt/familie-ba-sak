@@ -7,9 +7,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder18ÅrVilkårTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMånedFraMånedsskifte
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erUnder18ÅrVilkårTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifte
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår

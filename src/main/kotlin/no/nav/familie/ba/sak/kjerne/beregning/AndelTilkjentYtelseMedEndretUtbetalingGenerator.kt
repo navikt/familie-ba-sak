@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.ZipPadding
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.zipMedNeste
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.zipMedNeste
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi

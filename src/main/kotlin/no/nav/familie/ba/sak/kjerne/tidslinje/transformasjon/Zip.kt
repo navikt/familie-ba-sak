@@ -1,14 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.ETTER
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.FØR
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding.INGEN_PADDING
-import java.time.YearMonth
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 
 /**
  * Returnerer en tidslinje med par av hvert etterfølgende element i tidslinjen.
@@ -29,17 +24,17 @@ enum class ZipPadding {
     INGEN_PADDING,
 }
 
-fun <T> Tidslinje<T, Måned>.zipMedNeste(zipPadding: ZipPadding = INGEN_PADDING): Tidslinje<Pair<T?, T?>, Måned> {
-    val padding =
-        listOf(
-            månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
-        )
+fun <T> Tidslinje<T>.zipMedNeste(zipPadding: ZipPadding = ZipPadding.INGEN_PADDING): Tidslinje<Pair<T?, T?>> {
+    val padding = listOf(Periode(null, null, null))
 
     return when (zipPadding) {
-        FØR -> padding + perioder()
-        ETTER -> perioder() + padding
-        INGEN_PADDING -> perioder()
+        ZipPadding.FØR -> padding + tilPerioder()
+        ZipPadding.ETTER -> tilPerioder() + padding
+        ZipPadding.INGEN_PADDING -> tilPerioder()
     }.zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+        val verdi = forrige.verdi to denne.verdi
+        val fom = if (zipPadding == ZipPadding.ETTER) forrige.fom else denne.fom
+        val tom = if (zipPadding == ZipPadding.ETTER) forrige.tom else denne.tom
+        Periode(verdi, fom, tom)
     }.tilTidslinje()
 }

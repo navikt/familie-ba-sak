@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.util.StringTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilStringTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class TidslinjeKombinasjonTest {
-    val kombinator = { venstre: Char?, høyre: Char? ->
+    private val kombinator = { venstre: Char?, høyre: Char? ->
         (venstre?.toString() ?: "").trim() + (høyre?.toString() ?: "").trim()
     }
 
@@ -79,9 +79,9 @@ class TidslinjeKombinasjonTest {
         val char1 = linje1.tilCharTidslinje(fom)
         val char2 = linje2.tilCharTidslinje(fom)
 
-        val k1 = char1.kombinerMed(char2, kombinator)
-        val f = StringTidslinje(fom, forventet.toList()).slåSammenLike()
+        val kombinertePerioder = char1.kombinerMed(char2, kombinator).tilPerioder()
+        val forventedePerioder = forventet.toList().tilStringTidslinje(fom).tilPerioder()
 
-        Assertions.assertEquals(f, k1)
+        Assertions.assertEquals(forventedePerioder, kombinertePerioder)
     }
 }

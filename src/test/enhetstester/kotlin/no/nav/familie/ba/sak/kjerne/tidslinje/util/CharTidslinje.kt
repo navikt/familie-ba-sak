@@ -1,53 +1,39 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somFraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somTilOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeSiden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.TidslinjePeriodeMedDato
+import no.nav.familie.tidslinje.tilTidslinje
+import java.time.LocalDate
 import java.time.YearMonth
 
-class CharTidslinje<T : Tidsenhet>(
-    private val tegn: String,
-    private val startTidspunkt: Tidspunkt<T>,
-) : Tidslinje<Char, T>() {
-    val fraOgMed =
-        when (tegn.first()) {
-            '<' -> startTidspunkt.somUendeligLengeSiden()
-            else -> startTidspunkt
-        }
-
-    val tilOgMed: Tidspunkt<T>
-        get() {
-            val sluttMåned = startTidspunkt.flytt(tegn.length.toLong() - 1)
-            return when (tegn.last()) {
-                '>' -> sluttMåned.somUendeligLengeTil()
-                else -> sluttMåned
-            }
-        }
-
-    override fun lagPerioder(): Collection<Periode<Char, T>> {
-        val tidspunkter = fraOgMed..tilOgMed
-
-        return tidspunkter.mapIndexed { index, tidspunkt ->
-            val c =
-                when (index) {
-                    0 -> if (tegn[index] == '<') tegn[index + 1] else tegn[index]
-                    tegn.length - 1 -> if (tegn[index] == '>') tegn[index - 1] else tegn[index]
-                    else -> tegn[index]
-                }
-            Periode(tidspunkt.somFraOgMed(), tidspunkt.somTilOgMed(), c)
-        }
-    }
+fun String.tilCharTidslinje(startTidspunkt: LocalDate): Tidslinje<Char> {
+    val erUendeligLengeSiden = firstOrNull() == '<'
+    val erUendeligLengeTil = lastOrNull() == '>'
+    val sisteIndeks = filter { it !in "<>" }.lastIndex
+    return this
+        .filter { it !in "<>" }
+        .mapIndexed { index, c ->
+            TidslinjePeriodeMedDato(
+                verdi = if (c == ' ') null else c,
+                fom = if (index == 0 && erUendeligLengeSiden) null else startTidspunkt.plusDays(index.toLong()),
+                tom = if (index == sisteIndeks && erUendeligLengeTil) null else startTidspunkt.plusDays(index.toLong()),
+            )
+        }.tilTidslinje()
 }
 
-fun String.tilCharTidslinje(fom: YearMonth): Tidslinje<Char, Måned> = CharTidslinje(this, MånedTidspunkt.med(fom)).slåSammenLike()
-
-fun <T : Tidsenhet> String.tilCharTidslinje(fom: Tidspunkt<T>): Tidslinje<Char, T> = CharTidslinje(this, fom).slåSammenLike()
+fun String.tilCharTidslinje(startTidspunkt: YearMonth): Tidslinje<Char> {
+    val erUendeligLengeSiden = firstOrNull() == '<'
+    val erUendeligLengeTil = lastOrNull() == '>'
+    val sisteIndeks = filter { it !in "<>" }.lastIndex
+    return this
+        .filter { it !in "<>" }
+        .mapIndexed { index, c ->
+            TidslinjePeriodeMedDato(
+                verdi = if (c == ' ') null else c,
+                fom = if (index == 0 && erUendeligLengeSiden) null else startTidspunkt.plusMonths(index.toLong()).førsteDagIInneværendeMåned(),
+                tom = if (index == sisteIndeks && erUendeligLengeTil) null else startTidspunkt.plusMonths(index.toLong()).sisteDagIInneværendeMåned(),
+            )
+        }.tilTidslinje()
+}
