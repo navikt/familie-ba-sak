@@ -10,16 +10,27 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.Utbetalingstidslinje
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.PatchetAndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilPatchetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -27,6 +38,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import no.nav.familie.tidslinje.verdier
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
@@ -46,6 +64,9 @@ class ForvalterService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val patchetAndelTilkjentYtelseRepository: PatchetAndelTilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -210,6 +231,79 @@ class ForvalterService(
             throw Feil("Det finnes flere vilkårresultater som begynner før fødselsdato til person: $this")
         }
     }
+
+    @Transactional
+    fun finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
+        fagsaker: Set<Long>,
+        korrigerAndelerFraOgMedDato: LocalDate,
+        dryRun: Boolean = true,
+    ): List<Pair<Long, List<AndelTilkjentYtelseKorreksjon>?>> {
+        return fagsaker.map { fagsakId ->
+            val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
+            if (sisteIverksatteBehandling != null) {
+                val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = sisteIverksatteBehandling.id)
+                val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
+                val utbetalingstidslinjer = utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsakId)
+                val andelTilkjentYtelseKorreksjoner: List<AndelTilkjentYtelseKorreksjon> =
+                    utbetalingstidslinjer.flatMap { utbetalingstidslinje ->
+                        val andeltidslinjeForUtbetalingstidslinje = finnAndelerTilkjentYtelseForUtbetalingstidslinje(utbetalingstidslinje = utbetalingstidslinje, andelerTilkjentYtelsePerAktørOgType = andelerTilkjentYtelse)
+                        utbetalingstidslinje.tidslinje
+                            .beskjærFraOgMed(korrigerAndelerFraOgMedDato)
+                            .kombinerMed(andeltidslinjeForUtbetalingstidslinje) { utbetalingsperiode, andelTilkjentYtelse ->
+                                if (utbetalingsperiode != null && andelTilkjentYtelse != null) {
+                                    if (utbetalingsperiode.periodeId != andelTilkjentYtelse.periodeOffset || utbetalingsperiode.forrigePeriodeId != andelTilkjentYtelse.forrigePeriodeOffset || utbetalingsperiode.behandlingId != andelTilkjentYtelse.kildeBehandlingId) {
+                                        return@kombinerMed AndelTilkjentYtelseKorreksjon(andelTilkjentYtelse, andelTilkjentYtelse.copy(id = 0, periodeOffset = utbetalingsperiode.periodeId, forrigePeriodeOffset = utbetalingsperiode.forrigePeriodeId, kildeBehandlingId = utbetalingsperiode.behandlingId))
+                                    }
+                                }
+                                return@kombinerMed null
+                            }.filtrerIkkeNull()
+                            .tilPerioderIkkeNull()
+                            .verdier()
+                    }
+
+                if (!dryRun) {
+                    val andelerSomSkalSlettes = andelTilkjentYtelseKorreksjoner.map { it.andelMedFeil }.toSet()
+                    val andelerSomSkalOpprettes = andelTilkjentYtelseKorreksjoner.map { it.korrigertAndel }.toSet()
+
+                    if (andelerSomSkalSlettes.size != andelerSomSkalOpprettes.size) throw Feil("Andeler som skal opprettes må være like mange som andeler vi sletter")
+
+                    val andelerSomSkalSlettesGruppertPåId = andelerSomSkalSlettes.groupBy { it.id }
+                    if (andelerSomSkalSlettesGruppertPåId.any { it.value.size > 1 }) throw Feil("Den samme andelen forekommer flere ganger blant andelene som er markert for sletting. Dette betyr at det finnes en splitt i utbetalingsoppdragene oversendt til Oppdrag som ikke eksisterer i andelene.")
+
+                    patchetAndelTilkjentYtelseRepository.saveAll(andelerSomSkalSlettes.map { it.tilPatchetAndelTilkjentYtelse() })
+
+                    tilkjentYtelse.andelerTilkjentYtelse.removeAll(andelerSomSkalSlettes)
+                    tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerSomSkalOpprettes)
+                }
+                return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner)
+            }
+            return@map Pair(fagsakId, null)
+        }
+    }
+
+    data class AndelTilkjentYtelseKorreksjon(
+        val andelMedFeil: AndelTilkjentYtelse,
+        val korrigertAndel: AndelTilkjentYtelse,
+    )
+
+    private fun finnAndelerTilkjentYtelseForUtbetalingstidslinje(
+        utbetalingstidslinje: Utbetalingstidslinje,
+        andelerTilkjentYtelsePerAktørOgType: Map<Pair<Aktør, YtelseType>, List<AndelTilkjentYtelse>>,
+    ): Tidslinje<AndelTilkjentYtelse> =
+        andelerTilkjentYtelsePerAktørOgType.entries
+            .single { (_, andeler) ->
+
+                val førsteOffset =
+                    andeler
+                        .firstOrNull { it.erAndelSomSkalSendesTilOppdrag() && it.periodeOffset != null }
+                        ?.periodeOffset
+                if (førsteOffset != null) {
+                    return@single utbetalingstidslinje.erTidslinjeForPeriodeId(førsteOffset)
+                }
+                return@single false
+            }.value
+            .map { Periode(verdi = it, fom = it.stønadFom.førsteDagIInneværendeMåned(), tom = it.stønadTom.sisteDagIInneværendeMåned()) }
+            .tilTidslinje()
 }
 
 interface FagsakMedFlereMigreringer {
