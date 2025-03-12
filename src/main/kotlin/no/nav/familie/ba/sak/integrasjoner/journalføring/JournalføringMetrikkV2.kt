@@ -27,6 +27,7 @@ class JournalføringMetrikkV2 {
             "ettersendelse til søknad om utvidet barnetrygd" to "Ettersendelse til søknad om utvidet barnetrygd",
             "ettersendelse til søknad om barnetrygd utvidet" to "Ettersendelse til søknad om utvidet barnetrygd",
             "tilleggskjema eøs" to "Tilleggskjema EØS",
+            "klage" to "Klage",
         )
 
     private val antallJournalpostTittel =
