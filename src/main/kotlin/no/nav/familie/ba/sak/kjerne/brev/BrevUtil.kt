@@ -40,12 +40,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.tilUtbetaltFraA
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erIkkeTom
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.mapIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.utils.splitPerMåned
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erIkkeTom
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.utils.splitPerMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
@@ -127,7 +126,7 @@ fun skalHenteUtbetalingerEøs(
 }
 
 fun hentLandOgStartdatoForUtbetalingstabell(
-    endringstidspunkt: MånedTidspunkt,
+    endringstidspunkt: YearMonth,
     landkoder: Map<String, String>,
     kompetanser: Collection<Kompetanse>,
 ): UtbetalingstabellAutomatiskValutajustering {
@@ -147,7 +146,7 @@ fun hentLandOgStartdatoForUtbetalingstabell(
                 it.utbetalingsland()
             }.toSet()
             .map { it.tilLandNavn(landkoder).navn }
-    return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = endringstidspunkt.tilYearMonth().tilMånedÅr())
+    return UtbetalingstabellAutomatiskValutajustering(utbetalingerEosLand = eøsLandMedUtbetalinger.slåSammen(), utbetalingerEosMndAar = endringstidspunkt.tilMånedÅr())
 }
 
 fun hentUtbetalingerPerMndEøs(

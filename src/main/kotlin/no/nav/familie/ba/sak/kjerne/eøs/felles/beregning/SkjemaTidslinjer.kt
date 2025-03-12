@@ -7,27 +7,22 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjema
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.felles.utenPeriode
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
+import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import no.nav.familie.tidslinje.Periode as FamilieFellesPeriode
 
 fun <S : PeriodeOgBarnSkjema<S>> S.tilTidslinje() = listOf(this).tilTidslinje()
 
 internal fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinje() =
-    tidslinje {
-        this.map {
+    this
+        .map {
             Periode(
-                it.fom.tilTidspunktEllerUendeligTidlig(),
-                it.tom.tilTidspunktEllerUendeligSent(),
-                it.utenPeriode(),
+                verdi = it.utenPeriode(),
+                fom = it.fom?.førsteDagIInneværendeMåned(),
+                tom = it.tom?.sisteDagIInneværendeMåned(),
             )
-        }
-    }
+        }.tilTidslinje()
 
 fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Map<Aktør, Tidslinje<S>> {
     val skjemaer = this
@@ -39,7 +34,7 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Ma
         skjemaer
             .filter { it.barnAktører.contains(aktør) }
             .map {
-                FamilieFellesPeriode(
+                Periode(
                     fom = it.fom?.førsteDagIInneværendeMåned(),
                     tom = it.tom?.sisteDagIInneværendeMåned(),
                     verdi = it.kopier(fom = null, tom = null, barnAktører = setOf(aktør)),

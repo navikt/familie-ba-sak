@@ -73,6 +73,7 @@ spec:
           cluster: dev-gcp
         - application: familie-prosessering
           cluster: dev-gcp
+        - application: familie-prosessering-lokal
         - application: familie-klage
           cluster: dev-gcp
         - application: bidrag-grunnlag-feature

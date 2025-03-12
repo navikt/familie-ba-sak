@@ -3,8 +3,11 @@ package no.nav.familie.ba.sak.ekstern.pensjon
 import no.nav.familie.ba.sak.common.EksternTjenesteFeil
 import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -20,12 +23,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -274,11 +276,11 @@ class PensjonService(
                 .tilTidslinje()
                 .kombinerMed(opprinneligeInfotrygdPerioder.tilTidslinje()) { periodeIBa, periodeIInfotrygd ->
                     periodeIInfotrygd.takeIf { periodeIBa == null }
-                }.perioder()
-                .mapNotNull {
-                    it.innhold?.copy(
-                        stønadFom = it.fraOgMed.tilYearMonth(),
-                        stønadTom = it.tilOgMed.tilYearMonth(),
+                }.tilPerioderIkkeNull()
+                .map {
+                    it.verdi.copy(
+                        stønadFom = it.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
+                        stønadTom = it.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
                     )
                 }
 
@@ -308,10 +310,10 @@ private fun List<BarnetrygdPeriode>.tilTidslinje() =
     this
         .map {
             Periode(
-                fraOgMed = it.stønadFom.tilTidspunkt(),
+                verdi = it,
+                fom = it.stønadFom.førsteDagIInneværendeMåned(),
                 // 999999999-12 er Infotrygds definisjon av uendelighet, klippes til 9999-12 for å kunne brukes i tidslinje. Kan fjernes når vi ikke lenger har løpende saker i infotrygd
-                tilOgMed = if (it.stønadTom > YearMonth.of(9999, 12)) YearMonth.of(9999, 12).tilTidspunkt() else it.stønadTom.tilTidspunkt(),
-                innhold = it,
+                tom = if (it.stønadTom > YearMonth.of(9999, 12)) LocalDate.of(9999, 12, 31) else it.stønadTom.sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
 

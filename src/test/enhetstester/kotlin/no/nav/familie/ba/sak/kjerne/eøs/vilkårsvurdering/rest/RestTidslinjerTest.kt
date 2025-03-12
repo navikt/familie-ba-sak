@@ -8,10 +8,10 @@ import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
