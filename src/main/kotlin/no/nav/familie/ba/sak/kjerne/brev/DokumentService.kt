@@ -71,11 +71,11 @@ class DokumentService(
                 BehandlerRolle.BESLUTTER,
             )
         if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && vedtak.stønadBrevPdF == null) {
-            logger.warn(
-                "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. " +
-                    "Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
+            throw FunksjonellFeil(
+                melding =
+                    "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
+                frontendFeilmelding = "Det finnes ikke noe vedtaksbrev.",
             )
-            throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
         } else {
             val pdf =
                 vedtak.stønadBrevPdF ?: throw Feil(
