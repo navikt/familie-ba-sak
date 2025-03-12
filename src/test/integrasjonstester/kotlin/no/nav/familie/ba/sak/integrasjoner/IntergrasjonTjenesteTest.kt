@@ -38,6 +38,8 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
+import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContextNyAktivBrukerDto
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -68,6 +70,7 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestOperations
 import java.net.URI
@@ -512,6 +515,96 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             assertThrows<IntegrasjonException> { integrasjonClient.opprettSkyggesak(aktørId, MOCK_FAGSAK_ID.toLong()) }
         assertTrue(feil.message?.contains("skyggesak") == true)
     }
+
+    @Test
+    @Tag("integration")
+    fun `skal hente ModiaContext`() {
+        wireMockServer
+            .stubFor(
+                get("/api/modia-context-holder")
+                    .willReturn(okJson(modiaContextResponse { success(it) })),
+            )
+
+        val modiaContext = integrasjonClient.hentModiaContext()
+
+        assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal oppdatere ModiaContext`() {
+        wireMockServer
+            .stubFor(
+                post("/api/modia-context-holder/sett-aktiv-bruker")
+                    .withRequestBody(modiaContextRequest())
+                    .willReturn(okJson(modiaContextResponse { success(it) })),
+            )
+
+        val modiaContext = integrasjonClient.settNyAktivBruker(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
+
+        assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal kaste IntegrasjonException ved henting av ModiaContext`() {
+        wireMockServer
+            .stubFor(
+                get("/api/modia-context-holder")
+                    .willReturn(
+                        aResponse()
+                            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .withBody(modiaContextResponse { failure("Noe gikk galt") }),
+                    ),
+            )
+
+        val exception = assertThrows<RessursException> { integrasjonClient.hentModiaContext() }
+
+        assertThat(exception.message).contains("modia-context-holder")
+        assertThat(exception.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(exception.ressurs.melding).isEqualTo("Noe gikk galt")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal kaste IntegrasjonException ved oppdatering av ModiaContext`() {
+        wireMockServer
+            .stubFor(
+                post("/api/modia-context-holder/sett-aktiv-bruker")
+                    .withRequestBody(modiaContextRequest())
+                    .willReturn(
+                        aResponse()
+                            .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                            .withBody(modiaContextResponse { failure("Noe gikk galt") }),
+                    ),
+            )
+
+        val exception =
+            assertThrows<RessursException> {
+                integrasjonClient.settNyAktivBruker(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
+            }
+
+        assertThat(exception.message).contains("modia-context-holder")
+        assertThat(exception.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+        assertThat(exception.ressurs.melding).isEqualTo("Noe gikk galt")
+    }
+
+    private fun modiaContextResponse(ressursFunksjon: (ModiaContext) -> Ressurs<ModiaContext>) =
+        objectMapper.writeValueAsString(
+            ressursFunksjon(
+                ModiaContext(
+                    aktivBruker = "13025514402",
+                    aktivEnhet = "0000",
+                ),
+            ),
+        )
+
+    private fun modiaContextRequest() =
+        equalToJson(
+            objectMapper.writeValueAsString(
+                ModiaContextNyAktivBrukerDto(personIdent = "13025514402"),
+            ),
+        )
 
     private fun journalpostOkResponse(): Ressurs<ArkiverDokumentResponse> = success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
 

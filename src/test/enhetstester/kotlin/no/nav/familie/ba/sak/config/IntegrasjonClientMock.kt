@@ -16,6 +16,8 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfo
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
+import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContextNyAktivBrukerDto
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
@@ -182,6 +184,21 @@ class IntegrasjonClientMock {
             }
 
             every { mockIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries.map { Enhet(it.enhetsnummer, it.enhetsnavn) }
+
+            every { mockIntegrasjonClient.hentModiaContext() } answers {
+                ModiaContext(
+                    aktivBruker = "13025514402",
+                    aktivEnhet = "0000",
+                )
+            }
+
+            every { mockIntegrasjonClient.settNyAktivBruker(any()) } answers {
+                val aktivBruker = firstArg<ModiaContextNyAktivBrukerDto>().personIdent
+                ModiaContext(
+                    aktivBruker = aktivBruker,
+                    aktivEnhet = "0000",
+                )
+            }
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {
