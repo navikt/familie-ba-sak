@@ -281,11 +281,6 @@ class ForvalterService(
         }
     }
 
-    data class AndelTilkjentYtelseKorreksjon(
-        val andelMedFeil: AndelTilkjentYtelse,
-        val korrigertAndel: AndelTilkjentYtelse,
-    )
-
     private fun finnAndelerTilkjentYtelseForUtbetalingstidslinje(
         utbetalingstidslinje: Utbetalingstidslinje,
         andelerTilkjentYtelsePerAktørOgType: Map<Pair<Aktør, YtelseType>, List<AndelTilkjentYtelse>>,
@@ -310,3 +305,8 @@ interface FagsakMedFlereMigreringer {
     val fagsakId: Long
     val fødselsnummer: String
 }
+
+data class AndelTilkjentYtelseKorreksjon(
+    val andelMedFeil: AndelTilkjentYtelse,
+    val korrigertAndel: AndelTilkjentYtelse,
+)

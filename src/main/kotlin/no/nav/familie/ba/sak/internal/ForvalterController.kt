@@ -509,4 +509,22 @@ class ForvalterController(
 
         return ResponseEntity.ok(utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId).map { it.tilUtbetalingsperioder() })
     }
+
+    @PostMapping("/finn-og-patch-andeler-tilkjent-ytelse-i-fagsaker-med-avvik")
+    fun finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
+        @RequestBody finnOgPatchAndelerRequestDto: FinnOgPatchAndelerRequestDto,
+    ): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelseKorreksjon>?>>> =
+        ResponseEntity.ok(
+            forvalterService.finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
+                fagsaker = finnOgPatchAndelerRequestDto.fagsaker,
+                korrigerAndelerFraOgMedDato = finnOgPatchAndelerRequestDto.korrigerAndelerFraOgMedDato,
+                dryRun = finnOgPatchAndelerRequestDto.dryRun,
+            ),
+        )
 }
+
+data class FinnOgPatchAndelerRequestDto(
+    val fagsaker: Set<Long>,
+    val korrigerAndelerFraOgMedDato: LocalDate = LocalDate.of(2025, 2, 1),
+    val dryRun: Boolean = true,
+)
