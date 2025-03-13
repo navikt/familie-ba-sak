@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.internal
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -18,6 +20,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.Utbetalingstidslinje
 import no.nav.familie.ba.sak.integrasjoner.økonomi.lagUtbetalingsperiode
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -26,8 +29,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.PatchetAndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.PatchetAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -68,7 +69,7 @@ class ForvalterServiceTest {
     private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
     private val utbetalingsTidslinjeService = mockk<UtbetalingsTidslinjeService>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val patchetAndelTilkjentYtelseRepository = mockk<PatchetAndelTilkjentYtelseRepository>()
+    private val oppdaterTilkjentYtelseService = mockk<OppdaterTilkjentYtelseService>()
 
     private val forvalterService =
         ForvalterService(
@@ -84,7 +85,7 @@ class ForvalterServiceTest {
             persongrunnlagService = persongrunnlagService,
             utbetalingsTidslinjeService = utbetalingsTidslinjeService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
-            patchetAndelTilkjentYtelseRepository = patchetAndelTilkjentYtelseRepository,
+            oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
         )
 
     @Test
@@ -326,7 +327,7 @@ class ForvalterServiceTest {
     @Nested
     inner class FinnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik {
         @Test
-        fun `skal finne og korrigere avvik i periodeId, forrigePeriodeId og kildeBehandlingId`() {
+        fun `skal finne og korrigere avvik i periodeId, forrigePeriodeId og kildeBehandlingId dersom dryRun er satt til false`() {
             // Arrange
             val fagsak = lagFagsak()
             val behandling = lagBehandling(fagsak = fagsak)
@@ -450,9 +451,7 @@ class ForvalterServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) } returns sisteIverksatteBehandling
             every { tilkjentYtelseRepository.findByBehandling(behandlingId = sisteIverksatteBehandling.id) } returns tilkjentYtelse
             every { utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id) } returns utbetalingstidslinjer
-            every { patchetAndelTilkjentYtelseRepository.saveAll(any<List<PatchetAndelTilkjentYtelse>>()) } answers {
-                firstArg()
-            }
+            every { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedKorrigerteAndeler(any(), any()) } just Runs
 
             // Act
             val fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon =
@@ -464,7 +463,154 @@ class ForvalterServiceTest {
 
             // Assert
             assertThat(fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon).hasSize(1)
-            verify(exactly = 1) { patchetAndelTilkjentYtelseRepository.saveAll(any<List<PatchetAndelTilkjentYtelse>>()) }
+            verify(exactly = 1) { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedKorrigerteAndeler(any(), any()) }
+
+            val andelTilkjentYtelseKorreksjonerForFagsak = fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon.first()
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.first).isEqualTo(fagsak.id)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second).hasSize(2)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.periodeId }).containsExactlyInAnyOrder(3, 4)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.forrigePeriodeId }).containsExactlyInAnyOrder(2, 3)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.kildeBehandlingId }?.toSet()).containsExactlyInAnyOrder(sisteIverksatteBehandling.id)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.andelMedFeil.id }).containsExactlyInAnyOrder(andelTilkjentYtelse2.id, andelTilkjentYtelse3.id)
+        }
+
+        @Test
+        fun `skal finne avvik i periodeId, forrigePeriodeId og kildeBehandlingId dersom dryRun er satt til true`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val behandling = lagBehandling(fagsak = fagsak)
+            val sisteIverksatteBehandling = lagBehandling(fagsak = fagsak)
+            val barn = lagPerson(type = PersonType.BARN)
+
+            // Perioder med utbetalinger i fagsak
+            val periode1 =
+                CommonPeriode(fom = YearMonth.of(2022, 7).førsteDagIInneværendeMåned(), tom = YearMonth.of(2024, 6).sisteDagIInneværendeMåned())
+            val periode2 =
+                CommonPeriode(fom = YearMonth.of(2024, 7).førsteDagIInneværendeMåned(), tom = YearMonth.of(2026, 2).sisteDagIInneværendeMåned())
+            val periode3 =
+                CommonPeriode(fom = YearMonth.of(2026, 3).førsteDagIInneværendeMåned(), tom = YearMonth.of(2035, 2).sisteDagIInneværendeMåned())
+
+            // Andeler i sisteIversatteBehandling med feil periodeId, forrigePeriodeId og kildeBehandlingsId for de 2 siste andelene
+            val andelTilkjentYtelse1 = lagAndelTilkjentYtelse(id = 1, fom = periode1.fom.toYearMonth(), tom = periode1.tom.toYearMonth(), aktør = barn.aktør, periodeIdOffset = 0, forrigeperiodeIdOffset = null, kildeBehandlingId = behandling.id)
+            val andelTilkjentYtelse2 = lagAndelTilkjentYtelse(id = 2, fom = periode2.fom.toYearMonth(), tom = periode2.tom.toYearMonth(), aktør = barn.aktør, periodeIdOffset = 1, forrigeperiodeIdOffset = 0, kildeBehandlingId = behandling.id)
+            val andelTilkjentYtelse3 = lagAndelTilkjentYtelse(id = 3, fom = periode3.fom.toYearMonth(), tom = periode3.tom.toYearMonth(), aktør = barn.aktør, periodeIdOffset = 2, forrigeperiodeIdOffset = 1, kildeBehandlingId = behandling.id)
+
+            // Tilkjent ytelse i sisteIverksatteBehandling
+            val tilkjentYtelse =
+                lagTilkjentYtelse(behandling = sisteIverksatteBehandling, lagAndelerTilkjentYtelse = {
+                    setOf(
+                        andelTilkjentYtelse1,
+                        andelTilkjentYtelse2,
+                        andelTilkjentYtelse3,
+                    )
+                })
+
+            // Alle utbetalingsperioder sendt til Oppdrag
+            val utbetalingsperiode1 =
+                lagUtbetalingsperiode(
+                    fom = periode1.fom,
+                    tom = periode1.tom,
+                    periodeId = 0,
+                    forrigePeriodeId = null,
+                    behandlingId = behandling.id,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal(1766),
+                    opphør = null,
+                )
+
+            val utbetalingsperiode2 =
+                lagUtbetalingsperiode(
+                    fom = periode2.fom,
+                    tom = periode2.tom,
+                    periodeId = 1,
+                    forrigePeriodeId = 0,
+                    behandlingId = behandling.id,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal(1766),
+                    opphør = null,
+                )
+
+            val utbetalingsperiode3 =
+                lagUtbetalingsperiode(
+                    fom = periode3.fom,
+                    tom = periode3.tom,
+                    periodeId = 2,
+                    forrigePeriodeId = 1,
+                    behandlingId = behandling.id,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal(1766),
+                    opphør = null,
+                )
+
+            // Perioder oppdatert i sisteIverksatteBehandling
+            val utbetalingsperiode4 =
+                lagUtbetalingsperiode(
+                    fom = periode2.fom,
+                    tom = periode2.tom,
+                    periodeId = 3,
+                    forrigePeriodeId = 2,
+                    behandlingId = sisteIverksatteBehandling.id,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal(1766),
+                    opphør = null,
+                )
+
+            val utbetalingsperiode5 =
+                lagUtbetalingsperiode(
+                    fom = periode3.fom,
+                    tom = periode3.tom,
+                    periodeId = 4,
+                    forrigePeriodeId = 3,
+                    behandlingId = sisteIverksatteBehandling.id,
+                    klassifisering = YtelseType.ORDINÆR_BARNETRYGD.klassifisering,
+                    beløp = BigDecimal(1766),
+                    opphør = null,
+                )
+
+            // Utbetalingstidslinjer i fagsak
+            val utbetalingstidslinjer: List<Utbetalingstidslinje> =
+                listOf(
+                    Utbetalingstidslinje(
+                        utbetalingsperioder = setOf(utbetalingsperiode1, utbetalingsperiode2, utbetalingsperiode3, utbetalingsperiode4, utbetalingsperiode5),
+                        tidslinje =
+                            listOf(
+                                Periode(
+                                    verdi = utbetalingsperiode1,
+                                    fom = periode1.fom,
+                                    tom = periode1.tom,
+                                ),
+                                Periode(
+                                    verdi = utbetalingsperiode4,
+                                    fom = periode2.fom,
+                                    tom = periode2.tom,
+                                ),
+                                Periode(
+                                    verdi = utbetalingsperiode5,
+                                    fom = periode3.fom,
+                                    tom = periode3.tom,
+                                ),
+                            ).tilTidslinje(),
+                    ),
+                )
+
+            val fagsaker = setOf(fagsak.id)
+            val korrigerAndelerFraOgMedDato = LocalDate.of(2025, 2, 1)
+
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsak.id) } returns sisteIverksatteBehandling
+            every { tilkjentYtelseRepository.findByBehandling(behandlingId = sisteIverksatteBehandling.id) } returns tilkjentYtelse
+            every { utbetalingsTidslinjeService.genererUtbetalingstidslinjerForFagsak(fagsakId = fagsak.id) } returns utbetalingstidslinjer
+
+            // Act
+            val fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon =
+                forvalterService.finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
+                    fagsaker = fagsaker,
+                    korrigerAndelerFraOgMedDato = korrigerAndelerFraOgMedDato,
+                    dryRun = true,
+                )
+
+            // Assert
+            assertThat(fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon).hasSize(1)
+            verify(exactly = 0) { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedKorrigerteAndeler(any(), any()) }
 
             val andelTilkjentYtelseKorreksjonerForFagsak = fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon.first()
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.first).isEqualTo(fagsak.id)

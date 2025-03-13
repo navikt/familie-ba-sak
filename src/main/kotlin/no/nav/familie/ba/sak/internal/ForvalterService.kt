@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsTidslinjeService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.Utbetalingstidslinje
+import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterTilkjentYtelseService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -23,10 +24,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.PatchetAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.tilPatchetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -67,7 +66,7 @@ class ForvalterService(
     private val persongrunnlagService: PersongrunnlagService,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val patchetAndelTilkjentYtelseRepository: PatchetAndelTilkjentYtelseRepository,
+    private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -249,8 +248,12 @@ class ForvalterService(
                     utbetalingstidslinjer.flatMap { utbetalingstidslinje ->
                         val andeltidslinjeForUtbetalingstidslinje = finnAndelerTilkjentYtelseForUtbetalingstidslinje(utbetalingstidslinje = utbetalingstidslinje, andelerTilkjentYtelsePerAktørOgType = andelerTilkjentYtelse)
                         utbetalingstidslinje.tidslinje
+                            // Ser kun på andeler som løper fra og med korrigerAndelerFraOgMedDato. Tanken er at vi ikke ønsker å korrigere bakover i tid.
                             .beskjærFraOgMed(korrigerAndelerFraOgMedDato)
                             .kombinerMed(andeltidslinjeForUtbetalingstidslinje) { utbetalingsperiode, andelTilkjentYtelse ->
+                                // Dersom verken utbetalingsperiode eller andelTilkjentYtelse er null betyr det at de overlapper.
+                                // Dersom de har ulike verdier for enten periodeId, forrigePeriodeId eller kildeBehandlingId oppretter vi en AndelTilkjentYtelseKorreksjon
+                                // Korreksjonen inneholder andelen med feil samt en korrigert versjon av andelen.
                                 if (utbetalingsperiode != null && andelTilkjentYtelse != null) {
                                     if (utbetalingsperiode.periodeId != andelTilkjentYtelse.periodeOffset || utbetalingsperiode.forrigePeriodeId != andelTilkjentYtelse.forrigePeriodeOffset || utbetalingsperiode.behandlingId != andelTilkjentYtelse.kildeBehandlingId) {
                                         return@kombinerMed AndelTilkjentYtelseKorreksjon(andelTilkjentYtelse, andelTilkjentYtelse.copy(id = 0, periodeOffset = utbetalingsperiode.periodeId, forrigePeriodeOffset = utbetalingsperiode.forrigePeriodeId, kildeBehandlingId = utbetalingsperiode.behandlingId))
@@ -263,18 +266,12 @@ class ForvalterService(
                     }
 
                 if (!dryRun) {
-                    val andelerSomSkalSlettes = andelTilkjentYtelseKorreksjoner.map { it.andelMedFeil }.toSet()
-                    val andelerSomSkalOpprettes = andelTilkjentYtelseKorreksjoner.map { it.korrigertAndel }.toSet()
-
-                    if (andelerSomSkalSlettes.size != andelerSomSkalOpprettes.size) throw Feil("Andeler som skal opprettes må være like mange som andeler vi sletter")
-
-                    val andelerSomSkalSlettesGruppertPåId = andelerSomSkalSlettes.groupBy { it.id }
-                    if (andelerSomSkalSlettesGruppertPåId.any { it.value.size > 1 }) throw Feil("Den samme andelen forekommer flere ganger blant andelene som er markert for sletting. Dette betyr at det finnes en splitt i utbetalingsoppdragene oversendt til Oppdrag som ikke eksisterer i andelene.")
-
-                    patchetAndelTilkjentYtelseRepository.saveAll(andelerSomSkalSlettes.map { it.tilPatchetAndelTilkjentYtelse() })
-
-                    tilkjentYtelse.andelerTilkjentYtelse.removeAll(andelerSomSkalSlettes)
-                    tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerSomSkalOpprettes)
+                    // Sletter andeler med feil og oppretter korrigerte andeler.
+                    // Slettede andeler lagres i ny tabell PatchetAndelTilkjentYtelse slik at vi har mulighet til å finne ut hvordan de så ut før endringen.
+                    oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedKorrigerteAndeler(
+                        tilkjentYtelse = tilkjentYtelse,
+                        andelTilkjentYtelseKorreksjoner = andelTilkjentYtelseKorreksjoner,
+                    )
                 }
                 return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner.tilAndelerTilkjentYtelseKorreksjonerDto())
             }
