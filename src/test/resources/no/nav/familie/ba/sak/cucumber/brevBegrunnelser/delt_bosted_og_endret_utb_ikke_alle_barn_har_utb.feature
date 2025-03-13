@@ -415,4 +415,107 @@ Egenskap: Delt bosted og endret utbetaling, ikke alle barn har utbetaling
 
     Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.12.2024 til 30.11.2033
       | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
-      | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD | Ja            | 12.03.21 og 03.05.23 | 2           | november 2024                        |         | 6 048  | 21.10.24         | SØKER_FÅR_UTVIDET       |                             |
+      | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD | Ja            | 12.03.21 og 03.05.23 | 2           | november 2024                        |         | 6 048 | 21.10.24         | SØKER_FÅR_UTVIDET       |                             |
+
+
+  Scenario: : Ved overgang til full barnetrygd så skal bare barn med delt bosted bli inkludert i begrunnelse for delt bosted
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype | Status  |
+      | 1        | NORMAL     | LØPENDE |
+
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat        | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | DELVIS_INNVILGET_OG_ENDRET | SØKNAD           | Nei                       | NASJONAL            | AVSLUTTET         |
+      | 2            | 1        | 1                   | ENDRET_UTBETALING          | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 05.02.1980  |              |
+      | 1            | 2       | BARN       | 30.01.2010  |              |
+      | 1            | 3       | BARN       | 29.08.2011  |              |
+      | 2            | 1       | SØKER      | 05.02.1980  |              |
+      | 2            | 2       | BARN       | 30.01.2010  |              |
+      | 2            | 3       | BARN       | 29.08.2011  |              |
+
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                        | Utdypende vilkår            | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD            |                             | 02.04.2024 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 2       | UNDER_18_ÅR                   |                             | 30.01.2010 | 29.01.2028 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | GIFT_PARTNERSKAP              |                             | 30.01.2010 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | BOR_MED_SØKER                 |                             | 01.02.2022 | 01.04.2024 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | BOR_MED_SØKER                 | DELT_BOSTED_SKAL_IKKE_DELES | 02.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 3       | UNDER_18_ÅR                   |                             | 29.08.2011 | 28.08.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | GIFT_PARTNERSKAP              |                             | 29.08.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                             | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 3       | BOR_MED_SØKER                 | DELT_BOSTED                 | 02.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår                        | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 1       | UTVIDET_BARNETRYGD            |                  | 02.04.2024 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 2       | GIFT_PARTNERSKAP              |                  | 30.01.2010 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR                   |                  | 30.01.2010 | 29.01.2028 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER                 |                  | 01.02.2022 | 01.04.2024 | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | BOR_MED_SØKER                 | DELT_BOSTED      | 02.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 3       | UNDER_18_ÅR                   |                  | 29.08.2011 | 28.08.2029 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | GIFT_PARTNERSKAP              |                  | 29.08.2011 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 3       | BOR_MED_SØKER                 | DELT_BOSTED      | 02.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 1       | 1            | 01.05.2024 | 30.09.2024 | ETTERBETALING_3MND | 0       | 22.01.2025       |                             |
+      | 1       | 2            | 01.05.2024 | 30.09.2024 | ETTERBETALING_3MND | 0       | 22.01.2025       |                             |
+      | 1       | 2            | 01.10.2024 | 28.02.2025 | DELT_BOSTED        | 100     | 14.02.2025       | 2024-04-02                  |
+      | 2       | 2            | 01.05.2024 | 28.02.2025 | DELT_BOSTED        | 100     | 14.02.2025       | 2024-04-02                  |
+      | 3       | 1            | 01.05.2024 | 31.01.2025 | DELT_BOSTED        | 0       | 22.01.2025       | 2024-04-02                  |
+      | 3       | 2            | 01.05.2024 | 31.01.2025 | DELT_BOSTED        | 0       | 22.01.2025       | 2024-04-02                  |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 1       | 1            | 01.05.2024 | 30.09.2024 | 0     | UTVIDET_BARNETRYGD | 0       | 2516 |
+      | 1       | 1            | 01.10.2024 | 31.12.2027 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 1            | 01.01.2028 | 31.07.2029 | 1258  | UTVIDET_BARNETRYGD | 50      | 2516 |
+      | 2       | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 1            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 2       | 1            | 01.01.2024 | 31.08.2024 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 2       | 1            | 01.09.2024 | 31.12.2027 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 1            | 01.05.2024 | 31.01.2025 | 0     | ORDINÆR_BARNETRYGD | 0       | 1510 |
+      | 3       | 1            | 01.02.2025 | 31.07.2029 | 883   | ORDINÆR_BARNETRYGD | 50      | 1766 |
+
+      | 1       | 2            | 01.05.2024 | 30.09.2024 | 0     | UTVIDET_BARNETRYGD | 0       | 2516 |
+      | 1       | 2            | 01.10.2024 | 28.02.2025 | 2516  | UTVIDET_BARNETRYGD | 100     | 2516 |
+      | 1       | 2            | 01.03.2025 | 31.07.2029 | 1258  | UTVIDET_BARNETRYGD | 50      | 2516 |
+      | 2       | 2            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 2       | 2            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 2       | 2            | 01.01.2024 | 31.08.2024 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 2       | 2            | 01.09.2024 | 28.02.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.03.2025 | 31.12.2027 | 883   | ORDINÆR_BARNETRYGD | 50      | 1766 |
+      | 3       | 2            | 01.05.2024 | 31.01.2025 | 0     | ORDINÆR_BARNETRYGD | 0       | 1510 |
+      | 3       | 2            | 01.02.2025 | 31.07.2029 | 883   | ORDINÆR_BARNETRYGD | 50      | 1766 |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                           | Ugyldige begrunnelser |
+      | 01.02.2025 | 28.02.2025 | UTBETALING         |                                | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato   | Standardbegrunnelser                           | Eøsbegrunnelser | Fritekster |
+      | 01.02.2025 | 28.02.2025 | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.02.2025 til 28.02.2025
+      | Begrunnelse                                    | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED | STANDARD | Nei           | 29.08.11             | 1           | januar 2025                          |         | 883   | 22.01.25         | SØKER_FÅR_UTVIDET       |                             |

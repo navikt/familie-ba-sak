@@ -27,6 +27,11 @@ data class RestJournalpostDokument(
     val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
 )
 
+data class TilknyttetBehandling(
+    val behandlingstype: Journalføringsbehandlingstype,
+    val behandlingId: String,
+)
+
 data class RestJournalføring(
     val avsender: NavnOgIdent,
     val bruker: NavnOgIdent,
@@ -36,6 +41,7 @@ data class RestJournalføring(
     val underkategori: BehandlingUnderkategori?,
     val knyttTilFagsak: Boolean,
     val opprettOgKnyttTilNyBehandling: Boolean,
+    val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
     val tilknyttedeBehandlingIder: List<String>,
     val dokumenter: List<RestJournalpostDokument>,
     // Saksbehandler sin ident
@@ -44,6 +50,7 @@ data class RestJournalføring(
     val nyBehandlingsårsak: BehandlingÅrsak,
     val fagsakType: FagsakType,
     val institusjon: RestInstitusjon? = null,
+    val fagsakId: Long? = null,
 ) {
     fun oppdaterMedDokumentOgSak(
         sak: Sak,

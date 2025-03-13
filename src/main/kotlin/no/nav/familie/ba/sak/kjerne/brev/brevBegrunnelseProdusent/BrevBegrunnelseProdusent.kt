@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltDeltUtvidetIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltUtvidetIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erNullPgaDifferanseberegningEllerDeltBosted
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.finnBarnMedAlleredeUtbetalt
@@ -373,6 +374,10 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
         val andelerIPeriode = begrunnelseGrunnlag.dennePerioden.andeler
         val erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode = deltBostedIVilkårsvurderingIPeriode && andelerIPeriode.any { it.prosent != BigDecimal.ZERO }
 
+        val sumAndelerDennePeriode = andelerIPeriode.sumOf { it.kalkulertUtbetalingsbeløp }
+        val sumAndelerForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.andeler?.sumOf { it.kalkulertUtbetalingsbeløp } ?: 0
+        val søkerFårUtbetaltDeltUtvidetIPeriode = begrunnelsesGrunnlagPerPerson.erBetaltDeltUtvidetIPeriode()
+
         (
             (
                 endretUtbetalingAndelIPeriode?.årsak == Årsak.DELT_BOSTED &&
@@ -380,7 +385,8 @@ private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson:
             ) ||
                 erDeltBostedIVilkårsvurderingMedUtbetalingIPeriode
         ) &&
-            person.type == PersonType.BARN
+            person.type == PersonType.BARN &&
+            (sumAndelerDennePeriode != sumAndelerForrigePeriode || søkerFårUtbetaltDeltUtvidetIPeriode)
     }
 
 private fun erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(sanityBegrunnelse: ISanityBegrunnelse) =
