@@ -469,8 +469,8 @@ class ForvalterServiceTest {
             val andelTilkjentYtelseKorreksjonerForFagsak = fagsakerMedTilhørendeAndelTilkjentYtelseKorreksjon.first()
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.first).isEqualTo(fagsak.id)
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second).hasSize(2)
-            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.periodeOffset }).containsExactlyInAnyOrder(3, 4)
-            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.forrigePeriodeOffset }).containsExactlyInAnyOrder(2, 3)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.periodeId }).containsExactlyInAnyOrder(3, 4)
+            assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.forrigePeriodeId }).containsExactlyInAnyOrder(2, 3)
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.kildeBehandlingId }?.toSet()).containsExactlyInAnyOrder(sisteIverksatteBehandling.id)
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.andelMedFeil.id }).containsExactlyInAnyOrder(andelTilkjentYtelse2.id, andelTilkjentYtelse3.id)
         }
