@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelForVedtaksbegrunnelseTidslinje
@@ -189,12 +190,16 @@ enum class YtelseType(
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
         }
 
+    // FIXME NAV-22043
     fun tilSatsType(
         person: Person,
         ytelseDato: LocalDate,
     ) = when (this) {
         ORDINÆR_BARNETRYGD ->
-            if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
+
+            if (ytelseDato.isSameOrAfter(LocalDate.of(2024, 9, 1))) {
+                SatsType.ORBA
+            } else if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
                 SatsType.TILLEGG_ORBA
             } else {
                 SatsType.ORBA
