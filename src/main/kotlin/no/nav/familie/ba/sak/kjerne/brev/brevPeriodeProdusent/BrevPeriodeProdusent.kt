@@ -146,6 +146,13 @@ fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltUtvidetIPeriode(): Boole
         }
     }
 
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltDeltUtvidetIPeriode(): Boolean =
+    this.any {
+        it.value.dennePerioden.andeler.any { andel ->
+            andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 && andel.prosent == BigDecimal(50)
+        }
+    }
+
 fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnBarnMedAlleredeUtbetalt(): Set<Person> =
     this
         .filterKeys { it.type == PersonType.BARN }
