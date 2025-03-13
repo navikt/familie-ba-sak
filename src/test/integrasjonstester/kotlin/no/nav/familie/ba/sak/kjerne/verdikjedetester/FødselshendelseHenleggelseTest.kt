@@ -65,7 +65,7 @@ class FødselshendelseHenleggelseTest(
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2024, 9, 1)
     }
 
     @AfterEach
