@@ -1,19 +1,23 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.ClockProvider
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class AvregningService(
@@ -28,46 +32,50 @@ class AvregningService(
 
         val andelerInneværendeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
         val andelerForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
-        val sisteDagIForrigeMåned = LocalDate.now(clockProvider.get()).sisteDagIForrigeMåned()
+        val inneværendeMåned = YearMonth.now(clockProvider.get())
 
-        return etterbetalingerOgFeilutbetalinger(andelerInneværendeBehandling, andelerForrigeBehandling, sisteDagIForrigeMåned)
+        return etterbetalingerOgFeilutbetalinger(andelerInneværendeBehandling, andelerForrigeBehandling, inneværendeMåned)
     }
 
     fun etterbetalingerOgFeilutbetalinger(
         andelerInneværendeBehandling: List<AndelTilkjentYtelse>,
         andelerForrigeBehandling: List<AndelTilkjentYtelse>,
-        sisteDagIForrigeMåned: LocalDate,
+        inneværendeMåned: YearMonth,
     ): List<Periode<EtterbetalingOgFeilutbetaling>> {
+        val sisteDagIForrigeMåned = inneværendeMåned.forrigeMåned().sisteDagIInneværendeMåned()
         val andelerIFortidenInneværendeBehandlingTidslinjer = andelerInneværendeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteDagIForrigeMåned)
         val andelerIFortidenForrigeBehandlingTidslinjer = andelerForrigeBehandling.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteDagIForrigeMåned)
 
-        val tidslinjerMedDifferanser =
-            andelerIFortidenInneværendeBehandlingTidslinjer
-                .outerJoin(andelerIFortidenForrigeBehandlingTidslinjer) { nyAndel, gammelAndel ->
-                    when {
-                        nyAndel == null && gammelAndel == null -> null
-                        nyAndel == null && gammelAndel != null -> -gammelAndel.kalkulertUtbetalingsbeløp
-                        nyAndel != null && gammelAndel == null -> nyAndel.kalkulertUtbetalingsbeløp
-                        else -> (nyAndel!!.kalkulertUtbetalingsbeløp - gammelAndel!!.kalkulertUtbetalingsbeløp).takeIf { it != 0 }
-                    }
-                }.values
+        val tidslinjerMedDifferanser = lagTidslinjerMedDifferanser(andelerIFortidenInneværendeBehandlingTidslinjer, andelerIFortidenForrigeBehandlingTidslinjer)
 
-        val perioderMedEtterbetalingerOgFeilutbetalinger =
-            tidslinjerMedDifferanser
-                .kombiner { differanser ->
-                    val (etterbetaling, feilutbetaling) = differanser.partition { it > 0 }.toList().map { it.sum() }
-                    if (etterbetaling != 0 || feilutbetaling != 0) {
-                        EtterbetalingOgFeilutbetaling(
-                            etterbetaling = etterbetaling,
-                            feilutbetaling = -feilutbetaling,
-                        )
-                    } else {
-                        null
-                    }
-                }.tilPerioderIkkeNull()
+        val perioderMedEtterbetalingerOgFeilutbetalinger = summerEtterbetalingerOgFeilutbetalinger(tidslinjerMedDifferanser).tilPerioderIkkeNull()
 
         return perioderMedEtterbetalingerOgFeilutbetalinger
     }
+
+    private fun lagTidslinjerMedDifferanser(
+        andelerIFortidenInneværendeBehandlingTidslinjer: Map<Pair<Aktør, YtelseType>, Tidslinje<AndelTilkjentYtelse>>,
+        andelerIFortidenForrigeBehandlingTidslinjer: Map<Pair<Aktør, YtelseType>, Tidslinje<AndelTilkjentYtelse>>,
+    ): Collection<Tidslinje<Int>> =
+        andelerIFortidenInneværendeBehandlingTidslinjer
+            .outerJoin(andelerIFortidenForrigeBehandlingTidslinjer) { nyAndel, gammelAndel ->
+                when {
+                    nyAndel == null && gammelAndel == null -> 0
+                    nyAndel == null && gammelAndel != null -> -gammelAndel.kalkulertUtbetalingsbeløp
+                    nyAndel != null && gammelAndel == null -> nyAndel.kalkulertUtbetalingsbeløp
+                    else -> nyAndel!!.kalkulertUtbetalingsbeløp - gammelAndel!!.kalkulertUtbetalingsbeløp
+                }
+            }.values
+
+    private fun summerEtterbetalingerOgFeilutbetalinger(tidslinjerMedDifferanser: Collection<Tidslinje<Int>>): Tidslinje<EtterbetalingOgFeilutbetaling> =
+        tidslinjerMedDifferanser
+            .kombiner { differanser ->
+                val (etterbetaling, feilutbetaling) = differanser.partition { it > 0 }.toList().map { it.sum() }
+                EtterbetalingOgFeilutbetaling(
+                    etterbetaling = etterbetaling,
+                    feilutbetaling = -feilutbetaling,
+                )
+            }
 }
 
 data class EtterbetalingOgFeilutbetaling(
