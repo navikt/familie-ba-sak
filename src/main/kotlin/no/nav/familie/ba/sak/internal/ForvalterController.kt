@@ -513,7 +513,7 @@ class ForvalterController(
     @PostMapping("/finn-og-patch-andeler-tilkjent-ytelse-i-fagsaker-med-avvik")
     fun finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
         @RequestBody finnOgPatchAndelerRequestDto: FinnOgPatchAndelerRequestDto,
-    ): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelseKorreksjon>?>>> =
+    ): ResponseEntity<List<Pair<Long, List<AndelTilkjentYtelseKorreksjonDto>?>>> =
         ResponseEntity.ok(
             forvalterService.finnOgPatchAndelerTilkjentYtelseIFagsakerMedAvvik(
                 fagsaker = finnOgPatchAndelerRequestDto.fagsaker,

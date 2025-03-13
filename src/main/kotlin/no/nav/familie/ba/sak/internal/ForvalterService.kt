@@ -51,6 +51,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class ForvalterService(
@@ -237,7 +238,7 @@ class ForvalterService(
         fagsaker: Set<Long>,
         korrigerAndelerFraOgMedDato: LocalDate,
         dryRun: Boolean = true,
-    ): List<Pair<Long, List<AndelTilkjentYtelseKorreksjon>?>> {
+    ): List<Pair<Long, List<AndelTilkjentYtelseKorreksjonDto>?>> {
         return fagsaker.map { fagsakId ->
             val sisteIverksatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
             if (sisteIverksatteBehandling != null) {
@@ -275,7 +276,7 @@ class ForvalterService(
                     tilkjentYtelse.andelerTilkjentYtelse.removeAll(andelerSomSkalSlettes)
                     tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerSomSkalOpprettes)
                 }
-                return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner)
+                return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner.tilAndelerTilkjentYtelseKorreksjonerDto())
             }
             return@map Pair(fagsakId, null)
         }
@@ -309,4 +310,38 @@ interface FagsakMedFlereMigreringer {
 data class AndelTilkjentYtelseKorreksjon(
     val andelMedFeil: AndelTilkjentYtelse,
     val korrigertAndel: AndelTilkjentYtelse,
+)
+
+fun List<AndelTilkjentYtelseKorreksjon>.tilAndelerTilkjentYtelseKorreksjonerDto() =
+    this.map {
+        AndelTilkjentYtelseKorreksjonDto(
+            andelMedFeil = it.andelMedFeil.tilAndelTilkjentYtelseDto(),
+            korrigertAndel = it.korrigertAndel.tilAndelTilkjentYtelseDto(),
+        )
+    }
+
+fun AndelTilkjentYtelse.tilAndelTilkjentYtelseDto() =
+    AndelTilkjentYtelseDto(
+        id = this.id,
+        stønadFom = this.stønadFom,
+        stønadTom = this.stønadTom,
+        beløp = this.kalkulertUtbetalingsbeløp,
+        periodeId = this.periodeOffset,
+        forrigePeriodeId = this.forrigePeriodeOffset,
+        kildeBehandlingId = this.kildeBehandlingId,
+    )
+
+data class AndelTilkjentYtelseKorreksjonDto(
+    val andelMedFeil: AndelTilkjentYtelseDto,
+    val korrigertAndel: AndelTilkjentYtelseDto,
+)
+
+data class AndelTilkjentYtelseDto(
+    val id: Long,
+    val stønadFom: YearMonth,
+    val stønadTom: YearMonth,
+    val beløp: Int,
+    val periodeId: Long?,
+    val forrigePeriodeId: Long?,
+    val kildeBehandlingId: Long?,
 )
