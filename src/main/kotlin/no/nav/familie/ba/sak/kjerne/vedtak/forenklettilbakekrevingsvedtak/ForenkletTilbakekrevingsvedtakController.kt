@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestForenkletTilbakekrevingsvedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterForenkletTilbakekrevingsvedtakFritekst
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -96,5 +99,46 @@ class ForenkletTilbakekrevingsvedtakController(
         forenkletTilbakekrevingsvedtakService.slettForenkletTilbakekrevingsvedtak(behandlingId)
 
         return ResponseEntity.ok(Ressurs.success("ForenkletTilbakekrevingsvedtak for behandling=$behandlingId slettet OK."))
+    }
+
+    @GetMapping(
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        path = ["/pdf"],
+    )
+    fun hentForenkletTilbakekrevingsvedtakPdf(
+        @PathVariable behandlingId: Long,
+    ): Ressurs<ByteArray> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "Hent ForenkletTilbakekrevingsvedtak pdf",
+        )
+        val forenkletTilbakekrevingsvedtak =
+            forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandlingId = behandlingId)
+                ?: throw FunksjonellFeil("Det er ikke opprettet forenklet tilbakekrevingsvedtak for behandling $behandlingId.")
+
+        val vedtakPdf =
+            forenkletTilbakekrevingsvedtak.vedtakPdf
+                ?: throw FunksjonellFeil("Det har ikke blitt opprettet forenklet tilbakekrevingsvedtak pdf for behandling $behandlingId")
+
+        return Ressurs.success(vedtakPdf)
+    }
+
+    @PostMapping(
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        path = ["/pdf"],
+    )
+    fun opprettOgHentForenkletTilbakekrevingsvedtakPdf(
+        @PathVariable behandlingId: Long,
+    ): Ressurs<ByteArray> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Oppretter ForenkletTilbakekrevingsvedtak pdf",
+        )
+
+        val forenkletTilbakekrevingsvedtakPdf =
+            forenkletTilbakekrevingsvedtakService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandlingId).vedtakPdf
+                ?: throw Feil("ForenkletTilbakekrevingsvedtak pdf ikke opprettet")
+
+        return Ressurs.success(forenkletTilbakekrevingsvedtakPdf)
     }
 }

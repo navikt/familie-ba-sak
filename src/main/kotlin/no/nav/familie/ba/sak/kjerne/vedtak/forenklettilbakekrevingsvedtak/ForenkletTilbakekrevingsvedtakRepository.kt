@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.transaction.annotation.Transactional
 
 interface ForenkletTilbakekrevingsvedtakRepository : JpaRepository<ForenkletTilbakekrevingsvedtak, Long> {
-    @Query(value = "SELECT ftv FROM ForenkletTilbakekrevingsvedtak ftv WHERE ftv.behandlingId = :behandlingId")
     @Transactional(readOnly = true)
+    @Query("SELECT ftv FROM ForenkletTilbakekrevingsvedtak ftv JOIN ftv.behandling b WHERE b.id = :behandlingId")
     fun finnForenkletTilbakekrevingsvedtakForBehandling(behandlingId: Long): ForenkletTilbakekrevingsvedtak?
 }

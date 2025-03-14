@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -9,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional
 class ForenkletTilbakekrevingsvedtakService(
     private val forenkletTilbakekrevingsvedtakRepository: ForenkletTilbakekrevingsvedtakRepository,
     private val loggService: LoggService,
+    private val dokumentGenereringService: DokumentGenereringService,
+    private val behandlingService: BehandlingHentOgPersisterService,
 ) {
     fun finnForenkletTilbakekrevingsvedtak(behandlingId: Long) = forenkletTilbakekrevingsvedtakRepository.finnForenkletTilbakekrevingsvedtakForBehandling(behandlingId)
 
@@ -16,9 +20,10 @@ class ForenkletTilbakekrevingsvedtakService(
     fun opprettForenkletTilbakekrevingsvedtak(behandlingId: Long) =
         finnForenkletTilbakekrevingsvedtak(behandlingId) ?: run {
             loggService.loggForenkletTilbakekrevingsvedtakOpprettet(behandlingId)
+            val behandling = behandlingService.hent(behandlingId)
             forenkletTilbakekrevingsvedtakRepository.save(
                 ForenkletTilbakekrevingsvedtak(
-                    behandlingId = behandlingId,
+                    behandling = behandling,
                     samtykke = false,
                     fritekst = STANDARD_TEKST_FORENKLET_TILBAKEKREVINGSVEDTAK,
                 ),
@@ -61,6 +66,19 @@ class ForenkletTilbakekrevingsvedtakService(
             forenkletTilbakekrevingsvedtakRepository.delete(it)
             loggService.loggForenkletTilbakekrevingsvedtakSlettet(behandlingId)
         }
+
+    @Transactional
+    fun opprettOgLagreForenkletTilbakekrevingsvedtakPdf(
+        behandlingId: Long,
+    ): ForenkletTilbakekrevingsvedtak {
+        val forenkletTilbakekrevingsvedtak = hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId)
+        val pdf = dokumentGenereringService.genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak)
+
+        forenkletTilbakekrevingsvedtak.vedtakPdf = pdf
+        forenkletTilbakekrevingsvedtakRepository.save(forenkletTilbakekrevingsvedtak)
+
+        return forenkletTilbakekrevingsvedtak
+    }
 
     private fun hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId: Long): ForenkletTilbakekrevingsvedtak =
         finnForenkletTilbakekrevingsvedtak(behandlingId)
