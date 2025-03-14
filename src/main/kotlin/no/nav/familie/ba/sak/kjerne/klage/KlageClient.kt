@@ -26,7 +26,7 @@ class KlageClient(
                 .build()
                 .toUri()
 
-        return kallEksternTjenesteRessurs<UUID>(
+        return kallEksternTjenesteRessurs(
             tjeneste = "klage",
             uri = uri,
             formål = "Opprett klagebehandling",
