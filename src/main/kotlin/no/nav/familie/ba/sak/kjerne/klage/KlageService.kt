@@ -53,14 +53,16 @@ class KlageService(
     ): UUID {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
-        return opprettKlage(fagsak, opprettKlageDto.kravMottattDato)
+        val klageMottattDato = opprettKlageDto.klageMottattDato ?: (opprettKlageDto.kravMottattDato ?: throw Feil("Klage mottatt-dato ikke satt"))
+
+        return opprettKlage(fagsak, klageMottattDato)
     }
 
     fun opprettKlage(
         fagsak: Fagsak,
-        kravMottattDato: LocalDate,
+        klageMottattDato: LocalDate,
     ): UUID {
-        if (kravMottattDato.isAfter(LocalDate.now())) {
+        if (klageMottattDato.isAfter(LocalDate.now())) {
             throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid")
         }
 
@@ -73,7 +75,7 @@ class KlageService(
                 stønadstype = Stønadstype.BARNETRYGD,
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
-                klageMottatt = kravMottattDato,
+                klageMottatt = klageMottattDato,
                 behandlendeEnhet = enhetId,
                 behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
             ),
