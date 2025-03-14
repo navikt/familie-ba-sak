@@ -63,10 +63,25 @@ class DokumentService(
     fun hentBrevForVedtak(vedtak: Vedtak): Ressurs<ByteArray> {
         val høyesteRolletilgangForInnloggetBruker = SikkerhetContext.hentHøyesteRolletilgangForInnloggetBruker(rolleConfig)
 
-        if (høyesteRolletilgangForInnloggetBruker in listOf(BehandlerRolle.VEILEDER, BehandlerRolle.FORVALTER) && vedtak.stønadBrevPdF == null) {
-            throw FunksjonellFeil("Det finnes ikke noe vedtaksbrev.")
+        val funksjonelleRoller =
+            listOf(
+                BehandlerRolle.VEILEDER,
+                BehandlerRolle.FORVALTER,
+                BehandlerRolle.SAKSBEHANDLER,
+                BehandlerRolle.BESLUTTER,
+            )
+        if (høyesteRolletilgangForInnloggetBruker in funksjonelleRoller && vedtak.stønadBrevPdF == null) {
+            throw FunksjonellFeil(
+                melding =
+                    "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
+                frontendFeilmelding = "Det finnes ikke noe vedtaksbrev.",
+            )
         } else {
-            val pdf = vedtak.stønadBrevPdF ?: throw Feil("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}")
+            val pdf =
+                vedtak.stønadBrevPdF ?: throw Feil(
+                    "Klarte ikke finne vedtaksbrev for vedtak med id ${vedtak.id}. " +
+                        "Innlogget bruker har rolle: $høyesteRolletilgangForInnloggetBruker",
+                )
             return Ressurs.success(pdf)
         }
     }

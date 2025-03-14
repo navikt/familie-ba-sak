@@ -58,7 +58,7 @@ class DokumentGenereringService(
             secureLogger.info("Feil ved dokumentgenerering. Genererer hentVedtaksperioderTest \n ${testVerktøyService.hentVedtaksperioderTest(vedtak.behandling.id)}")
 
             throw Feil(
-                message = "Klarte ikke generere vedtaksbrev på behandling ${vedtak.behandling}: ${feil.message}",
+                message = "Klarte ikke generere vedtaksbrev på fagsak/behandling ${vedtak.behandling.fagsak.id}/${vedtak.behandling.id}: ${feil.message}",
                 frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = feil,
