@@ -521,7 +521,7 @@ class UtbetalingsTidslinjeServiceTest {
         )
 }
 
-private fun lagUtbetalingsperiode(
+fun lagUtbetalingsperiode(
     fom: LocalDate,
     tom: LocalDate,
     periodeId: Long,
