@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.util.UUID
 
 @Service
 class KlageService(
@@ -49,30 +50,32 @@ class KlageService(
     fun opprettKlage(
         fagsakId: Long,
         opprettKlageDto: OpprettKlageDto,
-    ) {
+    ): UUID {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
-        opprettKlage(fagsak, opprettKlageDto.kravMottattDato)
+        val klageMottattDato = opprettKlageDto.klageMottattDato ?: (opprettKlageDto.kravMottattDato ?: throw Feil("Klage mottatt-dato ikke satt"))
+
+        return opprettKlage(fagsak, klageMottattDato)
     }
 
     fun opprettKlage(
         fagsak: Fagsak,
-        kravMottattDato: LocalDate,
-    ) {
-        if (kravMottattDato.isAfter(LocalDate.now())) {
+        klageMottattDato: LocalDate,
+    ): UUID {
+        if (klageMottattDato.isAfter(LocalDate.now())) {
             throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid")
         }
 
         val aktivtFødselsnummer = fagsak.aktør.aktivFødselsnummer()
         val enhetId = integrasjonClient.hentBehandlendeEnhetForPersonIdentMedRelasjoner(aktivtFødselsnummer).enhetId
 
-        klageClient.opprettKlage(
+        return klageClient.opprettKlage(
             OpprettKlagebehandlingRequest(
                 ident = aktivtFødselsnummer,
                 stønadstype = Stønadstype.BARNETRYGD,
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
-                klageMottatt = kravMottattDato,
+                klageMottatt = klageMottattDato,
                 behandlendeEnhet = enhetId,
                 behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
             ),
