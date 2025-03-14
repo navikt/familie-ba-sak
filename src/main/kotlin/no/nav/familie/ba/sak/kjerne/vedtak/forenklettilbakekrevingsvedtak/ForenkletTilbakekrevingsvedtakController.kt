@@ -137,7 +137,7 @@ class ForenkletTilbakekrevingsvedtakController(
 
         val forenkletTilbakekrevingsvedtakPdf =
             forenkletTilbakekrevingsvedtakService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandlingId).vedtakPdf
-                ?: throw Feil("ForenkletTilbakekrevingsvedtak pdf ikke opprettet")
+                ?: throw Feil("Forenklet tilbakekrevingsvedtak pdf ble ikke opprettet for behandling $behandlingId.")
 
         return Ressurs.success(forenkletTilbakekrevingsvedtakPdf)
     }

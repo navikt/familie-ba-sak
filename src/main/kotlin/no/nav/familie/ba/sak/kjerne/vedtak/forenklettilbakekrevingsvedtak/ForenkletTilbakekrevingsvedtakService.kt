@@ -75,7 +75,7 @@ class ForenkletTilbakekrevingsvedtakService(
         val pdf = dokumentGenereringService.genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak)
 
         forenkletTilbakekrevingsvedtak.vedtakPdf = pdf
-        forenkletTilbakekrevingsvedtakRepository.save(forenkletTilbakekrevingsvedtak)
+        forenkletTilbakekrevingsvedtakRepository.saveAndFlush(forenkletTilbakekrevingsvedtak)
 
         return forenkletTilbakekrevingsvedtak
     }

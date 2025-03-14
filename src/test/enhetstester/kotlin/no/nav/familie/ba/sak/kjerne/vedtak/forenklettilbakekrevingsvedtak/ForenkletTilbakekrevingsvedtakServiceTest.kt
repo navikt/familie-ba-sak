@@ -213,4 +213,29 @@ class ForenkletTilbakekrevingsvedtakServiceTest {
             verify(exactly = 0) { forenkletTilbakekrevingsvedtakRepository.delete(any()) }
         }
     }
+
+    @Nested
+    inner class OpprettOgLagreForenkletTilbakekrevingsvedtakPdfTest {
+        @Test
+        fun `Skal lagre PDF i forenkletTilbakekrevingsvedtak`() {
+            // Arrange
+            val behandling = lagBehandling(id = 1)
+            val forenkletTilbakekrevingsvedtak = ForenkletTilbakekrevingsvedtak(behandling = behandling, samtykke = false, fritekst = "", vedtakPdf = null)
+            val pdf = ByteArray(200)
+
+            every { forenkletTilbakekrevingsvedtakRepository.finnForenkletTilbakekrevingsvedtakForBehandling(behandling.id) } returns forenkletTilbakekrevingsvedtak
+            every { dokumentGenereringService.genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak) } returns pdf
+            every { forenkletTilbakekrevingsvedtakRepository.saveAndFlush(forenkletTilbakekrevingsvedtak) } returnsArgument (0)
+
+            // Act
+            val forenkletTilbakekrevingsvedtakMedPdf = forenkletTilbakekrevingsvedtakService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandling.id)
+
+            // Assert
+            assertThat(forenkletTilbakekrevingsvedtakMedPdf.vedtakPdf).isEqualTo(pdf)
+
+            verify(exactly = 1) { forenkletTilbakekrevingsvedtakRepository.finnForenkletTilbakekrevingsvedtakForBehandling(behandling.id) }
+            verify(exactly = 1) { dokumentGenereringService.genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak) }
+            verify(exactly = 1) { forenkletTilbakekrevingsvedtakRepository.saveAndFlush(forenkletTilbakekrevingsvedtak) }
+        }
+    }
 }
