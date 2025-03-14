@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
+import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -126,7 +126,7 @@ class FødselshendelseRevurderingTest(
         assertUtbetalingsperiode(
             nesteMånedUtbetalingsperiode,
             2,
-            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2,
+            ordinærSatsNesteMånedTilTester().beløp * 2,
         )
     }
 }

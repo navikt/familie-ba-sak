@@ -244,17 +244,19 @@ object TilkjentYtelseValidering {
         val satser = SatsService.hentAllesatser()
         val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
         val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
+        val ordinær = satser.filter { it.type == SatsType.ORBA }
         val utvidet = satser.filter { it.type == SatsType.UTVIDET_BARNETRYGD }
         if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty()) error("Fant ikke satser ved validering")
         val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
+        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
         val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
 
         return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
             maksOrdinærMedTillegg + maksUtvidet
         } else {
             when (personType) {
-                PersonType.BARN -> maksOrdinærMedTillegg
+                PersonType.BARN -> maxOf(maksOrdinær, maksOrdinærMedTillegg)
                 PersonType.SØKER -> maksUtvidet + maksSmåbarnstillegg
                 else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
             }

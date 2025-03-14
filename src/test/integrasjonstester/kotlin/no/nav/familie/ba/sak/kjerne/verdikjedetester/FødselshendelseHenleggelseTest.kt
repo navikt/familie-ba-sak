@@ -35,8 +35,8 @@ import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -65,7 +65,7 @@ class FødselshendelseHenleggelseTest(
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2024, 9, 1)
     }
 
     @AfterEach
@@ -328,7 +328,7 @@ class FødselshendelseHenleggelseTest(
 
         assertEquals(BehandlingUnderkategori.UTVIDET, behandling.underkategori)
         assertEquals(
-            tilleggOrdinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
+            ordinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id),
             ),

@@ -39,7 +39,7 @@ object SatsService {
             Sats(SatsType.TILLEGG_ORBA, 1654, LocalDate.of(2021, 9, 1), LocalDate.of(2021, 12, 31)),
             Sats(SatsType.TILLEGG_ORBA, 1676, LocalDate.of(2022, 1, 1), LocalDate.of(2023, 2, 28)),
             Sats(SatsType.TILLEGG_ORBA, 1723, LocalDate.of(2023, 3, 1), LocalDate.of(2023, 6, 30)),
-            Sats(SatsType.TILLEGG_ORBA, 1766, LocalDate.of(2023, 7, 1), LocalDate.MAX), // Egentlig er tom-dato 2024-08-31, men omskriving skjer senere
+            Sats(SatsType.TILLEGG_ORBA, 1766, LocalDate.of(2023, 7, 1), LocalDate.of(2024, 8, 31)),
             Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31)),
             Sats(SatsType.UTVIDET_BARNETRYGD, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
             Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
@@ -100,7 +100,9 @@ fun satstypeTidslinje(satsType: SatsType) =
 
 fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int> {
     val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
-    val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
+    val tilleggOrbaTidslinje =
+        satstypeTidslinje(SatsType.TILLEGG_ORBA)
+            .filtrerMed(erUnder6ÅrTidslinje(barn))
     return orbaTidslinje
         .kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
         .beskjærFraOgMed(fraOgMed = barn.fødselsdato.førsteDagIInneværendeMåned())

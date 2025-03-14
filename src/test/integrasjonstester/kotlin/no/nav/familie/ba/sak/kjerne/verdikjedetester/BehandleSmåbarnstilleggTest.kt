@@ -40,9 +40,9 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
@@ -103,7 +103,7 @@ class BehandleSmåbarnstilleggTest(
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2024, 9, 1)
     }
 
     @AfterEach
@@ -192,7 +192,7 @@ class BehandleSmåbarnstilleggTest(
             )
 
         assertEquals(
-            tilleggOrdinærSatsTilTester() + sisteUtvidetSatsTilTester() + sisteSmåbarnstilleggSatsTilTester(),
+            ordinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester() + sisteSmåbarnstilleggSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = restUtvidetBehandlingEtterBehandlingsResultat.data!!,
             ),
