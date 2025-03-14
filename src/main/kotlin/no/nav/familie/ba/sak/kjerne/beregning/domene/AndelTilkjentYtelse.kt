@@ -190,13 +190,11 @@ enum class YtelseType(
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
         }
 
-    // FIXME NAV-22043
     fun tilSatsType(
         person: Person,
         ytelseDato: LocalDate,
     ) = when (this) {
         ORDINÆR_BARNETRYGD ->
-
             if (ytelseDato.isSameOrAfter(LocalDate.of(2024, 9, 1))) {
                 SatsType.ORBA
             } else if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {

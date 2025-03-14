@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
+import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -163,14 +163,14 @@ class FødselshendelseFørstegangsbehandlingTest(
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode =
             utbetalingsperioder.find {
-                it.periodeFom.toYearMonth() >= tilleggOrdinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
-                    it.periodeFom.toYearMonth() <= tilleggOrdinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
+                it.periodeFom.toYearMonth() >= ordinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
+                    it.periodeFom.toYearMonth() <= ordinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
             }!!
 
         assertUtbetalingsperiode(
             gjeldendeUtbetalingsperiode,
             2,
-            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2,
+            ordinærSatsNesteMånedTilTester().beløp * 2,
         )
     }
 }
