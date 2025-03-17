@@ -53,9 +53,7 @@ class KlageService(
     ): UUID {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
-        val klageMottattDato = opprettKlageDto.klageMottattDato ?: (opprettKlageDto.kravMottattDato ?: throw Feil("Klage mottatt-dato ikke satt"))
-
-        return opprettKlage(fagsak, klageMottattDato)
+        return opprettKlage(fagsak, opprettKlageDto.klageMottattDato)
     }
 
     fun opprettKlage(
