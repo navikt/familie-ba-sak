@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltDeltUtvidetIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltUtvidetIPeriode
@@ -494,7 +496,8 @@ private fun ISanityBegrunnelse.validerBrevbegrunnelse(
     barnasFødselsdatoer: List<LocalDate>,
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() && !this.gjelderSatsendring && !this.erAvslagUregistrerteBarnBegrunnelse()) {
-        throw BrevBegrunnelseFeil("Ingen personer på brevbegrunnelse ${this.apiNavn}")
+        logger.warn("Ingen personer på brevbegrunnelse ${this.apiNavn}")
+        throw BrevBegrunnelseFeil("Begrunnelsen ${this.navnISystem} er ikke gyldig for denne perioden. Kontakt team BAKS hvis du mener det er feil.")
     }
 }
 
@@ -528,4 +531,4 @@ fun ISanityBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
 
 class BrevBegrunnelseFeil(
     melding: String,
-) : IllegalStateException(melding)
+) : FunksjonellFeil(melding)
