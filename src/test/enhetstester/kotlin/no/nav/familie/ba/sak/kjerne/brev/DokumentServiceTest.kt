@@ -7,7 +7,6 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -479,7 +478,7 @@ internal class DokumentServiceTest {
             val feilmelding =
                 assertThrows<FunksjonellFeil> {
                     dokumentService.hentBrevForVedtak(vedtakUtenStønadBrev)
-                }.melding
+                }.frontendFeilmelding
 
             assertThat(feilmelding).isEqualTo("Det finnes ikke noe vedtaksbrev.")
         }
@@ -494,11 +493,11 @@ internal class DokumentServiceTest {
 
             // Act && Assert
             val feilmelding =
-                assertThrows<Feil> {
+                assertThrows<FunksjonellFeil> {
                     dokumentService.hentBrevForVedtak(vedtakUtenStønadBrev)
                 }.message
 
-            assertThat(feilmelding).isEqualTo("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtakUtenStønadBrev.id}")
+            assertThat(feilmelding).isEqualTo("Klarte ikke finne vedtaksbrev for vedtak med id ${vedtakUtenStønadBrev.id}. Innlogget bruker har rolle: $rolle")
         }
 
         @Test

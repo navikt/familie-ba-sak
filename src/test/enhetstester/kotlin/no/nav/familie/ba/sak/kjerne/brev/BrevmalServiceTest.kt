@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -42,7 +42,7 @@ internal class BrevmalServiceTest {
         val behandling =
             lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV, resultat = Behandlingsresultat.IKKE_VURDERT)
 
-        assertThrows<Feil> {
+        assertThrows<FunksjonellFeil> {
             brevmalService.hentVedtaksbrevmal(behandling)
         }
     }
