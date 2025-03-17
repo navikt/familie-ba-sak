@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Tidslinje
@@ -216,7 +216,7 @@ internal fun erEndringIKompetanseForPerson(
             forrigeKompetanserForPerson = forrigeKompetanserForPerson,
         )
 
-    return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
+    return endringIKompetanseTidslinje.tilPerioder().any { it.verdi == true }
 }
 
 internal fun erEndringIVilkårsvurderingForPerson(

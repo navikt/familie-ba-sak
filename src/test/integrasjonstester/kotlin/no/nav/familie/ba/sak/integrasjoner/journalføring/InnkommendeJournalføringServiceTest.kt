@@ -59,7 +59,7 @@ class InnkommendeJournalføringServiceTest(
 
         val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
         assertNotNull(behandling)
-        assertEquals(request.nyBehandlingstype, behandling!!.type)
+        assertEquals(request.nyBehandlingstype.tilBehandingType(), behandling!!.type)
         assertEquals(request.nyBehandlingsårsak, behandling.opprettetÅrsak)
 
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)

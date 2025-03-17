@@ -18,8 +18,8 @@ class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationT
 
     @Test
     fun `vilkårsvurdering med EØS-perioder + kompetanser med sekundærland fører til skjemaer med valutakurser`() {
-        val søkerStartdato = 1.jan(2020).tilLocalDate()
-        val barnStartdato = 2.jan(2020).tilLocalDate()
+        val søkerStartdato = 1.jan(2020)
+        val barnStartdato = 2.jan(2020)
 
         val vilkårsvurderingRequest =
             mapOf(

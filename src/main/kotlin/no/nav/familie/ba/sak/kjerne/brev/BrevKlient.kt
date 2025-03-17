@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.internal.TestVerktøyService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
@@ -10,6 +11,7 @@ import no.nav.familie.http.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import java.net.URI
 
@@ -47,6 +49,12 @@ class BrevKlient(
             kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Henter begrunnelsestekst") {
                 postForEntity(uri, begrunnelseData)
             }
+        } catch (exception: HttpClientErrorException.BadRequest) {
+            log.warn("En bad request oppstod ved henting av begrunneelsetekst. Se SecureLogs for detaljer,")
+            secureLogger.warn("En bad request oppstod ved henting av begrunnelsetekst", exception)
+            throw FunksjonellFeil(
+                "Begrunnelsen ${begrunnelseData.apiNavn} passer ikke vedtaksperioden. Hvis du mener dette er feil, ta kontakt med team BAKS.",
+            )
         } catch (e: Exception) {
             secureLogger.info("Kall for å hente begrunnelsetest feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
             throw e

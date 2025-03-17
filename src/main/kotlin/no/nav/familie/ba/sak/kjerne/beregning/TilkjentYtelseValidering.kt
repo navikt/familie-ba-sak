@@ -6,7 +6,9 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
@@ -17,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
@@ -25,15 +29,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.mapVerdi
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.tomTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombiner
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -265,7 +267,7 @@ object TilkjentYtelseValidering {
     ): List<MånedPeriode> {
         val kombinertOverlappTidslinje =
             YtelseType
-                .values()
+                .entries
                 .map { ytelseType ->
                     lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                         andeler = andeler.filter { it.type == ytelseType },
@@ -274,9 +276,9 @@ object TilkjentYtelseValidering {
                 }.kombiner { it.minstEnYtelseHarOverlapp() }
 
         return kombinertOverlappTidslinje
-            .perioder()
-            .filter { it.innhold == true }
-            .map { MånedPeriode(it.fraOgMed.tilYearMonth(), it.tilOgMed.tilYearMonth()) }
+            .tilPerioder()
+            .filter { it.verdi == true }
+            .map { MånedPeriode(it.fom?.toYearMonth() ?: MIN_MÅNED, it.tom?.toYearMonth() ?: MAX_MÅNED) }
     }
 
     internal fun Iterable<Boolean>.minstEnYtelseHarOverlapp(): Boolean = any { it }
@@ -284,9 +286,9 @@ object TilkjentYtelseValidering {
     fun lagErOver100ProsentUtbetalingPåYtelseTidslinje(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
-    ): Tidslinje<Boolean, Måned> {
+    ): Tidslinje<Boolean> {
         if (barnsAndelerFraAndreBehandlinger.isEmpty()) {
-            return emptyList<Periode<Boolean, Måned>>().tilTidslinje()
+            return tomTidslinje()
         }
         val prosenttidslinjerPerBehandling =
             (andeler + barnsAndelerFraAndreBehandlinger)
@@ -296,11 +298,11 @@ object TilkjentYtelseValidering {
 
         val erOver100ProsentTidslinje =
             prosenttidslinjerPerBehandling
-                .fold(emptyList<Periode<BigDecimal, Måned>>().tilTidslinje()) { summertProsentTidslinje, prosentTidslinje ->
+                .fold(tomTidslinje<BigDecimal>()) { summertProsentTidslinje, prosentTidslinje ->
                     summertProsentTidslinje.kombinerMed(prosentTidslinje) { sumProsentForPeriode, prosentForAndel ->
                         (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
                     }
-                }.map { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
+                }.mapVerdi { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
 
         return erOver100ProsentTidslinje
     }
@@ -309,10 +311,10 @@ object TilkjentYtelseValidering {
 private fun List<AndelTilkjentYtelse>.tilProsentAvYtelseUtbetaltTidslinje() =
     this
         .map {
-            månedPeriodeAv(
-                fraOgMed = it.periode.fom,
-                tilOgMed = it.periode.tom,
-                innhold = it.prosent,
+            Periode(
+                verdi = it.prosent,
+                fom = it.periode.fom.førsteDagIInneværendeMåned(),
+                tom = it.periode.tom.sisteDagIInneværendeMåned(),
             )
         }.tilTidslinje()
 

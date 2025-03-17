@@ -20,8 +20,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærFraOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
@@ -242,7 +241,7 @@ fun List<UtfyltKompetanse>.tilTidslinje() =
             )
         }.tilTidslinje()
 
-fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt: MånedTidspunkt): Map<Aktør, List<UtfyltKompetanse>> {
+fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(endringstidspunkt: YearMonth): Map<Aktør, List<UtfyltKompetanse>> {
     val alleBarnAktørIder = this.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
 
     val utfylteKompetanser =
@@ -254,7 +253,7 @@ fun Collection<Kompetanse>.tilUtfylteKompetanserEtterEndringstidpunktPerAktør(e
         utfylteKompetanser
             .filter { it.barnAktører.contains(aktør) }
             .tilTidslinje()
-            .beskjærFraOgMed(endringstidspunkt.tilYearMonth().førsteDagIInneværendeMåned())
+            .beskjærFraOgMed(endringstidspunkt.førsteDagIInneværendeMåned())
             .tilPerioder()
             .mapNotNull { it.verdi }
     }

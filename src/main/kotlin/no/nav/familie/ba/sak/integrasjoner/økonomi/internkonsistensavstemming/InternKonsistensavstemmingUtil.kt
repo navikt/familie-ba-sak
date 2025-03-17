@@ -1,18 +1,19 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming
 
 import no.nav.familie.ba.sak.common.Utils.slåSammen
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.kombinerMed
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import java.math.BigDecimal
 
 fun erForskjellMellomAndelerOgOppdrag(
@@ -76,7 +77,7 @@ private fun Utbetalingsperiode.erIngenPersonerMedTilsvarendeAndelITidsrommet(
 }
 
 private fun Utbetalingsperiode.harTilsvarendeAndelerForPersonOgYtelsetype(
-    andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>,
+    andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal>,
 ): Boolean {
     val erAndelLikUtbetalingTidslinje =
         this
@@ -85,30 +86,27 @@ private fun Utbetalingsperiode.harTilsvarendeAndelerForPersonOgYtelsetype(
                 utbetalingsperiode?.let { utbetalingsperiode == andel }
             }
 
-    return erAndelLikUtbetalingTidslinje.perioder().all { it.innhold != false }
+    return erAndelLikUtbetalingTidslinje.tilPerioder().all { it.verdi != false }
 }
 
-private fun Utbetalingsperiode.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> =
-    tidslinje {
-        listOf(
-            Periode(
-                fraOgMed = this.vedtakdatoFom.tilMånedTidspunkt(),
-                tilOgMed = this.vedtakdatoTom.tilMånedTidspunkt(),
-                innhold = this.sats,
-            ),
-        )
-    }
+private fun Utbetalingsperiode.tilBeløpstidslinje(): Tidslinje<BigDecimal> =
+    listOf(
+        Periode(
+            verdi = this.sats,
+            fom = this.vedtakdatoFom.førsteDagIInneværendeMåned(),
+            tom = this.vedtakdatoTom.sisteDagIMåned(),
+        ),
+    ).tilTidslinje()
 
-private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> =
-    tidslinje {
-        this.map {
+private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecimal> =
+    this
+        .map {
             Periode(
-                fraOgMed = it.stønadFom.tilTidspunkt(),
-                tilOgMed = it.stønadTom.tilTidspunkt(),
-                innhold = it.kalkulertUtbetalingsbeløp.toBigDecimal(),
+                verdi = it.kalkulertUtbetalingsbeløp.toBigDecimal(),
+                fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                tom = it.stønadTom.sisteDagIInneværendeMåned(),
             )
-        }
-    }
+        }.tilTidslinje()
 
 private fun List<Utbetalingsperiode>.tilTidStrenger() = this.map { "${it.vedtakdatoFom.toYearMonth()} til ${it.vedtakdatoTom.toYearMonth()}" }.slåSammen()
 

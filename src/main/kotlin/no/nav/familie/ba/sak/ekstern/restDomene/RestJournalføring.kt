@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.erAlfanummeriskPlussKolon
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Bruker
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -27,6 +27,11 @@ data class RestJournalpostDokument(
     val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
 )
 
+data class TilknyttetBehandling(
+    val behandlingstype: Journalføringsbehandlingstype,
+    val behandlingId: String,
+)
+
 data class RestJournalføring(
     val avsender: NavnOgIdent,
     val bruker: NavnOgIdent,
@@ -36,14 +41,16 @@ data class RestJournalføring(
     val underkategori: BehandlingUnderkategori?,
     val knyttTilFagsak: Boolean,
     val opprettOgKnyttTilNyBehandling: Boolean,
+    val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
     val tilknyttedeBehandlingIder: List<String>,
     val dokumenter: List<RestJournalpostDokument>,
     // Saksbehandler sin ident
     val navIdent: String,
-    val nyBehandlingstype: BehandlingType,
+    val nyBehandlingstype: Journalføringsbehandlingstype,
     val nyBehandlingsårsak: BehandlingÅrsak,
     val fagsakType: FagsakType,
     val institusjon: RestInstitusjon? = null,
+    val fagsakId: Long? = null,
 ) {
     fun oppdaterMedDokumentOgSak(
         sak: Sak,
