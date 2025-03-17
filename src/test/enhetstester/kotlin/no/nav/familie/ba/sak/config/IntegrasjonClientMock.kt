@@ -208,9 +208,10 @@ class IntegrasjonClientMock {
         fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
             harTilgang: Boolean = false,
             slot: MutableList<List<String>> = mutableListOf(),
+            begrunnelse: String? = null,
         ) {
             every { sjekkTilgangTilPersoner(capture(slot)) } answers {
-                firstArg<List<String>>().map { Tilgang(personIdent = it, harTilgang = harTilgang) }
+                firstArg<List<String>>().map { Tilgang(personIdent = it, harTilgang = harTilgang, begrunnelse = begrunnelse) }
             }
         }
 
