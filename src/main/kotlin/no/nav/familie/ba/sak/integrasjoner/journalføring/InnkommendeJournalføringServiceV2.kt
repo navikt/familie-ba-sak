@@ -142,8 +142,8 @@ class InnkommendeJournalføringServiceV2(
 
         if (request.opprettOgKnyttTilNyBehandling) {
             if (kanBehandleKlage && request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
-                val kravMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved journalføring for journalpostId $journalpostId og oppgaveId $oppgaveId. for fagsak ${fagsak.id}")
-                val klagebehandlingId = klageService.opprettKlage(fagsak, kravMottattDato)
+                val klageMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved journalføring for journalpostId $journalpostId og oppgaveId $oppgaveId. for fagsak ${fagsak.id}")
+                val klagebehandlingId = klageService.opprettKlage(fagsak, klageMottattDato)
                 tilknyttedeBehandlinger.add(TilknyttetBehandling(Journalføringsbehandlingstype.KLAGE, klagebehandlingId.toString()))
             } else {
                 val nyBehandling =
@@ -230,8 +230,8 @@ class InnkommendeJournalføringServiceV2(
 
         if (request.opprettOgKnyttTilNyBehandling) {
             if (kanBehandleKlage && request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
-                val kravMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved ferdigstilling av opppgave med oppgaveId $oppgaveId for fagsak ${fagsak.id}")
-                val klagebehandlingId = klageService.opprettKlage(fagsak, kravMottattDato)
+                val klageMottattDato = request.datoMottatt?.toLocalDate() ?: throw Feil("Dato mottatt ikke satt ved ferdigstilling av opppgave med oppgaveId $oppgaveId for fagsak ${fagsak.id}")
+                val klagebehandlingId = klageService.opprettKlage(fagsak, klageMottattDato)
                 tilknyttedeBehandlinger.add(TilknyttetBehandling(Journalføringsbehandlingstype.KLAGE, klagebehandlingId.toString()))
             } else {
                 val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
