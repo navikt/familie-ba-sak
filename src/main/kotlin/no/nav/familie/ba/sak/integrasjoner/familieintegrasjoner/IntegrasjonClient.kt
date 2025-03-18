@@ -577,7 +577,7 @@ class IntegrasjonClient(
         }
     }
 
-    fun settNyAktivBrukerIModiaContext(dto: RestNyAktivBrukerIModiaContext): ModiaContext {
+    fun settNyAktivBrukerIModiaContext(nyAktivBruker: RestNyAktivBrukerIModiaContext): ModiaContext {
         val uri = URI.create("$integrasjonUri/modia-context-holder/sett-aktiv-bruker")
         return kallEksternTjenesteRessurs(
             tjeneste = "modia.context.holder.sett",
@@ -586,7 +586,7 @@ class IntegrasjonClient(
         ) {
             postForEntity(
                 uri = uri,
-                payload = dto,
+                payload = nyAktivBruker,
                 httpHeaders = HttpHeaders().medContentTypeJsonUTF8(),
             )
         }

@@ -35,12 +35,12 @@ class ModiaContextController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun settNyAktivBruker(
-        @RequestBody nyAktivBrukerDto: RestNyAktivBrukerIModiaContext,
+        @RequestBody nyAktivBruker: RestNyAktivBrukerIModiaContext,
     ): ResponseEntity<Ressurs<ModiaContext>> {
         tilgangService.validerTilgangTilPersoner(
-            personIdenter = listOf(nyAktivBrukerDto.personIdent),
+            personIdenter = listOf(nyAktivBruker.personIdent),
             event = AuditLoggerEvent.ACCESS,
         )
-        return ok(success(modiaContextService.settNyAktivBruker(nyAktivBrukerDto)))
+        return ok(success(modiaContextService.settNyAktivBruker(nyAktivBruker)))
     }
 }
