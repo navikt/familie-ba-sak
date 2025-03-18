@@ -1,51 +1,53 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
+import no.nav.familie.tidslinje.TidsEnhet
+import no.nav.familie.tidslinje.tomTidslinje
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class MånedFraMånedsskifteTest {
     @Test
     fun `skal gi tom tidslinje hvis alle dager er inni én måned`() {
-        val daglinje = "aaaaaa".tilCharTidslinje(7.des(2021))
-        val månedtidsline =
-            daglinje
-                .tilMånedFraMånedsskifteIkkeNull { _, _ -> 'b' }
+        val dagTidslinje = "aaaaaa".tilCharTidslinje(7.des(2021))
+        val månedTidslinje = dagTidslinje.tilMånedFraMånedsskifteIkkeNull { _, _ -> 'b' }
 
-        assertEquals(TomTidslinje<Char, Måned>(), månedtidsline)
+        val forventet = tomTidslinje<Char>(1.jan(2022), tidsEnhet = TidsEnhet.MÅNED)
+
+        assertEquals(forventet, månedTidslinje)
     }
 
     @Test
     fun `skal gi én måned ved ett månedsskifte`() {
-        val daglinje = "abcdefg".tilCharTidslinje(28.nov(2021))
-        val månedtidsline =
-            daglinje
+        val dagTidslinje = "abcdefg".tilCharTidslinje(28.nov(2021))
+        val månedTidslinje =
+            dagTidslinje
                 .tilMånedFraMånedsskifteIkkeNull { _, verdiFørsteDagDenneMåned ->
                     verdiFørsteDagDenneMåned
                 }
 
-        assertEquals("d".tilCharTidslinje(des(2021)), månedtidsline)
+        assertEquals("d".tilCharTidslinje(des(2021)).tilMåned { it.single() }, månedTidslinje)
     }
 
     @Test
     fun `skal gi to måneder ved to månedsskifter`() {
-        val daglinje = "abcdefghijklmnopqrstuvwxyzæøå0123456789".tilCharTidslinje(28.nov(2021))
-        val månedtidsline =
-            daglinje
+        val dagTidslinje = "abcdefghijklmnopqrstuvwxyzæøå0123456789".tilCharTidslinje(28.nov(2021))
+        val månedTidslinje =
+            dagTidslinje
                 .tilMånedFraMånedsskifteIkkeNull { verdiSisteDagForrigeMåned, _ ->
                     verdiSisteDagForrigeMåned
                 }
 
-        assertEquals("c4".tilCharTidslinje(des(2021)), månedtidsline)
+        assertEquals("c4".tilCharTidslinje(des(2021)).tilMåned { it.single() }, månedTidslinje)
     }
 
     @Test
     fun `skal gi tom tidslinje hvis månedsskiftet mangler verdi på begge sider`() {
-        val daglinje =
+        val dagTidslinje =
             "abcdefghijklmnopqrstuvwxyzæøå0123456789"
                 .tilCharTidslinje(28.nov(2021))
                 .mapIkkeNull {
@@ -55,16 +57,16 @@ internal class MånedFraMånedsskifteTest {
                     }
                 }
 
-        val månedtidsline =
-            daglinje
-                .tilMånedFraMånedsskifteIkkeNull { _, _ -> 'A' }
+        val månedTidslinje = dagTidslinje.tilMånedFraMånedsskifteIkkeNull { _, _ -> 'A' }
 
-        assertEquals(TomTidslinje<Char, Måned>(), månedtidsline)
+        val forventet = tomTidslinje<Char>(1.feb(2022), tidsEnhet = TidsEnhet.MÅNED)
+
+        assertEquals(forventet, månedTidslinje)
     }
 
     @Test
-    fun `skal gi tom tidslinje hvis månedsskiftet mangler verdi på begge én av sidene`() {
-        val daglinje =
+    fun `skal gi tom tidslinje hvis månedsskiftet mangler verdi på én av sidene`() {
+        val dagTidslinje =
             "abcdefghijklmnopqrstuvwxyzæøå0123456789"
                 .tilCharTidslinje(28.nov(2021))
                 .mapIkkeNull {
@@ -74,10 +76,10 @@ internal class MånedFraMånedsskifteTest {
                     }
                 }
 
-        val månedtidsline =
-            daglinje
-                .tilMånedFraMånedsskifteIkkeNull { _, _ -> 'A' }
+        val månedTidslinje = dagTidslinje.tilMånedFraMånedsskifteIkkeNull { _, _ -> 'A' }
 
-        assertEquals(TomTidslinje<Char, Måned>(), månedtidsline)
+        val forventet = tomTidslinje<Char>(1.feb(2022), tidsEnhet = TidsEnhet.MÅNED)
+
+        assertEquals(forventet, månedTidslinje)
     }
 }

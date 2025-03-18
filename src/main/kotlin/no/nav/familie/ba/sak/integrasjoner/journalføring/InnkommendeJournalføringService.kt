@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
+@Deprecated(message = "Erstattet av InnkommendeJournalføringServiceV2")
 class InnkommendeJournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,

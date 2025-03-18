@@ -1,13 +1,16 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.slåSammenLikePerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -57,17 +60,17 @@ fun List<AndelTilkjentYtelse>.tilRestYtelsePerioder(): List<RestYtelsePeriode> {
             .mapValues { (_, andelerTilkjentYtelse) ->
                 andelerTilkjentYtelse
                     .tilRestYtelsePeriodeUtenDatoerTidslinje()
-                    .slåSammenLike()
+                    .slåSammenLikePerioder()
             }
 
     return restYtelsePeriodeTidslinjePerAktørOgTypeSlåttSammen
-        .flatMap { (_, andelerTidslinje) -> andelerTidslinje.perioder() }
-        .mapNotNull { periode ->
-            periode.innhold?.let { innhold ->
+        .flatMap { (_, andelerTidslinje) -> andelerTidslinje.tilPerioderIkkeNull() }
+        .map { periode ->
+            periode.verdi.let { innhold ->
                 RestYtelsePeriode(
                     beløp = innhold.kalkulertUtbetalingsbeløp,
-                    stønadFom = periode.fraOgMed.tilYearMonth(),
-                    stønadTom = periode.tilOgMed.tilYearMonth(),
+                    stønadFom = periode.fom?.toYearMonth() ?: throw Feil("Fra og med-dato kan ikke være null"),
+                    stønadTom = periode.tom?.toYearMonth() ?: throw Feil("Til og med-dato kan ikke være null"),
                     ytelseType = innhold.ytelseType,
                     skalUtbetales = innhold.skalUtbetales,
                 )
@@ -84,10 +87,10 @@ data class RestYtelsePeriodeUtenDatoer(
 private fun List<AndelTilkjentYtelse>.tilRestYtelsePeriodeUtenDatoerTidslinje() =
     this
         .map {
-            månedPeriodeAv(
-                fraOgMed = it.stønadFom,
-                tilOgMed = it.stønadTom,
-                innhold =
+            Periode(
+                fom = it.stønadFom.førsteDagIInneværendeMåned(),
+                tom = it.stønadTom.sisteDagIInneværendeMåned(),
+                verdi =
                     RestYtelsePeriodeUtenDatoer(
                         kalkulertUtbetalingsbeløp = it.kalkulertUtbetalingsbeløp,
                         ytelseType = it.type,

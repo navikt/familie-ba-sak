@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -27,7 +29,9 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalføringController(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
+    private val innkommendeJournalføringServiceV2: InnkommendeJournalføringServiceV2,
     private val tilgangService: TilgangService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(
@@ -88,7 +92,12 @@ class JournalføringController(
         }
 
         val fagsakId =
-            innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+            if (unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false)) {
+                innkommendeJournalføringServiceV2.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+            } else {
+                innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+            }
+
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
     }
 }

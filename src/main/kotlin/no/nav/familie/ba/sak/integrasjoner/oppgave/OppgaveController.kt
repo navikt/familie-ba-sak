@@ -4,10 +4,13 @@ import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringService
+import no.nav.familie.ba.sak.integrasjoner.journalføring.InnkommendeJournalføringServiceV2
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DataForManuellJournalføring
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.RestFinnOppgaveRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -43,7 +46,9 @@ class OppgaveController(
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
+    private val innkommendeJournalføringServiceV2: InnkommendeJournalføringServiceV2,
     private val klageService: KlageService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     private val logger = LoggerFactory.getLogger(OppgaveController::class.java)
 
@@ -162,7 +167,12 @@ class OppgaveController(
         // Validerer at oppgave med gitt oppgaveId eksisterer
         oppgaveService.hentOppgave(oppgaveId)
 
-        val fagsakId = innkommendeJournalføringService.knyttJournalpostTilFagsakOgFerdigstillOppgave(request, oppgaveId)
+        val fagsakId =
+            if (unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false)) {
+                innkommendeJournalføringServiceV2.knyttJournalpostTilFagsakOgFerdigstillOppgave(request, oppgaveId)
+            } else {
+                innkommendeJournalføringService.knyttJournalpostTilFagsakOgFerdigstillOppgave(request, oppgaveId)
+            }
 
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Oppgaven $oppgaveId er lukket"))
     }

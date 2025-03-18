@@ -23,10 +23,10 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250311132904_6ee7728</prosessering.version>
-        <felles.version>3.20250305123143_5e4f8ca</felles.version>
+        <prosessering.version>2.20250317081900_f756677</prosessering.version>
+        <felles.version>3.20250312114810_5371990</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20230214104704_706e9c0</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250311122636_1d65715</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20250317084213_0b7e8b1</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20230214104704_706e9c0</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20241209130157_6873c2d</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250306084157_636f980</utbetalingsgenerator.version>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>5.0.19</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.5</springdoc.version>
-        <sentry.version>8.3.0</sentry.version>
+        <sentry.version>8.4.0</sentry.version>
         <kotlinx.version>1.10.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -47,7 +47,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.6</testcontainers.postgresql.version>
-        <unleash.version>10.1.1</unleash.version>
+        <unleash.version>10.2.0</unleash.version>
         <testcontainers.postgresql.version>1.20.6</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>

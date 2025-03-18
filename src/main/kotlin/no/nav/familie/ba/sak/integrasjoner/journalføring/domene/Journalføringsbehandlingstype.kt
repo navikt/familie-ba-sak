@@ -21,4 +21,16 @@ enum class Journalføringsbehandlingstype {
             KLAGE -> throw Feil("Klage finnes ikke i ${BehandlingType::class.simpleName}. Behandles i ekstern applikasjon.")
             TILBAKEKREVING -> throw Feil("Tilbakekreving finnes ikke i ${BehandlingType::class.simpleName}. Behandles i ekstern applikasjon.")
         }
+
+    fun skalBehandlesIEksternApplikasjon() = this == KLAGE || this == TILBAKEKREVING
+
+    fun tilVisningsnavn(): String =
+        when (this) {
+            FØRSTEGANGSBEHANDLING -> BehandlingType.FØRSTEGANGSBEHANDLING.visningsnavn
+            REVURDERING -> BehandlingType.REVURDERING.visningsnavn
+            MIGRERING_FRA_INFOTRYGD -> BehandlingType.MIGRERING_FRA_INFOTRYGD.visningsnavn
+            TEKNISK_ENDRING -> BehandlingType.TEKNISK_ENDRING.visningsnavn
+            KLAGE -> "Klage"
+            TILBAKEKREVING -> "Tilbakekreving"
+        }
 }

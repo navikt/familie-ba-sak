@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated(message = "Erstattet av JournalføringMetrikkV2")
 class JournalføringMetrikk {
     private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
 
