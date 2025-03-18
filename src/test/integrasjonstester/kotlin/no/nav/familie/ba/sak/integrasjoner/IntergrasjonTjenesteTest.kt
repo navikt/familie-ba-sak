@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -39,7 +40,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
-import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContextNyAktivBrukerDto
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs

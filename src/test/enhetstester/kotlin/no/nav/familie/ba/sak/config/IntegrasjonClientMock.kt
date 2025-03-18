@@ -10,6 +10,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -17,7 +18,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
-import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContextNyAktivBrukerDto
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType

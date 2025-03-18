@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.modiacontext
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

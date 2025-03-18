@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.modiacontext
 
+import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import org.springframework.stereotype.Service
 

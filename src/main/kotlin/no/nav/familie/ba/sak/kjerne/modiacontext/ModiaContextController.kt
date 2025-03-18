@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.modiacontext
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
