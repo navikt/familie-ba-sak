@@ -1,4 +1,4 @@
-create table PATCHET_ANDEL_TILKJENT_YTELSE
+CREATE TABLE IF NOT EXISTS PATCHET_ANDEL_TILKJENT_YTELSE
 (
     id                              bigint primary key,
     behandling_id                   bigint                              not null,
