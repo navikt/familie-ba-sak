@@ -10,7 +10,7 @@ import io.mockk.runs
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
 import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
-import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -193,7 +193,7 @@ class IntegrasjonClientMock {
             }
 
             every { mockIntegrasjonClient.settNyAktivBrukerIModiaContext(any()) } answers {
-                val aktivBruker = firstArg<ModiaContextNyAktivBrukerDto>().personIdent
+                val aktivBruker = firstArg<RestNyAktivBrukerIModiaContext>().personIdent
                 ModiaContext(
                     aktivBruker = aktivBruker,
                     aktivEnhet = "0000",

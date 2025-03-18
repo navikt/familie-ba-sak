@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.ekstern.restDomene.ModiaContextNyAktivBrukerDto
+import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -540,7 +540,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     .willReturn(okJson(modiaContextResponse { success(it) })),
             )
 
-        val modiaContext = integrasjonClient.settNyAktivBrukerIModiaContext(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
+        val modiaContext = integrasjonClient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
 
         assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
     }
@@ -581,7 +581,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         val exception =
             assertThrows<RessursException> {
-                integrasjonClient.settNyAktivBrukerIModiaContext(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
+                integrasjonClient.settNyAktivBrukerIModiaContext(RestNyAktivBrukerIModiaContext(personIdent = "13025514402"))
             }
 
         assertThat(exception.message).contains("modia-context-holder")
@@ -602,7 +602,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     private fun modiaContextRequest() =
         equalToJson(
             objectMapper.writeValueAsString(
-                ModiaContextNyAktivBrukerDto(personIdent = "13025514402"),
+                RestNyAktivBrukerIModiaContext(personIdent = "13025514402"),
             ),
         )
 
