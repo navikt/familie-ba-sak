@@ -1,0 +1,1 @@
+ALTER TABLE forenklet_tilbakekrevingsvedtak ADD COLUMN vedtak_pdf bytea;

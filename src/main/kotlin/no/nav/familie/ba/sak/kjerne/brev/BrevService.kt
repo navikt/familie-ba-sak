@@ -30,6 +30,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.DødsfallData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EtterbetalingInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FeilutbetaltValuta
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForenkletTilbakekrevingsvedtakBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForenkletTilbakekrevingsvedtakBrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
@@ -42,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørtSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsAvklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsUavklart
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
@@ -64,6 +67,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -293,7 +297,7 @@ class BrevService(
     }
 
     fun hentDødsfallbrevData(vedtak: Vedtak): Brev =
-        hentGrunnlagOgSignaturData(vedtak).let { data ->
+        hentGrunnlagOgSignaturData(vedtak.behandling).let { data ->
             Dødsfall(
                 data =
                     DødsfallData(
@@ -328,7 +332,7 @@ class BrevService(
         }
 
     fun hentKorreksjonbrevData(vedtak: Vedtak): Brev =
-        hentGrunnlagOgSignaturData(vedtak).let { data ->
+        hentGrunnlagOgSignaturData(vedtak.behandling).let { data ->
             KorreksjonVedtaksbrev(
                 data =
                     KorreksjonVedtaksbrevData(
@@ -431,7 +435,7 @@ class BrevService(
             )
         }
 
-        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak.behandling)
 
         val behandlingId = vedtak.behandling.id
 
@@ -444,13 +448,13 @@ class BrevService(
                         landkoder = integrasjonClient.hentLandkoderISO2(),
                     )
                 } catch (e: BrevBegrunnelseFeil) {
-                    secureLogger.info(
+                    secureLogger.warn(
                         "Brevbegrunnelsefeil for behandling $behandlingId, " +
                             "fagsak ${vedtak.behandling.fagsak.id} " +
                             "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
                             "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
                     )
-                    throw IllegalStateException(e.message, e)
+                    throw e
                 }
             }
 
@@ -491,7 +495,7 @@ class BrevService(
         vedtak: Vedtak,
         sammensattKontrollsak: SammensattKontrollsak,
     ): VedtakFellesfelterSammensattKontrollsak {
-        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak.behandling)
 
         val organisasjonsnummer =
             vedtak.behandling.fagsak.institusjon
@@ -534,14 +538,14 @@ class BrevService(
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean = simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
 
-    private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
-        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
+    private fun hentGrunnlagOgSignaturData(behandling: Behandling): GrunnlagOgSignaturData {
+        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(behandling.id)
         val (saksbehandler, beslutter) =
             hentSaksbehandlerOgBeslutter(
-                behandling = vedtak.behandling,
-                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id),
+                behandling = behandling,
+                totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id),
             )
-        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(vedtak.behandling.id).behandlendeEnhetNavn
+        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).behandlendeEnhetNavn
         return GrunnlagOgSignaturData(
             grunnlag = personopplysningGrunnlag,
             saksbehandler = saksbehandler,
@@ -622,6 +626,41 @@ class BrevService(
                 throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
             }
         }
+
+    fun hentBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak: ForenkletTilbakekrevingsvedtak): ForenkletTilbakekrevingsvedtakBrev {
+        val behandling = forenkletTilbakekrevingsvedtak.behandling
+        val fagsak = behandling.fagsak
+
+        val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(behandling)
+
+        val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
+        val navn = grunnlagOgSignaturData.grunnlag.søker.navn
+        val enhet = grunnlagOgSignaturData.enhet
+
+        val signatur = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+
+        return ForenkletTilbakekrevingsvedtakBrev(
+            data =
+                ForenkletTilbakekrevingsvedtakBrevData(
+                    delmalData =
+                        ForenkletTilbakekrevingsvedtakBrevData.DelmalData(
+                            signatur =
+                                SignaturDelmal(
+                                    enhet,
+                                    signatur,
+                                ),
+                        ),
+                    flettefelter =
+                        ForenkletTilbakekrevingsvedtakBrevData.Flettefelter(
+                            navn = navn,
+                            fodselsnummer = mottakerIdent,
+                            brevOpprettetDato = LocalDate.now(),
+                            forenkletTilbakekrevingsvedtakTekst = forenkletTilbakekrevingsvedtak.fritekst,
+                        ),
+                ),
+            mal = Brevmal.FORENKLET_TILBAKEKREVINGSVEDTAK,
+        )
+    }
 
     private data class GrunnlagOgSignaturData(
         val grunnlag: PersonopplysningGrunnlag,

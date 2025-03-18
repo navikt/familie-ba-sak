@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelForVedtaksbegrunnelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilAndelForVedtaksperiodeTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
@@ -193,12 +194,16 @@ enum class YtelseType(
         person: Person,
         ytelseDato: LocalDate,
     ) = when (this) {
-        ORDINÆR_BARNETRYGD ->
-            if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
+        ORDINÆR_BARNETRYGD -> {
+            val sisteSatsdatoForTilleggsOrba = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).gyldigTom
+            if (ytelseDato.isAfter(sisteSatsdatoForTilleggsOrba)) {
+                SatsType.ORBA
+            } else if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
                 SatsType.TILLEGG_ORBA
             } else {
                 SatsType.ORBA
             }
+        }
 
         UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
         SMÅBARNSTILLEGG -> SatsType.SMA

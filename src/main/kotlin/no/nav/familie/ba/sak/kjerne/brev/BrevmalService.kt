@@ -23,7 +23,7 @@ class BrevmalService(
 
     fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
         if (behandling.resultat == Behandlingsresultat.IKKE_VURDERT) {
-            throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
+            throw FunksjonellFeil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
         }
 
         val brevmal =

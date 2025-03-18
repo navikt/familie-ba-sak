@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.context.annotation.Lazy
@@ -58,7 +59,7 @@ class DokumentGenereringService(
             secureLogger.info("Feil ved dokumentgenerering. Genererer hentVedtaksperioderTest \n ${testVerktøyService.hentVedtaksperioderTest(vedtak.behandling.id)}")
 
             throw Feil(
-                message = "Klarte ikke generere vedtaksbrev på behandling ${vedtak.behandling}: ${feil.message}",
+                message = "Klarte ikke generere vedtaksbrev på fagsak/behandling ${vedtak.behandling.fagsak.id}/${vedtak.behandling.id}: ${feil.message}",
                 frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
                 throwable = feil,
@@ -96,6 +97,13 @@ class DokumentGenereringService(
                 throwable = exception,
             )
         }
+    }
+
+    fun genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak: ForenkletTilbakekrevingsvedtak): ByteArray {
+        val målform = persongrunnlagService.hentSøkersMålform(behandlingId = forenkletTilbakekrevingsvedtak.behandling.id)
+        val brev = brevService.hentBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak)
+
+        return brevKlient.genererBrev(målform.tilSanityFormat(), brev)
     }
 
     private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String =
