@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
+import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.ArbeidsforholdRequest
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
+import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
@@ -572,6 +574,32 @@ class IntegrasjonClient(
             formål = "Hent distribusjonskanal for bruker/mottaker",
         ) {
             postForEntity(uri, request)
+        }
+    }
+
+    fun settNyAktivBrukerIModiaContext(nyAktivBruker: RestNyAktivBrukerIModiaContext): ModiaContext {
+        val uri = URI.create("$integrasjonUri/modia-context-holder/sett-aktiv-bruker")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "modia.context.holder.sett",
+            uri = uri,
+            formål = "Oppdatere aktiv bruker i Modia-kontekst for innlogget saksbehandler",
+        ) {
+            postForEntity(
+                uri = uri,
+                payload = nyAktivBruker,
+                httpHeaders = HttpHeaders().medContentTypeJsonUTF8(),
+            )
+        }
+    }
+
+    fun hentModiaContext(): ModiaContext {
+        val uri = URI.create("$integrasjonUri/modia-context-holder")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "modia.context.holder.hent",
+            uri = uri,
+            formål = "Hente Modia-kontekst for innlogget saksbehandler",
+        ) {
+            getForEntity(uri)
         }
     }
 
