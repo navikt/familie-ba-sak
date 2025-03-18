@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.tidslinje.Tidslinje
 
 /**

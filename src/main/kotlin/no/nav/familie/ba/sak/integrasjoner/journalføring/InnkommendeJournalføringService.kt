@@ -38,6 +38,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Service
+@Deprecated(message = "Erstattet av InnkommendeJournalføringServiceV2")
 class InnkommendeJournalføringService(
     private val integrasjonClient: IntegrasjonClient,
     private val fagsakService: FagsakService,
@@ -128,7 +129,7 @@ class InnkommendeJournalføringService(
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
                     navIdent = request.navIdent,
-                    type = request.nyBehandlingstype,
+                    type = request.nyBehandlingstype.tilBehandingType(),
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
@@ -186,7 +187,7 @@ class InnkommendeJournalføringService(
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,
                     navIdent = request.navIdent,
-                    type = request.nyBehandlingstype,
+                    type = request.nyBehandlingstype.tilBehandingType(),
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,

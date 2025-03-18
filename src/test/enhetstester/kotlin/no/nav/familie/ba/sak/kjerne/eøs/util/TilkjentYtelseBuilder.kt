@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder18ÅrVilkårTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erUnder6ÅrTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.filtrerMed
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.tilCharTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erUnder18ÅrVilkårTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erUnder6ÅrTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.filtrerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.beskjærEtter
 import no.nav.familie.tidslinje.mapVerdi

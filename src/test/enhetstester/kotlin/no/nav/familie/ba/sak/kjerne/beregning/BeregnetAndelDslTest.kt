@@ -6,9 +6,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
 import no.nav.familie.ba.sak.kjerne.eøs.util.død
 import no.nav.familie.ba.sak.kjerne.eøs.util.født
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.aug
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.des
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal

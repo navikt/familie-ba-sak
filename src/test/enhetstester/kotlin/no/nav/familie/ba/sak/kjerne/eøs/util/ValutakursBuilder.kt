@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Vurderingsform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import java.time.YearMonth
 
 class ValutakursBuilder(

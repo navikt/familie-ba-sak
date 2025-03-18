@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassValutakurserTilUtenlandskePeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth

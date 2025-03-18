@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
@@ -60,7 +61,6 @@ import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalin
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -253,7 +253,7 @@ class BrevService(
             val endringstidspunkt = finnStarttidspunktForUtbetalingstabell(behandling = vedtak.behandling)
             val landkoder = integrasjonClient.hentLandkoderISO2()
             val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandlingId)
-            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.tilMånedTidspunkt(), landkoder, kompetanser)
+            return hentLandOgStartdatoForUtbetalingstabell(endringstidspunkt.toYearMonth(), landkoder, kompetanser)
         }
     }
 
@@ -444,13 +444,13 @@ class BrevService(
                         landkoder = integrasjonClient.hentLandkoderISO2(),
                     )
                 } catch (e: BrevBegrunnelseFeil) {
-                    secureLogger.info(
+                    secureLogger.warn(
                         "Brevbegrunnelsefeil for behandling $behandlingId, " +
                             "fagsak ${vedtak.behandling.fagsak.id} " +
                             "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
                             "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
                     )
-                    throw IllegalStateException(e.message, e)
+                    throw e
                 }
             }
 

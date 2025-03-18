@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull

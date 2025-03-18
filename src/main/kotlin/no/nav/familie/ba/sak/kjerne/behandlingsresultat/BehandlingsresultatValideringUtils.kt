@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgTyp
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.beskjærTilOgMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.outerJoin

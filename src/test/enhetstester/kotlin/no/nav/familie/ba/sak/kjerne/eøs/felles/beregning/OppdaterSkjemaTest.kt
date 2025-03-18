@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Test
 
 internal class OppdaterSkjemaTest {

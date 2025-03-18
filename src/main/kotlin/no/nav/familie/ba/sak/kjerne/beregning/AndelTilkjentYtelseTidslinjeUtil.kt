@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.erTilogMed3ÅrTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.komposisjon.joinIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.erTilogMed3ÅrTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje

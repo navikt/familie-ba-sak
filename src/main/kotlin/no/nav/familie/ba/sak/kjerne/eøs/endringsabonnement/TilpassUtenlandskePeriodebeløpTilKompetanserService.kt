@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.utbetalingsland
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinjefamiliefelles.transformasjon.forlengFremtidTilUendelig
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forlengFremtidTilUendelig
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.outerJoin
