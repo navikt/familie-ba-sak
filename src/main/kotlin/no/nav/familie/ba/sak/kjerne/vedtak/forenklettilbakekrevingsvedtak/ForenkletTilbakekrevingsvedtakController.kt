@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
 
+import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -101,8 +102,9 @@ class ForenkletTilbakekrevingsvedtakController(
         return ResponseEntity.ok(Ressurs.success("ForenkletTilbakekrevingsvedtak for behandling=$behandlingId slettet OK."))
     }
 
+    @Operation(summary = "Henter eksisterende forenklet tilbakekrevingsvedtak pdf.")
     @GetMapping(
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_PDF_VALUE],
         path = ["/pdf"],
     )
     fun hentForenkletTilbakekrevingsvedtakPdf(
@@ -112,19 +114,17 @@ class ForenkletTilbakekrevingsvedtakController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Hent ForenkletTilbakekrevingsvedtak pdf",
         )
-        val forenkletTilbakekrevingsvedtak =
-            forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandlingId = behandlingId)
-                ?: throw FunksjonellFeil("Det er ikke opprettet forenklet tilbakekrevingsvedtak for behandling $behandlingId.")
 
         val vedtakPdf =
-            forenkletTilbakekrevingsvedtak.vedtakPdf
+            forenkletTilbakekrevingsvedtakService.hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId = behandlingId).vedtakPdf
                 ?: throw FunksjonellFeil("Det har ikke blitt opprettet forenklet tilbakekrevingsvedtak pdf for behandling $behandlingId")
 
         return Ressurs.success(vedtakPdf)
     }
 
+    @Operation(summary = "Oppretter og henter forenklet tilbakekrevingsvedtak pdf.")
     @PostMapping(
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_PDF_VALUE],
         path = ["/pdf"],
     )
     fun opprettOgHentForenkletTilbakekrevingsvedtakPdf(

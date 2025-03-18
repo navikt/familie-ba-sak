@@ -80,7 +80,7 @@ class ForenkletTilbakekrevingsvedtakService(
         return forenkletTilbakekrevingsvedtak
     }
 
-    private fun hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId: Long): ForenkletTilbakekrevingsvedtak =
+    fun hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId: Long): ForenkletTilbakekrevingsvedtak =
         finnForenkletTilbakekrevingsvedtak(behandlingId)
             ?: throw FunksjonellFeil("Forenklet tilbakekrevingsvedtak finnes ikke for behandling $behandlingId. Oppdater fanen og prøv igjen.")
 
