@@ -547,7 +547,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
-    fun `skal kaste IntegrasjonException ved henting av ModiaContext`() {
+    fun `skal kaste RessursException ved henting av ModiaContext`() {
         wireMockServer
             .stubFor(
                 get("/api/modia-context-holder")
@@ -567,7 +567,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
     @Test
     @Tag("integration")
-    fun `skal kaste IntegrasjonException ved oppdatering av ModiaContext`() {
+    fun `skal kaste RessursException ved oppdatering av ModiaContext`() {
         wireMockServer
             .stubFor(
                 post("/api/modia-context-holder/sett-aktiv-bruker")
