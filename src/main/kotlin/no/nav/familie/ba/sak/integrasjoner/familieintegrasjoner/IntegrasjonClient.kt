@@ -577,7 +577,7 @@ class IntegrasjonClient(
         }
     }
 
-    fun settNyAktivBruker(dto: ModiaContextNyAktivBrukerDto): ModiaContext {
+    fun settNyAktivBrukerIModiaContext(dto: ModiaContextNyAktivBrukerDto): ModiaContext {
         val uri = URI.create("$integrasjonUri/modia-context-holder/sett-aktiv-bruker")
         return kallEksternTjenesteRessurs(
             tjeneste = "modia.context.holder.sett",

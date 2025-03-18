@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 class ModiaContextService(
     private val integrasjonClient: IntegrasjonClient,
 ) {
-    fun settNyAktivBruker(nyAktivBrukerDto: ModiaContextNyAktivBrukerDto): ModiaContext = integrasjonClient.settNyAktivBruker(nyAktivBrukerDto)
+    fun settNyAktivBruker(nyAktivBrukerDto: ModiaContextNyAktivBrukerDto): ModiaContext = integrasjonClient.settNyAktivBrukerIModiaContext(nyAktivBrukerDto)
 
     fun hentContext(): ModiaContext = integrasjonClient.hentModiaContext()
 }

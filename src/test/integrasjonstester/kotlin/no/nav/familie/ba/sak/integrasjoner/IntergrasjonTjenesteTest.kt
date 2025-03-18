@@ -540,7 +540,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     .willReturn(okJson(modiaContextResponse { success(it) })),
             )
 
-        val modiaContext = integrasjonClient.settNyAktivBruker(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
+        val modiaContext = integrasjonClient.settNyAktivBrukerIModiaContext(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
 
         assertThat(modiaContext.aktivBruker).isEqualTo("13025514402")
     }
@@ -581,7 +581,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         val exception =
             assertThrows<RessursException> {
-                integrasjonClient.settNyAktivBruker(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
+                integrasjonClient.settNyAktivBrukerIModiaContext(ModiaContextNyAktivBrukerDto(personIdent = "13025514402"))
             }
 
         assertThat(exception.message).contains("modia-context-holder")

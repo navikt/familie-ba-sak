@@ -192,7 +192,7 @@ class IntegrasjonClientMock {
                 )
             }
 
-            every { mockIntegrasjonClient.settNyAktivBruker(any()) } answers {
+            every { mockIntegrasjonClient.settNyAktivBrukerIModiaContext(any()) } answers {
                 val aktivBruker = firstArg<ModiaContextNyAktivBrukerDto>().personIdent
                 ModiaContext(
                     aktivBruker = aktivBruker,
