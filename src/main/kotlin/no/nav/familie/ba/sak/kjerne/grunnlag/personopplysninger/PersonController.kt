@@ -39,24 +39,6 @@ class PersonController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilgangService: TilgangService,
 ) {
-    @GetMapping
-    @Deprecated("Slettes etter overgang til POST endepunkter m/ requestbody")
-    fun hentPerson(
-        @RequestHeader personIdent: String,
-        @Valid
-        @RequestBody personIdentBody: PersonIdent?,
-    ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        // Valider personIdent
-        Fødselsnummer(personIdent)
-        val aktør = personidentService.hentAktør(personIdent)
-        val personinfo =
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
-                ?: personopplysningerService
-                    .hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
-                    .tilRestPersonInfo(personIdent)
-        return ResponseEntity.ok(Ressurs.success(personinfo))
-    }
-
     @PostMapping
     fun hentPerson(
         @Valid @RequestBody personIdentDto: PersonIdent,
@@ -71,25 +53,6 @@ class PersonController(
             familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
                 ?: personopplysningerService
                     .hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
-                    .tilRestPersonInfo(personIdent)
-        return ResponseEntity.ok(Ressurs.success(personinfo))
-    }
-
-    @GetMapping(path = ["/enkel"])
-    @Deprecated("Slettes etter overgang til POST endepunkter m/ requestbody")
-    fun hentPersonEnkel(
-        @RequestHeader personIdent: String,
-        @Valid
-        @RequestBody personIdentBody: PersonIdent?,
-    ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        // Valider personIdent
-        Fødselsnummer(personIdent)
-
-        val aktør = personidentService.hentAktør(personIdent)
-        val personinfo =
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
-                ?: personopplysningerService
-                    .hentPersoninfoEnkel(aktør)
                     .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
@@ -109,23 +72,6 @@ class PersonController(
                 ?: personopplysningerService
                     .hentPersoninfoEnkel(aktør)
                     .tilRestPersonInfo(personIdent)
-        return ResponseEntity.ok(Ressurs.success(personinfo))
-    }
-
-    @GetMapping(path = ["/adresse"])
-    @Deprecated("Slettes etter overgang til POST endepunkter m/ requestbody")
-    fun hentPersonAdresse(
-        @RequestHeader personIdent: String,
-    ): ResponseEntity<Ressurs<RestPersonInfo>> {
-        // For validering
-        Fødselsnummer(personIdent)
-
-        val aktør = personidentService.hentAktør(personIdent)
-        val personinfo =
-            familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
-                ?: personopplysningerService
-                    .hentPersoninfoNavnOgAdresse(aktør)
-                    .tilRestPersonInfoMedNavnOgAdresse(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 
