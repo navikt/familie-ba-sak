@@ -70,10 +70,10 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang. Mangler tilgang til: $adressebeskyttelsegraderingEllerNavAnsatt.",
+                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang. Mangler tilgang til: $adressebeskyttelsegraderingEllerNavAnsatt.",
+                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -119,8 +119,8 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til behandling=$behandlingId. Mangler tilgang til: $adressebeskyttelsegraderingEllerNavAnsatt.",
-                frontendFeilmelding = "Behandlingen inneholder personer som krever ytterligere tilganger. For å kunne se behandlingen kreves tilgang til: $adressebeskyttelsegraderingEllerNavAnsatt.",
+                        "har ikke tilgang til behandling=$behandlingId. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                frontendFeilmelding = "Behandlingen inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -154,9 +154,9 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til fagsak=$fagsakId. Mangler tilgang til: $adressebeskyttelsegraderingEllerNavAnsatt.",
+                        "har ikke tilgang til fagsak=$fagsakId. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding =
-                    "Fagsaken inneholder personer som krever ytterligere tilganger. For å kunne se fagsaken kreves tilgang til: $adressebeskyttelsegraderingEllerNavAnsatt.",
+                    "Fagsaken inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
