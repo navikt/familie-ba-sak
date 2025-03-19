@@ -26,3 +26,10 @@ data class SimuleringsPeriode(
     val feilutbetaling: BigDecimal,
     val etterbetaling: BigDecimal,
 )
+
+data class AvregningPeriode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val etterbetaling: BigDecimal,
+    val feilutbetaling: BigDecimal,
+)
