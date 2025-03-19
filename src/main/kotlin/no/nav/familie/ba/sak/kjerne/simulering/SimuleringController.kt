@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.domene.Simulering
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -21,7 +21,7 @@ class SimuleringController(
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestSimulering>> {
+    ): ResponseEntity<Ressurs<Simulering>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering =
