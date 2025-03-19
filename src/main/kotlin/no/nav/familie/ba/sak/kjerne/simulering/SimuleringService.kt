@@ -93,6 +93,7 @@ class SimuleringService(
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> = økonomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
 
+    @Transactional
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val behandlingErFerdigBesluttet =
