@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -24,8 +26,13 @@ class AvregningService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val clockProvider: ClockProvider,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     fun hentPerioderMedAvregning(behandlingId: Long): List<AvregningPeriode> {
+        if (!unleashService.isEnabled(BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING)) {
+            return emptyList()
+        }
+
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
