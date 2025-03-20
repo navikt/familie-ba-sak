@@ -27,7 +27,7 @@ class TilgangControllerTest(
                 PersonInfo(fødselsdato = LocalDate.now(), adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG),
             )
         every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(setOf(fnr))
         } answers { firstArg<List<String>>().map { Tilgang(it, true) } }
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))

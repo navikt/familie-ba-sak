@@ -30,11 +30,11 @@ class FamilieIntegrasjonerTilgangskontrollService(
         }
     }
 
-    fun sjekkTilgangTilPerson(personIdent: String): Tilgang = sjekkTilgangTilPersoner(listOf(personIdent)).values.single()
+    fun sjekkTilgangTilPerson(personIdent: String): Tilgang = sjekkTilgangTilPersoner(listOf(personIdent)).single()
 
-    fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> =
-        cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
+    fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> =
+        cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter.toSortedSet()) {
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it)
         }
 
     fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {

@@ -84,7 +84,6 @@ class TilgangService(
     private fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> =
         familieIntegrasjonerTilgangskontrollService
             .sjekkTilgangTilPersoner(personIdenter)
-            .map { it.value }
 
     fun validerTilgangTilBehandling(
         behandlingId: Long,
