@@ -323,10 +323,12 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     val begrunnelserPerPerson =
         vedtaksperiode.hentGyldigeBegrunnelserPerPerson(grunnlagForBegrunnelse).values.flatten()
 
+    val begrunnelserPerPersonSomPasserVedtaksperiode = begrunnelserPerPerson.filter { it.vedtakBegrunnelseType in vedtaksperiode.type.tillatteBegrunnelsestyper }
+
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = vedtaksperiode.id,
-        standardbegrunnelserFraFrontend = begrunnelserPerPerson.filterIsInstance<Standardbegrunnelse>(),
-        eøsStandardbegrunnelserFraFrontend = begrunnelserPerPerson.filterIsInstance<EØSStandardbegrunnelse>(),
+        standardbegrunnelserFraFrontend = begrunnelserPerPersonSomPasserVedtaksperiode.filterIsInstance<Standardbegrunnelse>().take(5),
+        eøsStandardbegrunnelserFraFrontend = begrunnelserPerPersonSomPasserVedtaksperiode.filterIsInstance<EØSStandardbegrunnelse>().take(5),
     )
 }
 
