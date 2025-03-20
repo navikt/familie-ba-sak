@@ -476,7 +476,7 @@ class AvregningServiceTest {
         }
 
         @Test
-        fun `skal returnere to perioder hvis det er forskjellig etterbetaling`() {
+        fun `skal returnere to perioder hvis det er etterbetalingen endres i utbetalingsperioden`() {
             // Arrange
             val andelerForrigeBehandling =
                 listOf(
