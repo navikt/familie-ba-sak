@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class SimuleringController(
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
+    private val avregningService: AvregningService,
 ) {
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
@@ -24,10 +26,13 @@ class SimuleringController(
     ): ResponseEntity<Ressurs<RestSimulering>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
-        val restSimulering =
+        val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
+        val simulering =
             vedtakSimuleringMottakereTilRestSimulering(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
+
+        val restSimulering = simulering.tilRestSimulering(avregningsperioder)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 }
