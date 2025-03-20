@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.stereotype.Service
 
 @Service
@@ -62,14 +64,16 @@ class TilgangService(
         event: AuditLoggerEvent,
     ) {
         personIdenter.forEach { auditLogger.log(Sporingsdata(event, it)) }
-        if (!harTilgangTilPersoner(personIdenter)) {
+        val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
+        if (!harTilgangTilAllePersoner(tilgangerTilPersoner)) {
+            val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang.",
+                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til $personIdenter",
+                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -77,10 +81,10 @@ class TilgangService(
     /**
      * sjekkTilgangTilPersoner er cachet i [familieIntegrasjonerTilgangskontrollService]
      */
-    private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean =
+    private fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> =
         familieIntegrasjonerTilgangskontrollService
             .sjekkTilgangTilPersoner(personIdenter)
-            .all { it.value.harTilgang }
+            .map { it.value }
 
     fun validerTilgangTilBehandling(
         behandlingId: Long,
@@ -109,10 +113,14 @@ class TilgangService(
             }
         }
 
-        if (!harTilgangTilPersoner(personIdenter)) {
+        val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenter)
+        if (!harTilgangTilAllePersoner(tilgangerTilPersoner)) {
+            val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
-                "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til behandling=$behandlingId",
+                melding =
+                    "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
+                        "har ikke tilgang til behandling=$behandlingId. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                frontendFeilmelding = "Behandlingen inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -139,15 +147,16 @@ class TilgangService(
                 ),
             )
         }
-        val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
-        if (!harTilgang) {
+
+        val tilgangerTilPersoner = sjekkTilgangTilPersoner(personIdenterIFagsak)
+        if (!harTilgangTilAllePersoner(tilgangerTilPersoner)) {
+            val adressebeskyttelsegraderingEllerNavAnsatt = tilgangerTilPersoner.tilBegrunnelserForManglendeTilgang()
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til fagsak=$fagsakId.",
+                        "har ikke tilgang til fagsak=$fagsakId. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding =
-                    "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til fagsak=$fagsakId.",
+                    "Fagsaken inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -179,4 +188,14 @@ class TilgangService(
             throw Feil(message = "Er ikke i riktig steg eller status. Forventer status FATTER_VEDTAK og steg BESLUTTE_VEDTAK")
         }
     }
+
+    private fun harTilgangTilAllePersoner(tilganger: List<Tilgang>): Boolean = tilganger.all { it.harTilgang }
+
+    private fun List<Tilgang>.tilBegrunnelserForManglendeTilgang(): String =
+        this
+            .filter { !it.harTilgang }
+            .mapNotNull { it.begrunnelse }
+            .toSet()
+            .toList()
+            .slåSammen()
 }

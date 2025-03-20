@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.log.mdc.MDCConstants
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -88,14 +89,18 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
 
-        assertThrows<RolleTilgangskontrollFeil> {
-            tilgangService.validerTilgangTilPersoner(
-                listOf(aktør.aktivFødselsnummer()),
-                AuditLoggerEvent.ACCESS,
-            )
-        }
+        val rolleTilgangskontrollFeil =
+            assertThrows<RolleTilgangskontrollFeil> {
+                tilgangService.validerTilgangTilPersoner(
+                    listOf(aktør.aktivFødselsnummer()),
+                    AuditLoggerEvent.ACCESS,
+                )
+            }
+
+        assertThat(rolleTilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
+        assertThat(rolleTilgangskontrollFeil.frontendFeilmelding).isEqualTo("Saksbehandler A har ikke tilgang. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
     }
 
     @Test
@@ -107,14 +112,17 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "NAV-ansatt")
 
-        assertThrows<RolleTilgangskontrollFeil> {
-            tilgangService.validerTilgangTilBehandling(
-                behandling.id,
-                AuditLoggerEvent.ACCESS,
-            )
-        }
+        val rolleTilgangskontrollFeil =
+            assertThrows<RolleTilgangskontrollFeil> {
+                tilgangService.validerTilgangTilBehandling(
+                    behandling.id,
+                    AuditLoggerEvent.ACCESS,
+                )
+            }
+        assertThat(rolleTilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til behandling=${behandling.id}. NAV-ansatt.")
+        assertThat(rolleTilgangskontrollFeil.frontendFeilmelding).isEqualTo("Behandlingen inneholder personer som krever ytterligere tilganger. NAV-ansatt.")
     }
 
     @Test
@@ -180,6 +188,7 @@ class TilgangServiceTest {
 
     @Test
     fun `validerTilgangTilFagsak - skal kaste feil dersom søker eller et eller flere av barna har diskresjonskode og saksbehandler mangler tilgang`() {
+        // Arrange
         val søkerAktør = randomAktør("65434563721")
         val barnAktør = randomAktør("12345678910")
         every { fagsakService.hentAktør(fagsak.id) }.returns(aktør)
@@ -202,14 +211,19 @@ class TilgangServiceTest {
                 ),
             ),
         )
-        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse")
         mockBrukerContext("A")
-        assertThrows<RolleTilgangskontrollFeil> {
-            tilgangService.validerTilgangTilFagsak(
-                fagsak.id,
-                AuditLoggerEvent.ACCESS,
-            )
-        }
+
+        // Act & Assert
+        val rolletilgangskontrollFeil =
+            assertThrows<RolleTilgangskontrollFeil> {
+                tilgangService.validerTilgangTilFagsak(
+                    fagsak.id,
+                    AuditLoggerEvent.ACCESS,
+                )
+            }
+        assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
+        assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
     }
 
     @Test
