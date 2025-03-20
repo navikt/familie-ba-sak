@@ -20,6 +20,7 @@ import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit.MONTHS
 
 @Service
 class AvregningService(
@@ -92,10 +93,15 @@ data class EtterbetalingOgFeilutbetaling(
 
 private fun List<Periode<EtterbetalingOgFeilutbetaling>>.tilAvregningPerioder(): List<AvregningPeriode> =
     this.map { periode ->
+        val fom = periode.fom ?: throw Feil("Fra og med-dato kan ikke være null")
+        val tom = periode.tom ?: throw Feil("Til og med-dato kan ikke være null")
+        val antallMåneder = fom.until(tom, MONTHS) + 1 // +1 for å inkludere siste måned
+        val totalEtterbetaling = periode.verdi.etterbetaling * antallMåneder
+        val totalFeilutbetaling = periode.verdi.feilutbetaling * antallMåneder
         AvregningPeriode(
-            fom = periode.fom ?: throw Feil("Fra og med-dato kan ikke være null"),
-            tom = periode.tom ?: throw Feil("Til og med-dato kan ikke være null"),
-            etterbetaling = periode.verdi.etterbetaling.toBigDecimal(),
-            feilutbetaling = periode.verdi.feilutbetaling.toBigDecimal(),
+            fom = fom,
+            tom = tom,
+            totalEtterbetaling = totalEtterbetaling.toBigDecimal(),
+            totalFeilutbetaling = totalFeilutbetaling.toBigDecimal(),
         )
     }

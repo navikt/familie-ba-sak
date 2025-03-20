@@ -57,6 +57,6 @@ data class RestSimulering(
 data class AvregningPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val etterbetaling: BigDecimal,
-    val feilutbetaling: BigDecimal,
+    val totalEtterbetaling: BigDecimal,
+    val totalFeilutbetaling: BigDecimal,
 )
