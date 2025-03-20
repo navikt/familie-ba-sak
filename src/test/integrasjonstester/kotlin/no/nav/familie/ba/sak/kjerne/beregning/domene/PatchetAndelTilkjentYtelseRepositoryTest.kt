@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 class PatchetAndelTilkjentYtelseRepositoryTest(
@@ -32,6 +33,12 @@ class PatchetAndelTilkjentYtelseRepositoryTest(
                 forrigePeriodeOffset = null,
                 nasjonaltPeriodebeløp = null,
                 differanseberegnetPeriodebeløp = null,
+                opprettetAv = "SB",
+                // DB runder av LocalDateTime, så setter nanosekunder til 0 slik at assert går gjennom
+                opprettetTidspunkt = LocalDateTime.now().withNano(0),
+                endretAv = "SB",
+                endretTidspunkt = LocalDateTime.now().withNano(0),
+                versjon = 1,
             )
 
         // Act

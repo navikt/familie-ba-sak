@@ -8,10 +8,11 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.math.BigDecimal
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -52,7 +53,17 @@ data class PatchetAndelTilkjentYtelse(
     val nasjonaltPeriodebeløp: Int?,
     @Column(name = "differanseberegnet_periodebelop")
     val differanseberegnetPeriodebeløp: Int? = null,
-) : BaseEntitet()
+    @Column(name = "opprettet_av", nullable = false, updatable = false)
+    val opprettetAv: String = SikkerhetContext.hentSaksbehandler(),
+    @Column(name = "opprettet_tid", nullable = false, updatable = false)
+    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "endret_av")
+    val endretAv: String = SikkerhetContext.hentSaksbehandler(),
+    @Column(name = "endret_tid")
+    val endretTidspunkt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "versjon", nullable = false)
+    val versjon: Long = 0,
+)
 
 fun AndelTilkjentYtelse.tilPatchetAndelTilkjentYtelse(): PatchetAndelTilkjentYtelse =
     PatchetAndelTilkjentYtelse(
@@ -71,4 +82,9 @@ fun AndelTilkjentYtelse.tilPatchetAndelTilkjentYtelse(): PatchetAndelTilkjentYte
         forrigePeriodeOffset = this.forrigePeriodeOffset,
         nasjonaltPeriodebeløp = this.nasjonaltPeriodebeløp,
         differanseberegnetPeriodebeløp = this.differanseberegnetPeriodebeløp,
+        opprettetAv = this.opprettetAv,
+        opprettetTidspunkt = this.opprettetTidspunkt,
+        endretAv = this.endretAv,
+        endretTidspunkt = this.endretTidspunkt,
+        versjon = this.versjon,
     )
