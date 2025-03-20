@@ -31,8 +31,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.scenario.stubScenario
+import no.nav.familie.ba.sak.util.ordinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.AfterEach
@@ -54,7 +54,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2024, 9, 1)
     }
 
     @AfterEach
@@ -154,7 +154,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
 
         assertEquals(
-            tilleggOrdinærSatsTilTester(),
+            ordinærSatsNesteMånedTilTester().beløp,
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!,
             ),
@@ -350,7 +350,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
 
         assertEquals(
-            tilleggOrdinærSatsTilTester() + sisteUtvidetSatsTilTester(),
+            ordinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!,
             ),
