@@ -153,60 +153,6 @@ class AvregningServiceTest {
             // Assert
             assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEmpty()
         }
-
-        @Test
-        fun `skal kun returnere perioder til og med forrige måned`() {
-            // Arrange
-            val andelerForrigeBehandling =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = apr(2025),
-                        person = barn1,
-                        kalkulertUtbetalingsbeløp = 1000,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = apr(2025),
-                        person = barn2,
-                        kalkulertUtbetalingsbeløp = 2000,
-                    ),
-                )
-
-            val andelerInneværendeBehandling =
-                listOf(
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = apr(2025),
-                        person = barn1,
-                        kalkulertUtbetalingsbeløp = 2000,
-                    ),
-                    lagAndelTilkjentYtelse(
-                        fom = jan(2025),
-                        tom = apr(2025),
-                        person = barn2,
-                        kalkulertUtbetalingsbeløp = 1000,
-                    ),
-                )
-
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
-
-            // Act
-            val perioderMedEtterbetalingOgFeilutbetaling =
-                avregningService.hentPerioderMedAvregning(behandlingId = inneværendeBehandling.id)
-
-            // Assert
-            val forventet =
-                AvregningPeriode(
-                    etterbetaling = 1000.toBigDecimal(),
-                    feilutbetaling = 1000.toBigDecimal(),
-                    fom = 1.jan(2025),
-                    tom = 28.feb(2025),
-                )
-
-            assertThat(perioderMedEtterbetalingOgFeilutbetaling.single()).isEqualTo(forventet)
-        }
     }
 
     @Nested
@@ -308,8 +254,8 @@ class AvregningServiceTest {
             // Assert
             val forventet =
                 AvregningPeriode(
-                    etterbetaling = 2000.toBigDecimal(),
-                    feilutbetaling = 1000.toBigDecimal(),
+                    totalEtterbetaling = 2000.toBigDecimal(),
+                    totalFeilutbetaling = 1000.toBigDecimal(),
                     fom = 1.jan(2025),
                     tom = 31.jan(2025),
                 )
@@ -368,8 +314,8 @@ class AvregningServiceTest {
             // Assert
             val forventet =
                 AvregningPeriode(
-                    etterbetaling = 1000.toBigDecimal(),
-                    feilutbetaling = 2000.toBigDecimal(),
+                    totalEtterbetaling = 1000.toBigDecimal(),
+                    totalFeilutbetaling = 2000.toBigDecimal(),
                     fom = 1.jan(2025),
                     tom = 31.jan(2025),
                 )
@@ -384,13 +330,13 @@ class AvregningServiceTest {
                 listOf(
                     lagAndelTilkjentYtelse(
                         fom = jan(2025),
-                        tom = jan(2025),
+                        tom = feb(2025),
                         person = barn1,
                         kalkulertUtbetalingsbeløp = 1000,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = jan(2025),
-                        tom = jan(2025),
+                        tom = feb(2025),
                         person = barn2,
                         kalkulertUtbetalingsbeløp = 2000,
                     ),
@@ -399,13 +345,13 @@ class AvregningServiceTest {
                 listOf(
                     lagAndelTilkjentYtelse(
                         fom = jan(2025),
-                        tom = jan(2025),
+                        tom = feb(2025),
                         person = barn1,
                         kalkulertUtbetalingsbeløp = 2000,
                     ),
                     lagAndelTilkjentYtelse(
                         fom = jan(2025),
-                        tom = jan(2025),
+                        tom = feb(2025),
                         person = barn2,
                         kalkulertUtbetalingsbeløp = 1000,
                     ),
@@ -421,10 +367,10 @@ class AvregningServiceTest {
             // Assert
             val forventet =
                 AvregningPeriode(
-                    etterbetaling = 1000.toBigDecimal(),
-                    feilutbetaling = 1000.toBigDecimal(),
+                    totalEtterbetaling = 2000.toBigDecimal(),
+                    totalFeilutbetaling = 2000.toBigDecimal(),
                     fom = 1.jan(2025),
-                    tom = 31.jan(2025),
+                    tom = 28.feb(2025),
                 )
 
             assertThat(perioderMedEtterbetalingOgFeilutbetaling.single()).isEqualTo(forventet)
@@ -527,14 +473,14 @@ class AvregningServiceTest {
             val forventet =
                 listOf(
                     AvregningPeriode(
-                        etterbetaling = 1000.toBigDecimal(),
-                        feilutbetaling = 1000.toBigDecimal(),
+                        totalEtterbetaling = 2000.toBigDecimal(),
+                        totalFeilutbetaling = 2000.toBigDecimal(),
                         fom = 1.jan(2024),
                         tom = 29.feb(2024),
                     ),
                     AvregningPeriode(
-                        etterbetaling = 2000.toBigDecimal(),
-                        feilutbetaling = 1000.toBigDecimal(),
+                        totalEtterbetaling = 4000.toBigDecimal(),
+                        totalFeilutbetaling = 2000.toBigDecimal(),
                         fom = 1.mar(2024),
                         tom = 30.apr(2024),
                     ),
@@ -587,6 +533,60 @@ class AvregningServiceTest {
 
             // Assert
             assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEmpty()
+        }
+
+        @Test
+        fun `skal kun returnere perioder til og med forrige måned`() {
+            // Arrange
+            val andelerForrigeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = apr(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = apr(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                )
+
+            val andelerInneværendeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = apr(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = apr(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                )
+
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
+
+            // Act
+            val perioderMedEtterbetalingOgFeilutbetaling =
+                avregningService.hentPerioderMedAvregning(behandlingId = inneværendeBehandling.id)
+
+            // Assert
+            val forventet =
+                AvregningPeriode(
+                    totalEtterbetaling = 2000.toBigDecimal(),
+                    totalFeilutbetaling = 2000.toBigDecimal(),
+                    fom = 1.jan(2025),
+                    tom = 28.feb(2025),
+                )
+
+            assertThat(perioderMedEtterbetalingOgFeilutbetaling.single()).isEqualTo(forventet)
         }
     }
 }
