@@ -21,6 +21,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.MONTHS
+import kotlin.math.absoluteValue
 
 @Service
 class AvregningService(
@@ -78,7 +79,7 @@ class AvregningService(
                 if (etterbetaling != 0 && feilutbetaling != 0) {
                     EtterbetalingOgFeilutbetaling(
                         etterbetaling = etterbetaling,
-                        feilutbetaling = -feilutbetaling,
+                        feilutbetaling = feilutbetaling.absoluteValue,
                     )
                 } else {
                     null
