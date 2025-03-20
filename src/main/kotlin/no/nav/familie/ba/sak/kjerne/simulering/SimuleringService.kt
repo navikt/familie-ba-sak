@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
-import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.domene.Simulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
@@ -93,6 +93,7 @@ class SimuleringService(
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> = økonomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
 
+    @Transactional
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val behandlingErFerdigBesluttet =
@@ -112,7 +113,7 @@ class SimuleringService(
         }
     }
 
-    private fun simuleringErUtdatert(simulering: RestSimulering) =
+    private fun simuleringErUtdatert(simulering: Simulering) =
         simulering.tidSimuleringHentet == null ||
             (
                 simulering.forfallsdatoNestePeriode != null &&

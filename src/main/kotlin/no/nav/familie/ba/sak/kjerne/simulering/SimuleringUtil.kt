@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.domene.Simulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
@@ -26,7 +26,7 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 
 fun vedtakSimuleringMottakereTilRestSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-): RestSimulering {
+): Simulering {
     val perioder =
         vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere,
@@ -43,7 +43,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(
     val tomSisteUtbetaling =
         perioder.filter { nestePeriode == null || it.fom < nestePeriode.fom }.maxOfOrNull { it.tom }
 
-    return RestSimulering(
+    return Simulering(
         perioder = perioder,
         fomDatoNestePeriode = nestePeriode?.fom,
         etterbetaling = hentTotalEtterbetaling(perioder, nestePeriode?.fom),
