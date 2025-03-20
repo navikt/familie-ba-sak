@@ -214,21 +214,21 @@ class IntegrasjonClientMock {
 
         fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
             map: Map<String, Boolean>,
-            slot: MutableList<Set<String>> = mutableListOf(),
+            slot: MutableList<List<String>> = mutableListOf(),
         ) {
             every { sjekkTilgangTilPersoner(capture(slot)) } answers {
-                val arg = firstArg<Set<String>>()
+                val arg = firstArg<List<String>>()
                 map.entries.filter { arg.contains(it.key) }.map { Tilgang(personIdent = it.key, harTilgang = it.value) }
             }
         }
 
         fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
             harTilgang: Boolean = false,
-            slot: MutableList<Set<String>> = mutableListOf(),
+            slot: MutableList<List<String>> = mutableListOf(),
             begrunnelse: String? = null,
         ) {
             every { sjekkTilgangTilPersoner(capture(slot)) } answers {
-                firstArg<Set<String>>().map { Tilgang(personIdent = it, harTilgang = harTilgang, begrunnelse = begrunnelse) }
+                firstArg<List<String>>().map { Tilgang(personIdent = it, harTilgang = harTilgang, begrunnelse = begrunnelse) }
             }
         }
 

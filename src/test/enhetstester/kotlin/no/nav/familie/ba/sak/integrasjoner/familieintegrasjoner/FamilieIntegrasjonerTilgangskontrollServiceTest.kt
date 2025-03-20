@@ -17,7 +17,7 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
     private val service = FamilieIntegrasjonerTilgangskontrollService(client, cacheManager, mockk())
 
-    private val slot = mutableListOf<Set<String>>()
+    private val slot = mutableListOf<List<String>>()
 
     @BeforeEach
     fun setUp() {
@@ -62,7 +62,7 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
         testWithBrukerContext("saksbehandler1") { service.sjekkTilgangTilPersoner(listOf("1", "1")) }
 
-        verify(exactly = 1) { client.sjekkTilgangTilPersoner(setOf("1")) }
+        verify(exactly = 1) { client.sjekkTilgangTilPersoner(listOf("1")) }
     }
 
     @Test
@@ -72,17 +72,18 @@ class FamilieIntegrasjonerTilgangskontrollServiceTest {
 
         testWithBrukerContext { service.sjekkTilgangTilPerson("1") }
         val sjekkTilgangTilPersoner = testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("2", "1", "3")) }
-        testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("1", "3", "2")) }
-        testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("3", "2", "1")) }
+        testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("2", "1", "3")) }
+        testWithBrukerContext { service.sjekkTilgangTilPersoner(listOf("3", "3", "3")) }
 
-        assertThat(sjekkTilgangTilPersoner.associate { it.personIdent to it.harTilgang }.toList()).containsExactlyInAnyOrderElementsOf(
+        assertThat(sjekkTilgangTilPersoner.all { it.key == it.value.personIdent })
+        assertThat(sjekkTilgangTilPersoner.map { it.key to it.value.harTilgang }).containsExactlyInAnyOrderElementsOf(
             tilgang.entries.map { Pair(it.key, it.value) }.toList(),
         )
 
         verify(exactly = 2) { client.sjekkTilgangTilPersoner(any()) }
 
-        val forventetFørsteKall = setOf("1")
-        val forventetAndreKall = setOf("1", "2", "3")
+        val forventetFørsteKall = listOf("1")
+        val forventetAndreKall = listOf("2", "3")
         assertThat(slot).containsExactlyElementsOf(listOf(forventetFørsteKall, forventetAndreKall))
     }
 }
