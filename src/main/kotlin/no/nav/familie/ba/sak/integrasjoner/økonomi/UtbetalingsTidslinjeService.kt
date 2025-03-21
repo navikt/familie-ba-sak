@@ -55,7 +55,7 @@ class UtbetalingsTidslinjeService(
 
         val tidslinjePerKjede = genererTidslinjePerKjede(iverksatteUtbetalingsoppdrag = iverksatteUtbetalingsoppdrag, utbetalingsperioderPerKjede = utbetalingsperioderPerKjede)
 
-        return tidslinjePerKjede.keys.map { sistePeriodeIdIKjede ->
+        return tidslinjePerKjede.filterValues { it.erTom() }.keys.map { sistePeriodeIdIKjede ->
             Utbetalingstidslinje(
                 utbetalingsperioder =
                     try {
