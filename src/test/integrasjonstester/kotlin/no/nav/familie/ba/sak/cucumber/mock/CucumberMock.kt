@@ -465,6 +465,7 @@ class CucumberMock(
             loggService = loggService,
             oppgaveService = oppgaveService,
             unleashService = unleashNextMedContextService,
+            forenkletTilbakekrevingsvedtakService = mockk(relaxed = true),
         )
 
     val snikeIKøenService =
