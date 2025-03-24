@@ -85,9 +85,7 @@ class ForenkletTilbakekrevingsvedtakController(
         return ResponseEntity.ok(Ressurs.success(oppdatertForenkletTilbakekrevingsvedtak.tilRestForenkletTilbakekrevingsvedtak()))
     }
 
-    @DeleteMapping(
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-    )
+    @DeleteMapping
     fun slettForenkletTilbakekrevingsvedtak(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<String>> {
@@ -104,7 +102,7 @@ class ForenkletTilbakekrevingsvedtakController(
 
     @Operation(summary = "Henter eksisterende forenklet tilbakekrevingsvedtak pdf.")
     @GetMapping(
-        produces = [MediaType.APPLICATION_PDF_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
         path = ["/pdf"],
     )
     fun hentForenkletTilbakekrevingsvedtakPdf(
@@ -124,7 +122,7 @@ class ForenkletTilbakekrevingsvedtakController(
 
     @Operation(summary = "Oppretter og henter forenklet tilbakekrevingsvedtak pdf.")
     @PostMapping(
-        produces = [MediaType.APPLICATION_PDF_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
         path = ["/pdf"],
     )
     fun opprettOgHentForenkletTilbakekrevingsvedtakPdf(
