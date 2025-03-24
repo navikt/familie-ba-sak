@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
@@ -47,14 +46,10 @@ class SaksstatistikkService(
     private val persongrunnlagService: PersongrunnlagService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val settPåVentService: SettPåVentService,
+    private val relatertBehandlingUtleder: RelatertBehandlingUtleder,
 ) {
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val forrigeBehandlingId =
-            behandlingHentOgPersisterService
-                .hentForrigeBehandlingSomErVedtatt(behandling)
-                .takeIf { erRevurderingEllerTekniskBehandling(behandling) }
-                ?.id
 
         val datoMottatt =
             when (behandling.opprettetÅrsak) {
@@ -73,6 +68,8 @@ class SaksstatistikkService(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId)
 
         val now = ZonedDateTime.now()
+
+        val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(behandling)
 
         return BehandlingDVH(
             funksjonellTid = now,
@@ -109,7 +106,8 @@ class SaksstatistikkService(
             versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
             // Ikke påkrevde felt
             vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
-            relatertBehandlingId = forrigeBehandlingId?.toString(),
+            relatertBehandlingId = relatertBehandling?.id,
+            // relatertBehandlingFagsystem = relatertBehandling?.fagsystem?.name,
             vedtakId = aktivtVedtak?.id?.toString(),
             resultat = behandling.resultat.name,
             behandlingTypeBeskrivelse = behandling.type.visningsnavn,
@@ -190,8 +188,6 @@ class SaksstatistikkService(
             )
         }
     }
-
-    private fun erRevurderingEllerTekniskBehandling(behandling: Behandling) = behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_ENDRING
 
     private fun Behandling.resultatBegrunnelser(vedtak: Vedtak?): List<ResultatBegrunnelseDVH> =
         when (resultat) {

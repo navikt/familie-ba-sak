@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagRelatertBehandling
 import no.nav.familie.ba.sak.datagenerator.lagSettPåVent
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -61,6 +62,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.nio.charset.Charset
@@ -86,6 +88,7 @@ internal class SaksstatistikkServiceTest {
     private val vedtakService = mockk<VedtakService>()
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val settPåVentService = mockk<SettPåVentService>()
+    private val relatertBehandlingUtleder = mockk<RelatertBehandlingUtleder>()
 
     private val sakstatistikkService =
         SaksstatistikkService(
@@ -99,6 +102,7 @@ internal class SaksstatistikkServiceTest {
             persongrunnlagService,
             vedtaksperiodeService,
             settPåVentService,
+            relatertBehandlingUtleder,
         )
 
     @BeforeAll
@@ -125,6 +129,11 @@ internal class SaksstatistikkServiceTest {
         unmockkAll()
     }
 
+    @BeforeEach
+    fun beforeEach() {
+        every { relatertBehandlingUtleder.utledRelatertBehandling(any()) } returns null
+    }
+
     @Test
     fun `Skal mappe henleggelsesårsak til behandlingDVH for henlagt behandling`() {
         val behandling =
@@ -141,6 +150,28 @@ internal class SaksstatistikkServiceTest {
 
         assertThat(behandlingDvh?.resultat).isEqualTo("HENLAGT_FEILAKTIG_OPPRETTET")
         assertThat(behandlingDvh?.resultatBegrunnelser).hasSize(0)
+    }
+
+    @Test
+    fun `Skal mappe relatert behandling til behandlingDVH`() {
+        // Arrange
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.KLAGE)
+
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+        every { relatertBehandlingUtleder.utledRelatertBehandling(any()) } returns
+            lagRelatertBehandling(
+                id = behandling.id.toString(),
+                vedtattTidspunkt = behandling.aktivertTidspunkt,
+                fagsystem = RelatertBehandling.Fagsystem.BA,
+            )
+
+        // Act
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+
+        // Assert
+        assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo(behandling.id.toString())
     }
 
     @Test

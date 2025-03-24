@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -16,16 +17,20 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 class KlageServiceTest {
-    val fagsakService = mockk<FagsakService>()
-    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    val stegService = mockk<StegService>()
-    val klageService =
+    private val fagsakService = mockk<FagsakService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val stegService = mockk<StegService>()
+    private val klagebehandlingHenter = mockk<KlagebehandlingHenter>()
+    private val klageService =
         KlageService(
             fagsakService = fagsakService,
             klageClient = mockk(),
@@ -34,6 +39,7 @@ class KlageServiceTest {
             stegService = stegService,
             vedtakService = mockk(),
             tilbakekrevingKlient = mockk(),
+            klagebehandlingHenter = klagebehandlingHenter,
         )
 
     @Nested
@@ -141,6 +147,55 @@ class KlageServiceTest {
             val result = klageService.validerOgOpprettRevurderingKlage(0L)
 
             Assertions.assertFalse(result.opprettetBehandling)
+        }
+    }
+
+    @Nested
+    inner class HentKlagebehandlingerPåFagsak {
+        @Test
+        fun `skal hente alle klagebehandlinger på fagsak`() {
+            // Arrange
+            val fagsakId = 1L
+
+            val klagebehandlinger =
+                listOf(
+                    lagKlagebehandlingDto(),
+                    lagKlagebehandlingDto(),
+                    lagKlagebehandlingDto(),
+                )
+
+            every { klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsakId) } returns klagebehandlinger
+
+            // Act
+            val resultat = klageService.hentKlagebehandlingerPåFagsak(fagsakId)
+
+            // Assert
+            assertThat(resultat).isEqualTo(klagebehandlinger)
+        }
+    }
+
+    @Nested
+    inner class HentSisteVedtatteKlagebehandling {
+        @Test
+        fun `skal hente siste vedtatte klagebehandling`() {
+            // Arrange
+            val fagsakId = 1L
+
+            val klagebehandlingDto =
+                lagKlagebehandlingDto(
+                    vedtaksdato = LocalDateTime.now(),
+                    status = no.nav.familie.kontrakter.felles.klage.BehandlingStatus.FERDIGSTILT,
+                    henlagtÅrsak = null,
+                    resultat = BehandlingResultat.MEDHOLD,
+                )
+
+            every { klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId) } returns klagebehandlingDto
+
+            // Act
+            val sisteVedtatteKlagebehandling = klageService.hentSisteVedtatteKlagebehandling(fagsakId)
+
+            // Assert
+            assertThat(sisteVedtatteKlagebehandling).isEqualTo(klagebehandlingDto)
         }
     }
 }

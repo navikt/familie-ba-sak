@@ -239,6 +239,8 @@ data class Behandling(
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
+    fun erRevurderingKlage() = type == BehandlingType.REVURDERING && opprettetÅrsak in setOf(BehandlingÅrsak.KLAGE, BehandlingÅrsak.IVERKSETTE_KA_VEDTAK)
+
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
 
     fun kanLeggeTilOgFjerneUtvidetVilkår() = erManuellMigrering() || erTekniskEndring() || erKorrigereVedtak() || erKlage() || erIverksetteKAVedtak()
