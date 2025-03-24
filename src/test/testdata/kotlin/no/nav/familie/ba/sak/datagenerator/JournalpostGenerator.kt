@@ -18,6 +18,7 @@ import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.DokumentInfo
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
+import no.nav.familie.kontrakter.felles.journalpost.JournalpostTilgang
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.kontrakter.felles.journalpost.Journalstatus
 import no.nav.familie.kontrakter.felles.journalpost.LogiskVedlegg
@@ -95,7 +96,7 @@ fun lagTilgangsstyrtJournalpost(
             avsenderMottakerIdType = AvsenderMottakerIdType.FNR,
             kanal = "NAV_NO",
         ),
-        harTilgang = harTilgang,
+        journalpostTilgang = JournalpostTilgang(harTilgang = harTilgang),
     )
 
 fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =

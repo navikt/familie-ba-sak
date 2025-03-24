@@ -75,7 +75,7 @@ class IntegrasjonClientTest {
         assertThat(tilgangsstyrtJournalpost.journalpost.journalpostId).isEqualTo("453492634")
         assertThat(tilgangsstyrtJournalpost.journalpost.tema).isEqualTo(Tema.BAR.name)
         assertThat(tilgangsstyrtJournalpost.journalpost.kanal).isEqualTo("NAV_NO")
-        assertThat(tilgangsstyrtJournalpost.harTilgang).isTrue
+        assertThat(tilgangsstyrtJournalpost.journalpostTilgang.harTilgang).isTrue
     }
 
     private fun readFile(filnavn: String): String = this::class.java.getResource("/familieintegrasjoner/json/$filnavn").readText()
