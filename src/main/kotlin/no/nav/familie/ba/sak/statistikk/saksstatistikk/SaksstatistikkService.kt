@@ -107,7 +107,7 @@ class SaksstatistikkService(
             // Ikke påkrevde felt
             vedtaksDato = aktivtVedtak?.vedtaksdato?.toLocalDate(),
             relatertBehandlingId = relatertBehandling?.id,
-            // relatertBehandlingFagsystem = relatertBehandling?.fagsystem?.name,
+            relatertBehandlingFagsystem = relatertBehandling?.fagsystem?.name,
             vedtakId = aktivtVedtak?.id?.toString(),
             resultat = behandling.resultat.name,
             behandlingTypeBeskrivelse = behandling.type.visningsnavn,

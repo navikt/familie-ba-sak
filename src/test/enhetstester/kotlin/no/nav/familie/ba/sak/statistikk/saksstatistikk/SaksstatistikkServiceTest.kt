@@ -172,6 +172,7 @@ internal class SaksstatistikkServiceTest {
 
         // Assert
         assertThat(behandlingDvh?.relatertBehandlingId).isEqualTo(behandling.id.toString())
+        assertThat(behandlingDvh?.relatertBehandlingFagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA.name)
     }
 
     @Test
