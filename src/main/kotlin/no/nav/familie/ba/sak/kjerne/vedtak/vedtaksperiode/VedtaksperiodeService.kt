@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -409,6 +410,9 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser().values.toList()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser().values.toList()
 
+        // For revurderinger med årsak klage skal fritekst legges til på alle begrunnelser
+        val alleBegrunnelserSkalStøtteFritekst = behandling.type == BehandlingType.REVURDERING && behandling.erKlage()
+
         val vedtaksperioder =
             if (behandling.status != BehandlingStatus.AVSLUTTET) {
                 val utvidetVedtaksperiodeMedBegrunnelser =
@@ -418,7 +422,13 @@ class VedtaksperiodeService(
                     )
                 utvidetVedtaksperiodeMedBegrunnelser
                     .sorter()
-                    .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser(sanityBegrunnelser, sanityEØSBegrunnelser) }
+                    .map {
+                        it.tilRestUtvidetVedtaksperiodeMedBegrunnelser(
+                            sanityBegrunnelser = sanityBegrunnelser,
+                            sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                            alleBegrunnelserSkalStøtteFritekst = alleBegrunnelserSkalStøtteFritekst,
+                        )
+                    }
             } else {
                 emptyList()
             }

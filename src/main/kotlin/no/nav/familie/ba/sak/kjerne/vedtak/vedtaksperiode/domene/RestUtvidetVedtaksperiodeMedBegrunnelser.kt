@@ -21,13 +21,26 @@ data class RestUtvidetVedtaksperiodeMedBegrunnelser(
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+    alleBegrunnelserSkalStøtteFritekst: Boolean,
 ): RestUtvidetVedtaksperiodeMedBegrunnelser =
     RestUtvidetVedtaksperiodeMedBegrunnelser(
         id = this.id,
         fom = this.fom,
         tom = this.tom,
         type = this.type,
-        begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse(sanityBegrunnelser) } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse(sanityEØSBegrunnelser) },
+        begrunnelser =
+            this.begrunnelser.map {
+                it.tilRestVedtaksbegrunnelse(
+                    sanityBegrunnelser = sanityBegrunnelser,
+                    alleBegrunnelserSkalStøtteFritekst = alleBegrunnelserSkalStøtteFritekst,
+                )
+            } +
+                this.eøsBegrunnelser.map {
+                    it.tilRestVedtaksbegrunnelse(
+                        sanityBegrunnelser = sanityEØSBegrunnelser,
+                        alleBegrunnelserSkalStøtteFritekst = alleBegrunnelserSkalStøtteFritekst,
+                    )
+                },
         fritekster = this.fritekster,
         utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
         gyldigeBegrunnelser = this.gyldigeBegrunnelser.map { it.enumnavnTilString() },

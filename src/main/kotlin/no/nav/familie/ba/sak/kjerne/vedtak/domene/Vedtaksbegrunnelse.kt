@@ -50,12 +50,15 @@ class Vedtaksbegrunnelse(
     override fun toString(): String = "Vedtaksbegrunnelse(id=$id, standardbegrunnelse=$standardbegrunnelse)"
 }
 
-fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse(sanityBegrunnelser: List<SanityBegrunnelse>) =
+fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse(
+    sanityBegrunnelser: List<SanityBegrunnelse>,
+    alleBegrunnelserSkalStøtteFritekst: Boolean,
+) =
     RestVedtaksbegrunnelse(
         standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
         vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
         vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),
-        støtterFritekst = this.standardbegrunnelse.støtterFritekst(sanityBegrunnelser),
+        støtterFritekst = if (alleBegrunnelserSkalStøtteFritekst) true else this.standardbegrunnelse.støtterFritekst(sanityBegrunnelser),
     )
 
 enum class Begrunnelsetype {
