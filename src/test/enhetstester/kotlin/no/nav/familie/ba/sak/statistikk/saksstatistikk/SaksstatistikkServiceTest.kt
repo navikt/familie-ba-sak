@@ -176,6 +176,24 @@ internal class SaksstatistikkServiceTest {
     }
 
     @Test
+    fun `Skal ikke mappe relatert behandling til behandlingDVH når relatert behandling er null`() {
+        // Arrange
+        val behandling = lagBehandling(behandlingType = BehandlingType.REVURDERING, årsak = BehandlingÅrsak.KLAGE)
+
+        every { behandlingHentOgPersisterService.hent(any()) } returns behandling
+        every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
+        every { vedtakService.hentAktivForBehandling(any()) } returns null
+        every { relatertBehandlingUtleder.utledRelatertBehandling(any()) } returns null
+
+        // Act
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+
+        // Assert
+        assertThat(behandlingDvh?.relatertBehandlingId).isNull()
+        assertThat(behandlingDvh?.relatertBehandlingFagsystem).isNull()
+    }
+
+    @Test
     fun `Skal mappe til behandlingDVH for Automatisk rute`() {
         val behandling =
             lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE, skalBehandlesAutomatisk = true).also {
