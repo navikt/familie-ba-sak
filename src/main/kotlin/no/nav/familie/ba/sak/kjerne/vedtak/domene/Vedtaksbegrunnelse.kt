@@ -53,13 +53,12 @@ class Vedtaksbegrunnelse(
 fun Vedtaksbegrunnelse.tilRestVedtaksbegrunnelse(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     alleBegrunnelserSkalStøtteFritekst: Boolean,
-) =
-    RestVedtaksbegrunnelse(
-        standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
-        vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
-        vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),
-        støtterFritekst = if (alleBegrunnelserSkalStøtteFritekst) true else this.standardbegrunnelse.støtterFritekst(sanityBegrunnelser),
-    )
+) = RestVedtaksbegrunnelse(
+    standardbegrunnelse = this.standardbegrunnelse.enumnavnTilString(),
+    vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
+    vedtakBegrunnelseSpesifikasjon = this.standardbegrunnelse.enumnavnTilString(),
+    støtterFritekst = if (alleBegrunnelserSkalStøtteFritekst) true else this.standardbegrunnelse.støtterFritekst(sanityBegrunnelser),
+)
 
 enum class Begrunnelsetype {
     STANDARD_BEGRUNNELSE,
