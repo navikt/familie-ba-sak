@@ -117,8 +117,6 @@ class OppgaveController(
 
         val minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null
 
-        val klagebehandlinger = if (minimalFagsak != null) klageService.hentKlagebehandlingerPåFagsak(minimalFagsak.id) else emptyList()
-
         val dataForManuellJournalføring =
             DataForManuellJournalføring(
                 oppgave = oppgave,
@@ -130,7 +128,6 @@ class OppgaveController(
                             .tilRestPersonInfo(it.aktivFødselsnummer())
                     },
                 minimalFagsak = minimalFagsak,
-                klagebehandlinger = klagebehandlinger,
             )
 
         return ResponseEntity.ok(
