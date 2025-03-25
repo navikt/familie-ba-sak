@@ -42,15 +42,22 @@ class RelatertBehandlingUtlederTest {
 
     @Nested
     inner class UtledRelatertBehandling {
-        @Test
-        fun `skal finne siste vedtatte barnetrygdbehandling selv for revurdering klage når toggle er skrudd av`() {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        fun `skal utlede relatert behandling med barnetrygdbehandling som siste vedtatte behandling selv for revurdering med årsak klage eller årsak iverksette ka vedtak når toggle er skrudd av`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
-            val revurderingKlage =
+            val revurdering =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.KLAGE,
+                    årsak = behandlingÅrsak,
                     aktivertTid = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.UTREDES,
                     resultat = Behandlingsresultat.IKKE_VURDERT,
@@ -58,17 +65,17 @@ class RelatertBehandlingUtlederTest {
 
             val sisteVedtatteBarnetrygdbehandling =
                 lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     aktivertTid = nåtidspunkt.minusSeconds(2),
                     status = BehandlingStatus.AVSLUTTET,
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
             every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns false
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurderingKlage.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurdering.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurderingKlage)
+            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { klageService wasNot called }
@@ -77,15 +84,22 @@ class RelatertBehandlingUtlederTest {
             assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
-        @Test
-        fun `skal kaste feil om ingen vedtatt klagebehandling finnes når den innsendte behandling er en revurdering med årsak klage`() {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        fun `skal kaste feil om ingen vedtatt klagebehandling finnes når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
             val revurderingKlage =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.KLAGE,
+                    årsak = behandlingÅrsak,
                     aktivertTid = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.UTREDES,
                     resultat = Behandlingsresultat.IKKE_VURDERT,
@@ -98,44 +112,26 @@ class RelatertBehandlingUtlederTest {
                 assertThrows<Feil> {
                     relatertBehandlingUtleder.utledRelatertBehandling(revurderingKlage)
                 }
-            assertThat(exception.message).isEqualTo("Forventer en vedtatt klagebehandling for behandling ${revurderingKlage.id}")
+            assertThat(exception.message).isEqualTo("Forventer en vedtatt klagebehandling for fagsak ${revurderingKlage.fagsak.id} og behandling ${revurderingKlage.id}")
             verify { behandlingHentOgPersisterService wasNot called }
         }
 
-        @Test
-        fun `skal kaste feil om ingen vedtatt klagebehandling finnes når den innsendte behandling er en revurdering med årsak iverksette ka vedtak`() {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        fun `skal utlede relatert behandling med klagebehandlingen som siste vedtatte behandling når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
             val revurderingKlage =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
-                    aktivertTid = nåtidspunkt.minusSeconds(1),
-                    status = BehandlingStatus.UTREDES,
-                    resultat = Behandlingsresultat.IKKE_VURDERT,
-                )
-
-            every { klageService.hentSisteVedtatteKlagebehandling(revurderingKlage.fagsak.id) } returns null
-
-            // Act & assert
-            val exception =
-                assertThrows<Feil> {
-                    relatertBehandlingUtleder.utledRelatertBehandling(revurderingKlage)
-                }
-            assertThat(exception.message).isEqualTo("Forventer en vedtatt klagebehandling for behandling ${revurderingKlage.id}")
-            verify { behandlingHentOgPersisterService wasNot called }
-        }
-
-        @Test
-        fun `skal utlede relatert behandling med klagebehandlingen som siste vedtatte behandling når den innsendte behandling er en revurdering med årsak klage`() {
-            // Arrange
-            val nåtidspunkt = LocalDateTime.now()
-
-            val revurderingKlage =
-                lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.KLAGE,
+                    årsak = behandlingÅrsak,
                     aktivertTid = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.UTREDES,
                     resultat = Behandlingsresultat.IKKE_VURDERT,
@@ -158,46 +154,22 @@ class RelatertBehandlingUtlederTest {
             assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteKlagebehandling.vedtaksdato)
         }
 
-        @Test
-        fun `skal utlede relatert behandling med klagebehandlingen som siste vedtatte behandling når den innsendte behandling er en revurdering med årsak iverksetter ka vedtak`() {
-            // Arrange
-            val nåtidspunkt = LocalDateTime.now()
-
-            val revurderingIverksetteKaVedtak =
-                lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.IVERKSETTE_KA_VEDTAK,
-                    aktivertTid = nåtidspunkt.minusSeconds(1),
-                    status = BehandlingStatus.UTREDES,
-                    resultat = Behandlingsresultat.IKKE_VURDERT,
-                )
-
-            val sisteVedtatteKlagebehandling =
-                lagKlagebehandlingDto(
-                    vedtaksdato = nåtidspunkt,
-                )
-
-            every { klageService.hentSisteVedtatteKlagebehandling(revurderingIverksetteKaVedtak.fagsak.id) } returns sisteVedtatteKlagebehandling
-
-            // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurderingIverksetteKaVedtak)
-
-            // Assert
-            verify { behandlingHentOgPersisterService wasNot called }
-            assertThat(relatertBehandling?.id).isEqualTo(sisteVedtatteKlagebehandling.id.toString())
-            assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.KLAGE)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteKlagebehandling.vedtaksdato)
-        }
-
-        @Test
-        fun `skal utlede relatert behandling med barnetrygdbehandlingen som siste vedtatte behandling når den innsendte behandling ikke er en revurdering med årsak klage eller iverksetter ka vedtak`() {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
+            mode = EnumSource.Mode.EXCLUDE,
+        )
+        fun `skal utlede relatert behandling med barnetrygdbehandlingen som siste vedtatte behandling når den innsendte behandling er en revurdering som ikke har årsak klage eller iverksetter ka vedtak`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
             val revurdering =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+                    årsak = behandlingÅrsak,
                     aktivertTid = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.UTREDES,
                     resultat = Behandlingsresultat.IKKE_VURDERT,
@@ -205,7 +177,7 @@ class RelatertBehandlingUtlederTest {
 
             val sisteVedtatteBarnetrygdbehandling =
                 lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     aktivertTid = nåtidspunkt.minusSeconds(2),
                     status = BehandlingStatus.AVSLUTTET,
                     resultat = Behandlingsresultat.INNVILGET,
@@ -224,11 +196,11 @@ class RelatertBehandlingUtlederTest {
         }
 
         @Test
-        fun `skal utlede relatert behandling med barnetrygdbehandlingen som siste vedtatte behandling når den innsendte behandling ikke er en revurdering`() {
+        fun `skal utlede relatert behandling med barnetrygdbehandlingen som siste vedtatte behandling når den innsendte behandling er en teknisk endring`() {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
-            val behandling =
+            val tekniskEndring =
                 lagBehandling(
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
                     årsak = BehandlingÅrsak.TEKNISK_ENDRING,
@@ -239,16 +211,16 @@ class RelatertBehandlingUtlederTest {
 
             val sisteVedtatteBarnetrygdbehandling =
                 lagBehandling(
-                    behandlingType = BehandlingType.TEKNISK_ENDRING,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     aktivertTid = nåtidspunkt.minusSeconds(2),
                     status = BehandlingStatus.AVSLUTTET,
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(tekniskEndring.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(behandling)
+            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(tekniskEndring)
 
             // Assert
             verify { klageService wasNot called }
@@ -257,22 +229,31 @@ class RelatertBehandlingUtlederTest {
             assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
-        @Test
-        fun `skal ikke utlede relatert behandling når ingen barnetrygdbehandling er vedtatt og den innsendte behandling ikke er en revurdering med årsak klage eller iverksette ka vedtak`() {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingType::class,
+            names = ["REVURDERING", "TEKNISK_ENDRING"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        fun `skal ikke utlede relatert behandling når ingen barnetrygdbehandlingen er vedtatte for den innsendte revurderingen eller teknisk endringen`(
+            behandlingType: BehandlingType,
+        ) {
             // Arrange
-            val revurdering =
+            val nåtidspunkt = LocalDateTime.now()
+
+            val behandling =
                 lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                    aktivertTid = LocalDateTime.now(),
+                    behandlingType = behandlingType,
+                    årsak = if (behandlingType == BehandlingType.TEKNISK_ENDRING) BehandlingÅrsak.TEKNISK_ENDRING else BehandlingÅrsak.SØKNAD,
+                    aktivertTid = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.UTREDES,
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurdering.fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
 
             // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
+            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(behandling)
 
             // Assert
             verify { klageService wasNot called }
@@ -285,36 +266,25 @@ class RelatertBehandlingUtlederTest {
             names = ["REVURDERING", "TEKNISK_ENDRING"],
             mode = EnumSource.Mode.EXCLUDE,
         )
-        fun `skal ikke utlede relatert behandling når kun behandling som ikke er revurdering eller teknisk endring for barnetrygd er vedtatt`(
+        fun `skal ikke utlede relatert behandling når den innsendte behandling ikke er en revurdering eller teknisk endring`(
             behandlingType: BehandlingType,
         ) {
             // Arrange
-            val nåtidspunkt = LocalDateTime.now()
-
             val revurdering =
                 lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    årsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                    aktivertTid = nåtidspunkt,
+                    behandlingType = behandlingType,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                    aktivertTid = LocalDateTime.now(),
                     status = BehandlingStatus.UTREDES,
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
-
-            val sisteVedtatteBarnetrygdbehandling =
-                lagBehandling(
-                    behandlingType = behandlingType,
-                    aktivertTid = nåtidspunkt.minusSeconds(1),
-                    status = BehandlingStatus.AVSLUTTET,
-                    resultat = Behandlingsresultat.INNVILGET,
-                )
-
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurdering.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { klageService wasNot called }
+            verify { behandlingHentOgPersisterService wasNot called }
             assertThat(relatertBehandling).isNull()
         }
     }
