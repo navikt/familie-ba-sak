@@ -20,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 
 class RelatertBehandlingUtlederTest {
@@ -41,17 +43,38 @@ class RelatertBehandlingUtlederTest {
     @Nested
     inner class UtledRelatertBehandling {
         @Test
-        fun `skal returnere null når toggle for å behandle klage er skrudd av`() {
+        fun `skal finne siste vedtatte barnetrygdbehandling selv for revurdering klage når toggle er skrudd av`() {
             // Arrange
-            val behandling = lagBehandling()
+            val nåtidspunkt = LocalDateTime.now()
+
+            val revurderingKlage =
+                lagBehandling(
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.KLAGE,
+                    aktivertTid = nåtidspunkt.minusSeconds(1),
+                    status = BehandlingStatus.UTREDES,
+                    resultat = Behandlingsresultat.IKKE_VURDERT,
+                )
+
+            val sisteVedtatteBarnetrygdbehandling =
+                lagBehandling(
+                    behandlingType = BehandlingType.REVURDERING,
+                    aktivertTid = nåtidspunkt.minusSeconds(2),
+                    status = BehandlingStatus.AVSLUTTET,
+                    resultat = Behandlingsresultat.INNVILGET,
+                )
 
             every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns false
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurderingKlage.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(behandling)
+            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurderingKlage)
 
             // Assert
-            assertThat(relatertBehandling).isNull()
+            verify { klageService wasNot called }
+            assertThat(relatertBehandling?.id).isEqualTo(sisteVedtatteBarnetrygdbehandling.id.toString())
+            assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
+            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
         @Test
@@ -256,8 +279,15 @@ class RelatertBehandlingUtlederTest {
             assertThat(relatertBehandling).isNull()
         }
 
-        @Test
-        fun `skal ikke utlede relatert behandling når kun en førstegangsbehandling for barnetrygd er vedtatt`() {
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingType::class,
+            names = ["REVURDERING", "TEKNISK_ENDRING"],
+            mode = EnumSource.Mode.EXCLUDE,
+        )
+        fun `skal ikke utlede relatert behandling når kun behandling som ikke er revurdering eller teknisk endring for barnetrygd er vedtatt`(
+            behandlingType: BehandlingType,
+        ) {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
@@ -272,7 +302,7 @@ class RelatertBehandlingUtlederTest {
 
             val sisteVedtatteBarnetrygdbehandling =
                 lagBehandling(
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    behandlingType = behandlingType,
                     aktivertTid = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.AVSLUTTET,
                     resultat = Behandlingsresultat.INNVILGET,

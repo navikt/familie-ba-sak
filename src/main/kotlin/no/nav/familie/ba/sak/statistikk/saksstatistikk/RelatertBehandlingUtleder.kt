@@ -15,11 +15,8 @@ class RelatertBehandlingUtleder(
     private val klageService: KlageService,
     private val unleashService: UnleashNextMedContextService,
 ) {
-    fun utledRelatertBehandling(behandling: Behandling): RelatertBehandling? {
-        if (!unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false)) {
-            return null
-        }
-        return if (behandling.erRevurderingKlage()) {
+    fun utledRelatertBehandling(behandling: Behandling): RelatertBehandling? =
+        if (behandling.erRevurderingKlage() && unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false)) {
             val sisteVedtatteKlagebehandling = klageService.hentSisteVedtatteKlagebehandling(behandling.fagsak.id)
             if (sisteVedtatteKlagebehandling == null) {
                 throw Feil("Forventer en vedtatt klagebehandling for behandling ${behandling.id}")
@@ -31,7 +28,6 @@ class RelatertBehandlingUtleder(
                 ?.takeIf { harBarnetrygdbehandlingKorrektBehandlingType(it) }
                 ?.let { RelatertBehandling.fraBarnetrygdbehandling(it) }
         }
-    }
 
     private fun harBarnetrygdbehandlingKorrektBehandlingType(barnetrygdbehandling: Behandling) =
         when (barnetrygdbehandling.type) {
