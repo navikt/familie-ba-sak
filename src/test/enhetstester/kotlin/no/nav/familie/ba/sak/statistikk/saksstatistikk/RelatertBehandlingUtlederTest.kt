@@ -96,7 +96,7 @@ class RelatertBehandlingUtlederTest {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
-            val revurderingKlage =
+            val revurdering =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = behandlingÅrsak,
@@ -105,14 +105,14 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            every { klageService.hentSisteVedtatteKlagebehandling(revurderingKlage.fagsak.id) } returns null
+            every { klageService.hentSisteVedtatteKlagebehandling(revurdering.fagsak.id) } returns null
 
             // Act & assert
             val exception =
                 assertThrows<Feil> {
-                    relatertBehandlingUtleder.utledRelatertBehandling(revurderingKlage)
+                    relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
                 }
-            assertThat(exception.message).isEqualTo("Forventer en vedtatt klagebehandling for fagsak ${revurderingKlage.fagsak.id} og behandling ${revurderingKlage.id}")
+            assertThat(exception.message).isEqualTo("Forventer en vedtatt klagebehandling for fagsak ${revurdering.fagsak.id} og behandling ${revurdering.id}")
             verify { behandlingHentOgPersisterService wasNot called }
         }
 
@@ -128,7 +128,7 @@ class RelatertBehandlingUtlederTest {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
-            val revurderingKlage =
+            val revurdering =
                 lagBehandling(
                     behandlingType = BehandlingType.REVURDERING,
                     årsak = behandlingÅrsak,
@@ -142,10 +142,10 @@ class RelatertBehandlingUtlederTest {
                     vedtaksdato = nåtidspunkt,
                 )
 
-            every { klageService.hentSisteVedtatteKlagebehandling(revurderingKlage.fagsak.id) } returns sisteVedtatteKlagebehandling
+            every { klageService.hentSisteVedtatteKlagebehandling(revurdering.fagsak.id) } returns sisteVedtatteKlagebehandling
 
             // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurderingKlage)
+            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { behandlingHentOgPersisterService wasNot called }
