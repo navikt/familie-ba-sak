@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.math.BigDecimal
 
 class BeslutteVedtakTest {
     private val toTrinnKontrollService = mockk<TotrinnskontrollService>()
@@ -113,6 +114,7 @@ class BeslutteVedtakTest {
         every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any<BehandlingId>()) } just runs
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns null
+        every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
     }
 
     @Nested
@@ -376,6 +378,7 @@ class BeslutteVedtakTest {
                 listOf(
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
+            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(10000)
 
             // Act && Assert
             val feilmelding =
