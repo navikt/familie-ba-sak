@@ -410,7 +410,7 @@ class VedtaksperiodeService(
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser().values.toList()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser().values.toList()
 
-        // For revurderinger med årsak klage skal fritekst legges til på alle begrunnelser
+        // For revurderinger med årsak klage skal fritekst støttes på alle begrunnelser
         val alleBegrunnelserSkalStøtteFritekst = behandling.type == BehandlingType.REVURDERING && behandling.erKlage()
 
         val vedtaksperioder =
