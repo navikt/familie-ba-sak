@@ -29,7 +29,7 @@ class RelatertBehandlingUtleder(
 
         if (behandling.erRevurderingEllerTekniskEndring()) {
             val sisteVedtatteBarnetrygdbehandling =
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             if (sisteVedtatteBarnetrygdbehandling == null) {
                 logger.warn("Forventer en vedtatt barnetrygdbehandling for fagsak ${behandling.fagsak.id} og behandling ${behandling.id}")
                 return null

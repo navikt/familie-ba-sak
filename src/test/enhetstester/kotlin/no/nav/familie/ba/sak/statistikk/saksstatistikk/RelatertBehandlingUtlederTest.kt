@@ -72,7 +72,7 @@ class RelatertBehandlingUtlederTest {
                 )
 
             every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns false
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurdering.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
@@ -183,7 +183,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(revurdering.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
@@ -217,7 +217,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(tekniskEndring.fagsak.id) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tekniskEndring) } returns sisteVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(tekniskEndring)
@@ -250,7 +250,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns null
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(behandling)
