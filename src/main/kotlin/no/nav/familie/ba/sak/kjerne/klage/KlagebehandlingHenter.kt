@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.HenlagtÅrsak
@@ -20,16 +21,17 @@ class KlagebehandlingHenter(
         return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
     }
 
-    fun hentSisteVedtatteKlagebehandling(fagsakId: Long): KlagebehandlingDto? =
-        hentKlagebehandlingerPåFagsak(fagsakId)
+    fun hentForrigeVedtatteKlagebehandling(behandling: Behandling): KlagebehandlingDto? =
+        hentKlagebehandlingerPåFagsak(behandling.fagsak.id)
             .asSequence()
-            .filter { SisteVedtatteKlagebehandlingSjekker.harKlagebehandlingKorrektStatus(it.status) }
-            .filter { SisteVedtatteKlagebehandlingSjekker.harKlagebehandlingKorrektHenlagtÅrsak(it.henlagtÅrsak) }
-            .filter { SisteVedtatteKlagebehandlingSjekker.harKlagebehandlingKorrektBehandlingResultat(it.resultat) }
+            .filter { ForrigeVedtatteKlagebehandlingSjekker.harKlagebehandlingKorrektStatus(it.status) }
+            .filter { ForrigeVedtatteKlagebehandlingSjekker.harKlagebehandlingKorrektHenlagtÅrsak(it.henlagtÅrsak) }
+            .filter { ForrigeVedtatteKlagebehandlingSjekker.harKlagebehandlingKorrektBehandlingResultat(it.resultat) }
             .filter { it.vedtaksdato != null }
+            .filter { it.vedtaksdato!!.isBefore(behandling.aktivertTidspunkt) }
             .maxByOrNull { it.vedtaksdato!! }
 
-    private object SisteVedtatteKlagebehandlingSjekker {
+    private object ForrigeVedtatteKlagebehandlingSjekker {
         fun harKlagebehandlingKorrektStatus(behandlingStatus: BehandlingStatus) =
             when (behandlingStatus) {
                 BehandlingStatus.FERDIGSTILT,

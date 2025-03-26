@@ -20,21 +20,20 @@ class RelatertBehandlingUtleder(
 
     fun utledRelatertBehandling(behandling: Behandling): RelatertBehandling? {
         if (behandling.erRevurderingKlage() && unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false)) {
-            val sisteVedtatteKlagebehandling = klageService.hentSisteVedtatteKlagebehandling(behandling.fagsak.id)
-            if (sisteVedtatteKlagebehandling == null) {
+            val forrigeVedtatteKlagebehandling = klageService.hentForrigeVedtatteKlagebehandling(behandling)
+            if (forrigeVedtatteKlagebehandling == null) {
                 throw Feil("Forventer en vedtatt klagebehandling for fagsak ${behandling.fagsak.id} og behandling ${behandling.id}")
             }
-            return RelatertBehandling.fraKlagebehandling(sisteVedtatteKlagebehandling)
+            return RelatertBehandling.fraKlagebehandling(forrigeVedtatteKlagebehandling)
         }
 
         if (behandling.erRevurderingEllerTekniskEndring()) {
-            val sisteVedtatteBarnetrygdbehandling =
-                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            if (sisteVedtatteBarnetrygdbehandling == null) {
+            val forrigeVedtatteBarnetrygdbehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+            if (forrigeVedtatteBarnetrygdbehandling == null) {
                 logger.warn("Forventer en vedtatt barnetrygdbehandling for fagsak ${behandling.fagsak.id} og behandling ${behandling.id}")
                 return null
             }
-            return RelatertBehandling.fraBarnetrygdbehandling(sisteVedtatteBarnetrygdbehandling)
+            return RelatertBehandling.fraBarnetrygdbehandling(forrigeVedtatteBarnetrygdbehandling)
         }
 
         return null
