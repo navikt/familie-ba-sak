@@ -46,11 +46,13 @@ class EØSBegrunnelse(
             begrunnelse = this.begrunnelse,
         )
 
-    fun tilRestVedtaksbegrunnelse(sanityBegrunnelser: List<ISanityBegrunnelse>) =
-        RestVedtaksbegrunnelse(
-            standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
-            vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
-            vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),
-            støtterFritekst = this.begrunnelse.støtterFritekst(sanityBegrunnelser),
-        )
+    fun tilRestVedtaksbegrunnelse(
+        sanityBegrunnelser: List<ISanityBegrunnelse>,
+        alleBegrunnelserSkalStøtteFritekst: Boolean,
+    ) = RestVedtaksbegrunnelse(
+        standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
+        vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
+        vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),
+        støtterFritekst = if (alleBegrunnelserSkalStøtteFritekst) true else this.begrunnelse.støtterFritekst(sanityBegrunnelser),
+    )
 }
