@@ -26,7 +26,7 @@ fun validerSatsendring(
 }
 
 fun validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) {
-    if ((vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.OPPHØR || vedtaksperiodeMedBegrunnelser.type == Vedtaksperiodetype.AVSLAG) && vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()) {
+    if (vedtaksperiodeMedBegrunnelser.harFriteksterUtenStandardbegrunnelser()) {
         val fritekstUtenStandardbegrunnelserFeilmelding =
             "Fritekst kan kun brukes i kombinasjon med en eller flere begrunnelser. " + "Legg først til en ny begrunnelse eller fjern friteksten(e)."
         throw FunksjonellFeil(
