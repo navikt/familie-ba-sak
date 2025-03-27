@@ -44,6 +44,7 @@ class KlageService(
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
+    private val klagebehandlingHenter: KlagebehandlingHenter,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -80,15 +81,9 @@ class KlageService(
         )
     }
 
-    fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> {
-        val klagebehandligerPerFagsak = klageClient.hentKlagebehandlinger(setOf(fagsakId))
+    fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> = klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsakId)
 
-        val klagerPåFagsak =
-            klagebehandligerPerFagsak[fagsakId]
-                ?: throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
-
-        return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
-    }
+    fun hentForrigeVedtatteKlagebehandling(behandling: Behandling): KlagebehandlingDto? = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
     @Transactional(readOnly = true)
     fun kanOppretteRevurdering(fagsakId: Long): KanOppretteRevurderingResponse {

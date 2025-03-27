@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
@@ -141,15 +140,6 @@ class SimuleringService(
     fun hentEtterbetaling(behandlingId: Long): BigDecimal {
         val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         return hentEtterbetaling(vedtakSimuleringMottakere)
-    }
-
-    fun hentFeilutbetalingTilOgMedForrigeMåned(behandlingId: Long): BigDecimal {
-        val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
-        val feilutbetaling =
-            vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
-                .filter { it.tom.isBefore(LocalDate.now().førsteDagIInneværendeMåned()) }
-                .sumOf { it.feilutbetaling }
-        return feilutbetaling
     }
 
     fun hentFeilutbetaling(behandlingId: Long): BigDecimal {
