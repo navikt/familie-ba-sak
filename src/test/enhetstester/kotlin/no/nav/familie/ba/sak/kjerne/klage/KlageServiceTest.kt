@@ -175,11 +175,11 @@ class KlageServiceTest {
     }
 
     @Nested
-    inner class HentSisteVedtatteKlagebehandling {
+    inner class HentForrigeVedtatteKlagebehandling {
         @Test
-        fun `skal hente siste vedtatte klagebehandling`() {
+        fun `skal hente forrige vedtatte klagebehandling`() {
             // Arrange
-            val fagsakId = 1L
+            val behandling = lagBehandling()
 
             val klagebehandlingDto =
                 lagKlagebehandlingDto(
@@ -189,13 +189,13 @@ class KlageServiceTest {
                     resultat = BehandlingResultat.MEDHOLD,
                 )
 
-            every { klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId) } returns klagebehandlingDto
+            every { klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling) } returns klagebehandlingDto
 
             // Act
-            val sisteVedtatteKlagebehandling = klageService.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klageService.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isEqualTo(klagebehandlingDto)
+            assertThat(forrigeVedtatteKlagebehandling).isEqualTo(klagebehandlingDto)
         }
     }
 }

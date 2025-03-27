@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.kjerne.klage
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.lagKlageinstansResultatDto
+import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
 import no.nav.familie.kontrakter.felles.klage.HenlagtÅrsak
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
+import java.util.UUID
 
 class KlagebehandlingHenterTest {
     private val klageClient = mockk<KlageClient>()
@@ -70,7 +73,7 @@ class KlagebehandlingHenterTest {
     }
 
     @Nested
-    inner class HentSisteVedtatteKlagebehandling {
+    inner class HentForrigeVedtatteKlagebehandling {
         @ParameterizedTest
         @EnumSource(
             value = BehandlingStatus::class,
@@ -81,24 +84,30 @@ class KlagebehandlingHenterTest {
             behandlingStatus: BehandlingStatus,
         ) {
             // Arrange
-            val fagsakId = 1L
+            val nåtidspunkt = LocalDateTime.now()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
 
             val klagebehandlingDto =
                 lagKlagebehandlingDto(
-                    vedtaksdato = LocalDateTime.now(),
+                    fagsakId = UUID.randomUUID(),
+                    vedtaksdato = nåtidspunkt.minusSeconds(1),
                     status = behandlingStatus,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
                 mapOf(
-                    fagsakId to listOf(klagebehandlingDto),
+                    behandling.fagsak.id to listOf(klagebehandlingDto),
                 )
 
             // Act
-            val sisteVedtatteKlagebehandling = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isNull()
+            assertThat(forrigeVedtatteKlagebehandling).isNull()
         }
 
         @ParameterizedTest
@@ -107,25 +116,30 @@ class KlagebehandlingHenterTest {
             henlagtÅrsak: HenlagtÅrsak,
         ) {
             // Arrange
-            val fagsakId = 1L
+            val nåtidspunkt = LocalDateTime.now()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
 
             val klagebehandlingDto =
                 lagKlagebehandlingDto(
-                    vedtaksdato = LocalDateTime.now(),
+                    vedtaksdato = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.FERDIGSTILT,
                     henlagtÅrsak = henlagtÅrsak,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
                 mapOf(
-                    fagsakId to listOf(klagebehandlingDto),
+                    behandling.fagsak.id to listOf(klagebehandlingDto),
                 )
 
             // Act
-            val sisteVedtatteKlagebehandling = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isNull()
+            assertThat(forrigeVedtatteKlagebehandling).isNull()
         }
 
         @ParameterizedTest
@@ -138,57 +152,72 @@ class KlagebehandlingHenterTest {
             behandlingResultat: BehandlingResultat,
         ) {
             // Arrange
-            val fagsakId = 1L
+            val nåtidspunkt = LocalDateTime.now()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
 
             val klagebehandlingDto =
                 lagKlagebehandlingDto(
-                    vedtaksdato = LocalDateTime.now(),
+                    vedtaksdato = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.FERDIGSTILT,
                     henlagtÅrsak = null,
                     resultat = behandlingResultat,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
                 mapOf(
-                    fagsakId to listOf(klagebehandlingDto),
+                    behandling.fagsak.id to listOf(klagebehandlingDto),
                 )
 
             // Act
-            val sisteVedtatteKlagebehandling = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isNull()
+            assertThat(forrigeVedtatteKlagebehandling).isNull()
         }
 
         @Test
         fun `skal filtrer bort klagebehandlinger med behandlingsresultat som er null`() {
             // Arrange
-            val fagsakId = 1L
+            val nåtidspunkt = LocalDateTime.now()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
 
             val klagebehandlingDto =
                 lagKlagebehandlingDto(
-                    vedtaksdato = LocalDateTime.now(),
+                    vedtaksdato = nåtidspunkt.minusSeconds(1),
                     status = BehandlingStatus.FERDIGSTILT,
                     henlagtÅrsak = null,
                     resultat = null,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
                 mapOf(
-                    fagsakId to listOf(klagebehandlingDto),
+                    behandling.fagsak.id to listOf(klagebehandlingDto),
                 )
 
             // Act
-            val sisteVedtatteKlagebehandling = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isNull()
+            assertThat(forrigeVedtatteKlagebehandling).isNull()
         }
 
         @Test
         fun `skal filtrer bort klagebehandlinger med vedtaksdato som er null`() {
             // Arrange
-            val fagsakId = 1L
+            val nåtidspunkt = LocalDateTime.now()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
 
             val klagebehandlingDto =
                 lagKlagebehandlingDto(
@@ -198,27 +227,34 @@ class KlagebehandlingHenterTest {
                     resultat = BehandlingResultat.MEDHOLD,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
                 mapOf(
-                    fagsakId to listOf(klagebehandlingDto),
+                    behandling.fagsak.id to listOf(klagebehandlingDto),
                 )
 
             // Act
-            val sisteVedtatteKlagebehandling = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isNull()
+            assertThat(forrigeVedtatteKlagebehandling).isNull()
         }
 
         @Test
-        fun `skal hente siste vedtatte klagebehandling med korrekt behandlingsresultat`() {
+        fun `skal hente forrige vedtatte klagebehandling med korrekt behandlingsresultat`() {
             // Arrange
-            val fagsakId = 1L
-            val nåtidspunkt = LocalDateTime.now()
+            val nåtidspunkt = LocalDateTime.of(2025, 1, 1, 12, 0)
+
+            val klageFagsakId = UUID.randomUUID()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
 
             val klagebehandlingDto1 =
                 lagKlagebehandlingDto(
-                    vedtaksdato = nåtidspunkt.minusSeconds(1),
+                    fagsakId = klageFagsakId,
+                    vedtaksdato = nåtidspunkt.minusSeconds(2),
                     status = BehandlingStatus.FERDIGSTILT,
                     henlagtÅrsak = null,
                     resultat = BehandlingResultat.MEDHOLD,
@@ -226,36 +262,83 @@ class KlagebehandlingHenterTest {
 
             val klagebehandlingDto2 =
                 lagKlagebehandlingDto(
-                    vedtaksdato = nåtidspunkt,
+                    fagsakId = klageFagsakId,
+                    vedtaksdato = nåtidspunkt.minusSeconds(3),
                     status = BehandlingStatus.FERDIGSTILT,
                     henlagtÅrsak = null,
                     resultat = BehandlingResultat.IKKE_MEDHOLD,
                     klageinstansResultat =
                         listOf(
                             lagKlageinstansResultatDto(
-                                mottattEllerAvsluttetTidspunkt = nåtidspunkt,
+                                type = BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET,
+                                mottattEllerAvsluttetTidspunkt = nåtidspunkt.minusSeconds(1),
                             ),
                         ),
                 )
 
             val klagebehandlingDto3 =
                 lagKlagebehandlingDto(
-                    vedtaksdato = nåtidspunkt.minusSeconds(2),
+                    fagsakId = klageFagsakId,
+                    vedtaksdato = nåtidspunkt.minusSeconds(4),
                     status = BehandlingStatus.FERDIGSTILT,
                     henlagtÅrsak = null,
                     resultat = BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
                 )
 
-            every { klageClient.hentKlagebehandlinger(setOf(fagsakId)) } returns
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
                 mapOf(
-                    fagsakId to listOf(klagebehandlingDto1, klagebehandlingDto2, klagebehandlingDto3),
+                    behandling.fagsak.id to listOf(klagebehandlingDto1, klagebehandlingDto2, klagebehandlingDto3),
+                )
+
+            val forventetForrigeVedtatteKlagebehandling = klagebehandlingDto2.copy(vedtaksdato = nåtidspunkt.minusSeconds(1))
+
+            // Act
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
+
+            // Assert
+            assertThat(forrigeVedtatteKlagebehandling).isEqualTo(forventetForrigeVedtatteKlagebehandling)
+        }
+
+        @Test
+        fun `skal filtrer bort klagebehandlinger med vedtaksdato etter den innsendte behandlingen`() {
+            // Arrange
+            val nåtidspunkt = LocalDateTime.of(2025, 1, 1, 12, 0)
+
+            val klageFagsakId = UUID.randomUUID()
+
+            val behandling =
+                lagBehandling(
+                    aktivertTid = nåtidspunkt,
+                )
+
+            val klagebehandlingDto1 =
+                lagKlagebehandlingDto(
+                    fagsakId = klageFagsakId,
+                    vedtaksdato = nåtidspunkt.plusSeconds(1),
+                    status = BehandlingStatus.FERDIGSTILT,
+                    henlagtÅrsak = null,
+                    resultat = BehandlingResultat.MEDHOLD,
+                )
+
+            val klagebehandlingDto2 =
+                lagKlagebehandlingDto(
+                    fagsakId = klageFagsakId,
+                    vedtaksdato = nåtidspunkt.minusSeconds(1),
+                    status = BehandlingStatus.FERDIGSTILT,
+                    henlagtÅrsak = null,
+                    resultat = BehandlingResultat.MEDHOLD,
+                )
+
+            every { klageClient.hentKlagebehandlinger(setOf(behandling.fagsak.id)) } returns
+                mapOf(
+                    behandling.fagsak.id to listOf(klagebehandlingDto1, klagebehandlingDto2),
                 )
 
             // Act
-            val sisteVedtatteKlagebehandling = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+            val forrigeVedtatteKlagebehandling = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
             // Assert
-            assertThat(sisteVedtatteKlagebehandling).isEqualTo(klagebehandlingDto2)
+            assertThat(forrigeVedtatteKlagebehandling).isEqualTo(klagebehandlingDto2)
         }
     }
 }

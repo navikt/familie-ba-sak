@@ -83,7 +83,7 @@ class KlageService(
 
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> = klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsakId)
 
-    fun hentSisteVedtatteKlagebehandling(fagsakId: Long): KlagebehandlingDto? = klagebehandlingHenter.hentSisteVedtatteKlagebehandling(fagsakId)
+    fun hentForrigeVedtatteKlagebehandling(behandling: Behandling): KlagebehandlingDto? = klagebehandlingHenter.hentForrigeVedtatteKlagebehandling(behandling)
 
     @Transactional(readOnly = true)
     fun kanOppretteRevurdering(fagsakId: Long): KanOppretteRevurderingResponse {

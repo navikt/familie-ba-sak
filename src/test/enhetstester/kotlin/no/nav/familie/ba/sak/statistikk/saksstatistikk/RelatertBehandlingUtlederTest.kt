@@ -48,7 +48,7 @@ class RelatertBehandlingUtlederTest {
             names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
             mode = EnumSource.Mode.INCLUDE,
         )
-        fun `skal utlede relatert behandling med barnetrygdbehandling som siste vedtatte behandling selv for revurdering med årsak klage eller årsak iverksette ka vedtak når toggle er skrudd av`(
+        fun `skal utlede relatert behandling med barnetrygdbehandling som forrige vedtatte behandling selv for revurdering med årsak klage eller årsak iverksette ka vedtak når toggle er skrudd av`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             // Arrange
@@ -63,7 +63,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            val sisteVedtatteBarnetrygdbehandling =
+            val forrigeVedtatteBarnetrygdbehandling =
                 lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     aktivertTid = nåtidspunkt.minusSeconds(2),
@@ -72,16 +72,16 @@ class RelatertBehandlingUtlederTest {
                 )
 
             every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns false
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns forrigeVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { klageService wasNot called }
-            assertThat(relatertBehandling?.id).isEqualTo(sisteVedtatteBarnetrygdbehandling.id.toString())
+            assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteBarnetrygdbehandling.id.toString())
             assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteBarnetrygdbehandling.aktivertTidspunkt)
+            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
         @ParameterizedTest
@@ -105,7 +105,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            every { klageService.hentSisteVedtatteKlagebehandling(revurdering.fagsak.id) } returns null
+            every { klageService.hentForrigeVedtatteKlagebehandling(revurdering) } returns null
 
             // Act & assert
             val exception =
@@ -122,7 +122,7 @@ class RelatertBehandlingUtlederTest {
             names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
             mode = EnumSource.Mode.INCLUDE,
         )
-        fun `skal utlede relatert behandling med klagebehandlingen som siste vedtatte behandling når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
+        fun `skal utlede relatert behandling med klagebehandlingen som forrige vedtatte behandling når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             // Arrange
@@ -137,21 +137,21 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            val sisteVedtatteKlagebehandling =
+            val forrigeVedtatteKlagebehandling =
                 lagKlagebehandlingDto(
                     vedtaksdato = nåtidspunkt,
                 )
 
-            every { klageService.hentSisteVedtatteKlagebehandling(revurdering.fagsak.id) } returns sisteVedtatteKlagebehandling
+            every { klageService.hentForrigeVedtatteKlagebehandling(revurdering) } returns forrigeVedtatteKlagebehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { behandlingHentOgPersisterService wasNot called }
-            assertThat(relatertBehandling?.id).isEqualTo(sisteVedtatteKlagebehandling.id.toString())
+            assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteKlagebehandling.id.toString())
             assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.KLAGE)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteKlagebehandling.vedtaksdato)
+            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteKlagebehandling.vedtaksdato)
         }
 
         @ParameterizedTest
@@ -160,7 +160,7 @@ class RelatertBehandlingUtlederTest {
             names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
             mode = EnumSource.Mode.EXCLUDE,
         )
-        fun `skal utlede relatert behandling med barnetrygdbehandlingen som siste vedtatte behandling når den innsendte behandling er en revurdering som ikke har årsak klage eller iverksetter ka vedtak`(
+        fun `skal utlede relatert behandling med barnetrygdbehandlingen som forrige vedtatte behandling når den innsendte behandling er en revurdering som ikke har årsak klage eller iverksetter ka vedtak`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             // Arrange
@@ -175,7 +175,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            val sisteVedtatteBarnetrygdbehandling =
+            val forrigeVedtatteBarnetrygdbehandling =
                 lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     aktivertTid = nåtidspunkt.minusSeconds(2),
@@ -183,20 +183,20 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns forrigeVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { klageService wasNot called }
-            assertThat(relatertBehandling?.id).isEqualTo(sisteVedtatteBarnetrygdbehandling.id.toString())
+            assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteBarnetrygdbehandling.id.toString())
             assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteBarnetrygdbehandling.aktivertTidspunkt)
+            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
         @Test
-        fun `skal utlede relatert behandling med barnetrygdbehandlingen som siste vedtatte behandling når den innsendte behandling er en teknisk endring`() {
+        fun `skal utlede relatert behandling med barnetrygdbehandlingen som forrige vedtatte behandling når den innsendte behandling er en teknisk endring`() {
             // Arrange
             val nåtidspunkt = LocalDateTime.now()
 
@@ -209,7 +209,7 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
-            val sisteVedtatteBarnetrygdbehandling =
+            val forrigeVedtatteBarnetrygdbehandling =
                 lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     aktivertTid = nåtidspunkt.minusSeconds(2),
@@ -217,16 +217,16 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tekniskEndring) } returns sisteVedtatteBarnetrygdbehandling
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tekniskEndring) } returns forrigeVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(tekniskEndring)
 
             // Assert
             verify { klageService wasNot called }
-            assertThat(relatertBehandling?.id).isEqualTo(sisteVedtatteBarnetrygdbehandling.id.toString())
+            assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteBarnetrygdbehandling.id.toString())
             assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(sisteVedtatteBarnetrygdbehandling.aktivertTidspunkt)
+            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
         @ParameterizedTest
