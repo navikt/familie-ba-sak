@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevInnhenteOpplysningerKlage
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevInnhenteOpplysningerKlageData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevKanSøke
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevTilForelderBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevTilForelderData
@@ -259,6 +261,29 @@ fun ManueltBrevRequest.tilBrev(
                             ),
                     ),
             )
+
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE -> {
+            if (fritekstAvsnitt == null) {
+                throw FunksjonellFeil("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
+            }
+            InformasjonsbrevInnhenteOpplysningerKlage(
+                data =
+                    InformasjonsbrevInnhenteOpplysningerKlageData(
+                        delmalData =
+                            InformasjonsbrevInnhenteOpplysningerKlageData.DelmalData(
+                                signatur = signaturDelmal,
+                                fritekstAvsnitt = fritekstAvsnitt,
+                            ),
+                        flettefelter =
+                            InformasjonsbrevInnhenteOpplysningerKlageData.Flettefelter(
+                                navn = mottakerNavn,
+                                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                                organisasjonsnummer = if (erOrgNr(mottakerIdent)) mottakerIdent else null,
+                                gjelder = this.vedrørende?.navn,
+                            ),
+                    ),
+            )
+        }
 
         Brevmal.UTBETALING_ETTER_KA_VEDTAK ->
             UtbetalingEtterKAVedtak(
