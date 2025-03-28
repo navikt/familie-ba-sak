@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevInnhenteOpplysningerKlageData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -116,6 +117,42 @@ class ManueltBrevRequestTest {
         }
         assertThat(brev.fritekst).isEqualTo("Fritekst avsnitt")
         assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
+    }
+
+    @Test
+    fun `tilBrev genererer 'innhente opplysninger klage'-brev som forventet`() {
+        val fnr = "12345678910"
+        val mottakerNavn = "mottakerNavn"
+        val brevRequestTilPerson =
+            baseRequest.copy(
+                brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
+                fritekstAvsnitt = "Fritekst avsnitt",
+            )
+        val brev = brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
+        with(brev.flettefelter) {
+            assertThat(fodselsnummer).containsExactly(fnr)
+            assertThat(navn).containsExactly(mottakerNavn)
+            assertThat(organisasjonsnummer).isNull()
+            assertThat(gjelder).isNull()
+        }
+        assertThat(brev.delmalData.fritekstAvsnitt.fritekstAvsnittTekst).containsExactly("Fritekst avsnitt")
+        assertThat(brev.delmalData.signatur.saksbehandler).containsExactly("Saks Behandlersen")
+    }
+
+    @Test
+    fun `'innhente opplysninger klage'-brev krever at fritekst avsnitt har en verdi`() {
+        val fnr = "12345678910"
+        val mottakerNavn = "mottakerNavn"
+        val brevRequestTilPerson =
+            baseRequest.copy(
+                brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
+                fritekstAvsnitt = "",
+            )
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                brevRequestTilPerson.tilBrev(fnr, mottakerNavn, "Saks Behandlersen") { emptyMap() }
+            }
+        assertThat(funksjonellFeil.melding).isEqualTo("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
     }
 
     @Test
