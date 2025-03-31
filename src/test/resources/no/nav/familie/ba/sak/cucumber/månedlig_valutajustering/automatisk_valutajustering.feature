@@ -47,7 +47,8 @@ Egenskap: Automatisk valutajustering
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
-      | 2       | 1            | 01.07.2023 | 30.09.2025 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.07.2023 | 30.04.2025 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.05.2025 | 30.09.2025 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1968 |
 
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av automatisk valutajustering og har følgende valutakurser
       | Valuta kode | Valutakursdato | Kurs |
@@ -60,7 +61,8 @@ Egenskap: Automatisk valutajustering
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats | Differanseberegnet beløp |
       | 2       | 2            | 01.07.2023 | 29.02.2024 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1566                     |
-      | 2       | 2            | 01.03.2024 | 30.09.2025 | 1466  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1466                     |
+      | 2       | 2            | 01.03.2024 | 30.04.2025 | 1466  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1466                     |
+      | 2       | 2            | 01.05.2025 | 30.09.2025 | 1668  | ORDINÆR_BARNETRYGD | 100     | 1968 | 1668                     |
 
   Scenario: Automatisk valutajustering skal endre på beløp riktig, selv om det er en utenlandsk periodbeløp som starter samme måned
     Og med utenlandsk periodebeløp
@@ -71,7 +73,8 @@ Egenskap: Automatisk valutajustering
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
       | 2       | 1            | 01.07.2023 | 29.02.2024 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 |
-      | 2       | 1            | 01.03.2024 | 30.09.2025 | 1366  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.03.2024 | 30.04.2025 | 1366  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.05.2025 | 30.09.2025 | 1366  | ORDINÆR_BARNETRYGD | 100     | 1968 |
 
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av automatisk valutajustering og har følgende valutakurser
       | Valuta kode | Valutakursdato | Kurs |
@@ -84,4 +87,5 @@ Egenskap: Automatisk valutajustering
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats | Differanseberegnet beløp |
       | 2       | 2            | 01.07.2023 | 29.02.2024 | 1566  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1566                     |
-      | 2       | 2            | 01.03.2024 | 30.09.2025 | 1166  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1166                     |
+      | 2       | 2            | 01.03.2024 | 30.04.2025 | 1166  | ORDINÆR_BARNETRYGD | 100     | 1766 | 1166                     |
+      | 2       | 2            | 01.05.2025 | 30.09.2025 | 1368  | ORDINÆR_BARNETRYGD | 100     | 1968 | 1368                     |
