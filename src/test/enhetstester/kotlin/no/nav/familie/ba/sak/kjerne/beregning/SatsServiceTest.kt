@@ -10,12 +10,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.TILLEGG_ORBA
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.plus
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
@@ -36,7 +38,7 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        assertEquals(10, ordinærePerioder.size)
+        assertEquals(11, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 970, fom = "2017-04", tom = "2019-02"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-03", tom = "2020-08"), ordinærePerioder[1])
@@ -47,7 +49,8 @@ class SatsServiceTest {
         assertPeriode(TestKrPeriode(beløp = 1083, fom = "2023-04", tom = "2023-06"), ordinærePerioder[6])
         assertPeriode(TestKrPeriode(beløp = 1310, fom = "2023-07", tom = "2023-12"), ordinærePerioder[7])
         assertPeriode(TestKrPeriode(beløp = 1510, fom = "2024-01", tom = "2024-08"), ordinærePerioder[8])
-        assertPeriode(TestKrPeriode(beløp = 1766, fom = "2024-09", tom = null), ordinærePerioder[9])
+        assertPeriode(TestKrPeriode(beløp = 1766, fom = "2024-09", tom = "2025-04"), ordinærePerioder[9])
+        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = null), ordinærePerioder[10])
     }
 
     @Test
@@ -57,9 +60,10 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        assertEquals(1, ordinærePerioder.size)
+        assertEquals(2, ordinærePerioder.size)
 
-        assertPeriode(TestKrPeriode(beløp = 1766, fom = "2025-01", tom = null), ordinærePerioder[0])
+        assertPeriode(TestKrPeriode(beløp = 1766, fom = "2025-01", tom = "2025-04"), ordinærePerioder[0])
+        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = null), ordinærePerioder[1])
     }
 
     @Test
@@ -69,14 +73,15 @@ class SatsServiceTest {
         val ordinærTidslinje = lagOrdinærTidslinje(barn)
         val ordinærePerioder = ordinærTidslinje.tilPerioderIkkeNull().toList()
 
-        assertEquals(6, ordinærePerioder.size)
+        assertEquals(7, ordinærePerioder.size)
 
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-12", tom = "2020-08"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1354, fom = "2020-09", tom = "2021-08"), ordinærePerioder[1])
         assertPeriode(TestKrPeriode(beløp = 1654, fom = "2021-09", tom = "2021-12"), ordinærePerioder[2])
         assertPeriode(TestKrPeriode(beløp = 1676, fom = "2022-01", tom = "2023-02"), ordinærePerioder[3])
         assertPeriode(TestKrPeriode(beløp = 1723, fom = "2023-03", tom = "2023-06"), ordinærePerioder[4])
-        assertPeriode(TestKrPeriode(beløp = 1766, fom = "2023-07", tom = null), ordinærePerioder[5])
+        assertPeriode(TestKrPeriode(beløp = 1766, fom = "2023-07", tom = "2025-04"), ordinærePerioder[5])
+        assertPeriode(TestKrPeriode(beløp = 1968, fom = "2025-05", tom = null), ordinærePerioder[6])
     }
 
     private fun assertPeriode(
@@ -112,7 +117,8 @@ class SatsServiceTest {
                     (mar(2023)..jun(2023)).tilTidslinje { 1083 } +
                     (jul(2023)..des(2023)).tilTidslinje { 1310 } +
                     (jan(2024)..aug(2024)).tilTidslinje { 1510 } +
-                    (sep(2024)..uendelig).tilTidslinje { 1766 }
+                    (sep(2024)..apr(2025)).tilTidslinje { 1766 } +
+                    (mai(2025)..uendelig).tilTidslinje { 1968 }
 
             val faktisk = satstypeTidslinje(ORBA)
 
