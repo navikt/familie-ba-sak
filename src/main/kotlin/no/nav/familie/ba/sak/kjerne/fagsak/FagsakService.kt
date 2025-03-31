@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingsbehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -57,7 +56,6 @@ class FagsakService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
     private val institusjonService: InstitusjonService,
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -192,8 +190,6 @@ class FagsakService(
     fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
 
-        val tilbakekrevingsbehandlinger =
-            tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger =
             behandlingHentOgPersisterService
                 .hentBehandlinger(fagsakId = fagsakId)
@@ -207,7 +203,6 @@ class FagsakService(
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
         return restBaseFagsak.tilRestMinimalFagsak(
             restVisningBehandlinger = visningsbehandlinger,
-            tilbakekrevingsbehandlinger = tilbakekrevingsbehandlinger,
             migreringsdato = migreringsdato,
         )
     }
@@ -215,14 +210,12 @@ class FagsakService(
     private fun lagRestFagsak(fagsakId: Long): RestFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
 
-        val tilbakekrevingsbehandlinger =
-            tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger =
             behandlingHentOgPersisterService
                 .hentBehandlinger(fagsakId = fagsakId)
                 .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
 
-        return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
+        return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger)
     }
 
     private fun lagRestBaseFagsak(fagsakId: Long): RestBaseFagsak {
