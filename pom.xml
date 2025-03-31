@@ -47,7 +47,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.20.6</testcontainers.postgresql.version>
-        <unleash.version>10.2.0</unleash.version>
+        <unleash.version>10.2.2</unleash.version>
         <testcontainers.postgresql.version>1.20.6</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
@@ -58,7 +58,7 @@
         <sonar.sources>src/main</sonar.sources>
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
-        <sonar-maven-plugin.version>5.0.0.4389</sonar-maven-plugin.version>
+        <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
     </properties>
 
@@ -541,7 +541,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.5.3</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
