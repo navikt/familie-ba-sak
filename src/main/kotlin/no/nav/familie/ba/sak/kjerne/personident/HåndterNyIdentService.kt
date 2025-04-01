@@ -22,6 +22,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.person.pdl.aktor.v2.Type
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class HåndterNyIdentService(
@@ -134,6 +135,12 @@ class HåndterNyIdentService(
         val fødselsdatoForrigeBehandling =
             personGrunnlag.personer.singleOrNull { it.aktør.aktørId in aktørIder }?.fødselsdato
                 ?: return // Hvis aktør ikke er med i forrige behandling kan vi patche selv om fødselsdato er ulik
+
+        // Hvis begge fødseldatoene er eldre enn 18 år kan vi patche uansett
+        if (fødselsdatoFraPdl.isBefore(LocalDate.now().minusYears(18)) && fødselsdatoForrigeBehandling.isBefore(LocalDate.now().minusYears(18))) {
+            secureLogger.info("$fødselsdatoFraPdl og $fødselsdatoForrigeBehandling er eldre enn 18 år. Kan patche uansett")
+            return
+        }
 
         if (fødselsdatoFraPdl.toYearMonth() != fødselsdatoForrigeBehandling.toYearMonth()) {
             secureLogger.warn(
