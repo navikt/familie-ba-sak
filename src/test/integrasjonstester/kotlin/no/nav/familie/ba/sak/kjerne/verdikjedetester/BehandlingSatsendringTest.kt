@@ -108,11 +108,12 @@ class BehandlingSatsendringTest(
             )
 
         assertThat(aty.map { Triple(it.stønadFom, it.stønadTom, it.sats) })
-            .hasSize(3)
+            .hasSize(4)
             .contains(
                 Triple(YearMonth.of(2023, 2), YearMonth.of(2023, 2), 1676),
                 Triple(YearMonth.of(2023, 3), YearMonth.of(2023, 6), 1723),
-                Triple(YearMonth.of(2023, 7), YearMonth.of(2040, 12), 1766),
+                Triple(YearMonth.of(2023, 7), YearMonth.of(2025, 4), 1766),
+                Triple(YearMonth.of(2025, 5), YearMonth.of(2040, 12), 1968),
             )
 
         val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_SEPTEMBER_2024)
