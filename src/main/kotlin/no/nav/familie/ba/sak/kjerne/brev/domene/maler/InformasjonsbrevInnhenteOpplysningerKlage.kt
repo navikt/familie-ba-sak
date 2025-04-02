@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class InformasjonsbrevInnhenteOpplysningerKlage(
-    override val mal: Brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
+    override val mal: Brevmal,
     override val data: InformasjonsbrevInnhenteOpplysningerKlageData,
 ) : Brev
 
