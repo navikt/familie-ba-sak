@@ -6,7 +6,7 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_SEPTEMBER_2024
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.hentAktivSatsendringstidspunkt
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -85,13 +85,13 @@ class BehandlingSatsendringTest(
                 Triple(YearMonth.of(2023, 2), YearMonth.of(2028, 12), 1676),
                 Triple(YearMonth.of(2029, 1), YearMonth.of(2040, 12), 1054),
             )
-        satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_SEPTEMBER_2024))
+        satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = hentAktivSatsendringstidspunkt()))
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
         val satsendringResultat =
-            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, SATSENDRINGMÅNED_SEPTEMBER_2024))
+            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, hentAktivSatsendringstidspunkt()))
 
         assertEquals(SatsendringSvar.SATSENDRING_KJØRT_OK, satsendringResultat)
 
@@ -116,7 +116,7 @@ class BehandlingSatsendringTest(
                 Triple(YearMonth.of(2025, 5), YearMonth.of(2040, 12), 1968),
             )
 
-        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_SEPTEMBER_2024)
+        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = hentAktivSatsendringstidspunkt())
         assertThat(satskjøring?.ferdigTidspunkt)
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
     }
@@ -130,11 +130,11 @@ class BehandlingSatsendringTest(
         val behandling = opprettBehandling(scenario)
 
         val satsendringResultat =
-            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, SATSENDRINGMÅNED_SEPTEMBER_2024))
+            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, hentAktivSatsendringstidspunkt()))
 
         assertEquals(SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT, satsendringResultat)
 
-        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_SEPTEMBER_2024)
+        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = hentAktivSatsendringstidspunkt())
         assertThat(satskjøring?.ferdigTidspunkt)
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
     }
