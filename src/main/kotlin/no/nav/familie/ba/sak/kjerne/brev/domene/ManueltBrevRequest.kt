@@ -262,11 +262,14 @@ fun ManueltBrevRequest.tilBrev(
                     ),
             )
 
-        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE -> {
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
+        -> {
             if (fritekstAvsnitt == null) {
                 throw FunksjonellFeil("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
             }
             InformasjonsbrevInnhenteOpplysningerKlage(
+                mal = brevmal,
                 data =
                     InformasjonsbrevInnhenteOpplysningerKlageData(
                         delmalData =
