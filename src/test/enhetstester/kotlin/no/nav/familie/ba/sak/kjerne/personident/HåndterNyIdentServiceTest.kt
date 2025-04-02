@@ -61,12 +61,12 @@ internal class HåndterNyIdentServiceTest {
                 personIdentService = personIdentService,
             )
 
-        val gammelFødselsdato = LocalDate.of(2000, 1, 1)
+        val gammelFødselsdato = LocalDate.now().minusYears(1)
         val gammeltFnr = randomFnr(gammelFødselsdato)
         val gammelAktør = tilAktør(gammeltFnr)
         val gammelPerson = lagPerson(aktør = gammelAktør, fødselsdato = gammelFødselsdato)
 
-        val nyFødselsdato = LocalDate.of(2000, 2, 2)
+        val nyFødselsdato = LocalDate.now().minusYears(1).minusMonths(3)
         val nyttFnr = randomFnr(nyFødselsdato)
         val nyAktør = tilAktør(nyttFnr)
 
