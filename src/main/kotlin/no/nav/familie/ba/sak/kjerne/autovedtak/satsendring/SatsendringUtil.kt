@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -30,9 +29,11 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertForSats(
         .filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { andel ->
             val person = personOpplysningGrunnlag.personer.single { it.aktør == andel.aktør }
-            val andelSatsType = andel.type.tilSatsType(person, andel.stønadFom.førsteDagIInneværendeMåned())
+            // Bruker stønadTom siden
 
-            andelSatsType == satstype
+            val andelSatsTyper = andel.type.tilSatsType(person, andel.stønadFom, andel.stønadTom)
+
+            andelSatsTyper.contains(satstype)
         }.filter { it.prosent != BigDecimal.ZERO }
         .all { andelTilkjentYtelse -> andelTilkjentYtelse.sats == SatsService.finnSisteSatsFor(satstype).beløp }
 }

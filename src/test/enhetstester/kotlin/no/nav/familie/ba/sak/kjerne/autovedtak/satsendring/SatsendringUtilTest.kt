@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 class SatsendringUtilTest {
     private val ugyldigSats = 1000
@@ -41,6 +42,23 @@ class SatsendringUtilTest {
                 }
 
         assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatser(personopplysningGrunnlag))
+    }
+
+    @Test
+    fun `Skal returnere false når andelen overlapper siste dag for TILLEGSORBA og satsendring for ORBA`() {
+        // Arrange
+        val andelerMedSisteSats =
+            listOf(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = YearMonth.of(2023, 7),
+                    tom = YearMonth.of(2030, 1),
+                    sats = 1766,
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    person = person4År,
+                ),
+            )
+        // Act & Assert
+        assertFalse(andelerMedSisteSats.erOppdatertMedSisteSatser(personopplysningGrunnlag))
     }
 
     @Test

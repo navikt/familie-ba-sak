@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.YtelsetypeBA
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -9,6 +11,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 
 class YtelseTypeTest {
     @Nested
@@ -44,48 +47,48 @@ class YtelseTypeTest {
     @Nested
     inner class TilSatsTypeTest {
         @Test
-        fun `tilSatsType for ORDINÆR_BARNETRYGD for en som er under 6 år i august 2024 skal returnere TILLEGGS_ORBA`() {
+        fun `tilSatsType for ORDINÆR_BARNETRYGD for en som er under 6 år i august 2024 skal returnere TILLEGGS_ORBA og ORBA`() {
             val person = lagPerson(fødselsdato = LocalDate.of(2024, 8, 1).minusYears(6).plusMonths(1))
-            val ytelseDato = LocalDate.of(2024, 8, 1)
+            val ytelseDatoFom = YearMonth.of(2024, 8)
 
-            val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDato)
-            assertThat(result).isEqualTo(SatsType.TILLEGG_ORBA)
+            val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth())
+            assertThat(result).isEqualTo(setOf(SatsType.TILLEGG_ORBA, SatsType.ORBA))
         }
 
         @Test
         fun `tilSatsType for ORDINÆR_BARNETRYGD for en som er under 6 år i september 2024 skal returnere ORBA`() {
             val person = lagPerson(fødselsdato = LocalDate.of(2024, 9, 1).minusYears(6).plusMonths(1))
-            val ytelseDato = LocalDate.of(2024, 9, 1)
+            val ytelseDatoFom = YearMonth.of(2024, 9)
 
-            val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDato)
+            val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
             assertThat(result).isEqualTo(SatsType.ORBA)
         }
 
         @Test
         fun `tilSatsType for ORDINÆR_BARNETRYGD etter 6 år`() {
             val person = mockk<Person>()
-            val ytelseDato = LocalDate.of(2026, 1, 1)
+            val ytelseDatoFom = YearMonth.of(2026, 1)
             every { person.hentSeksårsdag() } returns LocalDate.of(2025, 1, 1)
 
-            val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDato)
+            val result = YtelseType.ORDINÆR_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
             assertThat(result).isEqualTo(SatsType.ORBA)
         }
 
         @Test
         fun `tilSatsType for UTVIDET_BARNETRYGD`() {
             val person = mockk<Person>()
-            val ytelseDato = LocalDate.of(2020, 1, 1)
+            val ytelseDatoFom = YearMonth.of(2020, 1)
 
-            val result = YtelseType.UTVIDET_BARNETRYGD.tilSatsType(person, ytelseDato)
+            val result = YtelseType.UTVIDET_BARNETRYGD.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
             assertThat(result).isEqualTo(SatsType.UTVIDET_BARNETRYGD)
         }
 
         @Test
         fun `tilSatsType for SMÅBARNSTILLEGG`() {
             val person = mockk<Person>()
-            val ytelseDato = LocalDate.of(2020, 1, 1)
+            val ytelseDatoFom = YearMonth.of(2020, 1)
 
-            val result = YtelseType.SMÅBARNSTILLEGG.tilSatsType(person, ytelseDato)
+            val result = YtelseType.SMÅBARNSTILLEGG.tilSatsType(person, ytelseDatoFom, TIDENES_ENDE.toYearMonth()).single()
             assertThat(result).isEqualTo(SatsType.SMA)
         }
     }

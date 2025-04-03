@@ -123,6 +123,7 @@ internal fun hentStandardBegrunnelser(
             it.skalFiltreresPåHendelser(
                 begrunnelseGrunnlag,
                 vedtaksperiode.fom,
+                vedtaksperiode.tom,
             )
         }
 
