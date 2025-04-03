@@ -50,4 +50,7 @@ enum class FeatureToggle(
 
     // Tillatter behandling av klage
     BEHANDLE_KLAGE("familie-ba-sak.klage"),
+
+    // NAV-24658
+    SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK("familie-ba-sak.sett-relatert-behandling-for-revurdering-klage-i-saksstatistikk"),
 }
