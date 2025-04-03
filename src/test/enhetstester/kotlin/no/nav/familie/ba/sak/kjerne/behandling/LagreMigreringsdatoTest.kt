@@ -15,12 +15,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -33,44 +30,43 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class LagreMigreringsdatoTest {
-    val behandlingstemaService = mockk<BehandlingstemaService>()
-    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
-    val behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
-    val beregningService = mockk<BeregningService>()
-    val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
-    val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
-    val behandlingMetrikker = mockk<BehandlingMetrikker>()
-    val fagsakRepository = mockk<FagsakRepository>()
-    val vedtakRepository = mockk<VedtakRepository>()
-    val loggService = mockk<LoggService>()
-    val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
-    val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
-    val infotrygdService = mockk<InfotrygdService>()
-    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
-    val taskRepository = mockk<TaskRepositoryWrapper>()
-    val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
-    val vilkårsvurderingService = mockk<VilkårsvurderingService>()
-    val simuleringService = mockk<SimuleringService>()
-    val mockkUnleash = mockk<UnleashNextMedContextService>()
+    private val behandlingstemaService = mockk<BehandlingstemaService>()
+    private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
+    private val behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
+    private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    private val behandlingMetrikker = mockk<BehandlingMetrikker>()
+    private val fagsakRepository = mockk<FagsakRepository>()
+    private val vedtakRepository = mockk<VedtakRepository>()
+    private val loggService = mockk<LoggService>()
+    private val arbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
+    private val infotrygdService = mockk<InfotrygdService>()
+    private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
+    private val taskRepository = mockk<TaskRepositoryWrapper>()
+    private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
+    private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    private val mockkUnleash = mockk<UnleashNextMedContextService>()
+    private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
 
     private val behandlingService =
         BehandlingService(
-            behandlingHentOgPersisterService,
-            behandlingstemaService,
-            behandlingSøknadsinfoService,
-            behandlingMigreringsinfoRepository,
-            behandlingMetrikker,
-            saksstatistikkEventPublisher,
-            fagsakRepository,
-            vedtakRepository,
-            andelTilkjentYtelseRepository,
-            loggService,
-            arbeidsfordelingService,
-            infotrygdService,
-            vedtaksperiodeService,
-            taskRepository,
-            vilkårsvurderingService,
-            mockkUnleash,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingstemaService = behandlingstemaService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+            behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
+            behandlingMetrikker = behandlingMetrikker,
+            saksstatistikkEventPublisher = saksstatistikkEventPublisher,
+            fagsakRepository = fagsakRepository,
+            vedtakRepository = vedtakRepository,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            loggService = loggService,
+            arbeidsfordelingService = arbeidsfordelingService,
+            infotrygdService = infotrygdService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            taskRepository = taskRepository,
+            vilkårsvurderingService = vilkårsvurderingService,
+            unleashService = mockkUnleash,
+            eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
         )
 
     @Test

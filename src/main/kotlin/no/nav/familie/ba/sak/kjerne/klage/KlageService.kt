@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
@@ -100,42 +101,48 @@ class KlageService(
     }
 
     @Transactional
-    fun validerOgOpprettRevurderingKlage(fagsakId: Long): OpprettRevurderingResponse {
+    fun validerOgOpprettRevurderingKlage(
+        fagsakId: Long,
+        klagebehandlingId: UUID?,
+    ): OpprettRevurderingResponse {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
         val resultat = utledKanOppretteRevurdering(fagsak)
         return when (resultat) {
-            is KanOppretteRevurdering -> opprettRevurderingKlage(fagsak)
+            is KanOppretteRevurdering -> opprettRevurderingKlage(fagsak, klagebehandlingId)
             is KanIkkeOppretteRevurdering -> OpprettRevurderingResponse(IkkeOpprettet(resultat.årsak.ikkeOpprettetÅrsak))
         }
     }
 
-    private fun opprettRevurderingKlage(fagsak: Fagsak) =
-        try {
-            val forrigeBehandling =
-                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
-                    ?: throw Feil("Finner ikke tidligere behandling")
+    private fun opprettRevurderingKlage(
+        fagsak: Fagsak,
+        klagebehandlingId: UUID?,
+    ) = try {
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                ?: throw Feil("Finner ikke tidligere behandling")
 
-            val nyBehandling =
-                NyBehandling(
-                    kategori = forrigeBehandling.kategori,
-                    underkategori = forrigeBehandling.underkategori,
-                    søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
-                    behandlingType = BehandlingType.REVURDERING,
-                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
-                    navIdent = SikkerhetContext.hentSaksbehandler(),
-                    // barnasIdenter hentes fra forrige behandling i håndterNyBehandling() ved revurdering
-                    barnasIdenter = emptyList(),
-                    fagsakId = forrigeBehandling.fagsak.id,
-                )
+        val nyBehandling =
+            NyBehandling(
+                kategori = forrigeBehandling.kategori,
+                underkategori = forrigeBehandling.underkategori,
+                søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingType = BehandlingType.REVURDERING,
+                behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                navIdent = SikkerhetContext.hentSaksbehandler(),
+                // barnasIdenter hentes fra forrige behandling i håndterNyBehandling() ved revurdering
+                barnasIdenter = emptyList(),
+                fagsakId = forrigeBehandling.fagsak.id,
+                nyEksternBehandlingRelasjon = klagebehandlingId?.let { NyEksternBehandlingRelasjon.opprettForKlagebehandling(it) },
+            )
 
-            val revurdering = stegService.håndterNyBehandling(nyBehandling)
-            OpprettRevurderingResponse(Opprettet(revurdering.id.toString()))
-        } catch (e: Exception) {
-            logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
-            secureLogger.error("Feilet opprettelse av revurdering for fagsak=$fagsak", e)
-            OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
-        }
+        val revurdering = stegService.håndterNyBehandling(nyBehandling)
+        OpprettRevurderingResponse(Opprettet(revurdering.id.toString()))
+    } catch (e: Exception) {
+        logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
+        secureLogger.error("Feilet opprettelse av revurdering for fagsak=$fagsak", e)
+        OpprettRevurderingResponse(IkkeOpprettet(IkkeOpprettetÅrsak.FEIL, e.message))
+    }
 
     private fun utledKanOppretteRevurdering(fagsak: Fagsak): KanOppretteRevurderingResultat {
         val erÅpenBehandlingPåFagsak = behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(fagsak.id)

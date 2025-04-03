@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
+import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -20,10 +22,10 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.util.UUID
 
 class KlageServiceTest {
     private val fagsakService = mockk<FagsakService>()
@@ -45,7 +47,8 @@ class KlageServiceTest {
     @Nested
     inner class KanOppretteRevurdering {
         @Test
-        internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
+        fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
+            // Arrange
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
@@ -53,14 +56,17 @@ class KlageServiceTest {
                     status = BehandlingStatus.AVSLUTTET,
                 )
 
+            // Act
             val result = klageService.kanOppretteRevurdering(0L)
 
-            Assertions.assertTrue(result.kanOpprettes)
-            Assertions.assertEquals(result.årsak, null)
+            // Assert
+            assertThat(result.kanOpprettes).isTrue()
+            assertThat(result.årsak).isNull()
         }
 
         @Test
-        internal fun `kan ikke opprette revurdering hvis det finnes åpen behandling`() {
+        fun `kan ikke opprette revurdering hvis det finnes åpen behandling`() {
+            // Arrange
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
@@ -68,29 +74,35 @@ class KlageServiceTest {
                     status = BehandlingStatus.UTREDES,
                 )
 
+            // Act
             val result = klageService.kanOppretteRevurdering(0L)
 
-            Assertions.assertFalse(result.kanOpprettes)
-            Assertions.assertEquals(result.årsak, KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING)
+            // Assert
+            assertThat(result.kanOpprettes).isFalse()
+            assertThat(result.årsak).isEqualTo(KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING)
         }
 
         @Test
-        internal fun `kan ikke opprette revurdering hvis det ikke finnes noen behandlinger`() {
+        fun `kan ikke opprette revurdering hvis det ikke finnes noen behandlinger`() {
+            // Arrange
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
+            // Act
             val result = klageService.kanOppretteRevurdering(0L)
 
-            Assertions.assertFalse(result.kanOpprettes)
-            Assertions.assertEquals(result.årsak, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)
+            // Assert
+            assertThat(result.kanOpprettes).isFalse()
+            assertThat(result.årsak).isEqualTo(KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)
         }
     }
 
     @Nested
     inner class OpprettRevurderingKlage {
         @Test
-        internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
+        fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
+            // Arrange
             val aktør = randomAktør()
             val fagsak = Fagsak(aktør = aktør)
             val forrigeBehandling =
@@ -117,36 +129,88 @@ class KlageServiceTest {
                     navIdent = SikkerhetContext.hentSaksbehandler(),
                     barnasIdenter = emptyList(),
                     fagsakId = forrigeBehandling.fagsak.id,
+                    nyEksternBehandlingRelasjon = null,
                 )
 
-            klageService.validerOgOpprettRevurderingKlage(fagsak.id)
+            // Act
+            klageService.validerOgOpprettRevurderingKlage(fagsakId = fagsak.id, klagebehandlingId = null)
 
+            // Assert
             verify { stegService.håndterNyBehandling(nyBehandling) }
         }
 
         @Test
-        internal fun `kan ikke opprette revurdering hvis det finnes åpen behandling`() {
-            every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
-            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns
+        fun `kan opprette revurdering med ekstern behandling relasjon hvis det finnes en ferdigstilt behandling`() {
+            // Arrange
+            val klagebehandlingId = UUID.randomUUID()
+            val aktør = randomAktør()
+            val fagsak = Fagsak(aktør = aktør)
+            val forrigeBehandling =
                 lagBehandling(
-                    status = BehandlingStatus.UTREDES,
+                    behandlingKategori = BehandlingKategori.EØS,
+                    underkategori = BehandlingUnderkategori.UTVIDET,
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
+                    status = BehandlingStatus.AVSLUTTET,
                 )
 
-            val result = klageService.validerOgOpprettRevurderingKlage(0L)
+            val nyEksternBehandlingRelasjon =
+                NyEksternBehandlingRelasjon(
+                    eksternBehandlingId = klagebehandlingId.toString(),
+                    eksternBehandlingFagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
+                )
 
-            Assertions.assertFalse(result.opprettetBehandling)
+            val nyBehandling =
+                NyBehandling(
+                    kategori = forrigeBehandling.kategori,
+                    underkategori = forrigeBehandling.underkategori,
+                    søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                    navIdent = SikkerhetContext.hentSaksbehandler(),
+                    barnasIdenter = emptyList(),
+                    fagsakId = forrigeBehandling.fagsak.id,
+                    nyEksternBehandlingRelasjon = nyEksternBehandlingRelasjon,
+                )
+
+            every { fagsakService.hentPåFagsakId(any()) } returns fagsak
+            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
+
+            // Act
+            klageService.validerOgOpprettRevurderingKlage(fagsakId = fagsak.id, klagebehandlingId = klagebehandlingId)
+
+            // Assert
+            verify { stegService.håndterNyBehandling(nyBehandling) }
         }
 
         @Test
-        internal fun `kan ikke opprette revurdering hvis det ikke finnes noen behandlinger`() {
+        fun `kan ikke opprette revurdering hvis det finnes åpen behandling`() {
+            // Arrange
+            every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
+            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(status = BehandlingStatus.UTREDES)
+
+            // Act
+            val result = klageService.validerOgOpprettRevurderingKlage(fagsakId = 0L, klagebehandlingId = null)
+
+            // Assert
+            assertThat(result.opprettetBehandling).isFalse()
+        }
+
+        @Test
+        fun `kan ikke opprette revurdering hvis det ikke finnes noen behandlinger`() {
+            // Arrange
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
-            val result = klageService.validerOgOpprettRevurderingKlage(0L)
+            // Act
+            val result = klageService.validerOgOpprettRevurderingKlage(fagsakId = 0L, klagebehandlingId = null)
 
-            Assertions.assertFalse(result.opprettetBehandling)
+            // Assert
+            assertThat(result.opprettetBehandling).isFalse()
         }
     }
 

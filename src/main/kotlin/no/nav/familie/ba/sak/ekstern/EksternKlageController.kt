@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 // Kalles av familie-klage
 @RestController
@@ -47,8 +48,9 @@ class EksternKlageController(
         return Ressurs.success(klageService.kanOppretteRevurdering(fagsakId))
     }
 
+    @Deprecated(message = "Erstattet av metoden 'opprettRevurderingKlage'")
     @PostMapping("fagsaker/{fagsakId}/opprett-revurdering-klage")
-    fun opprettRevurderingKlage(
+    fun opprettRevurderingKlageGammel(
         @PathVariable fagsakId: Long,
     ): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
@@ -63,9 +65,35 @@ class EksternKlageController(
         }
         return Ressurs.success(
             klageService.validerOgOpprettRevurderingKlage(
-                fagsakId,
+                fagsakId = fagsakId,
+                klagebehandlingId = null,
             ),
         )
+    }
+
+    @PostMapping("fagsak/{fagsakId}/klagebehandling/{klagebehandlingId}/opprett-revurdering-klage")
+    fun opprettRevurderingKlage(
+        @PathVariable fagsakId: Long,
+        @PathVariable klagebehandlingId: UUID,
+    ): Ressurs<OpprettRevurderingResponse> {
+        tilgangService.validerTilgangTilHandlingOgFagsak(
+            fagsakId = fagsakId,
+            handling = "Opprett revurdering med årask klage på fagsak=$fagsakId",
+            event = AuditLoggerEvent.CREATE,
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+        )
+
+        if (!SikkerhetContext.kallKommerFraKlage()) {
+            throw Feil("Kallet utføres ikke av en autorisert klient")
+        }
+
+        val opprettRevurderingResponse =
+            klageService.validerOgOpprettRevurderingKlage(
+                fagsakId = fagsakId,
+                klagebehandlingId = klagebehandlingId,
+            )
+
+        return Ressurs.success(opprettRevurderingResponse)
     }
 
     @GetMapping("fagsaker/{fagsakId}/vedtak")

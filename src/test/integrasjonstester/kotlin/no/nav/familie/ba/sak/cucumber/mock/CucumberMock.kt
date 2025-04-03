@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.Månedli
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -137,6 +138,7 @@ class CucumberMock(
     val brevmottakerService = mockk<BrevmottakerService>()
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
     val patchetAndelTilkjentYtelseRepository = mockk<PatchetAndelTilkjentYtelseRepository>()
+    val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -268,6 +270,7 @@ class CucumberMock(
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = unleashNextMedContextService,
+            eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =
