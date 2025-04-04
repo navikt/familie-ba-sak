@@ -91,7 +91,7 @@ internal fun hentEØSStandardBegrunnelser(
 
     val filtrertPåHendelser =
         filtrertPåEndretVilkår.filterValues {
-            it.skalFiltreresPåHendelser(begrunnelseGrunnlag, vedtaksperiode.fom)
+            it.skalFiltreresPåHendelser(begrunnelseGrunnlag, vedtaksperiode.fom, vedtaksperiode.tom)
         }
 
     val filtrertPåSkalVisesSelvOmIkkeEndring =
