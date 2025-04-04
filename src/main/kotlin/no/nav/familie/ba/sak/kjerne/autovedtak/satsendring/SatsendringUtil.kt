@@ -29,7 +29,6 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertForSats(
         .filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { andel ->
             val person = personOpplysningGrunnlag.personer.single { it.aktør == andel.aktør }
-            // Bruker stønadTom siden
 
             val andelSatsTyper = andel.type.tilSatsType(person, andel.stønadFom, andel.stønadTom)
 
