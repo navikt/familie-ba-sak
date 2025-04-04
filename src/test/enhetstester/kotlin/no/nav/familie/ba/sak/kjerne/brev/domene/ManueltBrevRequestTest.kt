@@ -156,6 +156,54 @@ class ManueltBrevRequestTest {
     }
 
     @Test
+    fun `tilBrev genererer 'innhente opplysninger klage institusjon'-brev som forventet`() {
+        val fnr = "12345678910"
+        val orgnr = "123456789"
+        val saksbehandler = "Saks Behandlersen"
+        val fritekstAvsnitt = "Fritekst avsnitt"
+        val mottakerNavn = "mottakerNavn"
+
+        val brevRequestTilInstitusjon =
+            baseRequest.copy(
+                brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
+                vedrørende =
+                    PersonITest(
+                        fødselsnummer = fnr,
+                        navn = "navn tilhørende $fnr",
+                    ),
+                fritekstAvsnitt = fritekstAvsnitt,
+            )
+        val brev = brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, saksbehandler) { emptyMap() }.data as InformasjonsbrevInnhenteOpplysningerKlageData
+
+        with(brev.flettefelter) {
+            assertThat(organisasjonsnummer).containsExactly(orgnr)
+            assertThat(fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
+            assertThat(navn).containsExactly(mottakerNavn)
+            assertThat(gjelder).containsExactly(brevRequestTilInstitusjon.vedrørende?.navn)
+        }
+        assertThat(brev.delmalData.fritekstAvsnitt.fritekstAvsnittTekst).containsExactly(fritekstAvsnitt)
+        assertThat(brev.delmalData.signatur.saksbehandler).containsExactly(saksbehandler)
+    }
+
+    @Test
+    fun `'innhente opplysninger klage institusjon'-brev krever at fritekst avsnitt har en verdi`() {
+        val orgnr = "123456789"
+        val saksbehandler = "Saks Behandlersen"
+        val mottakerNavn = "mottakerNavn"
+
+        val brevRequestTilInstitusjon =
+            baseRequest.copy(
+                brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
+                fritekstAvsnitt = "",
+            )
+        val funksjonellFeil =
+            assertThrows<FunksjonellFeil> {
+                brevRequestTilInstitusjon.tilBrev(orgnr, mottakerNavn, saksbehandler) { emptyMap() }
+            }
+        assertThat(funksjonellFeil.melding).isEqualTo("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
+    }
+
+    @Test
     fun `Varsel årleg kontroll eøs request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
         val brev =
             baseRequest

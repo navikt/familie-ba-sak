@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -283,7 +283,7 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
-            ).byggMottakerdata(
+            ).byggMottakerdataFraBehandling(
                 behandling,
                 persongrunnlagService,
                 arbeidsfordelingService,
@@ -326,7 +326,7 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
-            ).byggMottakerdata(
+            ).byggMottakerdataFraBehandling(
                 behandling,
                 persongrunnlagService,
                 arbeidsfordelingService,
@@ -383,7 +383,7 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
-            ).byggMottakerdata(
+            ).byggMottakerdataFraBehandling(
                 behandling,
                 persongrunnlagService,
                 arbeidsfordelingService,
@@ -428,7 +428,7 @@ class DokumentServiceIntegrationTest(
         val manueltBrevRequest =
             ManueltBrevRequest(
                 brevmal = Brevmal.SVARTIDSBREV_INSTITUSJON,
-            ).byggMottakerdata(
+            ).byggMottakerdataFraBehandling(
                 behandling,
                 persongrunnlagService,
                 arbeidsfordelingService,
@@ -474,7 +474,7 @@ class DokumentServiceIntegrationTest(
             ManueltBrevRequest(
                 brevmal = Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
                 antallUkerSvarfrist = 3,
-            ).byggMottakerdata(
+            ).byggMottakerdataFraBehandling(
                 behandling,
                 persongrunnlagService,
                 arbeidsfordelingService,

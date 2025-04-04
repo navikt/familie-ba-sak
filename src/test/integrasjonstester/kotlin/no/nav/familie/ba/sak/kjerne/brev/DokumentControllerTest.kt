@@ -28,16 +28,17 @@ class DokumentControllerTest(
     private val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
         DokumentController(
-            dokumentGenereringService = mockDokumentGenereringService,
-            dokumentService = mockDokumentService,
-            vedtakService = vedtakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            dokumentService = mockDokumentService,
+            dokumentGenereringService = mockDokumentGenereringService,
+            vedtakService = vedtakService,
             tilgangService = tilgangService,
             persongrunnlagService = mockk(relaxed = true),
             arbeidsfordelingService = mockk(relaxed = true),
             utvidetBehandlingService = mockk(relaxed = true),
             dokumentDistribueringService = mockk(relaxed = true),
+            personRepository = mockk(relaxed = true),
         )
 
     @Test
