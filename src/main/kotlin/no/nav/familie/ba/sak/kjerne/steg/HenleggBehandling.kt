@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -45,7 +45,7 @@ class HenleggBehandling(
                 manueltBrevRequest =
                     ManueltBrevRequest(
                         brevmal = brevmal,
-                    ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
+                    ).byggMottakerdataFraBehandling(behandling, persongrunnlagService, arbeidsfordelingService),
             )
         }
 

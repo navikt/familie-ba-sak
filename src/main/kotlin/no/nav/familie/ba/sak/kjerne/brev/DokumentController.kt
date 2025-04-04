@@ -8,9 +8,10 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
-import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhet
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraFagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -44,6 +45,7 @@ class DokumentController(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val dokumentDistribueringService: DokumentDistribueringService,
+    private val personRepository: PersonRepository,
 ) {
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(
@@ -102,7 +104,7 @@ class DokumentController(
         return dokumentGenereringService
             .genererManueltBrev(
                 manueltBrevRequest =
-                    manueltBrevRequest.byggMottakerdata(
+                    manueltBrevRequest.byggMottakerdataFraBehandling(
                         behandling,
                         persongrunnlagService,
                         arbeidsfordelingService,
@@ -128,7 +130,7 @@ class DokumentController(
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest =
-                manueltBrevRequest.byggMottakerdata(
+                manueltBrevRequest.byggMottakerdataFraBehandling(
                     behandling,
                     persongrunnlagService,
                     arbeidsfordelingService,
@@ -161,7 +163,7 @@ class DokumentController(
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         return dokumentGenereringService
             .genererManueltBrev(
-                manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
+                manueltBrevRequest = manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, personRepository),
                 erForhåndsvisning = true,
                 fagsak = fagsak,
             ).let { Ressurs.success(it) }
@@ -178,9 +180,9 @@ class DokumentController(
             handling = "sende brev",
         )
 
-        val fagsakIdent = fagsakService.hentPåFagsakId(fagsakId).aktør.aktivFødselsnummer()
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsakIdent, arbeidsfordelingService),
+            manueltBrevRequest = manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, personRepository),
             fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
