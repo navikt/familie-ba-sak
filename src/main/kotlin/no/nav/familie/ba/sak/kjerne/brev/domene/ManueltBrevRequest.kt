@@ -40,8 +40,10 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollE�
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerDb
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
@@ -118,7 +120,7 @@ data class ManueltBrevRequest(
     }
 }
 
-fun ManueltBrevRequest.byggMottakerdata(
+fun ManueltBrevRequest.byggMottakerdataFraBehandling(
     behandling: Behandling,
     persongrunnlagService: PersongrunnlagService,
     arbeidsfordelingService: ArbeidsfordelingService,
@@ -127,7 +129,7 @@ fun ManueltBrevRequest.byggMottakerdata(
 
     val hentPerson = { ident: String ->
         persongrunnlagService.hentPersonerPåBehandling(listOf(ident), behandling).singleOrNull()
-            ?: error("Fant flere eller ingen personer med angitt personident på behandling $behandling")
+            ?: error("Fant flere eller ingen personer med angitt personident på behandlingId=${behandling.id}")
     }
     val enhet =
         arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).run {
@@ -162,22 +164,45 @@ fun ManueltBrevRequest.byggMottakerdata(
     }
 }
 
-fun ManueltBrevRequest.leggTilEnhet(
-    søkerIdent: String,
+fun ManueltBrevRequest.byggMottakerdataFraFagsak(
+    fagsak: Fagsak,
     arbeidsfordelingService: ArbeidsfordelingService,
+    personRepository: PersonRepository,
 ): ManueltBrevRequest {
-    val arbeidsfordelingsenhet =
-        arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-            søkerIdent = søkerIdent,
-            barnIdenter = barnIBrev,
-        )
-    return this.copy(
-        enhet =
-            Enhet(
-                enhetNavn = arbeidsfordelingsenhet.enhetNavn,
-                enhetId = arbeidsfordelingsenhet.enhetId,
-            ),
-    )
+    val personIFagsak =
+        personRepository.findByAktør(fagsak.aktør).maxByOrNull { it.endretTidspunkt }
+            ?: error("Fant ingen personer med angitt personident på fagsakId=${fagsak.id}")
+
+    val enhet =
+        arbeidsfordelingService
+            .hentArbeidsfordelingsenhetPåIdenter(
+                søkerIdent = fagsak.aktør.aktivFødselsnummer(),
+                barnIdenter = barnIBrev,
+            ).run {
+                Enhet(enhetId = enhetId, enhetNavn = enhetNavn)
+            }
+
+    return when (fagsak.type) {
+        FagsakType.INSTITUSJON -> {
+            this.copy(
+                enhet = enhet,
+                mottakerMålform = personIFagsak.målform,
+                vedrørende =
+                    object : Person {
+                        override val fødselsnummer = fagsak.aktør.aktivFødselsnummer()
+                        override val navn = personIFagsak.navn
+                    },
+            )
+        }
+
+        FagsakType.NORMAL,
+        FagsakType.BARN_ENSLIG_MINDREÅRIG,
+        ->
+            this.copy(
+                enhet = enhet,
+                mottakerMålform = personIFagsak.målform,
+            )
+    }
 }
 
 fun ManueltBrevRequest.tilBrev(
@@ -262,11 +287,14 @@ fun ManueltBrevRequest.tilBrev(
                     ),
             )
 
-        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE -> {
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE,
+        Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON,
+        -> {
             if (fritekstAvsnitt == null) {
                 throw FunksjonellFeil("Du må legge til fritekst for å forklare hvilke opplysninger du ønsker å innhente.")
             }
             InformasjonsbrevInnhenteOpplysningerKlage(
+                mal = brevmal,
                 data =
                     InformasjonsbrevInnhenteOpplysningerKlageData(
                         delmalData =
