@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
@@ -33,6 +35,7 @@ import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -57,6 +60,7 @@ class SettPåVentServiceTest(
     @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val snikeIKøenService: SnikeIKøenService,
+    @Autowired private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
 ) : AbstractSpringIntegrationTest() {
     private val barnFnr = leggTilPersonInfo(randomBarnFnr())
 
@@ -329,6 +333,61 @@ class SettPåVentServiceTest(
         assertThat(throwable).isInstanceOf(FunksjonellFeil::class.java)
         assertThat((throwable as FunksjonellFeil).frontendFeilmelding)
             .isEqualTo("Behandlingen er under maskinell vent, og kan gjenopptas senere.")
+    }
+
+    @Test
+    fun `Skal kaste feil for årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING med annen frist enn 5 dager`() {
+        val behandling = opprettBehandling()
+        val frist = LocalDate.now().plusDays(1)
+
+        val feil =
+            assertThrows<Feil> {
+                settPåVentService.settBehandlingPåVent(
+                    behandlingId = behandling.id,
+                    frist = frist,
+                    årsak = SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING,
+                )
+            }
+
+        assertThat(feil.message).isEqualTo("Uventet frist for SettPåVent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}. Forventet frist er 5 dager, faktisk frist er 1 dager.")
+    }
+
+    @Test
+    fun `Skal opprette forenklet tilbakekrevingsvedtak for behandlinger som settes på vent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`() {
+        val behandling = opprettBehandling()
+        val frist = LocalDate.now().plusDays(5)
+
+        val settPåVent =
+            settPåVentService.settBehandlingPåVent(
+                behandlingId = behandling.id,
+                frist = frist,
+                årsak = SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING,
+            )
+
+        assertThat(settPåVent.årsak).isEqualTo(SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING)
+        assertThat(settPåVent.frist).isEqualTo(frist)
+
+        val forenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandling.id)
+
+        assertThat(forenkletTilbakekrevingsvedtak).isNotNull()
+        assertThat(forenkletTilbakekrevingsvedtak!!.behandling.id).isEqualTo(behandling.id)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = SettPåVentÅrsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING"])
+    fun `Skal ikke opprette forenklet tilbakekrevingsvedtak for behandlinger som settes på vent med annen årsak enn AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`(årsak: SettPåVentÅrsak) {
+        val behandling = opprettBehandling()
+        val frist = LocalDate.now().plusDays(5)
+
+        settPåVentService.settBehandlingPåVent(
+            behandlingId = behandling.id,
+            frist = frist,
+            årsak = årsak,
+        )
+
+        val forenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandling.id)
+
+        assertThat(forenkletTilbakekrevingsvedtak).isNull()
     }
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
