@@ -171,7 +171,7 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
 ): ManueltBrevRequest {
     val personIFagsak =
         personRepository.findByAktør(fagsak.aktør).maxByOrNull { it.endretTidspunkt }
-            ?: error("Fant ingen personer med angitt personident på fagsak $fagsak")
+            ?: error("Fant ingen personer med angitt personident på fagsakId=${fagsak.id}")
 
     val enhet =
         arbeidsfordelingService
