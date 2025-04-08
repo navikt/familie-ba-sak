@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -123,4 +124,31 @@ fun nyRevurdering(
         underkategori = BehandlingUnderkategori.ORDINÆR,
         søknadMottattDato = LocalDate.now(),
         fagsakId = fagsakId,
+    )
+
+fun lagVisningsbehandling(
+    behandlingId: Long = 0L,
+    opprettetTidspunkt: LocalDateTime = LocalDateTime.now().minusDays(1),
+    aktivertTidspunkt: LocalDateTime = LocalDateTime.now().minusDays(1),
+    kategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    aktiv: Boolean = true,
+    opprettetÅrsak: BehandlingÅrsak? = BehandlingÅrsak.SØKNAD,
+    type: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    status: BehandlingStatus = BehandlingStatus.AVSLUTTET,
+    resultat: Behandlingsresultat = Behandlingsresultat.INNVILGET,
+    vedtaksdato: LocalDateTime? = LocalDateTime.now(),
+): Visningsbehandling =
+    Visningsbehandling(
+        behandlingId,
+        opprettetTidspunkt,
+        aktivertTidspunkt,
+        kategori,
+        underkategori,
+        aktiv,
+        opprettetÅrsak,
+        type,
+        status,
+        resultat,
+        vedtaksdato,
     )

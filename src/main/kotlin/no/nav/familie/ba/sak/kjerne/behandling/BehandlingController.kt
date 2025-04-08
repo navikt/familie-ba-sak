@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -46,6 +47,16 @@ class BehandlingController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
+    @GetMapping(path = ["fagsak/{fagsakId}"])
+    fun hentBehandlinger(
+        @PathVariable fagsakId: Long,
+    ): ResponseEntity<Ressurs<List<RestVisningBehandling>>> {
+        tilgangService.validerTilgangTilFagsak(event = AuditLoggerEvent.ACCESS, fagsakId = fagsakId)
+        tilgangService.verifiserHarTilgangTilHandling(minimumBehandlerRolle = BehandlerRolle.VEILEDER, handling = "hent behandlinger")
+        val behandlinger = behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsakId).map { RestVisningBehandling.opprettFraVisningsbehandling(it) }
+        return ResponseEntity.ok(Ressurs.success(behandlinger))
+    }
+
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(
         @RequestBody nyBehandling: NyBehandling,
