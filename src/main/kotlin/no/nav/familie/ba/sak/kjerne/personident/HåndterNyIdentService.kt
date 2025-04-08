@@ -42,29 +42,29 @@ class HåndterNyIdentService(
 
         val aktørId = identerFraPdl.hentAktivAktørId()
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-        val aktuellFagsakerVedMerging = hentAktuellFagsakerForIdenthendelse(identerFraPdl)
-        if (aktuellFagsakerVedMerging.size > 1) {
+        val aktuelleFagsakerVedMerging = hentAktuelleFagsakerForIdenthendelse(identerFraPdl)
+        if (aktuelleFagsakerVedMerging.size > 1) {
             logger.info("Fant mer enn 1 fagsak ved patching av ident")
         }
 
         return when {
             // Personen er ikke i noen fagsaker
-            aktuellFagsakerVedMerging.isNullOrEmpty() -> aktør
+            aktuelleFagsakerVedMerging.isNullOrEmpty() -> aktør
 
             // Ny aktørId, nytt fødselsnummer -> begge håndteres i PatchMergetIdentTask
             aktør == null -> {
-                aktuellFagsakerVedMerging.forEach { fagsak ->
+                aktuelleFagsakerVedMerging.forEach { fagsak ->
                     validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, fagsak)
                 }
 
                 // patcheendepunktet trenger en fagsak, men samme hvilken fagsak
-                opprettMergeIdentTask(aktuellFagsakerVedMerging.first().id, identerFraPdl)
+                opprettMergeIdentTask(aktuelleFagsakerVedMerging.first().id, identerFraPdl)
                 null
             }
 
             // Samme aktørId, nytt fødselsnummer -> legg til fødselsnummer på aktør
             !aktør.harIdent(fødselsnummer = nyIdent.ident) -> {
-                aktuellFagsakerVedMerging.forEach { fagsak ->
+                aktuelleFagsakerVedMerging.forEach { fagsak ->
                     validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, fagsak)
                 }
                 logger.info("Legger til ny ident")
@@ -102,7 +102,7 @@ class HåndterNyIdentService(
         return task
     }
 
-    private fun hentAktuellFagsakerForIdenthendelse(alleIdenterFraPdl: List<IdentInformasjon>): List<Fagsak> {
+    private fun hentAktuelleFagsakerForIdenthendelse(alleIdenterFraPdl: List<IdentInformasjon>): List<Fagsak> {
         val aktørerMedAktivPersonident =
             alleIdenterFraPdl
                 .hentAktørIder()
