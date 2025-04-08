@@ -23,7 +23,6 @@ import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
 import no.nav.familie.log.mdc.MDCConstants
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -72,7 +71,7 @@ class SaksstatistikkTest(
 
     @Test
     @Tag("integration")
-    fun `Skal lagre saksstatistikk sak til repository og sende meldinger`() {
+    fun `Skal lagre saksstatistikk sak til repository, sende meldinger og slette melding fra mellomlagring etter sending`() {
         val fnr = randomFnr()
         val fagsakId =
             fagsakController
@@ -96,16 +95,14 @@ class SaksstatistikkTest(
             sakstatistikkObjectMapper.readValue(mellomlagredeStatistikkHendelser.first().json, SakDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
-        val oppdatertMellomlagretSaksstatistikkHendelse =
-            saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id)
 
-        assertNotNull(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt)
+        assertNull(saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagredeStatistikkHendelser.first().id))
         assertEquals(lagretJsonSomSakDVH, sendteMeldinger["sak-$fagsakId"] as SakDVH)
     }
 
     @Test
     @Tag("integration")
-    fun `Skal lagre saksstatistikk behandling til repository og sende meldinger`() {
+    fun `Skal lagre saksstatistikk behandling til repository, sende meldinger og slette melding fra mellomlagring etter sending`() {
         val fnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr, false)
@@ -135,10 +132,8 @@ class SaksstatistikkTest(
             sakstatistikkObjectMapper.readValue(mellomlagretBehandling.last().json, BehandlingDVH::class.java)
 
         saksstatistikkScheduler.sendSaksstatistikk()
-        val oppdatertMellomlagretSaksstatistikkHendelse =
-            saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id)
 
-        assertNotNull(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt)
+        assertNull(saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id))
         assertEquals(lagretJsonSomSakDVH, sendteMeldinger["behandling-${behandling.id}"] as BehandlingDVH)
     }
 }
