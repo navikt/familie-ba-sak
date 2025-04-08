@@ -44,6 +44,7 @@ jobs:
           cache: 'maven'
       - name: Kjør enhetstester
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -68,6 +69,7 @@ jobs:
           cache: 'maven'
       - name: Kjør integrasjonstester
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -112,6 +114,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       - name: Kjør Sonar
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -133,6 +136,7 @@ jobs:
           cache: 'maven'
       - name: Kjør verdikjedetester m/ feature toggles slått av
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -153,6 +157,7 @@ jobs:
           cache: 'maven'
       - name: Kjør verdikjedetester m/ feature toggles slått på
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
