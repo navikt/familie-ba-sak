@@ -57,6 +57,7 @@ class HåndterNyIdentService(
                     validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, fagsak)
                 }
 
+                // patcheendepunktet trenger en fagsak, men samme hvilken fagsak
                 opprettMergeIdentTask(aktuellFagsakerVedMerging.first().id, identerFraPdl)
                 null
             }
