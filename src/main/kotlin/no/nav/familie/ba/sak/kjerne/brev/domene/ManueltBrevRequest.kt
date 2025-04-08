@@ -164,6 +164,24 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
     }
 }
 
+fun ManueltBrevRequest.leggTilEnhet(
+    søkerIdent: String,
+    arbeidsfordelingService: ArbeidsfordelingService,
+): ManueltBrevRequest {
+    val arbeidsfordelingsenhet =
+        arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
+            søkerIdent = søkerIdent,
+            barnIdenter = barnIBrev,
+        )
+    return this.copy(
+        enhet =
+            Enhet(
+                enhetNavn = arbeidsfordelingsenhet.enhetNavn,
+                enhetId = arbeidsfordelingsenhet.enhetId,
+            ),
+    )
+}
+
 fun ManueltBrevRequest.byggMottakerdataFraFagsak(
     fagsak: Fagsak,
     arbeidsfordelingService: ArbeidsfordelingService,
