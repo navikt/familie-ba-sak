@@ -617,6 +617,26 @@
 
     <profiles>
         <profile>
+            <id>enhetstest</id>
+            <properties>
+                <excludedGroups>integration,verdikjedetest</excludedGroups>
+            </properties>
+        </profile>
+        <profile>
+            <id>integrasjonstest</id>
+            <properties>
+                <groups>integration</groups>
+                <excludedGroups>verdikjedetest</excludedGroups>
+            </properties>
+        </profile>
+        <profile>
+            <id>verdikjedetest</id>
+            <properties>
+                <groups>verdikjedetest</groups>
+            </properties>
+        </profile>
+
+        <profile>
             <id>jacoco</id>
             <build>
                 <plugins>
