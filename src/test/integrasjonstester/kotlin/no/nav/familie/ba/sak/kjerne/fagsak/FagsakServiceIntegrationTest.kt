@@ -50,7 +50,7 @@ import org.springframework.web.client.HttpServerErrorException
 import java.time.LocalDate
 import java.time.YearMonth
 
-class FagsakServiceTest(
+class FagsakServiceIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
     @Autowired
