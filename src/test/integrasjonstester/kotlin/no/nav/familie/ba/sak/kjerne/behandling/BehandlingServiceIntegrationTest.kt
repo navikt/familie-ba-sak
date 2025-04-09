@@ -31,7 +31,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Tag("integration")
-class BehandlingServiceTest(
+class BehandlingServiceIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
     @Autowired
