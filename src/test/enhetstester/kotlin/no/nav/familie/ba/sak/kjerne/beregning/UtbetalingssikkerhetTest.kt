@@ -376,21 +376,22 @@ class UtbetalingssikkerhetTest {
         val utvidetBarnetrygd = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp
         val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
         val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
+        val ordinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
 
         assertEquals(
             utvidetBarnetrygd + småbarnstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL),
         )
         assertEquals(
-            tilleggOrdinærBarnetrygd,
+            ordinærBarnetrygd,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL),
         )
         assertEquals(
-            tilleggOrdinærBarnetrygd,
+            ordinærBarnetrygd,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON),
         )
         assertEquals(
-            tilleggOrdinærBarnetrygd + utvidetBarnetrygd,
+            ordinærBarnetrygd + utvidetBarnetrygd,
             TilkjentYtelseValidering.maksBeløp(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,

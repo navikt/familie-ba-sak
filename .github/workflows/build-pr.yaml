@@ -44,10 +44,11 @@ jobs:
           cache: 'maven'
       - name: Kjør enhetstester
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -DexcludedGroups=integration,verdikjedetest -Pjacoco -DjacocoTestDirectory=UT
+          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Penhetstest -Pjacoco -DjacocoTestDirectory=UT
       - name: Last opp Jacoco UT rapport
         uses: actions/upload-artifact@v4
         with:
@@ -68,10 +69,11 @@ jobs:
           cache: 'maven'
       - name: Kjør integrasjonstester
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Dgroups=integration -DexcludedGroups=verdikjedetest -Dsurefire.rerunFailingTestsCount=2 -Pjacoco -DjacocoTestDirectory=IT
+          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Pintegrasjonstest -Dsurefire.rerunFailingTestsCount=2 -Pjacoco -DjacocoTestDirectory=IT
       - name: Last opp Jacoco IT rapport
         uses: actions/upload-artifact@v4
         with:
@@ -112,6 +114,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       - name: Kjør Sonar
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -133,10 +136,11 @@ jobs:
           cache: 'maven'
       - name: Kjør verdikjedetester m/ feature toggles slått av
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=false" -Dgroups=verdikjedetest
+          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=false" -Pverdikjedetest
 
   verdikjedetesterFeatureToggleOn:
     name: Verdikjedetester m/ feature toggles slått på
@@ -153,7 +157,8 @@ jobs:
           cache: 'maven'
       - name: Kjør verdikjedetester m/ feature toggles slått på
         env:
+          MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=true" -Dgroups=verdikjedetest
+          mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DargLine="-DmockFeatureToggleAnswer=true" -Pverdikjedetest

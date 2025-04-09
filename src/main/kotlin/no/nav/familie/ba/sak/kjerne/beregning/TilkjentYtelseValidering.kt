@@ -253,7 +253,7 @@ object TilkjentYtelseValidering {
         val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
 
         return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
-            maksOrdinærMedTillegg + maksUtvidet
+            maxOf(maksOrdinær, maksOrdinærMedTillegg) + maksUtvidet
         } else {
             when (personType) {
                 PersonType.BARN -> maxOf(maksOrdinær, maksOrdinærMedTillegg)

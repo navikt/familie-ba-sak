@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -334,6 +335,7 @@ fun SanityEØSBegrunnelse.erLikKompetanseIPeriode(
 fun ISanityBegrunnelse.skalFiltreresPåHendelser(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
     fomVedtaksperiode: LocalDate?,
+    tomVedtaksperiode: LocalDate?,
 ): Boolean =
     if (!begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget()) {
         val person = begrunnelseGrunnlag.dennePerioden.person
@@ -347,6 +349,7 @@ fun ISanityBegrunnelse.skalFiltreresPåHendelser(
                 person,
                 begrunnelseGrunnlag.dennePerioden.andeler,
                 fomVedtaksperiode,
+                tomVedtaksperiode,
             )
     }
 
@@ -376,8 +379,18 @@ fun ISanityBegrunnelse.erSatsendring(
     person: Person,
     andeler: Iterable<AndelForVedtaksbegrunnelse>,
     fomVedtaksperiode: LocalDate?,
+    tomVedtaksperiode: LocalDate?,
 ): Boolean {
-    val satstyperPåAndelene = andeler.map { it.type.tilSatsType(person, fomVedtaksperiode ?: TIDENES_MORGEN) }.toSet()
+    // Bruker fomVedtaksperiode siden satsendring alltid er i starten av perioden
+    val satstyperPåAndelene =
+        andeler
+            .flatMap {
+                it.type.tilSatsType(
+                    person = person,
+                    fom = (fomVedtaksperiode ?: TIDENES_MORGEN).toYearMonth(),
+                    tom = (tomVedtaksperiode ?: TIDENES_ENDE).toYearMonth(),
+                )
+            }.toSet()
 
     val erSatsendringIPeriodenForPerson =
         satstyperPåAndelene.any { satstype ->

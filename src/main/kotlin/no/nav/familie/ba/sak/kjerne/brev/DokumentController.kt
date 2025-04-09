@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
-import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhet
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -102,7 +102,7 @@ class DokumentController(
         return dokumentGenereringService
             .genererManueltBrev(
                 manueltBrevRequest =
-                    manueltBrevRequest.byggMottakerdata(
+                    manueltBrevRequest.byggMottakerdataFraBehandling(
                         behandling,
                         persongrunnlagService,
                         arbeidsfordelingService,
@@ -128,7 +128,7 @@ class DokumentController(
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest =
-                manueltBrevRequest.byggMottakerdata(
+                manueltBrevRequest.byggMottakerdataFraBehandling(
                     behandling,
                     persongrunnlagService,
                     arbeidsfordelingService,
@@ -178,9 +178,9 @@ class DokumentController(
             handling = "sende brev",
         )
 
-        val fagsakIdent = fagsakService.hentPåFagsakId(fagsakId).aktør.aktivFødselsnummer()
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsakIdent, arbeidsfordelingService),
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
             fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))

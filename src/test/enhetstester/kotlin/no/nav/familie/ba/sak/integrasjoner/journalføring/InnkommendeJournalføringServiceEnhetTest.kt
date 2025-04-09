@@ -63,6 +63,6 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
         // Assert
-        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.harTilgang).isTrue
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.journalpostTilgang.harTilgang).isTrue
     }
 }

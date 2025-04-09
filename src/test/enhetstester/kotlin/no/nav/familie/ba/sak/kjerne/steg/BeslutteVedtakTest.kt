@@ -114,7 +114,7 @@ class BeslutteVedtakTest {
         every { automatiskOppdaterValutakursService.oppdaterValutakurserEtterEndringstidspunkt(any<BehandlingId>()) } just runs
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns null
-        every { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(any()) } returns BigDecimal.ZERO
+        every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
     }
 
     @Nested
@@ -378,7 +378,7 @@ class BeslutteVedtakTest {
                 listOf(
                     lagBrevmottakerDb(behandlingId = behandling.id),
                 )
-            every { simuleringService.hentFeilutbetalingTilOgMedForrigeMåned(any()) } returns BigDecimal.valueOf(100000)
+            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(10000)
 
             // Act && Assert
             val feilmelding =

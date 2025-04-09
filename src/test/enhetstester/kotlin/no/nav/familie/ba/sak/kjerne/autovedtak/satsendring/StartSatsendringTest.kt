@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_MARS_2023
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.hentAktivSatsendringstidspunkt
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -113,7 +113,7 @@ internal class StartSatsendringTest {
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns
             Satskjøring(
                 fagsakId = 1L,
-                satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
+                satsTidspunkt = hentAktivSatsendringstidspunkt(),
             )
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
@@ -125,7 +125,7 @@ internal class StartSatsendringTest {
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns
             Satskjøring(
                 fagsakId = 1L,
-                satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
+                satsTidspunkt = hentAktivSatsendringstidspunkt(),
             )
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))

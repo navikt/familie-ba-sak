@@ -56,7 +56,7 @@ class JournalføringControllerTest {
             assertThat(journalposter).hasSize(1)
             val tilgangsstyrtJournalpost = journalposter.single()
             assertThat(tilgangsstyrtJournalpost.journalpost.journalpostId).isEqualTo("1")
-            assertThat(tilgangsstyrtJournalpost.harTilgang).isTrue
+            assertThat(tilgangsstyrtJournalpost.journalpostTilgang.harTilgang).isTrue
         }
     }
 }

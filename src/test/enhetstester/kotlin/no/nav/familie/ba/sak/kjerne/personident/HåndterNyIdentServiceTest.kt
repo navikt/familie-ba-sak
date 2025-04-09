@@ -61,12 +61,12 @@ internal class HåndterNyIdentServiceTest {
                 personIdentService = personIdentService,
             )
 
-        val gammelFødselsdato = LocalDate.of(2000, 1, 1)
+        val gammelFødselsdato = LocalDate.now().minusYears(1)
         val gammeltFnr = randomFnr(gammelFødselsdato)
         val gammelAktør = tilAktør(gammeltFnr)
         val gammelPerson = lagPerson(aktør = gammelAktør, fødselsdato = gammelFødselsdato)
 
-        val nyFødselsdato = LocalDate.of(2000, 2, 2)
+        val nyFødselsdato = LocalDate.now().minusYears(1).minusMonths(3)
         val nyttFnr = randomFnr(nyFødselsdato)
         val nyAktør = tilAktør(nyttFnr)
 
@@ -112,7 +112,7 @@ internal class HåndterNyIdentServiceTest {
         }
 
         @Test
-        fun `håndterNyIdent kaster Feil når det eksisterer flere fagsaker for identer`() {
+        fun `håndterNyIdent kaster ikke Feil når det eksisterer flere fagsaker for identer`() {
             // arrange
             every { fagsakService.hentFagsakerPåPerson(any()) } returns
                 listOf(
@@ -121,12 +121,10 @@ internal class HåndterNyIdentServiceTest {
                 )
 
             // act & assert
-            val feil =
-                assertThrows<Feil> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
-                }
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
 
-            assertThat(feil.message).startsWith("Det eksisterer flere fagsaker på identer som skal merges")
+            assertThat(aktør).isNull()
+            verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
         }
 
         @Test

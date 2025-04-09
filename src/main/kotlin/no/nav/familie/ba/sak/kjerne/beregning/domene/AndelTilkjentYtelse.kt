@@ -36,7 +36,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.tidslinje.Tidslinje
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Objects
 
@@ -192,22 +191,21 @@ enum class YtelseType(
 
     fun tilSatsType(
         person: Person,
-        ytelseDato: LocalDate,
-    ) = when (this) {
-        ORDINÆR_BARNETRYGD -> {
-            val sisteSatsdatoForTilleggsOrba = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).gyldigTom
-            if (ytelseDato.isAfter(sisteSatsdatoForTilleggsOrba)) {
-                SatsType.ORBA
-            } else if (ytelseDato.toYearMonth() < person.hentSeksårsdag().toYearMonth()) {
-                SatsType.TILLEGG_ORBA
-            } else {
-                SatsType.ORBA
+        fom: YearMonth,
+        tom: YearMonth,
+    ): Set<SatsType> =
+        when (this) {
+            ORDINÆR_BARNETRYGD -> {
+                val sisteMÅnedForTilleggsOrba = minOf(SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).gyldigTom, person.hentSeksårsdag()).toYearMonth()
+                when {
+                    tom <= sisteMÅnedForTilleggsOrba -> setOf(SatsType.TILLEGG_ORBA)
+                    fom > sisteMÅnedForTilleggsOrba -> setOf(SatsType.ORBA)
+                    else -> setOf(SatsType.TILLEGG_ORBA, SatsType.ORBA)
+                }
             }
+            UTVIDET_BARNETRYGD -> setOf(SatsType.UTVIDET_BARNETRYGD)
+            SMÅBARNSTILLEGG -> setOf(SatsType.SMA)
         }
-
-        UTVIDET_BARNETRYGD -> SatsType.UTVIDET_BARNETRYGD
-        SMÅBARNSTILLEGG -> SatsType.SMA
-    }
 }
 
 private fun regelverkAvhengigeVilkår() =

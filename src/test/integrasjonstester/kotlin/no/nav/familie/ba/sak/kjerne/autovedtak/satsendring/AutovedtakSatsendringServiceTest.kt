@@ -103,7 +103,7 @@ class AutovedtakSatsendringServiceTest(
             satskjøringRepository.saveAndFlush(
                 Satskjøring(
                     fagsakId = behandling.fagsak.id,
-                    satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023,
+                    satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
                 ),
             )
 
@@ -130,7 +130,7 @@ class AutovedtakSatsendringServiceTest(
             satskjøringRepository.saveAndFlush(
                 Satskjøring(
                     fagsakId = behandling.fagsak.id,
-                    satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023,
+                    satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
                 ),
             )
 
@@ -158,7 +158,7 @@ class AutovedtakSatsendringServiceTest(
             satskjøringRepository.saveAndFlush(
                 Satskjøring(
                     fagsakId = behandling.fagsak.id,
-                    satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023,
+                    satsTidspunkt = StartSatsendring.hentAktivSatsendringstidspunkt(),
                 ),
             )
 

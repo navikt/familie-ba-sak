@@ -22,6 +22,7 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.person.pdl.aktor.v2.Type
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class HåndterNyIdentService(
@@ -41,22 +42,31 @@ class HåndterNyIdentService(
 
         val aktørId = identerFraPdl.hentAktivAktørId()
         val aktør = aktørIdRepository.findByAktørIdOrNull(aktørId)
-        val aktuellFagsakVedMerging = hentAktuellFagsakForIdenthendelse(identerFraPdl)
+        val aktuelleFagsakerVedMerging = hentAktuelleFagsakerForIdenthendelse(identerFraPdl)
+        if (aktuelleFagsakerVedMerging.size > 1) {
+            logger.info("Fant mer enn 1 fagsak ved patching av ident")
+        }
 
         return when {
             // Personen er ikke i noen fagsaker
-            aktuellFagsakVedMerging == null -> aktør
+            aktuelleFagsakerVedMerging.isNullOrEmpty() -> aktør
 
             // Ny aktørId, nytt fødselsnummer -> begge håndteres i PatchMergetIdentTask
             aktør == null -> {
-                validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakVedMerging)
-                opprettMergeIdentTask(aktuellFagsakVedMerging.id, identerFraPdl)
+                aktuelleFagsakerVedMerging.forEach { fagsak ->
+                    validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, fagsak)
+                }
+
+                // patcheendepunktet trenger en fagsak, men samme hvilken fagsak
+                opprettMergeIdentTask(aktuelleFagsakerVedMerging.first().id, identerFraPdl)
                 null
             }
 
             // Samme aktørId, nytt fødselsnummer -> legg til fødselsnummer på aktør
             !aktør.harIdent(fødselsnummer = nyIdent.ident) -> {
-                validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, aktuellFagsakVedMerging)
+                aktuelleFagsakerVedMerging.forEach { fagsak ->
+                    validerUendretFødselsdatoFraForrigeBehandling(identerFraPdl, fagsak)
+                }
                 logger.info("Legger til ny ident")
                 secureLogger.info("Legger til ny ident ${nyIdent.ident} på aktør ${aktør.aktørId}")
                 personIdentService.opprettPersonIdent(aktør, nyIdent.ident, true)
@@ -92,26 +102,15 @@ class HåndterNyIdentService(
         return task
     }
 
-    private fun hentAktuellFagsakForIdenthendelse(alleIdenterFraPdl: List<IdentInformasjon>): Fagsak? {
+    private fun hentAktuelleFagsakerForIdenthendelse(alleIdenterFraPdl: List<IdentInformasjon>): List<Fagsak> {
         val aktørerMedAktivPersonident =
             alleIdenterFraPdl
                 .hentAktørIder()
                 .mapNotNull { aktørIdRepository.findByAktørIdOrNull(it) }
                 .filter { aktør -> aktør.personidenter.any { personident -> personident.aktiv } }
 
-        val fagsaker =
-            aktørerMedAktivPersonident
-                .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) + fagsakService.hentAlleFagsakerForAktør(aktør) }
-
-        if (fagsaker.toSet().size > 1) {
-            secureLogger.warn(
-                "Det eksisterer flere fagsaker på identer som skal merges $fagsaker.\n" +
-                    "Identer: ${alleIdenterFraPdl.filter { it.gruppe == Type.FOLKEREGISTERIDENT.name }}",
-            )
-            throw Feil("Det eksisterer flere fagsaker på identer som skal merges. Patch manuelt. Info om fagsaker og identer ligger i securelog. $LENKE_INFO_OM_MERGING")
-        }
-
-        return fagsaker.firstOrNull()
+        return aktørerMedAktivPersonident
+            .flatMap { aktør -> fagsakService.hentFagsakerPåPerson(aktør) + fagsakService.hentAlleFagsakerForAktør(aktør) }
     }
 
     private fun validerUendretFødselsdatoFraForrigeBehandling(
@@ -134,6 +133,12 @@ class HåndterNyIdentService(
         val fødselsdatoForrigeBehandling =
             personGrunnlag.personer.singleOrNull { it.aktør.aktørId in aktørIder }?.fødselsdato
                 ?: return // Hvis aktør ikke er med i forrige behandling kan vi patche selv om fødselsdato er ulik
+
+        // Hvis begge fødseldatoene er eldre enn 18 år kan vi patche uansett
+        if (fødselsdatoFraPdl.isBefore(LocalDate.now().minusYears(18)) && fødselsdatoForrigeBehandling.isBefore(LocalDate.now().minusYears(18))) {
+            secureLogger.info("$fødselsdatoFraPdl og $fødselsdatoForrigeBehandling er eldre enn 18 år. Kan patche uansett")
+            return
+        }
 
         if (fødselsdatoFraPdl.toYearMonth() != fødselsdatoForrigeBehandling.toYearMonth()) {
             secureLogger.warn(
