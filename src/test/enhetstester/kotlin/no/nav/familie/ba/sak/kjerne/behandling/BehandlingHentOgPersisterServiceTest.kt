@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-class BehandlingHentOgPersisterServiceEnhetstest {
+class BehandlingHentOgPersisterServiceTest {
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
     private val vedtakRepository = mockk<VedtakRepository>()
