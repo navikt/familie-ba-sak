@@ -63,6 +63,7 @@ class SettPåVentServiceTest(
     @Autowired private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
 ) : AbstractSpringIntegrationTest() {
     private val barnFnr = leggTilPersonInfo(randomBarnFnr())
+    private val frist = LocalDate.now().plusDays(DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING)
 
     @BeforeAll
     fun init() {
@@ -73,7 +74,6 @@ class SettPåVentServiceTest(
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Kan sette en behandling på vent hvis statusen er utredes`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
-        val frist = LocalDate.now().plusDays(3)
 
         val settBehandlingPåVent =
             settPåVentService.settBehandlingPåVent(
@@ -94,7 +94,6 @@ class SettPåVentServiceTest(
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `gjenopprett behandling skal sette status til utredes på nytt`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
-        val frist = LocalDate.now().plusDays(3)
 
         settPåVentService.settBehandlingPåVent(
             behandling.id,
@@ -145,7 +144,7 @@ class SettPåVentServiceTest(
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandlingId,
-            frist = LocalDate.now().plusDays(21),
+            frist = frist,
             årsak = årsak,
         )
 
@@ -172,7 +171,7 @@ class SettPåVentServiceTest(
 
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-            frist = LocalDate.now().plusDays(21),
+            frist = frist,
             årsak = årsak,
         )
 
@@ -237,25 +236,23 @@ class SettPåVentServiceTest(
 
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
 
-        val frist1 = LocalDate.now().plusDays(21)
-
         val settPåVent =
             settPåVentRepository.save(
                 SettPåVent(
                     behandling = behandlingEtterVilkårsvurderingSteg,
-                    frist = frist1,
+                    frist = frist,
                     årsak = årsak,
                 ),
             )
 
-        Assertions.assertEquals(frist1, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
+        Assertions.assertEquals(frist, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
 
-        val frist2 = LocalDate.now().plusDays(9)
+        val nyFrist = LocalDate.now().plusDays(9)
 
-        settPåVent.frist = frist2
+        settPåVent.frist = nyFrist
         settPåVentRepository.save(settPåVent)
 
-        Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
+        Assertions.assertEquals(nyFrist, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
     }
 
     @ParameterizedTest
@@ -290,7 +287,7 @@ class SettPåVentServiceTest(
         settPåVentService
             .settBehandlingPåVent(
                 behandlingId = behandling1.id,
-                frist = LocalDate.now(),
+                frist = frist,
                 årsak = årsak,
             ).let {
                 settPåVentRepository.save(it.copy(frist = LocalDate.now().minusDays(1)))
@@ -298,7 +295,7 @@ class SettPåVentServiceTest(
 
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandling2.id,
-            frist = LocalDate.now().plusDays(21),
+            frist = frist,
             årsak = årsak,
         )
 
@@ -317,7 +314,6 @@ class SettPåVentServiceTest(
     @EnumSource(value = SettPåVentÅrsak::class)
     fun `Skal ikke kunne gjenoppta behandlingen hvis den er satt på maskinell vent`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
-        val frist = LocalDate.now().plusDays(3)
 
         settPåVentService.settBehandlingPåVent(
             behandling.id,
@@ -338,13 +334,12 @@ class SettPåVentServiceTest(
     @Test
     fun `Skal kaste feil for årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING med annen frist enn 5 dager`() {
         val behandling = opprettBehandling()
-        val frist = LocalDate.now().plusDays(1)
 
         val feil =
             assertThrows<Feil> {
                 settPåVentService.settBehandlingPåVent(
                     behandlingId = behandling.id,
-                    frist = frist,
+                    frist = LocalDate.now().plusDays(1),
                     årsak = SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING,
                 )
             }
@@ -355,7 +350,6 @@ class SettPåVentServiceTest(
     @Test
     fun `Skal opprette forenklet tilbakekrevingsvedtak for behandlinger som settes på vent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`() {
         val behandling = opprettBehandling()
-        val frist = LocalDate.now().plusDays(5)
 
         val settPåVent =
             settPåVentService.settBehandlingPåVent(
@@ -377,7 +371,6 @@ class SettPåVentServiceTest(
     @EnumSource(value = SettPåVentÅrsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING"])
     fun `Skal ikke opprette forenklet tilbakekrevingsvedtak for behandlinger som settes på vent med annen årsak enn AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
-        val frist = LocalDate.now().plusDays(5)
 
         settPåVentService.settBehandlingPåVent(
             behandlingId = behandling.id,
