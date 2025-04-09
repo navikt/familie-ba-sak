@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentRepository
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
@@ -55,7 +55,7 @@ class UtvidetBehandlingService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
-    private val settPåVentRepository: SettPåVentRepository,
+    private val settPåVentService: SettPåVentService,
     private val kompetanseRepository: KompetanseRepository,
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
@@ -142,8 +142,8 @@ class UtvidetBehandlingService(
             kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
             aktivSettPåVent =
-                settPåVentRepository
-                    .findByBehandlingIdAndAktiv(behandlingId, true)
+                settPåVentService
+                    .finnAktivSettPåVentPåBehandling(behandlingId = behandlingId)
                     ?.tilRestSettPåVent(),
             migreringsdato = behandlingService.hentMigreringsdatoIBehandling(behandlingId = behandlingId),
             valutakurser = valutakurser.map { it.tilRestValutakurs() },

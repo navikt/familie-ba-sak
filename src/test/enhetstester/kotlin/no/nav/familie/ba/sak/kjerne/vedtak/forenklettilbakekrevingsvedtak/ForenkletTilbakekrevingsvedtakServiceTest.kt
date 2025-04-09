@@ -25,8 +25,13 @@ class ForenkletTilbakekrevingsvedtakServiceTest {
         ForenkletTilbakekrevingsvedtakService(
             forenkletTilbakekrevingsvedtakRepository,
             loggService,
-            dokumentGenereringService,
             behandlingService,
+        )
+
+    private val forenkletTilbakekrevingsvedtakBrevService =
+        ForenkletTilbakekrevingsvedtakBrevService(
+            forenkletTilbakekrevingsvedtakRepository,
+            dokumentGenereringService,
         )
 
     @Nested
@@ -228,7 +233,7 @@ class ForenkletTilbakekrevingsvedtakServiceTest {
             every { forenkletTilbakekrevingsvedtakRepository.saveAndFlush(forenkletTilbakekrevingsvedtak) } returnsArgument (0)
 
             // Act
-            val forenkletTilbakekrevingsvedtakMedPdf = forenkletTilbakekrevingsvedtakService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandling.id)
+            val forenkletTilbakekrevingsvedtakMedPdf = forenkletTilbakekrevingsvedtakBrevService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandling.id)
 
             // Assert
             assertThat(forenkletTilbakekrevingsvedtakMedPdf.vedtakPdf).isEqualTo(pdf)

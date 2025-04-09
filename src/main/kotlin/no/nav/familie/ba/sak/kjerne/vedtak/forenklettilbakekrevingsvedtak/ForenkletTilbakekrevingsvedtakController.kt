@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 class ForenkletTilbakekrevingsvedtakController(
     val tilgangService: TilgangService,
     val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
+    val forenkletTilbakekrevingsvedtakBrevService: ForenkletTilbakekrevingsvedtakBrevService,
 ) {
     @GetMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -134,7 +135,7 @@ class ForenkletTilbakekrevingsvedtakController(
         )
 
         val forenkletTilbakekrevingsvedtakPdf =
-            forenkletTilbakekrevingsvedtakService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandlingId).vedtakPdf
+            forenkletTilbakekrevingsvedtakBrevService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandlingId).vedtakPdf
                 ?: throw Feil("Forenklet tilbakekrevingsvedtak pdf ble ikke opprettet for behandling $behandlingId.")
 
         return Ressurs.success(forenkletTilbakekrevingsvedtakPdf)
