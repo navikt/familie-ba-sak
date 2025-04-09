@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class BehandlingHentOgPersisterServiceTest(
+class BehandlingHentOgPersisterServiceIntegrationTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val fagsakService: FagsakService,
 ) : AbstractSpringIntegrationTest() {

@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
@@ -50,7 +49,6 @@ class FagsakService(
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val behandlingService: BehandlingService,
-    private val vedtakRepository: VedtakRepository,
     private val personopplysningerService: PersonopplysningerService,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
@@ -189,20 +187,10 @@ class FagsakService(
 
     fun lagRestMinimalFagsak(fagsakId: Long): RestMinimalFagsak {
         val restBaseFagsak = lagRestBaseFagsak(fagsakId)
-
-        val visningsbehandlinger =
-            behandlingHentOgPersisterService
-                .hentBehandlinger(fagsakId = fagsakId)
-                // Fjerner behandlinger med opprettetÅrsak = OPPDATER_UTVIDET_KLASSEKODE. Dette er kun en teknisk greie og ikke noe saksbehandler trenger å forholde seg til.
-                .filter { !it.erOppdaterUtvidetKlassekode() }
-                .map {
-                    it.tilRestVisningBehandling(
-                        vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
-                    )
-                }
+        val visningsbehandlinger = behandlingHentOgPersisterService.hentVisningsbehandlinger(fagsakId)
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
         return restBaseFagsak.tilRestMinimalFagsak(
-            restVisningBehandlinger = visningsbehandlinger,
+            restVisningBehandlinger = visningsbehandlinger.map { RestVisningBehandling.opprettFraVisningsbehandling(it) },
             migreringsdato = migreringsdato,
         )
     }

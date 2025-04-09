@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.springframework.stereotype.Service
 import java.time.YearMonth
@@ -13,6 +15,7 @@ import java.time.YearMonth
 class BehandlingHentOgPersisterService(
     private val behandlingRepository: BehandlingRepository,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
+    private val vedtakRepository: VedtakRepository,
 ) {
     fun lagreEllerOppdater(
         behandling: Behandling,
@@ -93,6 +96,13 @@ class BehandlingHentOgPersisterService(
     fun hentAlleFagsakerMedLøpendeValutakursIMåned(måned: YearMonth): List<Long> = behandlingRepository.finnAlleFagsakerMedLøpendeValutakursIMåned(måned.førsteDagIInneværendeMåned())
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> = behandlingRepository.finnBehandlinger(fagsakId)
+
+    fun hentVisningsbehandlinger(fagsakId: Long): List<Visningsbehandling> =
+        behandlingRepository
+            .finnBehandlinger(fagsakId)
+            // Fjerner behandlinger med opprettetÅrsak = OPPDATER_UTVIDET_KLASSEKODE. Dette er kun en teknisk greie og ikke noe saksbehandler trenger å forholde seg til.
+            .filter { !it.erOppdaterUtvidetKlassekode() }
+            .map { Visningsbehandling.opprettFraBehandling(it, vedtakRepository.finnVedtaksdatoForBehandling(it.id)) }
 
     fun hentBehandlinger(
         fagsakId: Long,

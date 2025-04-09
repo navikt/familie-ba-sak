@@ -22,7 +22,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class BehandlingServiceEnhetstest {
+class BehandlingServiceTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
 
     private val behandlingstemaService: BehandlingstemaService = mockk()
