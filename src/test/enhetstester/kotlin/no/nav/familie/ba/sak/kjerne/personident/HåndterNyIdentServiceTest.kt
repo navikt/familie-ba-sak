@@ -112,7 +112,7 @@ internal class HåndterNyIdentServiceTest {
         }
 
         @Test
-        fun `håndterNyIdent kaster Feil når det eksisterer flere fagsaker for identer`() {
+        fun `håndterNyIdent kaster ikke Feil når det eksisterer flere fagsaker for identer`() {
             // arrange
             every { fagsakService.hentFagsakerPåPerson(any()) } returns
                 listOf(
@@ -121,12 +121,10 @@ internal class HåndterNyIdentServiceTest {
                 )
 
             // act & assert
-            val feil =
-                assertThrows<Feil> {
-                    håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
-                }
+            val aktør = håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
 
-            assertThat(feil.message).startsWith("Det eksisterer flere fagsaker på identer som skal merges")
+            assertThat(aktør).isNull()
+            verify(exactly = 1) { opprettTaskService.opprettTaskForÅPatcheMergetIdent(any()) }
         }
 
         @Test
