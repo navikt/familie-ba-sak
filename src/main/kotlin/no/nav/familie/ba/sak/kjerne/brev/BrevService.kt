@@ -655,8 +655,8 @@ class BrevService(
                             navn = navn,
                             fodselsnummer = mottakerIdent,
                             brevOpprettetDato = LocalDate.now(),
-                            forenkletTilbakekrevingsvedtakTekst = forenkletTilbakekrevingsvedtak.fritekst,
                         ),
+                    fritekst = forenkletTilbakekrevingsvedtak.fritekst,
                 ),
             mal = Brevmal.FORENKLET_TILBAKEKREVINGSVEDTAK,
         )
