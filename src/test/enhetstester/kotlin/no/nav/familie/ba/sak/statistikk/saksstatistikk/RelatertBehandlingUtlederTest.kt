@@ -7,11 +7,14 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -21,17 +24,19 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 
 class RelatertBehandlingUtlederTest {
+    private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val unleashService = mockk<UnleashNextMedContextService>()
     private val relatertBehandlingUtleder =
         RelatertBehandlingUtleder(
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             unleashService = unleashService,
+            eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
     @BeforeEach
     fun oppsett() {
-        every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns true
+        every { unleashService.isEnabled(FeatureToggle.SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK, false) } returns true
     }
 
     @Nested
@@ -42,7 +47,7 @@ class RelatertBehandlingUtlederTest {
             names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
             mode = EnumSource.Mode.INCLUDE,
         )
-        fun `skal utlede relatert behandling med barnetrygdbehandling som forrige vedtatte behandling selv for revurdering med årsak klage eller årsak iverksette ka vedtak når toggle er skrudd av`(
+        fun `skal ikke ultede relatert behandling for revurdering med årsak klage eller årsak iverksette ka vedtak når toggle er skrudd av`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             // Arrange
@@ -65,16 +70,14 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.INNVILGET,
                 )
 
-            every { unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false) } returns false
+            every { unleashService.isEnabled(FeatureToggle.SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK, false) } returns false
             every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns forrigeVedtatteBarnetrygdbehandling
 
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
-            assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteBarnetrygdbehandling.id.toString())
-            assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteBarnetrygdbehandling.aktivertTidspunkt)
+            assertThat(relatertBehandling).isNull()
         }
 
         @ParameterizedTest
@@ -83,7 +86,7 @@ class RelatertBehandlingUtlederTest {
             names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
             mode = EnumSource.Mode.INCLUDE,
         )
-        fun `skal ikke utlede relatert behandling når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
+        fun `skal utlede relatert behandling når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
             behandlingÅrsak: BehandlingÅrsak,
         ) {
             // Arrange
@@ -98,11 +101,56 @@ class RelatertBehandlingUtlederTest {
                     resultat = Behandlingsresultat.IKKE_VURDERT,
                 )
 
+            val eksternBehandlingRelasjon = lagEksternBehandlingRelasjon()
+
+            every {
+                eksternBehandlingRelasjonService.finnEksternBehandlingRelasjon(
+                    behandlingId = revurdering.id,
+                    fagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
+                )
+            } returns eksternBehandlingRelasjon
+
             // Act
             val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
 
             // Assert
             verify { behandlingHentOgPersisterService wasNot called }
+            assertThat(relatertBehandling?.id).isEqualTo(eksternBehandlingRelasjon.eksternBehandlingId)
+            assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.KLAGE)
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = BehandlingÅrsak::class,
+            names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
+            mode = EnumSource.Mode.INCLUDE,
+        )
+        fun `skal ikke utlede relatert behandling om ingen ekstern behandling relasjon finnes  når den innsendte behandling er en revurdering med årsak klage eller årsak iverksette ka vedtak`(
+            behandlingÅrsak: BehandlingÅrsak,
+        ) {
+            // Arrange
+            val nåtidspunkt = LocalDateTime.now()
+
+            val revurdering =
+                lagBehandling(
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = behandlingÅrsak,
+                    aktivertTid = nåtidspunkt.minusSeconds(1),
+                    status = BehandlingStatus.UTREDES,
+                    resultat = Behandlingsresultat.IKKE_VURDERT,
+                )
+
+            every {
+                eksternBehandlingRelasjonService.finnEksternBehandlingRelasjon(
+                    behandlingId = revurdering.id,
+                    fagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
+                )
+            } returns null
+
+            // Act
+            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
+
+            // Assert
             assertThat(relatertBehandling).isNull()
         }
 
@@ -143,7 +191,6 @@ class RelatertBehandlingUtlederTest {
             // Assert
             assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteBarnetrygdbehandling.id.toString())
             assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
         @Test
@@ -176,7 +223,6 @@ class RelatertBehandlingUtlederTest {
             // Assert
             assertThat(relatertBehandling?.id).isEqualTo(forrigeVedtatteBarnetrygdbehandling.id.toString())
             assertThat(relatertBehandling?.fagsystem).isEqualTo(RelatertBehandling.Fagsystem.BA)
-            assertThat(relatertBehandling?.vedtattTidspunkt).isEqualTo(forrigeVedtatteBarnetrygdbehandling.aktivertTidspunkt)
         }
 
         @ParameterizedTest

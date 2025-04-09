@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VE
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -62,6 +63,7 @@ class BehandlingService(
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val unleashService: UnleashNextMedContextService,
+    private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
 ) {
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -106,6 +108,14 @@ class BehandlingService(
             )
             val lagretBehandling =
                 lagreNyOgDeaktiverGammelBehandling(behandling).also {
+                    if (nyBehandling.nyEksternBehandlingRelasjon != null) {
+                        eksternBehandlingRelasjonService.lagreEksternBehandlingRelasjon(
+                            EksternBehandlingRelasjon.opprettFraNyEksternBehandlingRelasjon(
+                                internBehandlingId = it.id,
+                                nyEksternBehandlingRelasjon = nyBehandling.nyEksternBehandlingRelasjon,
+                            ),
+                        )
+                    }
                     if (nyBehandling.søknadMottattDato != null) {
                         behandlingSøknadsinfoService.lagreNedSøknadsinfo(
                             mottattDato = nyBehandling.søknadMottattDato,

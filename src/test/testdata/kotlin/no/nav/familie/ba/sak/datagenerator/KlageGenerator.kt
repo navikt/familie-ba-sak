@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.statistikk.saksstatistikk.RelatertBehandling
 import no.nav.familie.kontrakter.felles.klage.BehandlingEventType
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.HenlagtÅrsak
@@ -48,15 +47,4 @@ fun lagKlageinstansResultatDto(
         mottattEllerAvsluttetTidspunkt = mottattEllerAvsluttetTidspunkt,
         journalpostReferanser = journalpostReferanser,
         årsakFeilregistrert = årsakFeilregistrert,
-    )
-
-fun lagRelatertBehandling(
-    id: String = "1",
-    vedtattTidspunkt: LocalDateTime = LocalDateTime.now(),
-    fagsystem: RelatertBehandling.Fagsystem = RelatertBehandling.Fagsystem.BA,
-): RelatertBehandling =
-    RelatertBehandling(
-        id = id,
-        vedtattTidspunkt = vedtattTidspunkt,
-        fagsystem = fagsystem,
     )
