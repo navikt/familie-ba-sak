@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -11,10 +10,13 @@ import org.springframework.transaction.annotation.Transactional
 class ForenkletTilbakekrevingsvedtakService(
     private val forenkletTilbakekrevingsvedtakRepository: ForenkletTilbakekrevingsvedtakRepository,
     private val loggService: LoggService,
-    private val dokumentGenereringService: DokumentGenereringService,
     private val behandlingService: BehandlingHentOgPersisterService,
 ) {
     fun finnForenkletTilbakekrevingsvedtak(behandlingId: Long) = forenkletTilbakekrevingsvedtakRepository.finnForenkletTilbakekrevingsvedtakForBehandling(behandlingId)
+
+    fun hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId: Long): ForenkletTilbakekrevingsvedtak =
+        finnForenkletTilbakekrevingsvedtak(behandlingId)
+            ?: throw FunksjonellFeil("Forenklet tilbakekrevingsvedtak finnes ikke for behandling $behandlingId. Oppdater fanen og prøv igjen.")
 
     @Transactional
     fun opprettForenkletTilbakekrevingsvedtak(behandlingId: Long) =
@@ -66,23 +68,6 @@ class ForenkletTilbakekrevingsvedtakService(
             forenkletTilbakekrevingsvedtakRepository.delete(it)
             loggService.loggForenkletTilbakekrevingsvedtakSlettet(behandlingId)
         }
-
-    @Transactional
-    fun opprettOgLagreForenkletTilbakekrevingsvedtakPdf(
-        behandlingId: Long,
-    ): ForenkletTilbakekrevingsvedtak {
-        val forenkletTilbakekrevingsvedtak = hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId)
-        val pdf = dokumentGenereringService.genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak)
-
-        forenkletTilbakekrevingsvedtak.vedtakPdf = pdf
-        forenkletTilbakekrevingsvedtakRepository.saveAndFlush(forenkletTilbakekrevingsvedtak)
-
-        return forenkletTilbakekrevingsvedtak
-    }
-
-    fun hentForenkletTilbakekrevingsvedtakEllerKastFunksjonellFeil(behandlingId: Long): ForenkletTilbakekrevingsvedtak =
-        finnForenkletTilbakekrevingsvedtak(behandlingId)
-            ?: throw FunksjonellFeil("Forenklet tilbakekrevingsvedtak finnes ikke for behandling $behandlingId. Oppdater fanen og prøv igjen.")
 
     companion object {
         // TODO: Denne endres på senere når det er klart hva standard tekst skal være

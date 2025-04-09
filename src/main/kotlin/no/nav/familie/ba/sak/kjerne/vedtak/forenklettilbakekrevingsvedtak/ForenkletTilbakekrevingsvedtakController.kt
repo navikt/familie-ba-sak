@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 class ForenkletTilbakekrevingsvedtakController(
     val tilgangService: TilgangService,
     val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
+    val forenkletTilbakekrevingsvedtakBrevService: ForenkletTilbakekrevingsvedtakBrevService,
 ) {
     @GetMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE],
@@ -85,9 +86,7 @@ class ForenkletTilbakekrevingsvedtakController(
         return ResponseEntity.ok(Ressurs.success(oppdatertForenkletTilbakekrevingsvedtak.tilRestForenkletTilbakekrevingsvedtak()))
     }
 
-    @DeleteMapping(
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-    )
+    @DeleteMapping
     fun slettForenkletTilbakekrevingsvedtak(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<String>> {
@@ -104,7 +103,7 @@ class ForenkletTilbakekrevingsvedtakController(
 
     @Operation(summary = "Henter eksisterende forenklet tilbakekrevingsvedtak pdf.")
     @GetMapping(
-        produces = [MediaType.APPLICATION_PDF_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
         path = ["/pdf"],
     )
     fun hentForenkletTilbakekrevingsvedtakPdf(
@@ -124,7 +123,7 @@ class ForenkletTilbakekrevingsvedtakController(
 
     @Operation(summary = "Oppretter og henter forenklet tilbakekrevingsvedtak pdf.")
     @PostMapping(
-        produces = [MediaType.APPLICATION_PDF_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
         path = ["/pdf"],
     )
     fun opprettOgHentForenkletTilbakekrevingsvedtakPdf(
@@ -136,7 +135,7 @@ class ForenkletTilbakekrevingsvedtakController(
         )
 
         val forenkletTilbakekrevingsvedtakPdf =
-            forenkletTilbakekrevingsvedtakService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandlingId).vedtakPdf
+            forenkletTilbakekrevingsvedtakBrevService.opprettOgLagreForenkletTilbakekrevingsvedtakPdf(behandlingId).vedtakPdf
                 ?: throw Feil("Forenklet tilbakekrevingsvedtak pdf ble ikke opprettet for behandling $behandlingId.")
 
         return Ressurs.success(forenkletTilbakekrevingsvedtakPdf)

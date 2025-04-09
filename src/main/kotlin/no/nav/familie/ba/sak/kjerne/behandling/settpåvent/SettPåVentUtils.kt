@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING
-import no.nav.familie.tidslinje.diffIDager
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit.DAYS
 
 const val DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING = 5L
 
@@ -63,10 +63,10 @@ fun validerFristForUlovfestetMotregning(
     behandling: Behandling,
     frist: LocalDate,
 ) {
-    val fristDager = LocalDate.now().diffIDager(frist)
-    if (fristDager == DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
+    val fristDager = LocalDate.now().until(frist, DAYS)
+    if (fristDager != DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
         throw Feil(
-            "Uventet frist for SettPåVent med årsak $AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}." +
+            "Uventet frist for SettPåVent med årsak $AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}. " +
                 "Forventet frist er $DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING dager, faktisk frist er $fristDager dager.",
         )
     }

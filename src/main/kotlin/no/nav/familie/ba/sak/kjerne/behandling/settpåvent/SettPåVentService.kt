@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,6 +24,7 @@ class SettPåVentService(
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
     private val unleashService: UnleashNextMedContextService,
+    private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
 ) {
     fun finnAktivSettPåVentPåBehandling(behandlingId: Long): SettPåVent? = settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
 
@@ -64,6 +66,10 @@ class SettPåVentService(
             behandlingId = behandling.id,
             nyFrist = frist,
         )
+
+        if (årsak == SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING) {
+            forenkletTilbakekrevingsvedtakService.opprettForenkletTilbakekrevingsvedtak(behandlingId)
+        }
 
         return settPåVent
     }
