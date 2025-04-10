@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak.AVV
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
 
-const val DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING = 5L
+const val DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING = 14L
 
 fun validerBehandlingKanSettesPåVent(
     gammelSettPåVent: SettPåVent?,
