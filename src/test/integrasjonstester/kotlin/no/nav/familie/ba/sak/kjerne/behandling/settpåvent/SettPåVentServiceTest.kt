@@ -344,7 +344,10 @@ class SettPåVentServiceTest(
                 )
             }
 
-        assertThat(feil.message).isEqualTo("Uventet frist for SettPåVent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}. Forventet frist er 5 dager, faktisk frist er 1 dager.")
+        assertThat(feil.message).isEqualTo(
+            "Uventet frist for SettPåVent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING for behandling ${behandling.id}. " +
+                "Forventet frist er $DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING dager, faktisk frist er 1 dager.",
+        )
     }
 
     @Test
