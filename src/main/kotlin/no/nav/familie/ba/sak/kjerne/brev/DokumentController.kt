@@ -196,8 +196,18 @@ class DokumentController(
         )
 
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+        val oppdatertManueltBrevRequest =
+            if (unleashNext.isEnabled(FeatureToggle.INNHENTE_OPPLYSNINGER_KLAGE_BREV)) {
+                manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
+            } else {
+                manueltBrevRequest.leggTilEnhet(
+                    fagsak.aktør.aktivFødselsnummer(),
+                    arbeidsfordelingService,
+                )
+            }
+
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
+            manueltBrevRequest = oppdatertManueltBrevRequest,
             fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
