@@ -227,6 +227,67 @@ class EndretMigreringsdatoUtlederTest {
     }
 
     @Test
+    fun `skal ikke kaste exception om man prøver å sette ny migreringsdato etter forrige migreringsdato når det er satsendring`() {
+        // Arrange
+        val migreringsdato = LocalDate.of(2024, 11, 1)
+        val migreringsdatoEndretDato = LocalDate.of(2024, 5, 1)
+
+        val fagsak = Fagsak(0L, randomAktør())
+
+        val migreringsBehandling1 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            )
+
+        val forrigeTilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = migreringsBehandling1,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = migreringsdato.toYearMonth(),
+                            tom = migreringsdato.plusMonths(1).toYearMonth(),
+                        ),
+                    )
+                },
+            )
+
+        val migreringsBehandling2 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            )
+
+        every {
+            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
+        } returns listOf(migreringsBehandling1, migreringsBehandling2)
+
+        every {
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsak.id)
+        } returns
+            BehandlingMigreringsinfo(
+                behandling = migreringsBehandling1,
+                migreringsdato = migreringsdato,
+            ).also { it.endretTidspunkt = migreringsdatoEndretDato.atStartOfDay() }
+
+        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(forrigeTilkjentYtelse)
+
+        // Act & assert
+        val endretMigreringsdato =
+            endretMigreringsdatoUtleder.utled(
+                fagsak = fagsak,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                erSatsendring = true,
+            )
+
+        assertThat(endretMigreringsdato).isNull()
+    }
+
+    @Test
     fun `skal returnere null dersom det kun finnes 1 behandling av typen MIGRERING_FRA_INFOTRYGD og dette er den første behandlingen i fagsaken`() {
         // Arrange
         val migreringsdato = LocalDate.of(2021, 11, 1)
