@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -43,7 +45,6 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import java.time.LocalDate
@@ -185,12 +186,8 @@ fun ManueltBrevRequest.leggTilEnhet(
 fun ManueltBrevRequest.byggMottakerdataFraFagsak(
     fagsak: Fagsak,
     arbeidsfordelingService: ArbeidsfordelingService,
-    personRepository: PersonRepository,
+    pdlRestClient: PdlRestClient,
 ): ManueltBrevRequest {
-    val personIFagsak =
-        personRepository.findByAktør(fagsak.aktør).maxByOrNull { it.endretTidspunkt }
-            ?: error("Fant ingen personer med angitt personident på fagsakId=${fagsak.id}")
-
     val enhet =
         arbeidsfordelingService
             .hentArbeidsfordelingsenhetPåIdenter(
@@ -202,13 +199,14 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
 
     return when (fagsak.type) {
         FagsakType.INSTITUSJON -> {
+            val personNavn = pdlRestClient.hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL).navn ?: throw FunksjonellFeil("Finner ikke navn på person i PDL")
+
             this.copy(
                 enhet = enhet,
-                mottakerMålform = personIFagsak.målform,
                 vedrørende =
                     object : Person {
                         override val fødselsnummer = fagsak.aktør.aktivFødselsnummer()
-                        override val navn = personIFagsak.navn
+                        override val navn = personNavn
                     },
             )
         }
@@ -218,7 +216,6 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
         ->
             this.copy(
                 enhet = enhet,
-                mottakerMålform = personIFagsak.målform,
             )
     }
 }

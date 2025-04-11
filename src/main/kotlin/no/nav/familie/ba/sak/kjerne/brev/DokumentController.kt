@@ -2,13 +2,17 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraBehandling
+import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdataFraFagsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhet
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -44,6 +48,8 @@ class DokumentController(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val dokumentDistribueringService: DokumentDistribueringService,
+    private val unleashNext: UnleashNextMedContextService,
+    private val pdlRestClient: PdlRestClient,
 ) {
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
     fun genererVedtaksbrev(
@@ -159,9 +165,20 @@ class DokumentController(
         )
 
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+
+        val oppdatertManueltBrevRequest =
+            if (unleashNext.isEnabled(FeatureToggle.INNHENTE_OPPLYSNINGER_KLAGE_BREV)) {
+                manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
+            } else {
+                manueltBrevRequest.leggTilEnhet(
+                    fagsak.aktør.aktivFødselsnummer(),
+                    arbeidsfordelingService,
+                )
+            }
+
         return dokumentGenereringService
             .genererManueltBrev(
-                manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
+                manueltBrevRequest = oppdatertManueltBrevRequest,
                 erForhåndsvisning = true,
                 fagsak = fagsak,
             ).let { Ressurs.success(it) }
@@ -179,8 +196,18 @@ class DokumentController(
         )
 
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+        val oppdatertManueltBrevRequest =
+            if (unleashNext.isEnabled(FeatureToggle.INNHENTE_OPPLYSNINGER_KLAGE_BREV)) {
+                manueltBrevRequest.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
+            } else {
+                manueltBrevRequest.leggTilEnhet(
+                    fagsak.aktør.aktivFødselsnummer(),
+                    arbeidsfordelingService,
+                )
+            }
+
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(fagsak.aktør.aktivFødselsnummer(), arbeidsfordelingService),
+            manueltBrevRequest = oppdatertManueltBrevRequest,
             fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
