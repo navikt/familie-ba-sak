@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.IBegrunnelseGrunnlagForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erUtbetalingEllerDeltBostedIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.finnBegrunnelseGrunnlagPerPerson
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.AndelForVedtaksbegrunnelse
 import java.math.BigDecimal
 
 fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
@@ -146,10 +147,17 @@ fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltUtvidetIPeriode(): Boole
         }
     }
 
-fun Map<Person, IBegrunnelseGrunnlagForPeriode>.erBetaltDeltUtvidetIPeriode(): Boolean =
-    this.any {
-        it.value.dennePerioden.andeler.any { andel ->
-            andel.type == YtelseType.UTVIDET_BARNETRYGD && andel.kalkulertUtbetalingsbeløp > 0 && andel.prosent == BigDecimal(50)
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnUtvidetAndelerIForrigePeriode(): List<AndelForVedtaksbegrunnelse> =
+    this.flatMap {
+        it.value.forrigePeriode?.andeler?.filter { andel ->
+            andel.type == YtelseType.UTVIDET_BARNETRYGD
+        } ?: emptyList()
+    }
+
+fun Map<Person, IBegrunnelseGrunnlagForPeriode>.finnUtvidetAndelerIDennePerioden(): List<AndelForVedtaksbegrunnelse> =
+    this.flatMap {
+        it.value.dennePerioden.andeler.filter { andel ->
+            andel.type == YtelseType.UTVIDET_BARNETRYGD
         }
     }
 
