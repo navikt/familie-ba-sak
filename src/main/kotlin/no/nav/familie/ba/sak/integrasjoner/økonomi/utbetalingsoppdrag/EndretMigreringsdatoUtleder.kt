@@ -21,6 +21,7 @@ class EndretMigreringsdatoUtleder(
     fun utled(
         fagsak: Fagsak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
+        erSatsendring: Boolean = false,
     ): YearMonth? {
         val førsteAndelFomDatoForrigeBehandling = forrigeTilkjentYtelse?.andelerTilkjentYtelse?.minOfOrNull { it.stønadFom } ?: return null
 
@@ -43,7 +44,7 @@ class EndretMigreringsdatoUtleder(
 
         // Plusser på 1 mnd på migreringsdato da barnetrygden kun skal løpe fra BA-sak tidligst mnd etter migrering.
         val migreringsdatoPåFagsakPlussEnMnd = behandlingMigreringsinfo.migreringsdato.plusMonths(1)
-        if (migreringsdatoPåFagsakPlussEnMnd.toYearMonth().isAfter(førsteAndelFomDatoForrigeBehandling)) {
+        if (!erSatsendring && migreringsdatoPåFagsakPlussEnMnd.toYearMonth().isAfter(førsteAndelFomDatoForrigeBehandling)) {
             throw IllegalStateException("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
         }
 

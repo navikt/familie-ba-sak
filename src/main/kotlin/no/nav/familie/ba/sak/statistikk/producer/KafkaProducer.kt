@@ -22,7 +22,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 
 interface KafkaProducer {
     fun sendMessageForTopicVedtakV2(vedtakV2: VedtakDVHV2): Long
@@ -90,9 +89,7 @@ class DefaultKafkaProducer(
         logger.info("$SAKSSTATISTIKK_BEHANDLING_TOPIC -> message sent -> offset=${response.recordMetadata.offset()}")
 
         saksstatistikkBehandlingDvhCounter.increment()
-        melding.offsetVerdi = response.recordMetadata.offset()
-        melding.sendtTidspunkt = LocalDateTime.now()
-        saksstatistikkMellomlagringRepository.save(melding)
+        saksstatistikkMellomlagringRepository.delete(melding)
         return response.recordMetadata.offset()
     }
 
@@ -105,9 +102,7 @@ class DefaultKafkaProducer(
         logger.info("$SAKSSTATISTIKK_SAK_TOPIC -> message sent -> offset=${response.recordMetadata.offset()}")
 
         saksstatistikkSakDvhCounter.increment()
-        melding.offsetVerdi = response.recordMetadata.offset()
-        melding.sendtTidspunkt = LocalDateTime.now()
-        saksstatistikkMellomlagringRepository.save(melding)
+        saksstatistikkMellomlagringRepository.delete(melding)
         return response.recordMetadata.offset()
     }
 
@@ -201,9 +196,7 @@ class MockKafkaProducer(
     override fun sendMessageForTopicBehandling(melding: SaksstatistikkMellomlagring): Long {
         logger.info("Skipper sending av saksstatistikk behandling for ${melding.jsonToBehandlingDVH().behandlingId} fordi kafka ikke er enablet")
         sendteMeldinger["behandling-${melding.jsonToBehandlingDVH().behandlingId}"] = melding.jsonToBehandlingDVH()
-        melding.offsetVerdiOnPrem = 42
-        melding.sendtTidspunkt = LocalDateTime.now()
-        saksstatistikkMellomlagringRepository.save(melding)
+        saksstatistikkMellomlagringRepository.delete(melding)
         return 42
     }
 
@@ -211,9 +204,7 @@ class MockKafkaProducer(
     override fun sendMessageForTopicSak(melding: SaksstatistikkMellomlagring): Long {
         logger.info("Skipper sending av saksstatistikk sak for ${melding.jsonToSakDVH().sakId} fordi kafka ikke er enablet")
         sendteMeldinger["sak-${melding.jsonToSakDVH().sakId}"] = melding.jsonToSakDVH()
-        melding.offsetVerdiOnPrem = 43
-        melding.sendtTidspunkt = LocalDateTime.now()
-        saksstatistikkMellomlagringRepository.save(melding)
+        saksstatistikkMellomlagringRepository.delete(melding)
         return 43
     }
 
