@@ -5,9 +5,11 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
-import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
+import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
@@ -16,13 +18,12 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingEtterKAVedtakDat
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class ManueltBrevRequestTest {
     private val årsaker = listOf("1", "2", "3")
@@ -307,18 +308,13 @@ class ManueltBrevRequestTest {
     inner class ByggMottakerdata {
         @Test
         fun `byggMottakerdataFraFagsak skal bygge korrekt informasjon om mottaker for institusjon`() {
-            val orgNummer = "123456789"
-            val institusjon = lagInstitusjon(orgNummer = orgNummer)
-
-            val fnr = "12345678910"
-            val navn = "Navn navnesen"
-            val aktør = randomAktør(fnr)
-            val person = lagPerson(aktør = aktør, personIdent = PersonIdent(fnr), navn = navn)
+            val institusjon = lagInstitusjon()
+            val aktør = randomAktør()
             val fagsak = lagFagsak(aktør = aktør, institusjon = institusjon, type = FagsakType.INSTITUSJON)
 
-            val personRepository =
-                mockk<PersonRepository> {
-                    every { findByAktør(fagsak.aktør) } returns listOf(person)
+            val pdlRestClient =
+                mockk<PdlRestClient> {
+                    every { hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL) } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "Navn navnesen")
                 }
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
@@ -331,12 +327,12 @@ class ManueltBrevRequestTest {
                 }
 
             val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON, mottakerMålform = Målform.NB)
-            val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, personRepository)
+            val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
 
             assertThat(result.enhet?.enhetId).isEqualTo("enhetId")
             assertThat(result.enhet?.enhetNavn).isEqualTo("enhetNavn")
             assertThat(result.mottakerMålform).isEqualTo(Målform.NB)
-            assertThat(result.vedrørende?.fødselsnummer).isEqualTo("12345678910")
+            assertThat(result.vedrørende?.fødselsnummer).isEqualTo(aktør.aktivFødselsnummer())
             assertThat(result.vedrørende?.navn).isEqualTo("Navn navnesen")
         }
     }
