@@ -309,12 +309,9 @@ class ManueltBrevRequestTest {
         @Test
         fun `byggMottakerdataFraFagsak skal bygge korrekt informasjon om mottaker for person`() {
             val aktør = randomAktør()
-            val fagsak = lagFagsak(aktør = aktør, type = FagsakType.INSTITUSJON)
+            val fagsak = lagFagsak(aktør = aktør, type = FagsakType.NORMAL)
 
-            val pdlRestClient =
-                mockk<PdlRestClient> {
-                    every { hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL) } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "Navn navnesen")
-                }
+            val pdlRestClient = mockk<PdlRestClient>()
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
                     enhetId = "enhetId",
@@ -325,14 +322,12 @@ class ManueltBrevRequestTest {
                     every { hentArbeidsfordelingsenhetPåIdenter(any(), any()) } returns arbeidsfordelingsenhet
                 }
 
-            val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE_INSTITUSJON, mottakerMålform = Målform.NB)
+            val request = ManueltBrevRequest(brevmal = Brevmal.INFORMASJONSBREV_INNHENTE_OPPLYSNINGER_KLAGE, mottakerMålform = Målform.NB)
             val result = request.byggMottakerdataFraFagsak(fagsak, arbeidsfordelingService, pdlRestClient)
 
             assertThat(result.enhet?.enhetId).isEqualTo("enhetId")
             assertThat(result.enhet?.enhetNavn).isEqualTo("enhetNavn")
             assertThat(result.mottakerMålform).isEqualTo(Målform.NB)
-            assertThat(result.vedrørende?.fødselsnummer).isEqualTo(aktør.aktivFødselsnummer())
-            assertThat(result.vedrørende?.navn).isEqualTo("Navn navnesen")
         }
 
         @Test
