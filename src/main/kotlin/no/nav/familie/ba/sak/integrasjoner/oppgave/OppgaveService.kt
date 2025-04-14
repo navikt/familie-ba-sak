@@ -380,7 +380,9 @@ class OppgaveService(
             !behandling.erMigrering() &&
             !behandling.erTekniskEndring()
         ) {
-            throw Feil("Fant ingen oppgaver å avslutte ved sending til godkjenner på $behandling")
+            logger.info("Fant ingen oppgaver å avslutte ved sending til godkjenner på behandling ${behandling.id}")
+
+            return
         }
 
         lagVedtakOppgaver
