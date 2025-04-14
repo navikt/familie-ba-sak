@@ -302,6 +302,18 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstOvertattAnsvarForBarn"
     },
+    INNVILGET_MIDLERTIDIG_DIFFERANSEUTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetMidlertidigDifferanseutbetaling"
+    },
+    INNVILGET_TILLEGSTEKST_FULL_UTBETALING_FÅR_IKKE_FRA_UK {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstFullUtbetalingFaarIkkeFraUk"
+    },
+    INNVILGET_PRIMÆRLAND_ALENEFORELDER_OPPHOLD_ANNET_EØS_LAND_NORGE_LOVVALG {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetPrimarlandAleneforelderOppholdAnnetEosLandNorgeLovvalg"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
