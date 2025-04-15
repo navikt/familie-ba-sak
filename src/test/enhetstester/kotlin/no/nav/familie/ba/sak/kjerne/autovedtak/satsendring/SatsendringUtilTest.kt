@@ -380,6 +380,12 @@ class SatsendringUtilTest {
         assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser(personopplysningGrunnlag)).isEqualTo(false)
     }
 
+    @Test
+    fun `Hvis denne testen feiler så er det skjedd en endring på aktive satser og testene som sjekker om en sats har eller ikke har oppdatert sats må utvides`() {
+        assertThat(SatsService.finnAlleAktiveSisteSatser().map { it.type }).hasSize(3).containsOnly(SatsType.SMA, SatsType.UTVIDET_BARNETRYGD, SatsType.ORBA)
+        assertThat(SatsType.entries).hasSize(5).containsOnly(SatsType.SMA, SatsType.UTVIDET_BARNETRYGD, SatsType.ORBA, SatsType.TILLEGG_ORBA, SatsType.FINN_SVAL)
+    }
+
     private fun datoForSisteSatsendringForSatsType(satsType: SatsType) = SatsService.finnSisteSatsFor(satsType).gyldigFom.toYearMonth()
 
     private fun lagPersonopplysningsgrunnlag(
