@@ -92,7 +92,7 @@ class VedtaksperiodeMedBegrunnelserController(
         @RequestBody
         restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
     ): ResponseEntity<Ressurs<List<RestUtvidetVedtaksperiodeMedBegrunnelser>>> {
-        val behandlingId = vedtaksperiodeHentOgPersisterService.hentBehandlingIdFor(vedtaksperiodeId)
+        val behandlingId = vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId) ?: throw FunksjonellFeil("Vedtaksperiodene har blitt oppdatert. Oppdater siden og forsøk å legge til fritekst på nytt.")
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -137,7 +137,10 @@ class VedtaksperiodeMedBegrunnelserController(
     fun genererBrevBegrunnelserForPeriode(
         @PathVariable vedtaksperiodeId: Long,
     ): ResponseEntity<Ressurs<Set<String>>> {
-        val behandlingId = vedtaksperiodeHentOgPersisterService.hentBehandlingIdFor(vedtaksperiodeId)
+        val behandlingId =
+            vedtaksperiodeHentOgPersisterService.finnBehandlingIdFor(vedtaksperiodeId)
+                ?: throw FunksjonellFeil("Vedtaksperiodene har blitt oppdatert. Oppdater siden og forsøk å legge til begrunnelser på nytt.")
+
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

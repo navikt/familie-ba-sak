@@ -39,30 +39,4 @@ class VedtaksperiodeHentOgPersisterServiceTest {
         // Assert
         assertThat(feil.message).isEqualTo("Fant ingen vedtaksperiode med id 1")
     }
-
-    @Test
-    fun `hentBehandlingIdFor skal kaste feil hvis det ikke finnes noe behandling for vedtaksperiode`() {
-        // Arrange && Act
-        every { vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(1) } returns null
-
-        val feil =
-            assertThrows<Feil> {
-                vedtaksperiodeHentOgPersisterService.hentBehandlingIdFor(1)
-            }
-
-        // Assert
-        assertThat(feil.message).isEqualTo("Fant ingen behandling tilhørende vedtaksperiode med id 1")
-    }
-
-    @Test
-    fun `hentBehandlingIdFor skal kaste returnere behandlingId hvis det finnes noe behandling for vedtaksperiode`() {
-        // Arrange
-        every { vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(1) } returns 20
-
-        // Act
-        val behandlingIdForVedtaksperiode = vedtaksperiodeHentOgPersisterService.hentBehandlingIdFor(1)
-
-        // Assert
-        assertThat(behandlingIdForVedtaksperiode).isEqualTo(20)
-    }
 }
