@@ -111,11 +111,13 @@ class JournalførVedtaksbrevTest {
         // Arrange
         every { mockFagsakRepository.finnFagsak(behandling.fagsak.id) } returns lagFagsak(type = FagsakType.INSTITUSJON, institusjon = Institusjon(orgNummer = "testOrgNummer", tssEksternId = null))
 
+        // Act
         journalførVedtaksbrevTask.utførStegOgAngiNeste(
             behandling = behandling,
             data = JournalførVedtaksbrevDTO(vedtakId = vedtak.id, task = mockk(relaxed = true)),
         )
 
+        // Assert
         verify(exactly = 1) {
             mockUtgåendeJournalføringService.journalførDokument(
                 fnr = any(),
@@ -143,11 +145,13 @@ class JournalførVedtaksbrevTest {
         every { mockFagsakRepository.finnFagsak(behandling.fagsak.id) } returns lagFagsak(type = FagsakType.NORMAL)
         every { mockBrevmottakerService.hentBrevmottakere(behandling.id) } returns emptyList()
 
+        // Act
         journalførVedtaksbrevTask.utførStegOgAngiNeste(
             behandling = behandling,
             data = JournalførVedtaksbrevDTO(vedtakId = vedtak.id, task = mockk(relaxed = true)),
         )
 
+        // Assert
         verify(exactly = 1) {
             mockUtgåendeJournalføringService.journalførDokument(
                 fnr = any(),
@@ -171,11 +175,13 @@ class JournalførVedtaksbrevTest {
         every { mockBrevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"), lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"))
         every { mockBrevmottakerService.lagMottakereFraBrevMottakere(any()) } returns listOf(Bruker, Bruker)
 
+        // Act
         journalførVedtaksbrevTask.utførStegOgAngiNeste(
             behandling = behandling,
             data = JournalførVedtaksbrevDTO(vedtakId = vedtak.id, task = mockk(relaxed = true)),
         )
 
+        // Assert
         verify(exactly = 2) {
             mockUtgåendeJournalføringService.journalførDokument(
                 fnr = any(),
@@ -208,11 +214,15 @@ class JournalførVedtaksbrevTest {
         every { mockBrevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"), lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"))
         every { mockBrevmottakerService.lagMottakereFraBrevMottakere(any()) } returns listOf(Bruker, Bruker)
         every { mockForenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandling.id) } returns forenkletTilbakekrevingsvedtak
+
+        // Act
         journalførVedtaksbrevTask.utførStegOgAngiNeste(
             behandling = behandling,
             data = JournalførVedtaksbrevDTO(vedtakId = vedtak.id, task = mockk(relaxed = true)),
         )
 
+        // Assert
+        // 2 vedtaksbrev + 2 forenklet tilbakekrevingsvedtak
         verify(exactly = 4) {
             mockUtgåendeJournalføringService.journalførDokument(
                 fnr = any(),
