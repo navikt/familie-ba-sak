@@ -9,12 +9,12 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import java.math.BigDecimal
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertMedSisteSatser(personOpplysningGrunnlag: PersonopplysningGrunnlag): Boolean =
-    SatsType.entries
-        .filter { it != SatsType.FINN_SVAL }
+    SatsService
+        .finnAlleAktiveSisteSatser()
         .all {
             this.erOppdatertForSats(
                 personOpplysningGrunnlag = personOpplysningGrunnlag,
-                satstype = it,
+                satstype = it.type,
             )
         }
 
