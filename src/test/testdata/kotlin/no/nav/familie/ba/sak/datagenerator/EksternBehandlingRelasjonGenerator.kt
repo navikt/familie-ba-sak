@@ -17,7 +17,7 @@ fun lagEksternBehandlingRelasjon(
         internBehandlingId = internBehandlingId,
         eksternBehandlingId = eksternBehandlingId,
         eksternBehandlingFagsystem = eksternBehandlingFagsystem,
-        opprettetTidspunkt = opprettetTidspunkt,
+        opprettetTid = opprettetTidspunkt,
     )
 
 fun lagNyEksternBehandlingRelasjon(

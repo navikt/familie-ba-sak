@@ -32,7 +32,7 @@ class EksternBehandlingRelasjonTest {
             assertThat(eksternBehandlingRelasjon.internBehandlingId).isEqualTo(internBehandlingId)
             assertThat(eksternBehandlingRelasjon.eksternBehandlingId).isEqualTo(nyEksternBehandlingRelasjon.eksternBehandlingId)
             assertThat(eksternBehandlingRelasjon.eksternBehandlingFagsystem).isEqualTo(nyEksternBehandlingRelasjon.eksternBehandlingFagsystem)
-            assertThat(eksternBehandlingRelasjon.opprettetTidspunkt).isNotNull()
+            assertThat(eksternBehandlingRelasjon.opprettetTid).isNotNull()
         }
     }
 }

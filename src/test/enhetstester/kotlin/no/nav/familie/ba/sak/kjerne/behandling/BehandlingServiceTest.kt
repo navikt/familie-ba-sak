@@ -135,7 +135,7 @@ class BehandlingServiceTest {
             assertThat(eksternBehandlingRelasjon.internBehandlingId).isEqualTo(opprettetBehandling.id)
             assertThat(eksternBehandlingRelasjon.eksternBehandlingId).isEqualTo(nyBehandling.nyEksternBehandlingRelasjon?.eksternBehandlingId)
             assertThat(eksternBehandlingRelasjon.eksternBehandlingFagsystem).isEqualTo(nyBehandling.nyEksternBehandlingRelasjon?.eksternBehandlingFagsystem)
-            assertThat(eksternBehandlingRelasjon.opprettetTidspunkt).isNotNull()
+            assertThat(eksternBehandlingRelasjon.opprettetTid).isNotNull()
         }
 
         @Test

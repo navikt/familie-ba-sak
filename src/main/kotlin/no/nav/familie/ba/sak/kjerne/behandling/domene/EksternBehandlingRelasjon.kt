@@ -18,15 +18,15 @@ data class EksternBehandlingRelasjon(
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ekstern_behandling_relasjon_seq_generator")
     @SequenceGenerator(name = "ekstern_behandling_relasjon_seq_generator", sequenceName = "ekstern_behandling_relasjon_seq", allocationSize = 50)
     val id: Long = 0,
-    @Column(name = "intern_behandling_id", nullable = false)
+    @Column(name = "fk_behandling_id", nullable = false)
     val internBehandlingId: Long,
     @Column(name = "ekstern_behandling_id", nullable = false)
     val eksternBehandlingId: String,
     @Enumerated(EnumType.STRING)
     @Column(name = "ekstern_behandling_fagsystem", nullable = false)
     val eksternBehandlingFagsystem: Fagsystem,
-    @Column(name = "opprettet_tidspunkt", nullable = false)
-    val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
+    @Column(name = "opprettet_tid", nullable = false)
+    val opprettetTid: LocalDateTime = LocalDateTime.now(),
 ) {
     enum class Fagsystem {
         KLAGE,

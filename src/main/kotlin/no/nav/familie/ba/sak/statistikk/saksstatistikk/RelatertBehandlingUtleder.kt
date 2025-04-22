@@ -26,7 +26,7 @@ class RelatertBehandlingUtleder(
                     fagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
                 )
             if (eksternKlagebehandlingRelasjon == null) {
-                logger.warn("Forventer en ekstern klagebehandling relasjon for fagsak ${behandling.fagsak.id} og behandling ${behandling.id}")
+                logger.warn("Forventer en ekstern klagebehandling relasjon for fagsak=${behandling.fagsak.id} og behandling=${behandling.id}")
                 return null
             }
             return RelatertBehandling.fraEksternBehandlingRelasjon(eksternKlagebehandlingRelasjon)
@@ -39,7 +39,7 @@ class RelatertBehandlingUtleder(
         if (behandling.erRevurderingEllerTekniskEndring()) {
             val forrigeVedtatteBarnetrygdbehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             if (forrigeVedtatteBarnetrygdbehandling == null) {
-                logger.warn("Forventer en vedtatt barnetrygdbehandling for fagsak ${behandling.fagsak.id} og behandling ${behandling.id}")
+                logger.warn("Forventer en vedtatt barnetrygdbehandling for fagsak=${behandling.fagsak.id} og behandling=${behandling.id}")
                 return null
             }
             return RelatertBehandling.fraBarnetrygdbehandling(forrigeVedtatteBarnetrygdbehandling)

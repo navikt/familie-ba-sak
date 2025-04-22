@@ -66,14 +66,14 @@ class EksternBehandlingRelasjonRepositoryTest(
                 assertThat(it.internBehandlingId).isEqualTo(behandling.id)
                 assertThat(it.eksternBehandlingId).isEqualTo(eksternBehandlingRelasjon1.eksternBehandlingId)
                 assertThat(it.eksternBehandlingFagsystem).isEqualTo(eksternBehandlingRelasjon1.eksternBehandlingFagsystem)
-                assertThat(it.opprettetTidspunkt).isNotNull()
+                assertThat(it.opprettetTid).isNotNull()
             }
             assertThat(eksternBehandlingRelasjoner).anySatisfy {
                 assertThat(it.id).isNotNull()
                 assertThat(it.internBehandlingId).isEqualTo(behandling.id)
                 assertThat(it.eksternBehandlingId).isEqualTo(eksternBehandlingRelasjon2.eksternBehandlingId)
                 assertThat(it.eksternBehandlingFagsystem).isEqualTo(eksternBehandlingRelasjon2.eksternBehandlingFagsystem)
-                assertThat(it.opprettetTidspunkt).isNotNull()
+                assertThat(it.opprettetTid).isNotNull()
             }
         }
 

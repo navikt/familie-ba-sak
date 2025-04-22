@@ -94,7 +94,7 @@ class EksternKlageControllerTest(
             assertThat(eksternBehandlingRelasjon[0].internBehandlingId).isEqualTo(revurderingBehandlingId)
             assertThat(eksternBehandlingRelasjon[0].eksternBehandlingId).isEqualTo(klagebehandlingId.toString())
             assertThat(eksternBehandlingRelasjon[0].eksternBehandlingFagsystem).isEqualTo(EksternBehandlingRelasjon.Fagsystem.KLAGE)
-            assertThat(eksternBehandlingRelasjon[0].opprettetTidspunkt).isNotNull()
+            assertThat(eksternBehandlingRelasjon[0].opprettetTid).isNotNull()
         }
     }
 }
