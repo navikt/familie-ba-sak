@@ -60,6 +60,12 @@ object SatsService {
         return gjeldendeSatsForPeriode.beløp
     }
 
+    fun finnAlleAktiveSisteSatser() =
+        hentAllesatser()
+            .filter { it.gyldigTom.isAfter(LocalDate.now()) }
+            .groupBy { it.type }
+            .map { (_, satser) -> satser.maxBy { it.gyldigTom } }
+
     fun finnSatsendring(startDato: LocalDate): List<Sats> =
         hentAllesatser()
             .filter { it.gyldigFom == startDato }
