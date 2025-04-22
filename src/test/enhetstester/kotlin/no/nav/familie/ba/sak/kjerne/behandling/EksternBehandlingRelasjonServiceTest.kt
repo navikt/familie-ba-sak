@@ -28,7 +28,10 @@ class EksternBehandlingRelasjonServiceTest {
             every { eksternBehandlingRelasjonRepository.save(any()) } returnsArgument 0
 
             // Act
-            val lagretEksternBehandlingRelasjon = eksternBehandlingRelasjonService.lagreEksternBehandlingRelasjon(eksternBehandlingRelasjon)
+            val lagretEksternBehandlingRelasjon =
+                eksternBehandlingRelasjonService.lagreEksternBehandlingRelasjon(
+                    eksternBehandlingRelasjon,
+                )
 
             // Assert
             verify { eksternBehandlingRelasjonRepository.save(eksternBehandlingRelasjon) }
@@ -74,17 +77,7 @@ class EksternBehandlingRelasjonServiceTest {
         @Test
         fun `skal ikke finne ekstern behandling relasjon da den ikke finnes`() {
             // Arrange
-            val nåtidspunkt = LocalDateTime.now()
             val behandlingId = 1L
-
-            val lagretEksternBehandlingRelasjon =
-                lagEksternBehandlingRelasjon(
-                    id = 1L,
-                    internBehandlingId = behandlingId,
-                    eksternBehandlingId = UUID.randomUUID().toString(),
-                    eksternBehandlingFagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
-                    opprettetTidspunkt = nåtidspunkt.minusSeconds(1),
-                )
 
             every {
                 eksternBehandlingRelasjonRepository.findByInternBehandlingIdOgFagsystem(
