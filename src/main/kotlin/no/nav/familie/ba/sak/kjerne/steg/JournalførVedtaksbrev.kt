@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -25,6 +26,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilFullmektigEllerVergeTask
@@ -44,6 +47,7 @@ class JournalførVedtaksbrev(
     private val organisasjonService: OrganisasjonService,
     private val brevmottakerService: BrevmottakerService,
     private val brevmalService: BrevmalService,
+    private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -54,11 +58,14 @@ class JournalførVedtaksbrev(
         val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
 
         if (fagsak == null || fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null) {
-            error("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
+            throw Feil("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
         }
 
         val behandlendeEnhet =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
+
+        val forenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandling.id)
+        val skalJournalføreForenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtak?.vedtakPdf != null
 
         val mottakere = mutableListOf<MottakerInfo>()
 
@@ -82,6 +89,7 @@ class JournalførVedtaksbrev(
         }
 
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
+
         mottakere.forEach { mottakerInfo ->
             journalførVedtaksbrev(
                 fnr = fagsak.aktør.aktivFødselsnummer(),
@@ -91,6 +99,17 @@ class JournalførVedtaksbrev(
                 mottakerInfo = mottakerInfo,
                 eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsak.id, behandling.id, mottakerInfo),
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
+
+            if (skalJournalføreForenkletTilbakekrevingsvedtak) {
+                journalførForenkletTilbakekrevingsvedtaksbrev(
+                    fnr = fagsak.aktør.aktivFødselsnummer(),
+                    fagsakId = fagsakId,
+                    forenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtak!!,
+                    journalførendeEnhet = behandlendeEnhet,
+                    mottakerInfo = mottakerInfo,
+                    eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsak.id, behandling.id, mottakerInfo),
+                ).also { journalposterTilDistribusjon[it] = mottakerInfo }
+            }
         }
 
         lagTaskForÅDistribuereVedtaksbrev(journalposterTilDistribusjon, data, behandling)
@@ -184,6 +203,37 @@ class JournalførVedtaksbrev(
             brev = brev,
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
+            avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
+            eksternReferanseId = eksternReferanseId,
+        )
+    }
+
+    fun journalførForenkletTilbakekrevingsvedtaksbrev(
+        fnr: String,
+        fagsakId: String,
+        forenkletTilbakekrevingsvedtak: ForenkletTilbakekrevingsvedtak,
+        journalførendeEnhet: String,
+        mottakerInfo: MottakerInfo,
+        eksternReferanseId: String,
+    ): String {
+        val behandling = forenkletTilbakekrevingsvedtak.behandling
+        val brev =
+            listOf(
+                Dokument(
+                    forenkletTilbakekrevingsvedtak.vedtakPdf!!,
+                    filtype = Filtype.PDFA,
+                    dokumenttype = Dokumenttype.BARNETRYGD_FORENKLET_TILBAKEKREVINGSVEDTAK,
+                ),
+            )
+
+        logger.info("Journalfører forenklet tilbakekrevingsvedtak brev for behandling ${behandling.id}")
+
+        return utgåendeJournalføringService.journalførDokument(
+            fnr = fnr,
+            fagsakId = fagsakId,
+            journalførendeEnhet = journalførendeEnhet,
+            brev = brev,
+            behandlingId = behandling.id,
             avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
             eksternReferanseId = eksternReferanseId,
         )
