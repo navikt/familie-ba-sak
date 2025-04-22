@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
