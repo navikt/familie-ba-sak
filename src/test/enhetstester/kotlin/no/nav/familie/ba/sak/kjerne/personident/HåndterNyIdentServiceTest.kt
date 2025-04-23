@@ -138,7 +138,15 @@ internal class HåndterNyIdentServiceTest {
                     håndterNyIdentService.håndterNyIdent(PersonIdent(nyttFnr))
                 }
 
-            assertThat(feil.message).startsWith("Fødselsdato er forskjellig fra forrige behandling.")
+            assertThat(feil.message).isEqualTo(
+                """Fødselsdato er forskjellig fra forrige behandling. 
+   Ny fødselsdato 2024-01-23, forrige fødselsdato 2024-04-23
+   Fagsak: 1 
+
+Du MÅ først patche fnr med PatchMergetIdentTask og etterpå sende saken til en fagressurs.
+Info om gammel og nytt fnr finner man loggmelding med level WARN i securelogs.
+Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3%B8r-sak.md#manuell-patching-av-akt%C3%B8r-for-en-behandling for mer info.""",
+            )
         }
 
         @Test

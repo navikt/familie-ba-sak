@@ -141,17 +141,21 @@ class HåndterNyIdentService(
         }
 
         if (fødselsdatoFraPdl.toYearMonth() != fødselsdatoForrigeBehandling.toYearMonth()) {
+            val introTekstOmFeil =
+                "Fødselsdato er forskjellig fra forrige behandling. \n" +
+                    "   Ny fødselsdato $fødselsdatoFraPdl, forrige fødselsdato $fødselsdatoForrigeBehandling\n" +
+                    "   Fagsak: ${forrigeBehandling.fagsak.id} \n"
             secureLogger.warn(
-                """Fødselsdato er forskjellig fra forrige behandling.
-                    Ny fødselsdato $fødselsdatoFraPdl, forrige fødselsdato $fødselsdatoForrigeBehandling
-                    Fagsak: ${forrigeBehandling.fagsak.id}
-                    Ny ident: ${alleIdenterFraPdl.filter { !it.historisk && it.gruppe == Type.FOLKEREGISTERIDENT.name }.map { it.ident }}
-                    Gamle identer: ${alleIdenterFraPdl.filter { it.historisk && it.gruppe == Type.FOLKEREGISTERIDENT.name }.map { it.ident }}
-                    Send informasjonen beskrevet over til en fagressurs og patch identen manuelt. Se lenke for mer info:
-                    ${LENKE_INFO_OM_MERGING}
-                """.trimMargin(),
+                "$introTekstOmFeil" +
+                    "   Ny ident: ${alleIdenterFraPdl.filter { !it.historisk && it.gruppe == Type.FOLKEREGISTERIDENT.name }.map { it.ident }}\n" +
+                    "   Gamle identer: ${alleIdenterFraPdl.filter { it.historisk && it.gruppe == Type.FOLKEREGISTERIDENT.name }.map { it.ident }}\n",
             )
-            throw Feil("Fødselsdato er forskjellig fra forrige behandling. Kopier tekst fra securelog og send til en fagressurs")
+            throw Feil(
+                "$introTekstOmFeil\n" +
+                    "Du MÅ først patche fnr med PatchMergetIdentTask og etterpå sende saken til en fagressurs.\n" +
+                    "Info om gammel og nytt fnr finner man loggmelding med level WARN i securelogs.\n" +
+                    "${LENKE_INFO_OM_MERGING}",
+            )
         }
     }
 
