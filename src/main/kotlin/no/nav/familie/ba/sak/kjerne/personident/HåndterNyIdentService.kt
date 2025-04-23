@@ -153,7 +153,7 @@ class HåndterNyIdentService(
             throw Feil(
                 "$introTekstOmFeil\n" +
                     "Du MÅ først patche fnr med PatchMergetIdentTask og etterpå sende saken til en fagressurs.\n" +
-                    "Info om gammel og nytt fnr finner man loggmelding med level WARN i securelogs.\n" +
+                    "Info om gammel og nytt fnr finner man i loggmelding med level WARN i securelogs.\n" +
                     "${LENKE_INFO_OM_MERGING}",
             )
         }

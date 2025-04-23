@@ -144,7 +144,7 @@ internal class HåndterNyIdentServiceTest {
    Fagsak: 1 
 
 Du MÅ først patche fnr med PatchMergetIdentTask og etterpå sende saken til en fagressurs.
-Info om gammel og nytt fnr finner man loggmelding med level WARN i securelogs.
+Info om gammel og nytt fnr finner man i loggmelding med level WARN i securelogs.
 Se https://github.com/navikt/familie/blob/main/doc/ba-sak/manuellt-patche-akt%C3%B8r-sak.md#manuell-patching-av-akt%C3%B8r-for-en-behandling for mer info.""",
             )
         }
