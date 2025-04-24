@@ -140,7 +140,7 @@ internal class HåndterNyIdentServiceTest {
 
             assertThat(feil.message).isEqualTo(
                 """Fødselsdato er forskjellig fra forrige behandling. 
-   Ny fødselsdato 2024-01-23, forrige fødselsdato 2024-04-23
+   Ny fødselsdato $nyFødselsdato, forrige fødselsdato $gammelFødselsdato
    Fagsak: 1 
 
 Du MÅ først patche fnr med PatchMergetIdentTask og etterpå sende saken til en fagressurs.
