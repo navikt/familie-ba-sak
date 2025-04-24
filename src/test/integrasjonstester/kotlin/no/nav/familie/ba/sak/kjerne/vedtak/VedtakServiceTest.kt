@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
@@ -86,6 +87,8 @@ class VedtakServiceTest(
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     @Autowired
     private val unleashService: UnleashNextMedContextService,
+    @Autowired
+    private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat
@@ -117,6 +120,7 @@ class VedtakServiceTest(
                 taskRepository,
                 vilkårsvurderingService,
                 unleashService,
+                eksternBehandlingRelasjonService,
             )
 
         val personAktørId = randomAktør()

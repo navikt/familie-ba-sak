@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Visningsbehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -151,4 +153,35 @@ fun lagVisningsbehandling(
         status,
         resultat,
         vedtaksdato,
+    )
+
+fun lagNyBehandling(
+    fagsakId: Long = 0L,
+    navIdent: String? = "Z123",
+    søkersIdent: String = "10468906606",
+    barnasIdenter: List<String> = listOf("08529926074", "27508947807"),
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    behandlingÅrsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+    kategori: BehandlingKategori? = BehandlingKategori.NASJONAL,
+    underkategori: BehandlingUnderkategori? = BehandlingUnderkategori.ORDINÆR,
+    skalBehandlesAutomatisk: Boolean = false,
+    nyMigreringsdato: LocalDate? = null,
+    søknadMottattDato: LocalDate? = LocalDate.now().minusDays(1),
+    søknadsinfo: Søknadsinfo? = null,
+    nyEksternBehandlingRelasjon: NyEksternBehandlingRelasjon? = null,
+): NyBehandling =
+    NyBehandling(
+        kategori,
+        underkategori,
+        søkersIdent,
+        behandlingType,
+        behandlingÅrsak,
+        skalBehandlesAutomatisk,
+        navIdent,
+        barnasIdenter,
+        nyMigreringsdato,
+        søknadMottattDato,
+        søknadsinfo,
+        fagsakId,
+        nyEksternBehandlingRelasjon,
     )

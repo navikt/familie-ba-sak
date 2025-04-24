@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
-import no.nav.familie.ba.sak.datagenerator.lagRelatertBehandling
 import no.nav.familie.ba.sak.datagenerator.lagSettPåVent
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -161,9 +160,8 @@ internal class SaksstatistikkServiceTest {
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
         every { relatertBehandlingUtleder.utledRelatertBehandling(any()) } returns
-            lagRelatertBehandling(
+            RelatertBehandling(
                 id = behandling.id.toString(),
-                vedtattTidspunkt = behandling.aktivertTidspunkt,
                 fagsystem = RelatertBehandling.Fagsystem.BA,
             )
 

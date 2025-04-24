@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -162,6 +163,7 @@ data class NyBehandling(
     val søknadMottattDato: LocalDate? = null,
     val søknadsinfo: Søknadsinfo? = null,
     val fagsakId: Long,
+    val nyEksternBehandlingRelasjon: NyEksternBehandlingRelasjon? = null,
 ) {
     init { // Initiell validering på request
         when {
