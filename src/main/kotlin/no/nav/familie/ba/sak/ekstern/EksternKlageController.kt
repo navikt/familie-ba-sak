@@ -78,7 +78,7 @@ class EksternKlageController(
     ): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
-            handling = "Opprett revurdering med årask klage på fagsak=$fagsakId",
+            handling = "Opprett revurdering med årsak klage på fagsak=$fagsakId",
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
