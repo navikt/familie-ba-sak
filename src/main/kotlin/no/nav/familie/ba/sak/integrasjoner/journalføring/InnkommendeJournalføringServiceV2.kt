@@ -89,7 +89,7 @@ class InnkommendeJournalføringServiceV2(
         }
     }
 
-    private fun opprettBehandlingOgEvtFagsakForJournalføring(
+    private fun opprettBehandlingForJournalføring(
         personIdent: String,
         navIdent: String,
         type: BehandlingType,
@@ -121,7 +121,7 @@ class InnkommendeJournalføringServiceV2(
         behandlendeEnhet: String,
         oppgaveId: String,
     ): String {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent = request.bruker.id)
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent = request.bruker.id, type = request.fagsakType, institusjon = request.institusjon)
         val kanBehandleKlage = unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE)
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
@@ -134,7 +134,7 @@ class InnkommendeJournalføringServiceV2(
                 tilknyttedeBehandlinger.add(TilknyttetBehandling(Journalføringsbehandlingstype.KLAGE, klagebehandlingId.toString()))
             } else {
                 val nyBehandling =
-                    opprettBehandlingOgEvtFagsakForJournalføring(
+                    opprettBehandlingForJournalføring(
                         personIdent = request.bruker.id,
                         navIdent = request.navIdent,
                         type = request.nyBehandlingstype.tilBehandingType(),
@@ -210,7 +210,7 @@ class InnkommendeJournalføringServiceV2(
             } else {
                 val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
                 val nyBehandling =
-                    opprettBehandlingOgEvtFagsakForJournalføring(
+                    opprettBehandlingForJournalføring(
                         personIdent = request.bruker.id,
                         navIdent = request.navIdent,
                         type = request.nyBehandlingstype.tilBehandingType(),
