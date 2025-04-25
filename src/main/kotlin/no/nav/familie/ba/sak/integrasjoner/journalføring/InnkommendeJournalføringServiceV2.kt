@@ -25,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -122,23 +121,11 @@ class InnkommendeJournalføringServiceV2(
         behandlendeEnhet: String,
         oppgaveId: String,
     ): String {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent = request.bruker.id)
         val kanBehandleKlage = unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE)
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
-
-        val fagsak =
-            if (request.fagsakId != null) {
-                fagsakService.hentPåFagsakId(request.fagsakId)
-            } else if (request.opprettOgKnyttTilNyBehandling) {
-                fagsakService.hentEllerOpprettFagsak(
-                    personIdent = request.bruker.id,
-                    type = FagsakType.NORMAL,
-                    institusjon = null,
-                )
-            } else {
-                throw Feil("Forventet en fagsak ved journalføring for journalpostId $journalpostId og oppgaveId $oppgaveId.")
-            }
 
         if (request.opprettOgKnyttTilNyBehandling) {
             if (kanBehandleKlage && request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
@@ -210,23 +197,10 @@ class InnkommendeJournalføringServiceV2(
         request: RestFerdigstillOppgaveKnyttJournalpost,
         oppgaveId: Long,
     ): String {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent = request.bruker.id)
         val kanBehandleKlage = unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE)
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
-
         val journalpost = hentJournalpost(request.journalpostId)
-
-        val fagsak =
-            if (request.fagsakId != null) {
-                fagsakService.hentPåFagsakId(request.fagsakId)
-            } else if (request.opprettOgKnyttTilNyBehandling) {
-                fagsakService.hentEllerOpprettFagsak(
-                    personIdent = request.bruker.id,
-                    type = FagsakType.NORMAL,
-                    institusjon = null,
-                )
-            } else {
-                throw Feil("Forventet en fagsak ved ferdigstilling av oppgave med oppgaveId $oppgaveId for journalpostId ${request.journalpostId}.")
-            }
 
         if (request.opprettOgKnyttTilNyBehandling) {
             if (kanBehandleKlage && request.nyBehandlingstype == Journalføringsbehandlingstype.KLAGE) {
