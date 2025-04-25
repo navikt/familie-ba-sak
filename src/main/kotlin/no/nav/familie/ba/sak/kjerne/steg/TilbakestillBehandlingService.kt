@@ -6,10 +6,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +25,8 @@ class TilbakestillBehandlingService(
     private val vedtakRepository: VedtakRepository,
     private val tilbakekrevingService: TilbakekrevingService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
+    private val avregningService: AvregningService,
+    private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
 ) {
     @Transactional
     fun initierOgSettBehandlingTilVilkårsvurdering(
@@ -98,5 +102,12 @@ class TilbakestillBehandlingService(
             behandlingId = behandling.id,
             steg = StegType.VILKÅRSVURDERING,
         )
+    }
+
+    @Transactional
+    fun slettForenkletTilbakekrevingsvedtakHvisBehandlingIkkeAvregner(behandlingId: Long) {
+        if (!avregningService.behandlingHarPerioderSomAvregnes(behandlingId)) {
+            forenkletTilbakekrevingsvedtakService.slettForenkletTilbakekrevingsvedtak(behandlingId)
+        }
     }
 }

@@ -30,6 +30,8 @@ class AvregningService(
     private val clockProvider: ClockProvider,
     private val unleashService: UnleashNextMedContextService,
 ) {
+    fun behandlingHarPerioderSomAvregnes(behandlingId: Long): Boolean = hentPerioderMedAvregning(behandlingId).isNotEmpty()
+
     fun hentPerioderMedAvregning(behandlingId: Long): List<AvregningPeriode> {
         if (!unleashService.isEnabled(BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING)) {
             return emptyList()
