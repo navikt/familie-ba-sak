@@ -120,11 +120,7 @@ data class Person(
             it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
         }
 
-    override fun toString(): String =
-        """Person(aktørId=$aktør,
-                        |type=$type
-                        |fødselsdato=$fødselsdato)
-        """.trimMargin()
+    override fun toString(): String = "Person(aktørId=${aktør.aktørId}, type=$type, fødselsdato=$fødselsdato)"
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
