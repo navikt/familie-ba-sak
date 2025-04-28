@@ -8,7 +8,7 @@ on:
     paths-ignore:
       - '**.md'
       - '**.MD'
-      - '.github/*.yaml'
+      - '.github/**.yaml'
       - '.gitignore'
       - 'CODEOWNERS'
       - 'LICENSE'
