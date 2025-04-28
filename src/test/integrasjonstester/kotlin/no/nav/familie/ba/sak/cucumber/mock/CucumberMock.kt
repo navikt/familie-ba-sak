@@ -469,7 +469,7 @@ class CucumberMock(
             loggService = loggService,
             oppgaveService = oppgaveService,
             unleashService = unleashNextMedContextService,
-            forenkletTilbakekrevingsvedtakService = mockk(relaxed = true),
+            tilbakekrevingsvedtakMotregningService = mockk(relaxed = true),
         )
 
     val snikeIKøenService =

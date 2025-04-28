@@ -737,11 +737,11 @@ class LoggService(
         ),
     )
 
-    fun loggForenkletTilbakekrevingsvedtakOpprettet(behandlingId: Long) =
+    fun loggTilbakekrevingsvedtakMotregningOpprettet(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_OPPRETTET,
+                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPRETTET,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,
@@ -750,11 +750,11 @@ class LoggService(
             ),
         )
 
-    fun loggForenkletTilbakekrevingsvedtakOppdatertSamtykke(behandlingId: Long) =
+    fun loggTilbakekrevingsvedtakMotregningOppdatertSamtykke(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_OPPDATERT_SAMTYKKE,
+                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT_SAMTYKKE,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,
@@ -763,11 +763,11 @@ class LoggService(
             ),
         )
 
-    fun loggForenkletTilbakekrevingsvedtakOppdatertFritekst(behandlingId: Long) =
+    fun loggTilbakekrevingsvedtakMotregningOppdatertFritekst(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_OPPDATERT_FRITEKST,
+                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT_FRITEKST,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,
@@ -776,11 +776,11 @@ class LoggService(
             ),
         )
 
-    fun loggForenkletTilbakekrevingsvedtakSlettet(behandlingId: Long) =
+    fun loggTilbakekrevingsvedtakMotregningSlettet(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.FORENKLET_TILBAKEKREVINGSVEDTAK_SLETTET,
+                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_SLETTET,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,

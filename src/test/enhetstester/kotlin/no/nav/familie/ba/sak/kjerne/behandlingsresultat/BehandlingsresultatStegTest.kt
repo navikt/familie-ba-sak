@@ -123,7 +123,7 @@ class BehandlingsresultatStegTest {
         every { kompetanseRepository.finnFraBehandlingId(any()) } returns emptyList()
         justRun {
             tilbakestillBehandlingService
-                .slettForenkletTilbakekrevingsvedtakHvisBehandlingIkkeAvregner(any())
+                .slettTilbakekrevingsvedtakMotregningHvisBehandlingIkkeAvregner(any())
         }
     }
 

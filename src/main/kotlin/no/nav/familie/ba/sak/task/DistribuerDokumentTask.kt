@@ -29,14 +29,14 @@ class DistribuerDokumentTask(
             distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev
         val erVedtaksbrevOgIkkeManueltSent =
             !distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev
-        val erForenkletTilbakekrevingsvedtak = distribuerDokumentDTO.brevmal == Brevmal.FORENKLET_TILBAKEKREVINGSVEDTAK
+        val erTilbakekrevingsvedtakMotregning = distribuerDokumentDTO.brevmal == Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING
 
         if (erManueltSendtOgIkkeVedtaksbrev && distribuerDokumentDTO.behandlingId == null) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                 distribuerDokumentDTO = distribuerDokumentDTO,
                 loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             )
-        } else if ((erManueltSendtOgIkkeVedtaksbrev || erForenkletTilbakekrevingsvedtak) && distribuerDokumentDTO.behandlingId != null) {
+        } else if ((erManueltSendtOgIkkeVedtaksbrev || erTilbakekrevingsvedtakMotregning) && distribuerDokumentDTO.behandlingId != null) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
                 distribuerDokumentDTO = distribuerDokumentDTO,
                 loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

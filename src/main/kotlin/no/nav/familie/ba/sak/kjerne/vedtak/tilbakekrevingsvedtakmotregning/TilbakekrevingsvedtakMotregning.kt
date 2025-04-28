@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak
+package no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -11,19 +11,19 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.ekstern.restDomene.RestForenkletTilbakekrevingsvedtak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "ForenkletTilbakekrevingsvedtak")
-@Table(name = "forenklet_tilbakekrevingsvedtak")
-data class ForenkletTilbakekrevingsvedtak(
+@Entity(name = "TilbakekrevingsvedtakMotregning")
+@Table(name = "tilbakekrevingsvedtak_motregning")
+data class TilbakekrevingsvedtakMotregning(
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "forenklet_tilbakekrevingsvedtak_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tilbakekrevingsvedtak_motregning_seq_generator")
     @SequenceGenerator(
-        name = "forenklet_tilbakekrevingsvedtak_seq_generator",
-        sequenceName = "forenklet_tilbakekrevingsvedtak_seq",
+        name = "tilbakekrevingsvedtak_motregning_seq_generator",
+        sequenceName = "tilbakekrevingsvedtak_motregning_seq",
         allocationSize = 50,
     )
     val id: Long = 0,
@@ -38,8 +38,8 @@ data class ForenkletTilbakekrevingsvedtak(
     var vedtakPdf: ByteArray? = null,
 ) : BaseEntitet()
 
-fun ForenkletTilbakekrevingsvedtak.tilRestForenkletTilbakekrevingsvedtak() =
-    RestForenkletTilbakekrevingsvedtak(
+fun TilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning() =
+    RestTilbakekrevingsvedtakMotregning(
         id = this.id,
         behandlingId = this.behandling.id,
         samtykke = this.samtykke,

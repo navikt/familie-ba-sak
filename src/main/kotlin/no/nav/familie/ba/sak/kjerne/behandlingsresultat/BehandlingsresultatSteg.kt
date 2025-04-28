@@ -173,7 +173,7 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        tilbakestillBehandlingService.slettForenkletTilbakekrevingsvedtakHvisBehandlingIkkeAvregner(behandling.id)
+        tilbakestillBehandlingService.slettTilbakekrevingsvedtakMotregningHvisBehandlingIkkeAvregner(behandling.id)
 
         return hentNesteStegGittEndringerIUtbetaling(
             behandling,

@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
-data class ForenkletTilbakekrevingsvedtakBrev(
+data class TilbakekrevingsvedtakMotregningBrev(
     override val mal: Brevmal,
-    override val data: ForenkletTilbakekrevingsvedtakBrevData,
+    override val data: TilbakekrevingsvedtakMotregningBrevData,
 ) : Brev
 
-data class ForenkletTilbakekrevingsvedtakBrevData(
+data class TilbakekrevingsvedtakMotregningBrevData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
     val fritekst: String,

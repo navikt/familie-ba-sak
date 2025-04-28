@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import org.assertj.core.api.Assertions.assertThat
@@ -19,10 +19,10 @@ class BehandlingsresultatStegTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
-    @Autowired private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
+    @Autowired private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
 ) : AbstractSpringIntegrationTest() {
     @Test
-    fun `skal slette forenklet tilbakekrevingsvedtak hvis behandling ikke lenger gjør avregning`() {
+    fun `skal slette Tilbakekrevingsvedtak motregning hvis behandling ikke lenger gjør avregning`() {
         // Arrange
         val barnFnr = leggTilPersonInfo(randomBarnFnr(alder = 6))
 
@@ -40,18 +40,18 @@ class BehandlingsresultatStegTest(
                 vedtaksperiodeService = mockk(),
             )
 
-        val forenkletTilbakekrevingsvedtak =
-            forenkletTilbakekrevingsvedtakService.opprettForenkletTilbakekrevingsvedtak(behandlingId = behandling.id)
+        val tilbakekrevingsvedtakMotregning =
+            tilbakekrevingsvedtakMotregningService.opprettTilbakekrevingsvedtakMotregning(behandlingId = behandling.id)
 
-        assertThat(forenkletTilbakekrevingsvedtak.behandling.id).isEqualTo(behandling.id)
+        assertThat(tilbakekrevingsvedtakMotregning.behandling.id).isEqualTo(behandling.id)
 
         // Act
         stegService.håndterBehandlingsresultat(behandling)
 
         // Assert
-        val forenkletTilbakekrevingsvedtakEtterBehandlingsresultatSteg =
-            forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandlingId = behandling.id)
+        val tilbakekrevingsvedtakMotregningEtterBehandlingsresultatSteg =
+            tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId = behandling.id)
 
-        assertThat(forenkletTilbakekrevingsvedtakEtterBehandlingsresultatSteg).isNull()
+        assertThat(tilbakekrevingsvedtakMotregningEtterBehandlingsresultatSteg).isNull()
     }
 }
