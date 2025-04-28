@@ -332,8 +332,12 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 
                     val relevanteBarn =
                         if (erAvslagPåSøker) {
-                            barnPåBehandlingen.map { it.fødselsdato } +
-                                uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+                            val personerFramstiltKravFor = grunnlag.behandlingsGrunnlagForVedtaksperioder.personerFremstiltKravFor
+                            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor }
+
+                            barnDetErFramstiltKravFor
+                                .ifEmpty { barnPåBehandlingen }
+                                .map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
                         } else {
                             (
                                 barnMedUtbetalingIForrigeperiode +

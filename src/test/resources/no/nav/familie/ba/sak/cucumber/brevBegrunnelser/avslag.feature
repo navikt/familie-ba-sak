@@ -586,3 +586,84 @@ Egenskap: Brevbegrunnelser ved eksplisitte avslag vs avslag
     Så forvent følgende brevbegrunnelser for behandling 1 i periode 01.12.2021 til -
       | Begrunnelse                                   | Type | Gjelder søker | Barnas fødselsdatoer | Antall barn | Målform | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |
       | AVSLAG_SELVSTENDIG_RETT_FORELDRENE_BOR_SAMMEN | EØS  | Nei           | 10.11.21             | 1           | nb      |                  |                           |                       |                                |                     |
+
+
+  Scenario: Ved bruk av avslagsbegrunnelser og det eksisterer barn som er fremstilt krav for, skal bare disse trekkes inn i begrunnelsen.
+
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype | Status  |
+      | 1        | NORMAL     | LØPENDE |
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            | AVSLUTTET         |
+      | 2            | 1        | 1                   | AVSLÅTT_OG_OPPHØRT  | SØKNAD           | Nei                       | NASJONAL            | UTREDES           |
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 30.05.1966  |              |
+      | 1            | 2       | BARN       | 18.11.2004  |              |
+      | 1            | 3       | BARN       | 10.02.2008  |              |
+      | 2            | 1       | SØKER      | 30.05.1966  |              |
+      | 2            | 2       | BARN       | 18.11.2004  |              |
+      | 2            | 3       | BARN       | 10.02.2008  |              |
+
+    Og dagens dato er 28.04.2025
+
+    Og med personer fremstilt krav for
+      | BehandlingId | AktørId |
+      | 2            | 3       |
+      | 2            | 1       |
+
+    Og lag personresultater for behandling 1
+
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 2       | GIFT_PARTNERSKAP                            |                  | 18.11.2004 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | UNDER_18_ÅR                                 |                  | 18.11.2004 | 17.11.2022 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | LOVLIG_OPPHOLD,BOR_MED_SØKER,BOSATT_I_RIKET |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 3       | GIFT_PARTNERSKAP                            |                  | 10.02.2008 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | UNDER_18_ÅR                                 |                  | 10.02.2008 | 09.02.2026 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag | Standardbegrunnelser            | Vurderes etter   |
+      | 1       | UTVIDET_BARNETRYGD                          |                  |            |            | IKKE_OPPFYLT | Ja                   | AVSLAG_BOR_IKKE_FAST_MED_BARNET |                  |
+      | 1       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.02.2022 |            | OPPFYLT      | Nei                  |                                 | NASJONALE_REGLER |
+      | 2       | GIFT_PARTNERSKAP                            |                  | 18.11.2004 |            | OPPFYLT      | Nei                  |                                 |                  |
+      | 2       | UNDER_18_ÅR                                 |                  | 18.11.2004 | 17.11.2022 | OPPFYLT      | Nei                  |                                 |                  |
+      | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 01.02.2022 |            | OPPFYLT      | Nei                  |                                 | NASJONALE_REGLER |
+      | 3       | UNDER_18_ÅR                                 |                  | 10.02.2008 | 09.02.2026 | OPPFYLT      | Nei                  |                                 |                  |
+      | 3       | GIFT_PARTNERSKAP                            |                  | 10.02.2008 |            | OPPFYLT      | Nei                  |                                 |                  |
+      | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD               |                  | 01.02.2022 |            | OPPFYLT      | Nei                  |                                 | NASJONALE_REGLER |
+      | 3       | BOR_MED_SØKER                               |                  | 01.02.2022 | 11.12.2024 | OPPFYLT      | Nei                  |                                 | NASJONALE_REGLER |
+      | 3       | BOR_MED_SØKER                               |                  | 12.12.2024 |            | IKKE_OPPFYLT | Nei                  |                                 | NASJONALE_REGLER |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.03.2022 | 31.10.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 1            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 1            | 01.01.2024 | 31.08.2024 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 1            | 01.09.2024 | 31.01.2026 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.03.2022 | 31.10.2022 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 2            | 01.03.2022 | 28.02.2023 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 2            | 01.03.2023 | 30.06.2023 | 1083  | ORDINÆR_BARNETRYGD | 100     | 1083 |
+      | 3       | 2            | 01.07.2023 | 31.12.2023 | 1310  | ORDINÆR_BARNETRYGD | 100     | 1310 |
+      | 3       | 2            | 01.01.2024 | 31.08.2024 | 1510  | ORDINÆR_BARNETRYGD | 100     | 1510 |
+      | 3       | 2            | 01.09.2024 | 31.12.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+    Når vedtaksperiodene genereres for behandling 2
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato | Til dato | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser            | Ugyldige begrunnelser |
+      |          |          | AVSLAG             |                                | AVSLAG_BOR_IKKE_FAST_MED_BARNET |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato | Til dato | Standardbegrunnelser            | Eøsbegrunnelser | Fritekster |
+      |          |          | AVSLAG_BOR_IKKE_FAST_MED_BARNET |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode - til -
+      | Begrunnelse                     | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | AVSLAG_BOR_IKKE_FAST_MED_BARNET | STANDARD | Ja            | 10.02.08             | 0           |                                      |         | 0     |                  |                         |                             |
