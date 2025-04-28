@@ -333,7 +333,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                     val relevanteBarn =
                         if (erAvslagPåSøker) {
                             val personerFramstiltKravFor = grunnlag.behandlingsGrunnlagForVedtaksperioder.personerFremstiltKravFor
-                            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor  }
+                            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor }
 
                             barnDetErFramstiltKravFor
                                 .ifEmpty { barnPåBehandlingen }
