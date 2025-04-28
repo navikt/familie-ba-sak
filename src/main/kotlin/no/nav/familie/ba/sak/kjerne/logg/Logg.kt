@@ -97,7 +97,6 @@ enum class LoggType(
     SAMMENSATT_KONTROLLSAK_ENDRET("Sammensatt kontrollsak endret"),
     SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
     TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPRETTET("Tilbakekrevingsvedtak motregning opprettet"),
-    TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT_FRITEKST("Tilbakekrevingsvedtak motregning fritekst oppdatert"),
-    TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT_SAMTYKKE("Tilbakekrevingsvedtak motregning samtykke oppdatert"),
+    TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT("Tilbakekrevingsvedtak motregning oppdatert"),
     TILBAKEKREVINGSVEDTAK_MOTREGNING_SLETTET("Tilbakekrevingsvedtak motregning fjernet"),
 }

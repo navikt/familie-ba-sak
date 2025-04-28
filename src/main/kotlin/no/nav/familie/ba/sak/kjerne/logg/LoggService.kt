@@ -750,24 +750,11 @@ class LoggService(
             ),
         )
 
-    fun loggTilbakekrevingsvedtakMotregningOppdatertSamtykke(behandlingId: Long) =
+    fun loggTilbakekrevingsvedtakMotregningOppdatert(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT_SAMTYKKE,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-            ),
-        )
-
-    fun loggTilbakekrevingsvedtakMotregningOppdatertFritekst(behandlingId: Long) =
-        lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT_FRITEKST,
+                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,

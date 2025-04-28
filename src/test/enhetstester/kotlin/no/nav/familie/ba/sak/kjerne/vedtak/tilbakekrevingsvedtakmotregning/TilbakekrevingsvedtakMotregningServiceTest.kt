@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class TilbakekrevingsvedtakMotregningServiceTest {
     private val tilbakekrevingsvedtakMotregningRepository = mockk<TilbakekrevingsvedtakMotregningRepository>()
@@ -54,7 +55,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `skal returner Tilbakekrevingsvedtak motregning hvis det finnes for behandling`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, fritekst = "fritekst")
+            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
 
@@ -72,7 +73,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal returnere eksisterende Tilbakekrevingsvedtak motregning dersom det allerede finnes`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, fritekst = "fritekst")
+            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
 
@@ -99,8 +100,11 @@ class TilbakekrevingsvedtakMotregningServiceTest {
 
             // Assert
             assertThat(tilbakekrevingsvedtakMotregning.behandling.id).isEqualTo(behandling.id)
-            assertThat(tilbakekrevingsvedtakMotregning.fritekst).isEqualTo("TEKST")
             assertThat(tilbakekrevingsvedtakMotregning.samtykke).isFalse()
+            assertThat(tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling).isNull()
+            assertThat(tilbakekrevingsvedtakMotregning.vurderingAvSkyld).isNull()
+            assertThat(tilbakekrevingsvedtakMotregning.varselDato).isNull()
+            assertThat(tilbakekrevingsvedtakMotregning.vedtakPdf).isNull()
 
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(tilbakekrevingsvedtakMotregning) }
             verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOpprettet(behandling.id) }
@@ -108,23 +112,33 @@ class TilbakekrevingsvedtakMotregningServiceTest {
     }
 
     @Nested
-    inner class OppdaterSamtykkePåTilbakekrevingsvedtakMotregningTest {
+    inner class OppdaterTilbakekrevingsvedtakMotregningTest {
         @Test
-        fun `Skal oppdatere samtykke på eksisterende Tilbakekrevingsvedtak motregning og opprette logg på dette`() {
+        fun `Skal oppdatere eksisterende Tilbakekrevingsvedtak motregning og opprette logg på dette`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, fritekst = "fritekst")
+            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
-            every { loggService.loggTilbakekrevingsvedtakMotregningOppdatertSamtykke(behandling.id) } returns mockk()
+            every { loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandling.id) } returns mockk()
             every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
 
             // Act
-            val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.oppdaterSamtykkePåTilbakekrevingsvedtakMotregning(behandling.id, true)
+            val tilbakekrevingsvedtakMotregning =
+                tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                    behandlingId = behandling.id,
+                    samtykke = true,
+                    årsakTilFeilutbetaling = "ny årsak",
+                    vurderingAvSkyld = "ny vurdering",
+                    varselDato = LocalDate.of(2025, 1, 1),
+                )
 
             // Assert
             assertThat(tilbakekrevingsvedtakMotregning.samtykke).isEqualTo(true)
-            verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOppdatertSamtykke(behandling.id) }
+            assertThat(tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling).isEqualTo("ny årsak")
+            assertThat(tilbakekrevingsvedtakMotregning.vurderingAvSkyld).isEqualTo("ny vurdering")
+            assertThat(tilbakekrevingsvedtakMotregning.varselDato).isEqualTo(LocalDate.of(2025, 1, 1))
+            verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandling.id) }
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(any()) }
         }
 
@@ -138,45 +152,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             // Act && Assert
             val feilmelding =
                 assertThrows<FunksjonellFeil> {
-                    tilbakekrevingsvedtakMotregningService.oppdaterSamtykkePåTilbakekrevingsvedtakMotregning(behandling.id, true)
-                }.melding
-
-            assertThat(feilmelding).isEqualTo("Tilbakekrevingsvedtak motregning finnes ikke for behandling 1. Oppdater fanen og prøv igjen.")
-        }
-    }
-
-    @Nested
-    inner class OppdaterFritekstPåTilbakekrevingsvedtakMotregningTest {
-        @Test
-        fun `Skal oppdatere fritekst på eksisterende Tilbakekrevingsvedtak motregning og opprette logg på dette`() {
-            // Arrange
-            val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, fritekst = "")
-
-            every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
-            every { loggService.loggTilbakekrevingsvedtakMotregningOppdatertFritekst(behandling.id) } returns mockk()
-            every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
-
-            // Act
-            val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.oppdaterFritekstPåTilbakekrevingsvedtakMotregning(behandling.id, "oppdatert med fritekst")
-
-            // Assert
-            assertThat(tilbakekrevingsvedtakMotregning.fritekst).isEqualTo("oppdatert med fritekst")
-            verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOppdatertFritekst(behandling.id) }
-            verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(any()) }
-        }
-
-        @Test
-        fun `Skal kaste funksjonell feil hvis Tilbakekrevingsvedtak motregning ikke finnes for behandling`() {
-            // Arrange
-            val behandling = lagBehandling(id = 1)
-
-            every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns null
-
-            // Act && Assert
-            val feilmelding =
-                assertThrows<FunksjonellFeil> {
-                    tilbakekrevingsvedtakMotregningService.oppdaterFritekstPåTilbakekrevingsvedtakMotregning(behandling.id, "finnes ikke")
+                    tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(behandling.id, true)
                 }.melding
 
             assertThat(feilmelding).isEqualTo("Tilbakekrevingsvedtak motregning finnes ikke for behandling 1. Oppdater fanen og prøv igjen.")
@@ -189,7 +165,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal slette Tilbakekrevingsvedtak motregning hvis det finnes`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, fritekst = "")
+            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
             every { loggService.loggTilbakekrevingsvedtakMotregningSlettet(behandling.id) } returns mockk()
@@ -225,7 +201,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal lagre PDF i tilbakekrevingsvedtakMotregning`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val tilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, fritekst = "", vedtakPdf = null)
+            val tilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, vedtakPdf = null)
             val pdf = ByteArray(200)
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns tilbakekrevingsvedtakMotregning

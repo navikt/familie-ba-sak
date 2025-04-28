@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class TilbakekrevingsvedtakMotregningService(
@@ -27,39 +28,36 @@ class TilbakekrevingsvedtakMotregningService(
                 TilbakekrevingsvedtakMotregning(
                     behandling = behandling,
                     samtykke = false,
-                    fritekst = STANDARD_TEKST_TILBAKEKREVINGSVEDTAK_MOTREGNING,
                 ),
             )
         }
 
     @Transactional
-    fun oppdaterSamtykkePåTilbakekrevingsvedtakMotregning(
+    fun oppdaterTilbakekrevingsvedtakMotregning(
         behandlingId: Long,
-        samtykke: Boolean,
+        samtykke: Boolean? = null,
+        årsakTilFeilutbetaling: String? = null,
+        vurderingAvSkyld: String? = null,
+        varselDato: LocalDate? = null,
     ): TilbakekrevingsvedtakMotregning {
         val tilbakekrevingsvedtakMotregning =
             hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandlingId).apply {
-                this.samtykke = samtykke
-                loggService.loggTilbakekrevingsvedtakMotregningOppdatertSamtykke(behandlingId)
+                samtykke?.let {
+                    this.samtykke = it
+                }
+                årsakTilFeilutbetaling?.let {
+                    this.årsakTilFeilutbetaling = it
+                }
+                vurderingAvSkyld?.let {
+                    this.vurderingAvSkyld = it
+                }
+                varselDato?.let {
+                    this.varselDato = it
+                }
             }
 
+        loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandlingId)
         return tilbakekrevingsvedtakMotregningRepository.save(tilbakekrevingsvedtakMotregning)
-    }
-
-    @Transactional
-    fun oppdaterFritekstPåTilbakekrevingsvedtakMotregning(
-        behandlingId: Long,
-        fritekst: String,
-    ): TilbakekrevingsvedtakMotregning {
-        val tilbakekrevingsvedtakMotregning =
-            hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandlingId).apply {
-                this.fritekst = fritekst
-                loggService.loggTilbakekrevingsvedtakMotregningOppdatertFritekst(behandlingId)
-            }
-
-        tilbakekrevingsvedtakMotregningRepository.save(tilbakekrevingsvedtakMotregning)
-
-        return tilbakekrevingsvedtakMotregning
     }
 
     @Transactional

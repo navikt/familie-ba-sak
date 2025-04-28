@@ -4,8 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregningFritekst
-import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregningSamtykke
+import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -49,31 +48,10 @@ class TilbakekrevingsvedtakMotregningController(
     @PatchMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        path = ["/fritekst"],
     )
-    fun oppdaterFritekstPåTilbakekrevingsvedtakMotregning(
+    fun oppdaterTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
-        @RequestBody restOppdaterTilbakekrevingsvedtakMotregningFritekst: RestOppdaterTilbakekrevingsvedtakMotregningFritekst,
-    ): ResponseEntity<Ressurs<RestTilbakekrevingsvedtakMotregning>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Oppdater fritekst på Tilbakekrevingsvedtak motregning",
-        )
-        tilgangService.validerKanRedigereBehandling(behandlingId)
-
-        val oppdatertTilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.oppdaterFritekstPåTilbakekrevingsvedtakMotregning(behandlingId, restOppdaterTilbakekrevingsvedtakMotregningFritekst.fritekst)
-
-        return ResponseEntity.ok(Ressurs.success(oppdatertTilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()))
-    }
-
-    @PatchMapping(
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        path = ["/samtykke"],
-    )
-    fun oppdaterSamtykkePåTilbakekrevingsvedtakMotregning(
-        @PathVariable behandlingId: Long,
-        @RequestBody restOppdaterTilbakekrevingsvedtakMotregningSamtykke: RestOppdaterTilbakekrevingsvedtakMotregningSamtykke,
+        @RequestBody restOppdaterTilbakekrevingsvedtakMotregningSamtykke: RestOppdaterTilbakekrevingsvedtakMotregning,
     ): ResponseEntity<Ressurs<RestTilbakekrevingsvedtakMotregning>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
@@ -81,7 +59,14 @@ class TilbakekrevingsvedtakMotregningController(
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        val oppdatertTilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.oppdaterSamtykkePåTilbakekrevingsvedtakMotregning(behandlingId, restOppdaterTilbakekrevingsvedtakMotregningSamtykke.samtykke)
+        val oppdatertTilbakekrevingsvedtakMotregning =
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandlingId,
+                samtykke = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.samtykke,
+                årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.årsakTilFeilutbetaling,
+                vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.vurderingAvSkyld,
+                varselDato = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.varselDato,
+            )
 
         return ResponseEntity.ok(Ressurs.success(oppdatertTilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()))
     }

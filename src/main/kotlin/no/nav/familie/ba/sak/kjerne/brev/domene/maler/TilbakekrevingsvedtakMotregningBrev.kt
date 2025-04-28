@@ -11,7 +11,9 @@ data class TilbakekrevingsvedtakMotregningBrev(
 data class TilbakekrevingsvedtakMotregningBrevData(
     override val delmalData: DelmalData,
     override val flettefelter: Flettefelter,
-    val fritekst: String,
+    val årsakTilFeilutbetaling: String?,
+    val vurderingAvSkyld: String?,
+    val varselDato: LocalDate?,
 ) : BrevData {
     data class Flettefelter(
         override val navn: Flettefelt,
