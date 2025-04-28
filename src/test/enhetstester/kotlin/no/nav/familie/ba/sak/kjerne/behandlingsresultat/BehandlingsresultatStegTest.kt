@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.common.Feil
@@ -51,6 +52,7 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.småbarnstillegg.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -84,6 +86,7 @@ class BehandlingsresultatStegTest {
     private val valutakursService = mockk<ValutakursService>()
     private val kompetanseRepository = mockk<KompetanseRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
+    private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
@@ -103,6 +106,7 @@ class BehandlingsresultatStegTest {
             localDateProvider = RealDateProvider(),
             kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
+            tilbakestillBehandlingService = tilbakestillBehandlingService,
         )
 
     private val behandling =
@@ -117,6 +121,10 @@ class BehandlingsresultatStegTest {
         every { simuleringService.hentSimuleringPåBehandling(any()) } returns emptyList()
         every { valutakursService.hentValutakurser(any()) } returns emptyList()
         every { kompetanseRepository.finnFraBehandlingId(any()) } returns emptyList()
+        justRun {
+            tilbakestillBehandlingService
+                .slettForenkletTilbakekrevingsvedtakHvisBehandlingIkkeAvregner(any())
+        }
     }
 
     @Nested

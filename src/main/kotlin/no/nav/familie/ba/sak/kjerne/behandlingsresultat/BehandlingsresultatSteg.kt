@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -64,6 +65,7 @@ class BehandlingsresultatSteg(
     private val localDateProvider: LocalDateProvider,
     private val kompetanseRepository: KompetanseRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -170,6 +172,8 @@ class BehandlingsresultatSteg(
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
+
+        tilbakestillBehandlingService.slettForenkletTilbakekrevingsvedtakHvisBehandlingIkkeAvregner(behandling.id)
 
         return hentNesteStegGittEndringerIUtbetaling(
             behandling,

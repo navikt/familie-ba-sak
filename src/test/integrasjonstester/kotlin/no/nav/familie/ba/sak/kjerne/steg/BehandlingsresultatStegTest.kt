@@ -1,0 +1,57 @@
+package no.nav.familie.ba.sak.kjerne.steg
+
+import io.mockk.mockk
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+
+class BehandlingsresultatStegTest(
+    @Autowired private val stegService: StegService,
+    @Autowired private val fagsakService: FagsakService,
+    @Autowired private val persongrunnlagService: PersongrunnlagService,
+    @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
+    @Autowired private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
+) : AbstractSpringIntegrationTest() {
+    @Test
+    fun `skal slette forenklet tilbakekrevingsvedtak hvis behandling ikke lenger gjør avregning`() {
+        // Arrange
+        val barnFnr = leggTilPersonInfo(randomBarnFnr(alder = 6))
+
+        val behandling =
+            kjørStegprosessForFGB(
+                tilSteg = StegType.VILKÅRSVURDERING,
+                søkerFnr = randomFnr(),
+                barnasIdenter = listOf(barnFnr),
+                stegService = stegService,
+                fagsakService = fagsakService,
+                persongrunnlagService = persongrunnlagService,
+                vilkårsvurderingService = vilkårsvurderingService,
+                vedtakService = mockk(),
+                brevmalService = mockk(),
+                vedtaksperiodeService = mockk(),
+            )
+
+        val forenkletTilbakekrevingsvedtak =
+            forenkletTilbakekrevingsvedtakService.opprettForenkletTilbakekrevingsvedtak(behandlingId = behandling.id)
+
+        assertThat(forenkletTilbakekrevingsvedtak.behandling.id).isEqualTo(behandling.id)
+
+        // Act
+        stegService.håndterBehandlingsresultat(behandling)
+
+        // Assert
+        val forenkletTilbakekrevingsvedtakEtterBehandlingsresultatSteg =
+            forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandlingId = behandling.id)
+
+        assertThat(forenkletTilbakekrevingsvedtakEtterBehandlingsresultatSteg).isNull()
+    }
+}
