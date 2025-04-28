@@ -219,7 +219,7 @@ class VedtaksperiodeServiceTest {
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)
 
         assertThat(perioder?.size).isEqualTo(1)
-        assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir etterbetaling på 200 kroner utbetalt til myndighetene i Norge.")
+        assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir etterbetaling på 200 kroner per måned utbetalt til myndighetene i Norge.")
     }
 
     @Test
@@ -247,6 +247,6 @@ class VedtaksperiodeServiceTest {
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)
 
         assertThat(perioder?.size).isEqualTo(1)
-        assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir ikke etterbetaling på 200 kroner utbetalt nå siden det er utbetalt barnetrygd i Norge.")
+        assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir ikke etterbetaling på 200 kroner per måned utbetalt nå siden det er utbetalt barnetrygd i Norge.")
     }
 }
