@@ -50,6 +50,7 @@ class BrevServiceTest {
             kompetanseRepository = mockk(),
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
             hjemmeltekstUtleder = hjemmeltekstUtleder,
+            avregningService = mockk(),
         )
 
     @BeforeEach
