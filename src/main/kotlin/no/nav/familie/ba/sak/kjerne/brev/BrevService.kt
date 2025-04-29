@@ -452,9 +452,9 @@ class BrevService(
                 } catch (e: BrevBegrunnelseFeil) {
                     secureLogger.warn(
                         "Brevbegrunnelsefeil for behandling $behandlingId, " +
-                                "fagsak ${vedtak.behandling.fagsak.id} " +
-                                "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
-                                "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
+                            "fagsak ${vedtak.behandling.fagsak.id} " +
+                            "på periode ${vedtaksperiode.fom} - ${vedtaksperiode.tom}. " +
+                            "\nAutogenerert test:\n" + testVerktøyService.hentBegrunnelsetest(behandlingId),
                     )
                     throw e
                 }
