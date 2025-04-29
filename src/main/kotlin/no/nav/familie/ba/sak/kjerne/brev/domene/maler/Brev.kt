@@ -86,7 +86,7 @@ enum class Brevmal(
     SVARTIDSBREV_INSTITUSJON(false, "svartidsbrevInstitusjon", "Svartidsbrev institusjon"),
     FORLENGET_SVARTIDSBREV(false, "forlengetSvartidsbrev", "Forlenget svartidsbrev"),
     FORLENGET_SVARTIDSBREV_INSTITUSJON(false, "forlengetSvartidsbrevInstitusjon", "Forlenget svartidsbrev institusjon"),
-    FORENKLET_TILBAKEKREVINGSVEDTAK(false, "forenkletTilbakekrevingsvedtak", "Forenklet tilbakekrevingsvedtak"),
+    TILBAKEKREVINGSVEDTAK_MOTREGNING(false, "tilbakekrevingsvedtakMotregning", "Tilbakekrevingsvedtak motregning"),
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
@@ -194,7 +194,7 @@ enum class Brevmal(
             SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV,
             FORLENGET_SVARTIDSBREV_INSTITUSJON,
-            FORENKLET_TILBAKEKREVINGSVEDTAK,
+            TILBAKEKREVINGSVEDTAK_MOTREGNING,
             INFORMASJONSBREV_FØDSEL_VERGEMÅL,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
             INFORMASJONSBREV_KAN_SØKE,
@@ -242,7 +242,7 @@ enum class Brevmal(
             HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD_INSTITUSJON
             SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
             FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
-            FORENKLET_TILBAKEKREVINGSVEDTAK -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
+            TILBAKEKREVINGSVEDTAK_MOTREGNING -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_VERGEMÅL
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
@@ -308,7 +308,7 @@ enum class Brevmal(
                 VARSEL_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_SØKT -> Distribusjonstype.VIKTIG
                 SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
                 FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
-                FORENKLET_TILBAKEKREVINGSVEDTAK -> Distribusjonstype.ANNET
+                TILBAKEKREVINGSVEDTAK_MOTREGNING -> Distribusjonstype.ANNET
                 INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
                 INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
                 INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET

@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
@@ -60,7 +60,7 @@ class SettPåVentServiceTest(
     @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val snikeIKøenService: SnikeIKøenService,
-    @Autowired private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
+    @Autowired private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
 ) : AbstractSpringIntegrationTest() {
     private val barnFnr = leggTilPersonInfo(randomBarnFnr())
     private val frist = LocalDate.now().plusDays(DAGER_FRIST_FOR_AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING)
@@ -351,7 +351,7 @@ class SettPåVentServiceTest(
     }
 
     @Test
-    fun `Skal opprette forenklet tilbakekrevingsvedtak for behandlinger som settes på vent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`() {
+    fun `Skal opprette Tilbakekrevingsvedtak motregning for behandlinger som settes på vent med årsak AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`() {
         val behandling = opprettBehandling()
 
         val settPåVent =
@@ -364,15 +364,15 @@ class SettPåVentServiceTest(
         assertThat(settPåVent.årsak).isEqualTo(SettPåVentÅrsak.AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING)
         assertThat(settPåVent.frist).isEqualTo(frist)
 
-        val forenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandling.id)
+        val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)
 
-        assertThat(forenkletTilbakekrevingsvedtak).isNotNull()
-        assertThat(forenkletTilbakekrevingsvedtak!!.behandling.id).isEqualTo(behandling.id)
+        assertThat(tilbakekrevingsvedtakMotregning).isNotNull()
+        assertThat(tilbakekrevingsvedtakMotregning!!.behandling.id).isEqualTo(behandling.id)
     }
 
     @ParameterizedTest
     @EnumSource(value = SettPåVentÅrsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING"])
-    fun `Skal ikke opprette forenklet tilbakekrevingsvedtak for behandlinger som settes på vent med annen årsak enn AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`(årsak: SettPåVentÅrsak) {
+    fun `Skal ikke opprette Tilbakekrevingsvedtak motregning for behandlinger som settes på vent med annen årsak enn AVVENTER_SAMTYKKE_ULOVFESTET_MOTREGNING`(årsak: SettPåVentÅrsak) {
         val behandling = opprettBehandling()
 
         settPåVentService.settBehandlingPåVent(
@@ -381,9 +381,9 @@ class SettPåVentServiceTest(
             årsak = årsak,
         )
 
-        val forenkletTilbakekrevingsvedtak = forenkletTilbakekrevingsvedtakService.finnForenkletTilbakekrevingsvedtak(behandling.id)
+        val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)
 
-        assertThat(forenkletTilbakekrevingsvedtak).isNull()
+        assertThat(tilbakekrevingsvedtakMotregning).isNull()
     }
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {

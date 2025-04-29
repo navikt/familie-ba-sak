@@ -30,8 +30,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.DødsfallData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EtterbetalingInstitusjon
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FeilutbetaltValuta
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForenkletTilbakekrevingsvedtakBrev
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForenkletTilbakekrevingsvedtakBrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
@@ -46,6 +44,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsAvklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsUavklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.TilbakekrevingsvedtakMotregningBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.TilbakekrevingsvedtakMotregningBrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndringSammensattKontrollsak
@@ -67,8 +67,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsak
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
@@ -627,8 +627,8 @@ class BrevService(
             }
         }
 
-    fun hentBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak: ForenkletTilbakekrevingsvedtak): ForenkletTilbakekrevingsvedtakBrev {
-        val behandling = forenkletTilbakekrevingsvedtak.behandling
+    fun hentBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregning): TilbakekrevingsvedtakMotregningBrev {
+        val behandling = tilbakekrevingsvedtakMotregning.behandling
         val fagsak = behandling.fagsak
 
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(behandling)
@@ -639,11 +639,11 @@ class BrevService(
 
         val signatur = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
 
-        return ForenkletTilbakekrevingsvedtakBrev(
+        return TilbakekrevingsvedtakMotregningBrev(
             data =
-                ForenkletTilbakekrevingsvedtakBrevData(
+                TilbakekrevingsvedtakMotregningBrevData(
                     delmalData =
-                        ForenkletTilbakekrevingsvedtakBrevData.DelmalData(
+                        TilbakekrevingsvedtakMotregningBrevData.DelmalData(
                             signatur =
                                 SignaturDelmal(
                                     enhet,
@@ -651,14 +651,14 @@ class BrevService(
                                 ),
                         ),
                     flettefelter =
-                        ForenkletTilbakekrevingsvedtakBrevData.Flettefelter(
+                        TilbakekrevingsvedtakMotregningBrevData.Flettefelter(
                             navn = navn,
                             fodselsnummer = mottakerIdent,
                             brevOpprettetDato = LocalDate.now(),
                         ),
-                    fritekst = forenkletTilbakekrevingsvedtak.fritekst,
+                    fritekst = tilbakekrevingsvedtakMotregning.fritekst,
                 ),
-            mal = Brevmal.FORENKLET_TILBAKEKREVINGSVEDTAK,
+            mal = Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
         )
     }
 

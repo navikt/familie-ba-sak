@@ -16,8 +16,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak.SammensattKontrollsakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.context.annotation.Lazy
 import org.springframework.http.HttpStatus
@@ -99,9 +99,9 @@ class DokumentGenereringService(
         }
     }
 
-    fun genererBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak: ForenkletTilbakekrevingsvedtak): ByteArray {
-        val målform = persongrunnlagService.hentSøkersMålform(behandlingId = forenkletTilbakekrevingsvedtak.behandling.id)
-        val brev = brevService.hentBrevForForenkletTilbakekrevingsvedtak(forenkletTilbakekrevingsvedtak)
+    fun genererBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregning): ByteArray {
+        val målform = persongrunnlagService.hentSøkersMålform(behandlingId = tilbakekrevingsvedtakMotregning.behandling.id)
+        val brev = brevService.hentBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
 
         return brevKlient.genererBrev(målform.tilSanityFormat(), brev)
     }

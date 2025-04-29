@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.forenklettilbakekrevingsvedtak.ForenkletTilbakekrevingsvedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -26,7 +26,7 @@ class TilbakestillBehandlingService(
     private val tilbakekrevingService: TilbakekrevingService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val avregningService: AvregningService,
-    private val forenkletTilbakekrevingsvedtakService: ForenkletTilbakekrevingsvedtakService,
+    private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
 ) {
     @Transactional
     fun initierOgSettBehandlingTilVilkårsvurdering(
@@ -105,9 +105,9 @@ class TilbakestillBehandlingService(
     }
 
     @Transactional
-    fun slettForenkletTilbakekrevingsvedtakHvisBehandlingIkkeAvregner(behandlingId: Long) {
+    fun slettTilbakekrevingsvedtakMotregningHvisBehandlingIkkeAvregner(behandlingId: Long) {
         if (!avregningService.behandlingHarPerioderSomAvregnes(behandlingId)) {
-            forenkletTilbakekrevingsvedtakService.slettForenkletTilbakekrevingsvedtak(behandlingId)
+            tilbakekrevingsvedtakMotregningService.slettTilbakekrevingsvedtakMotregning(behandlingId)
         }
     }
 }
