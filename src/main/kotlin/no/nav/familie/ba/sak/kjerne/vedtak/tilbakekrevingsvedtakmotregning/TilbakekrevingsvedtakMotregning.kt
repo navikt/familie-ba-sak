@@ -33,7 +33,7 @@ data class TilbakekrevingsvedtakMotregning(
     val behandling: Behandling,
     @Column(name = "samtykke", nullable = false, updatable = true)
     var samtykke: Boolean,
-    @Column(name = "årsak_til_feilutbetaling", nullable = true, updatable = true)
+    @Column(name = "aarsak_til_feilutbetaling", nullable = true, updatable = true)
     var årsakTilFeilutbetaling: String? = null,
     @Column(name = "vurdering_av_skyld", nullable = true, updatable = true)
     var vurderingAvSkyld: String? = null,

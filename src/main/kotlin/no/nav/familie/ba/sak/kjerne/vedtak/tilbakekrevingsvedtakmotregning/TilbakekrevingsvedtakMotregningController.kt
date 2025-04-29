@@ -51,21 +51,21 @@ class TilbakekrevingsvedtakMotregningController(
     )
     fun oppdaterTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
-        @RequestBody restOppdaterTilbakekrevingsvedtakMotregningSamtykke: RestOppdaterTilbakekrevingsvedtakMotregning,
+        @RequestBody restOppdaterTilbakekrevingsvedtakMotregning: RestOppdaterTilbakekrevingsvedtakMotregning,
     ): ResponseEntity<Ressurs<RestTilbakekrevingsvedtakMotregning>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Oppdater samtykke på Tilbakekrevingsvedtak motregning",
+            handling = "Oppdater tilbakekrevingsvedtak motregning",
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val oppdatertTilbakekrevingsvedtakMotregning =
             tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
                 behandlingId = behandlingId,
-                samtykke = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.samtykke,
-                årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.årsakTilFeilutbetaling,
-                vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.vurderingAvSkyld,
-                varselDato = restOppdaterTilbakekrevingsvedtakMotregningSamtykke.varselDato,
+                samtykke = restOppdaterTilbakekrevingsvedtakMotregning.samtykke,
+                årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
+                vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregning.vurderingAvSkyld,
+                varselDato = restOppdaterTilbakekrevingsvedtakMotregning.varselDato,
             )
 
         return ResponseEntity.ok(Ressurs.success(oppdatertTilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()))
