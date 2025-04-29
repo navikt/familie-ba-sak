@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIAlleNavn
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
@@ -42,7 +44,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørtSammensattKontrollsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsAvklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsUavklart
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturDelmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.TilbakekrevingsvedtakMotregningBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.TilbakekrevingsvedtakMotregningBrevData
@@ -96,6 +97,7 @@ class BrevService(
     private val valutakursRepository: ValutakursRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
+    private val avregningService: AvregningService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -637,17 +639,18 @@ class BrevService(
         val navn = grunnlagOgSignaturData.grunnlag.søker.navn
         val enhet = grunnlagOgSignaturData.enhet
 
-        val signatur = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+        val avregningperioderForBehandling = avregningService.hentPerioderMedAvregning(behandling.id)
 
         return TilbakekrevingsvedtakMotregningBrev(
             data =
                 TilbakekrevingsvedtakMotregningBrevData(
                     delmalData =
                         TilbakekrevingsvedtakMotregningBrevData.DelmalData(
-                            signatur =
-                                SignaturDelmal(
-                                    enhet,
-                                    signatur,
+                            signaturVedtak =
+                                SignaturVedtak(
+                                    enhet = enhet,
+                                    saksbehandler = grunnlagOgSignaturData.saksbehandler,
+                                    beslutter = grunnlagOgSignaturData.beslutter,
                                 ),
                         ),
                     flettefelter =
@@ -655,10 +658,10 @@ class BrevService(
                             navn = navn,
                             fodselsnummer = mottakerIdent,
                             brevOpprettetDato = LocalDate.now(),
+                            tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning,
+                            sumAvFeilutbetaling = Utils.formaterBeløp(avregningperioderForBehandling.sumOf { it.totalFeilutbetaling }.toInt()),
+                            avregningperioder = avregningperioderForBehandling.map { "${it.fom.tilMånedÅr()} til og med ${it.tom.tilMånedÅr()}" },
                         ),
-                    årsakTilFeilutbetaling = tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
-                    vurderingAvSkyld = tilbakekrevingsvedtakMotregning.vurderingAvSkyld,
-                    varselDato = tilbakekrevingsvedtakMotregning.varselDato,
                 ),
             mal = Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
         )
