@@ -91,6 +91,7 @@ class SaksbehandlerContextTest {
                     fornavn = "fornavn",
                     etternavn = "etternavn",
                     enhet = "enhet",
+                    enhetsnavn = "enhetsnavn",
                 )
 
             every { SikkerhetContext.hentGrupper() } returns emptyList()
