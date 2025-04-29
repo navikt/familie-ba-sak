@@ -226,7 +226,7 @@ class JournalførVedtaksbrev(
                 ),
             )
 
-        logger.info("Journalfører Tilbakekrevingsvedtak motregning brev for behandling ${behandling.id}")
+        logger.info("Journalfører brev for tilbakekrevingsvedtak ved motregning for behandling ${behandling.id}")
 
         return utgåendeJournalføringService.journalførDokument(
             fnr = fnr,

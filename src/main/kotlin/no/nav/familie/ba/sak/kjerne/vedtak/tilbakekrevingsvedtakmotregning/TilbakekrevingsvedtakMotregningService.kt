@@ -66,9 +66,4 @@ class TilbakekrevingsvedtakMotregningService(
             tilbakekrevingsvedtakMotregningRepository.delete(it)
             loggService.loggTilbakekrevingsvedtakMotregningSlettet(behandlingId)
         }
-
-    companion object {
-        // TODO: Denne endres på senere når det er klart hva standard tekst skal være
-        private const val STANDARD_TEKST_TILBAKEKREVINGSVEDTAK_MOTREGNING = "TEKST"
-    }
 }
