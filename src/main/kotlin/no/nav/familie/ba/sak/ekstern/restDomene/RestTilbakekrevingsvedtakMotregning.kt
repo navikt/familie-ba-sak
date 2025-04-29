@@ -7,7 +7,7 @@ data class RestTilbakekrevingsvedtakMotregning(
     val behandlingId: Long,
     val årsakTilFeilutbetaling: String?,
     val vurderingAvSkyld: String?,
-    val varselDato: LocalDate?,
+    val varselDato: LocalDate,
     val samtykke: Boolean,
 )
 

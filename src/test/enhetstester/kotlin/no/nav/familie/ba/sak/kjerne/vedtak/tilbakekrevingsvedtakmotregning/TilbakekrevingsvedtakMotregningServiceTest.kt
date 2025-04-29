@@ -55,7 +55,12 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `skal returner Tilbakekrevingsvedtak motregning hvis det finnes for behandling`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    varselDato = LocalDate.now(),
+                )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
 
@@ -73,7 +78,12 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal returnere eksisterende Tilbakekrevingsvedtak motregning dersom det allerede finnes`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    varselDato = LocalDate.now(),
+                )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
 
@@ -103,7 +113,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             assertThat(tilbakekrevingsvedtakMotregning.samtykke).isFalse()
             assertThat(tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling).isNull()
             assertThat(tilbakekrevingsvedtakMotregning.vurderingAvSkyld).isNull()
-            assertThat(tilbakekrevingsvedtakMotregning.varselDato).isNull()
+            assertThat(tilbakekrevingsvedtakMotregning.varselDato).isEqualTo(LocalDate.now())
             assertThat(tilbakekrevingsvedtakMotregning.vedtakPdf).isNull()
 
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(tilbakekrevingsvedtakMotregning) }
@@ -117,7 +127,12 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal oppdatere eksisterende Tilbakekrevingsvedtak motregning og opprette logg på dette`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    varselDato = LocalDate.now(),
+                )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
             every { loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandling.id) } returns mockk()
@@ -165,7 +180,12 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal slette Tilbakekrevingsvedtak motregning hvis det finnes`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val eksisterendeTilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    varselDato = LocalDate.now(),
+                )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
             every { loggService.loggTilbakekrevingsvedtakMotregningSlettet(behandling.id) } returns mockk()
@@ -201,7 +221,13 @@ class TilbakekrevingsvedtakMotregningServiceTest {
         fun `Skal lagre PDF i tilbakekrevingsvedtakMotregning`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
-            val tilbakekrevingsvedtakMotregning = TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false, vedtakPdf = null)
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    vedtakPdf = null,
+                    varselDato = LocalDate.now(),
+                )
             val pdf = ByteArray(200)
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns tilbakekrevingsvedtakMotregning

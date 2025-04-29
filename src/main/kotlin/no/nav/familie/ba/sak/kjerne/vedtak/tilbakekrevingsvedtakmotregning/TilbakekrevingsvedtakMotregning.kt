@@ -37,8 +37,8 @@ data class TilbakekrevingsvedtakMotregning(
     var årsakTilFeilutbetaling: String? = null,
     @Column(name = "vurdering_av_skyld", nullable = true, updatable = true)
     var vurderingAvSkyld: String? = null,
-    @Column(name = "varsel_dato", nullable = true, updatable = true)
-    var varselDato: LocalDate? = null,
+    @Column(name = "varsel_dato", nullable = false, updatable = true)
+    var varselDato: LocalDate = LocalDate.now(),
     @Column(name = "vedtak_pdf", nullable = true)
     var vedtakPdf: ByteArray? = null,
 ) : BaseEntitet()
