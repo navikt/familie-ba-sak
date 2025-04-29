@@ -206,7 +206,6 @@ class JournalførVedtaksbrevTest {
                 id = 1,
                 behandling = behandling,
                 samtykke = true,
-                fritekst = "fritekst",
                 vedtakPdf = ByteArray(0),
             )
 

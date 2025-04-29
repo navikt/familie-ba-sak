@@ -656,7 +656,9 @@ class BrevService(
                             fodselsnummer = mottakerIdent,
                             brevOpprettetDato = LocalDate.now(),
                         ),
-                    fritekst = tilbakekrevingsvedtakMotregning.fritekst,
+                    årsakTilFeilutbetaling = tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
+                    vurderingAvSkyld = tilbakekrevingsvedtakMotregning.vurderingAvSkyld,
+                    varselDato = tilbakekrevingsvedtakMotregning.varselDato,
                 ),
             mal = Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,
         )
