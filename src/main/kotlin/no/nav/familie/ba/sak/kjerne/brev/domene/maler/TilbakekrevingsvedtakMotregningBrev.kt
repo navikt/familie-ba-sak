@@ -21,7 +21,7 @@ data class TilbakekrevingsvedtakMotregningBrevData(
         val vurderingAvSkyld: Flettefelt,
         val varselDato: Flettefelt,
         val sumAvFeilutbetaling: Flettefelt,
-        val avregningPerioder: Flettefelt,
+        val avregningperioder: Flettefelt,
     ) : FlettefelterForDokument {
         constructor(
             navn: String,
@@ -38,7 +38,7 @@ data class TilbakekrevingsvedtakMotregningBrevData(
             vurderingAvSkyld = flettefelt(tilbakekrevingsvedtakMotregning.vurderingAvSkyld),
             varselDato = flettefelt(tilbakekrevingsvedtakMotregning.varselDato.tilDagMånedÅr()),
             sumAvFeilutbetaling = flettefelt(sumAvFeilutbetaling),
-            avregningPerioder = flettefelt(avregningperioder),
+            avregningperioder = flettefelt(avregningperioder),
         )
     }
 
