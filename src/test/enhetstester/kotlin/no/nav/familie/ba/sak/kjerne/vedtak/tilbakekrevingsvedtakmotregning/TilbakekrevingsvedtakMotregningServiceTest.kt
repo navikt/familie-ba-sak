@@ -227,6 +227,8 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     samtykke = false,
                     vedtakPdf = null,
                     varselDato = LocalDate.now(),
+                    årsakTilFeilutbetaling = "årsakTilFeilutbetaling",
+                    vurderingAvSkyld = "vurderingAvSkyld",
                 )
             val pdf = ByteArray(200)
 
@@ -243,6 +245,43 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) }
             verify(exactly = 1) { dokumentGenereringService.genererBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning) }
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.saveAndFlush(tilbakekrevingsvedtakMotregning) }
+        }
+
+        @Test
+        fun `Skal feile hvis fritekstfelter ikke er utfylt ved generering av brev`() {
+            // Arrange
+            val behandling = lagBehandling(id = 1)
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    varselDato = LocalDate.now(),
+                )
+
+            every {
+                tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id)
+            } returns tilbakekrevingsvedtakMotregning
+
+            // Act
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(
+                        behandling.id,
+                    )
+                }
+
+            // Assert
+            assertThat(feil.melding).isEqualTo("Fritekstfeltene for årsak til feilutbetaling og vurdering av skyld må være utfylt for å generere brevet.")
+
+            verify(exactly = 1) {
+                tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id)
+            }
+            verify(exactly = 0) {
+                dokumentGenereringService.genererBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
+            }
+            verify(exactly = 0) {
+                tilbakekrevingsvedtakMotregningRepository.saveAndFlush(tilbakekrevingsvedtakMotregning)
+            }
         }
     }
 }
