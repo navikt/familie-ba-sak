@@ -69,7 +69,7 @@ class KlageService(
 
         val aktivtFødselsnummer = fagsak.aktør.aktivFødselsnummer()
         val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
-        val enhetId =
+        val enhetsnummer =
             integrasjonClient
                 .hentBehandlendeEnheterSomNavIdentHarTilgangTil(NavIdent(saksbehandlerIdent))
                 .first()
@@ -82,7 +82,7 @@ class KlageService(
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
                 klageMottatt = klageMottattDato,
-                behandlendeEnhet = enhetId,
+                behandlendeEnhet = enhetsnummer,
                 behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
             ),
         )
