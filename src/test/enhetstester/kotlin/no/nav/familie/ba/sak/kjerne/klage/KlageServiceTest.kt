@@ -2,10 +2,13 @@ package no.nav.familie.ba.sak.kjerne.klage
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -19,11 +22,14 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
+import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -32,11 +38,13 @@ class KlageServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val stegService = mockk<StegService>()
     private val klagebehandlingHenter = mockk<KlagebehandlingHenter>()
+    private val integrasjonClient = mockk<IntegrasjonClient>()
+    private val klageClient = mockk<KlageClient>()
     private val klageService =
         KlageService(
             fagsakService = fagsakService,
-            klageClient = mockk(),
-            integrasjonClient = mockk(),
+            klageClient = klageClient,
+            integrasjonClient = integrasjonClient,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             stegService = stegService,
             vedtakService = mockk(),
@@ -260,6 +268,28 @@ class KlageServiceTest {
 
             // Assert
             assertThat(forrigeVedtatteKlagebehandling).isEqualTo(klagebehandlingDto)
+        }
+    }
+
+    @Nested
+    inner class SettRiktigEnhetVedOpprettelseAvKlage {
+        @Test
+        fun `skal sette enheten til saksbehandlers enhet ved opprettelse av klage`() {
+            // Arrange
+            val fagsak = lagFagsak()
+            val forventetEnhet = Enhet("1234", "en")
+            val enhetSomIkkeBurdeVelges = Enhet("2341", "to")
+            every { integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns
+                listOf(forventetEnhet, enhetSomIkkeBurdeVelges)
+
+            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
+            every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns UUID.randomUUID()
+
+            // Act
+            klageService.opprettKlage(fagsak, LocalDate.now())
+
+            // Assert
+            assertThat(opprettKlageRequest.captured.behandlendeEnhet).isEqualTo(forventetEnhet.enhetsnummer)
         }
     }
 }
