@@ -19,11 +19,22 @@ class TilbakekrevingsvedtakMotregningBrevService(
         behandlingId: Long,
     ): TilbakekrevingsvedtakMotregning {
         val tilbakekrevingsvedtakMotregning = hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandlingId)
+
+        validerAtFritekstfelterErUtfylt(tilbakekrevingsvedtakMotregning)
+
         val pdf = dokumentGenereringService.genererBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
 
         tilbakekrevingsvedtakMotregning.vedtakPdf = pdf
         tilbakekrevingsvedtakMotregningRepository.saveAndFlush(tilbakekrevingsvedtakMotregning)
 
         return tilbakekrevingsvedtakMotregning
+    }
+
+    private fun validerAtFritekstfelterErUtfylt(tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregning) {
+        if (tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling == null || tilbakekrevingsvedtakMotregning.vurderingAvSkyld == null) {
+            throw FunksjonellFeil(
+                "Fritekstfeltene for årsak til feilutbetaling og vurdering av skyld må være utfylt for å generere brevet.",
+            )
+        }
     }
 }
