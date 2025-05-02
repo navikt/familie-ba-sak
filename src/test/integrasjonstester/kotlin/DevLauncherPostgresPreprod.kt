@@ -1,4 +1,3 @@
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -7,6 +6,7 @@ import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
     System.setProperty("spring.profiles.active", Profil.DevPostgresPreprod.navn)
+
     val springBuilder =
         SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
             "mock-økonomi",
@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
         )
 
     if (args.contains("--dbcontainer")) {
-        springBuilder.initializers(DbContainerInitializer())
+        System.setProperty("spring.datasource.url", "jdbc:tc:postgresql:15://localhost/familie-ba-sak")
     }
 
     if (!args.contains("--manuellMiljø") && System.getProperty("AZURE_APP_CLIENT_ID") == null) {

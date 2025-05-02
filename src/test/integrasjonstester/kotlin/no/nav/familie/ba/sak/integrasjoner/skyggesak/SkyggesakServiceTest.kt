@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.skyggesak
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
@@ -15,13 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.Pageable
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDateTime
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "integrasjonstest")
 @Tag("integration")
 class SkyggesakServiceTest {

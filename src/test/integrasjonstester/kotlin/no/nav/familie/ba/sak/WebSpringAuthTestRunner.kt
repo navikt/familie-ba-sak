@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak
 
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.BehandlerRolle
@@ -17,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 
@@ -35,7 +33,6 @@ import org.springframework.web.client.RestTemplate
 )
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {

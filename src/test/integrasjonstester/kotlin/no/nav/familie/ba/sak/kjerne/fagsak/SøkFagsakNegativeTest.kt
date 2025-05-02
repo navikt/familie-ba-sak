@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest
 @ActiveProfiles(
@@ -28,7 +26,6 @@ import org.springframework.test.context.ContextConfiguration
     "mock-infotrygd-barnetrygd",
     "mock-brev-klient",
 )
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 class SøkFagsakNegativeTest {

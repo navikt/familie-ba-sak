@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.mockk.called
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -19,13 +18,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest")
 @Tag("integration")
 class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
