@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
@@ -42,6 +43,7 @@ class AutovedtakMånedligValutajusteringService(
     private val localDateProvider: LocalDateProvider,
     private val valutakursService: ValutakursService,
     private val simuleringService: SimuleringService,
+    private val startSatsendring: StartSatsendring,
 ) {
     val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -65,6 +67,15 @@ class AutovedtakMånedligValutajusteringService(
 
         if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) {
             throw Feil("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak $fagsakId")
+        }
+
+        val harOpprettetSatsendring =
+            startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId = fagsakId)
+        if (harOpprettetSatsendring) {
+            throw RekjørSenereException(
+                "Satsendring skal kjøre ferdig før man behandler månedlig valutajustering for fagsakId=$fagsakId",
+                LocalDateTime.now().plusMinutes(60),
+            )
         }
 
         val aktivOgÅpenBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)

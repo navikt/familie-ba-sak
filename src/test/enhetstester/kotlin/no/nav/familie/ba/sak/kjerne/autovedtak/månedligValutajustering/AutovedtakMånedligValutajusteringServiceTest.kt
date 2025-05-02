@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.prosessering.error.RekjørSenereException
 import no.nav.familie.util.VirkedagerProvider
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -30,6 +32,7 @@ class AutovedtakMånedligValutajusteringServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val valutaKursService = mockk<ValutakursService>()
     private val localDateProvider = mockk<LocalDateProvider>()
+    private val startSatsendring = mockk<StartSatsendring>()
 
     private val autovedtakMånedligValutajusteringService =
         AutovedtakMånedligValutajusteringService(
@@ -41,7 +44,13 @@ class AutovedtakMånedligValutajusteringServiceTest {
             behandlingService = mockk(),
             simuleringService = mockk(),
             taskRepository = mockk(),
+            startSatsendring = startSatsendring,
         )
+
+    @BeforeEach
+    internal fun setUp() {
+        every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId = any()) } returns false
+    }
 
     @Test
     fun `utførMånedligValutajustering kaster Feil hvis en annen enn nåværende måned blir sendt inn`() {
@@ -103,7 +112,34 @@ class AutovedtakMånedligValutajusteringServiceTest {
                 måned = YearMonth.now(),
             )
         }.run {
-            assertThat(message).isEqualTo("Forsøker å utføre satsendring på ikke løpende fagsak ${fagsak.id}")
+            assertThat(message).isEqualTo("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak ${fagsak.id}")
+        }
+    }
+
+    @Test
+    fun `utførMånedligValutajustering kaster RekjørSenereException hvis satsendring er trigget`() {
+        val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
+        val behandling = lagBehandling(fagsak = fagsak)
+
+        every { localDateProvider.now() } returns LocalDate.now()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
+        every { valutaKursService.hentValutakurser(any()) } returns
+            listOf(
+                Valutakurs(
+                    fom = YearMonth.now().minusMonths(1),
+                    tom = null,
+                    vurderingsform = Vurderingsform.AUTOMATISK,
+                ),
+            )
+        every { startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId = any()) } returns true
+
+        assertThrows<RekjørSenereException> {
+            autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
+                fagsakId = fagsak.id,
+                måned = YearMonth.now(),
+            )
+        }.run {
+            assertThat(årsak).isEqualTo("Satsendring skal kjøre ferdig før man behandler månedlig valutajustering for fagsakId=${fagsak.id}")
         }
     }
 
