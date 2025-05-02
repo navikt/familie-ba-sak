@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 @SpringBootTest
 @ExtendWith(SpringExtension::class)
-@ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest")
+@ActiveProfiles("postgres", "mock-brev-klient", "integrasjonstest", "testcontainers")
 @Tag("integration")
 class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
     @Autowired

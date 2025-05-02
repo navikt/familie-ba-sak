@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.skyggesak
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
@@ -21,7 +22,7 @@ import java.time.LocalDateTime
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles("postgres", "integrasjonstest")
 @Tag("integration")
-class SkyggesakServiceTest {
+class SkyggesakServiceTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var skyggesakRepository: SkyggesakRepository
 

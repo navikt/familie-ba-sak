@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 @ActiveProfiles(
     "postgres",
     "integrasjonstest",
+    "testcontainers",
     "mock-oauth",
     "mock-pdl-test-søk",
     "mock-ident-client",
