@@ -78,7 +78,8 @@ WITH sisteiverksatte AS (SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_i
                          WHERE f.status = 'LØPENDE'
                            AND f.arkivert = FALSE
                            AND b.status = 'AVSLUTTET'
-                           AND b.resultat != 'AVSLÅTT'
+                           AND b.resultat NOT LIKE '%AVSLÅTT%'
+                           AND b.resultat NOT LIKE '%HENLAGT%'
                          ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
 
 SELECT silp.fk_fagsak_id
