@@ -1,6 +1,5 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
-import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -44,8 +43,6 @@ class AutovedtakMånedligValutajusteringService(
     private val valutakursService: ValutakursService,
     private val simuleringService: SimuleringService,
 ) {
-    private val månedligvalutajusteringIgnorertÅpenBehandling = Metrics.counter("valutajustering.ignorert.aapenbehandling")
-
     val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
@@ -67,7 +64,7 @@ class AutovedtakMånedligValutajusteringService(
         }
 
         if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) {
-            throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak $fagsakId")
+            throw Feil("Forsøker å utføre månedlig valutajustering på ikke løpende fagsak $fagsakId")
         }
 
         val aktivOgÅpenBehandling = behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
