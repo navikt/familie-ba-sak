@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.Optional
+import java.util.*
 
 @Repository
 interface FagsakRepository : JpaRepository<Fagsak, Long> {
@@ -71,25 +71,29 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
 
     @Query(
         value = """
-WITH sisteiverksatte AS (SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
-                         FROM behandling b
-                                  INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                                  INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                         WHERE f.status = 'LØPENDE'
-                           AND f.arkivert = FALSE
-                           AND b.status = 'AVSLUTTET'
-                           AND b.resultat NOT LIKE '%AVSLÅTT%'
-                           AND b.resultat NOT LIKE '%HENLAGT%'
-                         ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
-
-SELECT silp.fk_fagsak_id
-FROM sisteiverksatte silp
-WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
-   OR NOT EXISTS (SELECT 1
-                  FROM andel_tilkjent_ytelse aty
-                  WHERE aty.fk_behandling_id = silp.id
-                    AND aty.stonad_tom >= DATE_TRUNC('month', NOW())
-                    AND aty.prosent > 0);
+            WITH sisteiverksatte AS (
+                SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
+                 FROM behandling b
+                          INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                          INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                 WHERE f.status = 'LØPENDE'
+                   AND f.arkivert = FALSE
+                   AND b.status = 'AVSLUTTET'
+                   AND b.resultat != 'AVSLÅTT'
+                   AND b.resultat NOT LIKE '%HENLAGT%'
+                 ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+             )
+            
+            SELECT silp.fk_fagsak_id
+            FROM sisteiverksatte silp
+            WHERE silp.stonad_tom < DATE_TRUNC('month', NOW())
+               OR NOT EXISTS (
+                SELECT 1
+                FROM andel_tilkjent_ytelse aty
+                WHERE aty.fk_behandling_id = silp.id
+                  AND aty.stonad_tom >= DATE_TRUNC('month', NOW())
+                  AND aty.prosent > 0
+                );
                 """,
         nativeQuery = true,
     )
