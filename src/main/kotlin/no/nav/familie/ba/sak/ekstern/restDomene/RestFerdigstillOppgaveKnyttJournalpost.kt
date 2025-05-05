@@ -9,7 +9,6 @@ import java.time.LocalDateTime
 data class RestFerdigstillOppgaveKnyttJournalpost(
     val journalpostId: String,
     val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
-    val tilknyttedeBehandlingIder: List<String> = emptyList(),
     val opprettOgKnyttTilNyBehandling: Boolean = false,
     val navIdent: String,
     val bruker: NavnOgIdent,
@@ -18,5 +17,4 @@ data class RestFerdigstillOppgaveKnyttJournalpost(
     val kategori: BehandlingKategori?,
     val underkategori: BehandlingUnderkategori?,
     val datoMottatt: LocalDateTime?,
-    val fagsakId: Long? = null,
 )

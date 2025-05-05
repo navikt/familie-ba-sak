@@ -1,20 +1,15 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import org.springframework.stereotype.Component
 
 @Component
-@Deprecated(message = "Erstattet av JournalføringMetrikkV2")
 class JournalføringMetrikk {
-    private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
-
     private val antallTilBehandling =
-        BehandlingType.entries.associateWith {
-            Metrics.counter("journalfoering.behandling", "behandlingstype", it.visningsnavn)
+        Journalføringsbehandlingstype.entries.associateWith {
+            Metrics.counter("journalfoering.behandling", "behandlingstype", it.tilVisningsnavn())
         }
 
     private val journalpostTittelMap =
@@ -28,6 +23,7 @@ class JournalføringMetrikk {
             "ettersendelse til søknad om utvidet barnetrygd" to "Ettersendelse til søknad om utvidet barnetrygd",
             "ettersendelse til søknad om barnetrygd utvidet" to "Ettersendelse til søknad om utvidet barnetrygd",
             "tilleggskjema eøs" to "Tilleggskjema EØS",
+            "klage" to "Klage",
         )
 
     private val antallJournalpostTittel =
@@ -43,19 +39,11 @@ class JournalføringMetrikk {
         Metrics.counter("journalfoering.journalpost", "tittel", "Fritekst")
 
     fun tellManuellJournalføringsmetrikker(
-        oppdatert: RestJournalføring,
-        behandlinger: List<Behandling>,
+        journalpostTittel: String?,
+        tilknyttetBehandlinger: List<TilknyttetBehandling>,
     ) {
-        if (oppdatert.knyttTilFagsak == true) {
-            behandlinger.forEach {
-                antallTilBehandling[it.type]?.increment()
-            }
-        } else {
-            antallGenerellSak.increment()
-        }
-
-        val tittelLower = oppdatert.journalpostTittel?.lowercase()
-        val kjentTittel = journalpostTittelMap[tittelLower]
+        tilknyttetBehandlinger.forEach { antallTilBehandling[it.behandlingstype]?.increment() }
+        val kjentTittel = journalpostTittelMap[journalpostTittel?.lowercase()]
         if (kjentTittel != null) {
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {

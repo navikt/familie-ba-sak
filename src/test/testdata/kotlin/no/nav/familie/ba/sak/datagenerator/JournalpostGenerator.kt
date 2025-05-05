@@ -107,9 +107,7 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring =
         journalpostTittel = "Søknad om ordinær barnetrygd",
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        knyttTilFagsak = true,
         opprettOgKnyttTilNyBehandling = true,
-        tilknyttedeBehandlingIder = emptyList(),
         dokumenter =
             listOf(
                 RestJournalpostDokument(
