@@ -23,7 +23,6 @@ enum class FeatureToggle(
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
 
-    // NAV-24034
     BRUK_NY_SAKSBEHANDLER_NAVN_FORMAT_I_SIGNATUR("familie-ba-sak.bruk-ny-saksbehandler-navn-format-i-signatur"),
 
     // NAV-24387

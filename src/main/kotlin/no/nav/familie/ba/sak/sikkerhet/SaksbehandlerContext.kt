@@ -23,10 +23,6 @@ class SaksbehandlerContext(
         } else {
             val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
 
-            if (!unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_NY_SAKSBEHANDLER_NAVN_FORMAT_I_SIGNATUR)) {
-                return SikkerhetContext.hentSaksbehandlerNavn()
-            }
-
             return try {
                 val saksbehandler = integrasjonClient.hentSaksbehandler(saksbehandlerIdent)
 
