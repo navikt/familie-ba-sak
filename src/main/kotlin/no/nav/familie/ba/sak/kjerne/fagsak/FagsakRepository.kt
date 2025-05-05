@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.*
+import java.util.Optional
 
 @Repository
 interface FagsakRepository : JpaRepository<Fagsak, Long> {
