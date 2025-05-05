@@ -89,7 +89,6 @@ class AutomatiskOppdaterValutakursServiceTest {
             dato.month.value.toBigDecimal()
         }
         every { vurderingsstrategiForValutakurserRepository.findByBehandlingId(any()) } returns null
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BYTT_VALUTAJUSTERING_DATO) } returns true
         valutakursRepository.deleteAll()
         utenlandskPeriodebeløpRepository.deleteAll()
         justRun { tilpassDifferanseberegningEtterValutakursService.skjemaerEndret(any(), any()) }

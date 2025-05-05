@@ -111,12 +111,7 @@ class AutomatiskOppdaterValutakursService(
         utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
         endringstidspunkt: YearMonth,
     ) {
-        val datoForPraksisEndringAutomatiskValutajustering =
-            if (unleashNextMedContextService.isEnabled(FeatureToggle.BYTT_VALUTAJUSTERING_DATO)) {
-                DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING
-            } else {
-                YearMonth.of(2023, 1)
-            }
+        val datoForPraksisEndringAutomatiskValutajustering = DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING
 
         if (behandling.erMigrering() || behandling.opprettetÅrsak.erManuellMigreringsårsak()) return
 

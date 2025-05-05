@@ -17,13 +17,9 @@ enum class FeatureToggle(
     // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
     SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM("familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"),
 
-    // NAV-23955
-    BYTT_VALUTAJUSTERING_DATO("familie-ba-sak.behandling.valutajustering_dato"),
-
     // NAV-23733
     BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET("familie-ba-sak.bruk-overstyring-av-fom-siste-andel-utvidet"),
 
-    BRUK_NY_SAKSBEHANDLER_NAVN_FORMAT_I_SIGNATUR("familie-ba-sak.bruk-ny-saksbehandler-navn-format-i-signatur"),
 
     // NAV-24387
     BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING("familie-ba-sak.bruk-utbetalingstidslinjer-ved-generering-av-perioder-til-avstemming"),
