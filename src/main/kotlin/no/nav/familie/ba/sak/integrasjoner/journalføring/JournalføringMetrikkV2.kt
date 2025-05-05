@@ -1,16 +1,12 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import org.springframework.stereotype.Component
 
 @Component
 class JournalføringMetrikkV2 {
-    private val antallGenerellSak: Counter = Metrics.counter("journalfoering.behandling", "behandlingstype", "Fagsak")
-
     private val antallTilBehandling =
         Journalføringsbehandlingstype.entries.associateWith {
             Metrics.counter("journalfoering.behandling", "behandlingstype", it.tilVisningsnavn())
@@ -43,19 +39,11 @@ class JournalføringMetrikkV2 {
         Metrics.counter("journalfoering.journalpost", "tittel", "Fritekst")
 
     fun tellManuellJournalføringsmetrikker(
-        request: RestJournalføring,
+        journalpostTittel: String?,
         tilknyttetBehandlinger: List<TilknyttetBehandling>,
     ) {
-        if (request.knyttTilFagsak) {
-            tilknyttetBehandlinger.forEach {
-                antallTilBehandling[it.behandlingstype]?.increment()
-            }
-        } else {
-            antallGenerellSak.increment()
-        }
-
-        val tittelLower = request.journalpostTittel?.lowercase()
-        val kjentTittel = journalpostTittelMap[tittelLower]
+        tilknyttetBehandlinger.forEach { antallTilBehandling[it.behandlingstype]?.increment() }
+        val kjentTittel = journalpostTittelMap[journalpostTittel?.lowercase()]
         if (kjentTittel != null) {
             antallJournalpostTittel[kjentTittel]?.increment()
         } else {
