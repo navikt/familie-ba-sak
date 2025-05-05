@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
