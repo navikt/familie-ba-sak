@@ -3,18 +3,17 @@ package no.nav.familie.ba.sak.config
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.junit5.MockKExtension
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest
 @ActiveProfiles(
     "postgres",
     "integrasjonstest",
+    "testcontainers",
     "mock-økonomi",
     "mock-pdl",
     "mock-ident-client",
@@ -29,7 +28,6 @@ import org.springframework.test.context.ContextConfiguration
     "mock-sanity-client",
     "mock-unleash",
 )
-@ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
 @MockKExtension.KeepMocks

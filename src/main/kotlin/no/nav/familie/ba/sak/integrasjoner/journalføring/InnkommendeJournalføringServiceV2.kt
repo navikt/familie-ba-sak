@@ -188,7 +188,7 @@ class InnkommendeJournalføringServiceV2(
             barnetrygdBehandlinger = barnetrygdBehandlinger,
         )
 
-        journalføringMetrikkV2.tellManuellJournalføringsmetrikker(request, tilknyttedeBehandlinger)
+        journalføringMetrikkV2.tellManuellJournalføringsmetrikker(request.journalpostTittel, tilknyttedeBehandlinger)
 
         return fagsak.id.toString()
     }

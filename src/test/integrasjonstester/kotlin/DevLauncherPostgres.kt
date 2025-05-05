@@ -1,9 +1,9 @@
-import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import org.springframework.boot.builder.SpringApplicationBuilder
 
 fun main(args: Array<String>) {
     System.setProperty("spring.profiles.active", "postgres")
+
     val springBuilder =
         SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
             "dev",
@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
         )
 
     if (args.contains("--dbcontainer")) {
-        springBuilder.initializers(DbContainerInitializer())
+        System.setProperty("spring.datasource.url", "jdbc:tc:postgresql:15://localhost/familie-ba-sak")
     }
 
     springBuilder.run(*args)
