@@ -9,6 +9,7 @@ data class RestTilbakekrevingsvedtakMotregning(
     val vurderingAvSkyld: String?,
     val varselDato: LocalDate,
     val samtykke: Boolean,
+    val heleBeløpetSkalKrevesTilbake: Boolean,
 )
 
 data class RestOppdaterTilbakekrevingsvedtakMotregning(
@@ -16,4 +17,5 @@ data class RestOppdaterTilbakekrevingsvedtakMotregning(
     val vurderingAvSkyld: String?,
     val varselDato: LocalDate?,
     val samtykke: Boolean?,
+    val heleBeløpetSkalKrevesTilbake: Boolean?,
 )

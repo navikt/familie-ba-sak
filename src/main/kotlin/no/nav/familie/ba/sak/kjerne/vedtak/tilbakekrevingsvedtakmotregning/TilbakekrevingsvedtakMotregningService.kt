@@ -28,6 +28,7 @@ class TilbakekrevingsvedtakMotregningService(
                 TilbakekrevingsvedtakMotregning(
                     behandling = behandling,
                     samtykke = false,
+                    heleBeløpetSkalKrevesTilbake = false,
                 ),
             )
         }
@@ -39,6 +40,7 @@ class TilbakekrevingsvedtakMotregningService(
         årsakTilFeilutbetaling: String? = null,
         vurderingAvSkyld: String? = null,
         varselDato: LocalDate? = null,
+        heleBeløpetSkalKrevesTilbake: Boolean? = null,
     ): TilbakekrevingsvedtakMotregning {
         val tilbakekrevingsvedtakMotregning =
             hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandlingId).apply {
@@ -53,6 +55,9 @@ class TilbakekrevingsvedtakMotregningService(
                 }
                 varselDato?.let {
                     this.varselDato = it
+                }
+                heleBeløpetSkalKrevesTilbake?.let {
+                    this.heleBeløpetSkalKrevesTilbake = it
                 }
             }
 
