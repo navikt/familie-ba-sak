@@ -33,10 +33,24 @@ class TilbakekrevingsvedtakMotregningRepositoryTest(
             val behandling = behandlingRepository.save(lagBehandlingUtenId(fagsak = fagsak))
 
             // Act
-            tilbakekrevingsvedtakMotregningRepository.saveAndFlush(TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false))
+            tilbakekrevingsvedtakMotregningRepository.saveAndFlush(
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    heleBeløpetSkalKrevesTilbake = false,
+                ),
+            )
 
             // Assert
-            assertThrows<DataIntegrityViolationException> { tilbakekrevingsvedtakMotregningRepository.saveAndFlush(TilbakekrevingsvedtakMotregning(behandling = behandling, samtykke = false)) }
+            assertThrows<DataIntegrityViolationException> {
+                tilbakekrevingsvedtakMotregningRepository.saveAndFlush(
+                    TilbakekrevingsvedtakMotregning(
+                        behandling = behandling,
+                        samtykke = false,
+                        heleBeløpetSkalKrevesTilbake = false,
+                    ),
+                )
+            }
         }
     }
 }
