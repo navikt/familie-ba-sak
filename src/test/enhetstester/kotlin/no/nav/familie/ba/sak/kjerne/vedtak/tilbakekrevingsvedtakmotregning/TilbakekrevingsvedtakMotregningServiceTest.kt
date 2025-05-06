@@ -60,6 +60,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -83,6 +84,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -132,6 +134,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -146,6 +149,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     årsakTilFeilutbetaling = "ny årsak",
                     vurderingAvSkyld = "ny vurdering",
                     varselDato = LocalDate.of(2025, 1, 1),
+                    heleBeløpetSkalKrevesTilbake = true,
                 )
 
             // Assert
@@ -153,6 +157,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             assertThat(tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling).isEqualTo("ny årsak")
             assertThat(tilbakekrevingsvedtakMotregning.vurderingAvSkyld).isEqualTo("ny vurdering")
             assertThat(tilbakekrevingsvedtakMotregning.varselDato).isEqualTo(LocalDate.of(2025, 1, 1))
+            assertThat(tilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake).isEqualTo(true)
             verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandling.id) }
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(any()) }
         }
@@ -185,6 +190,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -224,11 +230,12 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             val tilbakekrevingsvedtakMotregning =
                 TilbakekrevingsvedtakMotregning(
                     behandling = behandling,
-                    samtykke = false,
+                    samtykke = true,
                     vedtakPdf = null,
                     varselDato = LocalDate.now(),
                     årsakTilFeilutbetaling = "årsakTilFeilutbetaling",
                     vurderingAvSkyld = "vurderingAvSkyld",
+                    heleBeløpetSkalKrevesTilbake = true,
                 )
             val pdf = ByteArray(200)
 
@@ -254,8 +261,9 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             val tilbakekrevingsvedtakMotregning =
                 TilbakekrevingsvedtakMotregning(
                     behandling = behandling,
-                    samtykke = false,
+                    samtykke = true,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = true,
                 )
 
             every {
@@ -282,6 +290,40 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             verify(exactly = 0) {
                 tilbakekrevingsvedtakMotregningRepository.saveAndFlush(tilbakekrevingsvedtakMotregning)
             }
+        }
+    }
+
+    @Nested
+    inner class TilRestTilbakekrevingsvedtakMotregningTest {
+        @Test
+        fun `tilRestTilbakekrevingsvedtakMotregning skal returnere verdiene fra TilbakekrevingsvedtakMotregning`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = true,
+                    varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = true,
+                    årsakTilFeilutbetaling = "ny årsak",
+                    vurderingAvSkyld = "ny vurdering",
+                )
+
+            // Act
+            val restTilbakekrevingsvedtakMotregning =
+                tilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()
+
+            // Assert
+            assertThat(restTilbakekrevingsvedtakMotregning.id).isEqualTo(tilbakekrevingsvedtakMotregning.id)
+            assertThat(restTilbakekrevingsvedtakMotregning.behandlingId).isEqualTo(tilbakekrevingsvedtakMotregning.behandling.id)
+            assertThat(restTilbakekrevingsvedtakMotregning.samtykke).isEqualTo(tilbakekrevingsvedtakMotregning.samtykke)
+            assertThat(restTilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling).isEqualTo(
+                tilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
+            )
+            assertThat(restTilbakekrevingsvedtakMotregning.vurderingAvSkyld).isEqualTo(tilbakekrevingsvedtakMotregning.vurderingAvSkyld)
+            assertThat(restTilbakekrevingsvedtakMotregning.varselDato).isEqualTo(tilbakekrevingsvedtakMotregning.varselDato)
+            assertThat(restTilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake).isEqualTo(
+                tilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake,
+            )
         }
     }
 }
