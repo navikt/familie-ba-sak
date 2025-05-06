@@ -1,0 +1,3 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:15://localhost/familie-ba-sak

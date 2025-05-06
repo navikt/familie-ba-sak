@@ -25,6 +25,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
 @ActiveProfiles(
     "postgres",
     "integrasjonstest",
+    "testcontainers",
     "mock-oauth",
     "mock-localdate-service",
     "mock-tilbakekreving-klient",

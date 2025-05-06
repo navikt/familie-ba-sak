@@ -46,7 +46,7 @@ class JournalføringMetrikk {
         oppdatert: RestJournalføring,
         behandlinger: List<Behandling>,
     ) {
-        if (oppdatert.knyttTilFagsak) {
+        if (oppdatert.knyttTilFagsak == true) {
             behandlinger.forEach {
                 antallTilBehandling[it.type]?.increment()
             }

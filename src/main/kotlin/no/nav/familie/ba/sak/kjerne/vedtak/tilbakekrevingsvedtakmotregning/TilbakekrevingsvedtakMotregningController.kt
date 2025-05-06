@@ -66,6 +66,7 @@ class TilbakekrevingsvedtakMotregningController(
                 årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
                 vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregning.vurderingAvSkyld,
                 varselDato = restOppdaterTilbakekrevingsvedtakMotregning.varselDato,
+                heleBeløpetSkalKrevesTilbake = restOppdaterTilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake,
             )
 
         return ResponseEntity.ok(Ressurs.success(oppdatertTilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()))

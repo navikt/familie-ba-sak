@@ -25,6 +25,7 @@ import org.springframework.web.client.postForEntity
 @ActiveProfiles(
     "postgres",
     "integrasjonstest",
+    "testcontainers",
     "mock-pdl",
     "mock-ident-client",
     "mock-infotrygd-barnetrygd",

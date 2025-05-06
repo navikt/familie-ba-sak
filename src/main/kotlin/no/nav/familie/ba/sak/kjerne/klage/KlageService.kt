@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
@@ -67,7 +68,12 @@ class KlageService(
         }
 
         val aktivtFødselsnummer = fagsak.aktør.aktivFødselsnummer()
-        val enhetId = integrasjonClient.hentBehandlendeEnhetForPersonIdentMedRelasjoner(aktivtFødselsnummer).enhetId
+        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
+        val enhetsnummer =
+            integrasjonClient
+                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(NavIdent(saksbehandlerIdent))
+                .first()
+                .enhetsnummer
 
         return klageClient.opprettKlage(
             OpprettKlagebehandlingRequest(
@@ -76,7 +82,7 @@ class KlageService(
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
                 klageMottatt = klageMottattDato,
-                behandlendeEnhet = enhetId,
+                behandlendeEnhet = enhetsnummer,
                 behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
             ),
         )

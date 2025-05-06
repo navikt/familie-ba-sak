@@ -39,10 +39,10 @@ data class RestJournalføring(
     val journalpostTittel: String?,
     val kategori: BehandlingKategori?,
     val underkategori: BehandlingUnderkategori?,
-    val knyttTilFagsak: Boolean,
+    val knyttTilFagsak: Boolean?, // TODO : Fjern denne når togglen "familie-ba-sak.klage" er borte
     val opprettOgKnyttTilNyBehandling: Boolean,
     val tilknyttedeBehandlinger: List<TilknyttetBehandling> = emptyList(),
-    val tilknyttedeBehandlingIder: List<String>,
+    val tilknyttedeBehandlingIder: List<String>, // TODO : Fjern denne når togglen "familie-ba-sak.klage" er borte
     val dokumenter: List<RestJournalpostDokument>,
     // Saksbehandler sin ident
     val navIdent: String,

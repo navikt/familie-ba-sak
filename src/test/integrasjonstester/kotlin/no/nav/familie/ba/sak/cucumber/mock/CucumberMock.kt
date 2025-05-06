@@ -124,6 +124,7 @@ class CucumberMock(
     val utenlandskPeriodebeløpRepository = mockUtenlandskPeriodebeløpRepository(dataFraCucumber)
     val endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository(dataFraCucumber)
     val simuleringService = mockSimuleringService()
+    val startSatsendring = mockStartSatsendring()
     val totrinnskontrollRepository = mockTotrinnskontrollRepository(dataFraCucumber)
     val taskService = mockTaskService()
     val saksstatistikkEventPublisher = mockSaksstatistikkEventPublisher()
