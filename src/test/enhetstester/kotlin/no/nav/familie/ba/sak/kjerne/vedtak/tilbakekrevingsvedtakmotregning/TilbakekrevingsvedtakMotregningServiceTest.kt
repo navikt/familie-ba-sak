@@ -60,6 +60,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -83,6 +84,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -132,6 +134,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -185,6 +188,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     behandling = behandling,
                     samtykke = false,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
@@ -224,11 +228,12 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             val tilbakekrevingsvedtakMotregning =
                 TilbakekrevingsvedtakMotregning(
                     behandling = behandling,
-                    samtykke = false,
+                    samtykke = true,
                     vedtakPdf = null,
                     varselDato = LocalDate.now(),
                     årsakTilFeilutbetaling = "årsakTilFeilutbetaling",
                     vurderingAvSkyld = "vurderingAvSkyld",
+                    heleBeløpetSkalKrevesTilbake = true,
                 )
             val pdf = ByteArray(200)
 
@@ -254,8 +259,9 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             val tilbakekrevingsvedtakMotregning =
                 TilbakekrevingsvedtakMotregning(
                     behandling = behandling,
-                    samtykke = false,
+                    samtykke = true,
                     varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = true,
                 )
 
             every {

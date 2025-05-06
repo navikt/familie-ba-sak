@@ -207,6 +207,7 @@ class JournalførVedtaksbrevTest {
                 behandling = behandling,
                 samtykke = true,
                 vedtakPdf = ByteArray(0),
+                heleBeløpetSkalKrevesTilbake = true,
             )
 
         every { mockFagsakRepository.finnFagsak(behandling.fagsak.id) } returns lagFagsak(type = FagsakType.NORMAL)
