@@ -40,6 +40,11 @@ class AutovedtakSatsendringScheduler(
         }
     }
 
+    @Scheduled(cron = CRON_HVER_HVERDAG)
+    fun slettFeiledeSatsendringHverdager() {
+        startSatsendring.slettFeiledeSatsendringer()
+    }
+
     private fun startSatsendring(antallFagsaker: Int) {
         if (!isShuttingDown && leaderClientService.isLeader()) {
             logger.info("Starter schedulert jobb for satsendring ${StartSatsendring.hentAktivSatsendringstidspunkt()}. antallFagsaker=$antallFagsaker")
@@ -54,6 +59,7 @@ class AutovedtakSatsendringScheduler(
         const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 7-15 * * MON-FRI"
         const val CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID = "0 */5 16-20 * * MON-FRI"
         const val CRON_HVERT_5_MIN_LØRDAG = "0 */5 7-17 * * SAT"
+        const val CRON_HVER_HVERDAG = "0 0 7 * * MON-FRI"
     }
 
     override fun onApplicationEvent(event: ContextClosedEvent) {
