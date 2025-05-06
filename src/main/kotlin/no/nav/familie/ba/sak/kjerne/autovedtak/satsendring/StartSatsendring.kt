@@ -172,6 +172,19 @@ class StartSatsendring(
         opprettTaskService.opprettSatsendringTask(fagsakId, hentAktivSatsendringstidspunkt())
     }
 
+    fun slettFeiledeSatsendringer() {
+        val satsEndringer = satskjøringRepository.findBySatsTidspunktAndFerdigTidspunktIsNullAndFeiltypeIsNotNull(hentAktivSatsendringstidspunkt())
+
+        if (satsEndringer.isEmpty()) {
+            logger.info("Ingen feilede satsendringer å rekjøre")
+            return
+        }
+
+        satskjøringRepository.deleteAll(satsEndringer)
+
+        logger.info("Slettet ${satsEndringer.size} feilede satsendringer")
+    }
+
     companion object {
         fun hentAktivSatsendringstidspunkt(): YearMonth = SATSENDRINGMÅNED_MAI_2025
 
