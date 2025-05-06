@@ -39,6 +39,8 @@ data class TilbakekrevingsvedtakMotregning(
     var vurderingAvSkyld: String? = null,
     @Column(name = "varsel_dato", nullable = false, updatable = true)
     var varselDato: LocalDate = LocalDate.now(),
+    @Column(name = "hele_belopet_skal_kreves_tilbake", nullable = false, updatable = true)
+    var heleBeløpetSkalKrevesTilbake: Boolean,
     @Column(name = "vedtak_pdf", nullable = true)
     var vedtakPdf: ByteArray? = null,
 ) : BaseEntitet()
@@ -51,4 +53,5 @@ fun TilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning() =
         vurderingAvSkyld = this.vurderingAvSkyld,
         varselDato = this.varselDato,
         samtykke = this.samtykke,
+        heleBeløpetSkalKrevesTilbake = this.heleBeløpetSkalKrevesTilbake,
     )
