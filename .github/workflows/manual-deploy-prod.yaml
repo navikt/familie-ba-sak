@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    uses: navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@54c5d9228a37ca88ea58074a00eaa9cf9e90e7ec # ratchet:navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@main
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/build-maven-app.yaml@main # ratchet:exclude
     with:
       build-image: true
       push-image: true
@@ -21,7 +21,7 @@ jobs:
     permissions:
       id-token: write
     needs: [build]
-    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@54c5d9228a37ca88ea58074a00eaa9cf9e90e7ec # ratchet:navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@main
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/deploy.yaml@main # ratchet:exclude
     with:
       image: ${{ needs.build.outputs.image }}
       cluster: prod-gcp
