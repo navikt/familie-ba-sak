@@ -641,6 +641,15 @@ class BrevService(
 
         val avregningperioderForBehandling = avregningService.hentPerioderMedAvregning(behandling.id)
 
+        val avregningperioderBeskrevet =
+            avregningperioderForBehandling.map { (fom, tom) ->
+                if (fom.toYearMonth() == tom.toYearMonth()) {
+                    fom.tilMånedÅr()
+                } else {
+                    "${fom.tilMånedÅr()} til og med ${tom.tilMånedÅr()}"
+                }
+            }
+
         return TilbakekrevingsvedtakMotregningBrev(
             data =
                 TilbakekrevingsvedtakMotregningBrevData(
@@ -660,7 +669,7 @@ class BrevService(
                             brevOpprettetDato = LocalDate.now(),
                             tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning,
                             sumAvFeilutbetaling = Utils.formaterBeløp(avregningperioderForBehandling.sumOf { it.totalFeilutbetaling }.toInt()),
-                            avregningperioder = avregningperioderForBehandling.map { "${it.fom.tilMånedÅr()} til og med ${it.tom.tilMånedÅr()}" },
+                            avregningperioder = avregningperioderBeskrevet,
                         ),
                 ),
             mal = Brevmal.TILBAKEKREVINGSVEDTAK_MOTREGNING,

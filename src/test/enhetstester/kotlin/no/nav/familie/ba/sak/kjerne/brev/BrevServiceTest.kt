@@ -4,21 +4,33 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.hjemler.HjemmeltekstUtleder
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -29,12 +41,16 @@ class BrevServiceTest {
     val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     val hjemmeltekstUtleder = mockk<HjemmeltekstUtleder>()
+    val mockPersongrunnlagService = mockk<PersongrunnlagService>()
+    val mockTotrinnskontrollService = mockk<TotrinnskontrollService>()
+    val mockArbeidsfordelingService = mockk<ArbeidsfordelingService>()
+    val mockAvregningService = mockk<AvregningService>()
 
     val brevService =
         BrevService(
-            totrinnskontrollService = mockk(),
-            persongrunnlagService = mockk(),
-            arbeidsfordelingService = mockk(),
+            totrinnskontrollService = mockTotrinnskontrollService,
+            persongrunnlagService = mockPersongrunnlagService,
+            arbeidsfordelingService = mockArbeidsfordelingService,
             simuleringService = mockk(),
             vedtaksperiodeService = vedtaksperiodeService,
             korrigertEtterbetalingService = mockk(),
@@ -50,7 +66,7 @@ class BrevServiceTest {
             kompetanseRepository = mockk(),
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
             hjemmeltekstUtleder = hjemmeltekstUtleder,
-            avregningService = mockk(),
+            avregningService = mockAvregningService,
         )
 
     @BeforeEach
@@ -281,5 +297,102 @@ class BrevServiceTest {
         val starttidspunkt = brevService.finnStarttidspunktForUtbetalingstabell(behandling)
 
         assertThat(starttidspunkt).isEqualTo(LocalDate.of(2024, 5, 1))
+    }
+
+    @Nested
+    inner class HentBrevForTilbakekrevingsvedtakMotregningTest {
+        @Test
+        fun `Skal returnere brev med riktig genererte flettefelter`() {
+            val behandling = lagBehandling()
+            val arbeidsfordelingPåBehandling = lagArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            val søker = lagPerson(type = PersonType.SØKER)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, søker)
+
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = true,
+                    årsakTilFeilutbetaling = "Årsak til feilutbetaling",
+                    vurderingAvSkyld = "Vurdering av skyld",
+                    varselDato = LocalDate.of(2025, 5, 6),
+                    heleBeløpetSkalKrevesTilbake = true,
+                    vedtakPdf = null,
+                )
+
+            val avregningperioder =
+                listOf(
+                    AvregningPeriode(
+                        fom = LocalDate.of(2025, 5, 6),
+                        tom = LocalDate.of(2025, 6, 6),
+                        totalEtterbetaling = BigDecimal.ZERO,
+                        totalFeilutbetaling = BigDecimal.valueOf(300),
+                    ),
+                    AvregningPeriode(
+                        fom = LocalDate.of(2025, 7, 6),
+                        tom = LocalDate.of(2025, 8, 6),
+                        totalEtterbetaling = BigDecimal.ZERO,
+                        totalFeilutbetaling = BigDecimal.valueOf(300),
+                    ),
+                )
+
+            every { mockPersongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
+            every { mockTotrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id) } returns null
+            every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id) } returns arbeidsfordelingPåBehandling
+            every { mockAvregningService.hentPerioderMedAvregning(behandlingId = behandling.id) } returns avregningperioder
+
+            val brev = brevService.hentBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
+
+            assertThat(brev.data.flettefelter.aarsakTilFeilutbetaling).isEqualTo(listOf("Årsak til feilutbetaling"))
+            assertThat(brev.data.flettefelter.vurderingAvSkyld).isEqualTo(listOf("Vurdering av skyld"))
+            assertThat(brev.data.flettefelter.sumAvFeilutbetaling).isEqualTo(listOf("600"))
+            assertThat(brev.data.flettefelter.avregningperioder).isEqualTo(listOf("mai 2025 til og med juni 2025", "juli 2025 til og med august 2025"))
+        }
+
+        @Test
+        fun `Skal returnere brev med riktig genererte flettefelter når periodene bare er på 1 måned`() {
+            val behandling = lagBehandling()
+            val arbeidsfordelingPåBehandling = lagArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+            val søker = lagPerson(type = PersonType.SØKER)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, søker)
+
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = true,
+                    årsakTilFeilutbetaling = "Årsak til feilutbetaling",
+                    vurderingAvSkyld = "Vurdering av skyld",
+                    varselDato = LocalDate.of(2025, 5, 6),
+                    heleBeløpetSkalKrevesTilbake = true,
+                    vedtakPdf = null,
+                )
+
+            val avregningperioder =
+                listOf(
+                    AvregningPeriode(
+                        fom = LocalDate.of(2025, 5, 6),
+                        tom = LocalDate.of(2025, 5, 6),
+                        totalEtterbetaling = BigDecimal.ZERO,
+                        totalFeilutbetaling = BigDecimal.valueOf(300),
+                    ),
+                    AvregningPeriode(
+                        fom = LocalDate.of(2025, 6, 6),
+                        tom = LocalDate.of(2025, 6, 6),
+                        totalEtterbetaling = BigDecimal.ZERO,
+                        totalFeilutbetaling = BigDecimal.valueOf(300),
+                    ),
+                )
+
+            every { mockPersongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
+            every { mockTotrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id) } returns null
+            every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id) } returns arbeidsfordelingPåBehandling
+            every { mockAvregningService.hentPerioderMedAvregning(behandlingId = behandling.id) } returns avregningperioder
+
+            val brev = brevService.hentBrevForTilbakekrevingsvedtakMotregning(tilbakekrevingsvedtakMotregning)
+
+            assertThat(brev.data.flettefelter.aarsakTilFeilutbetaling).isEqualTo(listOf("Årsak til feilutbetaling"))
+            assertThat(brev.data.flettefelter.vurderingAvSkyld).isEqualTo(listOf("Vurdering av skyld"))
+            assertThat(brev.data.flettefelter.sumAvFeilutbetaling).isEqualTo(listOf("600"))
+            assertThat(brev.data.flettefelter.avregningperioder).isEqualTo(listOf("mai 2025", "juni 2025"))
+        }
     }
 }
