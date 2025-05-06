@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeDto
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -90,6 +91,7 @@ class ForvalterController(
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
+    private val startSatsendring: StartSatsendring,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -342,6 +344,17 @@ class ForvalterController(
         )
 
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+    }
+
+    @DeleteMapping(path = ["/slettFeiledeSatsendringer"])
+    fun slettFeiledeSatsendringer(): ResponseEntity<Ressurs<String>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Kjør intern konsistensavstemming",
+        )
+
+        startSatsendring.slettFeiledeSatsendringer()
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
