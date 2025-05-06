@@ -73,7 +73,7 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Pintegrasjonstest -Dsurefire.rerunFailingTestsCount=2 -DjacocoTestDirectory=IT
+          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Pintegrasjonstest -Dsurefire.rerunFailingTestsCount=2 -Pjacoco -DjacocoTestDirectory=IT
       - name: Last opp Jacoco IT rapport
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
         with:
@@ -101,6 +101,11 @@ jobs:
         with:
           name: jacocoUT
           path: jacoco/UT
+      - name: Last ned Jacoco IT rapport
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # ratchet:actions/download-artifact@v4
+        with:
+          name: jacocoIT
+          path: jacoco/IT
       - name: Cache Sonar packages
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # ratchet:actions/cache@v4
         with:
@@ -114,7 +119,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths="jacoco/UT/jacoco.xml"
+          mvn sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths="jacoco/UT/jacoco.xml,jacoco/IT/jacoco.xml"
 
   verdikjedetesterFeatureToggleOff:
     name: Verdikjedetester m/ feature toggles slått av
