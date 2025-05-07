@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.BrukerIdType
@@ -16,7 +17,7 @@ import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerReques
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class InnkommendeJournalføringServiceEnhetTest {
+class InnkommendeJournalføringServiceTest {
     private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
     private val mockedFagsakService: FagsakService = mockk()
     private val mockedBehandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
@@ -24,6 +25,7 @@ class InnkommendeJournalføringServiceEnhetTest {
     private val mockedStegService: StegService = mockk()
     private val mockedJournalføringMetrikk: JournalføringMetrikk = mockk()
     private val mockedBehandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
+    private val klageService: KlageService = mockk()
     private val innkommendeJournalføringService: InnkommendeJournalføringService =
         InnkommendeJournalføringService(
             integrasjonClient = mockedIntegrasjonClient,
@@ -33,6 +35,7 @@ class InnkommendeJournalføringServiceEnhetTest {
             stegService = mockedStegService,
             journalføringMetrikk = mockedJournalføringMetrikk,
             behandlingSøknadsinfoService = mockedBehandlingSøknadsinfoService,
+            klageService = klageService,
         )
 
     @Test
@@ -63,6 +66,6 @@ class InnkommendeJournalføringServiceEnhetTest {
         val journalposterForBruker = innkommendeJournalføringService.hentJournalposterForBruker(brukerId)
 
         // Assert
-        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.journalpostTilgang.harTilgang).isTrue
+        assertThat(journalposterForBruker.first { it.journalpost.journalpostId === journalpostId }.journalpostTilgang.harTilgang).isTrue()
     }
 }
