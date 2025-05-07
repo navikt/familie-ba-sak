@@ -42,22 +42,13 @@ jobs:
           java-version: 21
           distribution: 'temurin'
           cache: 'maven'
-      - name: Kjør enhetstester med Jacoco-profil
-        if: ${{ github.event_name != 'merge_group' }}
-        env:
-          MAVEN_OPTS: -Xss1024M -Xmx2048M
-          GITHUB_USERNAME: x-access-token
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Penhetstest -Pjacoco -DjacocoTestDirectory=UT
       - name: Kjør enhetstester
-        if: ${{ github.event_name == 'merge_group' }}
         env:
           MAVEN_OPTS: -Xss1024M -Xmx2048M
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Penhetstest -Pjacoco -DjacocoTestDirectory=UT
+          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Penhetstest ${{ github.event_name != 'merge_group' && '-Pjacoco -DjacocoTestDirectory=UT' || '' }}
       - name: Last opp Jacoco UT rapport
         if: ${{ github.event_name != 'merge_group' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
@@ -83,8 +74,9 @@ jobs:
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Pintegrasjonstest -Dsurefire.rerunFailingTestsCount=2 -Pjacoco -DjacocoTestDirectory=IT
+          mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Pintegrasjonstest -Dsurefire.rerunFailingTestsCount=2 ${{ github.event_name != 'merge_group' && '-Pjacoco -DjacocoTestDirectory=IT' || '' }}
       - name: Last opp Jacoco IT rapport
+        if: ${{ github.event_name != 'merge_group' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
         with:
           name: jacocoIT
@@ -93,9 +85,9 @@ jobs:
           overwrite: true
 
   sonar:
-    if: github.actor != 'dependabot[bot]'
+    if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
     name: Sonar
-    runs-on: ubuntu-latest-8-cores
+    runs-on: ubuntu-latest
     needs: [enhetstester, integrasjonstester]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
