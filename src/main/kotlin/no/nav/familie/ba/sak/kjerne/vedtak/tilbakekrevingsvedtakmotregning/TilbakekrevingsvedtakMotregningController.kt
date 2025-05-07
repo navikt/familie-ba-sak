@@ -5,7 +5,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregning
-import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -29,22 +30,8 @@ class TilbakekrevingsvedtakMotregningController(
     val tilgangService: TilgangService,
     val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
     val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
+    val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
-    @GetMapping(
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun hentTilbakekrevingsvedtakMotregning(
-        @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<RestTilbakekrevingsvedtakMotregning?>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Hent TilbakekrevingsvedtakMotregning",
-        )
-        val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId = behandlingId)
-
-        return ResponseEntity.ok(Ressurs.success(tilbakekrevingsvedtakMotregning?.tilRestTilbakekrevingsvedtakMotregning()))
-    }
-
     @PatchMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
@@ -52,30 +39,31 @@ class TilbakekrevingsvedtakMotregningController(
     fun oppdaterTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
         @RequestBody restOppdaterTilbakekrevingsvedtakMotregning: RestOppdaterTilbakekrevingsvedtakMotregning,
-    ): ResponseEntity<Ressurs<RestTilbakekrevingsvedtakMotregning>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdater tilbakekrevingsvedtak motregning",
         )
         tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        val oppdatertTilbakekrevingsvedtakMotregning =
-            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
-                behandlingId = behandlingId,
-                samtykke = restOppdaterTilbakekrevingsvedtakMotregning.samtykke,
-                årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
-                vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregning.vurderingAvSkyld,
-                varselDato = restOppdaterTilbakekrevingsvedtakMotregning.varselDato,
-                heleBeløpetSkalKrevesTilbake = restOppdaterTilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake,
-            )
+        tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+            behandlingId = behandlingId,
+            samtykke = restOppdaterTilbakekrevingsvedtakMotregning.samtykke,
+            årsakTilFeilutbetaling = restOppdaterTilbakekrevingsvedtakMotregning.årsakTilFeilutbetaling,
+            vurderingAvSkyld = restOppdaterTilbakekrevingsvedtakMotregning.vurderingAvSkyld,
+            varselDato = restOppdaterTilbakekrevingsvedtakMotregning.varselDato,
+            heleBeløpetSkalKrevesTilbake = restOppdaterTilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake,
+        )
 
-        return ResponseEntity.ok(Ressurs.success(oppdatertTilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning()))
+        val restUtvidetBehandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(restUtvidetBehandling))
     }
 
     @DeleteMapping
     fun slettTilbakekrevingsvedtakMotregning(
         @PathVariable behandlingId: Long,
-    ): ResponseEntity<Ressurs<String>> {
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Slett TilbakekrevingsvedtakMotregning",
@@ -84,7 +72,9 @@ class TilbakekrevingsvedtakMotregningController(
 
         tilbakekrevingsvedtakMotregningService.slettTilbakekrevingsvedtakMotregning(behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success("TilbakekrevingsvedtakMotregning for behandling=$behandlingId slettet OK."))
+        val restUtvidetBehandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(restUtvidetBehandling))
     }
 
     @Operation(summary = "Henter eksisterende Tilbakekrevingsvedtak motregning pdf.")
