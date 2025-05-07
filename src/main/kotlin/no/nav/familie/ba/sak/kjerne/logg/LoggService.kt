@@ -737,11 +737,11 @@ class LoggService(
         ),
     )
 
-    fun loggTilbakekrevingsvedtakMotregningOpprettet(behandlingId: Long) =
+    fun loggUlovfestetMotregningBenyttet(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPRETTET,
+                type = LoggType.ULOVFESTET_MOTREGNING_BENYTTET,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,
@@ -750,24 +750,11 @@ class LoggService(
             ),
         )
 
-    fun loggTilbakekrevingsvedtakMotregningOppdatert(behandlingId: Long) =
+    fun loggUlovfestetMotregningAngret(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT,
-                rolle =
-                    SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
-                        rolleConfig,
-                        BehandlerRolle.SAKSBEHANDLER,
-                    ),
-            ),
-        )
-
-    fun loggTilbakekrevingsvedtakMotregningSlettet(behandlingId: Long) =
-        lagre(
-            Logg(
-                behandlingId = behandlingId,
-                type = LoggType.TILBAKEKREVINGSVEDTAK_MOTREGNING_SLETTET,
+                type = LoggType.ULOVFESTET_MOTREGNING_ANGRET,
                 rolle =
                     SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                         rolleConfig,
