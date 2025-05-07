@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -217,7 +218,7 @@ class EndretMigreringsdatoUtlederTest {
 
         // Act & assert
         val exception =
-            assertThrows<IllegalStateException> {
+            assertThrows<FunksjonellFeil> {
                 endretMigreringsdatoUtleder.utled(
                     fagsak = fagsak,
                     forrigeTilkjentYtelse = forrigeTilkjentYtelse,
