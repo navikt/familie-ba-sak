@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
@@ -30,12 +31,11 @@ class FagsakRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun beforeEach() {
-        andelTilkjentYtelseRepository.deleteAll()
-        tilkjentYtelseRepository.deleteAll()
-        behandlingRepository.deleteAll()
+        databaseCleanupService.truncate()
     }
 
     @Nested
