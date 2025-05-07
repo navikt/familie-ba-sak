@@ -1,56 +1,32 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagMockRestJournalføring
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
-import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
+import no.nav.familie.ba.sak.ekstern.restDomene.TilknyttetBehandling
+import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Journalføringsbehandlingstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 
-class InnkommendeJournalføringServiceTest(
+class InnkommendeJournalføringServiceIntegrationTest(
     @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     @Autowired
-    private val fagsakService: FagsakService,
-    @Autowired
-    private val personidentService: PersonidentService,
-    @Autowired
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
     @Autowired
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 ) : AbstractSpringIntegrationTest() {
-    @Test
-    fun `ferdigstill skal oppdatere journalpost med GENERELL_SAKSTYPE hvis knyttTilFagsak er false`() {
-        val søkerFnr = randomFnr()
-        val søkerAktør = personidentService.hentAktør(søkerFnr)
-
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
-        behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandlingUtenId(fagsak))
-
-        val (sak, behandlinger) =
-            innkommendeJournalføringService
-                .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(), "12345")
-
-        assertNull(sak.fagsakId)
-        assertEquals(Sakstype.GENERELL_SAK.type, sak.sakstype)
-        assertEquals(0, behandlinger.size)
-    }
-
     @Test
     fun `journalfør skal opprette en førstegangsbehandling fra journalføring og lagre ned søknadsinfo`() {
         val søkerFnr = randomFnr()
@@ -82,7 +58,13 @@ class InnkommendeJournalføringServiceTest(
             førsteSøknad.copy(
                 datoMottatt = førsteSøknad.datoMottatt!!.plusDays(2),
                 opprettOgKnyttTilNyBehandling = false,
-                tilknyttedeBehandlingIder = listOf(behandling!!.id.toString()),
+                tilknyttedeBehandlinger =
+                    listOf(
+                        TilknyttetBehandling(
+                            behandlingstype = Journalføringsbehandlingstype.FØRSTEGANGSBEHANDLING,
+                            behandlingId = behandling!!.id.toString(),
+                        ),
+                    ),
             )
 
         innkommendeJournalføringService.journalfør(nySøknad2DagerSenere, "124", "mockEnhet", "2")

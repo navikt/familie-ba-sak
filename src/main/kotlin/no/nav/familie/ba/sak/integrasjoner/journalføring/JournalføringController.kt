@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import jakarta.validation.Valid
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -29,9 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalføringController(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
-    private val innkommendeJournalføringServiceV2: InnkommendeJournalføringServiceV2,
     private val tilgangService: TilgangService,
-    private val unleashService: UnleashNextMedContextService,
 ) {
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentJournalpost(
@@ -78,26 +74,16 @@ class JournalføringController(
         @PathVariable journalpostId: String,
         @PathVariable oppgaveId: String,
         @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
-        @RequestBody
-        @Valid
-        request: RestJournalføring,
+        @RequestBody @Valid request: RestJournalføring,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "journalføre",
         )
-
         if (request.dokumenter.any { it.dokumentTittel == null || it.dokumentTittel == "" }) {
             throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
         }
-
-        val fagsakId =
-            if (unleashService.isEnabled(FeatureToggle.BEHANDLE_KLAGE, false)) {
-                innkommendeJournalføringServiceV2.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
-            } else {
-                innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
-            }
-
+        val fagsakId = innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
     }
 }
