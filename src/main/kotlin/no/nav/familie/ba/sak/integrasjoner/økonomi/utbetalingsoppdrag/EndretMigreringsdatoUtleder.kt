@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
@@ -45,7 +46,10 @@ class EndretMigreringsdatoUtleder(
         // Plusser på 1 mnd på migreringsdato da barnetrygden kun skal løpe fra BA-sak tidligst mnd etter migrering.
         val migreringsdatoPåFagsakPlussEnMnd = behandlingMigreringsinfo.migreringsdato.plusMonths(1)
         if (!erSatsendring && migreringsdatoPåFagsakPlussEnMnd.toYearMonth().isAfter(førsteAndelFomDatoForrigeBehandling)) {
-            throw IllegalStateException("Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling")
+            throw FunksjonellFeil(
+                "Ny migreringsdato pluss 1 mnd kan ikke være etter første fom i forrige behandling",
+                "Migreringsdato i fagsak er lagt til å være etter en måned med utbetaling fra en behandling som ikke kommer fra infotrygd.",
+            )
         }
 
         // Sjekker om vi har opphørt fra migreringsdato pluss 1 mnd i en av behandlingene etter at migreringsdato sist ble endret.
