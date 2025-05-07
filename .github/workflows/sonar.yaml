@@ -42,7 +42,7 @@ jobs:
           cache: 'maven'
       - name: Kjør integrasjonstester
         env:
-          MAVEN_OPTS: "-Xmx4g -Dmaven.artifact.threads=10"
+          MAVEN_OPTS: "-Xmx6g -Dmaven.artifact.threads=10"
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
