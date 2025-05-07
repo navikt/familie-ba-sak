@@ -2,6 +2,11 @@ name: Manual deploy to dev
 on:
   workflow_dispatch:
     inputs:
+      skip-tests:
+        description: 'Skip tests?'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -14,7 +19,7 @@ jobs:
       build-image: true
       push-image: true
       byosbom: target/classes/META-INF/sbom/application.cdx.json
-      skip-tests: true
+      skip-tests: ${{ inputs.skip-tests }}
     secrets: inherit
   deploy-with-new-image:
     name: Deploy with new image
