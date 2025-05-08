@@ -37,6 +37,8 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.tilRestTilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -67,6 +69,7 @@ class UtvidetBehandlingService(
     private val refusjonEøsService: RefusjonEøsService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
+    private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -105,6 +108,8 @@ class UtvidetBehandlingService(
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId)
+
+        val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -161,6 +166,7 @@ class UtvidetBehandlingService(
             refusjonEøs = refusjonEøs,
             vurderingsstrategiForValutakurser = vurderingsstrategiForValutakurserRepository.findByBehandlingId(behandling.id)?.vurderingsstrategiForValutakurser,
             søknadMottattDato = søknadMottattDato,
+            tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.tilRestTilbakekrevingsvedtakMotregning(),
         )
     }
 }

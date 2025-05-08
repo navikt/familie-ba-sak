@@ -22,7 +22,6 @@ class TilbakekrevingsvedtakMotregningService(
     @Transactional
     fun opprettTilbakekrevingsvedtakMotregning(behandlingId: Long) =
         finnTilbakekrevingsvedtakMotregning(behandlingId) ?: run {
-            loggService.loggTilbakekrevingsvedtakMotregningOpprettet(behandlingId)
             val behandling = behandlingService.hent(behandlingId)
             tilbakekrevingsvedtakMotregningRepository.save(
                 TilbakekrevingsvedtakMotregning(
@@ -46,6 +45,9 @@ class TilbakekrevingsvedtakMotregningService(
             hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandlingId).apply {
                 samtykke?.let {
                     this.samtykke = it
+                    if (it) {
+                        loggService.loggUlovfestetMotregningBenyttet(behandlingId)
+                    }
                 }
                 årsakTilFeilutbetaling?.let {
                     this.årsakTilFeilutbetaling = it
@@ -61,7 +63,6 @@ class TilbakekrevingsvedtakMotregningService(
                 }
             }
 
-        loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandlingId)
         return tilbakekrevingsvedtakMotregningRepository.save(tilbakekrevingsvedtakMotregning)
     }
 
@@ -69,6 +70,8 @@ class TilbakekrevingsvedtakMotregningService(
     fun slettTilbakekrevingsvedtakMotregning(behandlingId: Long) =
         finnTilbakekrevingsvedtakMotregning(behandlingId)?.let {
             tilbakekrevingsvedtakMotregningRepository.delete(it)
-            loggService.loggTilbakekrevingsvedtakMotregningSlettet(behandlingId)
+            if (it.samtykke) {
+                loggService.loggUlovfestetMotregningAngret(behandlingId)
+            }
         }
 }

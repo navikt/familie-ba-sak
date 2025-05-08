@@ -7,6 +7,8 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOppdaterTilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
@@ -20,12 +22,14 @@ class TilbakekrevingsvedtakMotregningControllerTest {
     private val tilgangService = mockk<TilgangService>()
     private val tilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
     private val tilbakekrevingsvedtakMotregningBrevService = mockk<TilbakekrevingsvedtakMotregningBrevService>()
+    private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
 
     private val tilbakekrevingsvedtakMotregningController =
         TilbakekrevingsvedtakMotregningController(
             tilgangService = tilgangService,
             tilbakekrevingsvedtakMotregningService = tilbakekrevingsvedtakMotregningService,
             tilbakekrevingsvedtakMotregningBrevService = tilbakekrevingsvedtakMotregningBrevService,
+            utvidetBehandlingService = utvidetBehandlingService,
         )
 
     private val behandling = lagBehandling()
@@ -51,6 +55,8 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             heleBeløpetSkalKrevesTilbake = null,
         )
 
+    val restUtvidetBehandlingMock = mockk<RestUtvidetBehandling>()
+
     @BeforeEach
     fun setUp() {
         justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
@@ -64,6 +70,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
                 behandling.id,
             )
         } returns tilbakekrevingsvedtakMotregning
+        every { utvidetBehandlingService.lagRestUtvidetBehandling(behandling.id) } returns restUtvidetBehandlingMock
     }
 
     @Nested
@@ -71,7 +78,6 @@ class TilbakekrevingsvedtakMotregningControllerTest {
         @Test
         fun `alle endepunkter verifiserer tilgang til handling`() {
             // Act
-            tilbakekrevingsvedtakMotregningController.hentTilbakekrevingsvedtakMotregning(behandlingId = behandling.id)
             tilbakekrevingsvedtakMotregningController.slettTilbakekrevingsvedtakMotregning(behandlingId = behandling.id)
             tilbakekrevingsvedtakMotregningController.hentTilbakekrevingsvedtakMotregningPdf(behandlingId = behandling.id)
             tilbakekrevingsvedtakMotregningController.opprettOgHentTilbakekrevingsvedtakMotregningPdf(behandlingId = behandling.id)
@@ -82,10 +88,6 @@ class TilbakekrevingsvedtakMotregningControllerTest {
 
             // Assert
             verify(exactly = 1) {
-                tilgangService.verifiserHarTilgangTilHandling(
-                    minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                    handling = "Hent TilbakekrevingsvedtakMotregning",
-                )
                 tilgangService.verifiserHarTilgangTilHandling(
                     minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
                     handling = "Oppdater tilbakekrevingsvedtak motregning",
@@ -109,18 +111,6 @@ class TilbakekrevingsvedtakMotregningControllerTest {
     @Nested
     inner class ReturtypeTest {
         @Test
-        fun hentTilbakekrevingsvedtakMotregning() {
-            // Act
-            val response =
-                tilbakekrevingsvedtakMotregningController.hentTilbakekrevingsvedtakMotregning(behandlingId = behandling.id)
-
-            // Assert
-            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
-            assertThat(response.body!!.data).isEqualTo(tilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning())
-        }
-
-        @Test
         fun oppdaterTilbakekrevingsvedtakMotregning() {
             // Act
             val response =
@@ -132,7 +122,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
-            assertThat(response.body!!.data).isEqualTo(tilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning())
+            assertThat(response.body!!.data).isEqualTo(restUtvidetBehandlingMock)
         }
 
         @Test
@@ -144,7 +134,7 @@ class TilbakekrevingsvedtakMotregningControllerTest {
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.status).isEqualTo(Ressurs.Status.SUKSESS)
-            assertThat(response.body!!.data).isEqualTo("TilbakekrevingsvedtakMotregning for behandling=${behandling.id} slettet OK.")
+            assertThat(response.body!!.data).isEqualTo(restUtvidetBehandlingMock)
         }
 
         @Test
