@@ -49,13 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Penhetstest ${{ github.event_name != 'merge_group' && '-Pjacoco -DjacocoTestDirectory=UT' || '' }}
-      - name: Last opp surefire-rapporter
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
-        with:
-          name: surefire-reports-ut
-          path: target/surefire-reports
-          retention-days: 2
       - name: Last opp Jacoco UT rapport
         if: ${{ github.event_name != 'merge_group' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
@@ -82,6 +75,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn verify -B --no-transfer-progress --settings .m2/maven-settings.xml --file pom.xml -Pintegrasjonstest -Dsurefire.rerunFailingTestsCount=2 ${{ github.event_name != 'merge_group' && '-Pjacoco -DjacocoTestDirectory=IT' || '' }}
+      - name: Last opp surefire-rapporter
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
+        with:
+          name: surefire-reports-ut
+          path: target/surefire-reports
+          retention-days: 2
       - name: Last opp Jacoco IT rapport
         if: ${{ github.event_name != 'merge_group' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
