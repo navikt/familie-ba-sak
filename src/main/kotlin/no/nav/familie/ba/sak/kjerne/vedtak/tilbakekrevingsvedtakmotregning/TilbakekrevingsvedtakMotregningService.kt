@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilSimuleringService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
@@ -12,6 +13,7 @@ class TilbakekrevingsvedtakMotregningService(
     private val tilbakekrevingsvedtakMotregningRepository: TilbakekrevingsvedtakMotregningRepository,
     private val loggService: LoggService,
     private val behandlingService: BehandlingHentOgPersisterService,
+    private val tilbakestillBehandlingTilSimuleringService: TilbakestillBehandlingTilSimuleringService,
 ) {
     fun finnTilbakekrevingsvedtakMotregning(behandlingId: Long) = tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandlingId)
 
@@ -60,6 +62,7 @@ class TilbakekrevingsvedtakMotregningService(
                 }
                 heleBeløpetSkalKrevesTilbake?.let {
                     this.heleBeløpetSkalKrevesTilbake = it
+                    tilbakestillBehandlingTilSimuleringService.tilbakestillBehandlingTilSimuering(behandlingId)
                 }
             }
 
