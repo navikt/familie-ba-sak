@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -277,10 +278,11 @@ class KlageServiceTest {
         fun `skal sette enheten til saksbehandlers enhet ved opprettelse av klage`() {
             // Arrange
             val fagsak = lagFagsak()
-            val forventetEnhet = Enhet("1234", "en")
+            val forventetEnhet = Enhet("4833", "NAV Familie- og pensjonsytelser Oslo 1")
 
             val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
             every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns UUID.randomUUID()
+            every { mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil() } returns listOf(BarnetrygdEnhet.OSLO)
 
             // Act
             klageService.opprettKlage(fagsak, LocalDate.now())
