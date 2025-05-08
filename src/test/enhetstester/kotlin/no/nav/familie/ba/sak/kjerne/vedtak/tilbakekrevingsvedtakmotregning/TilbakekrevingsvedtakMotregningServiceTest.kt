@@ -5,6 +5,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilSimuleringServ
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
@@ -455,6 +457,130 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             assertThat(restTilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake).isEqualTo(
                 tilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake,
             )
+        }
+    }
+
+    @Nested
+    inner class ValiderAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter {
+        @Test
+        fun `skal kaste feil dersom samtykke er false`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = false,
+                    heleBeløpetSkalKrevesTilbake = false,
+                )
+
+            // Act & Assert
+            val feil =
+                assertThrows<Feil> {
+                    tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+                }
+
+            assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter hvis samtykke ikke er bekreftet.")
+        }
+
+        @Test
+        fun `skal kaste feil dersom heleBeløpetSkalKrevesTilbake er false`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = true,
+                    heleBeløpetSkalKrevesTilbake = false,
+                )
+
+            // Act & Assert
+            val feil =
+                assertThrows<Feil> {
+                    tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+                }
+
+            assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter hvis ikke hele beløpet skal kreves tilbake.")
+        }
+
+        @Test
+        fun `skal kaste feil dersom varseldato er i fremtiden`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = true,
+                    heleBeløpetSkalKrevesTilbake = true,
+                    varselDato = LocalDate.now().plusDays(1),
+                )
+
+            // Act & Assert
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+                }
+
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter med fremtidig varseldato.")
+        }
+
+        @Test
+        fun `skal kaste feil dersom årsak til feilutbetaling ikke er utfylt`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = true,
+                    heleBeløpetSkalKrevesTilbake = true,
+                    varselDato = LocalDate.now(),
+                    årsakTilFeilutbetaling = null,
+                )
+
+            // Act & Assert
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+                }
+
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter uten årsak til feilutbetaling.")
+        }
+
+        @Test
+        fun `skal kaste feil dersom vurdering av skyld ikke er utfylt`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = true,
+                    heleBeløpetSkalKrevesTilbake = true,
+                    varselDato = LocalDate.now(),
+                    årsakTilFeilutbetaling = "årsak til feilutbetaling",
+                    vurderingAvSkyld = null,
+                )
+
+            // Act & Assert
+            val feil =
+                assertThrows<FunksjonellFeil> {
+                    tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+                }
+
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter uten vurdering av skyld.")
+        }
+
+        @Test
+        fun `skal ikke kaste feil selv om vedtakPdf er null`() {
+            // Arrange
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = lagBehandling(),
+                    samtykke = true,
+                    heleBeløpetSkalKrevesTilbake = true,
+                    varselDato = LocalDate.now(),
+                    årsakTilFeilutbetaling = "årsak til feilutbetaling",
+                    vurderingAvSkyld = "vurdering av skyld",
+                    vedtakPdf = null,
+                )
+
+            // Act & Assert
+            assertDoesNotThrow {
+                tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+            }
         }
     }
 }

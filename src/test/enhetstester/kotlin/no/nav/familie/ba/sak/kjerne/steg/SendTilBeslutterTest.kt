@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.every
 import io.mockk.just
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
@@ -17,13 +18,18 @@ import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
+import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -40,6 +46,8 @@ class SendTilBeslutterTest {
     private val mockVedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val mockAutomatiskBeslutningService = mockk<AutomatiskBeslutningService>()
     private val mockValiderBrevmottakerService = mockk<ValiderBrevmottakerService>()
+    private val mockAvregningService = mockk<AvregningService>()
+    private val mockTilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
 
     private val totrinnskontrollService = TotrinnskontrollService(mockBehandlingService, mockTotrinnskontrollRepository, mockSaksbehandlerContext)
 
@@ -54,6 +62,8 @@ class SendTilBeslutterTest {
             vedtaksperiodeService = mockVedtaksperiodeService,
             automatiskBeslutningService = mockAutomatiskBeslutningService,
             validerBrevmottakerService = mockValiderBrevmottakerService,
+            avregningService = mockAvregningService,
+            tilbakekrevingsvedtakMotregningService = mockTilbakekrevingsvedtakMotregningService,
         )
 
     @Nested
@@ -116,6 +126,51 @@ class SendTilBeslutterTest {
             verify(exactly = 0) { mockVedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) }
             verify(exactly = 0) { mockVedtakService.oppdaterVedtakMedStønadsbrev(vedtak) }
             verify(exactly = 1) { mockBehandlingService.sendBehandlingTilBeslutter(behandling) }
+        }
+    }
+
+    @Nested
+    inner class PreValiderSteg {
+        @Test
+        fun `skal kaste feil hvis tilbakekrevingsvedtak ikke er komplett hvis det er perioder med avregning`() {
+            val behandling = lagBehandling()
+            val stegService = mockk<StegService>()
+            val behandlingsresultatSteg = mockk<BehandlingsresultatSteg>()
+
+            val tilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    heleBeløpetSkalKrevesTilbake = false,
+                )
+
+            justRun {
+                mockValiderBrevmottakerService
+                    .validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
+                        any(),
+                        any(),
+                        any(),
+                    )
+            }
+            every { mockVilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+            every { stegService.hentBehandlingSteg(any()) } returns behandlingsresultatSteg
+            justRun { behandlingsresultatSteg.preValiderSteg(any()) }
+            every { mockVedtakService.hentAktivForBehandlingThrows(any()) } returns mockk()
+            every { mockVedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(any()) } returns emptyList()
+            every { mockAvregningService.behandlingHarPerioderSomAvregnes(any()) } returns true
+            every {
+                mockTilbakekrevingsvedtakMotregningService.hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(
+                    any(),
+                )
+            } returns tilbakekrevingsvedtakMotregning
+
+            // Act
+            val feil =
+                assertThrows<Feil> {
+                    sendTilBeslutter.preValiderSteg(behandling, stegService)
+                }
+
+            assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis samtykke ikke er bekreftet.")
         }
     }
 
