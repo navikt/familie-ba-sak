@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilSimuleringService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -21,12 +22,14 @@ class TilbakekrevingsvedtakMotregningServiceTest {
     private val behandlingService = mockk<BehandlingHentOgPersisterService>()
     private val dokumentGenereringService = mockk<DokumentGenereringService>()
     private val loggService = mockk<LoggService>()
+    private val tilbakestillBehandlingTilSimuleringService = mockk<TilbakestillBehandlingTilSimuleringService>()
 
     private val tilbakekrevingsvedtakMotregningService =
         TilbakekrevingsvedtakMotregningService(
             tilbakekrevingsvedtakMotregningRepository,
             loggService,
             behandlingService,
+            tilbakestillBehandlingTilSimuleringService,
         )
 
     private val tilbakekrevingsvedtakMotregningBrevService =
@@ -139,6 +142,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
             every { loggService.loggUlovfestetMotregningBenyttet(behandling.id) } returns mockk()
             every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
+            every { tilbakestillBehandlingTilSimuleringService.tilbakestillBehandlingTilSimuering(any()) } returns mockk()
 
             // Act
             val tilbakekrevingsvedtakMotregning =
@@ -180,6 +184,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             } returns eksisterendeTilbakekrevingsvedtakMotregning
             every { loggService.loggUlovfestetMotregningBenyttet(behandling.id) } returns mockk()
             every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
+            every { tilbakestillBehandlingTilSimuleringService.tilbakestillBehandlingTilSimuering(any()) } returns mockk()
 
             // Act
             tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
@@ -239,6 +244,37 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                 }.melding
 
             assertThat(feilmelding).isEqualTo("Tilbakekrevingsvedtak motregning finnes ikke for behandling 1. Oppdater fanen og prøv igjen.")
+        }
+
+        @Test
+        fun `Skal tilbakekstille behandling til simulering når heleBeløpetSkalKrevesTilbake blir oppdatert`() {
+            // Arrange
+            val behandling = lagBehandling(id = 1)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = true,
+                    varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = true,
+                )
+
+            every {
+                tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(
+                    behandling.id,
+                )
+            } returns eksisterendeTilbakekrevingsvedtakMotregning
+            every { loggService.loggUlovfestetMotregningBenyttet(behandling.id) } returns mockk()
+            every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
+            every { tilbakestillBehandlingTilSimuleringService.tilbakestillBehandlingTilSimuering(any()) } returns mockk()
+
+            // Act
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                heleBeløpetSkalKrevesTilbake = false,
+            )
+
+            // Assert
+            verify { tilbakestillBehandlingTilSimuleringService.tilbakestillBehandlingTilSimuering(behandling.id) }
         }
     }
 
