@@ -96,7 +96,6 @@ enum class LoggType(
     SAMMENSATT_KONTROLLSAK_LAGT_TIL("Sammensatt kontrollsak lagt til"),
     SAMMENSATT_KONTROLLSAK_ENDRET("Sammensatt kontrollsak endret"),
     SAMMENSATT_KONTROLLSAK_FJERNET("Sammensatt kontrollsak fjernet"),
-    TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPRETTET("Tilbakekrevingsvedtak motregning opprettet"),
-    TILBAKEKREVINGSVEDTAK_MOTREGNING_OPPDATERT("Tilbakekrevingsvedtak motregning oppdatert"),
-    TILBAKEKREVINGSVEDTAK_MOTREGNING_SLETTET("Tilbakekrevingsvedtak motregning fjernet"),
+    ULOVFESTET_MOTREGNING_BENYTTET("Ulovfestet motregning er benyttet"),
+    ULOVFESTET_MOTREGNING_ANGRET("Ulovfestet motregning er angret"),
 }

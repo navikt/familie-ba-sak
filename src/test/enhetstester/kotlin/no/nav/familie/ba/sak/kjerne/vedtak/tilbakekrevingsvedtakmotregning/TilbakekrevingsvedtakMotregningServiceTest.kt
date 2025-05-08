@@ -104,7 +104,6 @@ class TilbakekrevingsvedtakMotregningServiceTest {
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns null
             every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
-            every { loggService.loggTilbakekrevingsvedtakMotregningOpprettet(behandling.id) } returns mockk()
             every { behandlingService.hent(behandlingId = behandling.id) } returns behandling
 
             // Act
@@ -119,7 +118,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             assertThat(tilbakekrevingsvedtakMotregning.vedtakPdf).isNull()
 
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(tilbakekrevingsvedtakMotregning) }
-            verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOpprettet(behandling.id) }
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
         }
     }
 
@@ -138,7 +137,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                 )
 
             every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
-            every { loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandling.id) } returns mockk()
+            every { loggService.loggUlovfestetMotregningBenyttet(behandling.id) } returns mockk()
             every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
 
             // Act
@@ -158,8 +157,72 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             assertThat(tilbakekrevingsvedtakMotregning.vurderingAvSkyld).isEqualTo("ny vurdering")
             assertThat(tilbakekrevingsvedtakMotregning.varselDato).isEqualTo(LocalDate.of(2025, 1, 1))
             assertThat(tilbakekrevingsvedtakMotregning.heleBeløpetSkalKrevesTilbake).isEqualTo(true)
-            verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningOppdatert(behandling.id) }
+            verify(exactly = 1) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
             verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.save(any()) }
+        }
+
+        @Test
+        fun `Skal kun opprette logg dersom samtykke er true ved oppdatering av eksisterende Tilbakekrevingsvedtak motregning`() {
+            // Arrange
+            val behandling = lagBehandling(id = 1)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = false,
+                    varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
+                )
+
+            every {
+                tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(
+                    behandling.id,
+                )
+            } returns eksisterendeTilbakekrevingsvedtakMotregning
+            every { loggService.loggUlovfestetMotregningBenyttet(behandling.id) } returns mockk()
+            every { tilbakekrevingsvedtakMotregningRepository.save(any()) } returnsArgument (0)
+
+            // Act
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                heleBeløpetSkalKrevesTilbake = true,
+            )
+
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
+
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                varselDato = LocalDate.now().plusDays(1),
+            )
+
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
+
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                årsakTilFeilutbetaling = "ny årsak",
+            )
+
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
+
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                vurderingAvSkyld = "ny vurdering",
+            )
+
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
+
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                samtykke = false,
+            )
+
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
+
+            tilbakekrevingsvedtakMotregningService.oppdaterTilbakekrevingsvedtakMotregning(
+                behandlingId = behandling.id,
+                samtykke = true,
+            )
+
+            verify(exactly = 1) { loggService.loggUlovfestetMotregningBenyttet(behandling.id) }
         }
 
         @Test
@@ -182,7 +245,31 @@ class TilbakekrevingsvedtakMotregningServiceTest {
     @Nested
     inner class SlettTilbakekrevingsvedtakMotregningTest {
         @Test
-        fun `Skal slette Tilbakekrevingsvedtak motregning hvis det finnes`() {
+        fun `Skal slette Tilbakekrevingsvedtak motregning og opprette logg når samtykke er true`() {
+            // Arrange
+            val behandling = lagBehandling(id = 1)
+            val eksisterendeTilbakekrevingsvedtakMotregning =
+                TilbakekrevingsvedtakMotregning(
+                    behandling = behandling,
+                    samtykke = true,
+                    varselDato = LocalDate.now(),
+                    heleBeløpetSkalKrevesTilbake = false,
+                )
+
+            every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
+            every { loggService.loggUlovfestetMotregningAngret(behandling.id) } returns mockk()
+            every { tilbakekrevingsvedtakMotregningRepository.delete(eksisterendeTilbakekrevingsvedtakMotregning) } just runs
+
+            // Act
+            tilbakekrevingsvedtakMotregningService.slettTilbakekrevingsvedtakMotregning(behandling.id)
+
+            // Assert
+            verify(exactly = 1) { loggService.loggUlovfestetMotregningAngret(behandling.id) }
+            verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.delete(eksisterendeTilbakekrevingsvedtakMotregning) }
+        }
+
+        @Test
+        fun `Skal slette Tilbakekrevingsvedtak motregning, men ikke opprette logg når samtykke er false`() {
             // Arrange
             val behandling = lagBehandling(id = 1)
             val eksisterendeTilbakekrevingsvedtakMotregning =
@@ -193,16 +280,24 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     heleBeløpetSkalKrevesTilbake = false,
                 )
 
-            every { tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(behandling.id) } returns eksisterendeTilbakekrevingsvedtakMotregning
-            every { loggService.loggTilbakekrevingsvedtakMotregningSlettet(behandling.id) } returns mockk()
+            every {
+                tilbakekrevingsvedtakMotregningRepository.finnTilbakekrevingsvedtakMotregningForBehandling(
+                    behandling.id,
+                )
+            } returns eksisterendeTilbakekrevingsvedtakMotregning
+            every { loggService.loggUlovfestetMotregningAngret(behandling.id) } returns mockk()
             every { tilbakekrevingsvedtakMotregningRepository.delete(eksisterendeTilbakekrevingsvedtakMotregning) } just runs
 
             // Act
             tilbakekrevingsvedtakMotregningService.slettTilbakekrevingsvedtakMotregning(behandling.id)
 
             // Assert
-            verify(exactly = 1) { loggService.loggTilbakekrevingsvedtakMotregningSlettet(behandling.id) }
-            verify(exactly = 1) { tilbakekrevingsvedtakMotregningRepository.delete(eksisterendeTilbakekrevingsvedtakMotregning) }
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningAngret(behandling.id) }
+            verify(exactly = 1) {
+                tilbakekrevingsvedtakMotregningRepository.delete(
+                    eksisterendeTilbakekrevingsvedtakMotregning,
+                )
+            }
         }
 
         @Test
@@ -216,7 +311,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
             tilbakekrevingsvedtakMotregningService.slettTilbakekrevingsvedtakMotregning(behandling.id)
 
             // Assert
-            verify(exactly = 0) { loggService.loggTilbakekrevingsvedtakMotregningSlettet(any()) }
+            verify(exactly = 0) { loggService.loggUlovfestetMotregningAngret(any()) }
             verify(exactly = 0) { tilbakekrevingsvedtakMotregningRepository.delete(any()) }
         }
     }
