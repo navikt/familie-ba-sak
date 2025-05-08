@@ -25,7 +25,6 @@ class TilpassArbeidsfordelingService(
             BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer -> håndterVikafossenEnhet2103(navIdent)
             else -> håndterAndreEnheter(navIdent, arbeidsfordelingsenhet)
         }
-    
 
     private fun håndterMidlertidigEnhet4863(
         navIdent: NavIdent?,

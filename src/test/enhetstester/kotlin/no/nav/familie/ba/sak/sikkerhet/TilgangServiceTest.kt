@@ -16,8 +16,6 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -30,7 +28,6 @@ import no.nav.familie.log.mdc.MDCConstants
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
@@ -53,7 +50,6 @@ class TilgangServiceTest {
             cacheManager,
             mockk(),
         )
-
 
     private val tilgangService =
         TilgangService(
@@ -83,7 +79,7 @@ class TilgangServiceTest {
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
-                personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
+            personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
         cacheManager.clearAllCaches()
     }
 

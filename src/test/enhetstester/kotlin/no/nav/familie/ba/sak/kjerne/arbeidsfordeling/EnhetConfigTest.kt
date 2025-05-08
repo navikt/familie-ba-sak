@@ -8,15 +8,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class EnhetConfigTest {
-
-    private val enhetConfig = EnhetConfig().apply {
-        enheter =
-            mapOf(
-                Pair("OSLO", "gruppeIdForOslo"),
-                Pair("DRAMMEN", "gruppeIdForDrammen"),
-                Pair("STEINKJER", "gruppeIdForSteinkjer")
-            )
-    }
+    private val enhetConfig =
+        EnhetConfig().apply {
+            enheter =
+                mapOf(
+                    Pair("OSLO", "gruppeIdForOslo"),
+                    Pair("DRAMMEN", "gruppeIdForDrammen"),
+                    Pair("STEINKJER", "gruppeIdForSteinkjer"),
+                )
+        }
 
     @BeforeEach
     internal fun setUp() {
@@ -49,4 +49,3 @@ class EnhetConfigTest {
         assertThat(enheterBrukerHarTilgangTil).containsExactly(BarnetrygdEnhet.DRAMMEN, BarnetrygdEnhet.STEINKJER)
     }
 }
-

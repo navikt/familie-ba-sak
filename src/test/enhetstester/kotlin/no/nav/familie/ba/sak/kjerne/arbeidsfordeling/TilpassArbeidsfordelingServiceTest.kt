@@ -102,7 +102,7 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(BarnetrygdEnhet.VIKAFOSSEN)
+                listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -133,11 +133,11 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(
-                        BarnetrygdEnhet.VIKAFOSSEN,
-                        BarnetrygdEnhet.OSLO,
-                        BarnetrygdEnhet.DRAMMEN
-                    )
+                listOf(
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                    BarnetrygdEnhet.OSLO,
+                    BarnetrygdEnhet.DRAMMEN,
+                )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -189,10 +189,10 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(
-                        BarnetrygdEnhet.STEINKJER,
-                        BarnetrygdEnhet.VADSO,
-                    )
+                listOf(
+                    BarnetrygdEnhet.STEINKJER,
+                    BarnetrygdEnhet.VADSO,
+                )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -220,7 +220,7 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(BarnetrygdEnhet.VIKAFOSSEN)
+                listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -295,9 +295,9 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(
-                        BarnetrygdEnhet.VIKAFOSSEN,
-                    )
+                listOf(
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -327,11 +327,11 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(
-                        BarnetrygdEnhet.VIKAFOSSEN,
-                        BarnetrygdEnhet.OSLO,
-                        BarnetrygdEnhet.DRAMMEN,
-                    )
+                listOf(
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                    BarnetrygdEnhet.OSLO,
+                    BarnetrygdEnhet.DRAMMEN,
+                )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -361,11 +361,11 @@ class TilpassArbeidsfordelingServiceTest {
             every {
                 mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                    listOf(
-                        BarnetrygdEnhet.MIDLERTIDIG_ENHET,
-                        BarnetrygdEnhet.VIKAFOSSEN,
-                        BarnetrygdEnhet.OSLO,
-                    )
+                listOf(
+                    BarnetrygdEnhet.MIDLERTIDIG_ENHET,
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                    BarnetrygdEnhet.OSLO,
+                )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =

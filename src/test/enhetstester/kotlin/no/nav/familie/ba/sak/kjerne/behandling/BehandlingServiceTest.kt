@@ -47,7 +47,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.*
+import java.util.UUID
 
 class BehandlingServiceTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
@@ -88,7 +88,7 @@ class BehandlingServiceTest {
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = unleashService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
-            enhetConfig = mocketEnhetConfig
+            enhetConfig = mocketEnhetConfig,
         )
 
     @AfterEach
@@ -120,7 +120,7 @@ class BehandlingServiceTest {
                             eksternBehandlingId = UUID.randomUUID().toString(),
                             eksternBehandlingFagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
                         ),
-                    navIdent = null
+                    navIdent = null,
                 )
 
             val eksternBehandlingRelasjonSlot = slot<EksternBehandlingRelasjon>()
@@ -175,7 +175,7 @@ class BehandlingServiceTest {
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.KLAGE,
                     nyEksternBehandlingRelasjon = null,
-                    navIdent = null
+                    navIdent = null,
                 )
 
             every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
@@ -222,11 +222,10 @@ class BehandlingServiceTest {
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.KLAGE,
                     nyEksternBehandlingRelasjon = null,
-                    navIdent = "testNavIdent"
+                    navIdent = "testNavIdent",
                 )
 
             val opprettetTaskSlot = slot<Task>()
-
 
             every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
             every { behandlingHentOgPersisterService.finnAktivForFagsak(nyBehandling.fagsakId) } returns null
@@ -245,10 +244,11 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(capture(opprettetTaskSlot)) } returnsArgument 0
             every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
-                BarnetrygdEnhet.OSLO.enhetsnummer,
-                BarnetrygdEnhet.OSLO.enhetsnavn,
-            )
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns
+                Arbeidsfordelingsenhet(
+                    BarnetrygdEnhet.OSLO.enhetsnummer,
+                    BarnetrygdEnhet.OSLO.enhetsnavn,
+                )
             every { mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil() } returns listOf(BarnetrygdEnhet.DRAMMEN)
 
             // Act
@@ -283,7 +283,7 @@ class BehandlingServiceTest {
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.KLAGE,
                     nyEksternBehandlingRelasjon = null,
-                    navIdent = "testNavIdent"
+                    navIdent = "testNavIdent",
                 )
 
             val opprettetTaskSlot = slot<Task>()
@@ -305,10 +305,11 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(capture(opprettetTaskSlot)) } returnsArgument 0
             every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
-            every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
-                BarnetrygdEnhet.OSLO.enhetsnummer,
-                BarnetrygdEnhet.OSLO.enhetsnavn,
-            )
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns
+                Arbeidsfordelingsenhet(
+                    BarnetrygdEnhet.OSLO.enhetsnummer,
+                    BarnetrygdEnhet.OSLO.enhetsnavn,
+                )
             every { mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil() } returns listOf(BarnetrygdEnhet.OSLO)
             mockkObject(SikkerhetContext)
             every { SikkerhetContext.hentSaksbehandler() } returns "testNavIdent"
@@ -335,11 +336,11 @@ class BehandlingServiceTest {
             val behandling = lagBehandling()
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                    listOf(
-                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
-                    )
+                listOf(
+                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
+                )
 
             // Act
             val erLøpende = behandlingService.erLøpende(behandling)
@@ -354,11 +355,11 @@ class BehandlingServiceTest {
             val behandling = lagBehandling()
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                    listOf(
-                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
-                    )
+                listOf(
+                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
+                )
 
             // Act
             val erLøpende = behandlingService.erLøpende(behandling)
@@ -373,11 +374,11 @@ class BehandlingServiceTest {
             val behandling = lagBehandling()
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                    listOf(
-                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
-                    )
+                listOf(
+                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
+                )
 
             // Act
             val erLøpende = behandlingService.erLøpende(behandling)

@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -70,7 +69,7 @@ class LagreMigreringsdatoTest {
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = mockkUnleash,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
-            enhetConfig = mocketEnhetConfig
+            enhetConfig = mocketEnhetConfig,
         )
 
     @Test

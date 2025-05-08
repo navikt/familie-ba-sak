@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
-import jakarta.annotation.PostConstruct
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
@@ -8,16 +7,12 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties
 class EnhetConfig {
-
     var enheter: Map<String, String> = emptyMap()
-    fun hentAlleEnheterBrukerHarTilgangTil() =
-        enheter.filter { SikkerhetContext.hentGrupper().contains(it.value) }
-            .mapNotNull { (key, _) -> runCatching { BarnetrygdEnhet.valueOf(key) }.getOrNull() }
 
-    @PostConstruct
-    fun init() {
-        println("Enheter lastet: $enheter")
-    }
+    fun hentAlleEnheterBrukerHarTilgangTil() =
+        enheter
+            .filter { SikkerhetContext.hentGrupper().contains(it.value) }
+            .mapNotNull { (key, _) -> runCatching { BarnetrygdEnhet.valueOf(key) }.getOrNull() }
 }
 
 enum class BarnetrygdEnhet(
@@ -32,6 +27,7 @@ enum class BarnetrygdEnhet(
     STEINKJER("4817", "NAV Familie- og pensjonsytelser Steinkjer"),
     MIDLERTIDIG_ENHET("4863", "Midlertidig enhet"),
     ;
+
     override fun toString(): String = "$enhetsnavn ($enhetsnummer)"
 
     companion object {

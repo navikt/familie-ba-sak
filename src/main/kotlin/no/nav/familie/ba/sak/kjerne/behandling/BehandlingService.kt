@@ -37,10 +37,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
-import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -144,11 +142,12 @@ class BehandlingService(
                  * har ikke tilgang til enheten, eller er systembruker.
                  */
 
-                val tilordnetRessurs = nyBehandling.navIdent?.let {
-                    val arbeidsfordelingsenhetPåLagretBehandling = arbeidsfordelingService.hentArbeidsfordelingsenhet(lagretBehandling)
+                val tilordnetRessurs =
+                    nyBehandling.navIdent?.let {
+                        val arbeidsfordelingsenhetPåLagretBehandling = arbeidsfordelingService.hentArbeidsfordelingsenhet(lagretBehandling)
 
-                    bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet = arbeidsfordelingsenhetPåLagretBehandling, it)
-                }
+                        bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet = arbeidsfordelingsenhetPåLagretBehandling, it)
+                    }
 
                 taskRepository.save(
                     OpprettOppgaveTask.opprettTask(
@@ -248,8 +247,8 @@ class BehandlingService(
                 behandling.fagsak.aktør.personidenter
                     .map { it.fødselsnummer }
             return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-                    !behandling.erMigrering() &&
-                    infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+                !behandling.erMigrering() &&
+                infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
         }
         logger.warn("Infotrygd-sjekk er skrudd av")
         return false
