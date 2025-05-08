@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -48,6 +49,7 @@ class SendTilBeslutterTest {
     private val mockValiderBrevmottakerService = mockk<ValiderBrevmottakerService>()
     private val mockAvregningService = mockk<AvregningService>()
     private val mockTilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
+    private val mockTilbakekrevingsvedtakMotregningBrevService = mockk<TilbakekrevingsvedtakMotregningBrevService>()
 
     private val totrinnskontrollService = TotrinnskontrollService(mockBehandlingService, mockTotrinnskontrollRepository, mockSaksbehandlerContext)
 
@@ -64,6 +66,7 @@ class SendTilBeslutterTest {
             validerBrevmottakerService = mockValiderBrevmottakerService,
             avregningService = mockAvregningService,
             tilbakekrevingsvedtakMotregningService = mockTilbakekrevingsvedtakMotregningService,
+            tilbakekrevingsvedtakMotregningBrevService = mockTilbakekrevingsvedtakMotregningBrevService,
         )
 
     @Nested
@@ -83,6 +86,7 @@ class SendTilBeslutterTest {
             every { mockVedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) } returns vedtak
             every { mockVedtakService.oppdaterVedtakMedStønadsbrev(vedtak) } returns vedtak
             every { mockBehandlingService.sendBehandlingTilBeslutter(behandling) } just runs
+            every { mockTilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns null
 
             // Act
             sendTilBeslutter.utførStegOgAngiNeste(behandling, "")
@@ -112,6 +116,7 @@ class SendTilBeslutterTest {
             every { mockLoggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true) } just runs
             every { mockTaskRepository.save(any()) } returnsArgument 0
             every { mockBehandlingService.sendBehandlingTilBeslutter(behandling) } just runs
+            every { mockTilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns null
 
             // Act
             sendTilBeslutter.utførStegOgAngiNeste(behandling, "")
@@ -126,6 +131,28 @@ class SendTilBeslutterTest {
             verify(exactly = 0) { mockVedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id) }
             verify(exactly = 0) { mockVedtakService.oppdaterVedtakMedStønadsbrev(vedtak) }
             verify(exactly = 1) { mockBehandlingService.sendBehandlingTilBeslutter(behandling) }
+        }
+
+        @Test
+        fun `Skal oppdatere vedtaksbrev for tilbakekrevingsvedtak motregning`() {
+            // Arrange
+            val behandling = lagBehandling(skalBehandlesAutomatisk = true)
+
+            every { mockSaksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "signatur"
+            every { mockTotrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id) } returns null
+            every { mockTotrinnskontrollRepository.save(any()) } returns mockk()
+            every { mockAutomatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling) } returns false
+            justRun { mockLoggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false) }
+            every { mockTaskRepository.save(any()) } returnsArgument 0
+            every { mockTilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns mockk()
+            every { mockTilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(any()) } returns mockk()
+            justRun { mockBehandlingService.sendBehandlingTilBeslutter(behandling) }
+
+            // Act
+            sendTilBeslutter.utførStegOgAngiNeste(behandling, "")
+
+            // Assert
+            verify(exactly = 1) { mockTilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id) }
         }
     }
 

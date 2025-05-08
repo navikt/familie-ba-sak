@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -42,6 +43,7 @@ class SendTilBeslutter(
     private val validerBrevmottakerService: ValiderBrevmottakerService,
     private val avregningService: AvregningService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
+    private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -103,6 +105,10 @@ class SendTilBeslutter(
         if (!behandling.skalBehandlesAutomatisk) {
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
             vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
+        }
+
+        tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
+            tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id)
         }
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
