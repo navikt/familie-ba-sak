@@ -80,8 +80,12 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
         with:
           name: surefire-reports-ut
-          path: target/surefire-reports
+          path: |
+            target/surefire-reports
+            core.*
+            /home/runner/work/familie-ba-sak/familie-ba-sak/*.log
           retention-days: 2
+
       - name: Last opp Jacoco IT rapport
         if: ${{ github.event_name != 'merge_group' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
