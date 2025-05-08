@@ -26,8 +26,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilFullmektigEllerVergeTask
@@ -47,7 +45,6 @@ class JournalførVedtaksbrev(
     private val organisasjonService: OrganisasjonService,
     private val brevmottakerService: BrevmottakerService,
     private val brevmalService: BrevmalService,
-    private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -63,9 +60,6 @@ class JournalførVedtaksbrev(
 
         val behandlendeEnhet =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
-
-        val tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)
-        val skalJournalføreTilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning?.vedtakPdf != null
 
         val mottakere = mutableListOf<MottakerInfo>()
 
@@ -99,17 +93,6 @@ class JournalførVedtaksbrev(
                 mottakerInfo = mottakerInfo,
                 eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsak.id, behandling.id, mottakerInfo),
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
-
-            if (skalJournalføreTilbakekrevingsvedtakMotregning) {
-                journalførTilbakekrevingsvedtakMotregningsbrev(
-                    fnr = fagsak.aktør.aktivFødselsnummer(),
-                    fagsakId = fagsakId,
-                    tilbakekrevingsvedtakMotregning = tilbakekrevingsvedtakMotregning!!,
-                    journalførendeEnhet = behandlendeEnhet,
-                    mottakerInfo = mottakerInfo,
-                    eksternReferanseId = genererEksternReferanseIdForJournalpost(fagsak.id, behandling.id, mottakerInfo),
-                ).also { journalposterTilDistribusjon[it] = mottakerInfo }
-            }
         }
 
         lagTaskForÅDistribuereVedtaksbrev(journalposterTilDistribusjon, data, behandling)
@@ -203,37 +186,6 @@ class JournalførVedtaksbrev(
             brev = brev,
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
-            avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
-            eksternReferanseId = eksternReferanseId,
-        )
-    }
-
-    fun journalførTilbakekrevingsvedtakMotregningsbrev(
-        fnr: String,
-        fagsakId: String,
-        tilbakekrevingsvedtakMotregning: TilbakekrevingsvedtakMotregning,
-        journalførendeEnhet: String,
-        mottakerInfo: MottakerInfo,
-        eksternReferanseId: String,
-    ): String {
-        val behandling = tilbakekrevingsvedtakMotregning.behandling
-        val brev =
-            listOf(
-                Dokument(
-                    tilbakekrevingsvedtakMotregning.vedtakPdf!!,
-                    filtype = Filtype.PDFA,
-                    dokumenttype = Dokumenttype.BARNETRYGD_FORENKLET_TILBAKEKREVINGSVEDTAK,
-                ),
-            )
-
-        logger.info("Journalfører brev for tilbakekrevingsvedtak ved motregning for behandling ${behandling.id}")
-
-        return utgåendeJournalføringService.journalførDokument(
-            fnr = fnr,
-            fagsakId = fagsakId,
-            journalførendeEnhet = journalførendeEnhet,
-            brev = brev,
-            behandlingId = behandling.id,
             avsenderMottaker = mottakerInfo.tilAvsenderMottaker(),
             eksternReferanseId = eksternReferanseId,
         )

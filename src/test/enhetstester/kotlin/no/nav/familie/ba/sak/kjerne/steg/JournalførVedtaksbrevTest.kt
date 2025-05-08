@@ -22,8 +22,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
-import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
@@ -41,7 +39,6 @@ class JournalførVedtaksbrevTest {
     private val mockOrganisasjonService = mockk<OrganisasjonService>()
     private val mockBrevmottakerService = mockk<BrevmottakerService>()
     private val mockBrevmalService = mockk<BrevmalService>()
-    private val mockTilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
 
     private val behandling = lagBehandling()
     private val vedtak = lagVedtak(behandling).apply { stønadBrevPdF = ByteArray(50) }
@@ -57,7 +54,6 @@ class JournalførVedtaksbrevTest {
             organisasjonService = mockOrganisasjonService,
             brevmottakerService = mockBrevmottakerService,
             brevmalService = mockBrevmalService,
-            tilbakekrevingsvedtakMotregningService = mockTilbakekrevingsvedtakMotregningService,
         )
 
     @BeforeEach
@@ -65,7 +61,6 @@ class JournalførVedtaksbrevTest {
         every { mockVedtakService.hent(vedtak.id) } returns vedtak
         every { mockArbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id) } returns arbeidsfordelingPåBehandling
         every { mockFagsakRepository.finnFagsak(behandling.fagsak.id) } returns behandling.fagsak
-        every { mockTilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandlingId = behandling.id) } returns null
         every { mockOrganisasjonService.hentOrganisasjon(any()) } returns Organisasjon("orgNummer", "orgNavn")
         every { mockUtgåendeJournalføringService.journalførDokument(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returnsMany listOf("1", "2", "3", "4", "5", "6", "7", "8")
         every { mockBrevmalService.hentBrevmal(behandling) } returns Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
@@ -196,46 +191,5 @@ class JournalførVedtaksbrevTest {
             )
         }
         verify(exactly = 2) { mockTaskRepository.save(any()) }
-    }
-
-    @Test
-    fun `Skal journalføre Tilbakekrevingsvedtak motregning til brevmottakere og lage task for å distribuere dokumentet til alle mottakere hvis fagsak er av type normal`() {
-        // Arrange
-        val tilbakekrevingsvedtakMotregning =
-            TilbakekrevingsvedtakMotregning(
-                id = 1,
-                behandling = behandling,
-                samtykke = true,
-                vedtakPdf = ByteArray(0),
-                heleBeløpetSkalKrevesTilbake = true,
-            )
-
-        every { mockFagsakRepository.finnFagsak(behandling.fagsak.id) } returns lagFagsak(type = FagsakType.NORMAL)
-        every { mockBrevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(lagBrevmottakerDb(behandlingId = behandling.id, landkode = "NO"), lagBrevmottakerDb(behandlingId = behandling.id, landkode = "SE"))
-        every { mockBrevmottakerService.lagMottakereFraBrevMottakere(any()) } returns listOf(Bruker, Bruker)
-        every { mockTilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id) } returns tilbakekrevingsvedtakMotregning
-
-        // Act
-        journalførVedtaksbrevTask.utførStegOgAngiNeste(
-            behandling = behandling,
-            data = JournalførVedtaksbrevDTO(vedtakId = vedtak.id, task = mockk(relaxed = true)),
-        )
-
-        // Assert
-        // 2 vedtaksbrev + 2 Tilbakekrevingsvedtak motregning
-        verify(exactly = 4) {
-            mockUtgåendeJournalføringService.journalførDokument(
-                fnr = any(),
-                fagsakId = any(),
-                journalførendeEnhet = any(),
-                brev = any(),
-                vedlegg = any(),
-                førsteside = any(),
-                behandlingId = any(),
-                avsenderMottaker = null,
-                eksternReferanseId = any(),
-            )
-        }
-        verify(exactly = 4) { mockTaskRepository.save(any()) }
     }
 }
