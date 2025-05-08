@@ -65,7 +65,6 @@ class OppgaveServiceTest {
             opprettTaskService = mockedOpprettTaskService,
             loggService = mockedLoggService,
             behandlingHentOgPersisterService = mockedBehandlingHentOgPersisterService,
-            tilpassArbeidsfordelingService = mockedTilpassArbeidsfordelingService,
             arbeidsfordelingPåBehandlingRepository = mockedArbeidsfordelingPåBehandlingRepository,
         )
 
@@ -80,9 +79,6 @@ class OppgaveServiceTest {
                 manueltOverstyrt = true,
             )
 
-        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet()
-        val navIdent = NavIdent("navIdent")
-
         every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { mockedBehandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { mockedOppgaveRepository.save(any()) } returns lagTestOppgave()
@@ -92,8 +88,6 @@ class OppgaveServiceTest {
 
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
-
-        every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
 
         // Act
         oppgaveService.opprettOppgave(BEHANDLING_ID, Oppgavetype.BehandleSak, FRIST_FERDIGSTILLELSE_BEH_SAK)
@@ -129,8 +123,6 @@ class OppgaveServiceTest {
                 manueltOverstyrt = false,
             )
 
-        val arbeidsfordelingsenhet = arbeidsfordelingPåBehandling.tilArbeidsfordelingsenhet()
-
         every { mockedBehandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { mockedBehandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { mockedOppgaveRepository.save(any()) } returns lagTestOppgave()
@@ -145,8 +137,6 @@ class OppgaveServiceTest {
 
         val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
         every { mockedIntegrasjonClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
-
-        every { mockedTilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, null) } returns null
 
         // Act
         oppgaveService.opprettOppgave(

@@ -6,8 +6,10 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
@@ -34,8 +36,11 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
+import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -64,6 +69,7 @@ class BehandlingService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val unleashService: UnleashNextMedContextService,
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
+    private val enhetConfig: EnhetConfig,
 ) {
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -134,13 +140,22 @@ class BehandlingService(
                 /**
                  * Oppretter oppgave via task slik at dersom noe feiler i forbindelse med opprettelse
                  * av behandling så rulles også tasken tilbake og vi forhindrer å opprette oppgave
+                 * Tilordnet ressurs blir overstyrt til null dersom saksbehandler som oppretter behandlingen ikke er den som er tilordnet,
+                 * har ikke tilgang til enheten, eller er systembruker.
                  */
+
+                val tilordnetRessurs = nyBehandling.navIdent?.let {
+                    val arbeidsfordelingsenhetPåLagretBehandling = arbeidsfordelingService.hentArbeidsfordelingsenhet(lagretBehandling)
+
+                    bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet = arbeidsfordelingsenhetPåLagretBehandling, it)
+                }
+
                 taskRepository.save(
                     OpprettOppgaveTask.opprettTask(
                         behandlingId = lagretBehandling.id,
                         oppgavetype = Oppgavetype.BehandleSak,
                         fristForFerdigstillelse = LocalDate.now(),
-                        tilordnetRessurs = nyBehandling.navIdent,
+                        tilordnetRessurs = tilordnetRessurs,
                     ),
                 )
             }
@@ -233,8 +248,8 @@ class BehandlingService(
                 behandling.fagsak.aktør.personidenter
                     .map { it.fødselsnummer }
             return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
-                !behandling.erMigrering() &&
-                infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
+                    !behandling.erMigrering() &&
+                    infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
         }
         logger.warn("Infotrygd-sjekk er skrudd av")
         return false
@@ -328,6 +343,20 @@ class BehandlingService(
     fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? = behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)?.migreringsdato
 
     fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate? = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
+
+    private fun bestemTilordnetRessursPåOppgave(
+        arbeidsfordelingsenhet: Arbeidsfordelingsenhet,
+        navIdent: String?,
+    ): String? {
+        if (navIdent == SYSTEM_FORKORTELSE || SikkerhetContext.hentSaksbehandler() != navIdent) {
+            return null
+        }
+        return if (enhetConfig.hentAlleEnheterBrukerHarTilgangTil().map { it.enhetsnummer }.contains(arbeidsfordelingsenhet.enhetId)) {
+            navIdent
+        } else {
+            null
+        }
+    }
 
     @Transactional
     fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {

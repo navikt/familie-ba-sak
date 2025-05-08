@@ -32,3 +32,10 @@ spec:
       - id: "93a26831-9866-4410-927b-74ff51a9107c"  # VEILEDER_ROLLE
       - id: "d21e00a4-969d-4b28-8782-dc818abfae65"  # SAKSBEHANDLER_ROLLE
       - id: "9449c153-5a1e-44a7-84c6-7cc7a8867233"  # BESLUTTER_ROLLE
+      - id: "e2cf416e-eb2b-4c86-8b5b-8c5b00385bcf"  # 0000-GA-ENHET_2103 (VIKAFOSSEN)
+      - id: "16d14203-a5e0-4813-ba76-6d0a69aeb88b"  # 0000-GA-ENHET_4806 (DRAMMEN)
+      - id: "a996c91f-6dd1-466d-bed0-06ddccab87f5"  # 0000-GA-ENHET_4820 (VADSØ)
+      - id: "48ff353a-fd52-4109-be32-d0e825322b1f"  # 0000-GA-ENHET_4833 (OSLO)
+      - id: "b00084c4-0325-4ec3-b17f-70aa0a03ed37"  # 0000-GA-ENHET_4842 (STORD)
+      - id: "b5a21ebf-d8c7-415c-9a88-6b4735f845cd"  # 0000-GA-ENHET_4817 (STEINKJER)
+      - id: "22a9b5f5-645f-4090-ae2d-29a38a126de6"  # 0000-GA-ENHET_4863 (MIDLERTIDIG_ENHET)

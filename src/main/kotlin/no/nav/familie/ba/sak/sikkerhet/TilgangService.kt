@@ -43,7 +43,7 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "${SikkerhetContext.hentSaksbehandlerNavn()} " +
-                        "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle",
+                            "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle",
             )
         }
 
@@ -53,7 +53,7 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang " +
-                        "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
+                            "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
                 frontendFeilmelding = "Du har ikke tilgang til å $handling.",
             )
         }
@@ -70,10 +70,10 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                            "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                            "har ikke tilgang. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
     }
@@ -119,7 +119,7 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til behandling=$behandlingId. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                            "har ikke tilgang til behandling=$behandlingId. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding = "Behandlingen inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )
         }
@@ -132,11 +132,11 @@ class TilgangService(
         val aktør = fagsakService.hentAktør(fagsakId)
         val personIdenterIFagsak =
             (
-                persongrunnlagService
-                    .hentSøkerOgBarnPåFagsak(fagsakId)
-                    ?.map { it.aktør.aktivFødselsnummer() }
-                    ?: emptyList()
-            ).ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+                    persongrunnlagService
+                        .hentSøkerOgBarnPåFagsak(fagsakId)
+                        ?.map { it.aktør.aktivFødselsnummer() }
+                        ?: emptyList()
+                    ).ifEmpty { listOf(aktør.aktivFødselsnummer()) }
 
         personIdenterIFagsak.forEach { fnr ->
             auditLogger.log(
@@ -154,7 +154,7 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding =
                     "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                        "har ikke tilgang til fagsak=$fagsakId. $adressebeskyttelsegraderingEllerNavAnsatt.",
+                            "har ikke tilgang til fagsak=$fagsakId. $adressebeskyttelsegraderingEllerNavAnsatt.",
                 frontendFeilmelding =
                     "Fagsaken inneholder personer som krever ytterligere tilganger. $adressebeskyttelsegraderingEllerNavAnsatt.",
             )

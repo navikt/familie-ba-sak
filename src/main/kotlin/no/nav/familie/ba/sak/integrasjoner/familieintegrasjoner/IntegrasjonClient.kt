@@ -263,17 +263,6 @@ class IntegrasjonClient(
         }
     }
 
-    fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<Enhet> {
-        val uri = URI.create("$integrasjonUri/enhetstilganger")
-        return kallEksternTjenesteRessurs<List<Enhet>>(
-            tjeneste = "enhetstilganger",
-            uri = uri,
-            formål = "Hent enheter en NAV-ident har tilgang til",
-        ) {
-            postForEntity(uri, HentEnheterNavIdentHarTilgangTilRequest(navIdent, Tema.BAR))
-        }.filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
-    }
-
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {
         val uri = URI.create("$integrasjonUri/oppgave/opprett")
 

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -17,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
@@ -41,12 +43,12 @@ import java.util.UUID
 class KlageService(
     private val fagsakService: FagsakService,
     private val klageClient: KlageClient,
-    private val integrasjonClient: IntegrasjonClient,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val klagebehandlingHenter: KlagebehandlingHenter,
+    private val enhetConfig: EnhetConfig,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -68,10 +70,9 @@ class KlageService(
         }
 
         val aktivtFødselsnummer = fagsak.aktør.aktivFødselsnummer()
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
         val enhetsnummer =
-            integrasjonClient
-                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(NavIdent(saksbehandlerIdent))
+            enhetConfig
+                .hentAlleEnheterBrukerHarTilgangTil()
                 .first()
                 .enhetsnummer
 

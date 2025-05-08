@@ -183,8 +183,6 @@ class IntegrasjonClientMock {
                 )
             }
 
-            every { mockIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries.map { Enhet(it.enhetsnummer, it.enhetsnavn) }
-
             every { mockIntegrasjonClient.hentModiaContext() } answers {
                 ModiaContext(
                     aktivBruker = "13025514402",

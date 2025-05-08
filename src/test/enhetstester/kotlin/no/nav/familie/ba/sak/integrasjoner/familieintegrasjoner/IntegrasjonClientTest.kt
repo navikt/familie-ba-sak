@@ -32,32 +32,6 @@ class IntegrasjonClientTest {
     }
 
     @Test
-    fun `hentEnheterSomNavIdentHarTilgangTil - skal hente enheter som NAV-ident har tilgang til`() {
-        // Arrange
-        val navIdent = NavIdent("1")
-
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(WireMock.urlEqualTo("/enhetstilganger"))
-                .willReturn(WireMock.okJson(readFile("enheterNavIdentHarTilgangTilResponse.json"))),
-        )
-
-        // Act
-        val enheter = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
-
-        // Assert
-        assertThat(enheter).hasSize(2)
-        assertThat(enheter).anySatisfy {
-            assertThat(it.enhetsnummer).isEqualTo(BarnetrygdEnhet.VADSØ.enhetsnummer)
-            assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.VADSØ.enhetsnavn)
-        }
-        assertThat(enheter).anySatisfy {
-            assertThat(it.enhetsnummer).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnummer)
-            assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnavn)
-        }
-    }
-
-    @Test
     fun `hentTilgangsstyrteJournalposterForBruker - skal hente tilgangsstyrte journalposter for bruker`() {
         // Arrange
         wiremockServerItem.stubFor(

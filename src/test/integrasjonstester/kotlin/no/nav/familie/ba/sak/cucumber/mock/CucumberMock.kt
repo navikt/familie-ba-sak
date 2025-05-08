@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.OppdaterT
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
@@ -216,6 +217,8 @@ class CucumberMock(
             persongrunnlagService = persongrunnlagService,
         )
 
+    val enhetConfig = EnhetConfig()
+
     val testVerktøyService =
         TestVerktøyService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -272,6 +275,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = unleashNextMedContextService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            enhetConfig = enhetConfig,
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =

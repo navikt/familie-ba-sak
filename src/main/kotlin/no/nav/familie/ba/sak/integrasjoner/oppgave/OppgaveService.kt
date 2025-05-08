@@ -44,7 +44,6 @@ class OppgaveService(
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
@@ -77,9 +76,6 @@ class OppgaveService(
                     .hentArbeidsfordelingPåBehandling(behandlingId)
                     .tilArbeidsfordelingsenhet()
 
-            val navIdent = tilordnetNavIdent?.let { NavIdent(it) }
-            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-
             val opprettOppgave =
                 OpprettOppgaveRequest(
                     ident = OppgaveIdentV2(ident = behandling.fagsak.aktør.aktørId, gruppe = IdentGruppe.AKTOERID),
@@ -91,7 +87,7 @@ class OppgaveService(
                     enhetsnummer = arbeidsfordelingsenhet.enhetId,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = tilordnetRessurs?.ident,
+                    tilordnetRessurs = tilordnetNavIdent,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"

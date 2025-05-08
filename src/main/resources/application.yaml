@@ -70,6 +70,15 @@ rolle:
   kode6: "5ef775f2-61f8-4283-bf3d-8d03f428aa14" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
 
+enheter:
+  VIKAFOSSEN: "e2cf416e-eb2b-4c86-8b5b-8c5b00385bcf"
+  DRAMMEN: "16d14203-a5e0-4813-ba76-6d0a69aeb88b"
+  VADSO: "a996c91f-6dd1-466d-bed0-06ddccab87f5"
+  OSLO: "48ff353a-fd52-4109-be32-d0e825322b1f"
+  STORD: "b00084c4-0325-4ec3-b17f-70aa0a03ed37"
+  STEINKJER: "b5a21ebf-d8c7-415c-9a88-6b4735f845cd"
+  MIDLERTIDIG_ENHET: "22a9b5f5-645f-4090-ae2d-29a38a126de6"
+
 funksjonsbrytere:
   enabled: true
   unleash:

@@ -4,8 +4,10 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -15,8 +17,11 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagNyBehandling
 import no.nav.familie.ba.sak.datagenerator.lagNyEksternBehandlingRelasjon
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
@@ -31,12 +36,18 @@ import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
+import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 class BehandlingServiceTest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
@@ -56,6 +67,7 @@ class BehandlingServiceTest {
     private val vilkårsvurderingService: VilkårsvurderingService = mockk()
     private val unleashService: UnleashNextMedContextService = mockk()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    private val mocketEnhetConfig = mockk<EnhetConfig>()
 
     private val behandlingService: BehandlingService =
         BehandlingService(
@@ -76,7 +88,13 @@ class BehandlingServiceTest {
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = unleashService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            enhetConfig = mocketEnhetConfig
         )
+
+    @AfterEach
+    fun afterEach() {
+        unmockkObject(SikkerhetContext)
+    }
 
     @Nested
     inner class OpprettBehandling {
@@ -102,6 +120,7 @@ class BehandlingServiceTest {
                             eksternBehandlingId = UUID.randomUUID().toString(),
                             eksternBehandlingFagsystem = EksternBehandlingRelasjon.Fagsystem.KLAGE,
                         ),
+                    navIdent = null
                 )
 
             val eksternBehandlingRelasjonSlot = slot<EksternBehandlingRelasjon>()
@@ -156,6 +175,7 @@ class BehandlingServiceTest {
                     behandlingType = BehandlingType.REVURDERING,
                     behandlingÅrsak = BehandlingÅrsak.KLAGE,
                     nyEksternBehandlingRelasjon = null,
+                    navIdent = null
                 )
 
             every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
@@ -183,6 +203,128 @@ class BehandlingServiceTest {
             assertThat(opprettetBehandling.id).isEqualTo(0L)
             verify { eksternBehandlingRelasjonService wasNot called }
         }
+
+        @Test
+        fun `Ved opprettelse av ny behandling der tilordnet ressurs ikke har tilgang til enhet settes tilordnet ressurs til null ved oppgave opprettelse`() {
+            // Arrange
+            val fagsak = lagFagsak()
+
+            val førstegangsbehandling =
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                )
+
+            val nyBehandling =
+                lagNyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                    nyEksternBehandlingRelasjon = null,
+                    navIdent = "testNavIdent"
+                )
+
+            val opprettetTaskSlot = slot<Task>()
+
+
+            every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(nyBehandling.fagsakId) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns førstegangsbehandling
+            every { behandlingstemaService.finnBehandlingKategori(nyBehandling.fagsakId) } returns BehandlingKategori.NASJONAL
+            every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingstemaService.finnUnderkategoriFraAktivBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
+            every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
+            every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
+            every { behandlingSøknadsinfoService.lagreNedSøknadsinfo(any(), any(), any()) } just runs
+            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
+            every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
+            every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs
+            every { vedtakRepository.save(any()) } returnsArgument 0
+            every { loggService.opprettBehandlingLogg(any()) } just runs
+            every { taskRepository.save(capture(opprettetTaskSlot)) } returnsArgument 0
+            every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
+                BarnetrygdEnhet.OSLO.enhetsnummer,
+                BarnetrygdEnhet.OSLO.enhetsnavn,
+            )
+            every { mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil() } returns listOf(BarnetrygdEnhet.DRAMMEN)
+
+            // Act
+            val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
+
+            // Assert
+            assertThat(opprettetBehandling.id).isEqualTo(0L)
+            verify { eksternBehandlingRelasjonService wasNot called }
+
+            val opprettetTask = opprettetTaskSlot.captured
+            val opprettOppgaveTaskDTO = objectMapper.readValue(opprettetTask.payload, OpprettOppgaveTaskDTO::class.java)
+
+            assertThat(opprettOppgaveTaskDTO.oppgavetype).isEqualTo(Oppgavetype.BehandleSak)
+            assertThat(opprettOppgaveTaskDTO.tilordnetRessurs).isNull()
+        }
+
+        @Test
+        fun `Ved opprettelse av ny behandling der tilordnet ressurs har tilgang til enhet så skal tilordnet ressurs være den samme`() {
+            // Arrange
+            val fagsak = lagFagsak()
+
+            val førstegangsbehandling =
+                lagBehandling(
+                    fagsak = fagsak,
+                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                    årsak = BehandlingÅrsak.SØKNAD,
+                )
+
+            val nyBehandling =
+                lagNyBehandling(
+                    fagsakId = fagsak.id,
+                    behandlingType = BehandlingType.REVURDERING,
+                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
+                    nyEksternBehandlingRelasjon = null,
+                    navIdent = "testNavIdent"
+                )
+
+            val opprettetTaskSlot = slot<Task>()
+
+            every { fagsakRepository.finnFagsak(nyBehandling.fagsakId) } returns fagsak
+            every { behandlingHentOgPersisterService.finnAktivForFagsak(nyBehandling.fagsakId) } returns null
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns førstegangsbehandling
+            every { behandlingstemaService.finnBehandlingKategori(nyBehandling.fagsakId) } returns BehandlingKategori.NASJONAL
+            every { behandlingstemaService.finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingstemaService.finnUnderkategoriFraAktivBehandling(nyBehandling.fagsakId) } returns BehandlingUnderkategori.ORDINÆR
+            every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
+            every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
+            every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
+            every { behandlingSøknadsinfoService.lagreNedSøknadsinfo(any(), any(), any()) } just runs
+            every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
+            every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
+            every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs
+            every { vedtakRepository.save(any()) } returnsArgument 0
+            every { loggService.opprettBehandlingLogg(any()) } just runs
+            every { taskRepository.save(capture(opprettetTaskSlot)) } returnsArgument 0
+            every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
+                BarnetrygdEnhet.OSLO.enhetsnummer,
+                BarnetrygdEnhet.OSLO.enhetsnavn,
+            )
+            every { mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil() } returns listOf(BarnetrygdEnhet.OSLO)
+            mockkObject(SikkerhetContext)
+            every { SikkerhetContext.hentSaksbehandler() } returns "testNavIdent"
+
+            // Act
+            val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
+
+            // Assert
+            assertThat(opprettetBehandling.id).isEqualTo(0L)
+
+            val opprettetTask = opprettetTaskSlot.captured
+            val opprettOppgaveTaskDTO = objectMapper.readValue(opprettetTask.payload, OpprettOppgaveTaskDTO::class.java)
+
+            assertThat(opprettOppgaveTaskDTO.oppgavetype).isEqualTo(Oppgavetype.BehandleSak)
+            assertThat(opprettOppgaveTaskDTO.tilordnetRessurs).isEqualTo("testNavIdent")
+        }
     }
 
     @Nested
@@ -193,11 +335,11 @@ class BehandlingServiceTest {
             val behandling = lagBehandling()
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
-                )
+                    listOf(
+                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().plusMonths(3)),
+                    )
 
             // Act
             val erLøpende = behandlingService.erLøpende(behandling)
@@ -212,11 +354,11 @@ class BehandlingServiceTest {
             val behandling = lagBehandling()
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
-                )
+                    listOf(
+                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
+                    )
 
             // Act
             val erLøpende = behandlingService.erLøpende(behandling)
@@ -231,11 +373,11 @@ class BehandlingServiceTest {
             val behandling = lagBehandling()
 
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns
-                listOf(
-                    lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-                    lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
-                )
+                    listOf(
+                        lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
+                        lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
+                    )
 
             // Act
             val erLøpende = behandlingService.erLøpende(behandling)

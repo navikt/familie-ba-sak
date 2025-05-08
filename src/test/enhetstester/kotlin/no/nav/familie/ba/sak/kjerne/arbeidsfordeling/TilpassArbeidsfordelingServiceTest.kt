@@ -4,21 +4,20 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
-import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class TilpassArbeidsfordelingServiceTest {
-    private val mockedIntegrasjonClient: IntegrasjonClient = mockk()
+    private val mocketEnhetConfig: EnhetConfig = mockk()
+
     private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService =
         TilpassArbeidsfordelingService(
-            integrasjonClient = mockedIntegrasjonClient,
+            enhetConfig = mocketEnhetConfig,
         )
 
     @Nested
@@ -75,9 +74,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns emptyList()
 
             // Act & assert
@@ -103,16 +100,9 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+                    listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -141,24 +131,13 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
-                    ),
-                )
+                    listOf(
+                        BarnetrygdEnhet.VIKAFOSSEN,
+                        BarnetrygdEnhet.OSLO,
+                        BarnetrygdEnhet.DRAMMEN
+                    )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -199,7 +178,7 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.STEINKJER
-            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSØ
+            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.VADSO
 
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
@@ -208,20 +187,12 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
-                    ),
-                )
+                    listOf(
+                        BarnetrygdEnhet.STEINKJER,
+                        BarnetrygdEnhet.VADSO,
+                    )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -247,20 +218,9 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = "1234",
-                        enhetsnavn = "Fiktiv enhet",
-                    ),
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+                    listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -307,9 +267,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns emptyList()
 
             // Act & assert
@@ -335,16 +293,11 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+                    listOf(
+                        BarnetrygdEnhet.VIKAFOSSEN,
+                    )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -364,7 +317,6 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO
-            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN
 
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
@@ -373,24 +325,13 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
-                    ),
-                )
+                    listOf(
+                        BarnetrygdEnhet.VIKAFOSSEN,
+                        BarnetrygdEnhet.OSLO,
+                        BarnetrygdEnhet.DRAMMEN,
+                    )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -418,24 +359,13 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mocketEnhetConfig.hentAlleEnheterBrukerHarTilgangTil()
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = arbeidsfordelingEnhet.enhetsnummer,
-                        enhetsnavn = arbeidsfordelingEnhet.enhetsnavn,
-                    ),
-                )
+                    listOf(
+                        BarnetrygdEnhet.MIDLERTIDIG_ENHET,
+                        BarnetrygdEnhet.VIKAFOSSEN,
+                        BarnetrygdEnhet.OSLO,
+                    )
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -468,97 +398,6 @@ class TilpassArbeidsfordelingServiceTest {
             // Assert
             assertThat(tilpassetArbeidsfordelingsenhet.enhetId).isEqualTo(arbeidsfordelingsenhet.enhetId)
             assertThat(tilpassetArbeidsfordelingsenhet.enhetNavn).isEqualTo(arbeidsfordelingsenhet.enhetNavn)
-        }
-    }
-
-    @Nested
-    inner class BestemTilordnetRessursPåOppgave {
-        @Test
-        fun `skal returnere navIdent dersom navIdent har tilgang til arbeidsfordelingsenhet`() {
-            // Arrange
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                )
-            val navIdent = NavIdent("1")
-
-            every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
-
-            // Act
-            val tilordnetRessurs =
-                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-
-            // Assert
-            assertThat(tilordnetRessurs).isEqualTo(navIdent)
-        }
-
-        @Test
-        fun `skal returnere null dersom navIdent ikke har tilgang til arbeidsfordelingsenhet`() {
-            // Arrange
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                )
-            val navIdent = NavIdent("1")
-
-            every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.OSLO.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.OSLO.enhetsnavn,
-                    ),
-                )
-
-            // Act
-            val tilordnetRessurs =
-                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-
-            // Assert
-            assertThat(tilordnetRessurs).isNull()
-        }
-
-        @Test
-        fun `skal returnere null dersom navIdent er null`() {
-            // Arrange
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                )
-            val navIdent = null
-
-            // Act
-            val tilordnetRessurs =
-                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-
-            // Assert
-            assertThat(tilordnetRessurs).isNull()
-        }
-
-        @Test
-        fun `skal returnere null dersom vi er i systemkontekst`() {
-            // Arrange
-            val arbeidsfordelingsenhet =
-                Arbeidsfordelingsenhet(
-                    enhetId = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                    enhetNavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                )
-            val navIdent = NavIdent(SYSTEM_FORKORTELSE)
-
-            // Act
-            val tilordnetRessurs =
-                tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-
-            // Assert
-            assertThat(tilordnetRessurs).isNull()
         }
     }
 }
