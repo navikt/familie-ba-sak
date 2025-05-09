@@ -75,6 +75,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Personopplysnin
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -342,6 +343,12 @@ class CucumberMock(
             tilbakestillBehandlingTilSimuleringService = tilbakestillBehandlingTilSimuleringService,
         )
 
+    val tilbakekrevingsvedtakMotregningBrevService =
+        TilbakekrevingsvedtakMotregningBrevService(
+            tilbakekrevingsvedtakMotregningRepository = tilbakekrevingsvedtakMotregningRepository,
+            dokumentGenereringService = dokumentGenereringService,
+        )
+
     val utenlandskPeriodebeløpService =
         UtenlandskPeriodebeløpService(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
@@ -582,6 +589,7 @@ class CucumberMock(
             tilbakekrevingService = tilbakekrevingService,
             brevmottakerService = brevmottakerService,
             tilbakekrevingsvedtakMotregningService = tilbakekrevingsvedtakMotregningService,
+            tilbakekrevingsvedtakMotregningBrevService = tilbakekrevingsvedtakMotregningBrevService,
         )
 
     val stegService =
