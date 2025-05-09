@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
@@ -57,6 +58,7 @@ class BeslutteVedtak(
     private val tilbakekrevingService: TilbakekrevingService,
     private val brevmottakerService: BrevmottakerService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
+    private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -120,6 +122,10 @@ class BeslutteVedtak(
             }
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
+
+            tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
+                tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id)
+            }
 
             val nesteSteg = sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling)
 

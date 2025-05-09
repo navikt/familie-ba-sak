@@ -11,6 +11,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -55,3 +56,21 @@ fun TilbakekrevingsvedtakMotregning.tilRestTilbakekrevingsvedtakMotregning() =
         samtykke = this.samtykke,
         heleBeløpetSkalKrevesTilbake = this.heleBeløpetSkalKrevesTilbake,
     )
+
+fun TilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter() {
+    if (!samtykke) {
+        throw FunksjonellFeil("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis samtykke ikke er bekreftet.")
+    }
+    if (!heleBeløpetSkalKrevesTilbake) {
+        throw FunksjonellFeil("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis ikke hele beløpet skal kreves tilbake.")
+    }
+    if (varselDato.isAfter(LocalDate.now())) {
+        throw FunksjonellFeil("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter med fremtidig varseldato.")
+    }
+    if (årsakTilFeilutbetaling.isNullOrBlank()) {
+        throw FunksjonellFeil("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter uten årsak til feilutbetaling.")
+    }
+    if (vurderingAvSkyld.isNullOrBlank()) {
+        throw FunksjonellFeil("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter uten vurdering av skyld.")
+    }
+}
