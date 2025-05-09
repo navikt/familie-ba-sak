@@ -193,7 +193,7 @@ class SendTilBeslutterTest {
 
             // Act
             val feil =
-                assertThrows<Feil> {
+                assertThrows<FunksjonellFeil> {
                     sendTilBeslutter.preValiderSteg(behandling, stegService)
                 }
 

@@ -161,6 +161,7 @@ class BeslutteVedtakTest {
 
             every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
             every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns mockk()
+            every { tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(any()) } returns mockk()
             every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             mockkObject(FerdigstillOppgaver.Companion)
             every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
