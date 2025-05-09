@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
@@ -67,12 +68,14 @@ import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlag
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilSimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingSteg
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.EøsSkjemaerForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.PersonopplysningGrunnlagForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
@@ -122,6 +125,7 @@ class CucumberMock(
     val kompetanseRepository = mockKompetanseRepository(dataFraCucumber)
     val valutakursRepository = mockValutakursRepository(dataFraCucumber)
     val utenlandskPeriodebeløpRepository = mockUtenlandskPeriodebeløpRepository(dataFraCucumber)
+    val tilbakekrevingsvedtakMotregningRepository = mockTilbakekrevingsvedtakMotregningRepository(dataFraCucumber)
     val endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository(dataFraCucumber)
     val simuleringService = mockSimuleringService()
     val startSatsendring = mockStartSatsendring()
@@ -296,6 +300,8 @@ class CucumberMock(
 
     val tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService = TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService)
 
+    val tilbakestillBehandlingTilSimuleringService = TilbakestillBehandlingTilSimuleringService(behandlingHentOgPersisterService, behandlingService)
+
     val valutakursService = ValutakursService(valutakursRepository = valutakursRepository, endringsabonnenter = valutakursAbonnenter)
 
     val automatiskOppdaterValutakursService =
@@ -326,6 +332,14 @@ class CucumberMock(
             tilpassDifferanseberegningEtterUtenlandskPeriodebeløpService,
             tilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService,
             tilpassValutakurserTilUtenlandskePeriodebeløpService,
+        )
+
+    val tilbakekrevingsvedtakMotregningService =
+        TilbakekrevingsvedtakMotregningService(
+            tilbakekrevingsvedtakMotregningRepository = tilbakekrevingsvedtakMotregningRepository,
+            loggService = loggService,
+            behandlingService = behandlingHentOgPersisterService,
+            tilbakestillBehandlingTilSimuleringService = tilbakestillBehandlingTilSimuleringService,
         )
 
     val utenlandskPeriodebeløpService =
@@ -567,6 +581,7 @@ class CucumberMock(
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
             brevmottakerService = brevmottakerService,
+            tilbakekrevingsvedtakMotregningService = tilbakekrevingsvedtakMotregningService,
         )
 
     val stegService =

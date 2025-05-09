@@ -39,7 +39,6 @@ class DokumentControllerTest(
             utvidetBehandlingService = mockk(relaxed = true),
             dokumentDistribueringService = mockk(relaxed = true),
             pdlRestClient = mockk(relaxed = true),
-            unleashNext = mockk(relaxed = true),
         )
 
     @Test

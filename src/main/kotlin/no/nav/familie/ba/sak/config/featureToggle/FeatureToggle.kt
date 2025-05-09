@@ -45,9 +45,6 @@ enum class FeatureToggle(
     // Tillatter behandling av klage
     BEHANDLE_KLAGE("familie-ba-sak.klage"),
 
-    // Skrur på informasjonsbrev for klage, inkluderer ny måte å generere brev for institusjon på fagsak.
-    INNHENTE_OPPLYSNINGER_KLAGE_BREV("familie-ba-sak.innhente-opplysninger-klage-brev"),
-
     // NAV-24658
     SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK("familie-ba-sak.sett-relatert-behandling-for-revurdering-klage-i-saksstatistikk"),
 }
