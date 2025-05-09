@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.containsExactly
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class TilpassArbeidsfordelingService(
-    private val integrasjonClient: IntegrasjonClient,
+    private val enhetConfig: EnhetConfig,
 ) {
     private val logger = LoggerFactory.getLogger(TilpassArbeidsfordelingService::class.java)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -27,30 +26,6 @@ class TilpassArbeidsfordelingService(
             else -> håndterAndreEnheter(navIdent, arbeidsfordelingsenhet)
         }
 
-    fun bestemTilordnetRessursPåOppgave(
-        arbeidsfordelingsenhet: Arbeidsfordelingsenhet,
-        navIdent: NavIdent?,
-    ): NavIdent? {
-        if (navIdent?.erSystemIdent() == true) {
-            return null
-        }
-        return if (harSaksbehandlerTilgangTilEnhet(enhetId = arbeidsfordelingsenhet.enhetId, navIdent = navIdent)) {
-            navIdent
-        } else {
-            null
-        }
-    }
-
-    private fun harSaksbehandlerTilgangTilEnhet(
-        enhetId: String,
-        navIdent: NavIdent?,
-    ): Boolean =
-        navIdent?.let {
-            integrasjonClient
-                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
-                .any { it.enhetsnummer == enhetId }
-        } ?: false
-
     private fun håndterMidlertidigEnhet4863(
         navIdent: NavIdent?,
     ): Arbeidsfordelingsenhet {
@@ -62,7 +37,7 @@ class TilpassArbeidsfordelingService(
             logger.error("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger.")
             throw MidlertidigEnhetIAutomatiskBehandlingFeil("Kan ikke håndtere ${BarnetrygdEnhet.MIDLERTIDIG_ENHET} i automatiske behandlinger.")
         }
-        val enheterNavIdentHarTilgangTil = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
+        val enheterNavIdentHarTilgangTil = enhetConfig.hentAlleEnheterBrukerHarTilgangTil()
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             logger.warn("Nav-Ident har ikke tilgang til noen enheter. Se SecureLogs for detaljer.")
             secureLogger.warn("Nav-Ident $navIdent har ikke tilgang til noen enheter.")
@@ -109,7 +84,7 @@ class TilpassArbeidsfordelingService(
                 arbeidsfordelingsenhet.enhetNavn,
             )
         }
-        val enheterNavIdentHarTilgangTil = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent)
+        val enheterNavIdentHarTilgangTil = enhetConfig.hentAlleEnheterBrukerHarTilgangTil()
         if (enheterNavIdentHarTilgangTil.isEmpty()) {
             logger.warn("Nav-Ident har ikke tilgang til noen enheter. Se SecureLogs for detaljer.")
             secureLogger.warn("Nav-Ident $navIdent har ikke tilgang til noen enheter.")

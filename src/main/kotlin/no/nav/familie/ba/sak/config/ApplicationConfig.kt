@@ -32,9 +32,9 @@ import java.time.temporal.ChronoUnit
 @EntityScan("no.nav.familie.prosessering", ApplicationConfig.PAKKENAVN)
 @ComponentScan("no.nav.familie.prosessering", "no.nav.familie.unleash", ApplicationConfig.PAKKENAVN, "no.nav.familie.metrikker")
 @EnableRetry
-@ConfigurationPropertiesScan
 @EnableJwtTokenValidation(ignore = ["org.springdoc"])
 @EnableOAuth2Client(cacheEnabled = true)
+@ConfigurationPropertiesScan
 class ApplicationConfig {
     @Bean
     fun logFilter(): FilterRegistrationBean<LogFilter> {

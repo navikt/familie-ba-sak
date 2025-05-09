@@ -50,6 +50,7 @@ class TilgangServiceTest {
             cacheManager,
             mockk(),
         )
+
     private val tilgangService =
         TilgangService(
             familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
