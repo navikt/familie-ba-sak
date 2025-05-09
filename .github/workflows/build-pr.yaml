@@ -121,7 +121,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths="jacoco/UT/jacoco.xml,jacoco/IT/jacoco.xml"
+          mvn sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths="jacoco/UT/jacoco.xml,jacoco/IT/report.xml"
 
   verdikjedetesterFeatureToggleOff:
     name: Verdikjedetester m/ feature toggles slått av
