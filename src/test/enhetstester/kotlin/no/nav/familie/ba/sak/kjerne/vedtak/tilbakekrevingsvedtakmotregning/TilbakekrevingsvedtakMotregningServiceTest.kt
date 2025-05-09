@@ -5,7 +5,6 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -474,11 +473,11 @@ class TilbakekrevingsvedtakMotregningServiceTest {
 
             // Act & Assert
             val feil =
-                assertThrows<Feil> {
+                assertThrows<FunksjonellFeil> {
                     tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
                 }
 
-            assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter hvis samtykke ikke er bekreftet.")
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis samtykke ikke er bekreftet.")
         }
 
         @Test
@@ -493,11 +492,11 @@ class TilbakekrevingsvedtakMotregningServiceTest {
 
             // Act & Assert
             val feil =
-                assertThrows<Feil> {
+                assertThrows<FunksjonellFeil> {
                     tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
                 }
 
-            assertThat(feil.message).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter hvis ikke hele beløpet skal kreves tilbake.")
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter hvis ikke hele beløpet skal kreves tilbake.")
         }
 
         @Test
@@ -517,7 +516,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
                 }
 
-            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter med fremtidig varseldato.")
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter med fremtidig varseldato.")
         }
 
         @Test
@@ -538,7 +537,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
                 }
 
-            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter uten årsak til feilutbetaling.")
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter uten årsak til feilutbetaling.")
         }
 
         @Test
@@ -560,7 +559,7 @@ class TilbakekrevingsvedtakMotregningServiceTest {
                     tilbakekrevingsvedtakMotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
                 }
 
-            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak motregning til beslutter uten vurdering av skyld.")
+            assertThat(feil.frontendFeilmelding).isEqualTo("Kan ikke sende tilbakekrevingsvedtak ved motregning til beslutter uten vurdering av skyld.")
         }
 
         @Test
