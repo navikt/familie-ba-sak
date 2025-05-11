@@ -279,6 +279,15 @@ private fun hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGru
             deltBostedIForrigePeriode && !deltBostedIDennePerioden
         }.keys
 
+private fun hentPersonerSomHarHattEndringIEndretUtbetalingAndelIDennePerioden(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson
+        .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+            val endretUtbetalingAndelIForrigePeriode = begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.endretUtbetalingAndel
+            val endretUtbetalingAndelIDennePeriode = begrunnelseGrunnlagForPersonIPeriode.dennePerioden.endretUtbetalingAndel
+
+            endretUtbetalingAndelIForrigePeriode != endretUtbetalingAndelIDennePeriode
+        }.keys
+
 private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson
         .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
@@ -364,6 +373,10 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
 
         erEtterEndretUtbetalingOgErIkkeAlleredeUtbetalt(this) ->
             (barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne + barnSomNåFårUtbetalingIPeriode).distinct().map { it.fødselsdato }
+
+        this.gjelderEndretutbetaling -> {
+            barnPåBegrunnelse.filter { hentPersonerSomHarHattEndringIEndretUtbetalingAndelIDennePerioden(begrunnelsesGrunnlagPerPerson).contains(it) }.map { it.fødselsdato }
+        }
 
         else -> {
             barnPåBegrunnelse.map { it.fødselsdato }
