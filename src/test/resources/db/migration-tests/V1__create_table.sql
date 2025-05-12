@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.3 (Debian 16.3-1.pgdg120+1)
--- Dumped by pg_dump version 16.3
+-- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped by pg_dump version 17.4 (Homebrew)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -445,6 +445,31 @@ CREATE SEQUENCE public.ecbvalutakurscache_seq
 
 
 --
+-- Name: ekstern_behandling_relasjon; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ekstern_behandling_relasjon (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    ekstern_behandling_id character varying NOT NULL,
+    ekstern_behandling_fagsystem character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone NOT NULL
+);
+
+
+--
+-- Name: ekstern_behandling_relasjon_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.ekstern_behandling_relasjon_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: endret_utbetaling_andel; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -609,6 +634,18 @@ CREATE SEQUENCE public.foedselshendelsefiltrering_resultat_seq
 
 
 --
+-- Name: forenklet_tilbakekrevingsvedtak_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.forenklet_tilbakekrevingsvedtak_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: gr_periode_overgangsstonad; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -719,20 +756,6 @@ CREATE SEQUENCE public.institusjon_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-
---
--- Name: journalpost; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.journalpost (
-    id bigint NOT NULL,
-    fk_behandling_id bigint NOT NULL,
-    journalpost_id character varying NOT NULL,
-    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
-    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
-    type character varying
-);
 
 
 --
@@ -961,6 +984,34 @@ CREATE SEQUENCE public.oppgave_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
+
+
+--
+-- Name: patchet_andel_tilkjent_ytelse; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.patchet_andel_tilkjent_ytelse (
+    id bigint NOT NULL,
+    behandling_id bigint NOT NULL,
+    tilkjent_ytelse_id bigint NOT NULL,
+    aktoer_id bigint NOT NULL,
+    kalkulert_utbetalingsbelop numeric,
+    stonad_fom timestamp(3) without time zone NOT NULL,
+    stonad_tom timestamp(3) without time zone NOT NULL,
+    type character varying(50) NOT NULL,
+    sats bigint,
+    prosent numeric,
+    kilde_behandling_id bigint,
+    periode_offset bigint,
+    forrige_periode_offset bigint,
+    nasjonalt_periodebelop numeric,
+    differanseberegnet_periodebelop numeric,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying(512) DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying(512),
+    endret_tid timestamp(3) without time zone
+);
 
 
 --
@@ -1275,7 +1326,7 @@ CREATE TABLE public.saksstatistikk_mellomlagring (
     funksjonell_id character varying NOT NULL,
     type character varying NOT NULL,
     kontrakt_versjon character varying NOT NULL,
-    json text NOT NULL,
+    "json" text NOT NULL,
     konvertert_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     sendt_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
@@ -1289,6 +1340,34 @@ CREATE TABLE public.saksstatistikk_mellomlagring (
 --
 
 CREATE SEQUENCE public.saksstatistikk_mellomlagring_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: sammensatt_kontrollsak; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sammensatt_kontrollsak (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fritekst character varying,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: sammensatt_kontrollsak_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.sammensatt_kontrollsak_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -1483,6 +1562,39 @@ CREATE TABLE public.tilbakekreving (
 --
 
 CREATE SEQUENCE public.tilbakekreving_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: tilbakekrevingsvedtak_motregning; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tilbakekrevingsvedtak_motregning (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    samtykke boolean DEFAULT false,
+    vedtak_pdf bytea,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone,
+    aarsak_til_feilutbetaling character varying,
+    vurdering_av_skyld character varying,
+    varsel_dato timestamp(3) without time zone NOT NULL,
+    hele_belopet_skal_kreves_tilbake boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: tilbakekrevingsvedtak_motregning_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.tilbakekrevingsvedtak_motregning_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -1963,6 +2075,18 @@ INSERT INTO public.batch VALUES (1002200, '2024-08-30 00:00:00', 'LEDIG');
 INSERT INTO public.batch VALUES (1002250, '2024-09-27 00:00:00', 'LEDIG');
 INSERT INTO public.batch VALUES (1002300, '2024-10-30 00:00:00', 'LEDIG');
 INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002400, '2025-01-03 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002450, '2025-01-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002500, '2025-02-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002550, '2025-03-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002600, '2025-04-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002650, '2025-05-23 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002700, '2025-06-27 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002750, '2025-07-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002800, '2025-09-01 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002850, '2025-09-29 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002900, '2025-10-30 00:00:00', 'LEDIG');
+INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 
 
 --
@@ -2003,6 +2127,12 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 
 --
 -- Data for Name: ecbvalutakurscache; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: ekstern_behandling_relasjon; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 
@@ -2062,12 +2192,6 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 
 
 --
--- Data for Name: journalpost; Type: TABLE DATA; Schema: public; Owner: -
---
-
-
-
---
 -- Data for Name: kompetanse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2105,6 +2229,12 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 
 --
 -- Data for Name: oppgave; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: patchet_andel_tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 
@@ -2176,6 +2306,12 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 
 
 --
+-- Data for Name: sammensatt_kontrollsak; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
 -- Data for Name: satskjoering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2197,22 +2333,24 @@ INSERT INTO public.batch VALUES (1002350, '2024-11-25 00:00:00', 'LEDIG');
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.task VALUES (51, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.509', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022
-', '2024-05-29 15:31:17.508603', NULL);
-INSERT INTO public.task VALUES (1, '1654', 'PLUKKET', 2, '2024-05-29 15:31:17.471', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022
-', '2024-05-29 15:31:17.471229', NULL);
+INSERT INTO public.task VALUES (51, '1654', 'UBEHANDLET', 1, '2025-05-12 11:53:48.055', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022', '2025-05-12 11:53:48.054853', NULL);
+INSERT INTO public.task VALUES (1, '1654', 'UBEHANDLET', 1, '2025-05-12 11:53:48.047', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022', '2025-05-12 11:53:48.047492', NULL);
 
 
 --
 -- Data for Name: task_logg; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.task_logg VALUES (51, 1, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
-INSERT INTO public.task_logg VALUES (1, 51, 'PLUKKET', 'node1', '2024-05-29 15:32:29.295', NULL, 'VL');
 
 
 --
 -- Data for Name: tilbakekreving; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+
+
+--
+-- Data for Name: tilbakekrevingsvedtak_motregning; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 
@@ -2322,7 +2460,7 @@ SELECT pg_catalog.setval('public.arbeidsfordeling_pa_behandling_seq', 1000000, f
 -- Name: batch_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.batch_seq', 1002350, true);
+SELECT pg_catalog.setval('public.batch_seq', 1002950, true);
 
 
 --
@@ -2375,6 +2513,13 @@ SELECT pg_catalog.setval('public.ecbvalutakurscache_seq', 1, false);
 
 
 --
+-- Name: ekstern_behandling_relasjon_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.ekstern_behandling_relasjon_seq', 1000000, false);
+
+
+--
 -- Name: endret_utbetaling_andel_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2414,6 +2559,13 @@ SELECT pg_catalog.setval('public.feilutbetalt_valuta_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.foedselshendelsefiltrering_resultat_seq', 1000000, false);
+
+
+--
+-- Name: forenklet_tilbakekrevingsvedtak_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.forenklet_tilbakekrevingsvedtak_seq', 1000000, false);
 
 
 --
@@ -2571,6 +2723,13 @@ SELECT pg_catalog.setval('public.saksstatistikk_mellomlagring_seq', 1000000, fal
 
 
 --
+-- Name: sammensatt_kontrollsak_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.sammensatt_kontrollsak_seq', 1000000, false);
+
+
+--
 -- Name: sats_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2602,7 +2761,7 @@ SELECT pg_catalog.setval('public.skyggesak_seq', 1000000, false);
 -- Name: task_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.task_logg_seq', 151, true);
+SELECT pg_catalog.setval('public.task_logg_seq', 1, false);
 
 
 --
@@ -2617,6 +2776,13 @@ SELECT pg_catalog.setval('public.task_seq', 51, true);
 --
 
 SELECT pg_catalog.setval('public.tilbakekreving_seq', 1000000, false);
+
+
+--
+-- Name: tilbakekrevingsvedtak_motregning_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.tilbakekrevingsvedtak_motregning_seq', 1000000, false);
 
 
 --
@@ -2871,6 +3037,14 @@ ALTER TABLE ONLY public.ecbvalutakurscache
 
 
 --
+-- Name: ekstern_behandling_relasjon ekstern_behandling_relasjon_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ekstern_behandling_relasjon
+    ADD CONSTRAINT ekstern_behandling_relasjon_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: endret_utbetaling_andel endret_utbetaling_andel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2951,14 +3125,6 @@ ALTER TABLE ONLY public.institusjon
 
 
 --
--- Name: journalpost journalpost_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.journalpost
-    ADD CONSTRAINT journalpost_pkey PRIMARY KEY (id);
-
-
---
 -- Name: kompetanse kompetanse_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2996,6 +3162,14 @@ ALTER TABLE ONLY public.logg
 
 ALTER TABLE ONLY public.oppgave
     ADD CONSTRAINT oppgave_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: patchet_andel_tilkjent_ytelse patchet_andel_tilkjent_ytelse_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.patchet_andel_tilkjent_ytelse
+    ADD CONSTRAINT patchet_andel_tilkjent_ytelse_pkey PRIMARY KEY (id);
 
 
 --
@@ -3095,6 +3269,14 @@ ALTER TABLE ONLY public.saksstatistikk_mellomlagring
 
 
 --
+-- Name: sammensatt_kontrollsak sammensatt_kontrollsak_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sammensatt_kontrollsak
+    ADD CONSTRAINT sammensatt_kontrollsak_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: satskjoering satskjoering_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3127,6 +3309,14 @@ ALTER TABLE ONLY public.tilbakekreving
 
 
 --
+-- Name: tilbakekrevingsvedtak_motregning tilbakekrevingsvedtak_motregning_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tilbakekrevingsvedtak_motregning
+    ADD CONSTRAINT tilbakekrevingsvedtak_motregning_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: totrinnskontroll totrinnskontroll_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3148,6 +3338,22 @@ ALTER TABLE ONLY public.feilutbetalt_valuta
 
 ALTER TABLE ONLY public.behandling_migreringsinfo
     ADD CONSTRAINT unik_behandling_id UNIQUE (fk_behandling_id);
+
+
+--
+-- Name: ekstern_behandling_relasjon unik_ekstern_behandling_relasjon; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ekstern_behandling_relasjon
+    ADD CONSTRAINT unik_ekstern_behandling_relasjon UNIQUE (fk_behandling_id, ekstern_behandling_fagsystem);
+
+
+--
+-- Name: tilbakekrevingsvedtak_motregning unique_fk_behandling_id; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tilbakekrevingsvedtak_motregning
+    ADD CONSTRAINT unique_fk_behandling_id UNIQUE (fk_behandling_id);
 
 
 --
@@ -3335,6 +3541,13 @@ CREATE INDEX data_chunk_transaksjons_id_idx ON public.data_chunk USING btree (tr
 
 
 --
+-- Name: ekstern_behandling_relasjon_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ekstern_behandling_relasjon_fk_behandling_id_idx ON public.ekstern_behandling_relasjon USING btree (fk_behandling_id);
+
+
+--
 -- Name: endret_utbetaling_andel_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3423,13 +3636,6 @@ CREATE INDEX henvendelse_logg_henvendelse_id_idx ON public.task_logg USING btree
 --
 
 CREATE INDEX henvendelse_status_idx ON public.task USING btree (status);
-
-
---
--- Name: journalpost_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX journalpost_fk_behandling_id_idx ON public.journalpost USING btree (fk_behandling_id);
 
 
 --
@@ -3577,6 +3783,13 @@ CREATE INDEX saksstatistikk_mellomlagring_sendt_tid_null_idx ON public.saksstati
 --
 
 CREATE INDEX saksstatistikk_mellomlagring_type_id_idx ON public.saksstatistikk_mellomlagring USING btree (type_id);
+
+
+--
+-- Name: sammensatt_kontrollsak_seq_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX sammensatt_kontrollsak_seq_fk_behandling_id_idx ON public.sammensatt_kontrollsak USING btree (fk_behandling_id);
 
 
 --
@@ -4003,6 +4216,22 @@ ALTER TABLE ONLY public.data_chunk
 
 
 --
+-- Name: ekstern_behandling_relasjon ekstern_behandling_relasjon_intern_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ekstern_behandling_relasjon
+    ADD CONSTRAINT ekstern_behandling_relasjon_intern_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+
+
+--
+-- Name: ekstern_behandling_relasjon ekstern_behandling_relasjon_til_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ekstern_behandling_relasjon
+    ADD CONSTRAINT ekstern_behandling_relasjon_til_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
+
+
+--
 -- Name: endret_utbetaling_andel endret_utbetaling_andel_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4083,6 +4312,14 @@ ALTER TABLE ONLY public.po_person
 
 
 --
+-- Name: tilbakekrevingsvedtak_motregning fk_tilbakekrevingsvedtak_motregning; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tilbakekrevingsvedtak_motregning
+    ADD CONSTRAINT fk_tilbakekrevingsvedtak_motregning FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
+
+
+--
 -- Name: foedselshendelsefiltrering_resultat foedselshendelsefiltrering_resultat_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4120,14 +4357,6 @@ ALTER TABLE ONLY public.gr_soknad
 
 ALTER TABLE ONLY public.task_logg
     ADD CONSTRAINT henvendelse_logg_henvendelse_id_fkey FOREIGN KEY (task_id) REFERENCES public.task(id);
-
-
---
--- Name: journalpost journalpost_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.journalpost
-    ADD CONSTRAINT journalpost_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
 
 
 --
@@ -4248,6 +4477,14 @@ ALTER TABLE ONLY public.po_statsborgerskap
 
 ALTER TABLE ONLY public.refusjon_eos
     ADD CONSTRAINT refusjon_eos_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+
+
+--
+-- Name: sammensatt_kontrollsak sammensatt_kontrollsak_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sammensatt_kontrollsak
+    ADD CONSTRAINT sammensatt_kontrollsak_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
 
 
 --
