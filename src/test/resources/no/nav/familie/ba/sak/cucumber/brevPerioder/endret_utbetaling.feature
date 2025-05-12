@@ -234,3 +234,105 @@ Egenskap: Brevperioder: Endret utbetaling
       | INGEN_UTBETALING | mars 2020   |                   | 0     | 0                          |                      | du                     |
       | UTBETALING       | august 2023 | til desember 2023 | 471   | 1                          | 21.07.23             | du                     |
       | UTBETALING       | januar 2024 | til februar 2037  | 0     | 2                          | 22.03.19 og 21.07.23 | du                     |
+
+  Scenario: Det skal bare flettes inn barn som nylig har fått endret utbetaling andel dersom det ikke er allerede utbetalt eller delt bosted
+    Gitt følgende fagsaker
+      | FagsakId | Fagsaktype | Status  |
+      | 1        | NORMAL     | LØPENDE |
+
+    Gitt følgende behandlinger
+      | BehandlingId | FagsakId | ForrigeBehandlingId | Behandlingsresultat | Behandlingsårsak | Skal behandles automatisk | Behandlingskategori | Behandlingsstatus |
+      | 1            | 1        |                     | ENDRET_UTBETALING   | SATSENDRING      | Ja                        | NASJONAL            | AVSLUTTET         |
+      | 2            | 1        | 1                   | ENDRET_OG_OPPHØRT   | NYE_OPPLYSNINGER | Nei                       | NASJONAL            | UTREDES           |
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato | Dødsfalldato |
+      | 1            | 1       | SØKER      | 10.06.1989  |              |
+      | 1            | 2       | BARN       | 05.10.2018  |              |
+      | 1            | 3       | BARN       | 15.03.2023  |              |
+      | 1            | 4       | BARN       | 08.04.2024  |              |
+      | 2            | 1       | SØKER      | 10.06.1989  |              |
+      | 2            | 2       | BARN       | 05.10.2018  |              |
+      | 2            | 3       | BARN       | 15.03.2023  |              |
+      | 2            | 4       | BARN       | 08.04.2024  |              |
+
+    Og dagens dato er 11.05.2025
+    Og lag personresultater for behandling 1
+    Og lag personresultater for behandling 2
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 2       | UNDER_18_ÅR                                 |                  | 05.10.2018 | 04.10.2036 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | GIFT_PARTNERSKAP                            |                  | 05.10.2018 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | BOR_MED_SØKER,BOSATT_I_RIKET,LOVLIG_OPPHOLD |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 3       | BOR_MED_SØKER,LOVLIG_OPPHOLD,BOSATT_I_RIKET |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 3       | UNDER_18_ÅR                                 |                  | 15.03.2023 | 14.03.2041 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | GIFT_PARTNERSKAP                            |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |                      |                  |
+
+      | 4       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                  | 08.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+      | 4       | GIFT_PARTNERSKAP                            |                  | 08.04.2024 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 4       | UNDER_18_ÅR                                 |                  | 08.04.2024 | 07.04.2042 | OPPFYLT  | Nei                  |                      |                  |
+
+    Og legg til nye vilkårresultater for behandling 2
+      | AktørId | Vilkår                                      | Utdypende vilkår | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag | Standardbegrunnelser | Vurderes etter   |
+      | 1       | LOVLIG_OPPHOLD,BOSATT_I_RIKET               |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 2       | UNDER_18_ÅR                                 |                  | 05.10.2018 | 04.10.2036 | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | GIFT_PARTNERSKAP                            |                  | 05.10.2018 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 2       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 01.02.2022 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 3       | GIFT_PARTNERSKAP                            |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | UNDER_18_ÅR                                 |                  | 15.03.2023 | 14.03.2041 | OPPFYLT  | Nei                  |                      |                  |
+      | 3       | BOSATT_I_RIKET,LOVLIG_OPPHOLD,BOR_MED_SØKER |                  | 15.03.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+      | 4       | UNDER_18_ÅR                                 |                  | 08.04.2024 | 07.04.2042 | OPPFYLT  | Nei                  |                      |                  |
+      | 4       | GIFT_PARTNERSKAP                            |                  | 08.04.2024 |            | OPPFYLT  | Nei                  |                      |                  |
+      | 4       | LOVLIG_OPPHOLD,BOSATT_I_RIKET,BOR_MED_SØKER |                  | 08.04.2024 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
+
+    Og med endrede utbetalinger
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 3       | 1            | 01.03.2024 | 28.02.2041 | ENDRE_MOTTAKER | 0       | 26.02.2024       |                             |
+      | 2       | 1            | 01.03.2024 | 30.09.2036 | ENDRE_MOTTAKER | 0       | 26.02.2024       |                             |
+      | 2       | 2            | 01.03.2024 | 30.09.2036 | ENDRE_MOTTAKER | 0       | 26.02.2024       |                             |
+      | 3       | 2            | 01.03.2024 | 28.02.2041 | ENDRE_MOTTAKER | 0       | 26.02.2024       |                             |
+      | 4       | 2            | 01.05.2025 | 31.03.2042 | ENDRE_MOTTAKER | 0       | 03.04.2025       |                             |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
+      | 2       | 1            | 01.03.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 2       | 1            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 2       | 1            | 01.07.2023 | 29.02.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 1            | 01.03.2024 | 30.09.2036 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 3       | 1            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3       | 1            | 01.07.2023 | 29.02.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 1            | 01.03.2024 | 28.02.2041 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 4       | 1            | 01.05.2024 | 30.04.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 4       | 1            | 01.05.2025 | 31.03.2042 | 1968  | ORDINÆR_BARNETRYGD | 100     | 1968 |
+
+      | 2       | 2            | 01.03.2022 | 28.02.2023 | 1676  | ORDINÆR_BARNETRYGD | 100     | 1676 |
+      | 2       | 2            | 01.03.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 2       | 2            | 01.07.2023 | 29.02.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 2       | 2            | 01.03.2024 | 30.09.2036 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 3       | 2            | 01.04.2023 | 30.06.2023 | 1723  | ORDINÆR_BARNETRYGD | 100     | 1723 |
+      | 3       | 2            | 01.07.2023 | 29.02.2024 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 3       | 2            | 01.03.2024 | 28.02.2041 | 0     | ORDINÆR_BARNETRYGD | 0       | 1766 |
+      | 4       | 2            | 01.05.2024 | 30.04.2025 | 1766  | ORDINÆR_BARNETRYGD | 100     | 1766 |
+      | 4       | 2            | 01.05.2025 | 31.03.2042 | 0     | ORDINÆR_BARNETRYGD | 0       | 1968 |
+
+    Når vedtaksperiodene genereres for behandling 2
+
+
+    Så forvent at følgende begrunnelser er gyldige
+      | Fra dato   | Til dato   | VedtaksperiodeType | Regelverk Gyldige begrunnelser | Gyldige begrunnelser                    | Ugyldige begrunnelser |
+      | 01.05.2025 | 30.09.2036 | OPPHØR             |                                | ENDRET_UTBETALING_OPPHØR_ENDRE_MOTTAKER |                       |
+
+    Og når disse begrunnelsene er valgt for behandling 2
+      | Fra dato   | Til dato   | Standardbegrunnelser                    | Eøsbegrunnelser | Fritekster |
+      | 01.05.2025 | 30.09.2036 | ENDRET_UTBETALING_OPPHØR_ENDRE_MOTTAKER |                 |            |
+
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.05.2025 til 30.09.2036
+      | Begrunnelse                             | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
+      | ENDRET_UTBETALING_OPPHØR_ENDRE_MOTTAKER | STANDARD |               | 08.04.24             | 1           | april 2025                           |         | 0     | 26.02.24         |                         |                             |
