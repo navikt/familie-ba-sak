@@ -60,7 +60,8 @@
         <sonar.tests>src/test</sonar.tests>
         <sonar.projectKey>navikt_familie-ba-sak</sonar.projectKey>
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+
+        <kover.reportXml.path>${project.build.directory}/site/kover/report.xml</kover.reportXml.path>
     </properties>
 
     <dependencyManagement>
@@ -539,31 +540,6 @@
                 </dependencies>
             </plugin>
             <plugin>
-                <groupId>org.jetbrains.kotlinx</groupId>
-                <artifactId>kover-maven-plugin</artifactId>
-                <version>0.9.1</version>
-                <executions>
-                    <execution>
-                        <id>instr</id>
-                        <goals>
-                            <goal>instrumentation</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>kover-xml</id>
-                        <goals>
-                            <goal>report-xml</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>kover-log</id>
-                        <goals>
-                            <goal>log</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.3</version>
@@ -662,47 +638,41 @@
         </profile>
 
         <profile>
-            <id>jacoco</id>
+            <id>kover</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>${jacoco-maven-plugin.version}</version>
+                        <groupId>org.jetbrains.kotlinx</groupId>
+                        <artifactId>kover-maven-plugin</artifactId>
+                        <version>0.9.1</version>
                         <executions>
                             <execution>
-                                <id>prepare-agent</id>
+                                <id>instr</id>
                                 <goals>
-                                    <goal>prepare-agent</goal>
+                                    <goal>instrumentation</goal>
                                 </goals>
-                                <configuration>
-                                    <destFile>
-                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}/jacoco.exec
-                                    </destFile>
-                                </configuration>
                             </execution>
                             <execution>
-                                <id>report</id>
+                                <id>kover-xml</id>
                                 <goals>
-                                    <goal>report</goal>
+                                    <goal>report-xml</goal>
                                 </goals>
-                                <configuration>
-                                    <dataFile>
-                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}/jacoco.exec
-                                    </dataFile>
-                                    <outputDirectory>
-                                        ${project.build.directory}/jacoco/${jacocoTestDirectory}
-                                    </outputDirectory>
-                                    <formats>
-                                        <format>XML</format>
-                                    </formats>
-                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>kover-log</id>
+                                <goals>
+                                    <goal>log</goal>
+                                </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <xmlFile>${kover.reportXml.path}</xmlFile>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
+
     </profiles>
 
 </project>
