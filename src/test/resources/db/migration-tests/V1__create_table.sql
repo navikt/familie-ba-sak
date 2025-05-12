@@ -2333,8 +2333,6 @@ INSERT INTO public.batch VALUES (1002950, '2025-11-21 00:00:00', 'LEDIG');
 -- Data for Name: task; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-INSERT INTO public.task VALUES (51, '1654', 'UBEHANDLET', 1, '2025-05-12 11:53:48.055', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-07.01.2022', '2025-05-12 11:53:48.054853', NULL);
-INSERT INTO public.task VALUES (1, '1654', 'UBEHANDLET', 1, '2025-05-12 11:53:48.047', 'startsatsendringforallebehandlinger', 'callId=startsatsendringforallebehandlinger-06.01.2022', '2025-05-12 11:53:48.047492', NULL);
 
 
 --
