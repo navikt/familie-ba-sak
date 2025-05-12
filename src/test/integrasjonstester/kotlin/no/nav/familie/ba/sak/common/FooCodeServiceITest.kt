@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 import java.util.regex.Pattern
 
-class FooCodeServiceTest : AbstractSpringIntegrationTest() {
+class FooCodeServiceITest : AbstractSpringIntegrationTest() {
     private val fooCodeService = FooCodeService()
 
     @Test
