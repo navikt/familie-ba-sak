@@ -391,6 +391,7 @@ class CucumberMock(
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             kompetanseService = kompetanseService,
             localDateProvider = mockedDateProvider,
+            utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
         )
 
     val småbarnstilleggService = SmåbarnstilleggService(beregningService)

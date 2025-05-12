@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndri
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -52,7 +54,6 @@ class BehandlingsresultatEndringUtilsTest {
     fun `utledEndringsresultat skal returnere INGEN_ENDRING dersom det ikke finnes noe endringer i behandling`() {
         val endringsresultat =
             utledEndringsresultat(
-                nåMåned = YearMonth.now(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -64,6 +65,9 @@ class BehandlingsresultatEndringUtilsTest {
                 forrigeEndretAndeler = emptyList(),
                 personerIBehandling = emptySet(),
                 personerIForrigeBehandling = emptySet(),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = emptyList(),
+                forrigeUtenlandskPeriodebeløp = emptyList(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.INGEN_ENDRING))
@@ -83,18 +87,20 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
-                nåMåned = YearMonth.now(),
-                forrigeAndeler = listOf(forrigeAndel),
                 nåværendeAndeler = listOf(forrigeAndel.copy(kalkulertUtbetalingsbeløp = 40)),
+                forrigeAndeler = listOf(forrigeAndel),
                 personerFremstiltKravFor = emptyList(),
-                forrigeKompetanser = emptyList(),
                 nåværendeKompetanser = emptyList(),
+                forrigeKompetanser = emptyList(),
                 nåværendePersonResultat = emptySet(),
                 forrigePersonResultat = emptySet(),
                 nåværendeEndretAndeler = emptyList(),
                 forrigeEndretAndeler = emptyList(),
                 personerIBehandling = setOf(person),
                 personerIForrigeBehandling = setOf(person),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = emptyList(),
+                forrigeUtenlandskPeriodebeløp = emptyList(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -176,18 +182,20 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
-                nåMåned = YearMonth.now(),
-                forrigeAndeler = forrigeAndeler,
                 nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
                 personerFremstiltKravFor = emptyList(),
-                forrigeKompetanser = emptyList(),
                 nåværendeKompetanser = emptyList(),
-                forrigePersonResultat = setOf(forrigePersonResultat),
+                forrigeKompetanser = emptyList(),
                 nåværendePersonResultat = setOf(nåværendePersonResultat),
+                forrigePersonResultat = setOf(forrigePersonResultat),
                 nåværendeEndretAndeler = emptyList(),
                 forrigeEndretAndeler = emptyList(),
                 personerIBehandling = setOf(barn),
                 personerIForrigeBehandling = setOf(barn),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = emptyList(),
+                forrigeUtenlandskPeriodebeløp = emptyList(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -216,23 +224,25 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
-                nåMåned = YearMonth.now(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
-                forrigeKompetanser = listOf(forrigeKompetanse),
                 nåværendeKompetanser =
                     listOf(
                         forrigeKompetanse
                             .copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
                             .apply { behandlingId = nåværendeBehandling.id },
                     ),
+                forrigeKompetanser = listOf(forrigeKompetanse),
                 nåværendePersonResultat = emptySet(),
                 forrigePersonResultat = emptySet(),
                 nåværendeEndretAndeler = emptyList(),
                 forrigeEndretAndeler = emptyList(),
                 personerIBehandling = setOf(barnPerson),
                 personerIForrigeBehandling = setOf(barnPerson),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = emptyList(),
+                forrigeUtenlandskPeriodebeløp = emptyList(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
@@ -253,18 +263,59 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
-                nåMåned = YearMonth.now(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
-                forrigeKompetanser = emptyList(),
                 nåværendeKompetanser = emptyList(),
+                forrigeKompetanser = emptyList(),
                 nåværendePersonResultat = emptySet(),
                 forrigePersonResultat = emptySet(),
-                forrigeEndretAndeler = listOf(forrigeEndretAndel),
                 nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
+                forrigeEndretAndeler = listOf(forrigeEndretAndel),
                 personerIBehandling = setOf(barn),
                 personerIForrigeBehandling = setOf(barn),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = emptyList(),
+                forrigeUtenlandskPeriodebeløp = emptyList(),
+            )
+
+        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
+    }
+
+    @Test
+    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i utenlandsk periodebeløp`() {
+        val barnPerson = lagPerson(aktør = barn1Aktør)
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+
+        val forrigeUtenlandskPeriodebeløp =
+            lagUtenlandskPeriodebeløp(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                valutakode = "NOK",
+                beløp = BigDecimal(500),
+                intervall = Intervall.MÅNEDLIG,
+                utbetalingsland = "NORGE",
+                fom = jan22,
+                tom = mai22,
+            )
+
+        val endringsresultat =
+            utledEndringsresultat(
+                nåværendeAndeler = emptyList(),
+                forrigeAndeler = emptyList(),
+                personerFremstiltKravFor = emptyList(),
+                nåværendeKompetanser = emptyList(),
+                forrigeKompetanser = emptyList(),
+                nåværendePersonResultat = emptySet(),
+                forrigePersonResultat = emptySet(),
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+                personerIBehandling = setOf(barnPerson),
+                personerIForrigeBehandling = setOf(barnPerson),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp.copy(valutakode = "SEK").apply { behandlingId = nåværendeBehandling.id }),
+                forrigeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))

@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -810,6 +811,32 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             )
 
         mock.stegService.håndterVilkårsvurdering(behandlinger[behandlingId]!!)
+    }
+
+    @Og("når behandlingsresultatet er utledet for behandling {}")
+    fun `når behandlingsresultatet er utledet for behehandling`(
+        behandlingId: Long,
+    ) {
+        val mock =
+            CucumberMock(
+                dataFraCucumber = this,
+                nyBehandlingId = behandlingId,
+            )
+
+        val behandling = behandlinger[behandlingId]!!
+
+        val behandlingsresultat = mock.behandlingsresultatService.utledBehandlingsresultat(behandlingId)
+
+        behandlinger[behandlingId] = behandling.copy(resultat = behandlingsresultat)
+    }
+
+    @Så("forvent at behandlingsresultatet er {} på behandling {}")
+    fun `forvent følgende behandlingsresultat på behandling`(
+        forventetBehandlingsresultat: Behandlingsresultat,
+        behandlingId: Long,
+    ) {
+        val faktiskResultat = behandlinger[behandlingId]!!.resultat
+        assertThat(faktiskResultat).isEqualTo(forventetBehandlingsresultat)
     }
 }
 
