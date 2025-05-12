@@ -53,7 +53,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = eøsPerioder,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetTidslinje,
                 inneværendeMåned = YearMonth.now(),
             )
@@ -76,7 +76,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = eøsPerioder,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 inneværendeMåned = YearMonth.now(),
             )
 
@@ -104,7 +104,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 inneværendeMåned = YearMonth.now(),
             )
 
@@ -136,7 +136,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
@@ -182,7 +182,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
@@ -210,7 +210,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
@@ -273,9 +273,9 @@ class TilpassKompetanserTilRegelverkTest {
                 barn2.aktør to "EEEENNEEE".tilRegelverkResultatTidslinje(jan2020),
             )
 
-        val barnasHarEtterbetaling3År =
+        val endredeUtbetalingPerioderSomKreverKompetanseTidlinjer =
             mapOf(
-                barn1.aktør to "TTT      ".somBoolskTidslinje(jan2020),
+                barn1.aktør to "FFF      ".somBoolskTidslinje(jan2020),
             )
 
         val forventedeKompetanser =
@@ -290,7 +290,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = barnasHarEtterbetaling3År,
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = endredeUtbetalingPerioderSomKreverKompetanseTidlinjer,
                 inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
@@ -310,16 +310,16 @@ class TilpassKompetanserTilRegelverkTest {
                 barn2.aktør to "EEEEEEEEE".tilRegelverkResultatTidslinje(jan2020),
             )
 
-        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
+        val endredeUtbetalingPerioderSomKreverKompetanseTidlinjer =
             mapOf(
-                Pair(barn1.aktør, "     tttt".somBoolskTidslinje(jan2020)),
+                Pair(barn1.aktør, "     FFFF".somBoolskTidslinje(jan2020)),
             )
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = endredeUtbetalingPerioderSomKreverKompetanseTidlinjer,
                 inneværendeMåned = YearMonth.now(),
             ).sortedBy { it.fom }
 
@@ -351,17 +351,17 @@ class TilpassKompetanserTilRegelverkTest {
                 barn2.aktør to "EEEE  EE".tilRegelverkResultatTidslinje(sep2024),
             )
 
-        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
+        val endredeUtbetalingPerioderSomKreverKompetanseTidlinjer =
             mapOf(
-                Pair(barn1.aktør, "FFFFFFFFFFF".somBoolskTidslinje(sep2024)),
-                Pair(barn2.aktør, "FFFFTTFF".somBoolskTidslinje(sep2024)),
+                Pair(barn1.aktør, "TTTTTTTTTTT".somBoolskTidslinje(sep2024)),
+                Pair(barn2.aktør, "TTTTFFTT".somBoolskTidslinje(sep2024)),
             )
 
         val faktiskeKompetanser =
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = kompetanser,
                 barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = endredeUtbetalingPerioderSomKreverKompetanseTidlinjer,
                 inneværendeMåned = inneværendeMåned,
             )
 
@@ -382,7 +382,7 @@ class TilpassKompetanserTilRegelverkTest {
             tilpassKompetanserTilRegelverk(
                 gjeldendeKompetanser = emptyList(),
                 barnaRegelverkTidslinjer = barnaRegelverkTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = emptyMap(),
+                endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = emptyMap(),
                 inneværendeMåned = des(2024),
             )
 

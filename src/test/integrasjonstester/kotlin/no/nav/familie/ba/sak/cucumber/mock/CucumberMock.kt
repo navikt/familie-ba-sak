@@ -375,6 +375,7 @@ class CucumberMock(
             kompetanseRepository = kompetanseRepository,
             endringsabonnenter = endringsabonnenterForKompetanse,
             clockProvider = clockProvider,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     val kompetanseService = KompetanseService(kompetanseRepository, endringsabonnenter = endringsabonnenterForKompetanse)

@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.skalUtbetales
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -18,13 +19,15 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
 import no.nav.familie.tidslinje.Tidslinje
+import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.YearMonth
 
@@ -40,7 +43,7 @@ class UtbetalingTidslinjeServiceTest {
 
         // Act
         val resultatMap =
-            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(
                 behandlingId = BehandlingId(behandling.id),
                 endretUtbetalingAndeler = emptyList(),
             )
@@ -68,7 +71,7 @@ class UtbetalingTidslinjeServiceTest {
 
         // Act
         val resultatMap =
-            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(
                 behandlingId = BehandlingId(behandling.id),
                 endretUtbetalingAndeler = emptyList(),
             )
@@ -77,8 +80,9 @@ class UtbetalingTidslinjeServiceTest {
         assertEquals(emptyMap<Aktør, Tidslinje<Boolean>>(), resultatMap)
     }
 
-    @Test
-    fun `Skal returnere false-periode hvis det finnes utbetaling av utvidet når ordinær er endret til 0kr`() {
+    @ParameterizedTest
+    @EnumSource(Årsak::class, names = ["ALLEREDE_UTBETALT", "ETTERBETALING_3ÅR", "DELT_BOSTED", "ETTERBETALING_3MND"], mode = EnumSource.Mode.INCLUDE)
+    fun `Skal returnere true-periode hvis det finnes utbetaling utvidet når ordinær er endret til 0kr med årsak`(årsak: Årsak) {
         // Arrange
         val behandling = lagBehandling()
         val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
@@ -100,14 +104,14 @@ class UtbetalingTidslinjeServiceTest {
                 behandlingId = behandling.id,
                 person = barn,
                 prosent = BigDecimal.ZERO,
-                årsak = Årsak.ALLEREDE_UTBETALT,
+                årsak = årsak,
                 fom = fomUtvidetOgEndring,
-                tom = YearMonth.now(),
+                tom = tomUtvidet,
             )
 
         // Act
         val resultatMap =
-            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(
                 behandlingId = BehandlingId(behandling.id),
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
             )
@@ -124,11 +128,62 @@ class UtbetalingTidslinjeServiceTest {
 
         assertEquals(fomUtvidetOgEndring, periode.fom?.toYearMonth())
         assertEquals(tomUtvidet, periode.tom?.toYearMonth())
-        assertFalse(periode.verdi!!)
+        assertThat(periode.verdi!!).isTrue
+    }
+
+    @ParameterizedTest
+    @EnumSource(Årsak::class, names = ["ENDRE_MOTTAKER"], mode = EnumSource.Mode.INCLUDE)
+    fun `Skal returnere false-periode hvis det finnes utbetaling utvidet når ordinær er endret til 0kr med årsak`(årsak: Årsak) {
+        // Arrange
+        val behandling = lagBehandling()
+        val fomUtvidetOgEndring = YearMonth.now().minusYears(2)
+        val tomUtvidet = YearMonth.now().plusYears(1)
+
+        every { beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = fomUtvidetOgEndring,
+                    tom = tomUtvidet,
+                    ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                    kalkulertUtbetalingsbeløp = 1000,
+                ),
+            )
+
+        val barn = lagPerson(type = PersonType.BARN)
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                person = barn,
+                prosent = BigDecimal.ZERO,
+                årsak = årsak,
+                fom = fomUtvidetOgEndring,
+                tom = tomUtvidet,
+            )
+
+        // Act
+        val resultatMap =
+            utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
+            )
+
+        // Assert
+        assertEquals(1, resultatMap.size)
+
+        val tidslinjeForBarn = resultatMap[barn.aktør]
+        val perioderForBarn = tidslinjeForBarn?.tilPerioder() ?: emptyList()
+
+        assertEquals(1, perioderForBarn.size)
+
+        val periode = perioderForBarn.first()
+
+        assertEquals(fomUtvidetOgEndring, periode.fom?.toYearMonth())
+        assertEquals(tomUtvidet, periode.tom?.toYearMonth())
+        assertThat(periode.verdi!!).isFalse
     }
 
     @Test
-    fun `Skal returnere true-periode hvis det finnes endring hvor ordinær er satt til 0kr og det ikke betales ut utvidet`() {
+    fun `Skal returnere false-periode hvis det finnes endring hvor ordinær er satt til 0kr og det ikke betales ut utvidet`() {
         // Arrange
         val behandling = lagBehandling()
 
@@ -149,7 +204,7 @@ class UtbetalingTidslinjeServiceTest {
 
         // Act
         val resultatMap =
-            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+            utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(
                 behandlingId = BehandlingId(behandling.id),
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
             )
@@ -164,13 +219,13 @@ class UtbetalingTidslinjeServiceTest {
         val førstePeriode = perioderForBarn.first()
 
         assertEquals(fomEndretUtbetaling.minusMonths(1), førstePeriode.tom?.toYearMonth())
-        assertFalse(førstePeriode.verdi!!)
+        assertThat(førstePeriode.verdi).isNull()
 
         val periodeUtenUtbetaling = perioderForBarn.last()
 
         assertEquals(fomEndretUtbetaling, periodeUtenUtbetaling.fom?.toYearMonth())
         assertEquals(tomEndretUtbetaling, periodeUtenUtbetaling.tom?.toYearMonth())
-        assertTrue(periodeUtenUtbetaling.verdi!!)
+        assertThat(periodeUtenUtbetaling.verdi!!).isFalse
     }
 
     @Nested
@@ -194,7 +249,10 @@ class UtbetalingTidslinjeServiceTest {
                     person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
                 )
 
-            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+            val faktisk =
+                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer().mapValues { (_, tidslinje) ->
+                    tidslinje.mapVerdi { !it.skalUtbetales() }
+                }
 
             assertEquals(forventet, faktisk)
         }
@@ -235,7 +293,10 @@ class UtbetalingTidslinjeServiceTest {
                     person2.aktør to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull(),
                 )
 
-            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+            val faktisk =
+                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer().mapValues { (_, tidslinje) ->
+                    tidslinje.mapVerdi { !it.skalUtbetales() }
+                }
 
             assertEquals(forventet, faktisk)
         }
@@ -259,51 +320,12 @@ class UtbetalingTidslinjeServiceTest {
                     person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
                 )
 
-            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
+            val faktisk =
+                endringer.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer().mapValues { (_, tidslinje) ->
+                    tidslinje.mapVerdi { !it.skalUtbetales() }
+                }
 
             assertEquals(forventet, faktisk)
-        }
-
-        @Test
-        fun `lager tidslinje for ett barn med endre mottaker`() {
-            val person = tilfeldigPerson()
-            val endringer =
-                listOf(
-                    lagEndretUtbetalingAndel(
-                        person = person,
-                        årsak = Årsak.ENDRE_MOTTAKER,
-                        fom = YearMonth.of(2020, 3),
-                        tom = YearMonth.of(2020, 7),
-                        prosent = BigDecimal.ZERO,
-                    ),
-                )
-
-            val forventet =
-                mapOf(
-                    person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
-                )
-
-            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
-
-            assertEquals(forventet, faktisk)
-        }
-
-        @Test
-        fun `ikke lag tidslinje hvis årsaken ikke er etterbetaling 3 år, allerede utbetalt eller endre mottaker`() {
-            val person = tilfeldigPerson()
-            val endringer =
-                listOf(
-                    lagEndretUtbetalingAndel(
-                        person = person,
-                        årsak = Årsak.DELT_BOSTED,
-                        fom = YearMonth.of(2020, 3),
-                        tom = YearMonth.of(2020, 7),
-                    ),
-                )
-
-            val faktisk = endringer.tilBarnasSkalIkkeUtbetalesTidslinjer()
-
-            assertEquals(emptyMap<Aktør, Tidslinje<Boolean>>(), faktisk)
         }
     }
 }
