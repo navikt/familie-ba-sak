@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -31,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.matcherErAutomatisk
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalFiltreresPåHendelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalVisesSelvOmIkkeEndring
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -105,6 +107,11 @@ internal fun hentStandardBegrunnelser(
             begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
         }
 
+    val filtrertPåUtgjørendeVilkårOgEndretUtbetalingAndelIForrigePeriode =
+        relevanteBegrunnelser.filterValues {
+            it.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePeriode(begrunnelseGrunnlag, vedtaksperiode)
+        }
+
     val filtrertPåEtterEndretUtbetaling =
         filtrertPåTema
             .filterValues {
@@ -138,7 +145,32 @@ internal fun hentStandardBegrunnelser(
         filtrertPåSmåbarnstillegg.keys +
         filtrertPåEtterEndretUtbetaling.keys +
         filtrertPåHendelser.keys +
-        filtrertPåSkalVisesSelvOmIkkeEndring.keys
+        filtrertPåSkalVisesSelvOmIkkeEndring.keys +
+        filtrertPåUtgjørendeVilkårOgEndretUtbetalingAndelIForrigePeriode.keys
+}
+
+fun SanityBegrunnelse.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePeriode(
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
+): Boolean {
+    val endretUtbetalingAndelForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel as? EndretUtbetalingAndelForVedtaksperiode ?: return false
+    val vilkårForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.vilkårResultater
+
+    val oppfylteVilkårForrigePeriodeSomStarterRettFørEndretUtbetalingAndelOgSlutterForrigeMåned =
+        vilkårForrigePeriode
+            ?.filter {
+                val månedenEtterVilkårFom = it.fom?.plusMonths(1) ?: return@filter false
+                val vilkårErUtgjørendeSammeMånedSomStartPåEndretUtbetalingAndel = månedenEtterVilkårFom.toYearMonth() == endretUtbetalingAndelForrigePeriode.fom
+                val vedtaksperiodenStarterMånedEtterSluttPåEndretUtbetalingAndel = endretUtbetalingAndelForrigePeriode.tom.plusMonths(1) == vedtaksperiode.fom?.toYearMonth()
+
+                vilkårErUtgjørendeSammeMånedSomStartPåEndretUtbetalingAndel &&
+                    vedtaksperiodenStarterMånedEtterSluttPåEndretUtbetalingAndel &&
+                    it.resultat == Resultat.OPPFYLT
+            }?.map { it.vilkårType } ?: emptyList()
+
+    return oppfylteVilkårForrigePeriodeSomStarterRettFørEndretUtbetalingAndelOgSlutterForrigeMåned.any {
+        vilkår.contains(it)
+    }
 }
 
 private fun filtrerPåVilkår(
