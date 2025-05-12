@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
         with:
           name: koverUT
-          path: target/kover/UT/UT.xml
+          path: target/kover/UT.xml
           retention-days: 1
           overwrite: true
 
@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # ratchet:actions/upload-artifact@v4
         with:
           name: koverIT
-          path: target/kover/IT/IT.xml
+          path: target/kover/IT.xml
           retention-days: 1
           overwrite: true
 
