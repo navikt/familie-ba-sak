@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelerOppdatertAbonnent
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -37,6 +39,7 @@ class TilpassKompetanserTilRegelverkService(
     private val utbetalingTidslinjeService: UtbetalingTidslinjeService,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val clockProvider: ClockProvider,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
@@ -55,20 +58,32 @@ class TilpassKompetanserTilRegelverkService(
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
-        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
-            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
-                behandlingId = behandlingId,
-                endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id),
-            )
+        val endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id)
 
         val oppdaterteKompetanser =
-            tilpassKompetanserTilRegelverk(
-                gjeldendeKompetanser = gjeldendeKompetanser,
-                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
-                annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
-                inneværendeMåned = YearMonth.now(clockProvider.get()),
-            ).medBehandlingId(behandlingId)
+            if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false)) {
+                val endredeUtbetalingPerioderSomKreverKompetanse =
+                    utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
+
+                tilpassKompetanserTilRegelverk(
+                    gjeldendeKompetanser = gjeldendeKompetanser,
+                    barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                    endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = endredeUtbetalingPerioderSomKreverKompetanse,
+                    annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
+                    inneværendeMåned = YearMonth.now(clockProvider.get()),
+                ).medBehandlingId(behandlingId)
+            } else {
+                val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
+                    utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
+
+                tilpassKompetanserTilRegelverkGammel(
+                    gjeldendeKompetanser = gjeldendeKompetanser,
+                    barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                    utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
+                    annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
+                    inneværendeMåned = YearMonth.now(clockProvider.get()),
+                ).medBehandlingId(behandlingId)
+            }
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
@@ -79,6 +94,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val utbetalingTidslinjeService: UtbetalingTidslinjeService,
     private val clockProvider: ClockProvider,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) : EndretUtbetalingAndelerOppdatertAbonnent {
@@ -100,23 +116,37 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val annenForelderOmfattetAvNorskLovgivningTidslinje =
             vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
-        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
-            utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
-
         val oppdaterteKompetanser =
-            tilpassKompetanserTilRegelverk(
-                gjeldendeKompetanser = gjeldendeKompetanser,
-                barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
-                utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
-                annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
-                inneværendeMåned = YearMonth.now(clockProvider.get()),
-            ).medBehandlingId(behandlingId)
+            if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false)) {
+                val endredeUtbetalingPerioderSomKreverKompetanse =
+                    utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
+
+                tilpassKompetanserTilRegelverk(
+                    gjeldendeKompetanser = gjeldendeKompetanser,
+                    barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                    endredeUtbetalingPerioderSomKreverKompetanseTidlinjer = endredeUtbetalingPerioderSomKreverKompetanse,
+                    annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
+                    inneværendeMåned = YearMonth.now(clockProvider.get()),
+                ).medBehandlingId(behandlingId)
+            } else {
+                val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
+                    utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
+
+                tilpassKompetanserTilRegelverkGammel(
+                    gjeldendeKompetanser = gjeldendeKompetanser,
+                    barnaRegelverkTidslinjer = barnasRegelverkResultatTidslinjer,
+                    utbetalesIkkeOrdinærEllerUtvidetTidslinjer = utbetalesIkkeOrdinærEllerUtvidetTidslinjer,
+                    annenForelderOmfattetAvNorskLovgivningTidslinje = annenForelderOmfattetAvNorskLovgivningTidslinje,
+                    inneværendeMåned = YearMonth.now(clockProvider.get()),
+                ).medBehandlingId(behandlingId)
+            }
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
     }
 }
 
-fun tilpassKompetanserTilRegelverk(
+@Deprecated("Bruk ny tilpassKompetanserTilRegelverk metode. Denne skal fases ut.")
+fun tilpassKompetanserTilRegelverkGammel(
     gjeldendeKompetanser: Collection<Kompetanse>,
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat>>,
     utbetalesIkkeOrdinærEllerUtvidetTidslinjer: Map<Aktør, Tidslinje<Boolean>>,
@@ -130,6 +160,36 @@ fun tilpassKompetanserTilRegelverk(
                 when (utbetalesIkkeOrdinærEllerUtvidet) {
                     true -> null // ta bort regelverk dersom det verken utbetales ordinær på barnet eller utvidet for søker
                     else -> regelverk
+                }
+            }
+
+    return gjeldendeKompetanser
+        .tilSeparateTidslinjerForBarna()
+        .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, eøsRegelverk ->
+            eøsRegelverk?.let { kompetanse ?: Kompetanse.NULL }
+        }.mapValues { (_, value) ->
+            value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
+                kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
+            }
+        }.mapValues { (_, tidslinje) ->
+            tidslinje.forlengFremtidTilUendelig(tidspunktForUendelighet = inneværendeMåned.sisteDagIInneværendeMåned())
+        }.tilSkjemaer()
+}
+
+fun tilpassKompetanserTilRegelverk(
+    gjeldendeKompetanser: Collection<Kompetanse>,
+    barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat>>,
+    endredeUtbetalingPerioderSomKreverKompetanseTidlinjer: Map<Aktør, Tidslinje<Boolean>>,
+    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean> = tomTidslinje(),
+    inneværendeMåned: YearMonth,
+): Collection<Kompetanse> {
+    val barnasEøsRegelverkTidslinjer =
+        barnaRegelverkTidslinjer
+            .tilBarnasEøsRegelverkTidslinjer()
+            .leftJoin(endredeUtbetalingPerioderSomKreverKompetanseTidlinjer) { regelverk, endretUtbetalingPeriodeSomKreverKompetanse ->
+                when (endretUtbetalingPeriodeSomKreverKompetanse) {
+                    false -> null // Endrede utbetalingsperioder fører til at vi ikke krever kompetanse
+                    else -> regelverk // Ingen endrede utbetalingsperioder eller de endrede utbetalingsperiodene fører til at vi krever kompetanse
                 }
             }
 
