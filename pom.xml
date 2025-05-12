@@ -549,6 +549,7 @@
                     <excludedGroups>${excludedGroups}</excludedGroups>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
+                    <argLine>-Xmx2g</argLine>
                 </configuration>
             </plugin>
             <plugin>
