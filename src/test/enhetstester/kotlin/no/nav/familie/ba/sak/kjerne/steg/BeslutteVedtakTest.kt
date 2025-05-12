@@ -32,10 +32,13 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
+import no.nav.familie.ba.sak.task.JournalførTilbakekrevingsvedtakMotregningBrevTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -67,6 +70,8 @@ class BeslutteVedtakTest {
     private val simuleringService = mockk<SimuleringService>()
     private val tilbakekrevingService = mockk<TilbakekrevingService>()
     private val brevmottakerService = mockk<BrevmottakerService>()
+    private val tilbakekrevingsvedtakMotregningService = mockk<TilbakekrevingsvedtakMotregningService>()
+    private val tilbakekrevingsvedtakMotregningBrevService = mockk<TilbakekrevingsvedtakMotregningBrevService>()
 
     val beslutteVedtak =
         BeslutteVedtak(
@@ -84,6 +89,8 @@ class BeslutteVedtakTest {
             simuleringService = simuleringService,
             tilbakekrevingService = tilbakekrevingService,
             brevmottakerService = brevmottakerService,
+            tilbakekrevingsvedtakMotregningService = tilbakekrevingsvedtakMotregningService,
+            tilbakekrevingsvedtakMotregningBrevService = tilbakekrevingsvedtakMotregningBrevService,
         )
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
@@ -115,6 +122,7 @@ class BeslutteVedtakTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns null
         every { simuleringService.hentFeilutbetaling(any<Long>()) } returns BigDecimal.ZERO
+        every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns null
     }
 
     @Nested
@@ -141,6 +149,36 @@ class BeslutteVedtakTest {
 
             verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
             Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
+        }
+
+        @Test
+        fun `Ved godkjent vedtak og eksisterende tilbakekrevingsvedtak ved motregning brev så skal det opprettes task for å journalføre denne`() {
+            // Arrange
+            val behandling = lagBehandling()
+            behandling.status = BehandlingStatus.FATTER_VEDTAK
+            behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
+            val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
+
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns mockk()
+            every { tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(any()) } returns mockk()
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            mockkObject(FerdigstillOppgaver.Companion)
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+            mockkObject(JournalførTilbakekrevingsvedtakMotregningBrevTask.Companion)
+            every { JournalførTilbakekrevingsvedtakMotregningBrevTask.opprettTask(behandling.id) } returns mockk()
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { brevmottakerService.hentBrevmottakere(behandling.id) } returns
+                listOf(
+                    lagBrevmottakerDb(behandlingId = behandling.id),
+                )
+
+            // Act
+            beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
+
+            // Assert
+            verify(exactly = 1) { JournalførTilbakekrevingsvedtakMotregningBrevTask.opprettTask(any()) }
         }
 
         @Test
@@ -387,6 +425,29 @@ class BeslutteVedtakTest {
                 }.melding
 
             assertThat(feilmelding).isEqualTo("Det er en feilutbetaling som saksbehandler ikke har tatt stilling til. Saken må underkjennes og sendes tilbake til saksbehandler for ny vurdering.")
+        }
+
+        @Test
+        fun `Skal oppdatere vedtaksbrev for tilbakekrevingsvedtak motregning`() {
+            // Arrange
+            val behandling = lagBehandling()
+
+            every { brevmottakerService.hentBrevmottakere(any()) } returns emptyList()
+            every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+            every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+            every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            every { tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(any()) } returns mockk()
+            every { tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(any()) } returns mockk()
+
+            // Act
+            beslutteVedtak.utførStegOgAngiNeste(behandling, RestBeslutningPåVedtak(Beslutning.GODKJENT))
+
+            // Assert
+            verify(exactly = 1) {
+                tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(
+                    behandling.id,
+                )
+            }
         }
     }
 }

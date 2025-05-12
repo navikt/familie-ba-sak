@@ -11,9 +11,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
+import no.nav.familie.ba.sak.kjerne.beregning.AvregningService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.validerPerioderInneholderBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -37,6 +41,9 @@ class SendTilBeslutter(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val validerBrevmottakerService: ValiderBrevmottakerService,
+    private val avregningService: AvregningService,
+    private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
+    private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -65,6 +72,12 @@ class SendTilBeslutter(
                 fagsakId = behandling.fagsak.id,
             )
         }
+
+        if (avregningService.behandlingHarPerioderSomAvregnes(behandling.id)) {
+            tilbakekrevingsvedtakMotregningService
+                .hentTilbakekrevingsvedtakMotregningEllerKastFunksjonellFeil(behandling.id)
+                .validerAtTilbakekrevingsvedtakMotregningKanSendesTilBeslutter()
+        }
     }
 
     override fun utførStegOgAngiNeste(
@@ -92,6 +105,10 @@ class SendTilBeslutter(
         if (!behandling.skalBehandlesAutomatisk) {
             val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
             vedtakService.oppdaterVedtakMedStønadsbrev(vedtak)
+        }
+
+        tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
+            tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id)
         }
 
         behandlingService.sendBehandlingTilBeslutter(behandling)

@@ -53,6 +53,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseMedData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -81,6 +82,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     var valutakurs = mutableMapOf<Long, List<Valutakurs>>()
     var utenlandskPeriodebeløp = mutableMapOf<Long, List<UtenlandskPeriodebeløp>>()
+    var tilbakekrevingsvedtakMotregning = mutableMapOf<Long, TilbakekrevingsvedtakMotregning>()
     var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     var tilkjenteYtelser = mutableMapOf<Long, TilkjentYtelse>()
     var overstyrteEndringstidspunkt = mutableMapOf<Long, LocalDate>()

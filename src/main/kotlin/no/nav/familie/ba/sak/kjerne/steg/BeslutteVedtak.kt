@@ -24,12 +24,15 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningBrevService
+import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.JournalførTilbakekrevingsvedtakMotregningBrevTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -54,6 +57,8 @@ class BeslutteVedtak(
     private val simuleringService: SimuleringService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val brevmottakerService: BrevmottakerService,
+    private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
+    private val tilbakekrevingsvedtakMotregningBrevService: TilbakekrevingsvedtakMotregningBrevService,
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
@@ -112,7 +117,15 @@ class BeslutteVedtak(
 
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
+            tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
+                opprettJournalførTilbakekrevingsvedtakMotregningBrevTask(behandling)
+            }
+
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
+
+            tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
+                tilbakekrevingsvedtakMotregningBrevService.opprettOgLagreTilbakekrevingsvedtakMotregningPdf(behandling.id)
+            }
 
             val nesteSteg = sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling)
 
@@ -231,6 +244,16 @@ class BeslutteVedtak(
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 vedtakId = vedtak.id,
                 personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
+                behandlingId = behandling.id,
+            )
+        taskRepository.save(task)
+    }
+
+    private fun opprettJournalførTilbakekrevingsvedtakMotregningBrevTask(
+        behandling: Behandling,
+    ) {
+        val task =
+            JournalførTilbakekrevingsvedtakMotregningBrevTask.opprettTask(
                 behandlingId = behandling.id,
             )
         taskRepository.save(task)
