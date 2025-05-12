@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.UtfyltEndretUtbetali
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 sealed interface IEndretUtbetalingAndelForVedtaksperiode {
     val prosent: BigDecimal
@@ -16,6 +17,8 @@ data class EndretUtbetalingAndelForVedtaksperiode(
     override val prosent: BigDecimal,
     override val årsak: Årsak,
     override val søknadstidspunkt: LocalDate,
+    val fom: YearMonth,
+    val tom: YearMonth,
 ) : IEndretUtbetalingAndelForVedtaksperiode
 
 data class EndretUtbetalingAndelForVedtaksperiodeDeltBosted(
@@ -38,5 +41,7 @@ fun IUtfyltEndretUtbetalingAndel.tilEndretUtbetalingAndelForVedtaksperiode(): IE
             prosent = this.prosent,
             årsak = this.årsak,
             søknadstidspunkt = this.søknadstidspunkt,
+            fom = this.fom,
+            tom = this.tom,
         )
     }
