@@ -437,6 +437,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -461,6 +462,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -504,6 +506,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -523,6 +526,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -558,6 +562,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 1054,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal(100),
@@ -573,6 +578,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 1766,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1766,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal(100),
@@ -612,6 +618,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -631,6 +638,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1766,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -673,6 +681,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 1054,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal(100),
@@ -717,6 +726,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                         AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                             aktør = barn.aktør,
                             beløp = 0,
+                            beløpUtenEndretUtbetaling = 0,
                             sats = 1054,
                             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                             prosent = BigDecimal.ZERO,
@@ -773,6 +783,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                             AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 0,
+                                beløpUtenEndretUtbetaling = 0,
                                 sats = 1054,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 prosent = BigDecimal.ZERO,
@@ -795,6 +806,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                             AndelTilkjentYtelseMedEndretUtbetalingGenerator.AndelMedEndretUtbetalingForTidslinje(
                                 aktør = barn.aktør,
                                 beløp = 1054,
+                                beløpUtenEndretUtbetaling = 0,
                                 sats = 1054,
                                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                                 prosent = BigDecimal(100),

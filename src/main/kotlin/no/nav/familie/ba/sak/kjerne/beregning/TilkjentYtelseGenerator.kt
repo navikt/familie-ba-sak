@@ -56,6 +56,7 @@ class TilkjentYtelseGenerator(
                         stønadTom = it.stønadTom,
                         kalkulertUtbetalingsbeløp = it.beløp,
                         nasjonaltPeriodebeløp = it.beløp,
+                        beløpUtenEndretUtbetaling = it.beløp,
                         type = YtelseType.ORDINÆR_BARNETRYGD,
                         sats = it.sats,
                         prosent = it.prosent,

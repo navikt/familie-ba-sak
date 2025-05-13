@@ -93,6 +93,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                     AndelMedEndretUtbetalingForTidslinje(
                         aktør = andelTilkjentYtelse.aktør,
                         beløp = nyttBeløp,
+                        beløpUtenEndretUtbetaling = andelTilkjentYtelse.beløpUtenEndretUtbetaling ?: andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
                         sats = andelTilkjentYtelse.sats,
                         ytelseType = andelTilkjentYtelse.type,
                         prosent = prosent,
@@ -109,6 +110,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
     internal data class AndelMedEndretUtbetalingForTidslinje(
         val aktør: Aktør,
         val beløp: Int,
+        val beløpUtenEndretUtbetaling: Int,
         val sats: Int,
         val ytelseType: YtelseType,
         val prosent: BigDecimal,
@@ -134,6 +136,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                 kalkulertUtbetalingsbeløp = this.verdi.beløp,
                 nasjonaltPeriodebeløp = this.verdi.beløp,
                 differanseberegnetPeriodebeløp = null,
+                beløpUtenEndretUtbetaling = this.verdi.beløpUtenEndretUtbetaling,
                 sats = this.verdi.sats,
                 prosent = this.verdi.prosent,
                 stønadFom = this.fom?.toYearMonth() ?: throw Feil("Fra og med-dato ikke satt"),

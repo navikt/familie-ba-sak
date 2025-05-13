@@ -121,6 +121,8 @@ class TilkjentYtelseBuilder(
                                     // Overskrives under
                                     kalkulertUtbetalingsbeløp = 0,
                                     // Overskrives under
+                                    beløpUtenEndretUtbetaling = 0,
+                                    // Overskrives under
                                     nasjonaltPeriodebeløp = 0,
                                     // Overskrives under
                                     differanseberegnetPeriodebeløp = null,
@@ -145,6 +147,7 @@ class TilkjentYtelseBuilder(
                         aty.copy(
                             sats = nasjonalt(sats) ?: kalkulert(sats),
                             kalkulertUtbetalingsbeløp = kalkulert(sats),
+                            beløpUtenEndretUtbetaling = nasjonalt(sats) ?: kalkulert(sats),
                             nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
                             differanseberegnetPeriodebeløp = differanse(sats),
                         )
