@@ -15,7 +15,7 @@ object EndringIUtenlandskPeriodebeløpUtil {
 
         val endringerTidslinje =
             nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-                forrige.erObligatoriskeFelterUtenomTidsperioderSatt() && nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeUtenlandskPeriodebeløp = forrige)
+                nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeUtenlandskPeriodebeløp = forrige)
             }
 
         return endringerTidslinje
