@@ -114,6 +114,16 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+      - name: Debug coverage files
+        run: |
+          echo "Files in kover/UT:"
+          ls -lh kover/UT
+          echo "Files in kover/IT:"
+          ls -lh kover/IT
+          echo "Show head of UT.xml:"
+          head -n 20 kover/UT/UT.xml || true
+          echo "Show head of IT.xml:"
+          head -n 20 kover/IT/IT.xml || true
       - name: Kjør Sonar
         env:
           MAVEN_OPTS: -Xss1024M -Xmx2048M
