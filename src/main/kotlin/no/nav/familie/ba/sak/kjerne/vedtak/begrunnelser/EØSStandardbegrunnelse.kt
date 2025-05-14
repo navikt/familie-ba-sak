@@ -210,6 +210,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetUkMidlertidigDifferanseutbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_UK_SØKER_HAR_NORSK_ARBEIDSGIVER_I_STORBRITANNIA {
+        override val sanityApiNavn = "innvilgetUkSokerHarNorskArbeidsgiverIStorbritannia"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     INNVILGET_PRIMÆRLAND_DEN_ANDRE_FORELDEREN_UTSENDT_ARBEIDSTAKER {
         override val sanityApiNavn = "innvilgetPrimaerlandDenAndreForelderenUtsendtArbeidstaker"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
@@ -236,6 +240,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     },
     INNVILGET_SEKUNDÆRLAND_HELE_FAMILIEN_BOSATT_UTENFOR_NORGE {
         override val sanityApiNavn = "innvilgetSekundaerlandHeleFamilienBosattUtenforNorge"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SEKUNDÆRLAND_SØKER_HAR_NORSK_ARBEIDSGIVER_I_EØS_LAND {
+        override val sanityApiNavn = "innvilgetSekundarSokerHarNorskArbeidsgiverIEosLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
+    INNVILGET_SEKUNDÆRLAND_SØKER_HAR_NORSK_ARBEIDSGIVER_I_STORBRITANNIA {
+        override val sanityApiNavn = "innvilgetSekundarSokerHarNorskArbeidsgiverIStorbritannia"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
     INNVILGET_SELVSTENDIG_RETT_PRIMÆRLAND_STANDARD {
@@ -673,6 +685,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     },
     FORTSATT_INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_NULLUTBETALING {
         override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SELVSTENDIG_RETT_TILLEGSTEKST_VEDTAK_FOR_SED {
+        override val sanityApiNavn = "fortsattInnvilgetSelvstendigRettTilleggstekstVedtakForSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
     REDUKSJON_BARN_DØD_EØS {
