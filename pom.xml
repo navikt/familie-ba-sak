@@ -23,14 +23,14 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250505123518_aa76fed</prosessering.version>
+        <prosessering.version>2.20250512065737_a9c3191</prosessering.version>
         <felles.version>3.20250505101905_835431d</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250422132745_dfaa902</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250508163827_676473b</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
-        <cucumber.version>7.22.1</cucumber.version>
+        <cucumber.version>7.22.2</cucumber.version>
         <mockk.version>1.14.2</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.25</token-validation-spring.version>
@@ -42,7 +42,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.1.10</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.1.11</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
@@ -53,7 +53,7 @@
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
-        <confluent.version>7.9.0</confluent.version>
+        <confluent.version>7.9.1</confluent.version>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.sources>src/main</sonar.sources>
@@ -549,6 +549,7 @@
                     <excludedGroups>${excludedGroups}</excludedGroups>
                     <threadCount>1</threadCount>
                     <runOrder>random</runOrder>
+                    <argLine>-Xmx2g</argLine>
                 </configuration>
             </plugin>
             <plugin>
