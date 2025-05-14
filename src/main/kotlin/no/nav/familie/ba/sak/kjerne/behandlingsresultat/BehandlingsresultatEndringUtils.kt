@@ -11,8 +11,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtenlandskPeriodebeløpUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -37,6 +39,8 @@ object BehandlingsresultatEndringUtils {
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
         nåværendePersonResultat: Set<PersonResultat>,
+        nåværendeUtenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
+        forrigeUtenlandskPeriodebeløp: List<UtenlandskPeriodebeløp>,
         forrigePersonResultat: Set<PersonResultat>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>,
@@ -59,6 +63,9 @@ object BehandlingsresultatEndringUtils {
 
                 val nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) }
                 val forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
+
+                val nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløp.filter { it.barnAktører.contains(aktør) }
+                val forrigeUtenlandskPeriodebeløpForPerson = forrigeUtenlandskPeriodebeløp.filter { it.barnAktører.contains(aktør) }
 
                 val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
                 val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
@@ -103,6 +110,12 @@ object BehandlingsresultatEndringUtils {
                         forrigeKompetanserForPerson = forrigeKompetanserForPerson,
                     )
 
+                val erEndringIUtenlandskPeriodebeløpForPerson =
+                    erEndringIUtenlandskPeriodebeløpForPerson(
+                        nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløpForPerson,
+                        forrigeUtenlandskPeriodebeløpForPerson = forrigeUtenlandskPeriodebeløpForPerson,
+                    )
+
                 val erEndringIEndretUtbetalingAndelerForPerson =
                     erEndringIEndretUtbetalingAndelerForPerson(
                         nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,
@@ -112,6 +125,7 @@ object BehandlingsresultatEndringUtils {
                 val erMinstEnEndringForPerson =
                     erEndringIBeløpForPerson ||
                         erEndringIKompetanseForPerson ||
+                        erEndringIUtenlandskPeriodebeløpForPerson ||
                         erEndringIVilkårsvurderingForPerson ||
                         erEndringIEndretUtbetalingAndelerForPerson
 
@@ -120,17 +134,19 @@ object BehandlingsresultatEndringUtils {
                         "Endringer: " +
                             "erEndringIBeløp=$erEndringIBeløpForPerson for aktør ${aktør.aktørId}," +
                             "erEndringIKompetanse=$erEndringIKompetanseForPerson for aktør ${aktør.aktørId}, " +
+                            "erEndringIUtenlandskPeriodebeløpForPerson=$erEndringIUtenlandskPeriodebeløpForPerson for aktør ${aktør.aktørId}," +
                             "erEndringIVilkårsvurdering=$erEndringIVilkårsvurderingForPerson for aktør ${aktør.aktørId}, " +
                             "erEndringIEndretUtbetalingAndeler=$erEndringIEndretUtbetalingAndelerForPerson for aktør ${aktør.aktørId}",
                     )
 
                     val endredeAndelTilkjentYtelseForPerson = if (erEndringIBeløpForPerson) "nye AndelerTilkjentYtelse for aktør ${aktør.aktørId}: $nåværendeAndeler , " else ""
                     val endredeKompetanserForPerson = if (erEndringIKompetanseForPerson) "nye kompetanser for aktør ${aktør.aktørId}: $nåværendeKompetanser ," else ""
+                    val endredeUtenlandskPeriodebeløpForPerson = if (erEndringIUtenlandskPeriodebeløpForPerson) "nye utenlandsk periodebeløp for aktør ${aktør.aktørId}: $nåværendeUtenlandskPeriodebeløp ," else ""
                     val endredeVilkårsvurderingerForPerson = if (erEndringIVilkårsvurderingForPerson) "nye personresultater for aktør ${aktør.aktørId}: $nåværendePersonResultat ," else ""
                     val endredeEndretUtbetalingAndelerForPerson = if (erEndringIEndretUtbetalingAndelerForPerson) "nye endretUtbetalingAndeler for aktør ${aktør.aktørId}: $nåværendeEndretAndeler" else ""
 
                     secureLogger.info(
-                        "Endringer: $endredeAndelTilkjentYtelseForPerson $endredeKompetanserForPerson $endredeVilkårsvurderingerForPerson $endredeEndretUtbetalingAndelerForPerson",
+                        "Endringer: $endredeAndelTilkjentYtelseForPerson $endredeKompetanserForPerson $endredeUtenlandskPeriodebeløpForPerson $endredeVilkårsvurderingerForPerson $endredeEndretUtbetalingAndelerForPerson",
                     )
                 }
 
@@ -217,6 +233,19 @@ internal fun erEndringIKompetanseForPerson(
         )
 
     return endringIKompetanseTidslinje.tilPerioder().any { it.verdi == true }
+}
+
+internal fun erEndringIUtenlandskPeriodebeløpForPerson(
+    nåværendeUtenlandskPeriodebeløpForPerson: List<UtenlandskPeriodebeløp>,
+    forrigeUtenlandskPeriodebeløpForPerson: List<UtenlandskPeriodebeløp>,
+): Boolean {
+    val endringIUtenlandskPeriodebeløpTidslinje =
+        EndringIUtenlandskPeriodebeløpUtil.lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
+            nåværendeUtenlandskPeriodebeløpForPerson = nåværendeUtenlandskPeriodebeløpForPerson,
+            forrigeUtenlandskPeriodebeløpForPerson = forrigeUtenlandskPeriodebeløpForPerson,
+        )
+
+    return endringIUtenlandskPeriodebeløpTidslinje.tilPerioder().any { it.verdi == true }
 }
 
 internal fun erEndringIVilkårsvurderingForPerson(
