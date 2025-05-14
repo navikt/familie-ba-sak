@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -24,6 +25,7 @@ class BehandlingsresultatService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val kompetanseService: KompetanseService,
     private val localDateProvider: LocalDateProvider,
+    private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
 ) {
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -73,6 +75,9 @@ class BehandlingsresultatService(
                 val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
                 val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
 
+                val utenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(BehandlingId(behandlingId))
+                val forrigeUtenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(BehandlingId(forrigeBehandling.id))
+
                 BehandlingsresultatEndringUtils.utledEndringsresultat(
                     nåværendeAndeler = andelerTilkjentYtelse,
                     forrigeAndeler = forrigeAndelerTilkjentYtelse,
@@ -82,6 +87,8 @@ class BehandlingsresultatService(
                     forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
                     nåværendeKompetanser = kompetanser.toList(),
                     forrigeKompetanser = forrigeKompetanser.toList(),
+                    nåværendeUtenlandskPeriodebeløp = utenlandskPeriodebeløp.toList(),
+                    forrigeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp.toList(),
                     personerFremstiltKravFor = personerFremstiltKravFor,
                     personerIBehandling = personerIBehandling,
                     personerIForrigeBehandling = personerIForrigeBehandling,
