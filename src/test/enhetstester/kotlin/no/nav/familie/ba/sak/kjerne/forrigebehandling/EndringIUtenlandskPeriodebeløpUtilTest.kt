@@ -18,6 +18,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
     @Test
     fun `Endring i utenlandskperiode beløp - skal ikke returnere noen endrede perioder når ingenting endrer seg`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val forrigeUtenlandskPeriodebeløp =
@@ -34,6 +35,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
         val nåværendeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp.copy().apply { behandlingId = nåværendeBehandling.id }
 
+        // Act
         val perioderMedEndring =
             EndringIUtenlandskPeriodebeløpUtil
                 .lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
@@ -42,11 +44,13 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertTrue(perioderMedEndring.isEmpty())
     }
 
     @Test
     fun `Endring i utenlandskperiode beløp - skal returnere endret periode når intervall endrer seg`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val forrigeUtenlandskPeriodebeløp =
@@ -63,6 +67,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
         val nåværendeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp.copy(intervall = Intervall.ÅRLIG).apply { behandlingId = nåværendeBehandling.id }
 
+        // Act
         val perioderMedEndring =
             EndringIUtenlandskPeriodebeløpUtil
                 .lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
@@ -71,6 +76,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tom?.toYearMonth())
@@ -78,6 +84,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
     @Test
     fun `Endring i utenlandskperiode beløp - skal returnere endret periode når beløp endrer seg`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val forrigeUtenlandskPeriodebeløp =
@@ -94,6 +101,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
         val nåværendeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp.copy(beløp = BigDecimal.valueOf(200)).apply { behandlingId = nåværendeBehandling.id }
 
+        // Act
         val perioderMedEndring =
             EndringIUtenlandskPeriodebeløpUtil
                 .lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
@@ -102,6 +110,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tom?.toYearMonth())
@@ -109,6 +118,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
     @Test
     fun `Endring i utenlandskperiode beløp - skal returnere endret periode når utbetalingsland endrer seg`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val forrigeUtenlandskPeriodebeløp =
@@ -125,6 +135,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
         val nåværendeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp.copy(utbetalingsland = "SVERIGE").apply { behandlingId = nåværendeBehandling.id }
 
+        // Act
         val perioderMedEndring =
             EndringIUtenlandskPeriodebeløpUtil
                 .lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
@@ -133,6 +144,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tom?.toYearMonth())
@@ -140,6 +152,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
     @Test
     fun `Endring i utenlandskperiode beløp - skal returnere endret periode når valutakode endrer seg`() {
+        // Arrange
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val forrigeUtenlandskPeriodebeløp =
@@ -156,6 +169,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
 
         val nåværendeUtenlandskPeriodebeløp = forrigeUtenlandskPeriodebeløp.copy(valutakode = "SEK").apply { behandlingId = nåværendeBehandling.id }
 
+        // Act
         val perioderMedEndring =
             EndringIUtenlandskPeriodebeløpUtil
                 .lagEndringIUtenlandskPeriodebeløpForPersonTidslinje(
@@ -164,6 +178,7 @@ class EndringIUtenlandskPeriodebeløpUtilTest {
                 ).tilPerioder()
                 .filter { it.verdi == true }
 
+        // Assert
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fom?.toYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tom?.toYearMonth())
