@@ -375,7 +375,10 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             (barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne + barnSomNåFårUtbetalingIPeriode).distinct().map { it.fødselsdato }
 
         this.gjelderEndretutbetaling -> {
-            barnPåBegrunnelse.filter { hentPersonerSomHarHattEndringIEndretUtbetalingAndelIDennePerioden(begrunnelsesGrunnlagPerPerson).contains(it) }.map { it.fødselsdato }
+            barnPåBegrunnelse
+                .filter { hentPersonerSomHarHattEndringIEndretUtbetalingAndelIDennePerioden(begrunnelsesGrunnlagPerPerson).contains(it) }
+                .ifEmpty { barnPåBegrunnelse }
+                .map { it.fødselsdato }
         }
 
         else -> {
