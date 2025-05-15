@@ -601,6 +601,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "fortsattInnvilgetTilleggsbegrunnelseVedtakForSed"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
+    FORTSATT_INNVILGET_UK_PRIMÆR_SØKER_HAR_NORSK_ARBEIDSGIVER_I_STORBRITANNIA {
+        override val sanityApiNavn = "fortsattInnvilgetUkPrimarSokerHarNorskArbeidsgiverIStorbritannia"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
     FORTSETT_INNVILGET_SEKUNDÆRLAND_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSekundaerlandStandard"
@@ -625,6 +629,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
 
     FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_ALENEANSVAR {
         override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkAleneansvar"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SEKUNDÆR_SØKER_HAR_NORSK_ARBEIDSGIVER_I_EØS_LAND {
+        override val sanityApiNavn = "fortsattInnvilgetSekundarSokerHarNorskArbeidsgiverIEosLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_UK_SEKUNDÆR_SØKER_HAR_NORSK_ARBEIDSGIVER_I_STORBRITANNIA {
+        override val sanityApiNavn = "fortsattInnvilgetUkSekundarSokerHarNorskArbeidsgiverIStorbritannia"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
     },
     FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD {
