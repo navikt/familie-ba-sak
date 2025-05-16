@@ -6,6 +6,8 @@ import io.mockk.mockkObject
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toLocalDate
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -49,6 +51,7 @@ internal class KompetanseServiceTest {
     val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
     val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
     val clockProvider = TestClockProvider()
+    val unleashNextMedContextService: UnleashNextMedContextService = mockk()
 
     val kompetanseService =
         KompetanseService(
@@ -64,6 +67,7 @@ internal class KompetanseServiceTest {
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
             clockProvider = clockProvider,
+            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     @BeforeEach
@@ -306,8 +310,9 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
-        every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
+        every { utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false) } returns true
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -369,8 +374,9 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
-        every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
+        every { utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false) } returns true
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -427,8 +433,9 @@ internal class KompetanseServiceTest {
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
         every { vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId) } returns tomTidslinje()
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
-        every { utbetalingTidslinjeService.hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(behandlingId, emptyList()) } returns emptyMap()
+        every { utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
+        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false) } returns true
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 

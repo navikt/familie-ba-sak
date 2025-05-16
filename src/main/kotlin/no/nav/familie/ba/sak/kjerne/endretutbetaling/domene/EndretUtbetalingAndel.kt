@@ -122,9 +122,18 @@ enum class Årsak(
             ALLEREDE_UTBETALT, ENDRE_MOTTAKER, ETTERBETALING_3ÅR, ETTERBETALING_3MND -> true
             DELT_BOSTED -> false
         }
+
+    // Kun relevant dersom barnets utbetaling er 0 prosent og det er overlappende utvidet barnetrygd for søker
+    fun kreverKompetanseVedIngenUtbetalingOgOverlappendeUtvidetBarnetrygd() =
+        when (this) {
+            ALLEREDE_UTBETALT, DELT_BOSTED, ETTERBETALING_3ÅR, ETTERBETALING_3MND -> true
+            ENDRE_MOTTAKER -> false
+        }
 }
 
 fun EndretUtbetalingAndel.førerTilOpphør() = this.prosent == BigDecimal.ZERO && this.årsak != null && this.årsak!!.førerTilOpphørVed0Prosent()
+
+fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != BigDecimal.ZERO
 
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(
