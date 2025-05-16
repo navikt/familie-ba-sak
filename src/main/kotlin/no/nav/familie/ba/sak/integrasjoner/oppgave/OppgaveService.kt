@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.TilpassArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.tilArbeidsfordelingsenhet
@@ -18,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
-import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -44,7 +42,6 @@ class OppgaveService(
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val tilpassArbeidsfordelingService: TilpassArbeidsfordelingService,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
@@ -77,9 +74,6 @@ class OppgaveService(
                     .hentArbeidsfordelingPåBehandling(behandlingId)
                     .tilArbeidsfordelingsenhet()
 
-            val navIdent = tilordnetNavIdent?.let { NavIdent(it) }
-            val tilordnetRessurs = tilpassArbeidsfordelingService.bestemTilordnetRessursPåOppgave(arbeidsfordelingsenhet, navIdent)
-
             val opprettOppgave =
                 OpprettOppgaveRequest(
                     ident = OppgaveIdentV2(ident = behandling.fagsak.aktør.aktørId, gruppe = IdentGruppe.AKTOERID),
@@ -91,7 +85,7 @@ class OppgaveService(
                     enhetsnummer = arbeidsfordelingsenhet.enhetId,
                     behandlingstema = behandling.tilOppgaveBehandlingTema().value,
                     behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                    tilordnetRessurs = tilordnetRessurs?.ident,
+                    tilordnetRessurs = tilordnetNavIdent,
                     behandlesAvApplikasjon =
                         when {
                             oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"

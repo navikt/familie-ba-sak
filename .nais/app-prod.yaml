@@ -65,6 +65,15 @@ spec:
           - id: "3d718ae5-f25e-47a4-b4b3-084a97604c1d"  # Forvalterrolle
           - id: "ad7b87a6-9180-467c-affc-20a566b0fec0"  # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "9ec6487d-f37a-4aad-a027-cd221c1ac32b"  # 0000-GA-Fortrolig_Adresse
+          - id: "60102d01-2521-40b4-97b9-e2d738f642c1"  # 0000-GA-ENHET_2103 (VIKAFOSSEN)
+          - id: "0d746128-7cb0-431b-9420-885e7a75260f"  # 0000-GA-ENHET_4806 (DRAMMEN)
+          - id: "4a9058c7-daae-452a-9fea-23beaa0778ff"  # 0000-GA-ENHET_4820 (VADSØ)
+          - id: "fde8342e-d9e6-4879-be17-a8f17cb9abfb"  # 0000-GA-ENHET_4833 (OSLO)
+          - id: "4c0aff0d-78f9-4a4d-94d3-a31a28d75142"  # 0000-GA-ENHET_4842 (STORD)
+          - id: "8672ac10-31f5-44df-b4a2-16d5443847bc"  # 0000-GA-ENHET_4817 (STEINKJER)
+          - id: "946a9fb3-1d6c-4cda-9bfe-aaa8b857dd1b"  # 0000-GA-ENHET_4863 (MIDLERTIDIG_ENHET)
+
+
       replyURLs:
         - "https://familie-ba-sak.intern.nav.no/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true

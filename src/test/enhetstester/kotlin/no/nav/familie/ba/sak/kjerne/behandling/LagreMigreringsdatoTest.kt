@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -47,6 +48,7 @@ class LagreMigreringsdatoTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val mockkUnleash = mockk<UnleashNextMedContextService>()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    private val mocketEnhetConfig = mockk<EnhetConfig>()
 
     private val behandlingService =
         BehandlingService(
@@ -67,6 +69,7 @@ class LagreMigreringsdatoTest {
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = mockkUnleash,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            enhetConfig = mocketEnhetConfig,
         )
 
     @Test

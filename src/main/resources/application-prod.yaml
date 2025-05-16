@@ -130,6 +130,15 @@ rolle:
   kode6: "ad7b87a6-9180-467c-affc-20a566b0fec0" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "9ec6487d-f37a-4aad-a027-cd221c1ac32b" # 0000-GA-Fortrolig_Adresse
 
+enheter:
+  VIKAFOSSEN: "60102d01-2521-40b4-97b9-e2d738f642c1"
+  DRAMMEN: "0d746128-7cb0-431b-9420-885e7a75260f"
+  VADSO: "4a9058c7-daae-452a-9fea-23beaa0778ff"
+  OSLO: "fde8342e-d9e6-4879-be17-a8f17cb9abfb"
+  STORD: "4c0aff0d-78f9-4a4d-94d3-a31a28d75142"
+  STEINKJER: "8672ac10-31f5-44df-b4a2-16d5443847bc"
+  MIDLERTIDIG_ENHET: "946a9fb3-1d6c-4cda-9bfe-aaa8b857dd1b"
+
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/familie-ba-sak

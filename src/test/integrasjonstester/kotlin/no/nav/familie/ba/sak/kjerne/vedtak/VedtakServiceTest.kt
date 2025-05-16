@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.EnhetConfig
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
@@ -89,6 +90,8 @@ class VedtakServiceTest(
     private val unleashService: UnleashNextMedContextService,
     @Autowired
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
+    @Autowired
+    private val enhetConfig: EnhetConfig,
 ) : AbstractSpringIntegrationTest() {
     lateinit var behandlingService: BehandlingService
     lateinit var vilkårResultat1: VilkårResultat
@@ -121,6 +124,7 @@ class VedtakServiceTest(
                 vilkårsvurderingService,
                 unleashService,
                 eksternBehandlingRelasjonService,
+                enhetConfig,
             )
 
         val personAktørId = randomAktør()

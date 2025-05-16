@@ -4,9 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.mockk
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.kontrakter.felles.BrukerIdType
-import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
@@ -29,32 +27,6 @@ class IntegrasjonClientTest {
         wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
         wiremockServerItem.start()
         integrasjonClient = IntegrasjonClient(URI.create(wiremockServerItem.baseUrl()), restOperations)
-    }
-
-    @Test
-    fun `hentEnheterSomNavIdentHarTilgangTil - skal hente enheter som NAV-ident har tilgang til`() {
-        // Arrange
-        val navIdent = NavIdent("1")
-
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(WireMock.urlEqualTo("/enhetstilganger"))
-                .willReturn(WireMock.okJson(readFile("enheterNavIdentHarTilgangTilResponse.json"))),
-        )
-
-        // Act
-        val enheter = integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
-
-        // Assert
-        assertThat(enheter).hasSize(2)
-        assertThat(enheter).anySatisfy {
-            assertThat(it.enhetsnummer).isEqualTo(BarnetrygdEnhet.VADSØ.enhetsnummer)
-            assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.VADSØ.enhetsnavn)
-        }
-        assertThat(enheter).anySatisfy {
-            assertThat(it.enhetsnummer).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnummer)
-            assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnavn)
-        }
     }
 
     @Test
