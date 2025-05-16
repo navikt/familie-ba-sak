@@ -27,20 +27,22 @@ class UtbetalingTidslinjeService(
         behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): Map<Aktør, Tidslinje<Boolean>> {
-        val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
-            hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+        // Boolsk tidslinje per barn som er true i alle perioder hvor ordinær barnetrygd ikke skal utbetales for barnet samtidig som søker ikke får utbetalt utvidet barnetrygd
+        val ingenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn: Map<Aktør, Tidslinje<Boolean>> =
+            hentIngenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn(
                 behandlingId = behandlingId,
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
             )
 
-        val utbetalesIkkeOrdinærMenUtvidetOgKompetanseKrevesTidslinjer =
-            hentUtbetalesIkkeOrdinærMenUtvidetTidslinjer(
+        // Boolsk tidslinje per barn som er true i alle perioder hvor ordinær barnetrygd ikke skal utbetales for barnet samtidig som søker får utbetalt utvidet barnetrygd, og årsaken til endret utbetaling krever kompetanse
+        val ingenUtbetalingAvOrdinærBarentrygdForBarnMenUtvidetBarnetrygdForSøkerOgKreverKompetanseTidslinjePerBarn: Map<Aktør, Tidslinje<Boolean>> =
+            hentIngenUtbetalingAvOrdinærBarentrygdForBarnMenUtvidetBarnetrygdForSøkerOgKompetanseKrevesTidslinjePerBarn(
                 behandlingId = behandlingId,
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
             )
 
-        return utbetalesIkkeOrdinærEllerUtvidetTidslinjer
-            .leftJoin(utbetalesIkkeOrdinærMenUtvidetOgKompetanseKrevesTidslinjer) { ingenUtbetalingOrdinærEllerUtvidet, ingenUtbetalingOrdinærMenUtvidetOgKreverKompetanse ->
+        return ingenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn
+            .leftJoin(ingenUtbetalingAvOrdinærBarentrygdForBarnMenUtvidetBarnetrygdForSøkerOgKreverKompetanseTidslinjePerBarn) { ingenUtbetalingOrdinærEllerUtvidet, ingenUtbetalingOrdinærMenUtvidetOgKreverKompetanse ->
                 when (ingenUtbetalingOrdinærEllerUtvidet) {
                     true -> false // Ingen utbetaling av ordinær eller utvidet og kompetanse kreves ikke
                     false -> ingenUtbetalingOrdinærMenUtvidetOgKreverKompetanse // Krever kompetanse i noen tilfeller dersom ingen utbetaling av ordinær men utbetaling av utvidet
@@ -49,33 +51,31 @@ class UtbetalingTidslinjeService(
             }.mapValues { it.value.filtrerIkkeNull() }
     }
 
-    fun hentUtbetalesIkkeOrdinærEllerUtvidetTidslinjer(
+    fun hentIngenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn(
         behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): Map<Aktør, Tidslinje<Boolean>> {
-        val barnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer =
+        val endretUtbetalingSkalIkkeUtbetalesTidslinjePerBarn =
             endretUtbetalingAndeler
                 .tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer()
 
-        val utvidetTidslinje =
+        val utvidetBarnetrygdTidslinje =
             beregningService
                 .hentAndelerTilkjentYtelseForBehandling(behandlingId.id)
                 .tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
 
-        return barnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer
+        return endretUtbetalingSkalIkkeUtbetalesTidslinjePerBarn
             .mapValues { (_, endretUtbetalingSkalIkkeUtbetalesTidslinje) ->
                 endretUtbetalingSkalIkkeUtbetalesTidslinje
-                    .kombinerMed(utvidetTidslinje) { endretUtbetalingAndelSkalIkkeUtbetales, utvidetAndel ->
+                    .kombinerMed(utvidetBarnetrygdTidslinje) { endretUtbetalingAndelSkalIkkeUtbetales, utvidetBarnetrygdAndel ->
                         endretUtbetalingAndelSkalIkkeUtbetales?.let {
-                            erIngenUtbetalingAvUtvidet(
-                                utvidetAndel,
-                            )
+                            !utvidetBarnetrygdAndel.skalUtbetales()
                         }
                     }
             }
     }
 
-    private fun hentUtbetalesIkkeOrdinærMenUtvidetTidslinjer(
+    private fun hentIngenUtbetalingAvOrdinærBarentrygdForBarnMenUtvidetBarnetrygdForSøkerOgKompetanseKrevesTidslinjePerBarn(
         behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): Map<Aktør, Tidslinje<Boolean>> {
@@ -93,7 +93,7 @@ class UtbetalingTidslinjeService(
                 val utbetalesIkkeOrdinærEllerUtvidetTidslinje =
                     endretUtbetalingSkalIkkeUtbetalesTidslinje
                         .kombinerMed(utvidetTidslinje) { endretUtbetalingAndelSkalIkkeUtbetales, utvidetAndel ->
-                            endretUtbetalingAndelSkalIkkeUtbetales?.let { erUtbetalingAvUtvidetOgKompetanseKreves(endretUtbetalingAndelSkalIkkeUtbetales, utvidetAndel) }
+                            endretUtbetalingAndelSkalIkkeUtbetales?.let { utvidetBarnetrygdSkalUtbetalesOgKompetanseKreves(endretUtbetalingAndelSkalIkkeUtbetales, utvidetAndel) }
                         }
                 utbetalesIkkeOrdinærEllerUtvidetTidslinje
             }
@@ -116,14 +116,11 @@ private fun <V> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel)
         verdi = mapper(this),
     )
 
-private fun erIngenUtbetalingAvUtvidet(
-    utvidetAndel: AndelTilkjentYtelse?,
-) = (utvidetAndel == null || utvidetAndel.kalkulertUtbetalingsbeløp == 0)
+private fun AndelTilkjentYtelse?.skalUtbetales() = (this != null && this.kalkulertUtbetalingsbeløp != 0)
 
-private fun erUtbetalingAvUtvidetOgKompetanseKreves(
+private fun utvidetBarnetrygdSkalUtbetalesOgKompetanseKreves(
     endretUtbetalingAndel: EndretUtbetalingAndel,
-    utvidetAndel: AndelTilkjentYtelse?,
+    utvidetBarnetrygdAndel: AndelTilkjentYtelse?,
 ): Boolean =
-    utvidetAndel != null &&
-        utvidetAndel.kalkulertUtbetalingsbeløp != 0 &&
+    utvidetBarnetrygdAndel.skalUtbetales() &&
         endretUtbetalingAndel.årsak?.kreverKompetanseVedIngenUtbetalingOgOverlappendeUtvidetBarnetrygd() == true
