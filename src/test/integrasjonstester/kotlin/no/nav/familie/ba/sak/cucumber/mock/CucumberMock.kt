@@ -534,6 +534,8 @@ class CucumberMock(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
+            preutfyllBosattIRiketService = mockk(),
+            unleashService = unleashService,
         )
 
     val registrerPersongrunnlag =
