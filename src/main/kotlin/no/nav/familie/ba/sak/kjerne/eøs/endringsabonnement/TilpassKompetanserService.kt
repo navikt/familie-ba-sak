@@ -74,7 +74,7 @@ class TilpassKompetanserTilRegelverkService(
                 ).medBehandlingId(behandlingId)
             } else {
                 val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
-                    utbetalingTidslinjeService.hentIngenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
+                    utbetalingTidslinjeService.hentIngenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
 
                 tilpassKompetanserTilRegelverkGammel(
                     gjeldendeKompetanser = gjeldendeKompetanser,
@@ -130,7 +130,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
                 ).medBehandlingId(behandlingId)
             } else {
                 val utbetalesIkkeOrdinærEllerUtvidetTidslinjer =
-                    utbetalingTidslinjeService.hentIngenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjer(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
+                    utbetalingTidslinjeService.hentIngenUtbetalingAvOrdinærBarnetrygdForBarnEllerUtvidetBarnetrygdForSøkerTidslinjePerBarn(behandlingId = behandlingId, endretUtbetalingAndeler = endretUtbetalingAndeler)
 
                 tilpassKompetanserTilRegelverkGammel(
                     gjeldendeKompetanser = gjeldendeKompetanser,
