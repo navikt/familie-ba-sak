@@ -9,9 +9,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import kotlin.collections.filter
 
 @Service
 class BisysService(
@@ -25,6 +27,12 @@ class BisysService(
         personIdent: String,
         fraDato: LocalDate,
     ): BisysUtvidetBarnetrygdResponse {
+        val identerFraPdl = personidentService.hentIdenter(personIdent, false)
+        if (identerFraPdl.filter { it.gruppe == Type.FOLKEREGISTERIDENT.name }.isEmpty()) {
+            secureLogger.info("Fant ikke gyldig fnr i PDL for $personIdent - $identerFraPdl. Returnerer tom liste til Bisys")
+            return BisysUtvidetBarnetrygdResponse(emptyList())
+        }
+
         val aktør = personidentService.hentAktør(personIdent)
 
         val samledeUtvidetBarnetrygdPerioder = mutableListOf<UtvidetBarnetrygdPeriode>()
