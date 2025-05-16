@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
@@ -190,6 +192,30 @@ class PdlRestClient(
             pdlResponse = pdlResponse,
         ) {
             it.person!!.opphold
+        }
+    }
+
+    fun hentBostedsadresserForPerson(aktør: Aktør): PdlBostedsadressePerson {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                query = hentGraphqlQuery("bostedsadresse"),
+            )
+
+        val pdlResponse: PdlBaseResponse<PdlBostedsadresseResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent bostedsadresse for person",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
+
+        return feilsjekkOgReturnerData(
+            ident = aktør.aktivFødselsnummer(),
+            pdlResponse = pdlResponse,
+        ) {
+            it.person
         }
     }
 
