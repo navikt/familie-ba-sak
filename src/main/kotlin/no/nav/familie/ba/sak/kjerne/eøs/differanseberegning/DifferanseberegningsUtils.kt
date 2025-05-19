@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -30,12 +31,13 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
  */
 fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal?,
+    skalBrukeNyDifferanseberegning: Boolean,
 ): AndelTilkjentYtelse? {
     val nyAndelTilkjentYtelse =
         when {
             this == null -> null
             utenlandskPeriodebeløpINorskeKroner == null -> this.utenDifferanseberegning()
-            else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
+            else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner, skalBrukeNyDifferanseberegning)
         }
 
     return nyAndelTilkjentYtelse
@@ -43,13 +45,18 @@ fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
 
 fun AndelTilkjentYtelse.medDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal,
+    skalBrukeNyDifferanseberegning: Boolean,
 ): AndelTilkjentYtelse {
     val avrundetUtenlandskPeriodebeløp =
         utenlandskPeriodebeløpINorskeKroner
             .toBigInteger()
             .intValueExact() // Fjern desimaler for å gi fordel til søker
 
-    val nyttDifferanseberegnetBeløp =
+    val nyttDifferanseberegnetPeriodebeløp by lazy {
+        (beløpUtenEndretUtbetaling ?: throw Feil("beløpUtenEndretUtbetaling kan ikke være null")) - avrundetUtenlandskPeriodebeløp
+    }
+
+    val nyttKalkulertUtbetalingsbeløp =
         (
             nasjonaltPeriodebeløp
                 ?: kalkulertUtbetalingsbeløp
@@ -57,8 +64,13 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
 
     return copy(
         id = 0,
-        kalkulertUtbetalingsbeløp = maxOf(nyttDifferanseberegnetBeløp, 0),
-        differanseberegnetPeriodebeløp = nyttDifferanseberegnetBeløp,
+        kalkulertUtbetalingsbeløp = maxOf(nyttKalkulertUtbetalingsbeløp, 0),
+        differanseberegnetPeriodebeløp =
+            if (skalBrukeNyDifferanseberegning) {
+                nyttDifferanseberegnetPeriodebeløp
+            } else {
+                nyttKalkulertUtbetalingsbeløp
+            },
     )
 }
 
@@ -89,9 +101,10 @@ fun Tidslinje<AndelTilkjentYtelse>.utenDifferanseberegning() =
 
 fun Tidslinje<AndelTilkjentYtelse>.oppdaterDifferanseberegning(
     utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal>,
+    skalBrukeNyDifferanseberegning: Boolean,
 ): Tidslinje<AndelTilkjentYtelse> =
     this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
-        andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
+        andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner, skalBrukeNyDifferanseberegning)
     }
 
 /**

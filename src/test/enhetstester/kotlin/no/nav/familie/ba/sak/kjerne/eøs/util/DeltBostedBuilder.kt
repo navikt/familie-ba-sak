@@ -71,14 +71,14 @@ fun DeltBostedBuilder.oppdaterTilkjentYtelse(): TilkjentYtelse {
 
 fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> =
     this
-        .filter { deltBosted -> deltBosted.fom != null && deltBosted.tom != null && deltBosted.prosent != null }
+        .filter { deltBosted -> deltBosted.fom != null && deltBosted.prosent != null }
         .flatMap { deltBosted ->
             deltBosted.barnPersoner.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     deltBosted.behandlingId,
                     it,
                     deltBosted.fom!!,
-                    deltBosted.tom!!,
+                    deltBosted.tom,
                     deltBosted.prosent!!,
                 )
             }
