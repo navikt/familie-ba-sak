@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
-import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 
@@ -72,12 +71,12 @@ class PreutfyllBosattIRiketService(
 
                     erBosattINorgePerioder
                         .tilTidslinje()
-                        .filtrer { harBostedsAdresseINorge -> harBostedsAdresseINorge == true }
                 }
             }
 
         return harBostedsadresseINorgeTidslinje
             .tilPerioder()
+            .filter { it.verdi == true }
             .map { periode ->
                 VilkårResultat(
                     personResultat = personResultat,
