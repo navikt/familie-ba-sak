@@ -27,7 +27,7 @@ class PreutfyllBosattIRiketService(
         }
     }
 
-    private fun genererBosattIRiketVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
+    fun genererBosattIRiketVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
         val alleBostedsAdresserForPerson =
             pdlRestClient
                 .hentBostedsadresserForPerson(aktør = personResultat.aktør)
