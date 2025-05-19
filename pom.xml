@@ -17,16 +17,16 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.1.20</kotlin.version>
+        <kotlin.version>2.1.21</kotlin.version>
         <kotlin.compiler.languageVersion>2.1</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.1</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250512065737_a9c3191</prosessering.version>
+        <prosessering.version>2.20250519094842_e8bd711</prosessering.version>
         <felles.version>3.20250505101905_835431d</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250422132745_dfaa902</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250508163827_676473b</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20250513140227_11db730</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>5.0.25</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.8</springdoc.version>
-        <sentry.version>8.11.1</sentry.version>
+        <sentry.version>8.12.0</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.1</kotlinx-kover.version>
 
@@ -83,7 +83,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.30</version>
+                <version>2.2.32</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
