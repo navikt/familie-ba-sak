@@ -318,7 +318,6 @@ class VilkårServiceIntegrasjonTest(
         )
     }
 
-
     @Test
     fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig vilkår`() {
         val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()

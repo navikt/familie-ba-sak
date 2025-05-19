@@ -29,25 +29,32 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
 
-        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns PdlBostedsadressePerson(listOf(PdlBostedsadresse(
-            gyldigFraOgMed = LocalDateTime.now().minusYears(4),
-            gyldigTilOgMed = LocalDateTime.now().minusYears(3),
-            vegadresse = PdlBostedsVegadresse(12345.toBigInteger()),
-            matrikkeladresse = null,
-            ukjentBosted = null
-        ), PdlBostedsadresse(
-            gyldigFraOgMed = LocalDateTime.now().minusYears(3).plusDays(1),
-            gyldigTilOgMed = LocalDateTime.now().minusYears(2),
-            vegadresse = null,
-            matrikkeladresse = PdlMatrikkeladresse(54321.toBigInteger()),
-            ukjentBosted = null
-        ), PdlBostedsadresse(
-            gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-            gyldigTilOgMed = null,
-            vegadresse = PdlBostedsVegadresse(98765.toBigInteger()),
-            matrikkeladresse = null,
-            ukjentBosted = null
-        )))
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            PdlBostedsadressePerson(
+                listOf(
+                    PdlBostedsadresse(
+                        gyldigFraOgMed = LocalDateTime.now().minusYears(4),
+                        gyldigTilOgMed = LocalDateTime.now().minusYears(3),
+                        vegadresse = PdlBostedsVegadresse(12345.toBigInteger()),
+                        matrikkeladresse = null,
+                        ukjentBosted = null,
+                    ),
+                    PdlBostedsadresse(
+                        gyldigFraOgMed = LocalDateTime.now().minusYears(3).plusDays(1),
+                        gyldigTilOgMed = LocalDateTime.now().minusYears(2),
+                        vegadresse = null,
+                        matrikkeladresse = PdlMatrikkeladresse(54321.toBigInteger()),
+                        ukjentBosted = null,
+                    ),
+                    PdlBostedsadresse(
+                        gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                        gyldigTilOgMed = null,
+                        vegadresse = PdlBostedsVegadresse(98765.toBigInteger()),
+                        matrikkeladresse = null,
+                        ukjentBosted = null,
+                    ),
+                ),
+            )
 
         // Act
         val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
@@ -68,30 +75,30 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
 
-        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns PdlBostedsadressePerson(
-            listOf(
-                PdlBostedsadresse(
-                    gyldigFraOgMed = LocalDateTime.now().minusMonths(6),
-                    gyldigTilOgMed = LocalDateTime.now().minusMonths(4),
-                    vegadresse = PdlBostedsVegadresse(12345.toBigInteger()),
-                    matrikkeladresse = null,
-                    ukjentBosted = null
-                ), PdlBostedsadresse(
-                    gyldigFraOgMed = LocalDateTime.now().minusMonths(4).plusDays(1),
-                    gyldigTilOgMed = LocalDateTime.now().minusMonths(2),
-                    vegadresse = null,
-                    matrikkeladresse = PdlMatrikkeladresse(54321.toBigInteger()),
-                    ukjentBosted = null
-                )
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            PdlBostedsadressePerson(
+                listOf(
+                    PdlBostedsadresse(
+                        gyldigFraOgMed = LocalDateTime.now().minusMonths(6),
+                        gyldigTilOgMed = LocalDateTime.now().minusMonths(4),
+                        vegadresse = PdlBostedsVegadresse(12345.toBigInteger()),
+                        matrikkeladresse = null,
+                        ukjentBosted = null,
+                    ),
+                    PdlBostedsadresse(
+                        gyldigFraOgMed = LocalDateTime.now().minusMonths(4).plusDays(1),
+                        gyldigTilOgMed = LocalDateTime.now().minusMonths(2),
+                        vegadresse = null,
+                        matrikkeladresse = PdlMatrikkeladresse(54321.toBigInteger()),
+                        ukjentBosted = null,
+                    ),
+                ),
             )
-        )
 
         // Act
         val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
         assertThat(vilkårsresutat).isEmpty()
-
     }
-
 }

@@ -52,7 +52,6 @@ class VilkårService(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat,
     ): List<RestPersonResultat> {
-
         val restPersonResultatUtenBegrunnelse = restPersonResultat.fjernAutomatiskBegrunnelse()
 
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
@@ -86,7 +85,6 @@ class VilkårService(
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
-
 
     @Transactional
     fun deleteVilkårsperiode(
@@ -243,5 +241,3 @@ class VilkårService(
 fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR
 
 fun SIVILSTANDTYPE.somForventetHosBarn() = this == SIVILSTANDTYPE.UOPPGITT || this == SIVILSTANDTYPE.UGIFT
-
-
