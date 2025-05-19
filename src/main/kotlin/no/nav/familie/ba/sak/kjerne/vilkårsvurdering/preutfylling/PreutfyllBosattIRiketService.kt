@@ -12,6 +12,8 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Service
 class PreutfyllBosattIRiketService(
@@ -76,7 +78,7 @@ class PreutfyllBosattIRiketService(
 
         return harBostedsadresseINorgeTidslinje
             .tilPerioder()
-            .filter { it.verdi == true }
+            .filter { it.verdi == true && ChronoUnit.MONTHS.between(it.fom, it.tom ?: LocalDate.MAX) >= 12 }
             .map { periode ->
                 VilkårResultat(
                     personResultat = personResultat,
@@ -85,7 +87,7 @@ class PreutfyllBosattIRiketService(
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,
-                    begrunnelse = "Vurdert og satt automatisk",
+                    begrunnelse = "Fyllt inn automatisk fra registerdata i PDL",
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()

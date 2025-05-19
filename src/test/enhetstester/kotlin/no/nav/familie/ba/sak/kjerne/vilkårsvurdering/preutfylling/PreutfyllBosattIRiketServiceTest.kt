@@ -59,4 +59,39 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårsresutat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
         assertThat(vilkårsresutat.first().vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
     }
+
+    @Test
+    fun `skal ikke ta med periode hvis bosatt i riket er mindre enn 12 mnd`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns PdlBostedsadressePerson(
+            listOf(
+                PdlBostedsadresse(
+                    gyldigFraOgMed = LocalDateTime.now().minusMonths(6),
+                    gyldigTilOgMed = LocalDateTime.now().minusMonths(4),
+                    vegadresse = PdlBostedsVegadresse(12345.toBigInteger()),
+                    matrikkeladresse = null,
+                    ukjentBosted = null
+                ), PdlBostedsadresse(
+                    gyldigFraOgMed = LocalDateTime.now().minusMonths(4).plusDays(1),
+                    gyldigTilOgMed = LocalDateTime.now().minusMonths(2),
+                    vegadresse = null,
+                    matrikkeladresse = PdlMatrikkeladresse(54321.toBigInteger()),
+                    ukjentBosted = null
+                )
+            )
+        )
+
+        // Act
+        val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        assertThat(vilkårsresutat).isEmpty()
+
+    }
+
 }
