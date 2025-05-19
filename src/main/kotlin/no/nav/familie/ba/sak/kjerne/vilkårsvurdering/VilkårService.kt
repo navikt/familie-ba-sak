@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
+import no.nav.familie.ba.sak.ekstern.restDomene.fjernAutomatiskBegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -51,16 +52,19 @@ class VilkårService(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat,
     ): List<RestPersonResultat> {
+
+        val restPersonResultatUtenBegrunnelse = restPersonResultat.fjernAutomatiskBegrunnelse()
+
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val restVilkårResultat =
-            restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
+            restPersonResultatUtenBegrunnelse.vilkårResultater.singleOrNull { it.id == vilkårId }
                 ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved oppdatering av vilkår")
 
         validerResultatBegrunnelse(restVilkårResultat)
 
         val personResultat =
-            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
+            finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultatUtenBegrunnelse.personIdent)
 
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
@@ -82,6 +86,7 @@ class VilkårService(
 
         return vilkårsvurderingService.oppdater(vilkårsvurdering).personResultater.map { it.tilRestPersonResultat() }
     }
+
 
     @Transactional
     fun deleteVilkårsperiode(
@@ -238,3 +243,5 @@ class VilkårService(
 fun Vilkår.gjelderAlltidFraBarnetsFødselsdato() = this == Vilkår.GIFT_PARTNERSKAP || this == Vilkår.UNDER_18_ÅR
 
 fun SIVILSTANDTYPE.somForventetHosBarn() = this == SIVILSTANDTYPE.UOPPGITT || this == SIVILSTANDTYPE.UGIFT
+
+

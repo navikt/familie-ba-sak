@@ -62,7 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class VilkårServiceTest(
+class VilkårServiceIntegrasjonTest(
     @Autowired
     private val behandlingService: BehandlingService,
     @Autowired
@@ -317,6 +317,7 @@ class VilkårServiceTest(
                 .type,
         )
     }
+
 
     @Test
     fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig vilkår`() {

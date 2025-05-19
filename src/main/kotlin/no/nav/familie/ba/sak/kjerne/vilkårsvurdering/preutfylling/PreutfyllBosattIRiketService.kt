@@ -87,7 +87,7 @@ class PreutfyllBosattIRiketService(
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,
-                    begrunnelse = "Fyllt inn automatisk fra registerdata i PDL",
+                    begrunnelse = "Fylt inn automatisk fra registerdata i PDL",
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
