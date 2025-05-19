@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -22,6 +24,7 @@ import java.time.LocalDate
 class TilkjentYtelseGenerator(
     private val overgangsstønadService: OvergangsstønadService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     fun genererTilkjentYtelse(
         behandling: Behandling,
@@ -63,11 +66,14 @@ class TilkjentYtelseGenerator(
                     )
                 }
 
+        val skalBeholdeSplittI0krAndeler = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
+
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
             lagAndelerMedEndretUtbetalingAndeler(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                 endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
                 tilkjentYtelse = tilkjentYtelse,
+                skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer =
@@ -76,6 +82,7 @@ class TilkjentYtelseGenerator(
                 andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                 endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
                 personResultater = vilkårsvurdering.personResultater,
+                skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )
 
         val småbarnstilleggErMulig =
@@ -113,6 +120,7 @@ class TilkjentYtelseGenerator(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                 endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
                 tilkjentYtelse = tilkjentYtelse,
+                skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })

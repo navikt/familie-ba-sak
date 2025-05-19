@@ -205,7 +205,7 @@ class CucumberMock(
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService),
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService, unleashNextMedContextService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)

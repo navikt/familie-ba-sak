@@ -50,6 +50,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     andelTilkjentYtelserUtenEndringer = emptyList(),
                     endretUtbetalingAndeler = emptyList(),
                     tilkjentYtelse = tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
 
             // Assert
@@ -96,6 +97,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
                     endretUtbetalingAndeler = emptyList(),
                     tilkjentYtelse = tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
 
             // Assert
@@ -163,6 +165,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
                     endretUtbetalingAndeler = listOf(endretUtbetalingAndelForBarn1),
                     tilkjentYtelse = tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
 
             // Assert
@@ -238,6 +241,7 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     andelTilkjentYtelserUtenEndringer = listOf(andelBarn, andelUtvidet, andelSmåbarnstillegg),
                     endretUtbetalingAndeler = listOf(endretUtbetalingAndelForSøker),
                     tilkjentYtelse = tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
             }
         }
@@ -290,10 +294,11 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
                     andelTilkjentYtelserUtenEndringer = listOf(andel1, andel2),
                     endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
                     tilkjentYtelse = tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
 
             // Assert
-            assertThat(oppdaterteAndeler.size).isEqualTo(3)
+            assertThat(oppdaterteAndeler).hasSize(4)
 
             assertThat(oppdaterteAndeler[0].kalkulertUtbetalingsbeløp).isEqualTo(andel1.kalkulertUtbetalingsbeløp)
             assertThat(oppdaterteAndeler[0].prosent).isEqualTo(andel1.prosent)
@@ -304,15 +309,22 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
             assertThat(oppdaterteAndeler[1].kalkulertUtbetalingsbeløp).isEqualTo(0)
             assertThat(oppdaterteAndeler[1].prosent).isEqualTo(endretUtbetalingAndel.prosent)
             assertThat(oppdaterteAndeler[1].stønadFom).isEqualTo(endretUtbetalingAndel.fom)
-            assertThat(oppdaterteAndeler[1].stønadTom).isEqualTo(endretUtbetalingAndel.tom)
+            assertThat(oppdaterteAndeler[1].stønadTom).isEqualTo(andel1.stønadTom)
             assertThat(oppdaterteAndeler[1].endreteUtbetalinger.size).isEqualTo(1)
             assertThat(oppdaterteAndeler[1].endreteUtbetalinger.single()).isEqualTo(endretUtbetalingAndel.endretUtbetalingAndel)
 
-            assertThat(oppdaterteAndeler[2].kalkulertUtbetalingsbeløp).isEqualTo(andel2.kalkulertUtbetalingsbeløp)
-            assertThat(oppdaterteAndeler[2].prosent).isEqualTo(andel2.prosent)
-            assertThat(oppdaterteAndeler[2].stønadFom).isEqualTo(endretUtbetalingAndel.tom?.plusMonths(1))
-            assertThat(oppdaterteAndeler[2].stønadTom).isEqualTo(andel2.stønadTom)
-            assertThat(oppdaterteAndeler[2].endreteUtbetalinger).isEmpty()
+            assertThat(oppdaterteAndeler[2].kalkulertUtbetalingsbeløp).isEqualTo(0)
+            assertThat(oppdaterteAndeler[2].prosent).isEqualTo(endretUtbetalingAndel.prosent)
+            assertThat(oppdaterteAndeler[2].stønadFom).isEqualTo(andel2.stønadFom)
+            assertThat(oppdaterteAndeler[2].stønadTom).isEqualTo(endretUtbetalingAndel.tom)
+            assertThat(oppdaterteAndeler[2].endreteUtbetalinger.size).isEqualTo(1)
+            assertThat(oppdaterteAndeler[2].endreteUtbetalinger.single()).isEqualTo(endretUtbetalingAndel.endretUtbetalingAndel)
+
+            assertThat(oppdaterteAndeler[3].kalkulertUtbetalingsbeløp).isEqualTo(andel2.kalkulertUtbetalingsbeløp)
+            assertThat(oppdaterteAndeler[3].prosent).isEqualTo(andel2.prosent)
+            assertThat(oppdaterteAndeler[3].stønadFom).isEqualTo(endretUtbetalingAndel.tom?.plusMonths(1))
+            assertThat(oppdaterteAndeler[3].stønadTom).isEqualTo(andel2.stønadTom)
+            assertThat(oppdaterteAndeler[3].endreteUtbetalinger).isEmpty()
         }
 
         @Test
@@ -346,9 +358,10 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
 
             val andelerTilkjentYtelse =
                 lagAndelerMedEndretUtbetalingAndeler(
-                    utbetalingsandeler,
-                    endretUtbetalingAndeler,
-                    utbetalingsandeler.first().tilkjentYtelse,
+                    andelTilkjentYtelserUtenEndringer = utbetalingsandeler,
+                    endretUtbetalingAndeler = endretUtbetalingAndeler,
+                    tilkjentYtelse = utbetalingsandeler.first().tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
 
             assertThat(andelerTilkjentYtelse.size).isEqualTo(1)
@@ -406,9 +419,10 @@ class AndelTilkjentYtelseMedEndretUtbetalingGeneratorTest {
 
             val andelerTilkjentYtelse =
                 lagAndelerMedEndretUtbetalingAndeler(
-                    utbetalingsandeler,
-                    endretUtbetalingAndeler,
-                    utbetalingsandeler.first().tilkjentYtelse,
+                    andelTilkjentYtelserUtenEndringer = utbetalingsandeler,
+                    endretUtbetalingAndeler = endretUtbetalingAndeler,
+                    tilkjentYtelse = utbetalingsandeler.first().tilkjentYtelse,
+                    skalBeholdeSplittI0krAndeler = true,
                 )
 
             assertThat(andelerTilkjentYtelse.size).isEqualTo(2)
