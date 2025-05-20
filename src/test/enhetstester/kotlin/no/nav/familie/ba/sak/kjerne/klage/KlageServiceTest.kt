@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -22,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
@@ -277,8 +277,8 @@ class KlageServiceTest {
         fun `skal sette enheten til saksbehandlers enhet ved opprettelse av klage`() {
             // Arrange
             val fagsak = lagFagsak()
-            val forventetEnhet = Enhet("1234", "en")
-            val enhetSomIkkeBurdeVelges = Enhet("2341", "to")
+            val forventetEnhet = BarnetrygdEnhet.OSLO
+            val enhetSomIkkeBurdeVelges = BarnetrygdEnhet.VIKAFOSSEN
             every { integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns
                 listOf(forventetEnhet, enhetSomIkkeBurdeVelges)
 

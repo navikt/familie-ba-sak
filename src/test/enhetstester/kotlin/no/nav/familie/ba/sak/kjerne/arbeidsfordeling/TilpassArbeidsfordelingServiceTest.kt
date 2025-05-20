@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
 import no.nav.familie.kontrakter.felles.NavIdent
-import no.nav.familie.kontrakter.felles.enhet.Enhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -75,9 +74,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns emptyList()
 
             // Act & assert
@@ -103,16 +100,9 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+                listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -141,23 +131,12 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
                 listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
-                    ),
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                    BarnetrygdEnhet.OSLO,
+                    BarnetrygdEnhet.DRAMMEN,
                 )
 
             // Act
@@ -208,19 +187,11 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
                 listOf(
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
-                    ),
+                    BarnetrygdEnhet.STEINKJER,
+                    BarnetrygdEnhet.VADSØ,
                 )
 
             // Act
@@ -247,20 +218,9 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = "1234",
-                        enhetsnavn = "Fiktiv enhet",
-                    ),
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+                listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilpassetArbeidsfordelingsenhet =
@@ -307,9 +267,7 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns emptyList()
 
             // Act & assert
@@ -335,15 +293,10 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
                 listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
+                    BarnetrygdEnhet.VIKAFOSSEN,
                 )
 
             // Act
@@ -364,7 +317,6 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             val enhetNavIdentHarTilgangTil1 = BarnetrygdEnhet.OSLO
-            val enhetNavIdentHarTilgangTil2 = BarnetrygdEnhet.DRAMMEN
 
             val arbeidsfordelingsenhet =
                 Arbeidsfordelingsenhet(
@@ -373,23 +325,12 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
                 listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil1.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil1.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = enhetNavIdentHarTilgangTil2.enhetsnummer,
-                        enhetsnavn = enhetNavIdentHarTilgangTil2.enhetsnavn,
-                    ),
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                    BarnetrygdEnhet.OSLO,
+                    BarnetrygdEnhet.DRAMMEN,
                 )
 
             // Act
@@ -418,23 +359,12 @@ class TilpassArbeidsfordelingServiceTest {
                 )
 
             every {
-                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(
-                    navIdent = navIdent,
-                )
+                mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent)
             } returns
                 listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.MIDLERTIDIG_ENHET.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                    Enhet(
-                        enhetsnummer = arbeidsfordelingEnhet.enhetsnummer,
-                        enhetsnavn = arbeidsfordelingEnhet.enhetsnavn,
-                    ),
+                    BarnetrygdEnhet.MIDLERTIDIG_ENHET,
+                    BarnetrygdEnhet.VIKAFOSSEN,
+                    BarnetrygdEnhet.OSLO,
                 )
 
             // Act
@@ -484,12 +414,7 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn,
-                    ),
-                )
+                    listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilordnetRessurs =
@@ -510,12 +435,7 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
-                listOf(
-                    Enhet(
-                        enhetsnummer = BarnetrygdEnhet.OSLO.enhetsnummer,
-                        enhetsnavn = BarnetrygdEnhet.OSLO.enhetsnavn,
-                    ),
-                )
+                    listOf(BarnetrygdEnhet.OSLO)
 
             // Act
             val tilordnetRessurs =
