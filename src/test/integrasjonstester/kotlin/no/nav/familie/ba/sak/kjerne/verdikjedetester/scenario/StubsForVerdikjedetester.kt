@@ -10,12 +10,16 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Folkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsDato
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKjoenn
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMetadata
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonData
@@ -32,6 +36,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROL
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import java.time.LocalDateTime
 
 fun stubScenario(scenario: RestScenario) {
     val alleIdenter = scenario.barna.map { it } + scenario.søker
@@ -39,8 +44,49 @@ fun stubScenario(scenario: RestScenario) {
         stubHentIdenter(it.ident)
         stubHentPersonStatsborgerskap(it)
         stubHentPersonVergemaalEllerFretidfullmakt(it)
+        stubHentBostedsadresserForPerson(it.ident)
     }
     stubHentPerson(scenario)
+}
+
+private fun stubHentBostedsadresserForPerson(personIdent: String) {
+    val response =
+        PdlBaseResponse(
+            data =
+                PdlBostedsadresseResponse(
+                    PdlBostedsadressePerson(
+                        listOf(
+                            PdlBostedsadresse(
+                                gyldigFraOgMed = LocalDateTime.now().minusYears(1),
+                                gyldigTilOgMed = LocalDateTime.now().minusMonths(1),
+                                vegadresse = null,
+                                matrikkeladresse = PdlMatrikkeladresse(1234.toBigInteger()),
+                                ukjentBosted = null,
+                            ),
+                        ),
+                    ),
+                ),
+            errors = null,
+            extensions = null,
+        )
+    val pdlRequestBody =
+        PdlPersonRequest(
+            variables = PdlPersonRequestVariables(personIdent),
+            query = hentGraphqlQuery("bostedsadresse"),
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
 }
 
 private fun stubHentIdenter(personIdent: String) {

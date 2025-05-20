@@ -24,8 +24,10 @@ class PreutfyllBosattIRiketService(
 
             val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat)
 
-            personResultat.vilkårResultater.removeIf { it.vilkårType == Vilkår.BOSATT_I_RIKET }
-            personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+            if (bosattIRiketVilkårResultat.isNotEmpty()) {
+                personResultat.vilkårResultater.removeIf { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
+            }
         }
     }
 
