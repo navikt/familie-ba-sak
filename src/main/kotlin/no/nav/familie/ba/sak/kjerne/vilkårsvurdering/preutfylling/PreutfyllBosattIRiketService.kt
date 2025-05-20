@@ -78,12 +78,14 @@ class PreutfyllBosattIRiketService(
 
         return harBostedsadresseINorgeTidslinje
             .tilPerioder()
-            .filter { it.verdi == true && ChronoUnit.MONTHS.between(it.fom, it.tom ?: LocalDate.MAX) >= 12 }
             .map { periode ->
+
+                val oppfyllerVilkår = periode.verdi == true && ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: LocalDate.MAX) >= 12
+
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
-                    resultat = Resultat.OPPFYLT,
+                    resultat = if (oppfyllerVilkår) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,

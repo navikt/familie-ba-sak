@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsVegadresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadressePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -60,15 +61,16 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
-        assertThat(vilkårsresutat).hasSize(2)
+        assertThat(vilkårsresutat).hasSize(3)
         assertThat(vilkårsresutat.first().periodeFom).isEqualTo(LocalDate.now().minusYears(4))
         assertThat(vilkårsresutat.first().periodeTom).isEqualTo(LocalDate.now().minusYears(2))
         assertThat(vilkårsresutat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
         assertThat(vilkårsresutat.first().vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+        assertThat(vilkårsresutat.find{ it.resultat == Resultat.IKKE_OPPFYLT}).isNotNull
     }
 
     @Test
-    fun `skal ikke ta med periode hvis bosatt i riket er mindre enn 12 mnd`() {
+    fun `skal gi vilkårsresultat IKKE_OPPFYLT hvis bosatt i riket er mindre enn 12 mnd`() {
         // Arrange
         val behandling = lagBehandling()
         val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
@@ -99,6 +101,10 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
-        assertThat(vilkårsresutat).isEmpty()
+        assertThat(vilkårsresutat.first().resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(vilkårsresutat.find{ it.resultat == Resultat.IKKE_OPPFYLT}).isNotNull
+
+
     }
+
 }
