@@ -66,7 +66,7 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårsresutat.first().periodeTom).isEqualTo(LocalDate.now().minusYears(2))
         assertThat(vilkårsresutat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
         assertThat(vilkårsresutat.first().vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
-        assertThat(vilkårsresutat.find{ it.resultat == Resultat.IKKE_OPPFYLT}).isNotNull
+        assertThat(vilkårsresutat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
     }
 
     @Test
@@ -102,9 +102,6 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(vilkårsresutat.first().resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertThat(vilkårsresutat.find{ it.resultat == Resultat.IKKE_OPPFYLT}).isNotNull
-
-
+        assertThat(vilkårsresutat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
     }
-
 }
