@@ -10,6 +10,7 @@ fun mockUnleashNextMedContextService(): UnleashNextMedContextService {
     val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
     every { unleashNextMedContextService.isEnabled(any<FeatureToggle>()) } returns true
     every { unleashNextMedContextService.isEnabled(any<FeatureToggle>(), any<Long>()) } returns true
+    every { unleashNextMedContextService.isEnabled(any<FeatureToggle>(), any<Boolean>()) } returns true
     return unleashNextMedContextService
 }
 
