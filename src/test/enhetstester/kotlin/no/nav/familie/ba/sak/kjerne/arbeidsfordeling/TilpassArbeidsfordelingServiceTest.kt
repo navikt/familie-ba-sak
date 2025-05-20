@@ -414,7 +414,7 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
-                    listOf(BarnetrygdEnhet.VIKAFOSSEN)
+                listOf(BarnetrygdEnhet.VIKAFOSSEN)
 
             // Act
             val tilordnetRessurs =
@@ -435,7 +435,7 @@ class TilpassArbeidsfordelingServiceTest {
             val navIdent = NavIdent("1")
 
             every { mockedIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent = navIdent) } returns
-                    listOf(BarnetrygdEnhet.OSLO)
+                listOf(BarnetrygdEnhet.OSLO)
 
             // Act
             val tilordnetRessurs =
