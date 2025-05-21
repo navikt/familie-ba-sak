@@ -26,7 +26,7 @@
         <prosessering.version>2.20250519094842_e8bd711</prosessering.version>
         <felles.version>3.20250505101905_835431d</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250422132745_dfaa902</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250513140227_11db730</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20250520105353_6584047</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
@@ -484,7 +484,7 @@
                         <dependency>
                             <groupId>com.pinterest.ktlint</groupId>
                             <artifactId>ktlint-cli</artifactId>
-                            <version>1.5.0</version>
+                            <version>1.6.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
