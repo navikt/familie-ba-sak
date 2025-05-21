@@ -184,7 +184,7 @@ class VilkårsvurderingForNyBehandlingService(
                         ?.map { it.aktør } ?: emptyList(),
             )
 
-        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_BOSATT_I_RIKET.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR.navn, false)) {
             if (!behandling.skalBehandlesAutomatisk) {
                 preutfyllBosattIRiketService.prefutfyllBosattIRiket(initiellVilkårsvurdering)
             }
