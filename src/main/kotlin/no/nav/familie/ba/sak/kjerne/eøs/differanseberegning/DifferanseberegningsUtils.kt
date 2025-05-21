@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -53,7 +53,7 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
             .intValueExact() // Fjern desimaler for å gi fordel til søker
 
     val nyttDifferanseberegnetPeriodebeløp by lazy {
-        (beløpUtenEndretUtbetaling ?: throw Feil("beløpUtenEndretUtbetaling kan ikke være null")) - avrundetUtenlandskPeriodebeløp
+        (beløpUtenEndretUtbetaling ?: throw FunksjonellFeil("En feil har oppstått. Gå tilbake til vilkårsvurderingen og trykk 'Neste'.")) - avrundetUtenlandskPeriodebeløp
     }
 
     val nyttKalkulertUtbetalingsbeløp =
