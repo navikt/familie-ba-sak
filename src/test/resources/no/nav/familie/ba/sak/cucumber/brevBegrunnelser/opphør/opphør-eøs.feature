@@ -45,7 +45,7 @@ Egenskap: Brevbegrunnelser ved opphør for EØS.
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |
-      | 3       | 1            | 01.07.2020 | 31.07.2020 | 0     | ORDINÆR_BARNETRYGD | 100     | 1054 |
+      | 3       | 1            | 01.07.2020 | 31.07.2020 | 1054  | ORDINÆR_BARNETRYGD | 100     | 1054 |
 
     Og med kompetanser
       | AktørId | Fra dato   | Til dato   | Resultat              | BehandlingId | Søkers aktivitet | Annen forelders aktivitet | Søkers aktivitetsland | Annen forelders aktivitetsland | Barnets bostedsland |

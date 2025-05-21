@@ -331,6 +331,9 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne = hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val barnSomNåFårUtbetalingIPeriode = barnMedUtbetaling - barnMedUtbetalingHøyereEnn0IForrigeperiode
 
+    val barnMedNullutbetalingForrigePeriode =
+        hentBarnMedNullutbetalingForrigePeriode(begrunnelsesGrunnlagPerPerson)
+
     return when {
         this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
 
@@ -352,7 +355,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                                 barnMedUtbetalingIForrigeperiode +
                                     barnMedOppfylteVilkår +
                                     barnMistetUtbetalingFraForrigeBehandling
-                            ).toSet().map { it.fødselsdato }
+                            ).toSet().minus(barnMedNullutbetalingForrigePeriode).map { it.fødselsdato }
                         }
 
                     relevanteBarn
@@ -386,6 +389,15 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         }
     }
 }
+
+private fun hentBarnMedNullutbetalingForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+    begrunnelsesGrunnlagPerPerson
+        .filterKeys { it.type == PersonType.BARN }
+        .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
+            val andelerTilkjentYtelse = begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList()
+
+            andelerTilkjentYtelse?.isNotEmpty() == true && andelerTilkjentYtelse.none { it.kalkulertUtbetalingsbeløp > 0 }
+        }.keys
 
 private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson.filter { (person, begrunnelseGrunnlag) ->
