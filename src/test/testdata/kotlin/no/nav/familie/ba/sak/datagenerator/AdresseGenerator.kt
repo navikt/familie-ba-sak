@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.datagenerator
 
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 
-fun opprettAdresse(
+fun lagGrVegadresse(
     matrikkelId: Long? = null,
     bruksenhetsnummer: String? = null,
     adressenavn: String? = null,
