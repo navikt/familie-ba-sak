@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadressePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.Tema
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
@@ -195,10 +195,10 @@ class PdlRestClient(
         }
     }
 
-    fun hentBostedsadresserForPerson(aktør: Aktør): PdlBostedsadressePerson {
+    fun hentBostedsadresserForPerson(fødselsnummer: String): List<Bostedsadresse> {
         val pdlPersonRequest =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                variables = PdlPersonRequestVariables(fødselsnummer),
                 query = hentGraphqlQuery("bostedsadresse"),
             )
 
@@ -212,10 +212,10 @@ class PdlRestClient(
             }
 
         return feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
+            ident = fødselsnummer,
             pdlResponse = pdlResponse,
         ) {
-            it.person
+            it.person?.bostedsadresse ?: emptyList()
         }
     }
 

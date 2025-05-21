@@ -5,12 +5,12 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadressePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKjoenn
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMetadata
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonData
@@ -32,11 +31,12 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 fun stubScenario(scenario: RestScenario) {
     val alleIdenter = scenario.barna.map { it } + scenario.søker
@@ -44,34 +44,38 @@ fun stubScenario(scenario: RestScenario) {
         stubHentIdenter(it.ident)
         stubHentPersonStatsborgerskap(it)
         stubHentPersonVergemaalEllerFretidfullmakt(it)
-        stubHentBostedsadresserForPerson(it.ident)
+        stubHentBostedsadresserForPerson(it)
     }
     stubHentPerson(scenario)
 }
 
-private fun stubHentBostedsadresserForPerson(personIdent: String) {
+private fun stubHentBostedsadresserForPerson(restScenarioPerson: RestScenarioPerson) {
+    val bursdagTilPerson = LocalDate.parse(restScenarioPerson.fødselsdato)
+
     val response =
         PdlBaseResponse(
             data =
                 PdlBostedsadresseResponse(
-                    PdlBostedsadressePerson(
-                        listOf(
-                            PdlBostedsadresse(
-                                gyldigFraOgMed = LocalDateTime.now().minusYears(1),
-                                gyldigTilOgMed = LocalDateTime.now().minusMonths(1),
-                                vegadresse = null,
-                                matrikkeladresse = PdlMatrikkeladresse(1234.toBigInteger()),
-                                ukjentBosted = null,
-                            ),
+                    person =
+                        PdlBostedsadressePerson(
+                            bostedsadresse =
+                                listOf(
+                                    Bostedsadresse(
+                                        gyldigFraOgMed = bursdagTilPerson,
+                                        gyldigTilOgMed = null,
+                                        vegadresse = null,
+                                        matrikkeladresse = lagMatrikkeladresse(1234L),
+                                        ukjentBosted = null,
+                                    ),
+                                ),
                         ),
-                    ),
                 ),
             errors = null,
             extensions = null,
         )
     val pdlRequestBody =
         PdlPersonRequest(
-            variables = PdlPersonRequestVariables(personIdent),
+            variables = PdlPersonRequestVariables(restScenarioPerson.ident),
             query = hentGraphqlQuery("bostedsadresse"),
         )
 

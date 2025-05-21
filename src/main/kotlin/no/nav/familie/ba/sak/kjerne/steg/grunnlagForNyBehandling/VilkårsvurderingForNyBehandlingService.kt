@@ -185,7 +185,9 @@ class VilkårsvurderingForNyBehandlingService(
             )
 
         if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_BOSATT_I_RIKET.navn, false)) {
-            preutfyllBosattIRiketService.prefutfyllBosattIRiket(initiellVilkårsvurdering)
+            if (!behandling.skalBehandlesAutomatisk) {
+                preutfyllBosattIRiketService.prefutfyllBosattIRiket(initiellVilkårsvurdering)
+            }
         }
 
         tellMetrikkerForFødselshendelse(

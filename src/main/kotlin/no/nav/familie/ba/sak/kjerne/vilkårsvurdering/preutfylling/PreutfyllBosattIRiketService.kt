@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.tomTidslinje
@@ -34,8 +34,7 @@ class PreutfyllBosattIRiketService(
     fun genererBosattIRiketVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
         val alleBostedsAdresserForPerson =
             pdlRestClient
-                .hentBostedsadresserForPerson(aktør = personResultat.aktør)
-                .bostedsadresse
+                .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
                 .sortedBy { it.gyldigFraOgMed }
 
         val harBostedsadresseINorgeTidslinje =
@@ -48,8 +47,8 @@ class PreutfyllBosattIRiketService(
                     val bostedsadresse = alleBostedsAdresserForPerson.single()
                     Periode(
                         verdi = harBostedsAdresseINorge(bostedsadresse),
-                        fom = bostedsadresse.gyldigFraOgMed.toLocalDate(),
-                        tom = bostedsadresse.gyldigTilOgMed?.toLocalDate(),
+                        fom = bostedsadresse.gyldigFraOgMed,
+                        tom = bostedsadresse.gyldigTilOgMed,
                     ).tilTidslinje()
                 }
 
@@ -59,8 +58,8 @@ class PreutfyllBosattIRiketService(
                             .zipWithNext { denne, neste ->
                                 Periode(
                                     verdi = harBostedsAdresseINorge(denne),
-                                    fom = denne.gyldigFraOgMed.toLocalDate(),
-                                    tom = denne.gyldigTilOgMed?.toLocalDate() ?: neste.gyldigFraOgMed.toLocalDate(),
+                                    fom = denne.gyldigFraOgMed,
+                                    tom = denne.gyldigTilOgMed ?: neste.gyldigFraOgMed,
                                 )
                             }.toMutableList()
 
@@ -68,8 +67,8 @@ class PreutfyllBosattIRiketService(
                     erBosattINorgePerioder.add(
                         Periode(
                             verdi = harBostedsAdresseINorge(alleBostedsAdresserForPerson.last()),
-                            fom = alleBostedsAdresserForPerson.last().gyldigFraOgMed.toLocalDate(),
-                            tom = alleBostedsAdresserForPerson.last().gyldigTilOgMed?.toLocalDate(),
+                            fom = alleBostedsAdresserForPerson.last().gyldigFraOgMed,
+                            tom = alleBostedsAdresserForPerson.last().gyldigTilOgMed,
                         ),
                     )
 
@@ -97,5 +96,5 @@ class PreutfyllBosattIRiketService(
             }.toSet()
     }
 
-    private fun harBostedsAdresseINorge(pdlBostedsAdresse: PdlBostedsadresse): Boolean = pdlBostedsAdresse.vegadresse != null || pdlBostedsAdresse.matrikkeladresse != null || pdlBostedsAdresse.ukjentBosted != null
+    private fun harBostedsAdresseINorge(bostedsadresse: Bostedsadresse): Boolean = bostedsadresse.vegadresse != null || bostedsadresse.matrikkeladresse != null || bostedsadresse.ukjentBosted != null
 }
