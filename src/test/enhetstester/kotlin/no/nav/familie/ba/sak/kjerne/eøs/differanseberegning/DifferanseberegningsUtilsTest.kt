@@ -92,37 +92,44 @@ class DifferanseberegningsUtilsTest {
     fun `Skal håndtere gjentakende endring og differanseberegning på andel tilkjent ytelse`() {
         val aty1 =
             lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-                100.toBigDecimal(),
+                utenlandskPeriodebeløpINorskeKroner = 100.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
             )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-50, aty1?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
+        Assertions.assertEquals(50, aty1?.beløpUtenEndretUtbetaling)
 
         val aty2 =
-            aty1?.copy(nasjonaltPeriodebeløp = 1).oppdaterDifferanseberegning(
-                75.toBigDecimal(),
+            aty1?.copy(nasjonaltPeriodebeløp = 1, beløpUtenEndretUtbetaling = 1).oppdaterDifferanseberegning(
+                utenlandskPeriodebeløpINorskeKroner = 75.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
             )
 
         Assertions.assertEquals(0, aty2?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(-74, aty2?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
+        Assertions.assertEquals(1, aty2?.beløpUtenEndretUtbetaling)
 
         val aty3 =
-            aty2?.copy(nasjonaltPeriodebeløp = 250).oppdaterDifferanseberegning(
-                75.toBigDecimal(),
+            aty2?.copy(nasjonaltPeriodebeløp = 250, beløpUtenEndretUtbetaling = 250).oppdaterDifferanseberegning(
+                utenlandskPeriodebeløpINorskeKroner = 75.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
             )
 
         Assertions.assertEquals(175, aty3?.kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(175, aty3?.differanseberegnetPeriodebeløp)
         Assertions.assertEquals(250, aty3?.nasjonaltPeriodebeløp)
+        Assertions.assertEquals(250, aty3?.beløpUtenEndretUtbetaling)
     }
 
     @Test
     fun `Skal fjerne desimaler i utenlandskperiodebeløp, effektivt øke den norske ytelsen med inntil én krone`() {
         val aty1 =
             lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-                100.987654.toBigDecimal(),
+                utenlandskPeriodebeløpINorskeKroner = 100.987654.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
             ) // Blir til rundet til 100
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
@@ -134,13 +141,26 @@ class DifferanseberegningsUtilsTest {
     fun `Skal beholde originalt nasjonaltPeriodebeløp når vi oppdatererDifferanseberegning gjentatte ganger`() {
         var aty1 =
             lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-                100.987654.toBigDecimal(),
+                utenlandskPeriodebeløpINorskeKroner = 100.987654.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
             )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
-        aty1 = aty1.oppdaterDifferanseberegning(13.6.toBigDecimal())
+
+        aty1 =
+            aty1.oppdaterDifferanseberegning(
+                utenlandskPeriodebeløpINorskeKroner = 13.6.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
+            )
+
         Assertions.assertEquals(37, aty1?.kalkulertUtbetalingsbeløp)
-        aty1 = aty1.oppdaterDifferanseberegning(49.2.toBigDecimal())
+
+        aty1 =
+            aty1.oppdaterDifferanseberegning(
+                utenlandskPeriodebeløpINorskeKroner = 49.2.toBigDecimal(),
+                skalBrukeNyDifferanseberegning = true,
+            )
+
         Assertions.assertEquals(1, aty1?.kalkulertUtbetalingsbeløp)
     }
 }

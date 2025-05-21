@@ -1,14 +1,123 @@
 {
-  "data": [
-    {
-      "enhetsnummer": "4820",
-      "enhetsnavn": "NAV Familie- og pensjonsytelser Vadsø"
-    },
-    {
-      "enhetsnummer": "4833",
-      "enhetsnavn": "NAV Familie- og pensjonsytelser Oslo 1"
-    }
-  ],
+  "data": {
+    "value": [
+      {
+        "id": "93a26831-9866-4410-927b-74ff51a9107c",
+        "displayName": "0000-GA-Barnetrygd-Veileder"
+      },
+      {
+        "id": "9449c153-5a1e-44a7-84c6-7cc7a8867233",
+        "displayName": "0000-GA-Barnetrygd-Beslutter"
+      },
+      {
+        "id": "314fa714-f13c-4cdc-ac5c-e13ce08e241c",
+        "displayName": "0000-GA-Barnetrygd-Superbruker"
+      },
+      {
+        "id": "52fe1bef-224f-49df-a40a-29f92d4520f8",
+        "displayName": "0000-GA-Kontantstotte-Beslutter"
+      },
+      {
+        "id": "c7e0b108-7ae6-432c-9ab4-946174c240c0",
+        "displayName": "0000-GA-Kontantstotte"
+      },
+      {
+        "id": "71f503a2-c28f-4394-a05a-8da263ceca4a",
+        "displayName": "0000-GA-Kontantstotte-Veileder"
+      },
+      {
+        "id": "28e66e77-d879-47f1-8835-fea505cfce9f",
+        "displayName": "0000-GA-GOSYS_MEDLEMSKAP_ENDRER"
+      },
+      {
+        "id": "6c7b1e6e-fd83-400f-9e0d-0f9e1bc24e4f",
+        "displayName": "0000-GA-PERSON-ENDRE_UTENLANDSKID"
+      },
+      {
+        "id": "87ea7c87-08a2-43bc-83d6-0bfeee92185d",
+        "displayName": "0000-GA-GOSYS_KODE6"
+      },
+      {
+        "id": "ea930b6b-9397-44d9-b9e6-f4cf527a632a",
+        "displayName": "0000-GA-Fortrolig_Adresse"
+      },
+      {
+        "id": "69d4a70f-1c83-42a8-8fb8-2f5d54048647",
+        "displayName": "0000-GA-GOSYS_KODE7"
+      },
+      {
+        "id": "5ef775f2-61f8-4283-bf3d-8d03f428aa14",
+        "displayName": "0000-GA-Strengt_Fortrolig_Adresse"
+      },
+      {
+        "id": "90fc4535-ab74-444e-8969-1935b9563e00",
+        "displayName": "0000-GA-GOSYS_LESE_INN_DOKUMENTER"
+      },
+      {
+        "id": "d12fdb94-ea30-452b-ad43-af1a3ab30157",
+        "displayName": "Alle-i-IT"
+      },
+      {
+        "id": "928636f4-fd0d-4149-978e-a6fb68bb19de",
+        "displayName": "0000-GA-STDAPPS"
+      },
+      {
+        "id": "3db683fb-ba0d-4d1a-aa92-153b101d9c88",
+        "displayName": "0000-GA-EnGangIAaret"
+      },
+      {
+        "id": "5044535d-245d-49ef-9a78-2efea67ba0bc",
+        "displayName": "0000-GA-GOSYS_LESE_UT_DOKUMENTER"
+      },
+      {
+        "id": "174bec27-e954-453b-8486-4a80d9fc7636",
+        "displayName": "0000-GA-GOSYS"
+      },
+      {
+        "id": "d2987104-63b2-4110-83ac-20ff6afe24a2",
+        "displayName": "0000-GA-GOSYS_REGIONAL"
+      },
+      {
+        "id": "a9f5ef81-4e81-42e8-b368-0273071b64b9",
+        "displayName": "0000-GA-GOSYS_OPPGAVE_BEHANDLER"
+      },
+      {
+        "id": "dec3ee50-b683-4644-9507-520e8f054ac2",
+        "displayName": "GRP Alle brukere"
+      },
+      {
+        "id": "b81de253-f948-4bdd-9897-a61012e5ebec",
+        "displayName": "0000-GA-GOSYS_Administrer_oppgaver"
+      },
+      {
+        "id": "3e3b7296-c57a-4b2b-9463-177aa1c96dd9",
+        "displayName": "0000-GA-TEMA_BAR"
+      },
+      {
+        "id": "e2cf416e-eb2b-4c86-8b5b-8c5b00385bcf",
+        "displayName": "0000-GA-ENHET_2103"
+      },
+      {
+        "id": "a996c91f-6dd1-466d-bed0-06ddccab87f5",
+        "displayName": "0000-GA-ENHET_4820"
+      },
+      {
+        "id": "cfe01415-0fdb-45cd-a94c-370199fe9956",
+        "displayName": "0000-GA-TEMA_KON"
+      },
+      {
+        "id": "52ca6398-d62b-4e01-bd60-8d3e4708a946",
+        "displayName": "checkpoint_inline_incoming"
+      },
+      {
+        "id": "da471520-ea8f-4590-aca9-579321cfd9ed",
+        "displayName": "All Users"
+      }
+    ]
+  },
   "status": "SUKSESS",
-  "melding": "Fant enheter"
+  "melding": "Hent saksbehandler grupper OK",
+  "frontendFeilmelding": null,
+  "stacktrace": null,
+  "callId": null
 }

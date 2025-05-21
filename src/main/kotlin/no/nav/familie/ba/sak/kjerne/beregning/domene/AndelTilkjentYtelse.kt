@@ -89,6 +89,8 @@ data class AndelTilkjentYtelse(
     val nasjonaltPeriodebeløp: Int?,
     @Column(name = "differanseberegnet_periodebelop")
     val differanseberegnetPeriodebeløp: Int? = null,
+    @Column(name = "belop_uten_endret_utbetaling")
+    val beløpUtenEndretUtbetaling: Int? = null,
 ) : BaseEntitet() {
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
@@ -108,7 +110,8 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(aktør, annen.aktør) &&
             Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
-            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp)
+            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp) &&
+            Objects.equals(beløpUtenEndretUtbetaling, annen.beløpUtenEndretUtbetaling)
     }
 
     override fun hashCode(): Int =
@@ -125,9 +128,10 @@ data class AndelTilkjentYtelse(
         )
 
     override fun toString(): String =
-        "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent," +
+        "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent, " +
             "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset, " +
-            "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, differanseberegnetBeløp = $differanseberegnetPeriodebeløp)"
+            "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, " +
+            "differanseberegnetBeløp = $differanseberegnetPeriodebeløp, beløpUtenEndretUtbetaling = $beløpUtenEndretUtbetaling)"
 
     fun stønadsPeriode() = MånedPeriode(this.stønadFom, this.stønadTom)
 

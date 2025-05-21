@@ -10,15 +10,15 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.ZipPadding
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.zipMedNeste
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.mapVerdi
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.ZipPadding
 import no.nav.familie.tidslinje.utvidelser.filtrerIkkeNull
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import no.nav.familie.tidslinje.utvidelser.zipMedNeste
 import java.math.BigDecimal
 
 object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
@@ -26,6 +26,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
+        skalBeholdeSplittI0krAndeler: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (endretUtbetalingAndeler.isEmpty()) {
             return andelTilkjentYtelserUtenEndringer
@@ -52,6 +53,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                             andelerAvTypeForPerson = andelerForAktørOgType,
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
+                            skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
                         )
                     YtelseType.SMÅBARNSTILLEGG ->
                         throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
@@ -65,6 +67,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         andelerAvTypeForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
+        skalBeholdeSplittI0krAndeler: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (endretUtbetalingAndelerForPerson.isEmpty()) {
             return andelerAvTypeForPerson
@@ -93,6 +96,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                     AndelMedEndretUtbetalingForTidslinje(
                         aktør = andelTilkjentYtelse.aktør,
                         beløp = nyttBeløp,
+                        beløpUtenEndretUtbetaling = andelTilkjentYtelse.beløpUtenEndretUtbetaling ?: andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
                         sats = andelTilkjentYtelse.sats,
                         ytelseType = andelTilkjentYtelse.type,
                         prosent = prosent,
@@ -101,14 +105,20 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                 }
             }
 
-        return andelerMedEndringerTidslinje
-            .slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel()
-            .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
+        return if (skalBeholdeSplittI0krAndeler) {
+            andelerMedEndringerTidslinje
+                .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
+        } else {
+            andelerMedEndringerTidslinje
+                .slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel()
+                .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
+        }
     }
 
     internal data class AndelMedEndretUtbetalingForTidslinje(
         val aktør: Aktør,
         val beløp: Int,
+        val beløpUtenEndretUtbetaling: Int,
         val sats: Int,
         val ytelseType: YtelseType,
         val prosent: BigDecimal,
@@ -134,6 +144,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                 kalkulertUtbetalingsbeløp = this.verdi.beløp,
                 nasjonaltPeriodebeløp = this.verdi.beløp,
                 differanseberegnetPeriodebeløp = null,
+                beløpUtenEndretUtbetaling = this.verdi.beløpUtenEndretUtbetaling,
                 sats = this.verdi.sats,
                 prosent = this.verdi.prosent,
                 stønadFom = this.fom?.toYearMonth() ?: throw Feil("Fra og med-dato ikke satt"),
