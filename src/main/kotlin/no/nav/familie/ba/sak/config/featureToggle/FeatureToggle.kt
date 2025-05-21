@@ -50,4 +50,6 @@ enum class FeatureToggle(
 
     // NAV-24917
     BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK("familie-ba-sak.bruk-oppdatert-logikk-for-tilpass-kompetanser-til-regelverk"),
+
+    SKAL_BRUKE_NY_DIFFERANSEBEREGNING("familie-ba-sak.skal-bruke-ny-differanseberegning"),
 }

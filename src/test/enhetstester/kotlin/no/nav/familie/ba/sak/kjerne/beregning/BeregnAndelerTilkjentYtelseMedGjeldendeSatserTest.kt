@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import no.nav.familie.ba.sak.common.rangeTo
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
@@ -367,11 +369,13 @@ private fun VilkårsvurderingBuilder.PersonResultatBuilder.beregnAndelerTilkjent
 
     val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+    val unleashServiceMock: UnleashNextMedContextService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, unleashServiceMock)
 
     every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
     every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
     every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+    every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING) } returns true
 
     return tilkjentYtelseGenerator
         .genererTilkjentYtelse(

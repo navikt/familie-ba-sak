@@ -38,7 +38,7 @@ class IntegrasjonClientTest {
 
         wiremockServerItem.stubFor(
             WireMock
-                .post(WireMock.urlEqualTo("/enhetstilganger"))
+                .get(WireMock.urlEqualTo("/saksbehandler/1/grupper"))
                 .willReturn(WireMock.okJson(readFile("enheterNavIdentHarTilgangTilResponse.json"))),
         )
 
@@ -52,8 +52,8 @@ class IntegrasjonClientTest {
             assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.VADSØ.enhetsnavn)
         }
         assertThat(enheter).anySatisfy {
-            assertThat(it.enhetsnummer).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnummer)
-            assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.OSLO.enhetsnavn)
+            assertThat(it.enhetsnummer).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnummer)
+            assertThat(it.enhetsnavn).isEqualTo(BarnetrygdEnhet.VIKAFOSSEN.enhetsnavn)
         }
     }
 

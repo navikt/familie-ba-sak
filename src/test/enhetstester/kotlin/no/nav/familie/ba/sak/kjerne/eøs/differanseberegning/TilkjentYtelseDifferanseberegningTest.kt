@@ -46,10 +46,12 @@ class TilkjentYtelseDifferanseberegningTest {
                 .medVilkår("EEEEEEEEEEEEEEEEEEEEEEE", LOVLIG_OPPHOLD)
                 .forPerson(barn1, startMåned)
                 .medVilkår("+>", UNDER_18_ÅR, GIFT_PARTNERSKAP)
-                .medVilkår("E>", BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
+                .medVilkår("E>", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                .medVilkår("é>", BOR_MED_SØKER)
                 .forPerson(barn2, startMåned)
                 .medVilkår("+>", UNDER_18_ÅR, GIFT_PARTNERSKAP)
-                .medVilkår("E>", BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER)
+                .medVilkår("E>", BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                .medVilkår("é>", BOR_MED_SØKER)
                 .byggPerson()
 
         val tilkjentYtelse = vilkårsvurderingBygger.byggTilkjentYtelse()
@@ -63,12 +65,12 @@ class TilkjentYtelseDifferanseberegningTest {
         val forventetTilkjentYtelseMedDelt =
             TilkjentYtelseBuilder(startMåned, behandling)
                 .forPersoner(barn1, barn2)
-                .medOrdinær(" $$$$$$", prosent = 50) { it / 2 }
-                .medOrdinær("       $$$$$$$$$$", prosent = 0) { 0 }
-                .medOrdinær("                 $$$$$$", prosent = 100) { it }
+                .medOrdinær(" $$$$$$", prosent = 50, utenEndretUtbetaling = { it / 2 }) { it / 2 }
+                .medOrdinær("       $$$$$$$$$$", prosent = 0, utenEndretUtbetaling = { it / 2 }) { 0 }
+                .medOrdinær("                 $$$$$$", prosent = 100, utenEndretUtbetaling = { it / 2 }) { it }
                 .bygg()
 
-        assertEquals(8, tilkjentYtelse.andelerTilkjentYtelse.size)
+        assertEquals(10, tilkjentYtelse.andelerTilkjentYtelse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDelt.andelerTilkjentYtelse,
             tilkjentYtelse.andelerTilkjentYtelse,
@@ -87,18 +89,23 @@ class TilkjentYtelseDifferanseberegningTest {
         val forventetTilkjentYtelseMedDiff =
             TilkjentYtelseBuilder(startMåned, behandling)
                 .forPersoner(barn1, barn2)
-                .medOrdinær(" $$", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 32 }) { it / 2 - 32 }
-                .medOrdinær("   $$", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 40 }) { it / 2 - 40 }
-                .medOrdinær("     $", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 45 }) { it / 2 - 45 }
-                .medOrdinær("      $", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 54 }) { it / 2 - 54 }
-                .medOrdinær("       $$$$$$$$$$", 0, nasjonalt = { 0 }, differanse = { -54 }) { 0 }
-                .medOrdinær("                 $$$$$$", 100, nasjonalt = { it }, differanse = { it - 54 }) { it - 54 }
+                .medOrdinær(" $$", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 32 }, utenEndretUtbetaling = { it / 2 }) { it / 2 - 32 }
+                .medOrdinær("   $$", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 40 }, utenEndretUtbetaling = { it / 2 }) { it / 2 - 40 }
+                .medOrdinær("     $", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 45 }, utenEndretUtbetaling = { it / 2 }) { it / 2 - 45 }
+                .medOrdinær("      $", 50, nasjonalt = { it / 2 }, differanse = { it / 2 - 54 }, utenEndretUtbetaling = { it / 2 }) { it / 2 - 54 }
+                .medOrdinær("       $$$$$$$$$$", 0, nasjonalt = { 0 }, differanse = { it / 2 - 54 }, utenEndretUtbetaling = { it / 2 }) { 0 }
+                .medOrdinær("                 $$$$$$", 100, nasjonalt = { it }, differanse = { it / 2 - 54 }, utenEndretUtbetaling = { it / 2 }) { it - 54 }
                 .bygg()
 
         val andelerMedDifferanse =
-            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+            beregnDifferanse(
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+                valutakurser = valutakurser,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
-        assertEquals(14, andelerMedDifferanse.size)
+        assertEquals(16, andelerMedDifferanse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
             andelerMedDifferanse,
@@ -159,7 +166,12 @@ class TilkjentYtelseDifferanseberegningTest {
                 .bygg()
 
         val andelerMedDiff =
-            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+            beregnDifferanse(
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+                valutakurser = valutakurser,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         assertEquals(6, andelerMedDiff.size)
         assertEqualsUnordered(
@@ -173,7 +185,12 @@ class TilkjentYtelseDifferanseberegningTest {
                 .bygg()
 
         val andelerUtenDiff =
-            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, blanktUtenlandskPeridebeløp, valutakurser)
+            beregnDifferanse(
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = blanktUtenlandskPeridebeløp,
+                valutakurser = valutakurser,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         assertEquals(3, andelerUtenDiff.size)
         assertEqualsUnordered(
@@ -182,7 +199,12 @@ class TilkjentYtelseDifferanseberegningTest {
         )
 
         val andelerMedDiffIgjen =
-            beregnDifferanse(tilkjentYtelse.andelerTilkjentYtelse, utenlandskePeriodebeløp, valutakurser)
+            beregnDifferanse(
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
+                utenlandskePeriodebeløp = utenlandskePeriodebeløp,
+                valutakurser = valutakurser,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         assertEquals(6, andelerMedDiffIgjen.size)
         assertEqualsUnordered(

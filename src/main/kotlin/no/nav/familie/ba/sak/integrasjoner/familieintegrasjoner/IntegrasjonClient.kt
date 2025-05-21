@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet.Companion.erGyldigBehandlendeBarnetrygdEnhet
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -21,9 +21,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_500
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
-import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType
@@ -32,8 +30,6 @@ import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
 import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.dokdistkanal.Distribusjonskanal
 import no.nav.familie.kontrakter.felles.dokdistkanal.DokdistkanalRequest
-import no.nav.familie.kontrakter.felles.enhet.Enhet
-import no.nav.familie.kontrakter.felles.enhet.HentEnheterNavIdentHarTilgangTilRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.TilgangsstyrtJournalpost
@@ -46,6 +42,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.organisasjon.Organisasjon
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import no.nav.familie.kontrakter.felles.saksbehandler.SaksbehandlerGrupper
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -141,22 +138,32 @@ class IntegrasjonClient(
         }
     }
 
-    @Cacheable("behandlendeEnhetForPersonMedRelasjon", cacheManager = "shortCache")
-    fun hentBehandlendeEnhetForPersonIdentMedRelasjoner(ident: String): Arbeidsfordelingsenhet {
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
+    )
+    @Cacheable("saksbehandler", cacheManager = "shortCache")
+    fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<BarnetrygdEnhet> {
         val uri =
             UriComponentsBuilder
                 .fromUri(integrasjonUri)
-                .pathSegment("arbeidsfordeling", "enhet", Tema.KON.name, "med-relasjoner")
+                .pathSegment("saksbehandler", navIdent.ident, "grupper")
                 .build()
                 .toUri()
 
-        return kallEksternTjenesteRessurs<List<Arbeidsfordelingsenhet>>(
-            tjeneste = "arbeidsfordeling",
-            uri = uri,
-            formål = "Hent strengeste behandlende enhet for person og alle relasjoner til personen",
-        ) {
-            postForEntity(uri, PersonIdent(ident))
-        }.single()
+        val saksbehandlerSineGrupper =
+            kallEksternTjenesteRessurs<SaksbehandlerGrupper>(
+                tjeneste = "saksbehandler",
+                uri = uri,
+                formål = "Henter gruppene til saksbehandler",
+            ) {
+                getForEntity(uri)
+            }
+
+        return saksbehandlerSineGrupper.value.mapNotNull { navn ->
+            BarnetrygdEnhet.entries.find { it.gruppenavn == navn.displayName }
+        }
     }
 
     @Retryable(
@@ -261,17 +268,6 @@ class IntegrasjonClient(
         ) {
             getForEntity(uri)
         }
-    }
-
-    fun hentBehandlendeEnheterSomNavIdentHarTilgangTil(navIdent: NavIdent): List<Enhet> {
-        val uri = URI.create("$integrasjonUri/enhetstilganger")
-        return kallEksternTjenesteRessurs<List<Enhet>>(
-            tjeneste = "enhetstilganger",
-            uri = uri,
-            formål = "Hent enheter en NAV-ident har tilgang til",
-        ) {
-            postForEntity(uri, HentEnheterNavIdentHarTilgangTilRequest(navIdent, Tema.BAR))
-        }.filter { erGyldigBehandlendeBarnetrygdEnhet(it.enhetsnummer) }
     }
 
     fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): OppgaveResponse {

@@ -495,6 +495,7 @@ fun lagTilkjentYtelse(
                     sats = sats,
                     differanseberegnetPeriodebeløp = differanseberegnetBeløp,
                     nasjonaltPeriodebeløp = sats,
+                    beløpUtenEndretUtbetaling = sats,
                 )
             }.groupBy {
                 it.behandlingId

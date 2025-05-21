@@ -48,12 +48,14 @@ class TilkjentYtelseBuilder(
         s: String,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
+        utenEndretUtbetaling: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it },
     ) = medYtelse(
         s = s,
         type = YtelseType.SMÅBARNSTILLEGG,
         kalkulert = kalkulert,
         differanse = differanse,
+        utenEndretUtbetaling = utenEndretUtbetaling,
         nasjonalt = nasjonalt,
     ) {
         satstypeTidslinje(SatsType.SMA)
@@ -63,12 +65,14 @@ class TilkjentYtelseBuilder(
         s: String,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
+        utenEndretUtbetaling: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it },
     ) = medYtelse(
         s = s,
         type = YtelseType.UTVIDET_BARNETRYGD,
         kalkulert = kalkulert,
         nasjonalt = nasjonalt,
+        utenEndretUtbetaling = utenEndretUtbetaling,
         differanse = differanse,
     ) {
         satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
@@ -79,6 +83,7 @@ class TilkjentYtelseBuilder(
         prosent: Long = 100,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
+        utenEndretUtbetaling: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it },
     ) = medYtelse(
         s,
@@ -86,6 +91,7 @@ class TilkjentYtelseBuilder(
         prosent,
         nasjonalt,
         differanse,
+        utenEndretUtbetaling,
         kalkulert,
     ) {
         val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
@@ -101,6 +107,7 @@ class TilkjentYtelseBuilder(
         prosent: Long = 100,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
+        utenEndretUtbetaling: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it },
         satsTidslinje: (Person) -> Tidslinje<Int>,
     ): TilkjentYtelseBuilder {
@@ -120,6 +127,8 @@ class TilkjentYtelseBuilder(
                                     stønadTom = MAX_MÅNED,
                                     // Overskrives under
                                     kalkulertUtbetalingsbeløp = 0,
+                                    // Overskrives under
+                                    beløpUtenEndretUtbetaling = 0,
                                     // Overskrives under
                                     nasjonaltPeriodebeløp = 0,
                                     // Overskrives under
@@ -145,6 +154,7 @@ class TilkjentYtelseBuilder(
                         aty.copy(
                             sats = nasjonalt(sats) ?: kalkulert(sats),
                             kalkulertUtbetalingsbeløp = kalkulert(sats),
+                            beløpUtenEndretUtbetaling = utenEndretUtbetaling(sats) ?: nasjonalt(sats) ?: kalkulert(sats),
                             nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
                             differanseberegnetPeriodebeløp = differanse(sats),
                         )

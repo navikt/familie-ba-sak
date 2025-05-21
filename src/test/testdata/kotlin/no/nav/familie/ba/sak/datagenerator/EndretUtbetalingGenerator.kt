@@ -50,7 +50,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId: Long,
     barn: Person,
     fom: YearMonth,
-    tom: YearMonth,
+    tom: YearMonth?,
     prosent: Int,
 ) = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId = behandlingId,
