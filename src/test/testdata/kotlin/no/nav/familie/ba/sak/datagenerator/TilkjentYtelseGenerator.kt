@@ -31,6 +31,7 @@ fun lagAndelTilkjentYtelse(
     sats: Int = sats(ytelseType),
     kalkulertUtbetalingsbeløp: Int? = null,
     nasjonaltPeriodebeløp: Int = beløp,
+    beløpUtenEndretUtbetaling: Int = beløp,
 ): AndelTilkjentYtelse =
     AndelTilkjentYtelse(
         id = id,
@@ -39,6 +40,7 @@ fun lagAndelTilkjentYtelse(
         tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
         kalkulertUtbetalingsbeløp = if (kalkulertUtbetalingsbeløp == null) beløp else kalkulertUtbetalingsbeløp,
         nasjonaltPeriodebeløp = nasjonaltPeriodebeløp,
+        beløpUtenEndretUtbetaling = beløpUtenEndretUtbetaling,
         stønadFom = fom,
         stønadTom = tom,
         type = ytelseType,

@@ -139,7 +139,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
             utvidetBehandlingTilbakestilt.utbetalingsperioder.sumUtbetaling()
 
         Assertions.assertEquals(3, utvidetBehandlingTilbakestilt.endretUtbetalingAndeler.size)
-        Assertions.assertEquals(3, utvidetBehandlingTilbakestilt.utbetalingsperioder.size)
+        Assertions.assertEquals(4, utvidetBehandlingTilbakestilt.utbetalingsperioder.size)
 
         Assertions.assertTrue(sumUtbetalingFørsteGang > 0)
         Assertions.assertTrue(sumUtbetalingDelt < sumUtbetalingFørsteGang)

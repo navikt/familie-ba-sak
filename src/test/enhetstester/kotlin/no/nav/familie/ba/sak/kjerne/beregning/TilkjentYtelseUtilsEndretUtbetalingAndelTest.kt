@@ -95,9 +95,10 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val andelerTilkjentYtelserEtterEUA =
             AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler(
-                (andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2),
-                endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2,
-                tilkjentYtelse,
+                andelTilkjentYtelserUtenEndringer = (andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2),
+                endretUtbetalingAndeler = endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2,
+                tilkjentYtelse = tilkjentYtelse,
+                skalBeholdeSplittI0krAndeler = true,
             )
 
         val andelerTilkjentYtelserEtterEUAList = andelerTilkjentYtelserEtterEUA.map { it.andel }.toList()

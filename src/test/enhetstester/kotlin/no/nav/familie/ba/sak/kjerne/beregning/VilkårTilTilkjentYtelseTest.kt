@@ -5,6 +5,8 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -37,12 +39,14 @@ import java.time.YearMonth
 class VilkårTilTilkjentYtelseTest {
     private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+    private val unleashServiceMock: UnleashNextMedContextService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, unleashServiceMock)
 
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING) } returns true
     }
 
     @AfterEach
@@ -357,10 +361,11 @@ class TestTilkjentYtelseBuilder(
                 aktør = person.aktør,
                 stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
                 stønadTom = stønadPeriode.tilOgMed!!.toYearMonth(),
-                kalkulertUtbetalingsbeløp = beløp.toInt(),
-                nasjonaltPeriodebeløp = beløp.toInt(),
+                kalkulertUtbetalingsbeløp = beløp,
+                nasjonaltPeriodebeløp = beløp,
+                beløpUtenEndretUtbetaling = beløp,
                 type = YtelseType.valueOf(type),
-                sats = beløp.toInt(),
+                sats = beløp,
                 prosent = BigDecimal(100),
             ),
         )
