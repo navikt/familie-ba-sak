@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.enhet.Enhet
 import no.nav.familie.kontrakter.felles.journalpost.AvsenderMottakerIdType
 import no.nav.familie.kontrakter.felles.kodeverk.BeskrivelseDto
 import no.nav.familie.kontrakter.felles.kodeverk.BetydningDto
@@ -183,7 +182,7 @@ class IntegrasjonClientMock {
                 )
             }
 
-            every { mockIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries.map { Enhet(it.enhetsnummer, it.enhetsnavn) }
+            every { mockIntegrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns BarnetrygdEnhet.entries
 
             every { mockIntegrasjonClient.hentModiaContext() } answers {
                 ModiaContext(
