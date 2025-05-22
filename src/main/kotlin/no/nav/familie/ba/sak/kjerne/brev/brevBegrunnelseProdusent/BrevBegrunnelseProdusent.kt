@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.erBetaltUtvidetIPeriode
@@ -340,25 +341,16 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
         gjelderSøker && !this.gjelderEtterEndretUtbetaling && !this.gjelderEndretutbetaling -> {
             when (this.periodeResultat) {
                 SanityPeriodeResultat.IKKE_INNVILGET -> {
-                    val erAvslagPåSøker = erEksplisittAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
-
-                    val relevanteBarn =
-                        if (erAvslagPåSøker) {
-                            val personerFramstiltKravFor = grunnlag.behandlingsGrunnlagForVedtaksperioder.personerFremstiltKravFor
-                            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor }
-
-                            barnDetErFramstiltKravFor
-                                .ifEmpty { barnPåBehandlingen }
-                                .map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
-                        } else {
-                            (
-                                barnMedUtbetalingIForrigeperiode +
-                                    barnMedOppfylteVilkår +
-                                    barnMistetUtbetalingFraForrigeBehandling
-                            ).toSet().minus(barnMedNullutbetalingForrigePeriode).map { it.fødselsdato }
-                        }
-
-                    relevanteBarn
+                    hentRelevanteBarnVedIkkeInnvilget(
+                        begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                        grunnlag = grunnlag,
+                        barnPåBehandlingen = barnPåBehandlingen,
+                        uregistrerteBarnPåBehandlingen = uregistrerteBarnPåBehandlingen,
+                        barnMedUtbetalingIForrigeperiode = barnMedUtbetalingIForrigeperiode,
+                        barnMedOppfylteVilkår = barnMedOppfylteVilkår,
+                        barnMistetUtbetalingFraForrigeBehandling = barnMistetUtbetalingFraForrigeBehandling,
+                        barnMedNullutbetalingForrigePeriode = barnMedNullutbetalingForrigePeriode,
+                    )
                 }
 
                 else -> (barnMedUtbetaling + barnPåBegrunnelse).toSet().map { it.fødselsdato }
@@ -388,6 +380,44 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
             barnPåBegrunnelse.map { it.fødselsdato }
         }
     }
+}
+
+private fun ISanityBegrunnelse.hentRelevanteBarnVedIkkeInnvilget(
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    grunnlag: GrunnlagForBegrunnelse,
+    barnPåBehandlingen: List<Person>,
+    uregistrerteBarnPåBehandlingen: List<BarnMedOpplysninger>,
+    barnMedUtbetalingIForrigeperiode: List<Person>,
+    barnMedOppfylteVilkår: List<Person>,
+    barnMistetUtbetalingFraForrigeBehandling: List<Person>,
+    barnMedNullutbetalingForrigePeriode: Set<Person>,
+): List<LocalDate> {
+    val erAvslagPåSøker = erEksplisittAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
+
+    val relevanteBarn =
+        if (erAvslagPåSøker) {
+            val personerFramstiltKravFor = grunnlag.behandlingsGrunnlagForVedtaksperioder.personerFremstiltKravFor
+            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor }
+
+            barnDetErFramstiltKravFor
+                .ifEmpty { barnPåBehandlingen }
+                .map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
+        } else {
+            val alleRelevanteBarn =
+                (
+                    barnMedUtbetalingIForrigeperiode +
+                        barnMedOppfylteVilkår +
+                        barnMistetUtbetalingFraForrigeBehandling
+                ).toSet()
+
+            val alleRelevanteBarnMedUtbetalingForrigePeriode = alleRelevanteBarn.minus(barnMedNullutbetalingForrigePeriode)
+
+            alleRelevanteBarnMedUtbetalingForrigePeriode
+                .ifEmpty { alleRelevanteBarn }
+                .map { it.fødselsdato }
+        }
+
+    return relevanteBarn
 }
 
 private fun hentBarnMedNullutbetalingForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
