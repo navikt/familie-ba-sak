@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.søknadreferanse.SøknadReferanseService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -47,6 +48,7 @@ class LagreMigreringsdatoTest {
     private val vilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val mockkUnleash = mockk<UnleashNextMedContextService>()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    private val søknadReferanseService = mockk<SøknadReferanseService>()
 
     private val behandlingService =
         BehandlingService(
@@ -67,6 +69,7 @@ class LagreMigreringsdatoTest {
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = mockkUnleash,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            søknadReferanseService = søknadReferanseService,
         )
 
     @Test
