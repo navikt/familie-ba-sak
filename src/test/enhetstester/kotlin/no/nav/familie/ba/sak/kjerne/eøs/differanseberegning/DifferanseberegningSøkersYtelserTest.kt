@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -70,7 +71,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -149,7 +155,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
@@ -186,7 +197,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
     }
@@ -197,7 +213,12 @@ class DifferanseberegningSøkersYtelserTest {
 
         val nyeAndeler =
             tilkjentYtelse.andelerTilkjentYtelse
-                .differanseberegnSøkersYtelser(emptyList(), emptyList(), emptySet())
+                .differanseberegnSøkersYtelser(
+                    barna = emptyList(),
+                    kompetanser = emptyList(),
+                    personResultater = emptySet(),
+                    skalBrukeNyDifferanseberegning = true,
+                )
 
         assertEquals(emptyList<AndelTilkjentYtelse>(), nyeAndeler)
     }
@@ -253,7 +274,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         // Dette er litt trist. Men selv om andelene er identiske, kan de ikke slås sammen fordi
         // de er til forveksling like som andeler som har en funksjonell årsak til å være splittet
@@ -314,7 +340,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -357,7 +388,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -407,7 +443,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jul(2020), behandling)
@@ -458,7 +499,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val nyeAndeler =
-            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jul(2020), behandling)
@@ -513,7 +559,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -569,7 +620,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -625,7 +681,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -688,7 +749,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -756,7 +822,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2017), behandling)
@@ -779,6 +850,7 @@ class DifferanseberegningSøkersYtelserTest {
                 .medOrdinær("                   $$$$$", nasjonalt = { 1000 }, kalkulert = { 1000 })
                 .bygg()
 
+        assertThat(tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert()).containsExactlyInAnyOrderElementsOf(forventet.andelerTilkjentYtelse.sortert())
         assertEquals(forventet.andelerTilkjentYtelse.sortert(), tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker.sortert())
     }
 
@@ -823,7 +895,12 @@ class DifferanseberegningSøkersYtelserTest {
                 .personResultater
 
         val tilkjenteYtelserEtterDiffernanseberegningForBarnaOgSøker =
-            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(barna, kompetanser, personResultater)
+            tilkjenteYtelserEtterDifferanseberegningForBarna.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+                barna = barna,
+                kompetanser = kompetanser,
+                personResultater = personResultater,
+                skalBrukeNyDifferanseberegning = true,
+            )
 
         val forventet =
             TilkjentYtelseBuilder(jan(2016), behandling)

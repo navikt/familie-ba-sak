@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
+import no.nav.familie.ba.sak.kjerne.behandling.søknadreferanse.SøknadReferanseService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -56,6 +57,7 @@ class BehandlingServiceTest {
     private val vilkårsvurderingService: VilkårsvurderingService = mockk()
     private val unleashService: UnleashNextMedContextService = mockk()
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    private val søknadReferanseService = mockk<SøknadReferanseService>()
 
     private val behandlingService: BehandlingService =
         BehandlingService(
@@ -76,6 +78,7 @@ class BehandlingServiceTest {
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = unleashService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            søknadReferanseService = søknadReferanseService,
         )
 
     @Nested
@@ -124,6 +127,7 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)
@@ -175,6 +179,7 @@ class BehandlingServiceTest {
             every { loggService.opprettBehandlingLogg(any()) } just runs
             every { taskRepository.save(any()) } returnsArgument 0
             every { unleashService.isEnabled(FeatureToggle.SJEKK_AKTIV_INFOTRYGD_SAK_REPLIKA, true) } returns false
+            every { unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) } returns true
 
             // Act
             val opprettetBehandling = behandlingService.opprettBehandling(nyBehandling)

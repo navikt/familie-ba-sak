@@ -93,6 +93,7 @@ class OppdragSteg {
             vilkårsvurderingService = mockk(),
             unleashService = unleashNextMedContextService,
             eksternBehandlingRelasjonService = mockk(),
+            søknadReferanseService = mockk(),
         )
 
     private val logger = LoggerFactory.getLogger(javaClass)

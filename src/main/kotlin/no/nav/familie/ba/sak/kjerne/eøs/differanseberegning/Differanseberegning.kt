@@ -44,6 +44,7 @@ fun beregnDifferanse(
     andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     valutakurser: Collection<Valutakurs>,
+    skalBrukeNyDifferanseberegning: Boolean,
 ): List<AndelTilkjentYtelse> {
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
@@ -56,7 +57,7 @@ fun beregnDifferanse(
 
     val barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer =
         andelTilkjentYtelseTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
-            aty.oppdaterDifferanseberegning(beløp)
+            aty.oppdaterDifferanseberegning(beløp, skalBrukeNyDifferanseberegning)
         }
 
     val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
@@ -75,6 +76,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>,
     kompetanser: Collection<Kompetanse>,
     personResultater: Set<PersonResultat>,
+    skalBrukeNyDifferanseberegning: Boolean,
 ): List<AndelTilkjentYtelse> {
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
@@ -123,7 +125,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 
     // Til slutt oppdaterer vi differanseberegningen på utvidet barnetrygd med den utenlandske delen
     val differanseberegnetUtvidetBarnetrygdTidslinje =
-        utvidetBarnetrygdTidslinje.oppdaterDifferanseberegning(utenlandskDelAvUtvidetBarnetrygdTidslinje)
+        utvidetBarnetrygdTidslinje.oppdaterDifferanseberegning(utenlandskDelAvUtvidetBarnetrygdTidslinje, skalBrukeNyDifferanseberegning)
 
     // For hvert barn finner vi ut hvor mye underskudd som gjenstår etter at delen av utvidet barnetrygd er trukket fra
     val barnasGjenståendeUnderskuddTidslinjer =
@@ -158,7 +160,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 
     // Til slutt oppdaterer vi differanseberegningen på småbarnstillegget med den utenlandske delen
     val differanseberegnetSmåbarnstilleggTidslinje =
-        småbarnstilleggTidslinje.oppdaterDifferanseberegning(utenlandskDelAvSmåbarnstilleggTidslinje)
+        småbarnstilleggTidslinje.oppdaterDifferanseberegning(utenlandskDelAvSmåbarnstilleggTidslinje, skalBrukeNyDifferanseberegning)
 
     // Returner det fulle settet av andeler, både barnas andeler og de potensielt nye andelene for søkers ytelser
     return this.filter { !it.erSøkersAndel() } +

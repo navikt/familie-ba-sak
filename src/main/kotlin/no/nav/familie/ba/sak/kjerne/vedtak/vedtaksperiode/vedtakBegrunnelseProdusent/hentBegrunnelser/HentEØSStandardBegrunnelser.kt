@@ -67,6 +67,15 @@ internal fun hentEØSStandardBegrunnelser(
                 )
         }
 
+    val filtrertPåUendretKompetanseEtterEndretUtbetalingAndel =
+        filtrertPåManuelleBegrunnelser.filterValues {
+            it.erLikKompetanseIPeriode(
+                begrunnelseGrunnlag,
+            ) &&
+                begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel == null &&
+                begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel != null
+        }
+
     val oppfylteVilkårDennePerioden =
         begrunnelseGrunnlag.dennePerioden.vilkårResultater.filter { it.resultat == Resultat.OPPFYLT }
 
@@ -102,6 +111,7 @@ internal fun hentEØSStandardBegrunnelser(
     return filtrertPåEndretVilkår.keys +
         filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp.keys +
         filtrertPåIngenEndringMedLikKompetanse.keys +
+        filtrertPåUendretKompetanseEtterEndretUtbetalingAndel.keys +
         filtrertPåTilleggstekstMedLikKompetanseEllerVilkår.keys +
         filtrertPåSkalVisesSelvOmIkkeEndring.keys +
         filtrertPåHendelser.keys +

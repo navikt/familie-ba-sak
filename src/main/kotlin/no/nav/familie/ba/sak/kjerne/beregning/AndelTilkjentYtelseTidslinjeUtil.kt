@@ -110,6 +110,7 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje>.tilAndelerTilkjentYtelse(tilkjent
                 type = it.verdi.ytelseType,
                 kalkulertUtbetalingsbeløp = it.verdi.beløp,
                 nasjonaltPeriodebeløp = it.verdi.nasjonaltPeriodebeløp,
+                beløpUtenEndretUtbetaling = it.verdi.beløp,
                 differanseberegnetPeriodebeløp = it.verdi.differanseberegnetPeriodebeløp,
                 sats = it.verdi.sats,
                 prosent = it.verdi.prosent,

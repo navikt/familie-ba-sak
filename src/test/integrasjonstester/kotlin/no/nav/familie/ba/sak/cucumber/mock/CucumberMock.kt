@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.søknadreferanse.SøknadReferanseService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -145,6 +146,7 @@ class CucumberMock(
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
     val patchetAndelTilkjentYtelseRepository = mockk<PatchetAndelTilkjentYtelseRepository>()
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    val søknadReferanseService = mockk<SøknadReferanseService>()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -183,6 +185,7 @@ class CucumberMock(
             kompetanseRepository = kompetanseRepository,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             vilkårsvurderingRepository = vilkårsvurderingRepository,
+            unleashService = unleashNextMedContextService,
         )
 
     val tilpassDifferanseberegningEtterTilkjentYtelseService =
@@ -191,6 +194,7 @@ class CucumberMock(
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
+            unleashService = unleashNextMedContextService,
         )
 
     val beregningService =
@@ -203,7 +207,7 @@ class CucumberMock(
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService),
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService, unleashNextMedContextService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
@@ -277,6 +281,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             unleashService = unleashNextMedContextService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
+            søknadReferanseService = søknadReferanseService,
         )
 
     val tilbakestillBehandlingTilBehandlingsresultatService =
@@ -288,7 +293,14 @@ class CucumberMock(
             tilbakekrevingService = tilbakekrevingService,
         )
 
-    val tilpassDifferanseberegningEtterValutakursService = TilpassDifferanseberegningEtterValutakursService(utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository, tilkjentYtelseRepository = tilkjentYtelseRepository, barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService))
+    val tilpassDifferanseberegningEtterValutakursService =
+        TilpassDifferanseberegningEtterValutakursService(
+            utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
+            barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
+            unleashService = unleashNextMedContextService,
+        )
+
     val tilbakestillBehandlingFraValutakursEndringService =
         TilbakestillBehandlingFraValutakursEndringService(
             tilbakestillBehandlingTilBehandlingsresultatService = tilbakestillBehandlingTilBehandlingsresultatService,
@@ -326,6 +338,7 @@ class CucumberMock(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             barnasDifferanseberegningEndretAbonnenter = listOf(tilpassDifferanseberegningSøkersYtelserService),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            unleashService = unleashNextMedContextService,
         )
 
     val utenlandskPeriodebeløpEndretAbonnenter =

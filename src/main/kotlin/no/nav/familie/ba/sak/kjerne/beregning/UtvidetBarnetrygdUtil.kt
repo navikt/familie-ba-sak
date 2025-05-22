@@ -26,6 +26,7 @@ object UtvidetBarnetrygdUtil {
         tilkjentYtelse: TilkjentYtelse,
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         personResultater: Set<PersonResultat>,
+        skalBeholdeSplittI0krAndeler: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val andelerTilkjentYtelseUtvidet =
             UtvidetBarnetrygdGenerator(
@@ -41,6 +42,7 @@ object UtvidetBarnetrygdUtil {
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
             endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
             tilkjentYtelse = tilkjentYtelse,
+            skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
         )
     }
 

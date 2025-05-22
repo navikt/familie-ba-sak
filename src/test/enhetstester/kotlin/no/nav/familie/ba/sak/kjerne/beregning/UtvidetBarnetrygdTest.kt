@@ -6,6 +6,8 @@ import io.mockk.mockkObject
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -50,12 +52,14 @@ internal class UtvidetBarnetrygdTest {
 
     private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock)
+    private val unleashServiceMock: UnleashNextMedContextService = mockk()
+    private val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, unleashServiceMock)
 
     @BeforeEach
     fun setup() {
         every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
         every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
+        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING) } returns true
     }
 
     @Test
