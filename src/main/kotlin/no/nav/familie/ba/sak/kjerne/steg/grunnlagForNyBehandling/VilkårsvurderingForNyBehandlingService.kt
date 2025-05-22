@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,7 +20,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
-import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -34,7 +34,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
-    private val unleashService: UnleashService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
@@ -184,7 +184,7 @@ class VilkårsvurderingForNyBehandlingService(
                         ?.map { it.aktør } ?: emptyList(),
             )
 
-        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR.navn, false)) {
+        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
             if (!behandling.skalBehandlesAutomatisk) {
                 preutfyllBosattIRiketService.prefutfyllBosattIRiket(initiellVilkårsvurdering)
             }

@@ -9,10 +9,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
-import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.time.LocalDate.MAX
 import java.time.temporal.ChronoUnit
 
 @Service
@@ -32,56 +31,29 @@ class PreutfyllBosattIRiketService(
     }
 
     fun genererBosattIRiketVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
-        val alleBostedsAdresserForPerson =
+        val alleBostedsadresserForPerson =
             pdlRestClient
                 .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
                 .sortedBy { it.gyldigFraOgMed }
 
         val harBostedsadresseINorgeTidslinje =
-            when (alleBostedsAdresserForPerson.size) {
-                0 -> {
-                    tomTidslinje()
-                }
-
-                1 -> {
-                    val bostedsadresse = alleBostedsAdresserForPerson.single()
+            alleBostedsadresserForPerson
+                .windowed(size = 2, step = 1, partialWindows = true) {
+                    val denne = it.first()
+                    val neste = it.getOrNull(1)
                     Periode(
-                        verdi = harBostedsAdresseINorge(bostedsadresse),
-                        fom = bostedsadresse.gyldigFraOgMed,
-                        tom = bostedsadresse.gyldigTilOgMed,
-                    ).tilTidslinje()
-                }
-
-                else -> {
-                    val erBosattINorgePerioder =
-                        alleBostedsAdresserForPerson
-                            .zipWithNext { denne, neste ->
-                                Periode(
-                                    verdi = harBostedsAdresseINorge(denne),
-                                    fom = denne.gyldigFraOgMed,
-                                    tom = denne.gyldigTilOgMed ?: neste.gyldigFraOgMed,
-                                )
-                            }.toMutableList()
-
-                    // zipWithNext tar ikke med den siste perioden så må legge den til her
-                    erBosattINorgePerioder.add(
-                        Periode(
-                            verdi = harBostedsAdresseINorge(alleBostedsAdresserForPerson.last()),
-                            fom = alleBostedsAdresserForPerson.last().gyldigFraOgMed,
-                            tom = alleBostedsAdresserForPerson.last().gyldigTilOgMed,
-                        ),
+                        verdi = harBostedsAdresseINorge(denne),
+                        fom = denne.gyldigFraOgMed,
+                        tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                     )
-
-                    erBosattINorgePerioder
-                        .tilTidslinje()
-                }
-            }
+                }.tilTidslinje()
 
         return harBostedsadresseINorgeTidslinje
             .tilPerioder()
             .map { periode ->
 
-                val oppfyllerVilkår = periode.verdi == true && ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: LocalDate.MAX) >= 12
+                val oppfyllerVilkår =
+                    periode.verdi == true && ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: MAX) >= 12
 
                 VilkårResultat(
                     personResultat = personResultat,

@@ -548,7 +548,7 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllBosattIRiketService = mockk(),
-            unleashService = unleashService,
+            unleashService = unleashNextMedContextService,
         )
 
     val registrerPersongrunnlag =

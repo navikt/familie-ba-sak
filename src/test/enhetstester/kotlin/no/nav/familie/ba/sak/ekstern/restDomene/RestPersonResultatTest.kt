@@ -34,5 +34,6 @@ class RestPersonResultatTest {
 
         // Assert
         assertThat(nyttRestPersonResultat.vilkårResultater.any { it.begrunnelse == "Fylt inn automatisk fra registerdata i PDL" }).isFalse
+        assertThat(nyttRestPersonResultat.vilkårResultater.any { it.erAutomatiskVurdert }).isFalse
     }
 }

@@ -45,18 +45,40 @@ class PreutfyllBosattIRiketServiceTest {
                     gyldigTilOgMed = null,
                     vegadresse = lagVegadresse(98765L),
                 ),
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(98764L),
+                ),
             )
 
         // Act
-        val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
-        assertThat(vilkårsresutat).hasSize(3)
-        assertThat(vilkårsresutat.first().periodeFom).isEqualTo(LocalDate.now().minusYears(4))
-        assertThat(vilkårsresutat.first().periodeTom).isEqualTo(LocalDate.now().minusYears(2))
-        assertThat(vilkårsresutat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
-        assertThat(vilkårsresutat.first().vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
-        assertThat(vilkårsresutat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+        assertThat(vilkårResultat).hasSize(3)
+        assertThat(vilkårResultat.first().periodeFom).isEqualTo(LocalDate.now().minusYears(4))
+        assertThat(vilkårResultat.first().periodeTom).isEqualTo(LocalDate.now().minusYears(2))
+        assertThat(vilkårResultat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
+        assertThat(vilkårResultat.first().vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+        assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+    }
+
+    @Test
+    fun `skal ikke få noen vilkårresultat når pdl ikke returnerer noen bostedsadresser`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns emptyList<Bostedsadresse>()
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        assertThat(vilkårResultat).isEmpty()
     }
 
     @Test
@@ -82,10 +104,10 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         // Act
-        val vilkårsresutat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
-        assertThat(vilkårsresutat.first().resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
-        assertThat(vilkårsresutat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+        assertThat(vilkårResultat.first().resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+        assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
     }
 }

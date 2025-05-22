@@ -84,7 +84,7 @@ fun RestPersonResultat.fjernAutomatiskBegrunnelse() =
         vilkårResultater =
             vilkårResultater.map { vilkårResultat ->
                 if (vilkårResultat.begrunnelse == "Fylt inn automatisk fra registerdata i PDL") {
-                    vilkårResultat.copy(begrunnelse = "")
+                    vilkårResultat.copy(begrunnelse = "", erAutomatiskVurdert = false)
                 } else {
                     vilkårResultat
                 }
