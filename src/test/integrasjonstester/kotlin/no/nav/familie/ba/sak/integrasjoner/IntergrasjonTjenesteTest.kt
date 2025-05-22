@@ -17,13 +17,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
-import no.nav.familie.ba.sak.datagenerator.lagTestJournalpost
-import no.nav.familie.ba.sak.datagenerator.lagTestOppgave
-import no.nav.familie.ba.sak.datagenerator.lagTestOppgaveDTO
-import no.nav.familie.ba.sak.datagenerator.lagVedtak
-import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.datagenerator.*
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
@@ -42,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
+import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -587,6 +582,33 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         assertThat(exception.message).contains("modia-context-holder")
         assertThat(exception.httpStatus).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         assertThat(exception.ressurs.melding).isEqualTo("Noe gikk galt")
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal hente VersjonertBarnetrygdSøknad`() {
+        val journalpostId = "1234"
+        val versjonertBarnetrygdSøknadV9 =
+            VersjonertBarnetrygdSøknadV9(
+                barnetrygdSøknad = lagBarnetrygdSøknadV9(),
+            )
+        wireMockServer.stubFor(
+            get("/api/baks/versjonertsoknad/ba/$journalpostId")
+                .willReturn(
+                    okJson(
+                        objectMapper.writeValueAsString(
+                            success(
+                                versjonertBarnetrygdSøknadV9,
+                            ),
+                        ),
+                    ),
+                ),
+        )
+
+        val versjonertSøknad = integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostId)
+
+        assertThat(versjonertSøknad).isNotNull
+        assertThat(versjonertSøknad).isEqualTo(versjonertBarnetrygdSøknadV9)
     }
 
     private fun modiaContextResponse(ressursFunksjon: (ModiaContext) -> Ressurs<ModiaContext>) =
