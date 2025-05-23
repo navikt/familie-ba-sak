@@ -5,11 +5,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonInfoQuery
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorStatus
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadressePerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsDato
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
@@ -28,10 +31,12 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.ForelderBarnRelasjon
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
+import java.time.LocalDate
 
 fun stubScenario(scenario: RestScenario) {
     val alleIdenter = scenario.barna.map { it } + scenario.søker
@@ -39,8 +44,53 @@ fun stubScenario(scenario: RestScenario) {
         stubHentIdenter(it.ident)
         stubHentPersonStatsborgerskap(it)
         stubHentPersonVergemaalEllerFretidfullmakt(it)
+        stubHentBostedsadresserForPerson(it)
     }
     stubHentPerson(scenario)
+}
+
+private fun stubHentBostedsadresserForPerson(restScenarioPerson: RestScenarioPerson) {
+    val bursdagTilPerson = LocalDate.parse(restScenarioPerson.fødselsdato)
+
+    val response =
+        PdlBaseResponse(
+            data =
+                PdlBostedsadresseResponse(
+                    person =
+                        PdlBostedsadressePerson(
+                            bostedsadresse =
+                                listOf(
+                                    Bostedsadresse(
+                                        gyldigFraOgMed = bursdagTilPerson,
+                                        gyldigTilOgMed = null,
+                                        vegadresse = null,
+                                        matrikkeladresse = lagMatrikkeladresse(1234L),
+                                        ukjentBosted = null,
+                                    ),
+                                ),
+                        ),
+                ),
+            errors = null,
+            extensions = null,
+        )
+    val pdlRequestBody =
+        PdlPersonRequest(
+            variables = PdlPersonRequestVariables(restScenarioPerson.ident),
+            query = hentGraphqlQuery("bostedsadresse"),
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
 }
 
 private fun stubHentIdenter(personIdent: String) {

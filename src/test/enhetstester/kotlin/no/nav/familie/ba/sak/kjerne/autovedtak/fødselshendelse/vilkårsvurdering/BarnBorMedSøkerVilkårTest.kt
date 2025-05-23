@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering
 
-import no.nav.familie.ba.sak.datagenerator.opprettAdresse
+import no.nav.familie.ba.sak.datagenerator.lagGrVegadresse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -76,13 +76,13 @@ class BarnBorMedSøkerVilkårTest {
 
         val søker = tilfeldigPerson(personType = PersonType.SØKER, kjønn = Kjønn.KVINNE)
 
-        val adresseMatrikkelId1barn = opprettAdresse(1234L)
-        val adresseMatrikkelId2Søker = opprettAdresse(4321L)
-        val adresseMatrikkelId1SøkerBruksenhetsnummer = opprettAdresse(matrikkelId = 1234L, bruksenhetsnummer = "123")
-        val adresseIkkePostnummerBarn = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123")
-        val adresseIkkePostnummerSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123")
-        val adresseAttrBarn = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
-        val adresseAttrSøker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
-        val adresseAttr2Søker = opprettAdresse(adressenavn = "Fågelveien", husnummer = "11", postnummer = "0245")
+        val adresseMatrikkelId1barn = lagGrVegadresse(1234L)
+        val adresseMatrikkelId2Søker = lagGrVegadresse(4321L)
+        val adresseMatrikkelId1SøkerBruksenhetsnummer = lagGrVegadresse(matrikkelId = 1234L, bruksenhetsnummer = "123")
+        val adresseIkkePostnummerBarn = lagGrVegadresse(adressenavn = "Fågelveien", husnummer = "123")
+        val adresseIkkePostnummerSøker = lagGrVegadresse(adressenavn = "Fågelveien", husnummer = "123")
+        val adresseAttrBarn = lagGrVegadresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
+        val adresseAttrSøker = lagGrVegadresse(adressenavn = "Fågelveien", husnummer = "123", postnummer = "0245")
+        val adresseAttr2Søker = lagGrVegadresse(adressenavn = "Fågelveien", husnummer = "11", postnummer = "0245")
     }
 }
