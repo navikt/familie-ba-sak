@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -596,6 +597,17 @@ class IntegrasjonClient(
             formål = "Hente Modia-kontekst for innlogget saksbehandler",
         ) {
             getForEntity(uri)
+        }
+    }
+
+    fun hentVersjonertBarnetrygdSøknad(journalpostId: String): VersjonertBarnetrygdSøknad {
+        val uri = URI.create("$integrasjonUri/baks/versjonertsoknad/ba/$journalpostId")
+        return kallEksternTjenesteRessurs(
+            tjeneste = "dokarkiv",
+            uri = uri,
+            formål = "Hente versjonert barnetrygd søknad",
+        ) {
+            getForEntity<Ressurs<VersjonertBarnetrygdSøknad>>(uri)
         }
     }
 
