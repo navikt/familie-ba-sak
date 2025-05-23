@@ -11,17 +11,20 @@ import no.nav.familie.kontrakter.felles.søknad.Søknadsfelt
 
 fun lagBarnetrygdSøknadV9(
     søkerFnr: String = randomFnr(),
-    barnFnr: String = randomFnr(),
+    barnFnr: List<String> = listOf(randomFnr()),
+    søknadstype: Søknadstype = Søknadstype.ORDINÆR,
+    erEøs: Boolean = false,
+    originalspråk: String = "nb",
 ): BarnetrygdSøknad =
     BarnetrygdSøknad(
         kontraktVersjon = 9,
         søker = lagSøkerV8(søkerFnr),
-        barn = listOf(lagBarnV8(barnFnr)),
-        antallEøsSteg = 0,
+        barn = barnFnr.map { lagBarnV8(it) },
+        antallEøsSteg = if (erEøs) 1 else 0,
         dokumentasjon = emptyList(),
-        originalSpråk = "NB",
+        originalSpråk = originalspråk,
         finnesPersonMedAdressebeskyttelse = false,
-        søknadstype = Søknadstype.ORDINÆR,
+        søknadstype = søknadstype,
         spørsmål = emptyMap(),
         teksterUtenomSpørsmål = emptyMap(),
     )
