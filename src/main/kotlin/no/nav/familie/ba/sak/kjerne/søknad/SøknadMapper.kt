@@ -23,6 +23,6 @@ interface SøknadMapper {
     class Lookup(
         private val søknadMappere: List<SøknadMapper>,
     ) {
-        fun hentMapperForSøknadVersjon(søknadVersjon: Int) = søknadMappere.single { it.søknadVersjon == søknadVersjon }
+        fun hentSøknadMapperForVersjon(søknadVersjon: Int) = søknadMappere.single { it.søknadVersjon == søknadVersjon }
     }
 }

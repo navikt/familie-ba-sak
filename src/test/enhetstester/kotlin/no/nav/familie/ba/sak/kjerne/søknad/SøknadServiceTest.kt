@@ -44,7 +44,7 @@ class SøknadServiceTest {
 
             every { søknadReferanseService.hentSøknadReferanse(behandling.id) } returns søknadReferanse
             every { integrasjonClient.hentVersjonertBarnetrygdSøknad(søknadReferanse.journalpostId) } returns versjonertBarnetrygdSøknadV9
-            every { søknadMapperLookup.hentMapperForSøknadVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
+            every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
 
             // Act
             val søknad = søknadService.hentSøknad(behandlingId = behandling.id)
