@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.datagenerator.opprettAdresse
+import no.nav.familie.ba.sak.datagenerator.lagGrVegadresse
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
@@ -250,13 +250,13 @@ class LovligOppholdVilkårTest {
                         eøsBorger.copy().apply {
                             arbeidsforhold = mutableListOf()
                             bostedsadresser =
-                                mutableListOf(opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"))
+                                mutableListOf(lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"))
                         },
                     annenForelder =
                         annenForelderNordiskBorger.copy(
                             bostedsadresser =
                                 mutableListOf(
-                                    opprettAdresse(
+                                    lagGrVegadresse(
                                         adressenavn = "Fågelveien",
                                         husnummer = "123",
                                         postnummer = "0245",
@@ -274,7 +274,7 @@ class LovligOppholdVilkårTest {
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder har bodd med mor`() {
         val tidligereAdresse =
-            opprettAdresse(adressenavn = "Uteveien", husnummer = "123", postnummer = "0245").also {
+            lagGrVegadresse(adressenavn = "Uteveien", husnummer = "123", postnummer = "0245").also {
                 it.periode =
                     DatoIntervallEntitet(
                         fom = LocalDate.now().minusYears(2),
@@ -291,7 +291,7 @@ class LovligOppholdVilkårTest {
                             bostedsadresser =
                                 mutableListOf(
                                     tidligereAdresse,
-                                    opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"),
+                                    lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"),
                                 )
                         },
                     annenForelder =
@@ -299,7 +299,7 @@ class LovligOppholdVilkårTest {
                             bostedsadresser =
                                 mutableListOf(
                                     tidligereAdresse,
-                                    opprettAdresse(
+                                    lagGrVegadresse(
                                         adressenavn = "Fågelveien",
                                         husnummer = "123",
                                         postnummer = "0245",
@@ -316,7 +316,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap, uten løpende arbeidsforhold og annen forelder bor med mor og nordisk`() {
-        val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+        val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -343,7 +343,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder(EØS) ikke løpende arbeidsforhold`() {
-        val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+        val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -371,7 +371,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir oppfylt for mor med EØS medlemskap, annen forelder(EØS) har løpende arbeidsforhold`() {
-        val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+        val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -407,7 +407,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder er tredjelandsborger`() {
-        val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+        val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
             vilkår
                 .vurderVilkår(
@@ -432,7 +432,7 @@ class LovligOppholdVilkårTest {
 
     @Test
     fun `Lovlig opphold blir ikke oppfylt for mor med EØS medlemskap, annen forelder er statsløs`() {
-        val adresse = opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+        val adresse = lagGrVegadresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
         val evaluering =
             vilkår
                 .vurderVilkår(

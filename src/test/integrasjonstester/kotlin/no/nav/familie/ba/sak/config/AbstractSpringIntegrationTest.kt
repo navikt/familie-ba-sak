@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles
     "testcontainers",
     "mock-økonomi",
     "mock-pdl",
+    "mock-pdl-client",
     "mock-ident-client",
     "mock-task-repository",
     "mock-infotrygd-barnetrygd",
