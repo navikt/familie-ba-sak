@@ -111,6 +111,8 @@ spec:
           cluster: dev-fss
         - application: familie-klage
           cluster: dev-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
