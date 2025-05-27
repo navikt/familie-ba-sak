@@ -6,10 +6,12 @@ import no.nav.familie.ba.sak.cucumber.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import org.assertj.core.api.Assertions.assertThat
@@ -18,7 +20,8 @@ import java.time.LocalDate
 
 class PreutfyllBosattIRiketServiceTest {
     private var pdlRestClient: PdlRestClient = mockk(relaxed = true)
-    private var preutfyllBosattIRiketService = PreutfyllBosattIRiketService(pdlRestClient)
+    private var søknadService: SøknadService = mockk(relaxed = true)
+    private var preutfyllBosattIRiketService = PreutfyllBosattIRiketService(pdlRestClient, søknadService)
 
     @Test
     fun `skal lage preutfylt vilkårresultat basert på data fra pdl`() {
@@ -109,5 +112,36 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         assertThat(vilkårResultat.first().resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+    }
+
+    @Test
+    fun `skal ikke gi oppfylt i siste periode hvis den er under 12 mnd og søker ikke planlegger å bo i Norge neste 12`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                    gyldigTilOgMed = LocalDate.now().minusMonths(4),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        assertThat(vilkårResultat).allSatisfy { it.resultat == Resultat.IKKE_OPPFYLT }
+    }
+
+    @Test
+    fun `skal gi oppfyl i siste periode hvis den er under 12 mnd og barn planlegger å bo i Norge neste 12`() {
+        // TODO()
     }
 }

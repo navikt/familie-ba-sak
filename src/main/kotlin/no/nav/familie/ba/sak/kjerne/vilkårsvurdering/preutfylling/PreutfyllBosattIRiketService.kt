@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -17,6 +18,7 @@ import java.time.temporal.ChronoUnit
 @Service
 class PreutfyllBosattIRiketService(
     private val pdlRestClient: PdlRestClient,
+    private val søknadService: SøknadService,
 ) {
     fun prefutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
         vilkårsvurdering.personResultater.forEach { personResultat ->
@@ -53,7 +55,7 @@ class PreutfyllBosattIRiketService(
             .map { periode ->
 
                 val oppfyllerVilkår =
-                    periode.verdi == true && ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: MAX) >= 12
+                    periode.verdi == true && (harBoodINorgeIMerEnn12Mnd(periode) || planleggerÅBoINorgeNeste12Mnd(personResultat))
 
                 VilkårResultat(
                     personResultat = personResultat,
@@ -66,6 +68,19 @@ class PreutfyllBosattIRiketService(
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
+    }
+
+    private fun harBoodINorgeIMerEnn12Mnd(periode: Periode<Boolean?>): Boolean = ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: MAX) >= 12
+
+    private fun planleggerÅBoINorgeNeste12Mnd(personResultat: PersonResultat): Boolean {
+        val søknad = søknadService.hentSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
+        val planleggerÅBoNeste12Mnd =
+            if (personResultat.erSøkersResultater()) {
+                søknad?.søker?.planleggerÅBoINorge12Mnd
+            } else {
+                søknad?.barn?.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd
+            }
+        return planleggerÅBoNeste12Mnd == true
     }
 
     private fun harBostedsAdresseINorge(bostedsadresse: Bostedsadresse): Boolean = bostedsadresse.vegadresse != null || bostedsadresse.matrikkeladresse != null || bostedsadresse.ukjentBosted != null
