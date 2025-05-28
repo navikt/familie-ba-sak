@@ -8,15 +8,15 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.springframework.stereotype.Service
 
 @Service
 class AutomatiskRegistrerSøknadService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
 ) {
     fun lagRestRegistrerSøknad(behandling: Behandling): RestRegistrerSøknad {
@@ -34,16 +34,26 @@ class AutomatiskRegistrerSøknadService(
             )
 
         val barnaMedOpplysninger =
-            søknad.barn.map {
-                val barnAktør = personidentService.hentOgLagreAktør(it.fnr, true)
-                val barnPersonInfo = personopplysningerService.hentPersoninfoEnkel(barnAktør)
-
-                BarnMedOpplysninger(
-                    ident = barnAktør.aktivFødselsnummer(),
-                    navn = barnPersonInfo.navn ?: "",
-                    fødselsdato = barnPersonInfo.fødselsdato,
-                )
-            }
+            personopplysningerService
+                .hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør)
+                .forelderBarnRelasjon
+                .filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
+                .mapNotNull { barn ->
+                    // Filtrer bort barn som har adressebeskyttelse som ikke er i søknaden
+                    if (barn.adressebeskyttelseGradering == null ||
+                        barn.adressebeskyttelseGradering == ADRESSEBESKYTTELSEGRADERING.UGRADERT ||
+                        søknad.barn.any { it.fnr == barn.aktør.aktivFødselsnummer() }
+                    ) {
+                        BarnMedOpplysninger(
+                            ident = barn.aktør.aktivFødselsnummer(),
+                            navn = barn.navn ?: "Mangler navn",
+                            fødselsdato = barn.fødselsdato,
+                            inkludertISøknaden = søknad.barn.any { it.fnr == barn.aktør.aktivFødselsnummer() },
+                        )
+                    } else {
+                        null
+                    }
+                }
 
         return RestRegistrerSøknad(
             søknad =
