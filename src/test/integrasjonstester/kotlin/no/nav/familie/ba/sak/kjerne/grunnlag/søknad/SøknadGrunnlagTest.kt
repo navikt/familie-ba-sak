@@ -347,7 +347,14 @@ class SøknadGrunnlagTest(
     fun `Skal automatisk registrere søknad`() {
         // Arrange
         val søker = personidentService.hentAktør(randomFnr())
-        val barn = personopplysningerService.hentPersoninfoEnkel(søker).forelderBarnRelasjon.first()
+        val barnUtenRelasjon = randomFnr()
+        val barnMedRelasjon =
+            personopplysningerService
+                .hentPersoninfoEnkel(søker)
+                .forelderBarnRelasjon
+                .first()
+                .aktør
+                .aktivFødselsnummer()
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søker.aktivFødselsnummer())
 
@@ -356,7 +363,7 @@ class SøknadGrunnlagTest(
         every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
             lagVersjonertBarnetrygdSøknadV9(
                 søkerIdent = søker.aktivFødselsnummer(),
-                barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+                barnasIdenter = listOf(barnUtenRelasjon, barnMedRelasjon),
                 søknadstype = Søknadstype.UTVIDET,
                 originalspråk = "nn",
             )
@@ -382,16 +389,28 @@ class SøknadGrunnlagTest(
         assertThat(søknadDto.søkerMedOpplysninger.ident).isEqualTo(søker.aktivFødselsnummer())
         assertThat(søknadDto.søkerMedOpplysninger.målform).isEqualTo(Målform.NN)
 
-        assertThat(søknadDto.barnaMedOpplysninger[0].ident).isEqualTo(barn.aktør.aktivFødselsnummer())
-        assertThat(søknadDto.barnaMedOpplysninger[0].inkludertISøknaden).isTrue()
-        assertThat(søknadDto.barnaMedOpplysninger[0].erFolkeregistrert).isTrue()
-        assertThat(søknadDto.barnaMedOpplysninger[0].manueltRegistrert).isFalse()
+        assertThat(søknadDto.barnaMedOpplysninger).hasSize(2)
+
+        assertThat(søknadDto.barnaMedOpplysninger)
+            .anySatisfy {
+                assertThat(it.ident).isEqualTo(barnMedRelasjon)
+                assertThat(it.inkludertISøknaden).isTrue()
+                assertThat(it.erFolkeregistrert).isTrue()
+                assertThat(it.manueltRegistrert).isFalse()
+            }.anySatisfy {
+                assertThat(it.ident).isEqualTo(barnUtenRelasjon)
+                assertThat(it.inkludertISøknaden).isTrue()
+                assertThat(it.erFolkeregistrert).isTrue()
+                assertThat(it.manueltRegistrert).isFalse()
+            }
 
         val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id)
         assertThat(persongrunnlag).isNotNull()
         assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søker.aktivFødselsnummer())
-        assertThat(persongrunnlag.barna).hasSize(1)
-        assertThat(persongrunnlag.barna[0].aktør.aktivFødselsnummer()).isEqualTo(barn.aktør.aktivFødselsnummer())
+
+        assertThat(persongrunnlag.barna).hasSize(2)
+        assertThat(persongrunnlag.barna.map { it.aktør.aktivFødselsnummer() })
+            .containsExactlyInAnyOrder(barnUtenRelasjon, barnMedRelasjon)
     }
 
     @Test
