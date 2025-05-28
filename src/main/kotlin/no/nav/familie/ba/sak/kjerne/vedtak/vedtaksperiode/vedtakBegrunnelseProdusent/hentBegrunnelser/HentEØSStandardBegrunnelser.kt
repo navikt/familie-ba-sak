@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikKompetanseIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikVilkårOgUtdypendeVilkårIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erSammeTemaSomPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.filtrerPåEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.matcherErAutomatisk
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalFiltreresPåHendelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalVisesSelvOmIkkeEndring
@@ -31,9 +32,11 @@ internal fun hentEØSStandardBegrunnelser(
     utvidetVilkårPåSøkerIForrigePeriode: VilkårResultatForVedtaksperiode?,
     temaSomPeriodeErVurdertEtter: TemaerForBegrunnelser,
 ): Set<IVedtakBegrunnelse> {
+    val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
+
     val filtrertPåManuelleBegrunnelser =
         sanityEØSBegrunnelser
-            .filterValues { it.periodeResultat in relevantePeriodeResultater }
+            .filterValues { it.periodeResultat in relevantePeriodeResultater || it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT }
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
             .filterValues { it.erSammeTemaSomPeriode(temaSomPeriodeErVurdertEtter) }
@@ -108,6 +111,11 @@ internal fun hentEØSStandardBegrunnelser(
             it.skalVisesSelvOmIkkeEndring(begrunnelseGrunnlag.dennePerioden)
         }
 
+    val filtrertPåEndretUtbetaling =
+        filtrertPåManuelleBegrunnelser.filterValues {
+            filtrerPåEndretUtbetaling(it, endretUtbetalingDennePerioden)
+        }
+
     return filtrertPåEndretVilkår.keys +
         filtrertPåEndretKompetanseValutakursOgUtenlandskperiodeBeløp.keys +
         filtrertPåIngenEndringMedLikKompetanse.keys +
@@ -116,7 +124,8 @@ internal fun hentEØSStandardBegrunnelser(
         filtrertPåSkalVisesSelvOmIkkeEndring.keys +
         filtrertPåHendelser.keys +
         filtrertPåOpphørFraForrigeBehandling.keys +
-        filtrertPåReduksjonFraForrigeBehandling.keys
+        filtrertPåReduksjonFraForrigeBehandling.keys +
+        filtrertPåEndretUtbetaling.keys
 }
 
 private fun erEndringIKompetanse(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.dennePerioden.kompetanse != begrunnelseGrunnlag.forrigePeriode?.kompetanse
@@ -124,3 +133,5 @@ private fun erEndringIKompetanse(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPer
 private fun erEndringIValutakurs(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.dennePerioden.valutakurs != begrunnelseGrunnlag.forrigePeriode?.valutakurs
 
 private fun erEndringIUtenlandskPeriodebeløp(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.dennePerioden.utenlandskPeriodebeløp != begrunnelseGrunnlag.forrigePeriode?.utenlandskPeriodebeløp
+
+private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.dennePerioden.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.dennePerioden.erOrdinæreVilkårInnvilget() }

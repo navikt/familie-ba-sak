@@ -50,6 +50,14 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 }
             }
 
+            SanityPeriodeResultat.IKKE_RELEVANT ->
+                periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.dennePerioden.kompetanse } +
+                    if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
+                        begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse }
+                    } else {
+                        periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
+                    }
+
             else -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
         }
 
