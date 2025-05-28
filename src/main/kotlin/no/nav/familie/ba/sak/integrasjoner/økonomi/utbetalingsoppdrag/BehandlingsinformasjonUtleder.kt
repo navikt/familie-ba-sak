@@ -36,7 +36,7 @@ class BehandlingsinformasjonUtleder(
             personIdent = fagsak.aktør.aktivFødselsnummer(),
             vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: LocalDate.now(clockProvider.get()),
             opphørAlleKjederFra = finnOpphørsdatoForAlleKjeder(forrigeTilkjentYtelse, sisteAndelPerKjede, endretMigreringsdato),
-            utbetalesTil = finnUtebetalesTil(fagsak),
+            utbetalesTil = finnUtbetalesTil(fagsak),
             opphørKjederFraFørsteUtbetaling = finnOpphørKjederFraFørsteUtbetaling(endretMigreringsdato, erSimulering),
         )
     }
@@ -52,7 +52,7 @@ class BehandlingsinformasjonUtleder(
             endretMigreringsdato
         }
 
-    private fun finnUtebetalesTil(fagsak: Fagsak): String =
+    private fun finnUtbetalesTil(fagsak: Fagsak): String =
         when (fagsak.type) {
             FagsakType.NORMAL,
             FagsakType.BARN_ENSLIG_MINDREÅRIG,
