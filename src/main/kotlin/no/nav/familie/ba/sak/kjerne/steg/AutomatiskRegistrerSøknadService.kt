@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
@@ -21,8 +22,8 @@ class AutomatiskRegistrerSøknadService(
 ) {
     fun lagRestRegistrerSøknad(behandling: Behandling): RestRegistrerSøknad {
         val søknad =
-            søknadService.hentSøknad(behandling.id)
-                ?: throw IllegalStateException("Fant ikke søknad for behandling med id ${behandling.id}")
+            søknadService.finnSøknad(behandling.id)
+                ?: throw Feil("Fant ikke søknad for behandling med id ${behandling.id}")
 
         val underkategori = søknad.behandlingUnderkategori.tilDto()
 
