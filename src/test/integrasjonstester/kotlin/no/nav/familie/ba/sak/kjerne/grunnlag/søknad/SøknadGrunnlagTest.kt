@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
+import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -12,7 +13,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -20,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -28,6 +32,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
+import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
+import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
+import no.nav.familie.kontrakter.ba.søknad.v8.Barn
+import no.nav.familie.kontrakter.ba.søknad.v8.Søker
+import no.nav.familie.kontrakter.ba.søknad.v9.BarnetrygdSøknad
+import no.nav.familie.kontrakter.felles.søknad.Søknadsfelt
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -64,6 +75,8 @@ class SøknadGrunnlagTest(
     private val databaseCleanupService: DatabaseCleanupService,
     @Autowired
     private val brevmalService: BrevmalService,
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient,
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
@@ -186,6 +199,7 @@ class SøknadGrunnlagTest(
     private fun lagNyBehandling(
         søkerIdent: String,
         fagsakId: Long,
+        journalpostIdSøknad: String? = null,
     ) = NyBehandling(
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -193,6 +207,14 @@ class SøknadGrunnlagTest(
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         søknadMottattDato = LocalDate.now(),
         fagsakId = fagsakId,
+        søknadsinfo =
+            journalpostIdSøknad?.let {
+                Søknadsinfo(
+                    journalpostId = it,
+                    brevkode = null,
+                    erDigital = true,
+                )
+            },
     )
 
     @Test
@@ -316,5 +338,140 @@ class SøknadGrunnlagTest(
             )
 
         assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+    }
+
+    @Test
+    fun `Skal automatisk registrere søknad`() {
+        // Arrange
+        val søkerIdent = randomFnr()
+        val barnIdent = randomFnr()
+        val søkerAktør = personidentService.hentAktør(søkerIdent)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+
+        val journalpostIdSøknad = "123456789"
+
+        every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
+            lagVersjonertBarnetrygdSøknadV9(
+                søkerIdent = søkerIdent,
+                barnasIdenter = listOf(barnIdent),
+                søknadstype = Søknadstype.UTVIDET,
+                originalspråk = "nn",
+            )
+
+        // Act
+        val behandling =
+            stegService.håndterNyBehandling(
+                lagNyBehandling(
+                    søkerIdent = søkerIdent,
+                    fagsakId = fagsak.id,
+                    journalpostIdSøknad = journalpostIdSøknad,
+                ),
+            )
+
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
+        assertThat(søknadGrunnlag).isNotNull()
+
+        val søknadDto = søknadGrunnlag!!.hentSøknadDto()
+        assertThat(søknadDto.underkategori).isEqualTo(BehandlingUnderkategoriDTO.UTVIDET)
+
+        assertThat(søknadDto.søkerMedOpplysninger.ident).isEqualTo(søkerIdent)
+        assertThat(søknadDto.søkerMedOpplysninger.målform).isEqualTo(Målform.NN)
+
+        assertThat(søknadDto.barnaMedOpplysninger[0].ident).isEqualTo(barnIdent)
+        assertThat(søknadDto.barnaMedOpplysninger[0].inkludertISøknaden).isTrue()
+        assertThat(søknadDto.barnaMedOpplysninger[0].erFolkeregistrert).isTrue()
+        assertThat(søknadDto.barnaMedOpplysninger[0].manueltRegistrert).isFalse()
+
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+        assertThat(persongrunnlag).isNotNull()
+        assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søkerIdent)
+        assertThat(persongrunnlag.barna).hasSize(1)
+        assertThat(persongrunnlag.barna[0].aktør.aktivFødselsnummer()).isEqualTo(barnIdent)
+    }
+
+    @Test
+    fun `Skal returnere behandling etter registrere persongrunnlag hvis behandling ikke har søknad`() {
+        // Arrange
+        val søkerIdent = randomFnr()
+        val barnIdent = randomFnr()
+        val søkerAktør = personidentService.hentAktør(søkerIdent)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+
+        // Act
+        val behandling =
+            stegService.håndterNyBehandling(
+                lagNyBehandling(
+                    søkerIdent = søkerIdent,
+                    fagsakId = fagsak.id,
+                    // Sender ikke med journalpostIdSøknad
+                ),
+            )
+
+        assertThat(behandling.steg).isEqualTo(StegType.REGISTRERE_SØKNAD)
+
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
+        assertThat(søknadGrunnlag).isNull()
+
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+        assertThat(persongrunnlag).isNotNull()
+        assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søkerIdent)
+        assertThat(persongrunnlag.barna).isEmpty()
+    }
+
+    private fun lagVersjonertBarnetrygdSøknadV9(
+        søkerIdent: String,
+        barnasIdenter: List<String>,
+        søknadstype: Søknadstype = Søknadstype.ORDINÆR,
+        originalspråk: String = "nb",
+    ): VersjonertBarnetrygdSøknadV9 {
+        fun <T> tomtSøknadsfelt() =
+            Søknadsfelt<T>(
+                label = emptyMap(),
+                verdi = emptyMap(),
+            )
+        return VersjonertBarnetrygdSøknadV9(
+            barnetrygdSøknad =
+                BarnetrygdSøknad(
+                    kontraktVersjon = 9,
+                    søker =
+                        Søker(
+                            ident =
+                                Søknadsfelt(
+                                    label = emptyMap(),
+                                    verdi = mapOf("nb" to søkerIdent),
+                                ),
+                            harEøsSteg = false,
+                            navn = tomtSøknadsfelt(),
+                            statsborgerskap = tomtSøknadsfelt(),
+                            adresse = tomtSøknadsfelt(),
+                            adressebeskyttelse = false,
+                            sivilstand = tomtSøknadsfelt(),
+                            spørsmål = emptyMap(),
+                        ),
+                    barn =
+                        barnasIdenter.map {
+                            Barn(
+                                ident =
+                                    Søknadsfelt(
+                                        label = emptyMap(),
+                                        verdi = mapOf("nb" to it),
+                                    ),
+                                harEøsSteg = false,
+                                navn = tomtSøknadsfelt(),
+                                registrertBostedType = tomtSøknadsfelt(),
+                                spørsmål = emptyMap(),
+                            )
+                        },
+                    antallEøsSteg = 0,
+                    søknadstype = søknadstype,
+                    finnesPersonMedAdressebeskyttelse = false,
+                    spørsmål = emptyMap(),
+                    dokumentasjon = emptyList(),
+                    teksterUtenomSpørsmål = emptyMap(),
+                    originalSpråk = originalspråk,
+                ),
+        )
     }
 }

@@ -635,6 +635,7 @@ class CucumberMock(
                 opprettTaskService = mockk(),
                 satskjøringRepository = mockk(),
                 unleashService = unleashNextMedContextService,
+                automatiskRegistrerSøknadService = mockk(),
             ),
         )
 
