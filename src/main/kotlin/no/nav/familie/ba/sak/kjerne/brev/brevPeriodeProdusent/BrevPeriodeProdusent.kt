@@ -195,4 +195,8 @@ private fun hentDuEllerInstitusjonenTekst(
                 else -> "Du"
             }
         }
+
+        FagsakType.SKJERMET_BARN -> {
+            TODO("NAV-25256 Ikke implementert enda")
+        }
     }
