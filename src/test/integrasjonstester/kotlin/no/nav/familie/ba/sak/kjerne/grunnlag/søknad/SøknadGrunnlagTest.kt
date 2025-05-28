@@ -369,6 +369,8 @@ class SøknadGrunnlagTest(
                 ),
             )
 
+        assertThat(behandling.steg).isEqualTo(StegType.VILKÅRSVURDERING)
+
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
         assertThat(søknadGrunnlag).isNotNull()
 
