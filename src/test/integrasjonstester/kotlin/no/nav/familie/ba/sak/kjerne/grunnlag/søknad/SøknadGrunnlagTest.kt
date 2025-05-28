@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -77,6 +78,8 @@ class SøknadGrunnlagTest(
     private val brevmalService: BrevmalService,
     @Autowired
     private val integrasjonClient: IntegrasjonClient,
+    @Autowired
+    private val personopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
     fun init() {
@@ -343,18 +346,17 @@ class SøknadGrunnlagTest(
     @Test
     fun `Skal automatisk registrere søknad`() {
         // Arrange
-        val søkerIdent = randomFnr()
-        val barnIdent = randomFnr()
-        val søkerAktør = personidentService.hentAktør(søkerIdent)
+        val søker = personidentService.hentAktør(randomFnr())
+        val barn = personopplysningerService.hentPersoninfoEnkel(søker).forelderBarnRelasjon.first()
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak = fagsakService.hentEllerOpprettFagsak(søker.aktivFødselsnummer())
 
         val journalpostIdSøknad = "123456789"
 
         every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
             lagVersjonertBarnetrygdSøknadV9(
-                søkerIdent = søkerIdent,
-                barnasIdenter = listOf(barnIdent),
+                søkerIdent = søker.aktivFødselsnummer(),
+                barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
                 søknadstype = Søknadstype.UTVIDET,
                 originalspråk = "nn",
             )
@@ -363,7 +365,7 @@ class SøknadGrunnlagTest(
         val behandling =
             stegService.håndterNyBehandling(
                 lagNyBehandling(
-                    søkerIdent = søkerIdent,
+                    søkerIdent = søker.aktivFødselsnummer(),
                     fagsakId = fagsak.id,
                     journalpostIdSøknad = journalpostIdSøknad,
                 ),
@@ -377,19 +379,19 @@ class SøknadGrunnlagTest(
         val søknadDto = søknadGrunnlag!!.hentSøknadDto()
         assertThat(søknadDto.underkategori).isEqualTo(BehandlingUnderkategoriDTO.UTVIDET)
 
-        assertThat(søknadDto.søkerMedOpplysninger.ident).isEqualTo(søkerIdent)
+        assertThat(søknadDto.søkerMedOpplysninger.ident).isEqualTo(søker.aktivFødselsnummer())
         assertThat(søknadDto.søkerMedOpplysninger.målform).isEqualTo(Målform.NN)
 
-        assertThat(søknadDto.barnaMedOpplysninger[0].ident).isEqualTo(barnIdent)
+        assertThat(søknadDto.barnaMedOpplysninger[0].ident).isEqualTo(barn.aktør.aktivFødselsnummer())
         assertThat(søknadDto.barnaMedOpplysninger[0].inkludertISøknaden).isTrue()
         assertThat(søknadDto.barnaMedOpplysninger[0].erFolkeregistrert).isTrue()
         assertThat(søknadDto.barnaMedOpplysninger[0].manueltRegistrert).isFalse()
 
         val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id)
         assertThat(persongrunnlag).isNotNull()
-        assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søkerIdent)
+        assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søker.aktivFødselsnummer())
         assertThat(persongrunnlag.barna).hasSize(1)
-        assertThat(persongrunnlag.barna[0].aktør.aktivFødselsnummer()).isEqualTo(barnIdent)
+        assertThat(persongrunnlag.barna[0].aktør.aktivFødselsnummer()).isEqualTo(barn.aktør.aktivFødselsnummer())
     }
 
     @Test
