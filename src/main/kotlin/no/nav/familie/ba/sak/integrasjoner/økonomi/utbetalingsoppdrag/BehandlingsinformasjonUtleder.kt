@@ -57,6 +57,8 @@ class BehandlingsinformasjonUtleder(
             FagsakType.NORMAL,
             FagsakType.BARN_ENSLIG_MINDREÅRIG,
             -> fagsak.aktør.aktivFødselsnummer()
+            FagsakType.SKJERMET_BARN,
+            -> TODO("NAV-25256 Ikke implementert enda")
 
             FagsakType.INSTITUSJON,
             -> {
