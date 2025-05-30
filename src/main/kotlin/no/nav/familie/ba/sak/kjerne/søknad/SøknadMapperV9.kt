@@ -17,9 +17,21 @@ class SøknadMapperV9 : SøknadMapper {
         }
 
         return Søknad(
+            søker =
+                Søker(
+                    fnr = versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.fnr,
+                    planleggerÅBoINorge12Mnd =
+                        versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål["planleggerÅBoINorge12Mnd"]
+                            ?.verdi["nb"] == "JA",
+                ),
             barn =
                 versjonertBarnetrygdSøknad.barnetrygdSøknad.barn
-                    .map { Barn(it.fnr) },
+                    .map {
+                        Barn(
+                            fnr = it.fnr,
+                            planleggerÅBoINorge12Mnd = it.spørsmål["planleggerÅBoINorge12Mnd"]?.verdi["nb"] == "JA",
+                        )
+                    },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),
             behandlingKategori =
                 versjonertBarnetrygdSøknad.barnetrygdSøknad.antallEøsSteg
