@@ -23,11 +23,11 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250519094842_e8bd711</prosessering.version>
+        <prosessering.version>2.20250526085951_e212049</prosessering.version>
         <felles.version>3.20250505101905_835431d</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20250422132745_dfaa902</eksterne-kontrakter-bisys.version>
+        <eksterne-kontrakter-bisys.version>2.0_20250528130257_514d030</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250520105353_6584047</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.saksstatistikk>2.0_20250528130257_514d030</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250528130257_514d030</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
@@ -36,7 +36,7 @@
         <token-validation-spring.version>5.0.29</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.8</springdoc.version>
-        <sentry.version>8.12.0</sentry.version>
+        <sentry.version>8.13.2</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.1</kotlinx-kover.version>
 
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.5</version>
+            <version>42.7.6</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -484,7 +484,7 @@
                         <dependency>
                             <groupId>com.pinterest.ktlint</groupId>
                             <artifactId>ktlint-cli</artifactId>
-                            <version>1.5.0</version>
+                            <version>1.6.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
