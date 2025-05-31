@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -92,6 +93,7 @@ class SaksstatistikkService(
                     NORMAL -> null
                     BARN_ENSLIG_MINDREÅRIG -> ENSLIG_MINDREÅRIG_KODE
                     INSTITUSJON -> INSTITUSJON.name
+                    SKJERMET_BARN -> SKJERMET_BARN.name
                 },
             behandlingAarsak = behandling.opprettetÅrsak.name,
             automatiskBehandlet = behandling.skalBehandlesAutomatisk,

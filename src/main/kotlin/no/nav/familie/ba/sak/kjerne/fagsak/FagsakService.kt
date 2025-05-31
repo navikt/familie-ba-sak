@@ -91,6 +91,10 @@ class FagsakService(
         type: FagsakType = FagsakType.NORMAL,
         institusjon: RestInstitusjon? = null,
     ): Fagsak {
+        if (type == FagsakType.SKJERMET_BARN) {
+            TODO("NAV-25256 Ikke implementert enda")
+        }
+
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
 
         val eksisterendeFagsak =
