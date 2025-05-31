@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpph�
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.tilLandNavn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.UtbetalingstabellAutomatiskValutajustering
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.utbetalingEøs.AndelUpbOgValutakurs
@@ -48,7 +49,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.utils.splitPerMåned
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.tidslinje.utvidelser.outerJoin
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
-import tilLandNavn
 import java.time.LocalDate
 import java.time.YearMonth
 

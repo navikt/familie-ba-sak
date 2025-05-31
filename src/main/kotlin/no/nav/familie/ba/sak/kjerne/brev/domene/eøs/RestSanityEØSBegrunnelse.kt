@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.eøs
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdi
 import no.nav.familie.ba.sak.kjerne.brev.domene.finnEnumverdiNullable
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -43,6 +46,9 @@ data class RestSanityEØSBegrunnelse(
     val begrunnelseTypeForPerson: String?,
     val valgbarhet: String?,
     val ikkeIBruk: Boolean?,
+    val endringsaarsaker: List<String>? = emptyList(),
+    val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
+    val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -85,6 +91,17 @@ data class RestSanityEØSBegrunnelse(
                     it.finnEnumverdi<ØvrigTrigger>(apiNavn)
                 } ?: emptyList(),
             begrunnelseTypeForPerson = begrunnelseTypeForPerson.finnEnumverdi<VedtakBegrunnelseType>(apiNavn),
+            endringsaarsaker =
+                endringsaarsaker?.mapNotNull {
+                    it.finnEnumverdi<Årsak>(apiNavn)
+                } ?: emptyList(),
+            endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
+                endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
+                    .finnEnumverdiNullable<EndretUtbetalingsperiodeDeltBostedTriggere>(),
+            endretUtbetalingsperiodeTriggere =
+                endretUtbetalingsperiodeTriggere?.mapNotNull {
+                    it.finnEnumverdi<EndretUtbetalingsperiodeTrigger>(apiNavn)
+                } ?: emptyList(),
             ikkeIBruk = ikkeIBruk ?: false,
         )
     }
