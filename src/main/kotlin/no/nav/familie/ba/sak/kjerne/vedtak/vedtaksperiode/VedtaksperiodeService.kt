@@ -175,7 +175,7 @@ class VedtaksperiodeService(
         )
 
         if (
-            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
+            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType.erEndretUtbetaling() }
         ) {
             val andelerTilkjentYtelse =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService

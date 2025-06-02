@@ -57,9 +57,9 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnEndretUtbetalingb
     fagsakId: Long,
 ) {
     val erMuligÅVelgeEndretUtbetalingBegrunnelse =
-        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
+        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType.erEndretUtbetaling() }
     val erValgtEndretUtbetalingBegrunnelse =
-        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
+        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType.erEndretUtbetaling() }
 
     if (erMuligÅVelgeEndretUtbetalingBegrunnelse && !erValgtEndretUtbetalingBegrunnelse) {
         logger.info("Vedtaksperioden ${this.fom?.tilKortString() ?: ""} - ${this.tom?.tilKortString() ?: ""} mangler endretubetalingsbegrunnelse. Fagsak: $fagsakId, behandling: $behandlingId")
