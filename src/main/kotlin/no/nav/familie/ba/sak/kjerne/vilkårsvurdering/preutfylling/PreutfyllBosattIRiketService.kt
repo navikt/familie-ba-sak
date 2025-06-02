@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -13,6 +15,7 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDate.MAX
 import java.time.temporal.ChronoUnit
 
@@ -20,13 +23,20 @@ import java.time.temporal.ChronoUnit
 class PreutfyllBosattIRiketService(
     private val pdlRestClient: PdlRestClient,
     private val søknadService: SøknadService,
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun prefutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
         if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
 
+        val eldsteBarnsFødselsdato =
+            persongrunnlagService
+                .hentAktivThrows(vilkårsvurdering.behandling.id)
+                .barna
+                .minOfOrNull { it.fødselsdato } ?: LocalDate.MIN
+
         vilkårsvurdering.personResultater.forEach { personResultat ->
 
-            val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat)
+            val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat, eldsteBarnsFødselsdato)
 
             if (bosattIRiketVilkårResultat.isNotEmpty()) {
                 personResultat.vilkårResultater.removeIf { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -35,7 +45,10 @@ class PreutfyllBosattIRiketService(
         }
     }
 
-    fun genererBosattIRiketVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
+    fun genererBosattIRiketVilkårResultat(
+        personResultat: PersonResultat,
+        eldsteBarnsFødselsdato: LocalDate = LocalDate.MIN,
+    ): Set<VilkårResultat> {
         val alleBostedsadresserForPerson =
             pdlRestClient
                 .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
@@ -52,6 +65,7 @@ class PreutfyllBosattIRiketService(
                         tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                     )
                 }.tilTidslinje()
+                .beskjærFraOgMed(eldsteBarnsFødselsdato)
 
         return harBostedsadresseINorgeTidslinje
             .tilPerioder()
