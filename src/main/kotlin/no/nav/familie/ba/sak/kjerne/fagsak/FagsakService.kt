@@ -100,15 +100,21 @@ class FagsakService(
         institusjon: RestInstitusjon? = null,
         skjermetBarnSøker: RestSkjermetBarnSøker? = null,
     ): Fagsak {
-        if (
-            unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) &&
-            type == FagsakType.SKJERMET_BARN &&
-            fraAutomatiskBehandling
-        ) {
-            throw FunksjonellFeil(
-                melding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
-                frontendFeilmelding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
-            )
+        if (type == FagsakType.SKJERMET_BARN) {
+            when {
+                !unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) -> {
+                    throw FunksjonellFeil(
+                        melding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
+                        frontendFeilmelding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
+                    )
+                }
+                fraAutomatiskBehandling -> {
+                    throw FunksjonellFeil(
+                        melding = "Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk",
+                        frontendFeilmelding = "Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk",
+                    )
+                }
+            }
         }
 
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)

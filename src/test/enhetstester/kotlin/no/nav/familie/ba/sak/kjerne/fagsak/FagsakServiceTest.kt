@@ -2,10 +2,16 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagVisningsbehandling
+import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
+import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
@@ -31,6 +37,7 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 class FagsakServiceTest {
@@ -169,6 +176,134 @@ class FagsakServiceTest {
                 assertThat(it.resultat).isEqualTo(visningsbehandling2.resultat)
                 assertThat(it.vedtaksdato).isEqualTo(visningsbehandling2.vedtaksdato)
             }
+        }
+    }
+
+    @Nested
+    inner class HentEllerOpprettFagsakTest {
+        @Test
+        fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn i automatiske løyper`() {
+            // Arrange
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+
+            val barnIdent = randomBarnFnr(alder = 5)
+            val søkerIdent = randomFnr()
+            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+
+            // Act && Assert
+            val frontendFeilmelding =
+                assertThrows<FunksjonellFeil> {
+                    fagsakService.hentEllerOpprettFagsak(
+                        personIdent = barnIdent,
+                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        fraAutomatiskBehandling = true,
+                        type = FagsakType.SKJERMET_BARN,
+                    )
+                }.frontendFeilmelding
+
+            assertThat(frontendFeilmelding).isEqualTo("Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk")
+        }
+
+        @Test
+        fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn uten at toggle er på`() {
+            // Arrange
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns false
+
+            val barnIdent = randomBarnFnr(alder = 5)
+            val søkerIdent = randomFnr()
+            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+
+            // Act && Assert
+            val frontendFeilmelding =
+                assertThrows<FunksjonellFeil> {
+                    fagsakService.hentEllerOpprettFagsak(
+                        personIdent = barnIdent,
+                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        fraAutomatiskBehandling = true,
+                        type = FagsakType.SKJERMET_BARN,
+                    )
+                }.frontendFeilmelding
+
+            assertThat(frontendFeilmelding).isEqualTo("Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.")
+        }
+
+        @Test
+        fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn men ikke sender med søkers ident`() {
+            // Arrange
+            val barnIdent = randomBarnFnr(alder = 5)
+            val barnAktør = randomAktør(barnIdent)
+
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
+
+            // Act && Assert
+            val frontendFeilmelding =
+                assertThrows<FunksjonellFeil> {
+                    fagsakService.hentEllerOpprettFagsak(
+                        personIdent = barnIdent,
+                        skjermetBarnSøker = null,
+                        fraAutomatiskBehandling = false,
+                        type = FagsakType.SKJERMET_BARN,
+                    )
+                }.frontendFeilmelding
+
+            assertThat(frontendFeilmelding).isEqualTo("Mangler påkrevd variabel søkersident for skjermet barn søker")
+        }
+
+        @Test
+        fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn men søker og barn har samme ident`() {
+            // Arrange
+            val ident = randomBarnFnr(alder = 5)
+            val barnIdent = ident
+            val søkerIdent = ident
+            val barnAktør = randomAktør(barnIdent)
+
+            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
+
+            // Act && Assert
+            val frontendFeilmelding =
+                assertThrows<FunksjonellFeil> {
+                    fagsakService.hentEllerOpprettFagsak(
+                        personIdent = barnIdent,
+                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        fraAutomatiskBehandling = false,
+                        type = FagsakType.SKJERMET_BARN,
+                    )
+                }.frontendFeilmelding
+
+            assertThat(frontendFeilmelding).isEqualTo("Søker og barn søkt for kan ikke være lik for fagsak type skjermet barn")
+        }
+
+        @Test
+        fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
+            // Arrange
+            val barnIdent = randomBarnFnr(alder = 5)
+            val søkerIdent = randomFnr()
+            val barnAktør = randomAktør(barnIdent)
+            val søkerAktør = randomAktør(søkerIdent)
+
+            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
+            every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
+            every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør.aktørId) } returns mockk()
+
+            // Act && Assert
+            val frontendFeilmelding =
+                assertThrows<FunksjonellFeil> {
+                    fagsakService.hentEllerOpprettFagsak(
+                        personIdent = barnIdent,
+                        skjermetBarnSøker = restSkjermetBarnSøker,
+                        fraAutomatiskBehandling = false,
+                        type = FagsakType.SKJERMET_BARN,
+                    )
+                }.frontendFeilmelding
+
+            assertThat(frontendFeilmelding).isEqualTo("Det finnes allerede en skjermet barn fagsak på dette barnet som er koblet til samme søker.")
         }
     }
 }
