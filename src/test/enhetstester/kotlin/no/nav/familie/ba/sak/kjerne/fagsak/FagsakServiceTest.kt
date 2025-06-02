@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -48,6 +49,7 @@ class FagsakServiceTest {
     private val organisasjonService = mockk<OrganisasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val unleashService = mockk<UnleashNextMedContextService>()
+    private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -65,6 +67,7 @@ class FagsakServiceTest {
             organisasjonService = organisasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             unleashService = unleashService,
+            skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
         )
 
     @Nested

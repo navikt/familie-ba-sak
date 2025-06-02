@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.log.mdc.MDCConstants
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -78,6 +80,22 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
         assertEquals(FagsakType.NORMAL, fagsak?.type)
         assertNull(fagsak?.institusjon)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `Skal opprette fagsak av type SKJERMET_BARN`() {
+        val fnr = randomFnr()
+        val søkersIdent = randomFnr()
+        val skjermetBarnSøker = RestSkjermetBarnSøker(søkersIdent = søkersIdent)
+
+        fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = fnr, fagsakType = FagsakType.SKJERMET_BARN, skjermetBarnSøker = skjermetBarnSøker))
+
+        val fagsak = fagsakService.hentFagsakPåPerson(tilAktør(fnr), FagsakType.SKJERMET_BARN)
+
+        assertThat(fnr).isEqualTo(fagsak?.aktør?.aktivFødselsnummer())
+        assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)
+        assertThat(fagsak?.skjermetBarnSøker).isNotNull
     }
 
     @Test
@@ -179,7 +197,10 @@ class FagsakControllerTest(
         val søkerAktør = mockPersonidentService.hentOgLagreAktør(søkerFnr, true)
         val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(barnaFnr, true)
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsak(
+                søkerAktør.aktivFødselsnummer(),
+            )
 
         val behandling =
             behandlingService.opprettBehandling(
