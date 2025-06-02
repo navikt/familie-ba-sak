@@ -135,7 +135,7 @@ class PreutfyllBosattIRiketServiceTest {
                 ),
             )
 
-        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
+        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
 
         // Act
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
@@ -161,7 +161,7 @@ class PreutfyllBosattIRiketServiceTest {
                 ),
             )
 
-        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
+        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
 
         // Act
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
@@ -239,7 +239,7 @@ class PreutfyllBosattIRiketServiceTest {
                 ),
             )
 
-        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(randomFnr() to false))
+        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(randomFnr() to false))
 
         every { pdlRestClient.hentStatsborgerskapUtenHistorikk(any()) } returns
             listOf(
@@ -274,7 +274,7 @@ class PreutfyllBosattIRiketServiceTest {
                 ),
             )
 
-        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad()
+        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
 
         every { pdlRestClient.hentStatsborgerskapUtenHistorikk(any()) } returns
             listOf(
