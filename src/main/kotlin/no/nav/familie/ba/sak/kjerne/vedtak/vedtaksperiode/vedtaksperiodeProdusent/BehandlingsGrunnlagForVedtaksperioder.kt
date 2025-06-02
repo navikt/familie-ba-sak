@@ -516,7 +516,7 @@ fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) = this.
 fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) = this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
 @JvmName("endredeUtbetalingerFiltrerPåAktør")
-fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) = this.filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
+fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) = this.filter { endretUtbetaling -> endretUtbetaling.personer.any { it.aktør == aktør } }
 
 @JvmName("utfyltKompetanseFiltrerPåAktør")
 fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) = this.filter { it.barnAktører.contains(aktør) }

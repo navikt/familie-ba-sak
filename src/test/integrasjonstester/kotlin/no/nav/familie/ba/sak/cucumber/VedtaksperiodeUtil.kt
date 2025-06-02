@@ -392,13 +392,18 @@ fun lagEndredeUtbetalinger(
     persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
 ) = nyeEndredeUtbetalingAndeler
     .map { rad ->
-        val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+        val aktørIder = VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe(rad)
         val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
         EndretUtbetalingAndel(
             behandlingId = behandlingId,
             fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
             tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
-            person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId },
+            personer =
+                persongrunnlag
+                    .finnPersonGrunnlagForBehandling(behandlingId)
+                    .personer
+                    .filter { it.aktør.aktørId in aktørIder }
+                    .toMutableSet(),
             prosent =
                 parseValgfriLong(
                     VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT,

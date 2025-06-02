@@ -11,13 +11,13 @@ import java.time.YearMonth
 
 fun lagEndretUtbetalingAndel(
     behandlingId: Long,
-    barn: Person,
+    personer: Set<Person>,
     fom: YearMonth,
     tom: YearMonth,
     prosent: Int,
 ) = lagEndretUtbetalingAndel(
     behandlingId = behandlingId,
-    person = barn,
+    personer = personer,
     fom = fom,
     tom = tom,
     prosent = BigDecimal(prosent),
@@ -26,7 +26,7 @@ fun lagEndretUtbetalingAndel(
 fun lagEndretUtbetalingAndel(
     id: Long = 0,
     behandlingId: Long = 0,
-    person: Person,
+    personer: Set<Person>,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),
     tom: YearMonth? = YearMonth.now(),
@@ -36,7 +36,7 @@ fun lagEndretUtbetalingAndel(
 ) = EndretUtbetalingAndel(
     id = id,
     behandlingId = behandlingId,
-    person = person,
+    personer = personer.toMutableSet(),
     prosent = prosent,
     fom = fom,
     tom = tom,
@@ -48,13 +48,13 @@ fun lagEndretUtbetalingAndel(
 
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId: Long,
-    barn: Person,
+    personer: Set<Person>,
     fom: YearMonth,
     tom: YearMonth?,
     prosent: Int,
 ) = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     behandlingId = behandlingId,
-    person = barn,
+    personer = personer,
     fom = fom,
     tom = tom,
     prosent = BigDecimal(prosent),
@@ -63,7 +63,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     id: Long = 0,
     behandlingId: Long = 0,
-    person: Person,
+    personer: Set<Person>,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),
     tom: YearMonth? = YearMonth.now(),
@@ -76,7 +76,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         EndretUtbetalingAndel(
             id = id,
             behandlingId = behandlingId,
-            person = person,
+            personer = personer.toMutableSet(),
             prosent = prosent,
             fom = fom,
             tom = tom,

@@ -80,10 +80,9 @@ data class EndretUtbetalingAndel(
         }
 
     fun validerUtfyltEndring(): Boolean {
-        if (manglerObligatoriskFelt()
-        ) {
+        if (manglerObligatoriskFelt()) {
             val feilmelding =
-                "Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()"
+                "Personer, prosent, fom, tom, årsak, begrunnelse og søknadstidspunkt skal være utfylt: $this"
             throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
 
@@ -95,14 +94,14 @@ data class EndretUtbetalingAndel(
         }
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null) {
-            throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
+            throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this")
         }
 
         return true
     }
 
     fun manglerObligatoriskFelt() =
-        person == null ||
+        personer.isEmpty() ||
             prosent == null ||
             fom == null ||
             tom == null ||
@@ -144,7 +143,8 @@ fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != Big
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(
         id = this.id,
-        personIdent = this.aktivtFødselsnummer,
+        personIdent = this.personIdenter.firstOrNull(),
+        personIdenter = this.personIdenter,
         prosent = this.prosent,
         fom = this.fom,
         tom = this.tom,
@@ -157,7 +157,7 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel()
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
-    person: Person,
+    personer: Set<Person>,
 ): EndretUtbetalingAndel {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom
@@ -166,7 +166,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
-    this.person = person
+    this.personer = personer.toMutableSet()
     return this
 }
 
@@ -180,7 +180,7 @@ data class TomEndretUtbetalingAndel(
 sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
     val id: Long
     val behandlingId: Long
-    val person: Person
+    val personer: Set<Person>
     val prosent: BigDecimal
     val fom: YearMonth
     val tom: YearMonth
@@ -192,7 +192,7 @@ sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
 data class UtfyltEndretUtbetalingAndel(
     override val id: Long,
     override val behandlingId: Long,
-    override val person: Person,
+    override val personer: Set<Person>,
     override val prosent: BigDecimal,
     override val fom: YearMonth,
     override val tom: YearMonth,
@@ -204,7 +204,7 @@ data class UtfyltEndretUtbetalingAndel(
 data class UtfyltEndretUtbetalingAndelDeltBosted(
     override val id: Long,
     override val behandlingId: Long,
-    override val person: Person,
+    override val personer: Set<Person>,
     override val prosent: BigDecimal,
     override val fom: YearMonth,
     override val tom: YearMonth,
@@ -225,7 +225,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
             UtfyltEndretUtbetalingAndelDeltBosted(
                 id = this.id,
                 behandlingId = this.behandlingId,
-                person = this.person!!,
+                personer = this.personer,
                 prosent = this.prosent!!,
                 fom = this.fom!!,
                 tom = this.tom!!,
@@ -238,7 +238,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
             UtfyltEndretUtbetalingAndel(
                 id = this.id,
                 behandlingId = this.behandlingId,
-                person = this.person!!,
+                personer = this.personer,
                 prosent = this.prosent!!,
                 fom = this.fom!!,
                 tom = this.tom!!,

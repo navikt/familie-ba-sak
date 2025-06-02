@@ -62,7 +62,7 @@ class EndretUtbetalingAndelServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 årsak = Årsak.DELT_BOSTED,
                 fom = YearMonth.now().minusMonths(5),
                 tom = YearMonth.now().minusMonths(1),

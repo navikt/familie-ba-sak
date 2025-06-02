@@ -1008,14 +1008,14 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             listOf(
                 lagEndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    barn = barn,
+                    personer = setOf(barn),
                     fom = YearMonth.now(),
                     tom = YearMonth.now().plusMonths(6),
                     prosent = 50,
                 ),
                 lagEndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    barn = barn,
+                    personer = setOf(barn),
                     fom = YearMonth.now().plusMonths(7),
                     tom = YearMonth.now().plusMonths(12),
                     prosent = 100,
@@ -1083,11 +1083,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             .usingRecursiveFieldByFieldElementComparatorIgnoringFields(
                 "id",
                 "behandlingId",
-                "person",
+                "personer",
                 *baseEntitetFelter,
             ).isEqualTo(endredeUtbetalingsAndeler)
 
-        assertThat(kopiertEndredeUtbetalingsandeler.all { kopiertEua -> endredeUtbetalingsAndeler.any { eua -> eua.person!!.aktør.aktørId == kopiertEua.person!!.aktør.aktørId } }).isTrue
+        assertThat(kopiertEndredeUtbetalingsandeler.all { kopiertEua -> endredeUtbetalingsAndeler.any { eua -> eua.personer == kopiertEua.personer } }).isTrue
 
         validerKopiertVilkårsvurdering(kopiertVilkårsvurdering, vilkårsvurdering, forventetVilkårsvurdering)
     }
