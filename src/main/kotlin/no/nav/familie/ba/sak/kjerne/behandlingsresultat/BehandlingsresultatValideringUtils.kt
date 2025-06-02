@@ -76,8 +76,8 @@ object BehandlingsresultatValideringUtils {
     }
 
     fun validerIngenEndringTilbakeITid(
-        andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
-        andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+        andelerDenneBehandlingen: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
         nåMåned: YearMonth,
     ) {
         val forrigeMåned = nåMåned.minusMonths(1)
@@ -97,15 +97,15 @@ object BehandlingsresultatValideringUtils {
     }
 
     fun validerSatsErUendret(
-        andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
-        andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+        andelerDenneBehandlingen: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
     ) {
         val andelerDenneBehandlingTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
         val andelerForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
 
         val endringISatsTidslinjer =
             andelerDenneBehandlingTidslinje.outerJoin(andelerForrigeBehanldingTidslinje) { nyAndel, gammelAndel ->
-                if (nyAndel?.sats != gammelAndel?.sats) {
+                if (nyAndel?.sats != gammelAndel?.sats && nyAndel?.kalkulertUtbetalingsbeløp != 0 && gammelAndel?.kalkulertUtbetalingsbeløp != 0) {
                     ErEndringIAndel(andelForrigeBehandling = gammelAndel, andelDenneBehandlingen = nyAndel)
                 } else {
                     IngenEndringIAndel
