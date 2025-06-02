@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iNordiskLand
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -17,6 +18,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDate.MAX
+import java.time.LocalDate.now
 import java.time.temporal.ChronoUnit
 
 @Service
@@ -54,30 +56,41 @@ class PreutfyllBosattIRiketService(
                 .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
                 .sortedBy { it.gyldigFraOgMed }
 
-        val harBostedsadresseINorgeTidslinje =
+        val erBosattINorgeTidslinje =
             alleBostedsadresserForPerson
                 .windowed(size = 2, step = 1, partialWindows = true) {
                     val denne = it.first()
                     val neste = it.getOrNull(1)
+
                     Periode(
                         verdi = harBostedsAdresseINorge(denne),
                         fom = denne.gyldigFraOgMed,
                         tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                     )
                 }.tilTidslinje()
+
+        val oppfyllerBosattIRiketTidslinje =
+            erBosattINorgeTidslinje
+                .tilPerioder()
+                .map { erBosattINorgePeriode ->
+                    erBosattINorgePeriode.copy(
+                        verdi =
+                            erBosattINorgePeriode.verdi == true &&
+                                (
+                                    erBosattINorgePeriode.erMinst12Måneder() ||
+                                        (erBosattINorgePeriode.erNåværendePeriode() && planleggerÅBoINorgeI12Måneder(personResultat))
+                                ),
+                    )
+                }.tilTidslinje()
                 .beskjærFraOgMed(eldsteBarnsFødselsdato)
 
-        return harBostedsadresseINorgeTidslinje
+        return oppfyllerBosattIRiketTidslinje
             .tilPerioder()
             .map { erBosattINorgePeriode ->
-
-                val oppfyllerVilkår =
-                    erBosattINorgePeriode.verdi == true && (erPeriodeMinst12Måneder(erBosattINorgePeriode) || planleggerÅBoINorgeNeste12Mnd(personResultat))
-
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
-                    resultat = if (oppfyllerVilkår) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                    resultat = if (erBosattINorgePeriode.verdi == true) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = erBosattINorgePeriode.fom,
                     periodeTom = erBosattINorgePeriode.tom,
@@ -87,9 +100,20 @@ class PreutfyllBosattIRiketService(
             }.toSet()
     }
 
-    private fun erPeriodeMinst12Måneder(periode: Periode<Boolean?>): Boolean = ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: MAX) >= 12
+    private fun Periode<*>.erNåværendePeriode(): Boolean = (tom ?: MAX) >= now()
 
-    private fun planleggerÅBoINorgeNeste12Mnd(personResultat: PersonResultat): Boolean {
+    private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: now()) >= 12
+
+    private fun planleggerÅBoINorgeI12Måneder(personResultat: PersonResultat): Boolean =
+        erNordiskStatsborger(personResultat) ||
+            erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat)
+
+    private fun erNordiskStatsborger(personResultat: PersonResultat): Boolean {
+        val statsborgerskap = pdlRestClient.hentStatsborgerskapUtenHistorikk(personResultat.aktør)
+        return statsborgerskap.any { it.iNordiskLand() }
+    }
+
+    private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
         val søknad = søknadService.hentSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
         val planleggerÅBoNeste12Mnd =
             if (personResultat.erSøkersResultater()) {

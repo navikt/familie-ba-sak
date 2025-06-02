@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -140,7 +141,7 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
-        assertThat(vilkårResultat).allSatisfy { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(vilkårResultat).allMatch { it.resultat == Resultat.IKKE_OPPFYLT }
     }
 
     @Test
@@ -194,5 +195,83 @@ class PreutfyllBosattIRiketServiceTest {
 
         assertThat(vilkårResultat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+    }
+
+    @Test
+    fun `skal ikke sjekke 12 måneders krav for nordiske statsborgere`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(10),
+                    gyldigTilOgMed = LocalDate.now().minusMonths(8),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(randomFnr() to false))
+
+        every { pdlRestClient.hentStatsborgerskapUtenHistorikk(any()) } returns
+            listOf(
+                Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(2)
+    }
+
+    @Test
+    fun `skal gi ikke oppyflt på 12 måneders krav for nordiske statsborgere for eldre perioder`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(12),
+                    gyldigTilOgMed = LocalDate.now().minusMonths(5),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(1),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad()
+
+        every { pdlRestClient.hentStatsborgerskapUtenHistorikk(any()) } returns
+            listOf(
+                Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        val ikkeOppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(ikkeOppfyltPeriode).`as`("Forventer én IKKE_OPPFYLT periode").isNotNull
+        assertThat(ikkeOppfyltPeriode?.periodeFom).`as`("Ikke oppfylt periode fom").isEqualTo(LocalDate.now().minusMonths(12))
+        assertThat(ikkeOppfyltPeriode?.periodeTom).`as`("Ikke oppfylt periode tom").isEqualTo(LocalDate.now().minusMonths(1).minusDays(1))
+
+        val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT }
+        assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
+        assertThat(oppfyltPeriode?.periodeFom).`as`("Oppfylt periode fom").isEqualTo(LocalDate.now().minusMonths(1))
+        assertThat(oppfyltPeriode?.periodeTom).`as`("Oppfylt periode tom").isNull()
     }
 }
