@@ -111,7 +111,7 @@ class PreutfyllBosattIRiketService(
     }
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
-        val søknad = søknadService.hentSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
+        val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
         val planleggerÅBoNeste12Mnd =
             if (personResultat.erSøkersResultater()) {
                 søknad?.søker?.planleggerÅBoINorge12Mnd
