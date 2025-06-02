@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
@@ -71,6 +72,8 @@ class FagsakServiceIntegrationTest(
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    @Autowired
+    private val unleashService: UnleashNextMedContextService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
@@ -705,6 +708,33 @@ class FagsakServiceIntegrationTest(
         assertThat(feilmelding).isEqualTo("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
     }
 
+    @Test
+    fun `Skal opprette fagsak for skjermet barn`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+
+        // Act
+        opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.SKJERMET_BARN)
+    }
+
+    @Test
+    fun `Skal ikke opprette fagsak for skjermet barn hvis automatisk behandling`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+
+        // Act
+        assertThrows<FunksjonellFeil> {
+            opprettFagsakForPersonMedStatus(
+                personIdent = barn.aktør.aktivFødselsnummer(),
+                fagsakStatus = FagsakStatus.AVSLUTTET,
+                fagsakType = FagsakType.SKJERMET_BARN,
+                fraAutomatiskBehandling = true,
+            )
+        }.also {
+            assertThat(it.melding).isEqualTo("Kan ikke opprette skjermet barn fagsak i automatisk behandling")
+        }
+    }
+
     private data class PeriodeForAktør(
         val fom: YearMonth,
         val tom: YearMonth,
@@ -716,9 +746,16 @@ class FagsakServiceIntegrationTest(
         personIdent: String,
         fagsakStatus: FagsakStatus,
         fagsakType: FagsakType = FagsakType.NORMAL,
+        fraAutomatiskBehandling: Boolean = false,
     ): Fagsak {
         val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent, fagsakType = fagsakType, institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null)
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                fødselsnummer = personIdent,
+                fraAutomatiskBehandling = fraAutomatiskBehandling,
+                fagsakType = fagsakType,
+                institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null,
+            )
         return fagsakService.oppdaterStatus(fagsak, fagsakStatus)
     }
 

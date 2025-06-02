@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagVisningsbehandling
@@ -46,6 +47,7 @@ class FagsakServiceTest {
     private val institusjonService = mockk<InstitusjonService>()
     private val organisasjonService = mockk<OrganisasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
+    private val unleashService = mockk<UnleashNextMedContextService>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -62,6 +64,7 @@ class FagsakServiceTest {
             institusjonService = institusjonService,
             organisasjonService = organisasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            unleashService = unleashService,
         )
 
     @Nested
