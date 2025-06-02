@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -21,6 +22,8 @@ class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
 ) {
     fun prefutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
+        if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
+
         vilkårsvurdering.personResultater.forEach { personResultat ->
 
             val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat)
@@ -52,25 +55,25 @@ class PreutfyllBosattIRiketService(
 
         return harBostedsadresseINorgeTidslinje
             .tilPerioder()
-            .map { periode ->
+            .map { erBosattINorgePeriode ->
 
                 val oppfyllerVilkår =
-                    periode.verdi == true && (harBoodINorgeIMerEnn12Mnd(periode) || planleggerÅBoINorgeNeste12Mnd(personResultat))
+                    erBosattINorgePeriode.verdi == true && (erPeriodeMinst12Måneder(erBosattINorgePeriode) || planleggerÅBoINorgeNeste12Mnd(personResultat))
 
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
                     resultat = if (oppfyllerVilkår) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
-                    periodeFom = periode.fom,
-                    periodeTom = periode.tom,
+                    periodeFom = erBosattINorgePeriode.fom,
+                    periodeTom = erBosattINorgePeriode.tom,
                     begrunnelse = "Fylt inn automatisk fra registerdata i PDL",
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
     }
 
-    private fun harBoodINorgeIMerEnn12Mnd(periode: Periode<Boolean?>): Boolean = ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: MAX) >= 12
+    private fun erPeriodeMinst12Måneder(periode: Periode<Boolean?>): Boolean = ChronoUnit.MONTHS.between(periode.fom, periode.tom ?: MAX) >= 12
 
     private fun planleggerÅBoINorgeNeste12Mnd(personResultat: PersonResultat): Boolean {
         val søknad = søknadService.hentSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
