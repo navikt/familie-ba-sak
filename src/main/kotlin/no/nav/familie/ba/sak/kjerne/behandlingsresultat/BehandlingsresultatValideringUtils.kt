@@ -76,8 +76,8 @@ object BehandlingsresultatValideringUtils {
     }
 
     fun validerIngenEndringTilbakeITid(
-        andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
-        andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+        andelerDenneBehandlingen: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
         nåMåned: YearMonth,
     ) {
         val forrigeMåned = nåMåned.minusMonths(1)
@@ -97,8 +97,8 @@ object BehandlingsresultatValideringUtils {
     }
 
     fun validerSatsErUendret(
-        andelerDenneBehandlingen: List<AndelTilkjentYtelse>,
-        andelerForrigeBehandling: List<AndelTilkjentYtelse>,
+        andelerDenneBehandlingen: Collection<AndelTilkjentYtelse>,
+        andelerForrigeBehandling: Collection<AndelTilkjentYtelse>,
     ) {
         val andelerDenneBehandlingTidslinje = andelerDenneBehandlingen.tilTidslinjerPerAktørOgType()
         val andelerForrigeBehanldingTidslinje = andelerForrigeBehandling.tilTidslinjerPerAktørOgType()
