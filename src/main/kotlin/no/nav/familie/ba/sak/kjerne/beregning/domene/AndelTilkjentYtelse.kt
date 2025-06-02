@@ -128,7 +128,7 @@ data class AndelTilkjentYtelse(
         )
 
     override fun toString(): String =
-        "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, prosent = $prosent, " +
+        "AndelTilkjentYtelse(id = $id, behandling = $behandlingId, type = $type, sats = $sats, prosent = $prosent, " +
             "beløp = $kalkulertUtbetalingsbeløp, stønadFom = $stønadFom, stønadTom = $stønadTom, periodeOffset = $periodeOffset, " +
             "forrigePeriodeOffset = $forrigePeriodeOffset, kildeBehandlingId = $kildeBehandlingId, nasjonaltPeriodebeløp = $nasjonaltPeriodebeløp, " +
             "differanseberegnetBeløp = $differanseberegnetPeriodebeløp, beløpUtenEndretUtbetaling = $beløpUtenEndretUtbetaling)"
@@ -224,12 +224,12 @@ fun Collection<AndelTilkjentYtelse>.tilTidslinjerPerAktørOgType(): Map<Pair<Akt
         andelerTilkjentYtelsePåPerson.tilTidslinje()
     }
 
-fun List<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelForVedtaksperiode>> =
+fun Collection<AndelTilkjentYtelse>.tilAndelForVedtaksperiodeTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelForVedtaksperiode>> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         andelerTilkjentYtelsePåPerson.tilAndelForVedtaksperiodeTidslinje()
     }
 
-fun List<AndelTilkjentYtelse>.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelForVedtaksbegrunnelse>> =
+fun Collection<AndelTilkjentYtelse>.tilAndelForVedtaksbegrunnelseTidslinjerPerAktørOgType(): Map<Pair<Aktør, YtelseType>, Tidslinje<AndelForVedtaksbegrunnelse>> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         andelerTilkjentYtelsePåPerson.tilAndelForVedtaksbegrunnelseTidslinje()
     }
