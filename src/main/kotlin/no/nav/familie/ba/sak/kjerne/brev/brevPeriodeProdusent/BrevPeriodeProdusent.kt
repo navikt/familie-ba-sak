@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent
 
-import lagBrevBegrunnelse
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr

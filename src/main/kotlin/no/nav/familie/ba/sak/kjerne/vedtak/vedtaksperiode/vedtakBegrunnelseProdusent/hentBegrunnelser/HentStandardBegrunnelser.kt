@@ -1,16 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentBegrunnelser
 
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -21,22 +18,23 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdu
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.TemaerForBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderOpphørFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.begrunnelseGjelderReduksjonFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erEndretUtbetaling
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erEtterEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForBrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForFagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erGjeldendeForUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erLikVilkårOgUtdypendeVilkårIPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.erSammeTemaSomPeriode
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.filtrerPåEndretUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentEndretUtbetalingDennePerioden
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.hentResultaterForForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.matcherErAutomatisk
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalFiltreresPåHendelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtakBegrunnelseProdusent.skalVisesSelvOmIkkeEndring
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.IEndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.VilkårResultatForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
-import java.math.BigDecimal
 
 internal fun hentStandardBegrunnelser(
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
@@ -149,30 +147,6 @@ internal fun hentStandardBegrunnelser(
         filtrertPåUtgjørendeVilkårOgEndretUtbetalingAndelIForrigePeriode.keys
 }
 
-fun SanityBegrunnelse.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePeriode(
-    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
-    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
-): Boolean {
-    val endretUtbetalingAndelForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel as? EndretUtbetalingAndelForVedtaksperiode ?: return false
-    val vilkårForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.vilkårResultater
-
-    val oppfylteVilkårForrigePeriodeSomStarterRettFørEndretUtbetalingAndelOgSlutterForrigeMåned =
-        vilkårForrigePeriode
-            ?.filter {
-                val månedenEtterVilkårFom = it.fom?.plusMonths(1) ?: return@filter false
-                val vilkårErUtgjørendeSammeMånedSomStartPåEndretUtbetalingAndel = månedenEtterVilkårFom.toYearMonth() == endretUtbetalingAndelForrigePeriode.fom
-                val vedtaksperiodenStarterMånedEtterSluttPåEndretUtbetalingAndel = endretUtbetalingAndelForrigePeriode.tom.plusMonths(1) == vedtaksperiode.fom?.toYearMonth()
-
-                vilkårErUtgjørendeSammeMånedSomStartPåEndretUtbetalingAndel &&
-                    vedtaksperiodenStarterMånedEtterSluttPåEndretUtbetalingAndel &&
-                    it.resultat == Resultat.OPPFYLT
-            }?.map { it.vilkårType } ?: emptyList()
-
-    return oppfylteVilkårForrigePeriodeSomStarterRettFørEndretUtbetalingAndelOgSlutterForrigeMåned.any {
-        vilkår.contains(it)
-    }
-}
-
 private fun filtrerPåVilkår(
     it: SanityBegrunnelse,
     begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
@@ -187,15 +161,6 @@ private fun filtrerPåVilkår(
     it.erGjeldendeForRegelverk(
         begrunnelseGrunnlag,
     )
-
-private fun filtrerPåEndretUtbetaling(
-    it: SanityBegrunnelse,
-    endretUtbetalingDennePerioden: IEndretUtbetalingAndelForVedtaksperiode?,
-) = it.erEndretUtbetaling(endretUtbetalingDennePerioden)
-
-private fun SanityBegrunnelse.erEndretUtbetaling(
-    endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
-): Boolean = this.gjelderEndretUtbetaling() && this.erLikEndretUtbetalingIPeriode(endretUtbetaling)
 
 private fun SanityBegrunnelse.erGjeldendeForRegelverk(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean = begrunnelseGrunnlag.dennePerioden.vilkårResultater.none { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN } || this.tema == Tema.FELLES
 
@@ -255,68 +220,6 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
     val erEndringISmåbarnstillegg = erSmåbarnstilleggForrigePeriode != erSmåbarnstilleggDennePerioden
 
     return begrunnelseGjelderSmåbarnstillegg && begrunnelseMatcherPeriodeResultat && (erEndringISmåbarnstillegg || erEndringISmåbarnstilleggFraForrigeBehandling)
-}
-
-private fun SanityBegrunnelse.erEtterEndretUtbetaling(
-    endretUtbetalingDennePerioden: IEndretUtbetalingAndelForVedtaksperiode?,
-    endretUtbetalingForrigePeriode: IEndretUtbetalingAndelForVedtaksperiode?,
-): Boolean {
-    if (!this.erEndringsårsakOgGjelderEtterEndretUtbetaling()) return false
-
-    return this.matcherEtterEndretUtbetaling(
-        endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
-        endretUtbetalingForrigePeriode = endretUtbetalingForrigePeriode,
-    )
-}
-
-private fun SanityBegrunnelse.matcherEtterEndretUtbetaling(
-    endretUtbetalingDennePerioden: IEndretUtbetalingAndelForVedtaksperiode?,
-    endretUtbetalingForrigePeriode: IEndretUtbetalingAndelForVedtaksperiode?,
-): Boolean {
-    val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
-        this.endringsaarsaker.all { it == endretUtbetalingForrigePeriode?.årsak }
-
-    val begrunnelseMatcherEndretUtbetalingIDennePerioden =
-        this.endringsaarsaker.all { it == endretUtbetalingDennePerioden?.årsak }
-
-    if (!begrunnelseMatcherEndretUtbetalingIForrigePeriode || begrunnelseMatcherEndretUtbetalingIDennePerioden) return false
-
-    return endretUtbetalingForrigePeriode?.årsak != Årsak.DELT_BOSTED ||
-        this.erDeltBostedUtbetalingstype(
-            endretUtbetalingForrigePeriode,
-        )
-}
-
-private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() = this.endringsaarsaker.isNotEmpty() && this.gjelderEtterEndretUtbetaling()
-
-private fun SanityBegrunnelse.gjelderEndretUtbetaling() = this.endringsaarsaker.isNotEmpty() && !this.gjelderEtterEndretUtbetaling()
-
-internal fun SanityBegrunnelse.erLikEndretUtbetalingIPeriode(
-    endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode?,
-): Boolean {
-    if (endretUtbetaling == null) return false
-
-    val erEndringsårsakerIBegrunnelseOgPeriodeLike = this.endringsaarsaker.all { it == endretUtbetaling.årsak }
-    if (!erEndringsårsakerIBegrunnelseOgPeriodeLike) return false
-
-    return if (endretUtbetaling.årsak == Årsak.DELT_BOSTED) {
-        this.erDeltBostedUtbetalingstype(endretUtbetaling)
-    } else {
-        true
-    }
-}
-
-private fun SanityBegrunnelse.erDeltBostedUtbetalingstype(
-    endretUtbetaling: IEndretUtbetalingAndelForVedtaksperiode,
-): Boolean {
-    val inneholderAndelSomSkalUtbetales = endretUtbetaling.prosent != BigDecimal.ZERO
-
-    return when (this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger) {
-        EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT -> true
-        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES -> inneholderAndelSomSkalUtbetales
-        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES -> !inneholderAndelSomSkalUtbetales
-        null -> true
-    }
 }
 
 private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.forrigePeriode?.erOrdinæreVilkårInnvilget() == true }
