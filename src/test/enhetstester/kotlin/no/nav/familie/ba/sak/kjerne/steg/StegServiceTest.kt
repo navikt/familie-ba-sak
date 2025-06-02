@@ -62,12 +62,14 @@ class StegServiceTest {
             opprettTaskService = opprettTaskService,
             satskjøringRepository = satskjøringRepository,
             unleashService = unleashService,
+            automatiskRegistrerSøknadService = mockk(),
         )
 
     @BeforeEach
     fun setup() {
         every { tilgangService.validerTilgangTilBehandling(any(), any()) } just runs
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
+        every { unleashService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) } returns true
     }
 
     @Nested

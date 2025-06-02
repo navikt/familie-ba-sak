@@ -72,6 +72,7 @@ class StegService(
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
     private val unleashService: UnleashNextMedContextService,
+    private val automatiskRegistrerSøknadService: AutomatiskRegistrerSøknadService,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
 
@@ -245,6 +246,19 @@ class StegService(
         restRegistrerSøknad: RestRegistrerSøknad,
     ): Behandling = fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
+    @Transactional
+    fun håndterAutomatiskRegistrerSøknad(behandling: Behandling): Behandling =
+        try {
+            val restRegistrerSøknad = automatiskRegistrerSøknadService.lagRestRegistrerSøknad(behandling)
+            fullførSøknadsHåndtering(
+                behandling = behandling,
+                restRegistrerSøknad = restRegistrerSøknad,
+            )
+        } catch (e: Exception) {
+            logger.warn("Klarte ikke å automatisk registrere søknad for behandling ${behandling.id}. Feil: ${e.message}", e)
+            behandling
+        }
+
     private fun fullførSøknadsHåndtering(
         behandling: Behandling,
         restRegistrerSøknad: RestRegistrerSøknad,
@@ -272,8 +286,18 @@ class StegService(
         val behandlingSteg: RegistrerPersongrunnlag =
             hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
 
-        return håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
+        val behandlingEtterRegistrerePersongrunnlag =
+            håndterSteg(behandling, behandlingSteg) {
+                behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
+            }
+
+        return if (
+            unleashService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) &&
+            behandlingEtterRegistrerePersongrunnlag.steg == StegType.REGISTRERE_SØKNAD
+        ) {
+            håndterAutomatiskRegistrerSøknad(behandlingEtterRegistrerePersongrunnlag)
+        } else {
+            behandlingEtterRegistrerePersongrunnlag
         }
     }
 

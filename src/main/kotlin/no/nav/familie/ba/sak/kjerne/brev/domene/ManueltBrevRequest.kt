@@ -162,6 +162,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
                 )
             }
         }
+        FagsakType.SKJERMET_BARN -> TODO("NAV-25256 Ikke implementert enda")
     }
 }
 
@@ -199,6 +200,7 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
             this.copy(
                 enhet = enhet,
             )
+        FagsakType.SKJERMET_BARN -> TODO("NAV-25256 Ikke implementert enda")
     }
 }
 

@@ -47,7 +47,7 @@ class SøknadServiceTest {
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
 
             // Act
-            val søknad = søknadService.hentSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNotNull
@@ -66,7 +66,7 @@ class SøknadServiceTest {
             every { søknadReferanseService.hentSøknadReferanse(behandling.id) } returns null
 
             // Act
-            val søknad = søknadService.hentSøknad(behandlingId = behandling.id)
+            val søknad = søknadService.finnSøknad(behandlingId = behandling.id)
 
             // Assert
             assertThat(søknad).isNull()

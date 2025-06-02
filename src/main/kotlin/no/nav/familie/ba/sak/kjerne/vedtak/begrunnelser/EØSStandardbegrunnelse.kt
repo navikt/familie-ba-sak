@@ -754,7 +754,16 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_SENTRUM_FOR_LIVSINTERESSE_SÆRKULLSBARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
         override val sanityApiNavn = "reduksjonSentrumForLivsinteresseSaerkullsbarn"
-    }, ;
+    },
+    ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS_INGEN_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingUtvidetEosIngenUtbetaling"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_UTVIDET_SELVSTENDIG_RETT_EØS_INGEN_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingUtvidetSelvstendigRettEosIngenUtbetaling"
+    },
+    ;
 
     override val kanDelesOpp: Boolean = false
 

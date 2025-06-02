@@ -69,7 +69,7 @@ enum class Vilkår(
             behandlingUnderkategori: BehandlingUnderkategori,
         ): Set<Vilkår> =
             when (fagsakType) {
-                FagsakType.NORMAL ->
+                FagsakType.NORMAL, FagsakType.SKJERMET_BARN ->
                     when (personType) {
                         BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
                         SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
