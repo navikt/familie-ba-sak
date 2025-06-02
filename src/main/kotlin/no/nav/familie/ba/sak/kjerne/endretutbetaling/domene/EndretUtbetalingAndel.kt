@@ -6,11 +6,13 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -44,9 +46,13 @@ data class EndretUtbetalingAndel(
     val id: Long = 0,
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
-    @ManyToOne
-    @JoinColumn(name = "fk_po_person_id")
-    var person: Person? = null,
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "PERSON_TIL_ENDRET_UTBETALING_ANDEL",
+        joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
+        inverseJoinColumns = [JoinColumn(name = "fk_person_id")],
+    )
+    var personer: MutableSet<Person> = mutableSetOf(),
     @Column(name = "prosent")
     var prosent: BigDecimal? = null,
     @Column(name = "fom", columnDefinition = "DATE")
