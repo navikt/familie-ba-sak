@@ -13,12 +13,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.Periode
+import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.LocalDate.MAX
-import java.time.LocalDate.now
 import java.time.temporal.ChronoUnit
 
 @Service
@@ -78,7 +77,7 @@ class PreutfyllBosattIRiketService(
                             erBosattINorgePeriode.verdi == true &&
                                 (
                                     erBosattINorgePeriode.erMinst12Måneder() ||
-                                        (erBosattINorgePeriode.erNåværendePeriode() && planleggerÅBoINorgeI12Måneder(personResultat))
+                                        (erBosattINorgePeriode.omfatter(LocalDate.now()) && planleggerÅBoINorgeI12Måneder(personResultat))
                                 ),
                     )
                 }.tilTidslinje()
@@ -100,9 +99,7 @@ class PreutfyllBosattIRiketService(
             }.toSet()
     }
 
-    private fun Periode<*>.erNåværendePeriode(): Boolean = (tom ?: MAX) >= now()
-
-    private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: now()) >= 12
+    private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
 
     private fun planleggerÅBoINorgeI12Måneder(personResultat: PersonResultat): Boolean =
         erNordiskStatsborger(personResultat) ||

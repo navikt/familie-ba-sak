@@ -145,8 +145,29 @@ class PreutfyllBosattIRiketServiceTest {
     }
 
     @Test
-    fun `skal gi oppfylt i siste periode hvis den er under 12 mnd og barn planlegger å bo i Norge neste 12`() {
-        // TODO()
+    fun `skal gi oppfylt i siste periode hvis den er under 12 mnd og søker planlegger å bo i Norge neste 12`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        every { søknadService.hentSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        assertThat(vilkårResultat.singleOrNull()?.resultat).isEqualTo(Resultat.OPPFYLT)
     }
 
     @Test
