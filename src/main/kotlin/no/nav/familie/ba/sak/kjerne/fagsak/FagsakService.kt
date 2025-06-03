@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -256,7 +257,7 @@ class FagsakService(
         return RestBaseFagsak(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
             id = fagsak.id,
-            søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
+            søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
             status = fagsak.status,
             underBehandling =
                 if (aktivBehandling == null) {
@@ -277,6 +278,18 @@ class FagsakService(
                     )
                 },
         )
+    }
+
+    private fun hentSøkersFødselsnummer(fagsak: Fagsak): String {
+        val aktør =
+            if (fagsak.type == FagsakType.SKJERMET_BARN) {
+                personidentService.hentAktør(
+                    fagsak.skjermetBarnSøker?.aktørId ?: throw Feil("Søker er ikke lagret på fagsaken"),
+                )
+            } else {
+                fagsak.aktør
+            }
+        return aktør.aktivFødselsnummer()
     }
 
     @Transactional
