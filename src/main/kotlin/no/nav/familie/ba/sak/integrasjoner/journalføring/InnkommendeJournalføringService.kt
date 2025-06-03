@@ -118,7 +118,13 @@ class InnkommendeJournalføringService(
         behandlendeEnhet: String,
         oppgaveId: String,
     ): String {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent = request.bruker.id, type = request.fagsakType, institusjon = request.institusjon)
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsak(
+                personIdent = request.bruker.id,
+                type = request.fagsakType,
+                institusjon = request.institusjon,
+            )
+
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
@@ -193,7 +199,10 @@ class InnkommendeJournalføringService(
         request: RestFerdigstillOppgaveKnyttJournalpost,
         oppgaveId: Long,
     ): String {
-        val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent = request.bruker.id)
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsak(
+                personIdent = request.bruker.id,
+            )
         val tilknyttedeBehandlinger: MutableList<TilknyttetBehandling> = request.tilknyttedeBehandlinger.toMutableList()
         val journalpost = hentJournalpost(request.journalpostId)
 

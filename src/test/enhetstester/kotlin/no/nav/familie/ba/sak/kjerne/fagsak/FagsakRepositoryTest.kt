@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -31,6 +33,7 @@ class FagsakRepositoryTest(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
@@ -224,5 +227,26 @@ class FagsakRepositoryTest(
 
         // Assert
         assertThat(fagsakerSomSkalAvsluttes).hasSize(0)
+    }
+
+    @Nested
+    inner class FinnFagsakForSkjermetBarnSøker {
+        @Test
+        fun `Skal finne fagsak dersom det finnes en fagsak som har søker som skjermet barn søker`() {
+            // Arrange
+            val barn = aktørIdRepository.save(randomAktør())
+            val søker = aktørIdRepository.save(randomAktør())
+            val skjermetBarnSøker = skjermetBarnSøkerRepository.save(SkjermetBarnSøker(aktørId = søker.aktørId))
+
+            fagsakRepository.save(lagFagsakUtenId(aktør = barn, status = FagsakStatus.LØPENDE, skjermetBarnSøker = skjermetBarnSøker, type = FagsakType.SKJERMET_BARN))
+
+            // Act
+            val fagsak = fagsakRepository.finnFagsakForSkjermetBarnSøker(barn, søker.aktørId)
+
+            // Assert
+            assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)
+            assertThat(fagsak?.aktør).isEqualTo(barn)
+            assertThat(fagsak?.skjermetBarnSøker).isEqualTo(skjermetBarnSøker)
+        }
     }
 }
