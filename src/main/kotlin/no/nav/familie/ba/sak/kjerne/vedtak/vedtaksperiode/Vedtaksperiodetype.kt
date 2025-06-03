@@ -12,6 +12,7 @@ enum class Vedtaksperiodetype(
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.EØS_ENDRET_UTBETALING,
             VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
             VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
             VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
@@ -39,6 +40,7 @@ enum class Vedtaksperiodetype(
             VedtakBegrunnelseType.INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.EØS_ENDRET_UTBETALING,
             VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
             VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
             VedtakBegrunnelseType.EØS_INNVILGET,
@@ -49,6 +51,7 @@ enum class Vedtaksperiodetype(
         setOf(
             VedtakBegrunnelseType.OPPHØR,
             VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.EØS_ENDRET_UTBETALING,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
             VedtakBegrunnelseType.EØS_OPPHØR,
