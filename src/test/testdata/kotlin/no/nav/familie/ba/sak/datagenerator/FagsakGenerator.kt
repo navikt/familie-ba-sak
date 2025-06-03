@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 
 fun defaultFagsak(aktør: Aktør = tilAktør(randomFnr())) =
     Fagsak(
@@ -40,6 +41,7 @@ fun lagFagsakUtenId(
     status: FagsakStatus = FagsakStatus.OPPRETTET,
     type: FagsakType = FagsakType.NORMAL,
     arkivert: Boolean = false,
+    skjermetBarnSøker: SkjermetBarnSøker? = null,
 ) = Fagsak(
     id = 0,
     aktør = aktør,
@@ -47,4 +49,5 @@ fun lagFagsakUtenId(
     status = status,
     type = type,
     arkivert = arkivert,
+    skjermetBarnSøker = skjermetBarnSøker,
 )

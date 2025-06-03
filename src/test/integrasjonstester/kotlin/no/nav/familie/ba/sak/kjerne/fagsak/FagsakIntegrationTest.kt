@@ -14,7 +14,10 @@ class FagsakIntegrationTest(
     @Test
     fun `hentMinimalFagsakerForPerson() skal return begge fagsaker for en person`() {
         val personFnr = randomFnr()
-        val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
+        val fagsakOmsorgperson =
+            fagsakService.hentEllerOpprettFagsak(
+                personFnr,
+            )
         val fagsakInstitusjon =
             fagsakService.hentEllerOpprettFagsak(
                 personFnr,
@@ -23,7 +26,11 @@ class FagsakIntegrationTest(
                 RestInstitusjon("orgnr", null),
             )
         val fagsakEnsligMindreÅrig =
-            fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
+            fagsakService.hentEllerOpprettFagsak(
+                personFnr,
+                false,
+                FagsakType.BARN_ENSLIG_MINDREÅRIG,
+            )
 
         val minimalFagsakList = fagsakService.hentMinimalFagsakerForPerson(fagsakOmsorgperson.aktør)
 
@@ -36,7 +43,10 @@ class FagsakIntegrationTest(
     @Test
     fun `hentMinimalFagsakForPerson() skal return riktig fagsak for en person`() {
         val personFnr = randomFnr()
-        val fagsakOmsorgperson = fagsakService.hentEllerOpprettFagsak(personFnr)
+        val fagsakOmsorgperson =
+            fagsakService.hentEllerOpprettFagsak(
+                personFnr,
+            )
         val fagsakInstitusjon =
             fagsakService.hentEllerOpprettFagsak(
                 personFnr,
@@ -45,7 +55,11 @@ class FagsakIntegrationTest(
                 RestInstitusjon("orgnr", null),
             )
         val fagsakEnsligMindreÅrig =
-            fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
+            fagsakService.hentEllerOpprettFagsak(
+                personFnr,
+                false,
+                FagsakType.BARN_ENSLIG_MINDREÅRIG,
+            )
 
         val defaultMinimalFagsak = fagsakService.hentMinimalFagsakForPerson(fagsakOmsorgperson.aktør)
         assertThat(defaultMinimalFagsak.data!!.id).isEqualTo(fagsakOmsorgperson.id)
