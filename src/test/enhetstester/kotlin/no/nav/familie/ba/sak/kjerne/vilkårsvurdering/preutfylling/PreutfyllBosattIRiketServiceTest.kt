@@ -263,4 +263,31 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
         assertThat(oppfyltPeriode?.periodeTom).`as`("Oppfylt periode tom").isEqualTo(LocalDate.now().minusMonths(5))
     }
+
+    @Test
+    fun `skal oppfylle vilkår hvis barn er født i Norge og er bosatt i Norge i mindre enn 12 mnd`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(1)
+        val barnsVilkårResultat = vilkårResultat.find { it.personResultat?.id == personResultat.id }
+        assertThat(barnsVilkårResultat?.resultat).isEqualTo(Resultat.OPPFYLT)
+    }
 }
