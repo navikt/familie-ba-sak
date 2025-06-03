@@ -281,13 +281,14 @@ class FagsakService(
     }
 
     private fun hentSøkersFødselsnummer(fagsak: Fagsak): String {
-        val aktør = if (fagsak.type == FagsakType.SKJERMET_BARN) {
-            personidentService.hentAktør(
-                fagsak.skjermetBarnSøker?.aktørId ?: throw Feil("Søker er ikke lagret på fagsaken")
-            )
-        } else {
-            fagsak.aktør
-        }
+        val aktør =
+            if (fagsak.type == FagsakType.SKJERMET_BARN) {
+                personidentService.hentAktør(
+                    fagsak.skjermetBarnSøker?.aktørId ?: throw Feil("Søker er ikke lagret på fagsaken"),
+                )
+            } else {
+                fagsak.aktør
+            }
         return aktør.aktivFødselsnummer()
     }
 
