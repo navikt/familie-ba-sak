@@ -196,6 +196,66 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
+    fun `skal sjekke at en endret periode ikke strekker seg utover ytterpunktene for tilkjent ytelse for flere barn`() {
+        val barn1 = tilfeldigPerson()
+        val barn2 = tilfeldigPerson()
+
+        val andelTilkjentYtelser =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2020, 2),
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 2),
+                    tom = YearMonth.of(2020, 3),
+                    person = barn2,
+                ),
+            )
+
+        val gyldigEndretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                personer = mutableSetOf(barn1, barn2),
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 2),
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                begrunnelse = "Allerede utbetalt",
+                prosent = BigDecimal.ZERO,
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        assertDoesNotThrow {
+            validerPeriodeInnenforTilkjentytelse(gyldigEndretUtbetalingAndel, andelTilkjentYtelser)
+        }
+
+        val endretUtbetalingAndelSomErUgyldigForBarn1 =
+            gyldigEndretUtbetalingAndel.copy(
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 3),
+            )
+
+        assertThrows<FunksjonellFeil> {
+            validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndelSomErUgyldigForBarn1, andelTilkjentYtelser)
+        }.also {
+            assertThat(it.melding).isEqualTo("Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.")
+        }
+
+        val endretUtbetalingAndelSomErUgyldigForBarn2 =
+            gyldigEndretUtbetalingAndel.copy(
+                fom = YearMonth.of(2020, 1),
+                tom = YearMonth.of(2020, 2),
+            )
+
+        assertThrows<FunksjonellFeil> {
+            validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndelSomErUgyldigForBarn2, andelTilkjentYtelser)
+        }.also {
+            assertThat(it.melding).isEqualTo("Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.")
+        }
+    }
+
+    @Test
     fun `Skal kaste feil hvis endringsperiode med årsak delt bosted ikke overlapper helt med delt bosted periode`() {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
