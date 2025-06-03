@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -211,6 +212,44 @@ internal class BehandlingsresultatValideringUtilsTest {
             BehandlingsresultatValideringUtils.validerSatsErUendret(
                 andelerForrigeBehandling = listOf(originalAndel),
                 andelerDenneBehandlingen = listOf(originalAndel),
+            )
+        }
+    }
+
+    @Test
+    fun `validerSatsErUendret - Skal ikke kaste feil dersom sats endrer seg hvis kalkulertUtbetalingsbeløp er 0`() {
+        val person = tilfeldigPerson()
+        val originalAndel =
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2019, 1),
+                tom = YearMonth.of(2019, 4),
+                sats = 970,
+                kalkulertUtbetalingsbeløp = 0,
+                person = person,
+            )
+
+        val nyeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2019, 1),
+                    tom = YearMonth.of(2019, 2),
+                    sats = 970,
+                    kalkulertUtbetalingsbeløp = 0,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2019, 3),
+                    tom = YearMonth.of(2019, 4),
+                    sats = 1054,
+                    kalkulertUtbetalingsbeløp = 0,
+                    person = person,
+                ),
+            )
+
+        assertDoesNotThrow {
+            BehandlingsresultatValideringUtils.validerSatsErUendret(
+                andelerForrigeBehandling = listOf(originalAndel),
+                andelerDenneBehandlingen = nyeAndeler,
             )
         }
     }

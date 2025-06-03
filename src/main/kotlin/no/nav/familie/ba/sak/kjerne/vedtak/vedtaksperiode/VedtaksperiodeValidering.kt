@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import org.slf4j.Logger
@@ -57,9 +56,9 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnEndretUtbetalingb
     fagsakId: Long,
 ) {
     val erMuligÅVelgeEndretUtbetalingBegrunnelse =
-        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
+        this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType.erEndretUtbetaling() }
     val erValgtEndretUtbetalingBegrunnelse =
-        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
+        this.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType.erEndretUtbetaling() }
 
     if (erMuligÅVelgeEndretUtbetalingBegrunnelse && !erValgtEndretUtbetalingBegrunnelse) {
         logger.info("Vedtaksperioden ${this.fom?.tilKortString() ?: ""} - ${this.tom?.tilKortString() ?: ""} mangler endretubetalingsbegrunnelse. Fagsak: $fagsakId, behandling: $behandlingId")

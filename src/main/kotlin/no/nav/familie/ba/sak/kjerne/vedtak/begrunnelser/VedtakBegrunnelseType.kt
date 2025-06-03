@@ -18,8 +18,9 @@ enum class VedtakBegrunnelseType(
     FORTSATT_INNVILGET(5),
     EØS_FORTSATT_INNVILGET(5),
     INSTITUSJON_FORTSATT_INNVILGET(5),
-    ENDRET_UTBETALING(7),
     ETTER_ENDRET_UTBETALING(6),
+    ENDRET_UTBETALING(7),
+    EØS_ENDRET_UTBETALING(7),
     ;
 
     fun erInnvilget(): Boolean = this == INNVILGET || this == INSTITUSJON_INNVILGET
@@ -27,4 +28,6 @@ enum class VedtakBegrunnelseType(
     fun erReduksjon(): Boolean = this == REDUKSJON || this == INSTITUSJON_REDUKSJON
 
     fun erAvslag(): Boolean = this == AVSLAG || this == INSTITUSJON_AVSLAG || this == EØS_AVSLAG
+
+    fun erEndretUtbetaling() = this == ENDRET_UTBETALING || this == EØS_ENDRET_UTBETALING
 }
