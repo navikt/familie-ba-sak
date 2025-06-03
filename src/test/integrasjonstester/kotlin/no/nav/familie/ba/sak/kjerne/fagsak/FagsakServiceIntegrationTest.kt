@@ -739,7 +739,7 @@ class FagsakServiceIntegrationTest(
                 fraAutomatiskBehandling = true,
             )
         }.also {
-            assertThat(it.melding).isEqualTo("Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.")
+            assertThat(it.melding).isEqualTo("Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk")
         }
     }
 
