@@ -712,6 +712,7 @@ class FagsakServiceIntegrationTest(
     @Test
     fun `Skal opprette fagsak for skjermet barn som ikke er automatisk behandling`() {
         // Arrange
+        System.setProperty("mockFeatureToggleAnswer", "true")
         val barn = lagPerson(type = PersonType.BARN)
 
         // Act

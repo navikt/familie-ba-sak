@@ -80,6 +80,7 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsak?.aktør?.aktivFødselsnummer())
         assertEquals(FagsakType.NORMAL, fagsak?.type)
         assertNull(fagsak?.institusjon)
+        assertNull(fagsak?.skjermetBarnSøker)
     }
 
     @Test
@@ -96,6 +97,7 @@ class FagsakControllerTest(
         assertThat(fnr).isEqualTo(fagsak?.aktør?.aktivFødselsnummer())
         assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)
         assertThat(fagsak?.skjermetBarnSøker).isNotNull
+        assertThat(fagsak?.institusjon).isNull()
     }
 
     @Test
