@@ -109,12 +109,14 @@ class PreutfyllBosattIRiketService(
     private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
-        val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
+        val søknad =
+            søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
+                ?: return false
         val planleggerÅBoNeste12Mnd =
             if (personResultat.erSøkersResultater()) {
-                søknad?.søker?.planleggerÅBoINorge12Mnd
+                søknad.søker.planleggerÅBoINorge12Mnd
             } else {
-                søknad?.barn?.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd
+                søknad.barn.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd
             }
         return planleggerÅBoNeste12Mnd == true
     }
@@ -138,7 +140,7 @@ class PreutfyllBosattIRiketService(
     private fun lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
         val statsborgerskapGruppertPåLand =
             pdlRestClient
-                .hentStatsborgerskapMedHistorikk(personResultat.aktør)
+                .hentStatsborgerskap(personResultat.aktør, historikk = true)
                 .groupBy { it.land }
 
         return statsborgerskapGruppertPåLand.values

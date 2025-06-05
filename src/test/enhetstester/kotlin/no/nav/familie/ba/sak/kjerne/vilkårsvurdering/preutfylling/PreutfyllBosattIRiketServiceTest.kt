@@ -252,7 +252,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
 
-        every { pdlRestClient.hentStatsborgerskapMedHistorikk(any()) } returns
+        every { pdlRestClient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
@@ -305,7 +305,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
 
-        every { pdlRestClient.hentStatsborgerskapMedHistorikk(any()) } returns
+        every { pdlRestClient.hentStatsborgerskap(any(), historikk = true) } returns
             listOf(
                 Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
                 Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(1), gyldigTilOgMed = null, bekreftelsesdato = null),

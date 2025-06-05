@@ -151,31 +151,13 @@ class PdlRestClient(
         }
     }
 
-    fun hentStatsborgerskapMedHistorikk(aktør: Aktør): List<Statsborgerskap> {
+    fun hentStatsborgerskap(
+        aktør: Aktør,
+        historikk: Boolean = false,
+    ): List<Statsborgerskap> {
         val pdlPersonRequest =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-                query = hentGraphqlQuery("statsborgerskap-med-historikk"),
-            )
-        val pdlResponse: PdlBaseResponse<PdlStatsborgerskapResponse> =
-            kallEksternTjeneste(
-                tjeneste = "pdl",
-                uri = pdlUri,
-                formål = "Hent statsborgerskap uten historikk",
-            ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
-
-        return feilsjekkOgReturnerData(
-            ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse,
-        ) {
-            it.person!!.statsborgerskap
-        }
-    }
-
-    fun hentStatsborgerskapUtenHistorikk(aktør: Aktør): List<Statsborgerskap> {
-        val pdlPersonRequest =
-            PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer(), historikk = historikk),
                 query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
             )
         val pdlResponse: PdlBaseResponse<PdlStatsborgerskapResponse> =

@@ -35,7 +35,10 @@ class MockPdlRestClient(
             ),
         )
 
-    override fun hentStatsborgerskapMedHistorikk(aktør: Aktør): List<Statsborgerskap> =
+    override fun hentStatsborgerskap(
+        aktør: Aktør,
+        historikk: Boolean,
+    ): List<Statsborgerskap> =
         listOf(
             Statsborgerskap(
                 land = "NOR",
