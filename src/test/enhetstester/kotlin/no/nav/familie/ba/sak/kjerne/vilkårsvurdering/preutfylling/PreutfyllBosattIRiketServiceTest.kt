@@ -60,7 +60,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(4))
 
         // Assert
         assertThat(vilkårResultat).hasSize(3)
@@ -168,7 +168,7 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
 
         // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusMonths(2))
 
         // Assert
         assertThat(vilkårResultat.singleOrNull()?.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -226,9 +226,16 @@ class PreutfyllBosattIRiketServiceTest {
     fun `skal gi oppfylt på 12 måneders krav for nordiske statsborgere`() {
         // Arrange
         val behandling = lagBehandling()
-        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+            )
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
-        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
             listOf(
@@ -245,13 +252,13 @@ class PreutfyllBosattIRiketServiceTest {
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
 
-        every { pdlRestClient.hentStatsborgerskapUtenHistorikk(any()) } returns
+        every { pdlRestClient.hentStatsborgerskapMedHistorikk(any()) } returns
             listOf(
                 Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
             )
 
         // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusMonths(12))
 
         // Assert
         val ikkeOppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }
@@ -259,9 +266,65 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(ikkeOppfyltPeriode?.periodeFom).`as`("Ikke oppfylt periode fom").isEqualTo(LocalDate.now().minusMonths(5).plusDays(1))
         assertThat(ikkeOppfyltPeriode?.periodeTom).`as`("Ikke oppfylt periode tom").isEqualTo(LocalDate.now().minusMonths(1).minusDays(1))
 
-        val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT && it.periodeFom == LocalDate.now().minusMonths(12) }
+        val oppfyltPeriode1 = vilkårResultat.find { it.periodeFom == LocalDate.now().minusMonths(12) }
+        assertThat(oppfyltPeriode1?.resultat).`as`("Forventer OPPFYLT periode for 12 måneder siden").isEqualTo(Resultat.OPPFYLT)
+        assertThat(oppfyltPeriode1?.periodeTom).`as`("Oppfylt periode for 12 måneder siden tom").isEqualTo(LocalDate.now().minusMonths(5))
+
+        val oppfyltPeriode2 = vilkårResultat.find { it.periodeFom == LocalDate.now().minusMonths(1) }
+        assertThat(oppfyltPeriode2?.resultat).`as`("Forventer OPPFYLT periode for 1 måned siden").isEqualTo(Resultat.OPPFYLT)
+        assertThat(oppfyltPeriode2?.periodeTom).`as`("Oppfylt periode for 1 måned siden tom").isNull()
+    }
+
+    @Test
+    fun `skal gi oppfylt på 12 måneders krav for nordiske statsborgere selv hvis det er dobbelt statsborgerskap`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+            )
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusYears(5),
+                    gyldigTilOgMed = LocalDate.now().minusYears(4).minusMonths(2),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
+
+        every { pdlRestClient.hentStatsborgerskapMedHistorikk(any()) } returns
+            listOf(
+                Statsborgerskap(land = "DNK", gyldigFraOgMed = LocalDate.now().minusYears(3), gyldigTilOgMed = null, bekreftelsesdato = null),
+                Statsborgerskap(land = "NOR", gyldigFraOgMed = LocalDate.now().minusYears(1), gyldigTilOgMed = null, bekreftelsesdato = null),
+                Statsborgerskap(land = "AUT", gyldigFraOgMed = LocalDate.now().minusYears(5), gyldigTilOgMed = LocalDate.now().minusYears(1), bekreftelsesdato = null),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(5))
+
+        // Assert
+        val ikkeOppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(ikkeOppfyltPeriode).`as`("Forventer én IKKE_OPPFYLT periode").isNotNull
+        assertThat(ikkeOppfyltPeriode?.periodeFom).`as`("Ikke oppfylt periode fom").isEqualTo(LocalDate.now().minusYears(5))
+        assertThat(ikkeOppfyltPeriode?.periodeTom).`as`("Ikke oppfylt periode tom").isEqualTo(LocalDate.now().minusYears(1).minusDays(1))
+
+        val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT }
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
-        assertThat(oppfyltPeriode?.periodeTom).`as`("Oppfylt periode tom").isEqualTo(LocalDate.now().minusMonths(5))
+        assertThat(oppfyltPeriode?.periodeFom).`as`("Oppfylt periode fom").isEqualTo(LocalDate.now().minusYears(1))
+        assertThat(oppfyltPeriode?.periodeTom).`as`("Oppfylt periode tom").isNull()
     }
 
     @Test
@@ -283,7 +346,7 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusMonths(2))
 
         // Assert
         assertThat(vilkårResultat).hasSize(1)
