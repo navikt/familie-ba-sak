@@ -290,7 +290,7 @@ class FagsakServiceTest {
             every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
             every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
             every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
-            every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør.aktørId) } returns mockk()
+            every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør) } returns mockk()
 
             // Act && Assert
             val frontendFeilmelding =
