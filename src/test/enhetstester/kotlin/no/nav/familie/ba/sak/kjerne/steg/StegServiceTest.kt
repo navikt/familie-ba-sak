@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
@@ -18,13 +19,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -45,10 +46,11 @@ class StegServiceTest {
     private val satskjøringRepository: SatskjøringRepository = mockk()
     private val unleashService: UnleashNextMedContextService = mockk()
     private val tilgangService: TilgangService = mockk()
+    private val mocketRegistrerPersongrunnlag: RegistrerPersongrunnlag = mockk<RegistrerPersongrunnlag>(relaxed = true)
 
     private val stegService =
         StegService(
-            steg = listOf(mockRegistrerPersongrunnlag()),
+            steg = listOf(mocketRegistrerPersongrunnlag),
             fagsakService = mockk(),
             behandlingService = behandlingService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -112,6 +114,8 @@ class StegServiceTest {
             every { behandlingService.erLøpende(forrigeBehandling) } returns false
             every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
             every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketRegistrerPersongrunnlag.utførStegOgAngiNeste(opprettetBehandling, any()) } returns StegType.VILKÅRSVURDERING
 
             // Act
             val håndtertNyBehandling = stegService.håndterNyBehandling(nyBehandling)
@@ -136,6 +140,58 @@ class StegServiceTest {
             assertThat(håndtertNyBehandling.endretTidspunkt).isNotNull()
             assertThat(håndtertNyBehandling.versjon).isEqualTo(0L)
             assertThat(håndtertNyBehandling.steg).isEqualTo(StegType.REGISTRERE_PERSONGRUNNLAG)
+        }
+
+        @Test
+        fun `Skal sende inn fagsak aktør som barnas ident dersom fagsak type er SKJERMET_BARN`() {
+            // Arrange
+            val barn = randomAktør()
+
+            val forrigeBehandling = lagBehandling()
+            val registrerPersongrunnlagDtoSlot = slot<RegistrerPersongrunnlagDTO>()
+
+            val nyBehandling =
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    søkersIdent = barn.aktivFødselsnummer(),
+                    barnasIdenter = emptyList(),
+                    nyMigreringsdato = LocalDate.now().minusMonths(6),
+                    fagsakId = 1L,
+                )
+
+            val opprettetBehandling =
+                lagBehandling(
+                    fagsak =
+                        lagFagsak(
+                            id = nyBehandling.fagsakId,
+                            aktør = barn,
+                            type = FagsakType.SKJERMET_BARN,
+                        ),
+                    behandlingKategori = nyBehandling.kategori!!,
+                    underkategori = nyBehandling.underkategori!!,
+                    behandlingType = nyBehandling.behandlingType,
+                    årsak = nyBehandling.behandlingÅrsak,
+                )
+
+            every { behandlingHentOgPersisterService.hent(opprettetBehandling.id) } returns opprettetBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
+            every { behandlingService.erLøpende(forrigeBehandling) } returns false
+            every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
+            every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
+            every { mocketRegistrerPersongrunnlag.utførStegOgAngiNeste(opprettetBehandling, capture(registrerPersongrunnlagDtoSlot)) } returns StegType.VILKÅRSVURDERING
+
+            // Act
+            stegService.håndterNyBehandling(nyBehandling)
+
+            // Assert
+            val registrerPersongrunnlagDTO = registrerPersongrunnlagDtoSlot.captured
+
+            assertThat(registrerPersongrunnlagDTO.barnasIdenter.size).isEqualTo(1)
+            assertThat(registrerPersongrunnlagDTO.barnasIdenter.single()).isEqualTo(barn.aktivFødselsnummer())
         }
 
         @Test
@@ -236,28 +292,15 @@ class StegServiceTest {
     inner class HåndterPersongrunnlagTest {
         @Test
         fun `skal feile dersom behandlingen er satt på vent`() {
-            // Arange
+            // Arrange
             val behandling = lagBehandling(status = BehandlingStatus.SATT_PÅ_VENT)
             val grunnlag = RegistrerPersongrunnlagDTO("123", emptyList())
+
+            every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
 
             // Act & assert
             val exception = assertThrows<FunksjonellFeil> { stegService.håndterPersongrunnlag(behandling, grunnlag) }
             assertThat(exception.message).isEqualTo("System prøver å utføre steg REGISTRERE_PERSONGRUNNLAG på behandling ${behandling.id} som er på vent.")
         }
     }
-
-    private fun mockRegistrerPersongrunnlag() =
-        object : RegistrerPersongrunnlag(
-            behandlingHentOgPersisterService = mockk(),
-            vilkårsvurderingForNyBehandlingService = mockk(),
-            personopplysningGrunnlagForNyBehandlingService = mockk(),
-            eøsSkjemaerForNyBehandlingService = mockk(),
-        ) {
-            override fun utførStegOgAngiNeste(
-                behandling: Behandling,
-                data: RegistrerPersongrunnlagDTO,
-            ): StegType = StegType.VILKÅRSVURDERING
-
-            override fun stegType(): StegType = StegType.REGISTRERE_PERSONGRUNNLAG
-        }
 }

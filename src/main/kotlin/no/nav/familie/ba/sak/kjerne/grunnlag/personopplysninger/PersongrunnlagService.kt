@@ -227,9 +227,8 @@ class PersongrunnlagService(
                 målform = målform,
                 personType =
                     when (behandling.fagsak.type) {
-                        NORMAL -> PersonType.SØKER
+                        NORMAL, SKJERMET_BARN -> PersonType.SØKER
                         BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
-                        SKJERMET_BARN -> TODO("NAV-25256 Ikke implementert enda")
                     },
                 skalHenteEnkelPersonInfo = skalHenteEnkelPersonInfo,
                 hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
