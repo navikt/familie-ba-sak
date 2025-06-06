@@ -46,8 +46,5 @@ enum class FeatureToggle(
     // NAV-24658
     SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK("familie-ba-sak.sett-relatert-behandling-for-revurdering-klage-i-saksstatistikk"),
 
-    // NAV-24917
-    BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK("familie-ba-sak.bruk-oppdatert-logikk-for-tilpass-kompetanser-til-regelverk"),
-
     SKAL_BRUKE_NY_DIFFERANSEBEREGNING("familie-ba-sak.skal-bruke-ny-differanseberegning"),
 }
