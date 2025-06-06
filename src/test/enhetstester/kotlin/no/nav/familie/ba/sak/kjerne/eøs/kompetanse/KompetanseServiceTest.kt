@@ -52,7 +52,6 @@ internal class KompetanseServiceTest {
     val unleashServiceMock: UnleashNextMedContextService = mockk()
     val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, unleashServiceMock)
     val clockProvider = TestClockProvider()
-    val unleashNextMedContextService: UnleashNextMedContextService = mockk()
 
     val kompetanseService =
         KompetanseService(
@@ -68,7 +67,6 @@ internal class KompetanseServiceTest {
             kompetanseRepository = mockKompetanseRepository,
             endringsabonnenter = emptyList(),
             clockProvider = clockProvider,
-            unleashNextMedContextService = unleashNextMedContextService,
         )
 
     @BeforeEach
@@ -314,7 +312,6 @@ internal class KompetanseServiceTest {
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
         every { utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false) } returns true
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -378,7 +375,6 @@ internal class KompetanseServiceTest {
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
         every { utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false) } returns true
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
@@ -437,7 +433,6 @@ internal class KompetanseServiceTest {
         every { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId.id) } returns emptyList()
         every { utbetalingTidslinjeService.hentEndredeUtbetalingsPerioderSomKreverKompetanseTidslinjer(behandlingId, emptyList()) } returns emptyMap()
         every { andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id) } returns tilkjentYtelse.andelerTilkjentYtelse.toList().map { AndelTilkjentYtelseMedEndreteUtbetalinger(it, emptyList()) }
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OPPDATERT_LOGIKK_FOR_TILPASS_KOMPETANSER_TIL_REGELVERK, false) } returns true
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId)
 
