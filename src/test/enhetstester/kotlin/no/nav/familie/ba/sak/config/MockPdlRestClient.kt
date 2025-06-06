@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
@@ -30,6 +32,19 @@ class MockPdlRestClient(
                 vegadresse = null,
                 matrikkeladresse = lagMatrikkeladresse(1234L),
                 ukjentBosted = null,
+            ),
+        )
+
+    override fun hentStatsborgerskap(
+        aktør: Aktør,
+        historikk: Boolean,
+    ): List<Statsborgerskap> =
+        listOf(
+            Statsborgerskap(
+                land = "NOR",
+                gyldigFraOgMed = LocalDate.now(),
+                gyldigTilOgMed = null,
+                bekreftelsesdato = null,
             ),
         )
 }

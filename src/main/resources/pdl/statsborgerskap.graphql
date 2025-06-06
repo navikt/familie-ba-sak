@@ -1,6 +1,6 @@
-query($ident: ID!) {
+query($ident: ID!, $historikk: Boolean!) {
     person: hentPerson(ident: $ident) {
-        statsborgerskap {
+        statsborgerskap(historikk: $historikk) {
             bekreftelsesdato
             land
             gyldigFraOgMed
