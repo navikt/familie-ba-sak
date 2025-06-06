@@ -6,7 +6,11 @@ data class RestInstitusjon(
     val orgNummer: String?,
     val tssEksternId: String?,
     val navn: String? = null,
-)
+) {
+    fun valider() {
+        // TODO : Valider at man har et gyldig orgnr?
+    }
+}
 
 data class RestRegistrerInstitusjon(
     val orgNummer: String,

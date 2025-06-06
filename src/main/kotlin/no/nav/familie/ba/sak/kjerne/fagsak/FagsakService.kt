@@ -208,13 +208,7 @@ class FagsakService(
         fagsakTyper: List<FagsakType> = FagsakType.values().toList(),
     ): Ressurs<List<RestMinimalFagsak>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
-        return if (!fagsaker.isEmpty()) {
-            Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
-        } else {
-            Ressurs.failure(
-                errorMessage = "Fant ikke fagsaker på person",
-            )
-        }
+        return Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
