@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>3.5.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -23,20 +23,20 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250519094842_e8bd711</prosessering.version>
-        <felles.version>3.20250505101905_835431d</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20250422132745_dfaa902</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250520105353_6584047</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20250422132745_dfaa902</familie.kontrakter.stønadsstatistikk>
+        <prosessering.version>2.20250526085951_e212049</prosessering.version>
+        <felles.version>3.20250602160953_48db326</felles.version>
+        <eksterne-kontrakter-bisys.version>2.0_20250602102519_b7debdf</eksterne-kontrakter-bisys.version>
+        <felles-kontrakter.version>3.0_20250602111633_e3dbc75</felles-kontrakter.version>
+        <familie.kontrakter.saksstatistikk>2.0_20250602102519_b7debdf</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20250602102519_b7debdf</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
-        <cucumber.version>7.22.2</cucumber.version>
+        <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.2</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
-        <token-validation-spring.version>5.0.27</token-validation-spring.version>
+        <token-validation-spring.version>5.0.29</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.8</springdoc.version>
-        <sentry.version>8.12.0</sentry.version>
+        <sentry.version>8.13.2</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.1</kotlinx-kover.version>
 
@@ -47,9 +47,9 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.21.0</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.21.1</testcontainers.postgresql.version>
         <unleash.version>10.2.2</unleash.version>
-        <testcontainers.postgresql.version>1.21.0</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.21.1</testcontainers.postgresql.version>
         <maven.model.version>3.9.9</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
@@ -69,7 +69,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.4.5</version>
+                <version>3.5.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.5</version>
+            <version>42.7.6</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -410,7 +410,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <version>4.2.1</version>
+            <version>4.3.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -484,7 +484,7 @@
                         <dependency>
                             <groupId>com.pinterest.ktlint</groupId>
                             <artifactId>ktlint-cli</artifactId>
-                            <version>1.5.0</version>
+                            <version>1.6.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>

@@ -326,6 +326,22 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
         override val sanityApiNavn = "innvilgetPrimarlandAleneforelderOppholdAnnetEosLandNorgeLovvalg"
     },
+    INNVILGET_TILLEGGSTEKST_SEKUNDÆR_FÅR_IKKE_BA_I_ANNET_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstSekundarFaarIkkeBaIAnnetLand"
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_SEKUNDÆR_FÅR_IKKE_BA_I_ANNET_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundarFaarIkkeBaIAnnetLand"
+    },
+    INNVILGET_TILLEGGSTEKST_SEKUNDÆR_INFO_OM_MULIG_REFUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstSekundarInfoOmMuligRefusjon"
+    },
+    INNVILGET_SELVSTENDIG_RETT_TILLEGGSTEKST_SEKUNDÆR_INFO_OM_MULIG_REFUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+        override val sanityApiNavn = "innvilgetSelvstendigRettTilleggstekstSekundarInfoOmMuligRefusjon"
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -754,7 +770,16 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_SENTRUM_FOR_LIVSINTERESSE_SÆRKULLSBARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
         override val sanityApiNavn = "reduksjonSentrumForLivsinteresseSaerkullsbarn"
-    }, ;
+    },
+    ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS_INGEN_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingUtvidetEosIngenUtbetaling"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_UTVIDET_SELVSTENDIG_RETT_EØS_INGEN_UTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingUtvidetSelvstendigRettEosIngenUtbetaling"
+    },
+    ;
 
     override val kanDelesOpp: Boolean = false
 

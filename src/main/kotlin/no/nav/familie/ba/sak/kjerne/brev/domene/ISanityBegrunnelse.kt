@@ -27,6 +27,11 @@ sealed interface ISanityBegrunnelse {
     val øvrigeTriggere: List<ØvrigTrigger>
     val ikkeIBruk: Boolean
     val støtterFritekst: Boolean
+    val endringsaarsaker: List<Årsak>
+    val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere?
+    val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>
+
+    fun gjelderEtterEndretUtbetaling() = this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
 
     val gjelderEtterEndretUtbetaling
         get() =
@@ -63,15 +68,13 @@ data class SanityBegrunnelse(
     override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     override val ikkeIBruk: Boolean = false,
     override val støtterFritekst: Boolean = false,
+    override val endringsaarsaker: List<Årsak> = emptyList(),
+    override val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
+    override val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     val rolle: List<VilkårRolle> = emptyList(),
     val hjemler: List<String> = emptyList(),
     val hjemlerFolketrygdloven: List<String> = emptyList(),
-    val endringsaarsaker: List<Årsak> = emptyList(),
-    val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
-    val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
-) : ISanityBegrunnelse {
-    fun gjelderEtterEndretUtbetaling() = this.endretUtbetalingsperiodeTriggere.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE)
-}
+) : ISanityBegrunnelse
 
 enum class ØvrigTrigger {
     MANGLER_OPPLYSNINGER,
@@ -100,6 +103,9 @@ data class SanityEØSBegrunnelse(
     override val øvrigeTriggere: List<ØvrigTrigger> = emptyList(),
     override val ikkeIBruk: Boolean = false,
     override val støtterFritekst: Boolean = false,
+    override val endringsaarsaker: List<Årsak> = emptyList(),
+    override val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
+    override val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger> = emptyList(),
     val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,

@@ -1,10 +1,9 @@
+package no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent
+
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentBarnasFødselsdatoerForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.hentSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -38,17 +37,29 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
         when (sanityBegrunnelse.periodeResultat) {
             SanityPeriodeResultat.INNVILGET_ELLER_ØKNING,
             SanityPeriodeResultat.INGEN_ENDRING,
-            -> periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.dennePerioden.kompetanse }
+            ->
+                hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
+                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+                )
 
             SanityPeriodeResultat.IKKE_INNVILGET,
             SanityPeriodeResultat.REDUKSJON,
-            -> {
-                if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
-                    begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse }
-                } else {
-                    periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
-                }
-            }
+            ->
+                hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
+                    begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
+                    begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+                )
+
+            SanityPeriodeResultat.IKKE_RELEVANT ->
+                hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(
+                    periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+                ) +
+                    hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
+                        begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling = begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling,
+                        begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                        periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
+                    )
 
             else -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
         }
@@ -107,6 +118,18 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
         }
     }
 }
+
+private fun hentRelevanteKompetanserVedIkkeInnvilgetEllerReduksjon(
+    begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling: Boolean,
+    begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+    periodegrunnlagForPersonerIBegrunnelse: Map<Person, IBegrunnelseGrunnlagForPeriode>,
+) = if (begrunnelseGjelderSøkerOgOpphørFraForrigeBehandling) {
+    begrunnelsesGrunnlagPerPerson.values.mapNotNull { it.sammePeriodeForrigeBehandling?.kompetanse }
+} else {
+    periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.forrigePeriode?.kompetanse }
+}
+
+private fun hentRelevanteKompetanserVedInnvilgetEllerIngenEndring(periodegrunnlagForPersonerIBegrunnelse: Map<Person, IBegrunnelseGrunnlagForPeriode>) = periodegrunnlagForPersonerIBegrunnelse.values.mapNotNull { it.dennePerioden.kompetanse }
 
 data class Landkode(
     val kode: String,

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -252,6 +253,7 @@ data class FagsakRequest(
     val personIdent: String,
     val fagsakType: FagsakType? = FagsakType.NORMAL,
     val institusjon: RestInstitusjon? = null,
+    val skjermetBarnSøker: RestSkjermetBarnSøker? = null,
 ) {
     // Bruker init til å validere personidenten
     init {

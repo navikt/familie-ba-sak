@@ -103,13 +103,13 @@ class BehandlingsresultatSteg(
 
         if (behandling.erMånedligValutajustering()) {
             BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
-                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                andelerForrigeBehandling = andelerForrigeBehandling.toList(),
+                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,
+                andelerForrigeBehandling = andelerForrigeBehandling,
                 nåMåned = localDateProvider.now().toYearMonth(),
             )
             BehandlingsresultatValideringUtils.validerSatsErUendret(
-                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                andelerForrigeBehandling = andelerForrigeBehandling.toList(),
+                andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,
+                andelerForrigeBehandling = andelerForrigeBehandling,
             )
         }
 

@@ -70,7 +70,10 @@ class VilkårsvurderingTestController(
         val søker = personer.first { it.type == PersonType.SØKER }
         val barn = personer.filter { it.type == PersonType.BARN }
 
-        val fagsak = fagsakService.hentEllerOpprettFagsak(søker.aktør.aktivFødselsnummer())
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsak(
+                søker.aktør.aktivFødselsnummer(),
+            )
 
         val behandling =
             behandlingService.opprettBehandling(

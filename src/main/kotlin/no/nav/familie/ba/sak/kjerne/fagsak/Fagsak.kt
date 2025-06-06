@@ -15,6 +15,7 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import java.util.Objects
 
 @Entity(name = "Fagsak")
@@ -38,6 +39,13 @@ data class Fagsak(
         updatable = true,
     )
     var institusjon: Institusjon? = null,
+    @ManyToOne(optional = true)
+    @JoinColumn(
+        name = "fk_skjermet_barn_soker_id",
+        nullable = true,
+        updatable = true,
+    )
+    var skjermetBarnSøker: SkjermetBarnSøker? = null,
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: FagsakStatus = FagsakStatus.OPPRETTET,
@@ -73,6 +81,7 @@ enum class FagsakType {
     NORMAL,
     BARN_ENSLIG_MINDREÅRIG,
     INSTITUSJON,
+    SKJERMET_BARN,
     ;
 
     fun erBarnSøker() = this == BARN_ENSLIG_MINDREÅRIG || this == INSTITUSJON

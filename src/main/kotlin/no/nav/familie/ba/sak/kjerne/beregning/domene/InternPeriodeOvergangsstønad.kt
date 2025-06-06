@@ -40,8 +40,7 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
     this
         .sortedBy { it.fomDato }
         .fold(mutableListOf()) { sammenslåttePerioder, nestePeriode ->
-            if (sammenslåttePerioder.lastOrNull()?.tomDato?.toYearMonth() == nestePeriode.fomDato.forrigeMåned()
-            ) {
+            if (sammenslåttePerioder.lastOrNull()?.tomDato?.toYearMonth() == nestePeriode.fomDato.forrigeMåned()) {
                 sammenslåttePerioder.apply { add(removeLast().copy(tomDato = nestePeriode.tomDato)) }
             } else {
                 sammenslåttePerioder.apply { add(nestePeriode) }

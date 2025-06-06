@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -38,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import no.nav.familie.unleash.UnleashService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -71,6 +73,8 @@ class FagsakServiceIntegrationTest(
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
     @Autowired
     private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    @Autowired
+    private val unleashService: UnleashService,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
@@ -705,6 +709,41 @@ class FagsakServiceIntegrationTest(
         assertThat(feilmelding).isEqualTo("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
     }
 
+    @Test
+    fun `Skal opprette fagsak for skjermet barn som ikke er automatisk behandling`() {
+        // Arrange
+        System.setProperty("mockFeatureToggleAnswer", "true")
+        val barn = lagPerson(type = PersonType.BARN)
+
+        // Act
+        val opprettetFagsak = opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.SKJERMET_BARN)
+
+        // Assert
+        val skjermetBarnSøker = opprettetFagsak.skjermetBarnSøker
+
+        assertThat(skjermetBarnSøker).isNotNull
+    }
+
+    @Test
+    fun `Skal ikke opprette fagsak for skjermet barn hvis automatisk behandling`() {
+        // Arrange
+        val barn = lagPerson(type = PersonType.BARN)
+
+        System.setProperty("mockFeatureToggleAnswer", "true")
+
+        // Act
+        assertThrows<FunksjonellFeil> {
+            opprettFagsakForPersonMedStatus(
+                personIdent = barn.aktør.aktivFødselsnummer(),
+                fagsakStatus = FagsakStatus.AVSLUTTET,
+                fagsakType = FagsakType.SKJERMET_BARN,
+                fraAutomatiskBehandling = true,
+            )
+        }.also {
+            assertThat(it.melding).isEqualTo("Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk")
+        }
+    }
+
     private data class PeriodeForAktør(
         val fom: YearMonth,
         val tom: YearMonth,
@@ -716,9 +755,18 @@ class FagsakServiceIntegrationTest(
         personIdent: String,
         fagsakStatus: FagsakStatus,
         fagsakType: FagsakType = FagsakType.NORMAL,
+        fraAutomatiskBehandling: Boolean = false,
     ): Fagsak {
         val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent, fagsakType = fagsakType, institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null)
+        val skjermetBarnSøker = RestSkjermetBarnSøker(randomFnr())
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                fødselsnummer = personIdent,
+                fraAutomatiskBehandling = fraAutomatiskBehandling,
+                fagsakType = fagsakType,
+                institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null,
+                skjermetBarnSøker = if (fagsakType == FagsakType.SKJERMET_BARN) skjermetBarnSøker else null,
+            )
         return fagsakService.oppdaterStatus(fagsak, fagsakStatus)
     }
 

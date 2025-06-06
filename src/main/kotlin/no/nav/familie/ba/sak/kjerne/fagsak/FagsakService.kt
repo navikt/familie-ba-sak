@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
+import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
@@ -27,6 +31,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -57,6 +63,8 @@ class FagsakService(
     private val institusjonService: InstitusjonService,
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
@@ -77,9 +85,10 @@ class FagsakService(
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
         val fagsak =
             hentEllerOpprettFagsak(
-                fagsakRequest.personIdent,
+                personIdent = fagsakRequest.personIdent,
                 type = fagsakRequest.fagsakType ?: FagsakType.NORMAL,
                 institusjon = fagsakRequest.institusjon,
+                skjermetBarnSøker = fagsakRequest.skjermetBarnSøker,
             )
         return hentRestMinimalFagsak(fagsakId = fagsak.id)
     }
@@ -90,44 +99,73 @@ class FagsakService(
         fraAutomatiskBehandling: Boolean = false,
         type: FagsakType = FagsakType.NORMAL,
         institusjon: RestInstitusjon? = null,
+        skjermetBarnSøker: RestSkjermetBarnSøker? = null,
     ): Fagsak {
+        if (type == FagsakType.SKJERMET_BARN) {
+            when {
+                !unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) -> {
+                    throw FunksjonellFeil(
+                        melding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
+                        frontendFeilmelding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
+                    )
+                }
+                fraAutomatiskBehandling -> {
+                    throw FunksjonellFeil(
+                        melding = "Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk",
+                        frontendFeilmelding = "Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk",
+                    )
+                }
+            }
+        }
+
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
 
         val eksisterendeFagsak =
             when (type) {
                 FagsakType.INSTITUSJON -> {
-                    if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
-                    val eksisterendeFagsakPåPersonMedSammeOrgnummer = fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
+                    val orgnummer = institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
 
-                    eksisterendeFagsakPåPersonMedSammeOrgnummer?.let {
+                    fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, orgnummer)?.also {
                         throw FunksjonellFeil("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
+                    }
+                }
+
+                FagsakType.SKJERMET_BARN -> {
+                    val søkersIdent = skjermetBarnSøker?.søkersIdent ?: throw FunksjonellFeil("Mangler påkrevd variabel søkersident for skjermet barn søker")
+
+                    if (søkersIdent == personIdent) {
+                        throw FunksjonellFeil("Søker og barn søkt for kan ikke være lik for fagsak type skjermet barn")
+                    }
+
+                    val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent, true)
+
+                    fagsakRepository.finnFagsakForSkjermetBarnSøker(aktør, søkersAktør.aktørId)?.also {
+                        throw FunksjonellFeil("Det finnes allerede en skjermet barn fagsak på dette barnet som er koblet til samme søker.")
                     }
                 }
 
                 else -> fagsakRepository.finnFagsakForAktør(aktør, type)
             }
+        if (eksisterendeFagsak != null) return eksisterendeFagsak
 
-        return if (eksisterendeFagsak == null) {
-            val nyFagsak = Fagsak(aktør = aktør, type = type)
-            if (fraAutomatiskBehandling) {
-                antallFagsakerOpprettetFraAutomatisk.increment()
-            } else {
-                antallFagsakerOpprettetFraManuell.increment()
-            }
+        val nyFagsak = Fagsak(aktør = aktør, type = type)
 
-            if (type == FagsakType.INSTITUSJON) {
-                institusjonService
-                    .hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
-                    .apply {
-                        nyFagsak.institusjon = this
-                    }
-            }
-            val nyOgLagretFagsak = lagre(nyFagsak)
-            skyggesakService.opprettSkyggesak(nyOgLagretFagsak)
-            nyOgLagretFagsak
-        } else {
-            eksisterendeFagsak
+        if (type == FagsakType.INSTITUSJON) {
+            nyFagsak.institusjon = institusjonService.hentEllerOpprettInstitusjon(institusjon!!.orgNummer!!, institusjon.tssEksternId)
         }
+
+        if (type == FagsakType.SKJERMET_BARN) {
+            val søkersAktør = personidentService.hentOgLagreAktør(skjermetBarnSøker!!.søkersIdent, true)
+            nyFagsak.skjermetBarnSøker = skjermetBarnSøkerRepository.findByAktørId(søkersAktør.aktørId) ?: skjermetBarnSøkerRepository.saveAndFlush(SkjermetBarnSøker(aktørId = søkersAktør.aktørId))
+        }
+
+        if (fraAutomatiskBehandling) {
+            antallFagsakerOpprettetFraAutomatisk.increment()
+        } else {
+            antallFagsakerOpprettetFraManuell.increment()
+        }
+
+        return lagre(nyFagsak).also { skyggesakService.opprettSkyggesak(it) }
     }
 
     fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> = personRepository.findFagsakerByAktør(aktør)
@@ -219,7 +257,7 @@ class FagsakService(
         return RestBaseFagsak(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
             id = fagsak.id,
-            søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
+            søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
             status = fagsak.status,
             underBehandling =
                 if (aktivBehandling == null) {
@@ -242,13 +280,26 @@ class FagsakService(
         )
     }
 
+    private fun hentSøkersFødselsnummer(fagsak: Fagsak): String {
+        val aktør =
+            if (fagsak.type == FagsakType.SKJERMET_BARN) {
+                personidentService.hentAktør(
+                    fagsak.skjermetBarnSøker?.aktørId ?: throw Feil("Søker er ikke lagret på fagsaken"),
+                )
+            } else {
+                fagsak.aktør
+            }
+        return aktør.aktivFødselsnummer()
+    }
+
     @Transactional
     fun hentEllerOpprettFagsakForPersonIdent(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,
         fagsakType: FagsakType = FagsakType.NORMAL,
         institusjon: RestInstitusjon? = null,
-    ): Fagsak = hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon)
+        skjermetBarnSøker: RestSkjermetBarnSøker? = null,
+    ): Fagsak = hentEllerOpprettFagsak(fødselsnummer, fraAutomatiskBehandling, fagsakType, institusjon, skjermetBarnSøker)
 
     fun hentNormalFagsak(aktør: Aktør): Fagsak? =
         fagsakRepository.finnFagsakForAktør(
