@@ -9,9 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -49,6 +47,7 @@ class FagsakController(
         @RequestBody fagsakRequest: FagsakRequest,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
+        fagsakRequest.valider()
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(fagsakRequest.personIdent),
             event = AuditLoggerEvent.CREATE,
@@ -246,18 +245,6 @@ class FagsakController(
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)
-    }
-}
-
-data class FagsakRequest(
-    val personIdent: String,
-    val fagsakType: FagsakType? = FagsakType.NORMAL,
-    val institusjon: RestInstitusjon? = null,
-    val skjermetBarnSøker: RestSkjermetBarnSøker? = null,
-) {
-    // Bruker init til å validere personidenten
-    init {
-        Fødselsnummer(personIdent)
     }
 }
 

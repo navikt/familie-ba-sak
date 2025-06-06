@@ -245,8 +245,8 @@ class FagsakControllerTest(
                 )
             }
         val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
-        assert(fagsaker.status == Ressurs.Status.FEILET)
-        assertEquals("Mangler påkrevd variabel orgnummer for institusjon", exception.message)
+        assertThat(fagsaker.data!!).isEmpty()
+        assertThat(exception.message).isEqualTo("Institusjon mangler for fagsaktype institusjon.")
     }
 
     @Test
