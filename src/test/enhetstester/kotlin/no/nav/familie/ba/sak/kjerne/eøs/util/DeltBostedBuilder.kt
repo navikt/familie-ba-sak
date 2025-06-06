@@ -76,11 +76,11 @@ fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAn
         .flatMap { deltBosted ->
             deltBosted.barnPersoner.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                    deltBosted.behandlingId,
-                    it,
-                    deltBosted.fom!!,
-                    deltBosted.tom,
-                    deltBosted.prosent!!,
+                    behandlingId = deltBosted.behandlingId,
+                    personer = setOf(it),
+                    fom = deltBosted.fom!!,
+                    tom = deltBosted.tom,
+                    prosent = deltBosted.prosent!!,
                 )
             }
         }

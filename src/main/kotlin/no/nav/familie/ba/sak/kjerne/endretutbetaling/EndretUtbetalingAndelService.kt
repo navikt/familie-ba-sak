@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -37,10 +38,14 @@ class EndretUtbetalingAndelService(
         restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
-        val person =
+        val personerPåEndretUtbetalingAndel =
+            restEndretUtbetalingAndel.personIdenter
+                ?: restEndretUtbetalingAndel.personIdent?.let { listOf(it) }
+                ?: throw FunksjonellFeil("Endret utbetaling andel må ha minst én person ident")
+
+        val personer =
             persongrunnlagService
-                .hentPersonerPåBehandling(listOf(restEndretUtbetalingAndel.personIdent!!), behandling)
-                .first()
+                .hentPersonerPåBehandling(personerPåEndretUtbetalingAndel, behandling)
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -48,12 +53,13 @@ class EndretUtbetalingAndelService(
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
+        endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, personer.toSet())
 
         val andreEndredeAndelerPåBehandling =
             endretUtbetalingAndelHentOgPersisterService
                 .hentForBehandling(behandling.id)
                 .filter { it.id != endretUtbetalingAndelId }
+                .filterNot { it.manglerObligatoriskFelt() }
 
         val gyldigTomEtterDagensDato =
             beregnGyldigTomIFremtiden(
@@ -144,6 +150,7 @@ class EndretUtbetalingAndelService(
                 it.copy(
                     id = 0,
                     behandlingId = behandling.id,
+                    personer = it.personer.toMutableSet(),
                 ),
             )
         }

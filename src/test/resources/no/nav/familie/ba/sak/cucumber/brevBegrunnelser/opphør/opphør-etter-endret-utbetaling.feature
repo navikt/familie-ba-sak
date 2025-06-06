@@ -98,8 +98,7 @@ Egenskap: Opphør etter endret utbetaling
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak          | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 4       | 1            | 01.05.2024 | 30.11.2036 | ENDRE_MOTTAKER | 0       | 01.01.2024       |                             |
       | 3       | 1            | 01.05.2024 | 31.03.2033 | ENDRE_MOTTAKER | 0       | 01.01.2024       |                             |
-      | 3       | 2            | 01.05.2024 | 30.09.2024 | ENDRE_MOTTAKER | 0       | 01.01.2024       |                             |
-      | 4       | 2            | 01.05.2024 | 30.09.2024 | ENDRE_MOTTAKER | 0       | 01.01.2024       |                             |
+      | 3, 4    | 2            | 01.05.2024 | 30.09.2024 | ENDRE_MOTTAKER | 0       | 01.01.2024       |                             |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

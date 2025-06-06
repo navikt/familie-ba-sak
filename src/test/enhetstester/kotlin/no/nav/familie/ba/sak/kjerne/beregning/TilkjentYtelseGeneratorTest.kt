@@ -426,14 +426,14 @@ class TilkjentYtelseGeneratorTest {
                 endretAndeler =
                     listOf(
                         EndretAndel(
-                            person = søker,
+                            personer = setOf(søker),
                             skalUtbetales = false,
                             årsak = Årsak.DELT_BOSTED,
                             fom = april2022,
                             tom = juli2022,
                         ),
                         EndretAndel(
-                            person = barnFødtAugust2019,
+                            personer = setOf(barnFødtAugust2019),
                             skalUtbetales = false,
                             årsak = Årsak.DELT_BOSTED,
                             fom = april2022,
@@ -508,7 +508,7 @@ class TilkjentYtelseGeneratorTest {
                 endretAndeler =
                     listOf(
                         EndretAndel(
-                            person = barnFødtAugust2019,
+                            personer = setOf(barnFødtAugust2019),
                             skalUtbetales = false,
                             årsak = Årsak.DELT_BOSTED,
                             fom = april2022,
@@ -578,7 +578,7 @@ class TilkjentYtelseGeneratorTest {
                 endretAndeler =
                     listOf(
                         EndretAndel(
-                            person = barnFødtAugust2019,
+                            personer = setOf(barnFødtAugust2019),
                             skalUtbetales = true,
                             årsak = Årsak.DELT_BOSTED,
                             fom = juni2022,
@@ -665,14 +665,14 @@ class TilkjentYtelseGeneratorTest {
                 endretAndeler =
                     listOf(
                         EndretAndel(
-                            person = barnFødtAugust2019,
+                            personer = setOf(barnFødtAugust2019),
                             skalUtbetales = true,
                             årsak = Årsak.DELT_BOSTED,
                             fom = juni2022,
                             tom = juli2022,
                         ),
                         EndretAndel(
-                            person = søker,
+                            personer = setOf(søker),
                             skalUtbetales = true,
                             årsak = Årsak.DELT_BOSTED,
                             fom = juni2022,
@@ -756,14 +756,14 @@ class TilkjentYtelseGeneratorTest {
                 endretAndeler =
                     listOf(
                         EndretAndel(
-                            person = barnFødtAugust2016,
+                            personer = setOf(barnFødtAugust2016),
                             skalUtbetales = false,
                             årsak = Årsak.ETTERBETALING_3ÅR,
                             fom = april2019,
                             tom = juli2019,
                         ),
                         EndretAndel(
-                            person = søker,
+                            personer = setOf(søker),
                             skalUtbetales = false,
                             årsak = Årsak.ETTERBETALING_3ÅR,
                             fom = april2019,
@@ -833,7 +833,7 @@ class TilkjentYtelseGeneratorTest {
                 endretAndeler =
                     listOf(
                         EndretAndel(
-                            person = barnFødtAugust2016,
+                            personer = setOf(barnFødtAugust2016),
                             skalUtbetales = false,
                             årsak = Årsak.ETTERBETALING_3ÅR,
                             fom = april2019,
@@ -1239,7 +1239,7 @@ class TilkjentYtelseGeneratorTest {
     private data class EndretAndel(
         val fom: YearMonth,
         val tom: YearMonth,
-        val person: Person,
+        val personer: Set<Person>,
         val årsak: Årsak,
         val skalUtbetales: Boolean,
     )
@@ -1272,7 +1272,7 @@ class TilkjentYtelseGeneratorTest {
             endretAndeler.map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                     behandlingId = vilkårsvurdering.behandling.id,
-                    person = it.person,
+                    personer = it.personer,
                     prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,
                     årsak = it.årsak,
                     fom = it.fom,

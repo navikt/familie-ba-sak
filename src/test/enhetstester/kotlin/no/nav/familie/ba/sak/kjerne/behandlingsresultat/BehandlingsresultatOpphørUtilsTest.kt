@@ -339,14 +339,14 @@ class BehandlingsresultatOpphørUtilsTest {
         val endretUtBetalingAndeler =
             listOf(
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = for3mndSiden,
                     tom = for2mndSiden,
                     årsak = årsak,
                 ),
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = om4mnd,
                     tom = om4mnd,
@@ -390,14 +390,14 @@ class BehandlingsresultatOpphørUtilsTest {
         val endretUtBetalingAndeler =
             listOf(
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = for3mndSiden,
                     tom = for2mndSiden,
                     årsak = Årsak.DELT_BOSTED,
                 ),
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = om4mnd,
                     tom = om4mnd,
@@ -474,14 +474,14 @@ class BehandlingsresultatOpphørUtilsTest {
         val forrigeEndretAndeler =
             listOf(
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = for3mndSiden,
                     tom = for2mndSiden,
                     årsak = Årsak.ALLEREDE_UTBETALT,
                 ),
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = for1mndSiden,
                     tom = om4mnd,
@@ -523,7 +523,7 @@ class BehandlingsresultatOpphørUtilsTest {
         val forrigeEndretAndeler =
             listOf(
                 lagEndretUtbetalingAndel(
-                    person = barn,
+                    personer = setOf(barn),
                     prosent = BigDecimal.ZERO,
                     fom = for3mndSiden,
                     tom = for2mndSiden,

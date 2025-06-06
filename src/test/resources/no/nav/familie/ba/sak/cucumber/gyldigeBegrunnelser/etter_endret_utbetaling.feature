@@ -158,11 +158,8 @@ Egenskap: Gyldige begrunnelser for etter endret utbetaling, en mor med ett barn
       | 5       | BOSATT_I_RIKET               | VURDERT_MEDLEMSKAP | 16.08.2023 |            | OPPFYLT  | Nei                  |                      | NASJONALE_REGLER |
 
     Og med endrede utbetalinger
-      | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
-      | 5       | 2            | 01.09.2023 | 30.11.2024 | ETTERBETALING_3MND | 0       | 20.03.2025       |                             |
-      | 3       | 2            | 01.09.2023 | 30.11.2024 | ETTERBETALING_3MND | 0       | 20.03.2025       |                             |
-      | 4       | 2            | 01.09.2023 | 30.11.2024 | ETTERBETALING_3MND | 0       | 20.03.2025       |                             |
-      | 2       | 2            | 01.09.2023 | 30.11.2024 | ETTERBETALING_3MND | 0       | 20.03.2025       |                             |
+      | AktørId    | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
+      | 2, 3, 4, 5 | 2            | 01.09.2023 | 30.11.2024 | ETTERBETALING_3MND | 0       | 20.03.2025       |                             |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

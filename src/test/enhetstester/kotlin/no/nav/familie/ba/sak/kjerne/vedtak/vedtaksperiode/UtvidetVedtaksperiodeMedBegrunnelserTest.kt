@@ -43,7 +43,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
                 behandlingId = behandling.id,
                 fom = fom,
                 tom = tom,
-                person = barn2,
+                personer = setOf(barn2),
             )
 
         val andelerTilkjentYtelse =

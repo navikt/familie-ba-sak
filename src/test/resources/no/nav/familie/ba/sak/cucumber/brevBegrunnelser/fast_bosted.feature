@@ -57,8 +57,7 @@ Egenskap: Fast vs. delt bosted
 
     Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
-      | 4       | 1            | 01.02.2024 | 29.02.2024 | DELT_BOSTED | 0       | 28.02.2024       | 2024-01-05                  |
-      | 3       | 1            | 01.02.2024 | 29.02.2024 | DELT_BOSTED | 0       | 28.02.2024       | 2024-01-05                  |
+      | 3, 4    | 1            | 01.02.2024 | 29.02.2024 | DELT_BOSTED | 0       | 28.02.2024       | 2024-01-05                  |
 
     Når vedtaksperiodene genereres for behandling 1
 

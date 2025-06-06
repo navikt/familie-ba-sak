@@ -32,7 +32,7 @@ internal class EndretUtbetalingAndelTest {
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
-        endretUtbetalingAndel.person = tilfeldigPerson()
+        endretUtbetalingAndel.personer = mutableSetOf(tilfeldigPerson())
         endretUtbetalingAndel.prosent = BigDecimal(0)
         endretUtbetalingAndel.fom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
@@ -50,7 +50,7 @@ internal class EndretUtbetalingAndelTest {
         val behandling = lagBehandling()
         val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
 
-        endretUtbetalingAndel.person = tilfeldigPerson()
+        endretUtbetalingAndel.personer = mutableSetOf(tilfeldigPerson())
         endretUtbetalingAndel.prosent = BigDecimal(0)
         endretUtbetalingAndel.fom = YearMonth.of(2020, 10)
         endretUtbetalingAndel.tom = YearMonth.of(2020, 10)
@@ -69,7 +69,7 @@ internal class EndretUtbetalingAndelTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 fom = YearMonth.now(),
                 tom = null,
                 årsak = Årsak.DELT_BOSTED,
@@ -112,7 +112,7 @@ internal class EndretUtbetalingAndelTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 fom = YearMonth.now(),
                 tom = null,
                 årsak = Årsak.DELT_BOSTED,
@@ -121,7 +121,7 @@ internal class EndretUtbetalingAndelTest {
         val annenEndretAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 fom = YearMonth.now().plusMonths(5),
                 tom = YearMonth.now().plusMonths(8),
                 årsak = Årsak.DELT_BOSTED,

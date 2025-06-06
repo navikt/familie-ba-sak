@@ -371,7 +371,7 @@ class BeregningServiceTest {
             listOf(
                 EndretUtbetalingAndel(
                     behandlingId = behandling.id,
-                    person = barn,
+                    personer = mutableSetOf(barn),
                     prosent = BigDecimal(50),
                     fom = periodeFom.toYearMonth(),
                     tom = periodeTom.toYearMonth(),
@@ -1403,7 +1403,7 @@ class BeregningServiceTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = endretUtbetalingPerson,
+                personer = mutableSetOf(endretUtbetalingPerson),
                 fom = endretUtbetalingFom,
                 tom = endretUtbetalingTom,
                 årsak = endretUtbetalingÅrsak,

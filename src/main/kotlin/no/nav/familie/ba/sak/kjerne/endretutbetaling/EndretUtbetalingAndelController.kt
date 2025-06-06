@@ -48,9 +48,9 @@ class EndretUtbetalingAndelController(
         validerBehandlingKanRedigeres(behandling)
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-            behandling,
-            endretUtbetalingAndelId,
-            restEndretUtbetalingAndel,
+            behandling = behandling,
+            endretUtbetalingAndelId = endretUtbetalingAndelId,
+            restEndretUtbetalingAndel = restEndretUtbetalingAndel,
         )
 
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -79,8 +79,8 @@ class EndretUtbetalingAndelController(
         validerBehandlingKanRedigeres(behandling)
 
         endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-            behandling,
-            endretUtbetalingAndelId,
+            behandling = behandling,
+            endretUtbetalingAndelId = endretUtbetalingAndelId,
         )
 
         tilbakestillBehandlingTilBehandlingsresultatService

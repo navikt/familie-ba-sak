@@ -54,9 +54,9 @@ class EndretUtbetalingAndelValideringTest {
     val søker = lagPerson(type = PersonType.SØKER)
     val barn = lagPerson(type = PersonType.BARN)
     val endretUtbetalingAndelUtvidetNullutbetaling =
-        endretUtbetalingAndel(søker, YtelseType.UTVIDET_BARNETRYGD, BigDecimal.ZERO)
+        endretUtbetalingAndel(setOf(søker), YtelseType.UTVIDET_BARNETRYGD, BigDecimal.ZERO)
     val endretUtbetalingAndelDeltBostedNullutbetaling =
-        endretUtbetalingAndel(barn, YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO)
+        endretUtbetalingAndel(setOf(barn), YtelseType.ORDINÆR_BARNETRYGD, BigDecimal.ZERO)
 
     @AfterAll
     fun clearMocks() {
@@ -70,7 +70,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = barn1,
+                personer = mutableSetOf(barn1),
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
@@ -97,7 +97,7 @@ class EndretUtbetalingAndelValideringTest {
                 )
             }
         assertEquals(
-            "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
+            "Perioden som blir forsøkt lagt til overlapper med eksisterende periode for en av personene.",
             feil.melding,
         )
 
@@ -113,7 +113,7 @@ class EndretUtbetalingAndelValideringTest {
         )
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
-            listOf(endretUtbetalingAndel.copy(person = barn2)),
+            listOf(endretUtbetalingAndel.copy(personer = mutableSetOf(barn2))),
         )
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
@@ -148,7 +148,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = barn1,
+                personer = mutableSetOf(barn1),
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
@@ -163,7 +163,7 @@ class EndretUtbetalingAndelValideringTest {
                 validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, emptyList())
             }
         assertEquals(
-            "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
+            "Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.",
             feil.melding,
         )
 
@@ -180,7 +180,7 @@ class EndretUtbetalingAndelValideringTest {
                     validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser)
                 }
             assertEquals(
-                "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
+                "Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.",
                 feil.melding,
             )
         }
@@ -189,10 +189,70 @@ class EndretUtbetalingAndelValideringTest {
             listOf(
                 endretUtbetalingAndel,
                 endretUtbetalingAndel.copy(fom = YearMonth.of(2020, 2), tom = YearMonth.of(2020, 10)),
-                endretUtbetalingAndel.copy(fom = YearMonth.of(2018, 10), tom = YearMonth.of(2021, 10), person = barn2),
+                endretUtbetalingAndel.copy(fom = YearMonth.of(2018, 10), tom = YearMonth.of(2021, 10), personer = mutableSetOf(barn2)),
             )
 
         endretUtbetalingAndelerSomValiderer.forEach { validerPeriodeInnenforTilkjentytelse(it, andelTilkjentYtelser) }
+    }
+
+    @Test
+    fun `skal sjekke at en endret periode ikke strekker seg utover ytterpunktene for tilkjent ytelse for flere barn`() {
+        val barn1 = tilfeldigPerson()
+        val barn2 = tilfeldigPerson()
+
+        val andelTilkjentYtelser =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 1),
+                    tom = YearMonth.of(2020, 2),
+                    person = barn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2020, 2),
+                    tom = YearMonth.of(2020, 3),
+                    person = barn2,
+                ),
+            )
+
+        val gyldigEndretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                personer = mutableSetOf(barn1, barn2),
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 2),
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                begrunnelse = "Allerede utbetalt",
+                prosent = BigDecimal.ZERO,
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        assertDoesNotThrow {
+            validerPeriodeInnenforTilkjentytelse(gyldigEndretUtbetalingAndel, andelTilkjentYtelser)
+        }
+
+        val endretUtbetalingAndelSomErUgyldigForBarn1 =
+            gyldigEndretUtbetalingAndel.copy(
+                fom = YearMonth.of(2020, 2),
+                tom = YearMonth.of(2020, 3),
+            )
+
+        assertThrows<FunksjonellFeil> {
+            validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndelSomErUgyldigForBarn1, andelTilkjentYtelser)
+        }.also {
+            assertThat(it.melding).isEqualTo("Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.")
+        }
+
+        val endretUtbetalingAndelSomErUgyldigForBarn2 =
+            gyldigEndretUtbetalingAndel.copy(
+                fom = YearMonth.of(2020, 1),
+                tom = YearMonth.of(2020, 2),
+            )
+
+        assertThrows<FunksjonellFeil> {
+            validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndelSomErUgyldigForBarn2, andelTilkjentYtelser)
+        }.also {
+            assertThat(it.melding).isEqualTo("Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.")
+        }
     }
 
     @Test
@@ -200,7 +260,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = tilfeldigPerson(),
+                personer = mutableSetOf(tilfeldigPerson()),
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
@@ -241,7 +301,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = tilfeldigPerson(),
+                personer = mutableSetOf(tilfeldigPerson()),
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
@@ -263,7 +323,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = tilfeldigPerson(),
+                personer = mutableSetOf(tilfeldigPerson()),
                 fom = YearMonth.of(2020, 2),
                 tom = YearMonth.of(2020, 6),
                 årsak = Årsak.DELT_BOSTED,
@@ -300,8 +360,8 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `sjekk at alle endrede utbetalingsandeler validerer`() {
-        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
-        val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(person = tilfeldigPerson())
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndel(personer = setOf(tilfeldigPerson()))
+        val endretUtbetalingAndel2 = lagEndretUtbetalingAndel(personer = setOf(tilfeldigPerson()))
         validerAtAlleOpprettedeEndringerErUtfylt(listOf(endretUtbetalingAndel1, endretUtbetalingAndel2))
 
         val feil =
@@ -321,7 +381,7 @@ class EndretUtbetalingAndelValideringTest {
 
     @Test
     fun `sjekk at alle endrede utbetalingsandeler er tilknyttet andeltilkjentytelser`() {
-        val endretUtbetalingAndel1 = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(person = tilfeldigPerson())
+        val endretUtbetalingAndel1 = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(personer = setOf(tilfeldigPerson()))
         val feil =
             assertThrows<FunksjonellFeil> {
                 validerAtEndringerErTilknyttetAndelTilkjentYtelse(listOf(endretUtbetalingAndel1))
@@ -335,7 +395,7 @@ class EndretUtbetalingAndelValideringTest {
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(
             listOf(
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                    person = tilfeldigPerson(),
+                    personer = setOf(tilfeldigPerson()),
                     andelTilkjentYtelser = mutableListOf(andelTilkjentYtelse),
                 ),
             ),
@@ -740,7 +800,7 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     private fun endretUtbetalingAndel(
-        person: Person,
+        personer: Set<Person>,
         ytelsestype: YtelseType,
         prosent: BigDecimal,
         fomUtvidet: YearMonth = inneværendeMåned().minusMonths(1),
@@ -750,7 +810,7 @@ class EndretUtbetalingAndelValideringTest {
             id = Random.nextLong(),
             fom = fomUtvidet,
             tom = tomUtvidet,
-            person = person,
+            personer = personer,
             årsak = Årsak.DELT_BOSTED,
             prosent = prosent,
             andelTilkjentYtelser =
@@ -812,7 +872,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = tilfeldigPerson(),
+                personer = mutableSetOf(tilfeldigPerson()),
                 fom = YearMonth.now().minusMonths(3),
                 tom = YearMonth.now().plusMonths(1),
                 årsak = Årsak.ALLEREDE_UTBETALT,
@@ -841,7 +901,7 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                person = tilfeldigPerson(),
+                personer = mutableSetOf(tilfeldigPerson()),
                 fom = YearMonth.now().minusMonths(4),
                 tom = YearMonth.now(),
                 årsak = Årsak.ALLEREDE_UTBETALT,

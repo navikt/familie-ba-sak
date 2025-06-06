@@ -102,7 +102,7 @@ class UtbetalingTidslinjeServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 årsak = årsak,
                 fom = fomUtvidetOgEndring,
@@ -153,7 +153,7 @@ class UtbetalingTidslinjeServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 årsak = årsak,
                 fom = fomUtvidetOgEndring,
@@ -195,7 +195,7 @@ class UtbetalingTidslinjeServiceTest {
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 fom = fomEndretUtbetaling,
@@ -236,7 +236,7 @@ class UtbetalingTidslinjeServiceTest {
             val endringer =
                 listOf(
                     lagEndretUtbetalingAndel(
-                        person = person,
+                        personer = setOf(person),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 7),
@@ -265,21 +265,21 @@ class UtbetalingTidslinjeServiceTest {
             val endringer =
                 listOf(
                     lagEndretUtbetalingAndel(
-                        person = person1,
+                        personer = setOf(person1),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 7),
                         prosent = BigDecimal.ZERO,
                     ),
                     lagEndretUtbetalingAndel(
-                        person = person2,
+                        personer = setOf(person2),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2019, 11),
                         tom = YearMonth.of(2021, 3),
                         prosent = BigDecimal.ZERO,
                     ),
                     lagEndretUtbetalingAndel(
-                        person = person1,
+                        personer = setOf(person1),
                         årsak = Årsak.ETTERBETALING_3ÅR,
                         fom = YearMonth.of(2021, 1),
                         tom = YearMonth.of(2021, 5),
@@ -307,7 +307,7 @@ class UtbetalingTidslinjeServiceTest {
             val endringer =
                 listOf(
                     lagEndretUtbetalingAndel(
-                        person = person,
+                        personer = setOf(person),
                         årsak = Årsak.ALLEREDE_UTBETALT,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 7),

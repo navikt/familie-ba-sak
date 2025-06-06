@@ -266,7 +266,7 @@ internal class BrevUtilsTest {
 
         val endretUtbetalingAndeler =
             listOf(
-                lagEndretUtbetalingAndel(person = barn, fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().toYearMonth(), årsak = Årsak.ENDRE_MOTTAKER, prosent = BigDecimal(0)),
+                lagEndretUtbetalingAndel(personer = setOf(barn), fom = LocalDate.now().minusMonths(4).toYearMonth(), tom = LocalDate.now().toYearMonth(), årsak = Årsak.ENDRE_MOTTAKER, prosent = BigDecimal(0)),
             )
 
         val utenlandskePeriodebeløp =

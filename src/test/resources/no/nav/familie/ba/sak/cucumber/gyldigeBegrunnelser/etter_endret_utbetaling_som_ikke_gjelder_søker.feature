@@ -137,8 +137,7 @@ Egenskap: Etter endret utbetaling som ikke gjelder søker
 
     Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
-      | 8       | 2            | 01.08.2024 | 31.08.2024 | ETTERBETALING_3MND | 0       | 12.12.2024       |                             |
-      | 7       | 2            | 01.08.2024 | 31.08.2024 | ETTERBETALING_3MND | 0       | 12.12.2024       |                             |
+      | 7, 8    | 2            | 01.08.2024 | 31.08.2024 | ETTERBETALING_3MND | 0       | 12.12.2024       |                             |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

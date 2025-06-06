@@ -6,11 +6,13 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToOne
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -44,9 +46,13 @@ data class EndretUtbetalingAndel(
     val id: Long = 0,
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
-    @ManyToOne
-    @JoinColumn(name = "fk_po_person_id")
-    var person: Person? = null,
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "PERSON_TIL_ENDRET_UTBETALING_ANDEL",
+        joinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")],
+        inverseJoinColumns = [JoinColumn(name = "fk_person_id")],
+    )
+    var personer: MutableSet<Person> = mutableSetOf(),
     @Column(name = "prosent")
     var prosent: BigDecimal? = null,
     @Column(name = "fom", columnDefinition = "DATE")
@@ -76,7 +82,7 @@ data class EndretUtbetalingAndel(
     fun validerUtfyltEndring(): Boolean {
         if (manglerObligatoriskFelt()) {
             val feilmelding =
-                "Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()"
+                "Personer, prosent, fom, tom, årsak, begrunnelse og søknadstidspunkt skal være utfylt: $this"
             throw FunksjonellFeil(melding = feilmelding, frontendFeilmelding = feilmelding)
         }
 
@@ -88,14 +94,14 @@ data class EndretUtbetalingAndel(
         }
 
         if (årsak == Årsak.DELT_BOSTED && avtaletidspunktDeltBosted == null) {
-            throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this.tostring()")
+            throw FunksjonellFeil("Avtaletidspunkt skal være utfylt når årsak er delt bosted: $this")
         }
 
         return true
     }
 
     fun manglerObligatoriskFelt() =
-        person == null ||
+        personer.isEmpty() ||
             prosent == null ||
             fom == null ||
             tom == null ||
@@ -137,7 +143,8 @@ fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != Big
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(
         id = this.id,
-        personIdent = this.aktivtFødselsnummer,
+        personIdent = this.personIdenter.firstOrNull(),
+        personIdenter = this.personIdenter,
         prosent = this.prosent,
         fom = this.fom,
         tom = this.tom,
@@ -150,7 +157,7 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel()
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
-    person: Person,
+    personer: Set<Person>,
 ): EndretUtbetalingAndel {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom
@@ -159,7 +166,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     this.avtaletidspunktDeltBosted = restEndretUtbetalingAndel.avtaletidspunktDeltBosted
     this.søknadstidspunkt = restEndretUtbetalingAndel.søknadstidspunkt
     this.begrunnelse = restEndretUtbetalingAndel.begrunnelse
-    this.person = person
+    this.personer = personer.toMutableSet()
     return this
 }
 
@@ -173,7 +180,7 @@ data class TomEndretUtbetalingAndel(
 sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
     val id: Long
     val behandlingId: Long
-    val person: Person
+    val personer: Set<Person>
     val prosent: BigDecimal
     val fom: YearMonth
     val tom: YearMonth
@@ -185,7 +192,7 @@ sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
 data class UtfyltEndretUtbetalingAndel(
     override val id: Long,
     override val behandlingId: Long,
-    override val person: Person,
+    override val personer: Set<Person>,
     override val prosent: BigDecimal,
     override val fom: YearMonth,
     override val tom: YearMonth,
@@ -197,7 +204,7 @@ data class UtfyltEndretUtbetalingAndel(
 data class UtfyltEndretUtbetalingAndelDeltBosted(
     override val id: Long,
     override val behandlingId: Long,
-    override val person: Person,
+    override val personer: Set<Person>,
     override val prosent: BigDecimal,
     override val fom: YearMonth,
     override val tom: YearMonth,
@@ -218,7 +225,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
             UtfyltEndretUtbetalingAndelDeltBosted(
                 id = this.id,
                 behandlingId = this.behandlingId,
-                person = this.person!!,
+                personer = this.personer,
                 prosent = this.prosent!!,
                 fom = this.fom!!,
                 tom = this.tom!!,
@@ -231,7 +238,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel =
             UtfyltEndretUtbetalingAndel(
                 id = this.id,
                 behandlingId = this.behandlingId,
-                person = this.person!!,
+                personer = this.personer,
                 prosent = this.prosent!!,
                 fom = this.fom!!,
                 tom = this.tom!!,

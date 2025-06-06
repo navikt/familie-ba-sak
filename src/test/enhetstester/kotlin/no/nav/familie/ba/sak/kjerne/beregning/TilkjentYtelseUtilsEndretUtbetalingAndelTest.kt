@@ -81,7 +81,13 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
                 MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
                 MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4)),
             ).map {
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn1, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    personer = setOf(barn1),
+                    fom = it.fom,
+                    tom = it.tom,
+                    prosent = 50,
+                )
             }
 
         val endretUtbetalingerForBarn2 =
@@ -90,7 +96,13 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
                 MånedPeriode(YearMonth.of(2018, 7), YearMonth.of(2021, 9)),
                 MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12)),
             ).map {
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn2, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    personer = setOf(barn2),
+                    fom = it.fom,
+                    tom = it.tom,
+                    prosent = 50,
+                )
             }
 
         val andelerTilkjentYtelserEtterEUA =
