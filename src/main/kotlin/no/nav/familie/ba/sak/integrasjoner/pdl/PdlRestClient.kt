@@ -158,13 +158,13 @@ class PdlRestClient(
         val pdlPersonRequest =
             PdlPersonRequest(
                 variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer(), historikk = historikk),
-                query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
+                query = hentGraphqlQuery("statsborgerskap"),
             )
         val pdlResponse: PdlBaseResponse<PdlStatsborgerskapResponse> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
-                formål = "Hent statsborgerskap uten historikk",
+                formål = "Hent statsborgerskap med/uten historikk",
             ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
 
         return feilsjekkOgReturnerData(

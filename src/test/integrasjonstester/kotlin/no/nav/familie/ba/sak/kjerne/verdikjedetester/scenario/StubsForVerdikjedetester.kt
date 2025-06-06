@@ -313,7 +313,7 @@ private fun stubHentPersonStatsborgerskap(scenarioPerson: RestScenarioPerson) {
     val pdlRequestBody =
         PdlPersonRequest(
             variables = PdlPersonRequestVariables(ident = scenarioPerson.ident),
-            query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
+            query = hentGraphqlQuery("statsborgerskap"),
         )
 
     stubFor(
