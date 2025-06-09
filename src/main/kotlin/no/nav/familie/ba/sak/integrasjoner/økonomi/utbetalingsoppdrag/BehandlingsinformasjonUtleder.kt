@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.common.ClockProvider
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -58,7 +59,8 @@ class BehandlingsinformasjonUtleder(
             FagsakType.BARN_ENSLIG_MINDREÅRIG,
             -> fagsak.aktør.aktivFødselsnummer()
             FagsakType.SKJERMET_BARN,
-            -> TODO("NAV-25256 Ikke implementert enda")
+            -> fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?:
+            throw Feil("Skal utbetales til søker av barnet, men søker er ikke registrert på fagsak ${fagsak.id}")
 
             FagsakType.INSTITUSJON,
             -> {
