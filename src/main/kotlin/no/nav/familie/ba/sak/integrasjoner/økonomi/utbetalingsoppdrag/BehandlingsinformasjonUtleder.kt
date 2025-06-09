@@ -59,8 +59,9 @@ class BehandlingsinformasjonUtleder(
             FagsakType.BARN_ENSLIG_MINDREÅRIG,
             -> fagsak.aktør.aktivFødselsnummer()
             FagsakType.SKJERMET_BARN,
-            -> fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?:
-            throw Feil("Skal utbetales til søker av barnet, men søker er ikke registrert på fagsak ${fagsak.id}")
+            ->
+                fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer()
+                    ?: throw Feil("Barnetrygd skal utbetales til søker av barnet, men søker er ikke registrert på fagsak ${fagsak.id}")
 
             FagsakType.INSTITUSJON,
             -> {

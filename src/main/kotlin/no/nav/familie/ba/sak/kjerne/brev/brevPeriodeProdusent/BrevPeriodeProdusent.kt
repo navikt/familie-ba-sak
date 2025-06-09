@@ -188,7 +188,7 @@ private fun hentDuEllerInstitusjonenTekst(
             }
         }
 
-        FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.SKJERMET_BARN  -> {
+        FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.SKJERMET_BARN -> {
             when (brevPeriodeType) {
                 BrevPeriodeType.UTBETALING, BrevPeriodeType.INGEN_UTBETALING -> "du"
                 else -> "Du"
