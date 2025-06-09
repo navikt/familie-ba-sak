@@ -104,7 +104,9 @@ class StegService(
         val barnasIdenter =
             when {
                 behandling.fagsak.type == FagsakType.SKJERMET_BARN -> listOf(behandling.fagsak.aktør.aktivFødselsnummer())
+
                 nyBehandling.behandlingÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.HELMANUELL_MIGRERING) -> nyBehandling.barnasIdenter
+
                 nyBehandling.behandlingType == BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
 
                 nyBehandling.behandlingType in listOf(BehandlingType.REVURDERING, BehandlingType.TEKNISK_ENDRING, BehandlingType.MIGRERING_FRA_INFOTRYGD) -> {
