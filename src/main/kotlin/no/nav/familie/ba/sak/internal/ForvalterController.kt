@@ -211,7 +211,7 @@ class ForvalterController(
     ): String {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente data til test",
         )
 
