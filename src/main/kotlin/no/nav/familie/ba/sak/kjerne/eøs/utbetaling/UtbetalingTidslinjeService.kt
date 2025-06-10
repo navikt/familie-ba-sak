@@ -103,17 +103,22 @@ class UtbetalingTidslinjeService(
 internal fun Iterable<EndretUtbetalingAndel>.tilBarnasEndretUtbetalingSkalIkkeUtbetalesTidslinjer(): Map<Aktør, Tidslinje<EndretUtbetalingAndel>> =
     this
         .filter { !it.skalUtbetales() }
-        .filter { it.person?.type == PersonType.BARN }
-        .filter { it.person?.aktør != null }
-        .groupBy { it.person?.aktør!! }
-        .mapValues { (_, endringer) -> endringer.map { endretUtbetalingAndel -> endretUtbetalingAndel.tilPeriode { it } } }
-        .mapValues { (_, perioder) -> perioder.tilTidslinje() }
+        .flatMap { andel ->
+            andel.personer
+                .filter { it.type == PersonType.BARN }
+                .map { it.aktør to andel }
+        }.groupBy({ it.first }, { it.second })
+        .mapValues { (_, endringer) ->
+            endringer
+                .map { it.tilPeriode() }
+                .tilTidslinje()
+        }
 
-private fun <V> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel) -> V) =
+private fun EndretUtbetalingAndel.tilPeriode() =
     Periode(
         fom = this.fom?.førsteDagIInneværendeMåned(),
         tom = this.tom?.sisteDagIInneværendeMåned(),
-        verdi = mapper(this),
+        verdi = this,
     )
 
 private fun AndelTilkjentYtelse?.skalUtbetales() = (this != null && this.kalkulertUtbetalingsbeløp != 0)

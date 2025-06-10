@@ -43,16 +43,15 @@ object EndretUtbetalingAndelValidering {
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>,
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
-        if (eksisterendeEndringerPåBehandling.any
-                {
-                    it.overlapperMed(endretUtbetalingAndel.periode) &&
-                        it.person == endretUtbetalingAndel.person &&
-                        it.årsak == endretUtbetalingAndel.årsak
-                }
+        if (eksisterendeEndringerPåBehandling.any {
+                it.overlapperMed(endretUtbetalingAndel.periode) &&
+                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty() &&
+                    it.årsak == endretUtbetalingAndel.årsak
+            }
         ) {
             throw FunksjonellFeil(
-                melding = "Perioden som blir forsøkt lagt til overlapper med eksisterende periode på person.",
-                frontendFeilmelding = "Perioden du forsøker å legge til overlapper med eksisterende periode på personen. Om dette er ønskelig må du først endre den eksisterende perioden.",
+                melding = "Perioden som blir forsøkt lagt til overlapper med eksisterende periode for en av personene.",
+                frontendFeilmelding = "Perioden du forsøker å legge til overlapper med eksisterende periode for en av personene. Om dette er ønskelig må du først endre den eksisterende perioden.",
             )
         }
     }
@@ -62,30 +61,30 @@ object EndretUtbetalingAndelValidering {
         andelTilkjentYtelser: Collection<AndelTilkjentYtelse>,
     ) {
         endretUtbetalingAndel.validerUtfyltEndring()
-        val minsteDatoForTilkjentYtelse =
-            andelTilkjentYtelser
-                .filter {
-                    it.aktør == endretUtbetalingAndel.person!!.aktør
-                }.minByOrNull { it.stønadFom }
-                ?.stønadFom
+        endretUtbetalingAndel.personer.forEach { person ->
+            val minsteDatoForTilkjentYtelse =
+                andelTilkjentYtelser
+                    .filter { it.aktør == person.aktør }
+                    .minByOrNull { it.stønadFom }
+                    ?.stønadFom
 
-        val størsteDatoForTilkjentYtelse =
-            andelTilkjentYtelser
-                .filter {
-                    it.aktør == endretUtbetalingAndel.person!!.aktør
-                }.maxByOrNull { it.stønadTom }
-                ?.stønadTom
+            val størsteDatoForTilkjentYtelse =
+                andelTilkjentYtelser
+                    .filter { it.aktør == person.aktør }
+                    .maxByOrNull { it.stønadTom }
+                    ?.stønadTom
 
-        if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
-            (
-                endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
-                    endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)
-            )
-        ) {
-            throw FunksjonellFeil(
-                melding = "Det er ingen tilkjent ytelse for personen det blir forsøkt lagt til en endret periode for.",
-                frontendFeilmelding = "Du har valgt en periode der det ikke finnes tilkjent ytelse for valgt person i hele eller deler av perioden.",
-            )
+            if ((minsteDatoForTilkjentYtelse == null || størsteDatoForTilkjentYtelse == null) ||
+                (
+                    endretUtbetalingAndel.fom!!.isBefore(minsteDatoForTilkjentYtelse) ||
+                        endretUtbetalingAndel.tom!!.isAfter(størsteDatoForTilkjentYtelse)
+                )
+            ) {
+                throw FunksjonellFeil(
+                    melding = "Det er ingen tilkjent ytelse for en av personene det blir forsøkt lagt til en endret periode for.",
+                    frontendFeilmelding = "Du har valgt en periode der det ikke finnes utbetalinger for en av de valgte persone i hele eller deler av perioden.",
+                )
+            }
         }
     }
 
@@ -107,16 +106,18 @@ object EndretUtbetalingAndelValidering {
 
         return when (årsak) {
             Årsak.DELT_BOSTED -> {
-                val deltBostedPerioder =
-                    finnDeltBostedPerioder(
-                        person = endretUtbetalingAndel.person,
-                        vilkårsvurdering = vilkårsvurdering,
-                    ).map { it.tilMånedPeriode() }
+                endretUtbetalingAndel.personer.forEach { person ->
+                    val deltBostedPerioder =
+                        finnDeltBostedPerioder(
+                            person = person,
+                            vilkårsvurdering = vilkårsvurdering,
+                        ).map { it.tilMånedPeriode() }
 
-                validerDeltBosted(
-                    endretUtbetalingAndel = endretUtbetalingAndel,
-                    deltBostedPerioder = deltBostedPerioder,
-                )
+                    validerDeltBosted(
+                        endretUtbetalingAndel = endretUtbetalingAndel,
+                        deltBostedPerioder = deltBostedPerioder,
+                    )
+                }
             }
 
             Årsak.ETTERBETALING_3MND,

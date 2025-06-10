@@ -5,9 +5,10 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-class RestEndretUtbetalingAndel(
+data class RestEndretUtbetalingAndel(
     val id: Long?,
     val personIdent: String?,
+    val personIdenter: List<String>?,
     val prosent: BigDecimal?,
     val fom: YearMonth?,
     val tom: YearMonth?,
