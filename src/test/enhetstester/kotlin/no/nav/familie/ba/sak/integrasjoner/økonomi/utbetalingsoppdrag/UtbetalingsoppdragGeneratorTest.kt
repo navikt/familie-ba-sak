@@ -6,8 +6,6 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -30,7 +28,6 @@ import java.time.LocalDate
 
 class UtbetalingsoppdragGeneratorTest {
     private val klassifiseringKorrigerer: KlassifiseringKorrigerer = mockk()
-    private val unleashNextMedContextService: UnleashNextMedContextService = mockk()
     private val behandlingsinformasjonUtleder: BehandlingsinformasjonUtleder = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
@@ -39,7 +36,6 @@ class UtbetalingsoppdragGeneratorTest {
         UtbetalingsoppdragGenerator(
             utbetalingsgenerator = Utbetalingsgenerator(),
             klassifiseringKorrigerer = klassifiseringKorrigerer,
-            unleashNextMedContextService = unleashNextMedContextService,
             behandlingsinformasjonUtleder = behandlingsinformasjonUtleder,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -101,12 +97,6 @@ class UtbetalingsoppdragGeneratorTest {
             )
 
         every {
-            unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
-            )
-        } returns true
-
-        every {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
@@ -114,8 +104,6 @@ class UtbetalingsoppdragGeneratorTest {
         } answers {
             firstArg()
         }
-
-        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
 
         // Act
         val beregnetUtbetalingsoppdragLongId =
@@ -233,12 +221,6 @@ class UtbetalingsoppdragGeneratorTest {
             )
 
         every {
-            unleashNextMedContextService.isEnabled(
-                toggle = FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET,
-            )
-        } returns true
-
-        every {
             klassifiseringKorrigerer.korrigerKlassifiseringVedBehov(
                 beregnetUtbetalingsoppdrag = any(),
                 behandling = vedtak.behandling,
@@ -246,8 +228,6 @@ class UtbetalingsoppdragGeneratorTest {
         } answers {
             firstArg()
         }
-
-        every { tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(any()) } returns emptyList()
 
         // Act
         val beregnetUtbetalingsoppdragLongId =

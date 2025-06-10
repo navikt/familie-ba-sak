@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Component
 class UtbetalingsoppdragGenerator(
     private val utbetalingsgenerator: Utbetalingsgenerator,
     private val klassifiseringKorrigerer: KlassifiseringKorrigerer,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
     private val behandlingsinformasjonUtleder: BehandlingsinformasjonUtleder,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -70,16 +67,7 @@ class UtbetalingsoppdragGenerator(
                 .hentSisteAndelPerIdentOgType(fagsakId = behandling.fagsak.id)
                 .associateBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type.tilYtelseType()) }
 
-        val tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag = tilkjentYtelseRepository.findByOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag(behandling.fagsak.id)
-
-        return if (tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag.isNotEmpty() && unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_OVERSTYRING_AV_FOM_SISTE_ANDEL_UTVIDET)) {
-            SisteUtvidetAndelOverstyrer.overstyrSisteUtvidetBarnetrygdAndel(
-                sisteAndelPerKjede = sisteAndelPerKjede,
-                tilkjenteYtelserMedOppdatertUtvidetKlassekodeIUtbetalingsoppdrag = tilkjenteYtelserMedOppdatertUtvidetBarnetrygdKlassekodeIUtbetalingsoppdrag,
-            )
-        } else {
-            sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() }
-        }
+        return sisteAndelPerKjede.mapValues { it.value.tilAndelDataLongId() }
     }
 
     private fun hentForrigeTilkjentYtelse(behandling: Behandling): TilkjentYtelse? =
