@@ -81,7 +81,7 @@ object BehandlingsresultatSøknadUtils {
                     utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
                         forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                         nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                        endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.personer.any { it.aktør == aktør } },
+                        endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.personer.any { person -> person.aktør == aktør } },
                     )
                 }
             }

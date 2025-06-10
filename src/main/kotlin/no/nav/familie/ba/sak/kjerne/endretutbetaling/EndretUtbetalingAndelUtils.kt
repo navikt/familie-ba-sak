@@ -22,8 +22,8 @@ fun beregnGyldigTomIFremtiden(
     } else {
         val sisteTomAndeler =
             andelTilkjentYtelser
-                .filter { aty ->
-                    endretUtbetalingAndel.personer.any { it.aktør == aty.aktør }
+                .filter {
+                    endretUtbetalingAndel.personer.any { person -> person.aktør == it.aktør }
                 }.maxOf { it.stønadTom }
 
         return sisteTomAndeler
