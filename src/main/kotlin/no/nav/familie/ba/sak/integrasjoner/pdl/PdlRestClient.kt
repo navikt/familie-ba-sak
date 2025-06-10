@@ -164,7 +164,7 @@ class PdlRestClient(
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
-                formål = "Hent statsborgerskap med/uten historikk",
+                formål = "Hent statsborgerskap",
             ) { postForEntity(pdlUri, pdlPersonRequest, httpHeaders()) }
 
         return feilsjekkOgReturnerData(
