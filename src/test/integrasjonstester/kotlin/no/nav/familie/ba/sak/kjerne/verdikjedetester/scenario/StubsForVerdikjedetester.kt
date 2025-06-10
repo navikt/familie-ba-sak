@@ -46,8 +46,24 @@ fun stubScenario(scenario: RestScenario) {
         stubHentPersonVergemaalEllerFretidfullmakt(it)
         stubHentBostedsadresserForPerson(it)
         stubHentStatsborgerskap(it)
+        stubHentSøknad(it)
     }
     stubHentPerson(scenario)
+}
+
+private fun stubHentSøknad(restScenarioPerson: RestScenarioPerson) {
+    stubFor(
+        post(urlEqualTo("/rest/api/"))
+            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString("")))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(""),
+                    ),
+            ),
+    )
 }
 
 private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
