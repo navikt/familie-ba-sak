@@ -75,7 +75,7 @@ object BehandlingsresultatOpphørUtils {
 
         return personerMedAndeler.flatMap { aktør ->
             val andelerGruppertPerTypePåPerson = this.filter { it.aktør == aktør }.groupBy { it.type }
-            val endretUtbetalingAndelerPåPerson = endretAndeler.filter { it.person?.aktør == aktør }
+            val endretUtbetalingAndelerPåPerson = endretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
 
             andelerGruppertPerTypePåPerson.values.flatMap { andelerPerType ->
                 filtrerBortIrrelevanteAndelerPerPersonOgType(andelerPerType, endretUtbetalingAndelerPåPerson)

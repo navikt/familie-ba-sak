@@ -186,8 +186,7 @@ Egenskap: Vedtaksperioder med endret utbetaling der endringstidspunkt påvirker 
     Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak              | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
       | 1       | 1            | 01.03.2024 | 30.11.2024 | ETTERBETALING_3MND | 0       | 26.03.2025       |                             |
-      | 3       | 1            | 01.09.2023 | 31.03.2025 | DELT_BOSTED        | 0       | 26.03.2025       | 2023-08-01                  |
-      | 2       | 1            | 01.09.2023 | 31.03.2025 | DELT_BOSTED        | 0       | 26.03.2025       | 2023-08-01                  |
+      | 2, 3    | 1            | 01.09.2023 | 31.03.2025 | DELT_BOSTED        | 0       | 26.03.2025       | 2023-08-01                  |
 
     Og med andeler tilkjent ytelse
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Ytelse type        | Prosent | Sats |

@@ -13,7 +13,7 @@ fun beregnGyldigTomIFremtiden(
         andreEndredeAndelerPåBehandling
             .filter {
                 it.fom?.isAfter(endretUtbetalingAndel.fom) == true &&
-                    it.person == endretUtbetalingAndel.person
+                    it.personer == endretUtbetalingAndel.personer
             }.sortedBy { it.fom }
             .firstOrNull()
 
@@ -23,7 +23,7 @@ fun beregnGyldigTomIFremtiden(
         val sisteTomAndeler =
             andelTilkjentYtelser
                 .filter {
-                    it.aktør == endretUtbetalingAndel.person?.aktør
+                    endretUtbetalingAndel.personer.any { person -> person.aktør == it.aktør }
                 }.maxOf { it.stønadTom }
 
         return sisteTomAndeler

@@ -25,10 +25,10 @@
         <changelist>-SNAPSHOT</changelist>
         <prosessering.version>2.20250526085951_e212049</prosessering.version>
         <felles.version>3.20250602160953_48db326</felles.version>
-        <eksterne-kontrakter-bisys.version>2.0_20250602102519_b7debdf</eksterne-kontrakter-bisys.version>
+        <eksterne-kontrakter-bisys.version>2.0_20250604093431_85c9dc1</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250602111633_e3dbc75</felles-kontrakter.version>
-        <familie.kontrakter.saksstatistikk>2.0_20250602102519_b7debdf</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20250602102519_b7debdf</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.saksstatistikk>2.0_20250604093431_85c9dc1</familie.kontrakter.saksstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20250604093431_85c9dc1</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.2</mockk.version>
@@ -42,7 +42,7 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>2.1.11</mock-oauth2-server.version>
+        <mock-oauth2-server.version>2.2.1</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
@@ -50,7 +50,7 @@
         <testcontainers.postgresql.version>1.21.1</testcontainers.postgresql.version>
         <unleash.version>10.2.2</unleash.version>
         <testcontainers.postgresql.version>1.21.1</testcontainers.postgresql.version>
-        <maven.model.version>3.9.9</maven.model.version>
+        <maven.model.version>3.9.10</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
         <avro.version>1.12.0</avro.version>
         <confluent.version>7.9.1</confluent.version>
@@ -554,7 +554,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
