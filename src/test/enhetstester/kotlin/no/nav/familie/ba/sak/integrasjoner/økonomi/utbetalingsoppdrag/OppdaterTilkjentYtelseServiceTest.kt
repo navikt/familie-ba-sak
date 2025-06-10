@@ -175,7 +175,7 @@ class OppdaterTilkjentYtelseServiceTest {
                 listOf(
                     lagEndretUtbetalingAndel(
                         behandlingId = behandling.id,
-                        barn = søker,
+                        personer = setOf(søker),
                         fom = fom,
                         tom = tom,
                         prosent = 0,

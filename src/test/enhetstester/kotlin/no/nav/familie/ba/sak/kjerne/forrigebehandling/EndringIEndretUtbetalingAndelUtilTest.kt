@@ -24,7 +24,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 fom = jan22,
                 tom = aug22,
@@ -52,7 +52,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 fom = jan22,
                 tom = aug22,
@@ -81,7 +81,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val forrigeEndretAndelBarn1 =
             lagEndretUtbetalingAndel(
-                person = barn1,
+                personer = setOf(barn1),
                 prosent = BigDecimal.ZERO,
                 fom = jan22,
                 tom = aug22,
@@ -92,7 +92,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val forrigeEndretAndelBarn2 =
             lagEndretUtbetalingAndel(
-                person = barn2,
+                personer = setOf(barn2),
                 prosent = BigDecimal.ZERO,
                 fom = jan22,
                 tom = aug22,
@@ -104,8 +104,8 @@ class EndringIEndretUtbetalingAndelUtilTest {
             listOf(barn1, barn2)
                 .map {
                     EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUbetalingAndelPerPersonTidslinje(
-                        forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.person == it },
-                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.person == it },
+                        forrigeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2).filter { endretAndel -> endretAndel.personer.contains(it) },
+                        nåværendeEndretAndelerForPerson = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)).filter { endretAndel -> endretAndel.personer.contains(it) },
                     )
                 }.flatMap { it.tilPerioder() }
                 .filter { it.verdi == true }
@@ -120,7 +120,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 fom = jan22,
                 tom = aug22,
@@ -149,7 +149,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
         val barn = lagPerson(type = PersonType.BARN)
         val nåværendeEndretAndel =
             lagEndretUtbetalingAndel(
-                person = barn,
+                personer = setOf(barn),
                 prosent = BigDecimal.ZERO,
                 fom = jan22,
                 tom = aug22,
