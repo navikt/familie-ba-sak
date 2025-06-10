@@ -18,10 +18,12 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.log.mdc.MDCConstants
@@ -224,6 +226,38 @@ class TilgangServiceTest {
             }
         assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
         assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
+    }
+
+    @Test
+    fun `validerTilgangTilFagsak - skal kaste feil dersom søker og barn har diskresjonskode, fagsak av typen skjermet barn og ikke har behandling`() {
+        // Arrange
+        val søkerAktør = randomAktør("65434563721")
+        val barnAktør = randomAktør("12345678910")
+        val skjermetFagsak =
+            defaultFagsak(aktør = barnAktør)
+                .copy(skjermetBarnSøker = SkjermetBarnSøker(id = 1, søkerAktør), type = FagsakType.SKJERMET_BARN)
+        every { fagsakService.hentAktør(skjermetFagsak.id) }.returns(barnAktør)
+        every { fagsakService.hentPåFagsakId(skjermetFagsak.id) }.returns(skjermetFagsak)
+        every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) }.returns(emptyList())
+        every { persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsak.id) }.returns(
+            emptyList<PersonEnkel>().toSet(),
+        )
+        val slot = mutableListOf<List<String>>()
+
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(harTilgang = false, begrunnelse = "Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse", slot = slot)
+        mockBrukerContext("A")
+
+        // Act & Assert
+        val rolletilgangskontrollFeil =
+            assertThrows<RolleTilgangskontrollFeil> {
+                tilgangService.validerTilgangTilFagsak(
+                    skjermetFagsak.id,
+                    AuditLoggerEvent.ACCESS,
+                )
+            }
+        assertThat(rolletilgangskontrollFeil.message).isEqualTo("Saksbehandler A har ikke tilgang til fagsak=${fagsak.id}. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
+        assertThat(rolletilgangskontrollFeil.frontendFeilmelding).isEqualTo("Fagsaken inneholder personer som krever ytterligere tilganger. Bruker mangler rollen '0000-GA-Strengt_Fortrolig_Adresse.")
+        assertThat(slot).hasSize(1).containsOnly(listOf(barnAktør.aktivFødselsnummer(), søkerAktør.aktivFødselsnummer()))
     }
 
     @Test

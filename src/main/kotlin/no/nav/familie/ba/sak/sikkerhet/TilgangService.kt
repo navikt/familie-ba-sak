@@ -136,7 +136,10 @@ class TilgangService(
                     .hentSøkerOgBarnPåFagsak(fagsakId)
                     ?.map { it.aktør.aktivFødselsnummer() }
                     ?: emptyList()
-            ).ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+            ).ifEmpty {
+                val fagsak = fagsakService.hentPåFagsakId(fagsakId)
+                listOfNotNull(aktør.aktivFødselsnummer(), fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer())
+            }
 
         personIdenterIFagsak.forEach { fnr ->
             auditLogger.log(
