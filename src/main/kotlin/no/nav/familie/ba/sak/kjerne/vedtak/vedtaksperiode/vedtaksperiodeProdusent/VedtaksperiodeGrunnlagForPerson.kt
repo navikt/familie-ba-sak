@@ -156,9 +156,11 @@ data class AndelForVedtaksperiode(
         val erBeggeNull = kalkulertUtbetalingsbeløp == 0 && other.kalkulertUtbetalingsbeløp == 0
         val erIngenNull = kalkulertUtbetalingsbeløp != 0 && other.kalkulertUtbetalingsbeløp != 0
 
+        val satsEndretOgDifferanseberegnetPeriodebeløpErNegativt = sats != other.sats && differanseberegnetPeriodebeløp != null && differanseberegnetPeriodebeløp < 0
+
         return Objects.equals(type, other.type) &&
             Objects.equals(prosent, other.prosent) &&
-            ((erBeggeNull && !(sats != other.sats && differanseberegnetPeriodebeløp != null && differanseberegnetPeriodebeløp < 0)) || (erIngenNull && sats == other.sats))
+            ((erBeggeNull && !satsEndretOgDifferanseberegnetPeriodebeløpErNegativt) || (erIngenNull && sats == other.sats))
     }
 
     override fun hashCode(): Int =
