@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component
 class UtbetalingsoppdragGenerator(
     private val utbetalingsgenerator: Utbetalingsgenerator,
     private val klassifiseringKorrigerer: KlassifiseringKorrigerer,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
     private val behandlingsinformasjonUtleder: BehandlingsinformasjonUtleder,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,

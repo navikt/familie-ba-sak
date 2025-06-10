@@ -218,7 +218,6 @@ class OppdragSteg {
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
                 ),
-                unleashNextMedContextService,
                 BehandlingsinformasjonUtleder(
                     EndretMigreringsdatoUtleder(
                         behandlingHentOgPersisterService,

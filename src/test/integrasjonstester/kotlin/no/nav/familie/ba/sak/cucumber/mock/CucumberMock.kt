@@ -446,7 +446,6 @@ class CucumberMock(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
             klassifiseringKorrigerer =
                 KlassifiseringKorrigerer(
                     tilkjentYtelseRepository,
