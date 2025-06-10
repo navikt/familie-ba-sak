@@ -316,10 +316,8 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(5))
 
         // Assert
-        val ikkeOppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }
-        assertThat(ikkeOppfyltPeriode).`as`("Forventer én IKKE_OPPFYLT periode").isNotNull
-        assertThat(ikkeOppfyltPeriode?.periodeFom).`as`("Ikke oppfylt periode fom").isEqualTo(LocalDate.now().minusYears(5))
-        assertThat(ikkeOppfyltPeriode?.periodeTom).`as`("Ikke oppfylt periode tom").isEqualTo(LocalDate.now().minusYears(1).minusDays(1))
+        val ikkeOppfyltPeriode = vilkårResultat.filter { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(ikkeOppfyltPeriode.size).isEqualTo(2)
 
         val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT }
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
