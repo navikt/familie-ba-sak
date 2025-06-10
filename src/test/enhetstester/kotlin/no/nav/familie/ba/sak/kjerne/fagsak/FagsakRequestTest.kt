@@ -30,7 +30,7 @@ class FagsakRequestTest {
         }
 
         @Test
-        fun `skal ikke kaste exception on request er gyldig for normal fagsaktype`() {
+        fun `skal ikke kaste exception om request er gyldig for normal fagsaktype`() {
             // Arrange
             val fagsakRequest =
                 FagsakRequest(
@@ -45,7 +45,7 @@ class FagsakRequestTest {
         }
 
         @Test
-        fun `skal ikke kaste exception on request er gyldig for institusjon fagsaktype`() {
+        fun `skal ikke kaste exception om request er gyldig for institusjon fagsaktype`() {
             // Arrange
             val fagsakRequest =
                 FagsakRequest(
@@ -53,7 +53,7 @@ class FagsakRequestTest {
                     fagsakType = FagsakType.INSTITUSJON,
                     institusjon =
                         RestInstitusjon(
-                            orgNummer = "123",
+                            orgNummer = "889640782",
                             tssEksternId = "321",
                             navn = "orgnavn",
                         ),
@@ -65,7 +65,7 @@ class FagsakRequestTest {
         }
 
         @Test
-        fun `skal ikke kaste exception on request er gyldig for skjermet fagsaktype`() {
+        fun `skal ikke kaste exception om request er gyldig for skjermet fagsaktype`() {
             // Arrange
             val fagsakRequest =
                 FagsakRequest(
@@ -95,6 +95,27 @@ class FagsakRequestTest {
             assertThat(exception.message).isEqualTo("Institusjon mangler for fagsaktype institusjon.")
         }
 
+        @Test
+        fun `skal kaste exception om orgnummer er ugydlig for fagsaktype institusjon`() {
+            // Arrange
+            val fagsakRequest =
+                FagsakRequest(
+                    "21100426738",
+                    fagsakType = FagsakType.INSTITUSJON,
+                    institusjon =
+                        RestInstitusjon(
+                            orgNummer = "1",
+                            tssEksternId = "321",
+                            navn = "orgnavn",
+                        ),
+                    skjermetBarnSøker = null,
+                )
+
+            // Act & assert
+            val exception = assertThrows<FunksjonellFeil> { fagsakRequest.valider() }
+            assertThat(exception.message).isEqualTo("Organisasjonsnummeret er ugyldig.")
+        }
+
         @ParameterizedTest
         @EnumSource(
             value = FagsakType::class,
@@ -109,7 +130,7 @@ class FagsakRequestTest {
                     fagsakType = fagsakType,
                     institusjon =
                         RestInstitusjon(
-                            orgNummer = "123",
+                            orgNummer = "889640782",
                             tssEksternId = "321",
                             navn = "orgnavn",
                         ),
@@ -147,7 +168,7 @@ class FagsakRequestTest {
             // Arrange
             val institusjon =
                 RestInstitusjon(
-                    orgNummer = "123",
+                    orgNummer = "889640782",
                     tssEksternId = "321",
                     navn = "orgnavn",
                 )
