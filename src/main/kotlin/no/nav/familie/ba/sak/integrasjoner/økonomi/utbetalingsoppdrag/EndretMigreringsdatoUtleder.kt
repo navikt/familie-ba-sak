@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Component
@@ -20,8 +19,6 @@ class EndretMigreringsdatoUtleder(
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
-    private final val utbetalingsgenerator: Utbetalingsgenerator = TODO("initialize me")
-
     fun utled(
         fagsak: Fagsak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
