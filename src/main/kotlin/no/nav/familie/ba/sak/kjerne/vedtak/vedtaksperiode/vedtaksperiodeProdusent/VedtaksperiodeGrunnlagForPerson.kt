@@ -158,7 +158,7 @@ data class AndelForVedtaksperiode(
 
         return Objects.equals(type, other.type) &&
             Objects.equals(prosent, other.prosent) &&
-            (erBeggeNull || (erIngenNull && sats == other.sats))
+            ((erBeggeNull && !(sats != other.sats && differanseberegnetPeriodebeløp != null && differanseberegnetPeriodebeløp < 0)) || (erIngenNull && sats == other.sats))
     }
 
     override fun hashCode(): Int =
