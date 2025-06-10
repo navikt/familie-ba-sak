@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.ba.søknad.v9.SøknadsFeltId
 import no.nav.familie.kontrakter.ba.søknad.v9.hentVerdiForSøknadsfelt
+import no.nav.familie.kontrakter.ba.søknad.v9.tilBoolskSvar
 import org.springframework.stereotype.Component
 
 @Component
@@ -24,14 +25,15 @@ class SøknadMapperV9 : SøknadMapper {
                     fnr = versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.fnr,
                     planleggerÅBoINorge12Mnd =
                         versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
-                            .hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND) == "JA",
+                            .hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND)
+                            .tilBoolskSvar(),
                 ),
             barn =
                 versjonertBarnetrygdSøknad.barnetrygdSøknad.barn
                     .map {
                         Barn(
                             fnr = it.fnr,
-                            planleggerÅBoINorge12Mnd = it.spørsmål.hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND) == "JA",
+                            planleggerÅBoINorge12Mnd = it.spørsmål.hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND).tilBoolskSvar(),
                         )
                     },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),
