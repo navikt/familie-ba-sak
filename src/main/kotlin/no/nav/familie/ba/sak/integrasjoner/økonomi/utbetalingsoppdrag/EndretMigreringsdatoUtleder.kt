@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Component
@@ -19,6 +20,8 @@ class EndretMigreringsdatoUtleder(
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
+    private final val utbetalingsgenerator: Utbetalingsgenerator = TODO("initialize me")
+
     fun utled(
         fagsak: Fagsak,
         forrigeTilkjentYtelse: TilkjentYtelse?,
@@ -59,7 +62,8 @@ class EndretMigreringsdatoUtleder(
                 .findByFagsak(fagsakId = fagsak.id)
                 .filter { it.behandling.aktivertTidspunkt > behandlingMigreringsinfo.endretTidspunkt && it.utbetalingsoppdrag != null }
                 .map { objectMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
-                .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom == migreringsdatoPåFagsakPlussEnMnd } }
+                // Viktig at vi omgjør til YearMonth før sammenligning her da vi alltid bruker YearhMonth for endretMigreringsdato inn i utbetalingsgenerator
+                .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom?.toYearMonth() == migreringsdatoPåFagsakPlussEnMnd.toYearMonth() } }
 
         return if (fagsakOpphørtFraMigreringsdatoIEnAvBehandlingeneEtterMigreringsdatoBleEndret) {
             null
