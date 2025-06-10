@@ -62,7 +62,7 @@ class EndretMigreringsdatoUtleder(
                 .findByFagsak(fagsakId = fagsak.id)
                 .filter { it.behandling.aktivertTidspunkt > behandlingMigreringsinfo.endretTidspunkt && it.utbetalingsoppdrag != null }
                 .map { objectMapper.readValue(it.utbetalingsoppdrag, Utbetalingsoppdrag::class.java) }
-                // Viktig at vi omgjør til YearMonth før sammenligning her da vi alltid bruker YearhMonth for endretMigreringsdato inn i utbetalingsgenerator
+                // Viktig at vi omgjør til YearMonth før sammenligning her da vi alltid bruker YearMonth for endretMigreringsdato inn i utbetalingsgenerator
                 .any { utbetalingsoppdrag -> utbetalingsoppdrag.utbetalingsperiode.any { utbetalingsperiode -> utbetalingsperiode.opphør?.opphørDatoFom?.toYearMonth() == migreringsdatoPåFagsakPlussEnMnd.toYearMonth() } }
 
         return if (fagsakOpphørtFraMigreringsdatoIEnAvBehandlingeneEtterMigreringsdatoBleEndret) {
