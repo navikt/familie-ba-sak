@@ -1,6 +1,7 @@
 {
   "variables": {
-    "ident": "44556612345"
+    "ident": "44556612345",
+    "historikk": false
   },
   "query": "GRAPHQL-PLACEHOLDER"
 }

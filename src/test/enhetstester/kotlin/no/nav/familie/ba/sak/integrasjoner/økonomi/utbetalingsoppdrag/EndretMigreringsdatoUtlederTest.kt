@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -435,7 +436,82 @@ class EndretMigreringsdatoUtlederTest {
                                     periodeId = 0,
                                     forrigePeriodeId = null,
                                     ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
-                                    opphør = Opphør(migreringsdato.plusMonths(1)),
+                                    opphør = Opphør(migreringsdato.plusMonths(1).toYearMonth().toLocalDate()),
+                                ),
+                            ),
+                        ),
+                    ),
+            )
+
+        val migreringsBehandling2 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            )
+
+        every {
+            behandlingHentOgPersisterService.hentBehandlinger(fagsak.id)
+        } returns listOf(migreringsBehandling1, migreringsBehandling2)
+
+        every {
+            behandlingMigreringsinfoRepository.finnSisteBehandlingMigreringsInfoPåFagsak(fagsak.id)
+        } returns
+            BehandlingMigreringsinfo(
+                behandling = migreringsBehandling1,
+                migreringsdato = migreringsdato,
+            ).also { it.endretTidspunkt = migreringsdatoEndretDato.atStartOfDay() }
+
+        every { tilkjentYtelseRepository.findByFagsak(fagsak.id) } returns listOf(forrigeTilkjentYtelse)
+
+        // Act
+        val endretMigreringsdato =
+            endretMigreringsdatoUtleder.utled(
+                fagsak = fagsak,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+            )
+
+        // Assert
+        assertThat(endretMigreringsdato).isNull()
+    }
+
+    @Test
+    fun `skal returnere null dersom man allerede har opphørt fra migreringsdato pluss 1 mnd og migreringsdato ikke er den første i mnd`() {
+        // Arrange
+        val migreringsdato = LocalDate.of(2024, 11, 11)
+        val migreringsdatoEndretDato = LocalDate.of(2024, 11, 11)
+
+        val fagsak = Fagsak(0L, randomAktør())
+
+        val migreringsBehandling1 =
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            )
+
+        val forrigeTilkjentYtelse =
+            lagTilkjentYtelse(
+                behandling = migreringsBehandling1,
+                lagAndelerTilkjentYtelse = {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            tilkjentYtelse = it,
+                            fom = migreringsdato.plusMonths(2).toYearMonth(),
+                            tom = migreringsdato.plusMonths(3).toYearMonth(),
+                        ),
+                    )
+                },
+                utbetalingsoppdrag =
+                    objectMapper.writeValueAsString(
+                        lagUtbetalingsoppdrag(
+                            listOf(
+                                lagUtbetalingsperiode(
+                                    behandlingId = migreringsBehandling1.id,
+                                    periodeId = 0,
+                                    forrigePeriodeId = null,
+                                    ytelseTypeBa = YtelsetypeBA.ORDINÆR_BARNETRYGD,
+                                    opphør = Opphør(migreringsdato.plusMonths(1).toYearMonth().toLocalDate()),
                                 ),
                             ),
                         ),

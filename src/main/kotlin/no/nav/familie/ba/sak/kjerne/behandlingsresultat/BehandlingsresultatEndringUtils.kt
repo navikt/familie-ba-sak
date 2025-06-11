@@ -58,8 +58,8 @@ object BehandlingsresultatEndringUtils {
                 val nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør }
                 val forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør }
 
-                val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør }
-                val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
+                val nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
+                val forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.personer.any { person -> person.aktør == aktør } }
 
                 val nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) }
                 val forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }

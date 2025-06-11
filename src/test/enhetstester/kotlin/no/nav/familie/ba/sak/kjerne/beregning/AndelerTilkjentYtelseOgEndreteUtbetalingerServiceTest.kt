@@ -88,7 +88,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
             every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
                 listOf(
                     lagEndretUtbetalingAndel(
-                        person = aktør,
+                        personer = setOf(aktør),
                         fom = YearMonth.now().minusMonths(3),
                         tom = YearMonth.now().minusMonths(2),
                         årsak = Årsak.ENDRE_MOTTAKER,
@@ -130,7 +130,7 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerServiceTest {
             every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } returns
                 listOf(
                     lagEndretUtbetalingAndel(
-                        person = aktør,
+                        personer = setOf(aktør),
                         fom = YearMonth.now().minusMonths(3),
                         tom = YearMonth.now().minusMonths(1),
                         årsak = Årsak.ENDRE_MOTTAKER,

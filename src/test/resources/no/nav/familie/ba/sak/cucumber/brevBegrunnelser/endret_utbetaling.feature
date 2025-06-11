@@ -163,8 +163,7 @@ Egenskap: Brevbegrunnelse ved endret utbetaling
 
     Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak       | Prosent | Søknadstidspunkt | Avtaletidspunkt delt bosted |
-      | 4       | 2            | 01.12.2023 | 31.12.2023 | DELT_BOSTED | 100     | 06.12.2023       | 2023-11-05                  |
-      | 3       | 2            | 01.12.2023 | 31.12.2023 | DELT_BOSTED | 100     | 06.12.2023       | 2023-11-05                  |
+      | 3, 4    | 2            | 01.12.2023 | 31.12.2023 | DELT_BOSTED | 100     | 06.12.2023       | 2023-11-05                  |
 
     Når vedtaksperiodene genereres for behandling 2
 

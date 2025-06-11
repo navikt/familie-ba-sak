@@ -45,8 +45,59 @@ fun stubScenario(scenario: RestScenario) {
         stubHentPersonStatsborgerskap(it)
         stubHentPersonVergemaalEllerFretidfullmakt(it)
         stubHentBostedsadresserForPerson(it)
+        stubHentStatsborgerskap(it)
+        stubHentSøknad(it)
     }
     stubHentPerson(scenario)
+}
+
+private fun stubHentSøknad(restScenarioPerson: RestScenarioPerson) {
+    stubFor(
+        post(urlEqualTo("/rest/api/"))
+            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString("")))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(""),
+                    ),
+            ),
+    )
+}
+
+private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
+    val response =
+        PdlBaseResponse(
+            data =
+                PdlStatsborgerskapResponse(
+                    person =
+                        PdlStatsborgerskapPerson(
+                            statsborgerskap =
+                                restScenarioPerson.statsborgerskap,
+                        ),
+                ),
+            errors = null,
+            extensions = null,
+        )
+    val pdlRequestBody =
+        PdlPersonRequest(
+            variables = PdlPersonRequestVariables(restScenarioPerson.ident, historikk = true),
+            query = hentGraphqlQuery("statsborgerskap"),
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
 }
 
 private fun stubHentBostedsadresserForPerson(restScenarioPerson: RestScenarioPerson) {
@@ -313,7 +364,7 @@ private fun stubHentPersonStatsborgerskap(scenarioPerson: RestScenarioPerson) {
     val pdlRequestBody =
         PdlPersonRequest(
             variables = PdlPersonRequestVariables(ident = scenarioPerson.ident),
-            query = hentGraphqlQuery("statsborgerskap-uten-historikk"),
+            query = hentGraphqlQuery("statsborgerskap"),
         )
 
     stubFor(

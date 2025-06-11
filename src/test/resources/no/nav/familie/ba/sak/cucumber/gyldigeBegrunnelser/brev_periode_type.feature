@@ -59,8 +59,7 @@ Egenskap: Gyldige begrunnelser for forskjellige brevperiodetyper
 
     Og med endrede utbetalinger
       | AktørId | BehandlingId | Fra dato   | Til dato   | Årsak             | Prosent |
-      | 2       | 1            | 01.09.2020 | 01.09.2020 | ETTERBETALING_3ÅR | 0       |
-      | 3       | 1            | 01.09.2020 | 01.09.2020 | ETTERBETALING_3ÅR | 0       |
+      | 2, 3    | 1            | 01.09.2020 | 01.09.2020 | ETTERBETALING_3ÅR | 0       |
 
     Når vedtaksperiodene genereres for behandling 1
 

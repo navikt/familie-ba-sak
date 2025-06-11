@@ -254,6 +254,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 søknadstidspunkt = LocalDate.now().minusYears(3).withDayOfMonth(8),
                 begrunnelse = "begrunnelse",
                 personIdent = barnFnr,
+                personIdenter = listOf(barnFnr),
                 årsak = Årsak.DELT_BOSTED,
                 prosent = BigDecimal.ZERO,
                 erTilknyttetAndeler = false,
