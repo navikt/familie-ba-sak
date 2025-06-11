@@ -129,7 +129,6 @@ class DokumentGenereringServiceTest {
             every { personopplysningerService.hentPersoninfoEnkel(any()) } returns PersonInfo(fødselsdato = LocalDate.now(), navn = "navn")
 
             // Act && Assert
-
             val feilmelding =
                 assertThrows<Feil> {
                     dokumentGenereringService.genererManueltBrev(request, fagsak)
