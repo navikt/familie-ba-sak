@@ -4,8 +4,6 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -16,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -26,60 +23,14 @@ import java.time.LocalDateTime
 class RelatertBehandlingUtlederTest {
     private val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val unleashService = mockk<UnleashNextMedContextService>()
     private val relatertBehandlingUtleder =
         RelatertBehandlingUtleder(
-            unleashService = unleashService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
-    @BeforeEach
-    fun oppsett() {
-        every { unleashService.isEnabled(FeatureToggle.SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK, false) } returns true
-    }
-
     @Nested
     inner class UtledRelatertBehandling {
-        @ParameterizedTest
-        @EnumSource(
-            value = BehandlingÅrsak::class,
-            names = ["KLAGE", "IVERKSETTE_KA_VEDTAK"],
-            mode = EnumSource.Mode.INCLUDE,
-        )
-        fun `skal ikke ultede relatert behandling for revurdering med årsak klage eller årsak iverksette ka vedtak når toggle er skrudd av`(
-            behandlingÅrsak: BehandlingÅrsak,
-        ) {
-            // Arrange
-            val nåtidspunkt = LocalDateTime.now()
-
-            val revurdering =
-                lagBehandling(
-                    behandlingType = BehandlingType.REVURDERING,
-                    årsak = behandlingÅrsak,
-                    aktivertTid = nåtidspunkt.minusSeconds(1),
-                    status = BehandlingStatus.UTREDES,
-                    resultat = Behandlingsresultat.IKKE_VURDERT,
-                )
-
-            val forrigeVedtatteBarnetrygdbehandling =
-                lagBehandling(
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    aktivertTid = nåtidspunkt.minusSeconds(2),
-                    status = BehandlingStatus.AVSLUTTET,
-                    resultat = Behandlingsresultat.INNVILGET,
-                )
-
-            every { unleashService.isEnabled(FeatureToggle.SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK, false) } returns false
-            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(revurdering) } returns forrigeVedtatteBarnetrygdbehandling
-
-            // Act
-            val relatertBehandling = relatertBehandlingUtleder.utledRelatertBehandling(revurdering)
-
-            // Assert
-            assertThat(relatertBehandling).isNull()
-        }
-
         @ParameterizedTest
         @EnumSource(
             value = BehandlingÅrsak::class,
