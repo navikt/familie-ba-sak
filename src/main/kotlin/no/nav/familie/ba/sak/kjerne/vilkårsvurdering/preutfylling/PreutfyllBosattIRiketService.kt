@@ -63,9 +63,9 @@ class PreutfyllBosattIRiketService(
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordisk, erBosatt ->
                 val boolskVerdi = erNordisk == true && erBosatt == true
                 if (boolskVerdi) {
-                    BoolskVerdiMedKommentar(boolskVerdi, "- Har nordisk statsborgerskap")
+                    BoolskVerdiMedKommentar(boolskVerdi, "- Norsk/nordisk statsborgerskap")
                 } else {
-                    BoolskVerdiMedKommentar(boolskVerdi, "- Bor ikke i Norge med Nordisk statsborgerskap")
+                    BoolskVerdiMedKommentar(boolskVerdi, "")
                 }
             }
 
@@ -105,7 +105,7 @@ class PreutfyllBosattIRiketService(
                         if (erBosattINorgePeriode.verdi == true) {
                             sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
                         } else {
-                            BoolskVerdiMedKommentar(false, "- Ikke bosatt i riket")
+                            BoolskVerdiMedKommentar(false, " ")
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -118,11 +118,11 @@ class PreutfyllBosattIRiketService(
     ): BoolskVerdiMedKommentar =
         when {
             erBosattINorgePeriode.erMinst12Måneder() ->
-                BoolskVerdiMedKommentar(true, "- Har hatt norsk bostedsadresse i minst 12 måneder.")
+                BoolskVerdiMedKommentar(true, "- Norsk bostedsadresse i minst 12 måneder.")
 
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) -> BoolskVerdiMedKommentar(true, "Har oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
-            erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) -> BoolskVerdiMedKommentar(true, "Har bodd i Norge siden fødsel.")
-            else -> BoolskVerdiMedKommentar(false, "- Har ikke vært og planlegger ikke å være bosatt i Norge i 12 måneder.")
+            erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) -> BoolskVerdiMedKommentar(true, "- Bosatt i Norge siden fødsel.")
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) -> BoolskVerdiMedKommentar(true, "- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
+            else -> BoolskVerdiMedKommentar(false, "")
         }
 
     private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
