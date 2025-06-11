@@ -85,12 +85,14 @@ class PdlRestClient(
                     PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
                         pdlPerson.person.forelderBarnRelasjon
                             .mapNotNull { relasjon ->
-                                relasjon.relatertPersonsIdent?.let { ident ->
-                                    ForelderBarnRelasjon(
-                                        aktør = personidentService.hentAktør(ident),
-                                        relasjonsrolle = relasjon.relatertPersonsRolle,
-                                    )
-                                }
+                                relasjon.relatertPersonsIdent
+                                    ?.let { ident -> personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) }
+                                    ?.let { aktør ->
+                                        ForelderBarnRelasjon(
+                                            aktør = aktør,
+                                            relasjonsrolle = relasjon.relatertPersonsRolle,
+                                        )
+                                    }
                             }.toSet()
                     }
 
