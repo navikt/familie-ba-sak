@@ -45,8 +45,7 @@ object EndretUtbetalingAndelValidering {
         endretUtbetalingAndel.validerUtfyltEndring()
         if (eksisterendeEndringerPåBehandling.any {
                 it.overlapperMed(endretUtbetalingAndel.periode) &&
-                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty() &&
-                    it.årsak == endretUtbetalingAndel.årsak
+                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty()
             }
         ) {
             throw FunksjonellFeil(
