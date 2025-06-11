@@ -3,13 +3,16 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInstitusjon
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -661,6 +664,107 @@ class BehandlingsinformasjonUtlederTest {
                 .aktivFødselsnummer(),
         )
         assertThat(behandlingsinformasjon.opphørKjederFraFørsteUtbetaling).isFalse()
+    }
+
+    @Test
+    fun `skal utlede behandlingsinformasjon hvor utbetalesTil settes til søker for SKJERMET_BARN fagsaktype`() {
+        // Arrange
+        val saksbehandlerId = "123"
+        val søker = randomAktør()
+
+        val skjermetBarnSøker =
+            SkjermetBarnSøker(aktør = søker)
+
+        val fagsak =
+            lagFagsak(
+                type = FagsakType.SKJERMET_BARN,
+                skjermetBarnSøker = skjermetBarnSøker,
+            )
+
+        val behandling =
+            lagBehandling(
+                fagsak = fagsak,
+            )
+
+        val vedtak =
+            lagVedtak(
+                behandling = behandling,
+                vedtaksdato = null,
+            )
+
+        val forrigeTilkjentYtelse = null
+
+        every {
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
+        } returns null
+
+        // Act
+        val behandlingsinformasjon =
+            behandlingsinformasjonUtleder.utled(
+                saksbehandlerId = saksbehandlerId,
+                vedtak = vedtak,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                sisteAndelPerKjede = mapOf(),
+                false,
+            )
+
+        // Assert
+        assertThat(behandlingsinformasjon.saksbehandlerId).isEqualTo(saksbehandlerId)
+        assertThat(behandlingsinformasjon.behandlingId).isEqualTo(vedtak.behandling.id.toString())
+        assertThat(behandlingsinformasjon.eksternBehandlingId).isEqualTo(vedtak.behandling.id)
+        assertThat(behandlingsinformasjon.eksternFagsakId).isEqualTo(vedtak.behandling.fagsak.id)
+        assertThat(behandlingsinformasjon.fagsystem).isEqualTo(FagsystemBA.BARNETRYGD)
+        assertThat(behandlingsinformasjon.personIdent).isEqualTo(
+            vedtak.behandling.fagsak.aktør
+                .aktivFødselsnummer(),
+        )
+        assertThat(behandlingsinformasjon.vedtaksdato).isEqualTo(LocalDate.of(2024, 11, 1))
+        assertThat(behandlingsinformasjon.opphørAlleKjederFra).isNull()
+        assertThat(behandlingsinformasjon.utbetalesTil).isEqualTo(søker.aktivFødselsnummer())
+        assertThat(behandlingsinformasjon.opphørKjederFraFørsteUtbetaling).isFalse()
+    }
+
+    @Test
+    fun `skal kaste feil under utleding av behandlingsinformasjon dersom fagsak type er skjermet barn og det ikke er lagret ned søker`() {
+        // Arrange
+        val saksbehandlerId = "123"
+
+        val fagsak =
+            lagFagsak(
+                type = FagsakType.SKJERMET_BARN,
+                skjermetBarnSøker = null,
+            )
+
+        val behandling =
+            lagBehandling(
+                fagsak = fagsak,
+            )
+
+        val vedtak =
+            lagVedtak(
+                behandling = behandling,
+                vedtaksdato = null,
+            )
+
+        val forrigeTilkjentYtelse = null
+
+        every {
+            endretMigreringsdatoUtleder.utled(vedtak.behandling.fagsak, forrigeTilkjentYtelse)
+        } returns null
+
+        // Act && Assert
+        val feilmelding =
+            assertThrows<Feil> {
+                behandlingsinformasjonUtleder.utled(
+                    saksbehandlerId = saksbehandlerId,
+                    vedtak = vedtak,
+                    forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                    sisteAndelPerKjede = mapOf(),
+                    false,
+                )
+            }
+
+        assertThat(feilmelding.message).isEqualTo("Barnetrygd skal utbetales til søker av barnet, men søker er ikke registrert på fagsak 1")
     }
 
     @Test
