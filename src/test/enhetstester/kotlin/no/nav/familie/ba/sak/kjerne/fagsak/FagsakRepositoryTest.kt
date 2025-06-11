@@ -236,12 +236,12 @@ class FagsakRepositoryTest(
             // Arrange
             val barn = aktørIdRepository.save(randomAktør())
             val søker = aktørIdRepository.save(randomAktør())
-            val skjermetBarnSøker = skjermetBarnSøkerRepository.save(SkjermetBarnSøker(aktørId = søker.aktørId))
+            val skjermetBarnSøker = skjermetBarnSøkerRepository.save(SkjermetBarnSøker(aktør = søker))
 
             fagsakRepository.save(lagFagsakUtenId(aktør = barn, status = FagsakStatus.LØPENDE, skjermetBarnSøker = skjermetBarnSøker, type = FagsakType.SKJERMET_BARN))
 
             // Act
-            val fagsak = fagsakRepository.finnFagsakForSkjermetBarnSøker(barn, søker.aktørId)
+            val fagsak = fagsakRepository.finnFagsakForSkjermetBarnSøker(barn, søker)
 
             // Assert
             assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)

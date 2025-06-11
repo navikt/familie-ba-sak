@@ -24,12 +24,14 @@ fun lagFagsak(
     status: FagsakStatus = FagsakStatus.OPPRETTET,
     type: FagsakType = FagsakType.NORMAL,
     arkivert: Boolean = false,
+    skjermetBarnSøker: SkjermetBarnSøker? = null,
 ) = lagFagsakUtenId(
     aktør = aktør,
     institusjon = institusjon,
     status = status,
     type = type,
     arkivert = arkivert,
+    skjermetBarnSøker = skjermetBarnSøker,
 ).copy(id)
 
 /**
