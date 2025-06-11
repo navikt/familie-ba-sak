@@ -44,6 +44,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -63,8 +65,11 @@ class EndretUtbetalingAndelValideringTest {
         clearAllMocks()
     }
 
-    @Test
-    fun `skal sjekke at en endret periode ikke overlapper med eksisterende endringsperioder`() {
+    @ParameterizedTest
+    @EnumSource(Årsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["DELT_BOSTED"])
+    fun `skal sjekke at en endret periode ikke overlapper med eksisterende endringsperioder`(
+        årsak: Årsak,
+    ) {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
         val endretUtbetalingAndel =
@@ -88,10 +93,12 @@ class EndretUtbetalingAndelValideringTest {
                         endretUtbetalingAndel.copy(
                             fom = YearMonth.of(2018, 4),
                             tom = YearMonth.of(2019, 2),
+                            årsak = årsak,
                         ),
                         endretUtbetalingAndel.copy(
                             fom = YearMonth.of(2020, 4),
                             tom = YearMonth.of(2021, 2),
+                            årsak = årsak,
                         ),
                     ),
                 )
@@ -114,10 +121,6 @@ class EndretUtbetalingAndelValideringTest {
         validerIngenOverlappendeEndring(
             endretUtbetalingAndel,
             listOf(endretUtbetalingAndel.copy(personer = mutableSetOf(barn2))),
-        )
-        validerIngenOverlappendeEndring(
-            endretUtbetalingAndel,
-            listOf(endretUtbetalingAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)),
         )
     }
 
