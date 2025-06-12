@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.AktiverMinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -17,24 +19,29 @@ import org.springframework.stereotype.Service
 )
 class AktiverMinsideTask(
     private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer,
+    private val minsideAktiveringService: MinsideAktiveringService,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val aktiverMinsideDTO =
             objectMapper.readValue(task.payload, AktiverMinsideDTO::class.java)
 
-        // TODO: Vurdere om vi skal lagre informasjon om ident har aktivert minside i databasen og kun aktivere hvis det ikke er gjort tidligere
-        logger.info("Aktiverer minside for ident: ${aktiverMinsideDTO.ident}")
-        minsideAktiveringKafkaProducer.aktiver(aktiverMinsideDTO.ident)
+        if (minsideAktiveringService.harAktivertMinsideAktivering(aktiverMinsideDTO.aktør)) {
+            logger.info("Minside er allerede aktivert for aktør: ${aktiverMinsideDTO.aktør.aktørId}")
+            return
+        }
+        logger.info("Aktiverer minside for aktør: ${aktiverMinsideDTO.aktør.aktørId}")
+        minsideAktiveringService.aktiverMinsideAktivering(aktiverMinsideDTO.aktør)
+        minsideAktiveringKafkaProducer.aktiver(aktiverMinsideDTO.aktør.aktivFødselsnummer())
     }
 
     companion object {
         const val TASK_STEP_TYPE = "aktiverMinside"
         private val logger = LoggerFactory.getLogger(AktiverMinsideTask::class.java)
 
-        fun opprettTask(ident: String): Task =
+        fun opprettTask(aktør: Aktør): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(AktiverMinsideDTO(ident)),
+                payload = objectMapper.writeValueAsString(AktiverMinsideDTO(aktør)),
             )
     }
 }

@@ -1,49 +1,28 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
-import no.nav.familie.log.IdUtils
-import no.nav.familie.log.mdc.MDCConstants
-import no.nav.tms.microfrontend.MicrofrontendMessageBuilder
-import no.nav.tms.microfrontend.Sensitivitet
-import org.slf4j.LoggerFactory
-import org.slf4j.MDC
-import org.springframework.kafka.core.KafkaTemplate
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.stereotype.Service
 
 @Service
 class MinsideAktiveringService(
-    private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val minsideAktiveringRepository: MinsideAktiveringRepository,
 ) {
-    fun aktiver(personIdent: String) {
-        val aktiveringsmelding =
-            MicrofrontendMessageBuilder
-                .enable {
-                    ident = personIdent
-                    initiatedBy = INITIATED_BY
-                    microfrontendId = MICROFRONTEND_ID
-                    sensitivitet = Sensitivitet.HIGH
-                }.text()
-        val callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-        logger.info("Aktiverer minside mikrofrontend for personIdent: $personIdent, callId: $callId")
-        kafkaTemplate.send(TOPIC, callId, aktiveringsmelding)
+    fun harAktivertMinsideAktivering(aktør: Aktør): Boolean = minsideAktiveringRepository.existsByAktørAndAktivertIsTrue(aktør)
+
+    fun aktiverMinsideAktivering(aktør: Aktør): MinsideAktivering {
+        val minsideAktivering = minsideAktiveringRepository.findByAktør(aktør)
+        val aktivertMinsideAktivering =
+            minsideAktivering?.copy(aktivert = true) ?: MinsideAktivering(aktør = aktør, aktivert = true)
+        return minsideAktiveringRepository.save(aktivertMinsideAktivering)
     }
 
-    fun deaktiver(personIdent: String) {
-        val deaktiveringsmelding =
-            MicrofrontendMessageBuilder
-                .disable {
-                    ident = personIdent
-                    initiatedBy = INITIATED_BY
-                    microfrontendId = MICROFRONTEND_ID
-                }.text()
-        val callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-        logger.info("Deaktiverer minside mikrofrontend for personIdent: $personIdent, callId: $callId")
-        kafkaTemplate.send(TOPIC, deaktiveringsmelding)
+    fun deaktiverMinsideAktivering(aktør: Aktør): MinsideAktivering {
+        val minsideAktivering = minsideAktiveringRepository.findByAktør(aktør)
+        val deaktivertMinsideAktivering =
+            minsideAktivering?.copy(aktivert = false) ?: MinsideAktivering(aktør = aktør, aktivert = false)
+        return minsideAktiveringRepository.save(deaktivertMinsideAktivering)
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(MinsideAktiveringService::class.java)
-        private const val MICROFRONTEND_ID = "familie-ba-mikrofrontend-minside"
-        private const val INITIATED_BY = "teamfamilie"
-        private const val TOPIC = "min-side.aapen-microfrontend-v1"
-    }
+    fun hentAktiverteMinsideAktiveringerForAktører(aktører: List<Aktør>): List<MinsideAktivering> =
+        minsideAktiveringRepository.findAllByAktørInAndAktivertIsTrue(aktører)
 }
