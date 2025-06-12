@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.task.dto.DeaktiverMinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 3,
 )
 class DeaktiverMinsideTask(
-    private val minsideAktiveringService: MinsideAktiveringService,
+    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val deaktiverMinsideDTO =
@@ -24,7 +24,7 @@ class DeaktiverMinsideTask(
 
         // TODO: Vurdere om vi skal lagre informasjon om ident har aktivert minside i databasen og kun deaktivere hvis vi tidligere har aktivert for identen
         logger.info("Deaktiverer minside for ident: ${deaktiverMinsideDTO.ident}")
-        minsideAktiveringService.deaktiver(deaktiverMinsideDTO.ident)
+        minsideAktiveringKafkaProducer.deaktiver(deaktiverMinsideDTO.ident)
     }
 
     companion object {
