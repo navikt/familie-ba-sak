@@ -352,9 +352,9 @@ class SøknadGrunnlagTest(
             personopplysningerService
                 .hentPersoninfoEnkel(søker)
                 .forelderBarnRelasjon
-                .first()
-                .aktør
-                .aktivFødselsnummer()
+
+        val barnMedRelasjonUtenAdressebeskyttelse = barnMedRelasjon.first { it.adressebeskyttelseGradering == null }.aktør.aktivFødselsnummer()
+        val barnMedRelasjonMedAdressebeskyttelse = barnMedRelasjon.first { it.adressebeskyttelseGradering != null }.aktør.aktivFødselsnummer()
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søker.aktivFødselsnummer())
 
@@ -363,7 +363,7 @@ class SøknadGrunnlagTest(
         every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
             lagVersjonertBarnetrygdSøknadV9(
                 søkerIdent = søker.aktivFødselsnummer(),
-                barnasIdenter = listOf(barnUtenRelasjon, barnMedRelasjon),
+                barnasIdenter = listOf(barnUtenRelasjon, barnMedRelasjonUtenAdressebeskyttelse),
                 søknadstype = Søknadstype.UTVIDET,
                 originalspråk = "nn",
             )
@@ -389,12 +389,17 @@ class SøknadGrunnlagTest(
         assertThat(søknadDto.søkerMedOpplysninger.ident).isEqualTo(søker.aktivFødselsnummer())
         assertThat(søknadDto.søkerMedOpplysninger.målform).isEqualTo(Målform.NN)
 
-        assertThat(søknadDto.barnaMedOpplysninger).hasSize(2)
+        assertThat(søknadDto.barnaMedOpplysninger).hasSize(3)
 
         assertThat(søknadDto.barnaMedOpplysninger)
             .anySatisfy {
-                assertThat(it.ident).isEqualTo(barnMedRelasjon)
+                assertThat(it.ident).isEqualTo(barnMedRelasjonUtenAdressebeskyttelse)
                 assertThat(it.inkludertISøknaden).isTrue()
+                assertThat(it.erFolkeregistrert).isTrue()
+                assertThat(it.manueltRegistrert).isFalse()
+            }.anySatisfy {
+                assertThat(it.ident).isEqualTo(barnMedRelasjonMedAdressebeskyttelse)
+                assertThat(it.inkludertISøknaden).isFalse()
                 assertThat(it.erFolkeregistrert).isTrue()
                 assertThat(it.manueltRegistrert).isFalse()
             }.anySatisfy {
@@ -410,7 +415,7 @@ class SøknadGrunnlagTest(
 
         assertThat(persongrunnlag.barna).hasSize(2)
         assertThat(persongrunnlag.barna.map { it.aktør.aktivFødselsnummer() })
-            .containsExactlyInAnyOrder(barnUtenRelasjon, barnMedRelasjon)
+            .containsExactlyInAnyOrder(barnUtenRelasjon, barnMedRelasjonUtenAdressebeskyttelse)
     }
 
     @Test
