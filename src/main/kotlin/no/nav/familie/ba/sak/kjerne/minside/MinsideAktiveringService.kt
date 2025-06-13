@@ -23,6 +23,5 @@ class MinsideAktiveringService(
         return minsideAktiveringRepository.save(deaktivertMinsideAktivering)
     }
 
-    fun hentAktiverteMinsideAktiveringerForAktører(aktører: List<Aktør>): List<MinsideAktivering> =
-        minsideAktiveringRepository.findAllByAktørInAndAktivertIsTrue(aktører)
+    fun hentAktiverteMinsideAktiveringerForAktører(aktører: List<Aktør>): List<MinsideAktivering> = minsideAktiveringRepository.findAllByAktørInAndAktivertIsTrue(aktører)
 }
