@@ -125,7 +125,7 @@ class BehandlingService(
                             behandling = behandling,
                         )
                     }
-                    if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) && nyBehandling.søknadsinfo != null) {
+                    if (nyBehandling.søknadsinfo != null) {
                         søknadReferanseService.lagreSøknadReferanse(
                             behandlingId = it.id,
                             journalpostId = nyBehandling.søknadsinfo.journalpostId,
