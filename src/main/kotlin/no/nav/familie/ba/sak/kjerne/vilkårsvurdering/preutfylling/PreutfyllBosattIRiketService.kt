@@ -74,7 +74,7 @@ class PreutfyllBosattIRiketService(
         val erBosattIRiketTidslinje =
             erØvrigeKravForBosattIRiketOppfyltTidslinje
                 .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
-                    BoolskVerdiMedKommentar(erØvrigeKravOppfylt?.boolskVerdi == true || erNordiskOgBosatt?.boolskVerdi == true, erNordiskOgBosatt?.kommentar + "\n" + erØvrigeKravOppfylt?.kommentar)
+                    BoolskVerdiMedKommentar(erØvrigeKravOppfylt?.boolskVerdi == true || erNordiskOgBosatt?.boolskVerdi == true, (erNordiskOgBosatt?.kommentar + "\n" + (erØvrigeKravOppfylt?.kommentar ?: "")).trim())
                 }.beskjærFraOgMed(eldsteBarnsFødselsdato)
 
         return erBosattIRiketTidslinje
