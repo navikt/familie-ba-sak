@@ -42,7 +42,7 @@ class MockPdlRestClient(
         listOf(
             Statsborgerskap(
                 land = "NOR",
-                gyldigFraOgMed = LocalDate.now(),
+                gyldigFraOgMed = LocalDate.now().minusYears(1),
                 gyldigTilOgMed = null,
                 bekreftelsesdato = null,
             ),
