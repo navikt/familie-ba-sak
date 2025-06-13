@@ -16,11 +16,16 @@ import java.net.URI
 class MockPdlIdentRestClient(
     restOperations: RestOperations,
 ) : PdlIdentRestClient(URI("dummy_uri"), restOperations) {
+    private val identMap = mutableMapOf<String, List<IdentInformasjon>>()
+
     override fun hentIdenter(
         personIdent: String,
         historikk: Boolean,
-    ): List<IdentInformasjon> =
-        when {
+    ): List<IdentInformasjon> {
+        // If we have stored identities for this person, return them
+        identMap[personIdent]?.let { return it }
+
+        return when {
             historikk ->
                 listOf(
                     IdentInformasjon(personIdent, historisk = false, gruppe = "FOLKEREGISTERIDENT"),
@@ -41,4 +46,16 @@ class MockPdlIdentRestClient(
                     ),
                 )
         }
+    }
+
+    fun leggTilIdent(
+        personIdent: String,
+        identInformasjon: List<IdentInformasjon>,
+    ) {
+        identMap[personIdent] = identInformasjon
+    }
+
+    fun reset() {
+        identMap.clear()
+    }
 }

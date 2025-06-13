@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClientMock
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
@@ -33,7 +32,7 @@ abstract class AbstractMockkSpringRunner {
     private lateinit var mockPersonopplysningerService: PersonopplysningerService
 
     @Autowired
-    private lateinit var mockPdlIdentRestClient: PdlIdentRestClient
+    private lateinit var mockPdlIdentRestClient: MockPdlIdentRestClient
 
     @Autowired
     private lateinit var mockIntegrasjonClient: IntegrasjonClient
@@ -106,9 +105,7 @@ abstract class AbstractMockkSpringRunner {
             ClientMocks.clearPdlMocks(mockPersonopplysningerService)
         }
 
-        if (isMockKMock(mockPdlIdentRestClient)) {
-            ClientMocks.clearPdlIdentRestClient(mockPdlIdentRestClient)
-        }
+        mockPdlIdentRestClient.reset()
 
         IntegrasjonClientMock.clearIntegrasjonMocks(mockIntegrasjonClient)
         IntegrasjonClientMock.clearMockFamilieIntegrasjonerTilgangskontrollClient(

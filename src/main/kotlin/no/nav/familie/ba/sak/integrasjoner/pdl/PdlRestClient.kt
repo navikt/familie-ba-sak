@@ -86,8 +86,14 @@ class PdlRestClient(
                         pdlPerson.person.forelderBarnRelasjon
                             .mapNotNull { relasjon ->
                                 relasjon.relatertPersonsIdent
-                                    ?.let { ident -> personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) }
-                                    ?.let { aktør ->
+                                    ?.let { ident ->
+                                        personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident).run {
+                                            if (this == null) {
+                                                secureLogger.warn("Filtrert bort relasjon som ikke har aktivt fødselsnummer i PDL for ident $ident")
+                                            }
+                                            this
+                                        }
+                                    }?.let { aktør ->
                                         ForelderBarnRelasjon(
                                             aktør = aktør,
                                             relasjonsrolle = relasjon.relatertPersonsRolle,

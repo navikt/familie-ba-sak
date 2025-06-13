@@ -69,13 +69,10 @@ class PersonidentService(
         return aktør
     }
 
-    fun hentAktørOrNullHvisIkkeAktivFødselsnummer(identEllerAktørId: String): Aktør? {
-        if (hentIdenter(identEllerAktørId, false).hentAktivFødselsnummerOrNull() == null) {
-            secureLogger.warn("Fant ikke aktiv fødselsnummer for aktør med id $identEllerAktørId")
-            return null
+    fun hentAktørOrNullHvisIkkeAktivFødselsnummer(identEllerAktørId: String): Aktør? =
+        hentIdenter(identEllerAktørId, false).hentAktivFødselsnummerOrNull()?.let {
+            hentAktør(identEllerAktørId)
         }
-        return hentAktør(identEllerAktørId)
-    }
 
     fun hentOgLagreAktør(
         ident: String,
