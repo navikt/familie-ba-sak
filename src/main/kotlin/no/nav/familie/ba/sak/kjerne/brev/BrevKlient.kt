@@ -31,8 +31,16 @@ class BrevKlient(
         val uri = URI.create("$familieBrevUri/api/$sanityDataset/dokument/$målform/${brev.mal.apiNavn}/pdf")
 
         secureLogger.info("Kaller familie brev($uri) med data ${brev.data.toBrevString()}")
-        return kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Hente pdf for vedtaksbrev") {
-            postForEntity(uri, brev.data)
+        return try {
+            kallEksternTjeneste(FAMILIE_BREV_TJENESTENAVN, uri, "Hente pdf for vedtaksbrev") {
+                postForEntity(uri, brev.data)
+            }
+        } catch (exception: HttpClientErrorException.BadRequest) {
+            log.warn("En bad request oppstod ved henting av pdf. Se SecureLogs for detaljer,")
+            secureLogger.warn("En bad request oppstod ved henting av pdf", exception)
+            throw FunksjonellFeil(
+                "Det oppsto en feil ved generering av brev. Sjekk at begrunnelsene som er valgt er riktige og kontakt brukerstøtte hvis problemet vedvarer.",
+            )
         }
     }
 
@@ -56,7 +64,7 @@ class BrevKlient(
                 "Begrunnelsen ${begrunnelseData.apiNavn} passer ikke vedtaksperioden. Hvis du mener dette er feil, ta kontakt med team BAKS.",
             )
         } catch (e: Exception) {
-            secureLogger.info("Kall for å hente begrunnelsetest feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
+            secureLogger.info("Kall for å hente begrunnelsetekst feilet. Autogenerert test:\"" + testVerktøyService.hentBegrunnelsetest(vedtaksperiode.vedtak.behandling.id))
             throw e
         }
     }
