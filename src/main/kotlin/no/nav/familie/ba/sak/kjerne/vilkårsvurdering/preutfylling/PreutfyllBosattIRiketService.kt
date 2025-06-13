@@ -105,7 +105,7 @@ class PreutfyllBosattIRiketService(
                         if (erBosattINorgePeriode.verdi == true) {
                             sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
                         } else {
-                            BoolskVerdiMedKommentar(false, " ")
+                            BoolskVerdiMedKommentar(false, "")
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
