@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestTotrinnskontroll
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -71,20 +70,11 @@ class UtvidetBehandlingService(
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
     private val tilbakekrevingsvedtakMotregningService: TilbakekrevingsvedtakMotregningService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
-        val søknadsgrunnlag =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()?.let { søknadDTO ->
-                val barnIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }
-                val tilganger = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(barnIdenter)
-                søknadDTO.copy(
-                    barnaMedOpplysninger = søknadDTO.barnaMedOpplysninger.filter { barn -> tilganger.getValue(barn.ident).harTilgang },
-                )
-            }
-
+        val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.søkerOgBarn
 
@@ -135,7 +125,7 @@ class UtvidetBehandlingService(
             opprettetTidspunkt = behandling.opprettetTidspunkt,
             endretAv = behandling.endretAv,
             arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
-            søknadsgrunnlag = søknadsgrunnlag,
+            søknadsgrunnlag = søknadsgrunnlag?.hentSøknadDto(),
             personer =
                 personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) }
                     ?: emptyList(),

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.springframework.stereotype.Service
 
@@ -40,13 +41,21 @@ class AutomatiskRegistrerSøknadService(
                 .hentPersoninfoMedRelasjonerOgRegisterinformasjon(søker.aktør)
                 .forelderBarnRelasjon
                 .filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
-                .map { barn ->
-                    BarnMedOpplysninger(
-                        ident = barn.aktør.aktivFødselsnummer(),
-                        navn = barn.navn ?: "Mangler navn",
-                        fødselsdato = barn.fødselsdato,
-                        inkludertISøknaden = søknad.barn.any { it.fnr == barn.aktør.aktivFødselsnummer() },
-                    )
+                .mapNotNull { barn ->
+                    // Filtrer bort barn som har adressebeskyttelse og som ikke er med i søknaden
+                    if (barn.adressebeskyttelseGradering == null ||
+                        barn.adressebeskyttelseGradering == ADRESSEBESKYTTELSEGRADERING.UGRADERT ||
+                        søknad.barn.any { it.fnr == barn.aktør.aktivFødselsnummer() }
+                    ) {
+                        BarnMedOpplysninger(
+                            ident = barn.aktør.aktivFødselsnummer(),
+                            navn = barn.navn ?: "Mangler navn",
+                            fødselsdato = barn.fødselsdato,
+                            inkludertISøknaden = søknad.barn.any { it.fnr == barn.aktør.aktivFødselsnummer() },
+                        )
+                    } else {
+                        null
+                    }
                 }
 
         val barnUtenRelasjonFraSøknad =
