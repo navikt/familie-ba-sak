@@ -1,8 +1,9 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.dto.DeaktiverMinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -20,28 +21,34 @@ import org.springframework.stereotype.Service
 class DeaktiverMinsideTask(
     private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer,
     private val minsideAktiveringService: MinsideAktiveringService,
+    private val aktørIdRepository: AktørIdRepository,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val deaktiverMinsideDTO =
             objectMapper.readValue(task.payload, DeaktiverMinsideDTO::class.java)
-        if (!minsideAktiveringService.harAktivertMinsideAktivering(deaktiverMinsideDTO.aktør)) {
-            logger.info("Minside er ikke aktivert for aktør: ${deaktiverMinsideDTO.aktør.aktørId}")
+
+        val aktør =
+            aktørIdRepository.findByAktørIdOrNull(deaktiverMinsideDTO.aktørId)
+                ?: throw Feil("Aktør med aktørId ${deaktiverMinsideDTO.aktørId} finnes ikke")
+
+        if (!minsideAktiveringService.harAktivertMinsideAktivering(aktør)) {
+            logger.info("Minside er ikke aktivert for aktør: ${aktør.aktørId}")
             return
         }
 
-        logger.info("Deaktiverer minside for aktør: ${deaktiverMinsideDTO.aktør.aktørId}")
-        minsideAktiveringService.deaktiverMinsideAktivering(deaktiverMinsideDTO.aktør)
-        minsideAktiveringKafkaProducer.deaktiver(deaktiverMinsideDTO.aktør.aktivFødselsnummer())
+        logger.info("Deaktiverer minside for aktør: ${aktør.aktørId}")
+        minsideAktiveringService.deaktiverMinsideAktivering(aktør)
+        minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
     }
 
     companion object {
         const val TASK_STEP_TYPE = "deaktiverMinside"
         private val logger = LoggerFactory.getLogger(DeaktiverMinsideTask::class.java)
 
-        fun opprettTask(aktør: Aktør): Task =
+        fun opprettTask(aktørId: String): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktør)),
+                payload = objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktørId)),
             )
     }
 }
