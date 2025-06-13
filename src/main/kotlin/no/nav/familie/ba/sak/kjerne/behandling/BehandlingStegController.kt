@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -230,11 +231,18 @@ enum class HenleggÅrsak(
     TEKNISK_VEDLIKEHOLD("Teknisk vedlikehold"),
     ;
 
-    fun tilBehandlingsresultat() =
+    fun tilBehandlingsresultat(opprettetÅrsak: BehandlingÅrsak) =
         when (this) {
             FEILAKTIG_OPPRETTET -> Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET
+
             SØKNAD_TRUKKET -> Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET
-            AUTOMATISK_HENLAGT -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+
+            AUTOMATISK_HENLAGT ->
+                when (opprettetÅrsak) {
+                    BehandlingÅrsak.SMÅBARNSTILLEGG, BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG
+                    else -> Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE
+                }
+
             TEKNISK_VEDLIKEHOLD -> Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
         }
 }
