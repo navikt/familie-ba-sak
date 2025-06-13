@@ -48,29 +48,6 @@ class EksternKlageController(
         return Ressurs.success(klageService.kanOppretteRevurdering(fagsakId))
     }
 
-    @Deprecated(message = "Erstattet av metoden 'opprettRevurderingKlage'")
-    @PostMapping("fagsaker/{fagsakId}/opprett-revurdering-klage")
-    fun opprettRevurderingKlageGammel(
-        @PathVariable fagsakId: Long,
-    ): Ressurs<OpprettRevurderingResponse> {
-        tilgangService.validerTilgangTilHandlingOgFagsak(
-            fagsakId = fagsakId,
-            handling = "Opprett revurdering med årask klage på fagsak=$fagsakId",
-            event = AuditLoggerEvent.CREATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-        )
-
-        if (!SikkerhetContext.kallKommerFraKlage()) {
-            throw Feil("Kallet utføres ikke av en autorisert klient")
-        }
-        return Ressurs.success(
-            klageService.validerOgOpprettRevurderingKlage(
-                fagsakId = fagsakId,
-                klagebehandlingId = null,
-            ),
-        )
-    }
-
     @PostMapping("fagsak/{fagsakId}/klagebehandling/{klagebehandlingId}/opprett-revurdering-klage")
     fun opprettRevurderingKlage(
         @PathVariable fagsakId: Long,
