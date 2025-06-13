@@ -20,6 +20,7 @@ interface ArbeidsfordelingPåBehandlingRepository : JpaRepository<Arbeidsfordeli
              'HENLAGT_FEILAKTIG_OPPRETTET',
              'HENLAGT_SØKNAD_TRUKKET',
              'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+             'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG',
              'HENLAGT_TEKNISK_VEDLIKEHOLD'
             )   
         ORDER BY b.aktivert_tid DESC
