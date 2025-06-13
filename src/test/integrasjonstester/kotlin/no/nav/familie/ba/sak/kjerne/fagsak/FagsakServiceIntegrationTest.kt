@@ -4,7 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.config.MockPdlIdentRestClient
+import no.nav.familie.ba.sak.config.FakePdlIdentRestClient
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
@@ -78,7 +78,7 @@ class FagsakServiceIntegrationTest(
     @Autowired
     private val unleashService: UnleashService,
     @Autowired
-    private val mockPdlIdentRestClient: MockPdlIdentRestClient,
+    private val fakePdlIdentRestClient: FakePdlIdentRestClient,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun init() {
@@ -388,7 +388,7 @@ class FagsakServiceIntegrationTest(
     @Test
     fun `Skal returnere tom liste ved søk hvis ident ikke har aktiv fødselsnummer`() {
         val fnr = randomFnr()
-        mockPdlIdentRestClient.leggTilIdent(
+        fakePdlIdentRestClient.leggTilIdent(
             fnr,
             listOf(
                 IdentInformasjon("npid", gruppe = "NPID", historisk = false),

@@ -13,7 +13,7 @@ import java.net.URI
 @Service
 @Profile("mock-ident-client")
 @Primary
-class MockPdlIdentRestClient(
+class FakePdlIdentRestClient(
     restOperations: RestOperations,
 ) : PdlIdentRestClient(URI("dummy_uri"), restOperations) {
     private val identMap = mutableMapOf<String, List<IdentInformasjon>>()
