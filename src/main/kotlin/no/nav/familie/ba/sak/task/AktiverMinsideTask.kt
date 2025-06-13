@@ -31,10 +31,14 @@ class AktiverMinsideTask(
             aktørIdRepository.findByAktørIdOrNull(aktiverMinsideDTO.aktørId)
                 ?: throw Feil("Aktør med aktørId ${aktiverMinsideDTO.aktørId} finnes ikke")
 
+        // TODO: Må sjekke om barn i fagsak til aktør har kode 6 eller 19 og aktøren selv ikke har kode 6 eller 19. Hvis dette er tilfellet skal vi ikke aktivere minside.
+        // TODO: Det samme gjelder dersom aktør selv har kode 6 eller 19 og fagsaken er "skjermet barn"-fagsak
+
         if (minsideAktiveringService.harAktivertMinsideAktivering(aktør)) {
             logger.info("Minside er allerede aktivert for aktør: ${aktør.aktørId}")
             return
         }
+
         logger.info("Aktiverer minside for aktør: ${aktør.aktørId}")
         minsideAktiveringService.aktiverMinsideAktivering(aktør)
         minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
