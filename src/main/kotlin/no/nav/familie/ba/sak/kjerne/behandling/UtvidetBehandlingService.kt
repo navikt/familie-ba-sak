@@ -78,10 +78,10 @@ class UtvidetBehandlingService(
 
         val søknadsgrunnlag =
             søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentSøknadDto()?.let { søknadDTO ->
-                val barnIdenter = søknadDTO.barnaMedOpplysninger.map { it.ident }
-                val tilganger = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(barnIdenter)
+                val (barnUtenIdenter, barnMedIdenter) = søknadDTO.barnaMedOpplysninger.partition { it.ident.isBlank() }
+                val tilganger = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(barnMedIdenter.map { it.ident })
                 søknadDTO.copy(
-                    barnaMedOpplysninger = søknadDTO.barnaMedOpplysninger.filter { barn -> tilganger.getValue(barn.ident).harTilgang },
+                    barnaMedOpplysninger = barnUtenIdenter + barnMedIdenter.filter { tilganger.getValue(it.ident).harTilgang },
                 )
             }
 
