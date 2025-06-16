@@ -116,7 +116,7 @@ class BehandlingServiceTest {
             every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
             every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
             every { eksternBehandlingRelasjonService.lagreEksternBehandlingRelasjon(capture(eksternBehandlingRelasjonSlot)) } returnsArgument 0
-            every { behandlingSøknadsinfoService.lagreNedSøknadsinfo(any(), any(), any()) } just runs
+            every { behandlingSøknadsinfoService.lagreSøknadsinfo(any(), any(), any()) } just runs
             every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
             every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
             every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs
@@ -168,7 +168,7 @@ class BehandlingServiceTest {
             every { behandlingHentOgPersisterService.lagreEllerOppdater(any(), any()) } returnsArgument 0
             every { arbeidsfordelingService.fastsettBehandlendeEnhet(any(), any()) } just runs
             every { behandlingMetrikker.tellNøkkelTallVedOpprettelseAvBehandling(any()) } just runs
-            every { behandlingSøknadsinfoService.lagreNedSøknadsinfo(any(), any(), any()) } just runs
+            every { behandlingSøknadsinfoService.lagreSøknadsinfo(any(), any(), any()) } just runs
             every { saksstatistikkEventPublisher.publiserBehandlingsstatistikk(any()) } just runs
             every { vedtakRepository.findByBehandlingAndAktivOptional(any()) } returns null
             every { vedtaksperiodeService.kopierOverVedtaksperioder(any(), any()) } just runs

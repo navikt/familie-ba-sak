@@ -117,7 +117,7 @@ class BehandlingService(
                         )
                     }
                     if (nyBehandling.søknadMottattDato != null) {
-                        behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+                        behandlingSøknadsinfoService.lagreSøknadsinfo(
                             mottattDato = nyBehandling.søknadMottattDato,
                             søknadsinfo = nyBehandling.søknadsinfo,
                             behandling = behandling,

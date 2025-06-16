@@ -14,7 +14,7 @@ class BehandlingSøknadsinfoService(
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 ) {
     @Transactional
-    fun lagreNedSøknadsinfo(
+    fun lagreSøknadsinfo(
         mottattDato: LocalDate,
         søknadsinfo: Søknadsinfo?,
         behandling: Behandling,
