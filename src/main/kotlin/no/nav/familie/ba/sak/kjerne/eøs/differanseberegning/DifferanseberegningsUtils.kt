@@ -56,7 +56,7 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
         (
             beløpUtenEndretUtbetaling ?: throw FunksjonellFeil(
                 "En feil har oppstått. Beslutter må underkjenne behandlingen," +
-                        " slik at saksbehandler 1 kan gå tilbake til vilkårsvurderingen og trykke ‘Neste', og sende sak til godkjenning på nytt."
+                    " slik at saksbehandler 1 kan gå tilbake til vilkårsvurderingen og trykke ‘Neste', og sende sak til godkjenning på nytt.",
             )
         ) - avrundetUtenlandskPeriodebeløp
     }
