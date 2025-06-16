@@ -48,4 +48,7 @@ enum class FeatureToggle(
 
     // NAV-25329
     BRUK_NY_OPPRETT_FAGSAK_MODAL("familie-ba-sak.bruk.ny.opprett.fagsak.modal"),
+
+    // NAV-25472
+    MINSIDE_AKTIVERING("familie-ba-sak.minside-aktivering"),
 }
