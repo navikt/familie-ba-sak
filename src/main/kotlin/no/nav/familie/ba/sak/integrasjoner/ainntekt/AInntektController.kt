@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.ainntekt
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -23,6 +24,9 @@ class AInntektController(
     fun hentAInntektUrl(
         @RequestBody personIdent: PersonIdent,
     ): Ressurs<String> {
+        // Valider personIdent
+        Fødselsnummer(personIdent.ident)
+
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(personIdent.ident),
             event = AuditLoggerEvent.ACCESS,

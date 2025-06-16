@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.ainntekt
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
-import no.nav.familie.ba.sak.config.INTEGRASJONER_FNR
+import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.util.BrukerContextUtil
 import no.nav.familie.kontrakter.felles.PersonIdent
 import org.assertj.core.api.Assertions.assertThat
@@ -31,7 +31,7 @@ class AInntektControllerTest(
 
     @Test
     fun `kan hente ut A-Inntekt url`() {
-        val responseRessurs = ainntektController.hentAInntektUrl(PersonIdent(ident = INTEGRASJONER_FNR))
+        val responseRessurs = ainntektController.hentAInntektUrl(PersonIdent(ident = randomFnr()))
         assertThat(responseRessurs.data).isEqualTo(ainntektUrl)
     }
 
