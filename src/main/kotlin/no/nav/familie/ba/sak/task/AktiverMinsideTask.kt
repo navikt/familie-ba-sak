@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringAktørValidator
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -22,6 +23,7 @@ class AktiverMinsideTask(
     private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer,
     private val minsideAktiveringService: MinsideAktiveringService,
     private val aktørIdRepository: AktørIdRepository,
+    private val minsideAktiveringAktørValidator: MinsideAktiveringAktørValidator,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val aktiverMinsideDTO =
@@ -31,11 +33,21 @@ class AktiverMinsideTask(
             aktørIdRepository.findByAktørIdOrNull(aktiverMinsideDTO.aktørId)
                 ?: throw Feil("Aktør med aktørId ${aktiverMinsideDTO.aktørId} finnes ikke")
 
-        // TODO: Må sjekke om barn i fagsak til aktør har kode 6 eller 19 og aktøren selv ikke har kode 6 eller 19. Hvis dette er tilfellet skal vi ikke aktivere minside.
-        // TODO: Det samme gjelder dersom aktør selv har kode 6 eller 19 og fagsaken er "skjermet barn"-fagsak
+        val kanAktivereMinsideForAktør = minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør)
 
         if (minsideAktiveringService.harAktivertMinsideAktivering(aktør)) {
+            if (!kanAktivereMinsideForAktør) {
+                logger.info("Minside er aktivert for aktør: ${aktør.aktørId}, men skulle ikke vært det. Deaktiverer derfor minside.")
+                minsideAktiveringService.deaktiverMinsideAktivering(aktør)
+                minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
+                return
+            }
             logger.info("Minside er allerede aktivert for aktør: ${aktør.aktørId}")
+            return
+        }
+
+        if (!kanAktivereMinsideForAktør) {
+            logger.info("Kan ikke aktivere minside for aktør: ${aktør.aktørId} - ingen fagsaker eller kun skjermet barn/institusjon")
             return
         }
 

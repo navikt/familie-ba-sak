@@ -7,6 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringAktørValidator
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -23,11 +24,13 @@ class AktiverMinsideTaskTest {
     private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer = mockk()
     private val minsideAktiveringService: MinsideAktiveringService = mockk()
     private val aktørIdRepository: AktørIdRepository = mockk()
+    private val minsideAktiveringAktørValidator: MinsideAktiveringAktørValidator = mockk()
     private val aktiverMinsideTask =
         AktiverMinsideTask(
             minsideAktiveringKafkaProducer = minsideAktiveringKafkaProducer,
             minsideAktiveringService = minsideAktiveringService,
             aktørIdRepository = aktørIdRepository,
+            minsideAktiveringAktørValidator = minsideAktiveringAktørValidator,
         )
 
     @Nested
@@ -64,6 +67,7 @@ class AktiverMinsideTaskTest {
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
+            every { minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør) } returns true
             every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns false
             every { minsideAktiveringService.aktiverMinsideAktivering(aktør) } returns mockk()
             every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
@@ -91,9 +95,8 @@ class AktiverMinsideTaskTest {
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
+            every { minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør) } returns true
             every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns true
-            every { minsideAktiveringService.aktiverMinsideAktivering(aktør) } returns mockk()
-            every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
 
             // Act
             aktiverMinsideTask.doTask(task)
@@ -101,6 +104,68 @@ class AktiverMinsideTaskTest {
             // Assert
             verify(exactly = 1) {
                 aktørIdRepository.findByAktørIdOrNull(aktør.aktørId)
+                minsideAktiveringService.harAktivertMinsideAktivering(aktør)
+            }
+            verify(exactly = 0) {
+                minsideAktiveringService.aktiverMinsideAktivering(aktør)
+                minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
+            }
+        }
+
+        @Test
+        fun `skal deaktivere minside for aktør dersom aktør ikke kvalifiserer til minside men minside allerede er aktivert`() {
+            // Arrange
+            val aktør = randomAktør()
+            val task =
+                Task(
+                    type = TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(AktiverMinsideDTO(aktør.aktørId)),
+                )
+
+            every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
+            every { minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør) } returns false
+            every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns true
+            every { minsideAktiveringService.deaktiverMinsideAktivering(aktør) } returns mockk()
+            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
+
+            // Act
+            aktiverMinsideTask.doTask(task)
+
+            // Assert
+            verify(exactly = 1) {
+                aktørIdRepository.findByAktørIdOrNull(aktør.aktørId)
+                minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør)
+                minsideAktiveringService.harAktivertMinsideAktivering(aktør)
+                minsideAktiveringService.deaktiverMinsideAktivering(aktør)
+                minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
+            }
+            verify(exactly = 0) {
+                minsideAktiveringService.aktiverMinsideAktivering(aktør)
+                minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
+            }
+        }
+
+        @Test
+        fun `skal ikke aktivere minside for aktør dersom aktør ikke kvalifiserer til minside og minside ikke allerede er aktivert`() {
+            // Arrange
+            val aktør = randomAktør()
+            val task =
+                Task(
+                    type = TASK_STEP_TYPE,
+                    payload = objectMapper.writeValueAsString(AktiverMinsideDTO(aktør.aktørId)),
+                )
+
+            every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
+            every { minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør) } returns false
+            every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns false
+
+            // Act
+            aktiverMinsideTask.doTask(task)
+
+            // Assert
+            verify(exactly = 1) {
+                aktørIdRepository.findByAktørIdOrNull(aktør.aktørId)
+                minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør)
                 minsideAktiveringService.harAktivertMinsideAktivering(aktør)
             }
             verify(exactly = 0) {
