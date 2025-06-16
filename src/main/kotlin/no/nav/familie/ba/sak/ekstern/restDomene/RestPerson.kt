@@ -19,9 +19,10 @@ data class RestPerson(
     val registerhistorikk: RestRegisterhistorikk? = null,
     val målform: Målform,
     val dødsfallDato: LocalDate? = null,
+    val erManueltLagtTilISøknad: Boolean? = null,
 )
 
-fun Person.tilRestPerson() =
+fun Person.tilRestPerson(erManueltLagtTilISøknad: Boolean? = null): RestPerson =
     RestPerson(
         type = this.type,
         fødselsdato = this.fødselsdato,
@@ -31,4 +32,5 @@ fun Person.tilRestPerson() =
         registerhistorikk = this.tilRestRegisterhistorikk(),
         målform = this.målform,
         dødsfallDato = this.dødsfall?.dødsfallDato,
+        erManueltLagtTilISøknad = erManueltLagtTilISøknad,
     )
