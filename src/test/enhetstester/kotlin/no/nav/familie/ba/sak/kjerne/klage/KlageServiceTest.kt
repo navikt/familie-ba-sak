@@ -109,45 +109,6 @@ class KlageServiceTest {
     @Nested
     inner class OpprettRevurderingKlage {
         @Test
-        fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
-            // Arrange
-            val aktør = randomAktør()
-            val fagsak = Fagsak(aktør = aktør)
-            val forrigeBehandling =
-                lagBehandling(
-                    behandlingKategori = BehandlingKategori.EØS,
-                    underkategori = BehandlingUnderkategori.UTVIDET,
-                    fagsak = fagsak,
-                    behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-                    status = BehandlingStatus.AVSLUTTET,
-                )
-
-            every { fagsakService.hentPåFagsakId(any()) } returns fagsak
-            every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
-
-            val nyBehandling =
-                NyBehandling(
-                    kategori = forrigeBehandling.kategori,
-                    underkategori = forrigeBehandling.underkategori,
-                    søkersIdent = forrigeBehandling.fagsak.aktør.aktivFødselsnummer(),
-                    behandlingType = BehandlingType.REVURDERING,
-                    behandlingÅrsak = BehandlingÅrsak.KLAGE,
-                    navIdent = SikkerhetContext.hentSaksbehandler(),
-                    barnasIdenter = emptyList(),
-                    fagsakId = forrigeBehandling.fagsak.id,
-                    nyEksternBehandlingRelasjon = null,
-                )
-
-            // Act
-            klageService.validerOgOpprettRevurderingKlage(fagsakId = fagsak.id, klagebehandlingId = null)
-
-            // Assert
-            verify { stegService.håndterNyBehandling(nyBehandling) }
-        }
-
-        @Test
         fun `kan opprette revurdering med ekstern behandling relasjon hvis det finnes en ferdigstilt behandling`() {
             // Arrange
             val klagebehandlingId = UUID.randomUUID()
@@ -201,7 +162,7 @@ class KlageServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(status = BehandlingStatus.UTREDES)
 
             // Act
-            val result = klageService.validerOgOpprettRevurderingKlage(fagsakId = 0L, klagebehandlingId = null)
+            val result = klageService.validerOgOpprettRevurderingKlage(fagsakId = 0L, klagebehandlingId = UUID.randomUUID())
 
             // Assert
             assertThat(result.opprettetBehandling).isFalse()
@@ -215,7 +176,7 @@ class KlageServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
             // Act
-            val result = klageService.validerOgOpprettRevurderingKlage(fagsakId = 0L, klagebehandlingId = null)
+            val result = klageService.validerOgOpprettRevurderingKlage(fagsakId = 0L, klagebehandlingId = UUID.randomUUID())
 
             // Assert
             assertThat(result.opprettetBehandling).isFalse()
@@ -272,7 +233,7 @@ class KlageServiceTest {
     }
 
     @Nested
-    inner class SettRiktigEnhetVedOpprettelseAvKlage {
+    inner class OpprettKlage {
         @Test
         fun `skal sette enheten til saksbehandlers enhet ved opprettelse av klage`() {
             // Arrange
