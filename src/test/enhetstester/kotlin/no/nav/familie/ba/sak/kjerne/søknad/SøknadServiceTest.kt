@@ -7,9 +7,8 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.søknadreferanse.SøknadReferanse
-import no.nav.familie.ba.sak.kjerne.behandling.søknadreferanse.SøknadReferanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
@@ -18,12 +17,12 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class SøknadServiceTest {
-    private val søknadReferanseService: SøknadReferanseService = mockk()
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService = mockk()
     private val integrasjonClient: IntegrasjonClient = mockk()
     private val søknadMapperLookup: SøknadMapper.Lookup = mockk()
     private val søknadService =
         SøknadService(
-            søknadReferanseService = søknadReferanseService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
             integrasjonClient = integrasjonClient,
             søknadMapperLookup = søknadMapperLookup,
         )
@@ -34,7 +33,7 @@ class SøknadServiceTest {
         fun `skal hente søknad fra dokarkiv og mappe VerjsonertBarnetrygdSøknad til Søknad`() {
             // Arrange
             val behandling = lagBehandling()
-            val søknadReferanse = SøknadReferanse(behandlingId = behandling.id, journalpostId = "123456789")
+            val journalpostId = "123456789"
             val barn1 = randomFnr()
             val barn2 = randomFnr()
             val versjonertBarnetrygdSøknadV9 =
@@ -42,8 +41,8 @@ class SøknadServiceTest {
                     barnetrygdSøknad = lagBarnetrygdSøknadV9(barnFnr = listOf(barn1, barn2), søknadstype = Søknadstype.ORDINÆR, erEøs = true, originalspråk = "nn"),
                 )
 
-            every { søknadReferanseService.hentSøknadReferanse(behandling.id) } returns søknadReferanse
-            every { integrasjonClient.hentVersjonertBarnetrygdSøknad(søknadReferanse.journalpostId) } returns versjonertBarnetrygdSøknadV9
+            every { behandlingSøknadsinfoService.hentJournalpostId(behandling.id) } returns journalpostId
+            every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostId) } returns versjonertBarnetrygdSøknadV9
             every { søknadMapperLookup.hentSøknadMapperForVersjon(versjonertBarnetrygdSøknadV9.barnetrygdSøknad.kontraktVersjon) } returns SøknadMapperV9()
 
             // Act
@@ -59,11 +58,11 @@ class SøknadServiceTest {
         }
 
         @Test
-        fun `skal returnere null dersom det ikke finnes noen SøknadReferanse for behandling`() {
+        fun `skal returnere null dersom det ikke finnes noen BehandlingSøknadsinfo for behandling`() {
             // Arrange
             val behandling = lagBehandling()
 
-            every { søknadReferanseService.hentSøknadReferanse(behandling.id) } returns null
+            every { behandlingSøknadsinfoService.hentJournalpostId(behandling.id) } returns null
 
             // Act
             val søknad = søknadService.finnSøknad(behandlingId = behandling.id)

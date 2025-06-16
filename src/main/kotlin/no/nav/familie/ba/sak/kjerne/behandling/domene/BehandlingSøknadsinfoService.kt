@@ -32,6 +32,8 @@ class BehandlingSøknadsinfoService(
 
     fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? = behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).minOfOrNull { it.mottattDato }
 
+    fun hentJournalpostId(behandlingId: Long): String? = behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).firstOrNull()?.journalpostId
+
     fun hentSøknadsstatistikk(
         fom: LocalDate,
         tom: LocalDate,
