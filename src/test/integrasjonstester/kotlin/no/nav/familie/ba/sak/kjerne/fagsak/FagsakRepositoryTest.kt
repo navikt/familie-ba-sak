@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -98,7 +99,7 @@ class FagsakRepositoryTest(
         @ParameterizedTest
         @EnumSource(
             Behandlingsresultat::class,
-            names = ["HENLAGT_FEILAKTIG_OPPRETTET", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_AUTOMATISK_FØDSELSHENDELSE", "HENLAGT_TEKNISK_VEDLIKEHOLD"],
+            names = ["HENLAGT_FEILAKTIG_OPPRETTET", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_AUTOMATISK_FØDSELSHENDELSE", "HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG", "HENLAGT_TEKNISK_VEDLIKEHOLD"],
             mode = EnumSource.Mode.INCLUDE,
         )
         fun `skal ikke finne fagsak dersom alle avsluttede behandlinger er enten avslått eller henlagt`(
@@ -116,6 +117,15 @@ class FagsakRepositoryTest(
                         resultat = Behandlingsresultat.AVSLÅTT,
                         status = BehandlingStatus.AVSLUTTET,
                         aktivertTid = LocalDateTime.of(2025, 2, 11, 0, 0, 0),
+                        aktiv = false,
+                    ),
+                    lagBehandlingUtenId(
+                        fagsak = fagsak,
+                        behandlingType = BehandlingType.REVURDERING,
+                        resultat = Behandlingsresultat.AVSLÅTT,
+                        status = BehandlingStatus.AVSLUTTET,
+                        aktivertTid = LocalDateTime.of(2025, 4, 11, 0, 0, 0),
+                        årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
                         aktiv = false,
                     ),
                     lagBehandlingUtenId(

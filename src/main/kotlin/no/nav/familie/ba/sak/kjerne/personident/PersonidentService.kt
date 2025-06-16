@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummer
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivFødselsnummerOrNull
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.person.pdl.aktor.v2.Type
 import org.slf4j.LoggerFactory
@@ -67,6 +68,11 @@ class PersonidentService(
 
         return aktør
     }
+
+    fun hentAktørOrNullHvisIkkeAktivFødselsnummer(identEllerAktørId: String): Aktør? =
+        hentIdenter(identEllerAktørId, false).hentAktivFødselsnummerOrNull()?.let {
+            hentAktør(identEllerAktørId)
+        }
 
     fun hentOgLagreAktør(
         ident: String,
