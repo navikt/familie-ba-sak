@@ -5,13 +5,11 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertNotNull
+import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 
 class MinsideAktiveringRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
@@ -100,6 +98,27 @@ class MinsideAktiveringRepositoryTest(
             assertThat(lagredeMinsideAktiveringer).hasSize(1)
             assertThat(lagredeMinsideAktiveringer.map { it.aktør }).containsExactlyInAnyOrder(aktør1)
             assertThat(lagredeMinsideAktiveringer.map { it.aktivert }).containsExactlyInAnyOrder(true)
+        }
+    }
+
+    @Nested
+    inner class Save {
+        @Test
+        fun `skal feile dersom man forsøker å opprette MinsideAktivering på aktør som allerede har MinsideAktivering`() {
+            // Arrange
+            val aktør = aktørIdRepository.save(randomAktør())
+
+            minsideAktiveringRepository.save(
+                MinsideAktivering(
+                    aktør = aktør,
+                    aktivert = true,
+                ),
+            )
+
+            // Act & Assert
+            assertThrows<DataIntegrityViolationException> {
+                minsideAktiveringRepository.save(MinsideAktivering(aktør = aktør, aktivert = true))
+            }
         }
     }
 }
