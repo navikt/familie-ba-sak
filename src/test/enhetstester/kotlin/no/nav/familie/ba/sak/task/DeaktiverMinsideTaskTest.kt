@@ -113,14 +113,14 @@ class DeaktiverMinsideTaskTest {
         @Test
         fun `skal opprette task med riktig type og payload`() {
             // Arrange
-            val aktørId = "12345678901"
+            val aktør = randomAktør("12345678901")
 
             // Act
-            val task = DeaktiverMinsideTask.opprettTask(aktørId)
+            val task = DeaktiverMinsideTask.opprettTask(aktør)
 
             // Assert
             assertThat(task.type).isEqualTo(TASK_STEP_TYPE)
-            assertThat(task.payload).isEqualTo(objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktørId)))
+            assertThat(task.payload).isEqualTo(objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktør.aktørId)))
         }
     }
 }

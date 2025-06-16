@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringAktørValidator
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.dto.AktiverMinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -60,10 +61,10 @@ class AktiverMinsideTask(
         const val TASK_STEP_TYPE = "aktiverMinside"
         private val logger = LoggerFactory.getLogger(AktiverMinsideTask::class.java)
 
-        fun opprettTask(aktørId: String): Task =
+        fun opprettTask(aktør: Aktør): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(AktiverMinsideDTO(aktørId)),
+                payload = objectMapper.writeValueAsString(AktiverMinsideDTO(aktør.aktørId)),
             )
     }
 }
