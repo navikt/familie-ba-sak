@@ -83,6 +83,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
@@ -607,6 +608,12 @@ class CucumberMock(
             tilbakekrevingsvedtakMotregningBrevService = tilbakekrevingsvedtakMotregningBrevService,
         )
 
+    val opprettTaskService =
+        OpprettTaskService(
+            taskRepository = taskRepository,
+            satskjøringRepository = mockk(),
+        )
+
     val stegService =
         spyk(
             StegService(
@@ -630,7 +637,7 @@ class CucumberMock(
                 satsendringService = mockk(),
                 personopplysningerService = personopplysningerService,
                 automatiskBeslutningService = mockk(),
-                opprettTaskService = mockk(),
+                opprettTaskService = opprettTaskService,
                 satskjøringRepository = mockk(),
                 unleashService = unleashNextMedContextService,
                 automatiskRegistrerSøknadService = mockk(),
