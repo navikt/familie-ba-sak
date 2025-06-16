@@ -61,11 +61,11 @@ class PreutfyllBosattIRiketService(
 
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordisk, erBosatt ->
-                val boolskVerdi = erNordisk == true && erBosatt == true
-                if (boolskVerdi) {
-                    BoolskVerdiMedKommentar(boolskVerdi, "- Norsk/nordisk statsborgerskap")
+                val nordiskOgBosatt = erNordisk == true && erBosatt == true
+                if (nordiskOgBosatt) {
+                    Delvilkår.OppfyltDelvilkår("- Norsk/nordisk statsborgerskap")
                 } else {
-                    BoolskVerdiMedKommentar(boolskVerdi, "")
+                    Delvilkår.IkkeOppfyltDelvilkår
                 }
             }
 
@@ -74,7 +74,15 @@ class PreutfyllBosattIRiketService(
         val erBosattIRiketTidslinje =
             erØvrigeKravForBosattIRiketOppfyltTidslinje
                 .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
-                    BoolskVerdiMedKommentar(erØvrigeKravOppfylt?.boolskVerdi == true || erNordiskOgBosatt?.boolskVerdi == true, (erNordiskOgBosatt?.kommentar + "\n" + (erØvrigeKravOppfylt?.kommentar ?: "")).trim())
+                    val oppfylt = erØvrigeKravOppfylt?.erOppfylt == true || erNordiskOgBosatt?.erOppfylt == true
+
+                    val kommentar = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).mapNotNull { it?.begrunnelse?.takeIf { kommentar -> kommentar.isNotBlank() } }.joinToString("\n")
+
+                    if (oppfylt) {
+                        Delvilkår.OppfyltDelvilkår(kommentar)
+                    } else {
+                        Delvilkår.IkkeOppfyltDelvilkår
+                    }
                 }.beskjærFraOgMed(eldsteBarnsFødselsdato)
 
         return erBosattIRiketTidslinje
@@ -83,11 +91,11 @@ class PreutfyllBosattIRiketService(
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
-                    resultat = if (erBosattINorgePeriode.verdi?.boolskVerdi == true) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                    resultat = if (erBosattINorgePeriode.verdi?.erOppfylt == true) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = erBosattINorgePeriode.fom,
                     periodeTom = erBosattINorgePeriode.tom,
-                    begrunnelse = "Fylt inn automatisk fra registerdata i PDL \n" + erBosattINorgePeriode.verdi?.kommentar,
+                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + erBosattINorgePeriode.verdi?.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
@@ -96,7 +104,7 @@ class PreutfyllBosattIRiketService(
     private fun lagErØvrigeKravForBosattIRiketOppfyltTidslinje(
         erBosattINorgeTidslinje: Tidslinje<Boolean>,
         personResultat: PersonResultat,
-    ): Tidslinje<BoolskVerdiMedKommentar> =
+    ): Tidslinje<Delvilkår> =
         erBosattINorgeTidslinje
             .tilPerioder()
             .map { erBosattINorgePeriode ->
@@ -105,7 +113,7 @@ class PreutfyllBosattIRiketService(
                         if (erBosattINorgePeriode.verdi == true) {
                             sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
                         } else {
-                            BoolskVerdiMedKommentar(false, "")
+                            Delvilkår.IkkeOppfyltDelvilkår
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -115,14 +123,18 @@ class PreutfyllBosattIRiketService(
     private fun sjekkØvrigeKravForPeriode(
         erBosattINorgePeriode: Periode<Boolean?>,
         personResultat: PersonResultat,
-    ): BoolskVerdiMedKommentar =
+    ): Delvilkår =
         when {
             erBosattINorgePeriode.erMinst12Måneder() ->
-                BoolskVerdiMedKommentar(true, "- Norsk bostedsadresse i minst 12 måneder.")
+                Delvilkår.OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
 
-            erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) -> BoolskVerdiMedKommentar(true, "- Bosatt i Norge siden fødsel.")
-            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) -> BoolskVerdiMedKommentar(true, "- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
-            else -> BoolskVerdiMedKommentar(false, "")
+            erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) ->
+                Delvilkår.OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
+
+            erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) ->
+                Delvilkår.OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
+
+            else -> Delvilkår.IkkeOppfyltDelvilkår
         }
 
     private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
@@ -190,7 +202,18 @@ class PreutfyllBosattIRiketService(
     }
 }
 
-data class BoolskVerdiMedKommentar(
-    val boolskVerdi: Boolean,
-    val kommentar: String,
-)
+private sealed class Delvilkår {
+    abstract val erOppfylt: Boolean
+    abstract val begrunnelse: String
+
+    data class OppfyltDelvilkår(
+        override val begrunnelse: String,
+    ) : Delvilkår() {
+        override val erOppfylt: Boolean = true
+    }
+
+    data object IkkeOppfyltDelvilkår : Delvilkår() {
+        override val erOppfylt: Boolean = false
+        override val begrunnelse: String = ""
+    }
+}
