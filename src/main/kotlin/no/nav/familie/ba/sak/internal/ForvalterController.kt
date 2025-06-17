@@ -174,6 +174,13 @@ class ForvalterController(
         return ResponseEntity.ok(Pair("callId", callId))
     }
 
+
+    @GetMapping("/hjelp")
+    fun skrikEtterHjelp(): ResponseEntity<String> {
+        logger.error("HJELP!")
+        return ResponseEntity.ok("Hjelp")
+    }
+
     @GetMapping("/hentValutakurs/")
     fun hentValutakursFraEcb(
         @RequestParam valuta: String,
