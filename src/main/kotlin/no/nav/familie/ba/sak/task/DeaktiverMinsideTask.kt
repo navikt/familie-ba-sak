@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.task.dto.DeaktiverMinsideDTO
+import no.nav.familie.ba.sak.task.dto.MinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -26,7 +26,7 @@ class DeaktiverMinsideTask(
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
         val deaktiverMinsideDTO =
-            objectMapper.readValue(task.payload, DeaktiverMinsideDTO::class.java)
+            objectMapper.readValue(task.payload, MinsideDTO::class.java)
 
         val aktør =
             aktørIdRepository.findByAktørIdOrNull(deaktiverMinsideDTO.aktørId)
@@ -49,7 +49,7 @@ class DeaktiverMinsideTask(
         fun opprettTask(aktør: Aktør): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktør.aktørId)),
+                payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
             )
     }
 }

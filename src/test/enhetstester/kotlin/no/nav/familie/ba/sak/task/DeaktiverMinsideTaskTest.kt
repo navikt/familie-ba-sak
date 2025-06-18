@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask.Companion.TASK_STEP_TYPE
-import no.nav.familie.ba.sak.task.dto.DeaktiverMinsideDTO
+import no.nav.familie.ba.sak.task.dto.MinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -39,7 +39,7 @@ class DeaktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktørId)),
+                    payload = objectMapper.writeValueAsString(MinsideDTO(aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktørId) } returns null
@@ -59,7 +59,7 @@ class DeaktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktør.aktørId)),
+                    payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
@@ -86,7 +86,7 @@ class DeaktiverMinsideTaskTest {
             val task =
                 Task(
                     type = TASK_STEP_TYPE,
-                    payload = objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktør.aktørId)),
+                    payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
                 )
 
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør

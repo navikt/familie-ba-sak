@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.task.dto.AktiverMinsideDTO
+import no.nav.familie.ba.sak.task.dto.MinsideDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -27,12 +27,12 @@ class AktiverMinsideTask(
     private val minsideAktiveringAktørValidator: MinsideAktiveringAktørValidator,
 ) : AsyncTaskStep {
     override fun doTask(task: Task) {
-        val aktiverMinsideDTO =
-            objectMapper.readValue(task.payload, AktiverMinsideDTO::class.java)
+        val minsideDTO =
+            objectMapper.readValue(task.payload, MinsideDTO::class.java)
 
         val aktør =
-            aktørIdRepository.findByAktørIdOrNull(aktiverMinsideDTO.aktørId)
-                ?: throw Feil("Aktør med aktørId ${aktiverMinsideDTO.aktørId} finnes ikke")
+            aktørIdRepository.findByAktørIdOrNull(minsideDTO.aktørId)
+                ?: throw Feil("Aktør med aktørId ${minsideDTO.aktørId} finnes ikke")
 
         val kanAktivereMinsideForAktør = minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør)
 
@@ -64,7 +64,7 @@ class AktiverMinsideTask(
         fun opprettTask(aktør: Aktør): Task =
             Task(
                 type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(AktiverMinsideDTO(aktør.aktørId)),
+                payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
             )
     }
 }
