@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.ainntekt
 
-import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.util.BrukerContextUtil
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -36,12 +34,12 @@ class AInntektControllerTest(
     }
 
     @Test
-    fun `har ikke tilgang til å hente ut A-Inntekt url`() {
+    fun `prøver å hente ut A-Inntekt url på et ugyldig fnr`() {
         val feil =
-            assertThrows<RolleTilgangskontrollFeil> {
-                ainntektController.hentAInntektUrl(PersonIdent(ident = BARN_DET_IKKE_GIS_TILGANG_TIL_FNR))
+            assertThrows<IllegalStateException> {
+                ainntektController.hentAInntektUrl(PersonIdent(ident = "10000111111"))
             }
 
-        assertThat(feil.message).contains("Saksbehandler A har ikke tilgang.")
+        assertThat(feil.message).contains("10000111111")
     }
 }
