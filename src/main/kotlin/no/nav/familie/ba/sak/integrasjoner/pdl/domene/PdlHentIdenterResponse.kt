@@ -24,6 +24,13 @@ fun List<IdentInformasjon>.hentAktivFødselsnummer(): String =
             throw Error("Finner ikke folkeregisteriden i Pdl")
         }
 
+fun List<IdentInformasjon>.hentAktivFødselsnummerOrNull(): String? =
+    this.singleOrNull { it.gruppe == Type.FOLKEREGISTERIDENT.name && !it.historisk }?.ident.also {
+        if (it == null) {
+            secureLogger.warn("Finner ikke folkeregisterident i liste fra PDL: $this")
+        }
+    }
+
 fun List<IdentInformasjon>.hentAktivAktørId(): String =
     this.singleOrNull { it.gruppe == Type.AKTORID.name && !it.historisk }?.ident
         ?: run {

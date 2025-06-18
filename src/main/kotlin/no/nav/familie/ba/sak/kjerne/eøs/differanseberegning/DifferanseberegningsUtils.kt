@@ -53,7 +53,12 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
             .intValueExact() // Fjern desimaler for å gi fordel til søker
 
     val nyttDifferanseberegnetPeriodebeløp by lazy {
-        (beløpUtenEndretUtbetaling ?: throw FunksjonellFeil("En feil har oppstått. Gå tilbake til vilkårsvurderingen og trykk 'Neste'.")) - avrundetUtenlandskPeriodebeløp
+        (
+            beløpUtenEndretUtbetaling ?: throw FunksjonellFeil(
+                "En feil har oppstått. Gå tilbake til vilkårsvurderingen og trykk 'Neste'." +
+                    "Dersom behandlingen er sendt til totrinnskontroll må behandlingen underkjennes av beslutter slik at saksbehandler kan utføre dette.",
+            )
+        ) - avrundetUtenlandskPeriodebeløp
     }
 
     val nyttKalkulertUtbetalingsbeløp =

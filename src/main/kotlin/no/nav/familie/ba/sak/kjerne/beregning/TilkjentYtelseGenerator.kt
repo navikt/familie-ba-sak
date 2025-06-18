@@ -40,7 +40,8 @@ class TilkjentYtelseGenerator(
                 endretDato = LocalDate.now(),
             )
 
-        val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.personer.any { person -> person.type == PersonType.SØKER } }
+        val endretUtbetalingAndelerSøker = endretUtbetalingAndeler.filter { it.personer.any { person -> person.type == PersonType.SØKER } }
+        val endretUtbetalingAndelerBarna = endretUtbetalingAndeler.filter { it.personer.any { person -> person.type == PersonType.BARN } }
 
         val andelerTilkjentYtelseBarnaUtenEndringer =
             OrdinærBarnetrygdUtil
