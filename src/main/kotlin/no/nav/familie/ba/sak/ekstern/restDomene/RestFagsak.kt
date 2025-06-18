@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 open class RestBaseFagsak(
     open val opprettetTidspunkt: LocalDateTime,
     open val id: Long,
+    open val fagsakeier: String,
     open val søkerFødselsnummer: String,
     open val status: FagsakStatus,
     open val underBehandling: Boolean,
@@ -24,6 +25,7 @@ open class RestBaseFagsak(
 data class RestFagsak(
     override val opprettetTidspunkt: LocalDateTime,
     override val id: Long,
+    override val fagsakeier: String,
     override val søkerFødselsnummer: String,
     override val status: FagsakStatus,
     override val underBehandling: Boolean,
@@ -35,6 +37,7 @@ data class RestFagsak(
 ) : RestBaseFagsak(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
+        fagsakeier = fagsakeier,
         søkerFødselsnummer = søkerFødselsnummer,
         status = status,
         underBehandling = underBehandling,
@@ -49,6 +52,7 @@ fun RestBaseFagsak.tilRestFagsak(
 ) = RestFagsak(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
+    fagsakeier = this.fagsakeier,
     søkerFødselsnummer = this.søkerFødselsnummer,
     status = this.status,
     underBehandling = this.underBehandling,
@@ -62,6 +66,7 @@ fun RestBaseFagsak.tilRestFagsak(
 data class RestMinimalFagsak(
     override val opprettetTidspunkt: LocalDateTime,
     override val id: Long,
+    override val fagsakeier: String,
     override val søkerFødselsnummer: String,
     override val status: FagsakStatus,
     override val løpendeKategori: BehandlingKategori?,
@@ -75,6 +80,7 @@ data class RestMinimalFagsak(
 ) : RestBaseFagsak(
         opprettetTidspunkt = opprettetTidspunkt,
         id = id,
+        fagsakeier = fagsakeier,
         søkerFødselsnummer = søkerFødselsnummer,
         status = status,
         underBehandling = underBehandling,
@@ -91,6 +97,7 @@ fun RestBaseFagsak.tilRestMinimalFagsak(
 ) = RestMinimalFagsak(
     opprettetTidspunkt = this.opprettetTidspunkt,
     id = this.id,
+    fagsakeier = this.fagsakeier,
     søkerFødselsnummer = this.søkerFødselsnummer,
     status = this.status,
     underBehandling = this.underBehandling,
