@@ -44,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.modiacontext.ModiaContext
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.success
@@ -616,6 +617,31 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
 
         assertThat(versjonertSøknad).isNotNull
         assertThat(versjonertSøknad).isEqualTo(versjonertBarnetrygdSøknadV9)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal hente URL mot A-Inntekt`() {
+        val url = "/test/1234"
+        wireMockServer.stubFor(
+            post("/api/arbeid-og-inntekt/hent-url")
+                .willReturn(
+                    okJson(objectMapper.writeValueAsString(success(url))),
+                ),
+        )
+
+        val aInntektUrl = integrasjonClient.hentAInntektUrl(PersonIdent(randomFnr()))
+
+        assertThat(aInntektUrl).isEqualTo(url)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `skal kaste feil når henting av URL mot A-Inntekt feiler`() {
+        wireMockServer.stubFor(post("/api/arbeid-og-inntekt/hent-url").willReturn(status(500)))
+
+        val feil = assertThrows<IntegrasjonException> { integrasjonClient.hentAInntektUrl(PersonIdent(randomFnr())) }
+        assertTrue(feil.message?.contains("a-inntekt-url") == true)
     }
 
     private fun modiaContextResponse(ressursFunksjon: (ModiaContext) -> Ressurs<ModiaContext>) =
