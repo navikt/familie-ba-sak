@@ -18,6 +18,7 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
@@ -71,6 +72,8 @@ class PreutfyllBosattIRiketService(
 
         val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeTidslinje, personResultat)
 
+        val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
+
         val erBosattIRiketTidslinje =
             erØvrigeKravForBosattIRiketOppfyltTidslinje
                 .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
@@ -83,7 +86,7 @@ class PreutfyllBosattIRiketService(
                     } else {
                         IkkeOppfyltDelvilkår
                     }
-                }.beskjærFraOgMed(eldsteBarnsFødselsdato)
+                }.beskjærFraOgMed(maxOf(eldsteBarnsFødselsdato, førsteBosattINorgeDato))
 
         return erBosattIRiketTidslinje
             .tilPerioder()
