@@ -63,9 +63,9 @@ class PreutfyllBosattIRiketService(
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordisk, erBosatt ->
                 val nordiskOgBosatt = erNordisk == true && erBosatt == true
                 if (nordiskOgBosatt) {
-                    Delvilkår.OppfyltDelvilkår("- Norsk/nordisk statsborgerskap")
+                    OppfyltDelvilkår("- Norsk/nordisk statsborgerskap")
                 } else {
-                    Delvilkår.IkkeOppfyltDelvilkår
+                    IkkeOppfyltDelvilkår
                 }
             }
 
@@ -74,14 +74,14 @@ class PreutfyllBosattIRiketService(
         val erBosattIRiketTidslinje =
             erØvrigeKravForBosattIRiketOppfyltTidslinje
                 .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
-                    val oppfylt = erØvrigeKravOppfylt?.erOppfylt == true || erNordiskOgBosatt?.erOppfylt == true
+                    val oppfylt = erØvrigeKravOppfylt is OppfyltDelvilkår || erNordiskOgBosatt is OppfyltDelvilkår
 
-                    val kommentar = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).mapNotNull { it?.begrunnelse?.takeIf { kommentar -> kommentar.isNotBlank() } }.joinToString("\n")
+                    val kommentar = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).filterIsInstance<OppfyltDelvilkår>().joinToString("\n") { it.begrunnelse }
 
                     if (oppfylt) {
-                        Delvilkår.OppfyltDelvilkår(kommentar)
+                        OppfyltDelvilkår(kommentar)
                     } else {
-                        Delvilkår.IkkeOppfyltDelvilkår
+                        IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(eldsteBarnsFødselsdato)
 
@@ -91,11 +91,16 @@ class PreutfyllBosattIRiketService(
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
-                    resultat = if (erBosattINorgePeriode.verdi?.erOppfylt == true) Resultat.OPPFYLT else Resultat.IKKE_OPPFYLT,
+                    resultat =
+                        if (erBosattINorgePeriode.verdi is OppfyltDelvilkår) {
+                            Resultat.OPPFYLT
+                        } else {
+                            Resultat.IKKE_OPPFYLT
+                        },
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = erBosattINorgePeriode.fom,
                     periodeTom = erBosattINorgePeriode.tom,
-                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + erBosattINorgePeriode.verdi?.begrunnelse,
+                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + (erBosattINorgePeriode.verdi?.begrunnelse ?: ""),
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
@@ -113,7 +118,7 @@ class PreutfyllBosattIRiketService(
                         if (erBosattINorgePeriode.verdi == true) {
                             sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
                         } else {
-                            Delvilkår.IkkeOppfyltDelvilkår
+                            IkkeOppfyltDelvilkår
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -126,15 +131,15 @@ class PreutfyllBosattIRiketService(
     ): Delvilkår =
         when {
             erBosattINorgePeriode.erMinst12Måneder() ->
-                Delvilkår.OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
+                OppfyltDelvilkår("- Norsk bostedsadresse i minst 12 måneder.")
 
             erFødselsdatoIPeriode(personResultat.vilkårsvurdering.behandling.id, personResultat.aktør.aktørId, erBosattINorgePeriode) ->
-                Delvilkår.OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
+                OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
 
             erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) ->
-                Delvilkår.OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
+                OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
 
-            else -> Delvilkår.IkkeOppfyltDelvilkår
+            else -> IkkeOppfyltDelvilkår
         }
 
     private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
@@ -202,18 +207,14 @@ class PreutfyllBosattIRiketService(
     }
 }
 
-private sealed class Delvilkår {
-    abstract val erOppfylt: Boolean
-    abstract val begrunnelse: String
+private interface Delvilkår {
+    val begrunnelse: String
+}
 
-    data class OppfyltDelvilkår(
-        override val begrunnelse: String,
-    ) : Delvilkår() {
-        override val erOppfylt: Boolean = true
-    }
+private data class OppfyltDelvilkår(
+    override val begrunnelse: String,
+) : Delvilkår
 
-    data object IkkeOppfyltDelvilkår : Delvilkår() {
-        override val erOppfylt: Boolean = false
-        override val begrunnelse: String = ""
-    }
+private data object IkkeOppfyltDelvilkår : Delvilkår {
+    override val begrunnelse: String = ""
 }
