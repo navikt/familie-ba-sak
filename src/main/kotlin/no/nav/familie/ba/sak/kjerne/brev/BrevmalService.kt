@@ -85,6 +85,7 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
                         Behandlingsresultat.IKKE_VURDERT,
                         -> throw FunksjonellFeil(
@@ -119,6 +120,7 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
                         Behandlingsresultat.IKKE_VURDERT,
                         -> throw FunksjonellFeil(
@@ -160,6 +162,7 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
                         Behandlingsresultat.IKKE_VURDERT,
                         -> throw FunksjonellFeil(
@@ -197,6 +200,7 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
                         Behandlingsresultat.IKKE_VURDERT,
                         -> throw FunksjonellFeil(

@@ -41,11 +41,11 @@ enum class FeatureToggle(
     // Tillatter behandling av klage
     BEHANDLE_KLAGE("familie-ba-sak.klage"),
 
-    // NAV-24658
-    SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK("familie-ba-sak.sett-relatert-behandling-for-revurdering-klage-i-saksstatistikk"),
-
     SKAL_BRUKE_NY_DIFFERANSEBEREGNING("familie-ba-sak.skal-bruke-ny-differanseberegning"),
 
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
+
+    // NAV-25329
+    BRUK_NY_OPPRETT_FAGSAK_MODAL("familie-ba-sak.bruk.ny.opprett.fagsak.modal"),
 }

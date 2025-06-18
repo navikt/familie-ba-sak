@@ -85,12 +85,20 @@ class PdlRestClient(
                     PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON -> {
                         pdlPerson.person.forelderBarnRelasjon
                             .mapNotNull { relasjon ->
-                                relasjon.relatertPersonsIdent?.let { ident ->
-                                    ForelderBarnRelasjon(
-                                        aktør = personidentService.hentAktør(ident),
-                                        relasjonsrolle = relasjon.relatertPersonsRolle,
-                                    )
-                                }
+                                relasjon.relatertPersonsIdent
+                                    ?.let { ident ->
+                                        personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident).run {
+                                            if (this == null) {
+                                                secureLogger.warn("Filtrert bort relasjon som ikke har aktivt fødselsnummer i PDL for ident $ident")
+                                            }
+                                            this
+                                        }
+                                    }?.let { aktør ->
+                                        ForelderBarnRelasjon(
+                                            aktør = aktør,
+                                            relasjonsrolle = relasjon.relatertPersonsRolle,
+                                        )
+                                    }
                             }.toSet()
                     }
 

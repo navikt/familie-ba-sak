@@ -127,6 +127,7 @@ data class Behandling(
         resultat == Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET ||
             resultat == Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET ||
             resultat == Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE ||
+            resultat == Behandlingsresultat.HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG ||
             resultat == Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
@@ -310,7 +311,8 @@ enum class Behandlingsresultat(
     // Henlagt
     HENLAGT_FEILAKTIG_OPPRETTET(displayName = "Henlagt feilaktig opprettet"),
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
-    HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
+    HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering (fødselshendelse)"),
+    HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG(displayName = "Henlagt avslått i automatisk vilkårsvurdering (småbarnstillegg)"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert"),

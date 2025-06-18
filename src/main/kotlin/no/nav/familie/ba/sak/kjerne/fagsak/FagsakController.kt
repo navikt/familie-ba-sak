@@ -5,13 +5,13 @@ import no.nav.familie.ba.sak.common.RessursUtils.illegalState
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsakDeltager
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
-import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
-import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -43,12 +43,16 @@ class FagsakController(
     private val personidentService: PersonidentService,
     private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
+    private val unleash: UnleashNextMedContextService,
 ) {
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(
         @RequestBody fagsakRequest: FagsakRequest,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
+        if (unleash.isEnabled(FeatureToggle.BRUK_NY_OPPRETT_FAGSAK_MODAL)) {
+            fagsakRequest.valider()
+        }
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(fagsakRequest.personIdent),
             event = AuditLoggerEvent.CREATE,
@@ -246,18 +250,6 @@ class FagsakController(
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(FagsakController::class.java)
-    }
-}
-
-data class FagsakRequest(
-    val personIdent: String,
-    val fagsakType: FagsakType? = FagsakType.NORMAL,
-    val institusjon: RestInstitusjon? = null,
-    val skjermetBarnSøker: RestSkjermetBarnSøker? = null,
-) {
-    // Bruker init til å validere personidenten
-    init {
-        Fødselsnummer(personIdent)
     }
 }
 
