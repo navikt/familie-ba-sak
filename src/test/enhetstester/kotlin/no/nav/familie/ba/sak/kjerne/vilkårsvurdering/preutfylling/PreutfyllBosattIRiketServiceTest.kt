@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.cucumber.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
@@ -12,7 +13,9 @@ import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -174,6 +177,54 @@ class PreutfyllBosattIRiketServiceTest {
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(2))
+
+        // Assert
+        assertThat(vilkårResultat.singleOrNull()?.resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    @Test
+    fun `skal gi oppfylt hvis søker planlegger å bo i Norge neste 12 månedene`() {
+        // Arrange
+        val behandling = lagBehandling()
+        var barnFnr = randomFnr()
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                barnasFødselsdatoer = listOf(LocalDate.now().minusYears(2)),
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(barnFnr),
+            )
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat =
+            lagPersonResultat(
+                vilkårsvurdering = vilkårsvurdering,
+                person = lagPerson(personIdent = PersonIdent(barnFnr), type = PersonType.BARN),
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.now().minusMonths(2),
+                periodeTom = null,
+                lagFullstendigVilkårResultat = true,
+                personType = PersonType.BARN,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                erDeltBosted = false,
+                erDeltBostedSkalIkkeDeles = false,
+                erEksplisittAvslagPåSøknad = false,
+            )
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                    gyldigTilOgMed = null,
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnFnr to true))
 
         // Act
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(2))
