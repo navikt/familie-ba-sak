@@ -8,7 +8,7 @@ CREATE TABLE minside_aktivering
     opprettet_tid TIMESTAMP(3) DEFAULT localtimestamp NOT NULL,
     endret_av     VARCHAR,
     endret_tid    TIMESTAMP(3),
-    FOREIGN KEY (fk_aktor_id) REFERENCES AKTOER (aktoer_id) ON DELETE CASCADE
+    FOREIGN KEY (fk_aktor_id) REFERENCES AKTOER (aktoer_id) ON UPDATE CASCADE
 );
 
 CREATE SEQUENCE minside_aktivering_seq INCREMENT BY 50 START WITH 1000000 NO CYCLE;
