@@ -22,6 +22,7 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknad
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.NavIdent
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -608,6 +609,21 @@ class IntegrasjonClient(
             formål = "Hente versjonert barnetrygd søknad",
         ) {
             getForEntity<Ressurs<VersjonertBarnetrygdSøknad>>(uri)
+        }
+    }
+
+    fun hentAInntektUrl(personIdent: PersonIdent): String {
+        val url = URI.create("$integrasjonUri/arbeid-og-inntekt/hent-url")
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "a-inntekt-url",
+            uri = url,
+            formål = "Hent URL for person til A-inntekt",
+        ) {
+            postForEntity(
+                url,
+                personIdent,
+            )
         }
     }
 
