@@ -109,6 +109,7 @@ class FagsakService(
                         frontendFeilmelding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
                     )
                 }
+
                 fraAutomatiskBehandling -> {
                     throw FunksjonellFeil(
                         melding = "Kan ikke opprette fagsak med fagsaktype SKJERMET_BARN automatisk",
@@ -139,7 +140,7 @@ class FagsakService(
 
                     val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent, true)
 
-                    fagsakRepository.finnFagsakForSkjermetBarnSøker(aktør, søkersAktør.aktørId)?.also {
+                    fagsakRepository.finnFagsakForSkjermetBarnSøker(aktør, søkersAktør)?.also {
                         throw FunksjonellFeil("Det finnes allerede en skjermet barn fagsak på dette barnet som er koblet til samme søker.")
                     }
                 }
@@ -156,7 +157,7 @@ class FagsakService(
 
         if (type == FagsakType.SKJERMET_BARN) {
             val søkersAktør = personidentService.hentOgLagreAktør(skjermetBarnSøker!!.søkersIdent, true)
-            nyFagsak.skjermetBarnSøker = skjermetBarnSøkerRepository.findByAktørId(søkersAktør.aktørId) ?: skjermetBarnSøkerRepository.saveAndFlush(SkjermetBarnSøker(aktørId = søkersAktør.aktørId))
+            nyFagsak.skjermetBarnSøker = skjermetBarnSøkerRepository.findByAktør(søkersAktør) ?: skjermetBarnSøkerRepository.saveAndFlush(SkjermetBarnSøker(aktør = søkersAktør))
         }
 
         if (fraAutomatiskBehandling) {
@@ -208,13 +209,7 @@ class FagsakService(
         fagsakTyper: List<FagsakType> = FagsakType.values().toList(),
     ): Ressurs<List<RestMinimalFagsak>> {
         val fagsaker = fagsakRepository.finnFagsakerForAktør(aktør).filter { fagsakTyper.contains(it.type) }
-        return if (!fagsaker.isEmpty()) {
-            Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
-        } else {
-            Ressurs.failure(
-                errorMessage = "Fant ikke fagsaker på person",
-            )
-        }
+        return Ressurs.success(data = lagRestMinimalFagsaker(fagsaker))
     }
 
     fun hentRestFagsak(fagsakId: Long): Ressurs<RestFagsak> = Ressurs.success(data = lagRestFagsak(fagsakId))
@@ -283,9 +278,7 @@ class FagsakService(
     private fun hentSøkersFødselsnummer(fagsak: Fagsak): String {
         val aktør =
             if (fagsak.type == FagsakType.SKJERMET_BARN) {
-                personidentService.hentAktør(
-                    fagsak.skjermetBarnSøker?.aktørId ?: throw Feil("Søker er ikke lagret på fagsaken"),
-                )
+                fagsak.skjermetBarnSøker?.aktør ?: throw Feil("Søker er ikke lagret på fagsaken")
             } else {
                 fagsak.aktør
             }
@@ -325,7 +318,7 @@ class FagsakService(
     fun hentLøpendeFagsaker(): List<Fagsak> = fagsakRepository.finnLøpendeFagsaker()
 
     fun hentFagsakDeltager(personIdent: String): List<RestFagsakDeltager> {
-        val aktør = personidentService.hentAktør(personIdent)
+        val aktør = personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(personIdent) ?: return emptyList()
 
         val maskertDeltaker =
             runCatching {

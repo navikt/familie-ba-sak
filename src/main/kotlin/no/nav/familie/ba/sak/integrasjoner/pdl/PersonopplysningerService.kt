@@ -27,7 +27,7 @@ class PersonopplysningerService(
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
-        val relasjonsidenter = personinfo.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
+        val relasjonsidenter = personinfo.forelderBarnRelasjon.mapNotNull { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
         val forelderBarnRelasjon =
             personinfo.forelderBarnRelasjon

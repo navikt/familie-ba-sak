@@ -42,10 +42,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     ): Fagsak?
 
     @Lock(LockModeType.NONE)
-    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :barn and f.type = 'SKJERMET_BARN' and f.arkivert = false and f.skjermetBarnSøker.aktørId = :aktørId")
+    @Query(value = "SELECT f FROM Fagsak f WHERE f.aktør = :barnAktør and f.type = 'SKJERMET_BARN' and f.arkivert = false and f.skjermetBarnSøker.aktør = :søkerAktør")
     fun finnFagsakForSkjermetBarnSøker(
-        barn: Aktør,
-        aktørId: String,
+        barnAktør: Aktør,
+        søkerAktør: Aktør,
     ): Fagsak?
 
     @Lock(LockModeType.NONE)
@@ -210,6 +210,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                                              'HENLAGT_FEILAKTIG_OPPRETTET',
                                                              'HENLAGT_SØKNAD_TRUKKET',
                                                              'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+                                                             'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG',
                                                              'HENLAGT_TEKNISK_VEDLIKEHOLD'
                                         )
                                       AND b.status = 'AVSLUTTET'
@@ -227,6 +228,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                  'HENLAGT_FEILAKTIG_OPPRETTET',
                                  'HENLAGT_SØKNAD_TRUKKET',
                                  'HENLAGT_AUTOMATISK_FØDSELSHENDELSE',
+                                 'HENLAGT_AUTOMATISK_SMÅBARNSTILLEGG'
                                  'HENLAGT_TEKNISK_VEDLIKEHOLD'
             )
           AND vedtaksdato > :month

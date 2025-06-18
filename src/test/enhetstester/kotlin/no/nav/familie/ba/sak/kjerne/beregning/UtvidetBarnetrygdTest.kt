@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
@@ -38,6 +39,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.tidslinje.mapVerdi
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -1124,6 +1126,101 @@ internal class UtvidetBarnetrygdTest {
 
         assertEquals(1054, andelEtterSatsendring.sats)
         assertEquals(datoForSatsendring?.toYearMonth(), andelEtterSatsendring.stønadFom)
+    }
+
+    @Test
+    fun `Skal endre utbetaling for søker og barn på endret utbetaling andel`() {
+        val søker = OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15))
+        val barn = OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 6, 15), rolle = PersonType.BARN)
+
+        val behandling = lagBehandling()
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val søkerResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
+                .apply {
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = søker.fom,
+                            vilkårOppfyltTom = søker.tom,
+                            personType = PersonType.SØKER,
+                        ),
+                    )
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = søker.fom,
+                            vilkårOppfyltTom = søker.tom,
+                            personType = PersonType.SØKER,
+                            erUtvidet = true,
+                        ),
+                    )
+                }
+        val barnResultater =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
+                .apply {
+                    vilkårResultater.addAll(
+                        oppfylteVilkårFor(
+                            personResultat = this,
+                            vilkårOppfyltFom = barn.fom,
+                            vilkårOppfyltTom = barn.tom,
+                            personType = PersonType.BARN,
+                        ),
+                    )
+                }
+
+        vilkårsvurdering.apply { personResultater = setOf(søkerResultat, barnResultater) }
+
+        val personopplysningGrunnlag =
+            PersonopplysningGrunnlag(behandlingId = behandling.id)
+                .apply {
+                    personer.addAll(listOf(søker, barn).lagGrunnlagPersoner(this))
+                }
+
+        every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
+
+        val endretUtbetalingAndeler =
+            listOf(
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    personer = personopplysningGrunnlag.personer,
+                    fom = YearMonth.of(2019, 5),
+                    tom = YearMonth.of(2019, 5),
+                    prosent = BigDecimal.ZERO,
+                ),
+            )
+
+        val andeler =
+            tilkjentYtelseGenerator
+                .genererTilkjentYtelse(
+                    behandling = vilkårsvurdering.behandling,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                    endretUtbetalingAndeler = endretUtbetalingAndeler,
+                ).andelerTilkjentYtelse
+
+        assertThat(andeler)
+            .anySatisfy {
+                assertThat(it.aktør).isEqualTo(søker.aktør)
+                assertThat(it.stønadFom).isEqualTo(YearMonth.of(2019, 5))
+                assertThat(it.stønadTom).isEqualTo(YearMonth.of(2019, 5))
+                assertThat(it.prosent).isEqualTo(BigDecimal.ZERO)
+            }.anySatisfy {
+                assertThat(it.aktør).isEqualTo(søker.aktør)
+                assertThat(it.stønadFom).isEqualTo(YearMonth.of(2019, 6))
+                assertThat(it.stønadTom).isEqualTo(YearMonth.of(2020, 6))
+                assertThat(it.prosent).isEqualTo(BigDecimal(100))
+            }.anySatisfy {
+                assertThat(it.aktør).isEqualTo(barn.aktør)
+                assertThat(it.stønadFom).isEqualTo(YearMonth.of(2019, 5))
+                assertThat(it.stønadTom).isEqualTo(YearMonth.of(2019, 5))
+                assertThat(it.prosent).isEqualTo(BigDecimal.ZERO)
+            }.anySatisfy {
+                assertThat(it.aktør).isEqualTo(barn.aktør)
+                assertThat(it.stønadFom).isEqualTo(YearMonth.of(2019, 6))
+                assertThat(it.stønadTom).isEqualTo(YearMonth.of(2020, 6))
+                assertThat(it.prosent).isEqualTo(BigDecimal(100))
+            }
     }
 
     private data class OppfyltPeriode(

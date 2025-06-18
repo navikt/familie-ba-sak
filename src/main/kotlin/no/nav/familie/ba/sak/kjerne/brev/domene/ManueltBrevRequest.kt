@@ -154,6 +154,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
 
         FagsakType.NORMAL,
         FagsakType.BARN_ENSLIG_MINDREÅRIG,
+        FagsakType.SKJERMET_BARN,
         -> {
             hentPerson(mottakerIdent).let { mottakerPerson ->
                 this.copy(
@@ -162,7 +163,6 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
                 )
             }
         }
-        FagsakType.SKJERMET_BARN -> TODO("NAV-25256 Ikke implementert enda")
     }
 }
 
@@ -181,14 +181,16 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
             }
 
     return when (fagsak.type) {
-        FagsakType.INSTITUSJON -> {
-            val personNavn = pdlRestClient.hentPerson(fagsak.aktør, PersonInfoQuery.ENKEL).navn ?: throw FunksjonellFeil("Finner ikke navn på person i PDL")
+        FagsakType.INSTITUSJON, FagsakType.SKJERMET_BARN -> {
+            val aktør = fagsak.skjermetBarnSøker?.aktør ?: fagsak.aktør
+
+            val personNavn = pdlRestClient.hentPerson(aktør, PersonInfoQuery.ENKEL).navn ?: throw FunksjonellFeil("Finner ikke navn på person i PDL")
 
             this.copy(
                 enhet = enhet,
                 vedrørende =
                     object : Person {
-                        override val fødselsnummer = fagsak.aktør.aktivFødselsnummer()
+                        override val fødselsnummer = aktør.aktivFødselsnummer()
                         override val navn = personNavn
                     },
             )
@@ -200,7 +202,6 @@ fun ManueltBrevRequest.byggMottakerdataFraFagsak(
             this.copy(
                 enhet = enhet,
             )
-        FagsakType.SKJERMET_BARN -> TODO("NAV-25256 Ikke implementert enda")
     }
 }
 

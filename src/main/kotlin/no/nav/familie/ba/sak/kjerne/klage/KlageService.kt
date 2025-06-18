@@ -109,7 +109,7 @@ class KlageService(
     @Transactional
     fun validerOgOpprettRevurderingKlage(
         fagsakId: Long,
-        klagebehandlingId: UUID?,
+        klagebehandlingId: UUID,
     ): OpprettRevurderingResponse {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
 
@@ -122,7 +122,7 @@ class KlageService(
 
     private fun opprettRevurderingKlage(
         fagsak: Fagsak,
-        klagebehandlingId: UUID?,
+        klagebehandlingId: UUID,
     ) = try {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
@@ -139,7 +139,7 @@ class KlageService(
                 // barnasIdenter hentes fra forrige behandling i håndterNyBehandling() ved revurdering
                 barnasIdenter = emptyList(),
                 fagsakId = forrigeBehandling.fagsak.id,
-                nyEksternBehandlingRelasjon = klagebehandlingId?.let { NyEksternBehandlingRelasjon.opprettForKlagebehandling(it) },
+                nyEksternBehandlingRelasjon = NyEksternBehandlingRelasjon.opprettForKlagebehandling(klagebehandlingId),
             )
 
         val revurdering = stegService.håndterNyBehandling(nyBehandling)

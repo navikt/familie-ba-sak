@@ -69,7 +69,7 @@ class HenleggBehandling(
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
-        behandling.resultat = data.årsak.tilBehandlingsresultat()
+        behandling.resultat = data.årsak.tilBehandlingsresultat(behandling.opprettetÅrsak)
         behandling.leggTilHenleggStegOmDetIkkeFinnesFraFør()
 
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling)

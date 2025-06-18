@@ -72,7 +72,13 @@ class DokumentGenereringService(
         fagsak: Fagsak,
         erForhåndsvisning: Boolean = false,
     ): ByteArray {
-        val mottakerIdent = fagsak.institusjon?.orgNummer ?: fagsak.aktør.aktivFødselsnummer()
+        val mottakerIdent =
+            when (fagsak.type) {
+                FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG -> fagsak.aktør.aktivFødselsnummer()
+                FagsakType.INSTITUSJON -> fagsak.institusjon?.orgNummer ?: throw Feil("Fant ikke institusjon på fagsak id ${fagsak.id}")
+                FagsakType.SKJERMET_BARN -> fagsak.skjermetBarnSøker?.aktør?.aktivFødselsnummer() ?: throw Feil("Fant ikke søker på fagsak id ${fagsak.id}")
+            }
+
         val navnTilBrevHeader = finnSøkerEllerInstitusjonsNavn(fagsak)
         try {
             val brev: Brev =
@@ -107,13 +113,21 @@ class DokumentGenereringService(
     }
 
     private fun finnSøkerEllerInstitusjonsNavn(fagsak: Fagsak): String =
-        if (fagsak.type == FagsakType.INSTITUSJON) {
-            val orgnummer =
-                fagsak.institusjon?.orgNummer
-                    ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
-            organisasjonService.hentOrganisasjon(orgnummer).navn
-        } else {
-            personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn
-                ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
+        when (fagsak.type) {
+            FagsakType.NORMAL, FagsakType.BARN_ENSLIG_MINDREÅRIG ->
+                personopplysningerService.hentPersoninfoEnkel(fagsak.aktør).navn ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
+
+            FagsakType.INSTITUSJON ->
+                {
+                    val orgnummer = fagsak.institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
+
+                    organisasjonService.hentOrganisasjon(orgnummer).navn
+                }
+
+            FagsakType.SKJERMET_BARN -> {
+                val søkerAktør = fagsak.skjermetBarnSøker?.aktør ?: throw Feil("Fant ikke søker på skjermet barn fagsak id ${fagsak.id}")
+
+                personopplysningerService.hentPersoninfoEnkel(søkerAktør).navn ?: throw Feil("Klarte ikke hente navn på fagsak.aktør fra pdl")
+            }
         }
 }

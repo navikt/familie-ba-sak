@@ -26,7 +26,7 @@
         <prosessering.version>2.20250526085951_e212049</prosessering.version>
         <felles.version>3.20250602160953_48db326</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250604093431_85c9dc1</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20250602111633_e3dbc75</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20250610121909_2972b10</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250604093431_85c9dc1</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250604093431_85c9dc1</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
@@ -35,7 +35,7 @@
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.29</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>2.8.8</springdoc.version>
+        <springdoc.version>2.8.9</springdoc.version>
         <sentry.version>8.13.2</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.1</kotlinx-kover.version>
@@ -178,7 +178,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.6</version>
+            <version>42.7.7</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>

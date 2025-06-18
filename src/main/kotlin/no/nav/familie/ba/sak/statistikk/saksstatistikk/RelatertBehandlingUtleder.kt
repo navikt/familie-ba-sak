@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -12,14 +10,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class RelatertBehandlingUtleder(
-    private val unleashService: UnleashNextMedContextService,
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(RelatertBehandlingUtleder::class.java)
 
     fun utledRelatertBehandling(behandling: Behandling): RelatertBehandling? {
-        if (behandling.erRevurderingKlage() && unleashService.isEnabled(FeatureToggle.SETT_RELATERT_BEHANDLING_FOR_REVURDERING_KLAGE_I_SAKSSTATISTIKK, false)) {
+        if (behandling.erRevurderingKlage()) {
             val eksternKlagebehandlingRelasjon =
                 eksternBehandlingRelasjonService.finnEksternBehandlingRelasjon(
                     behandlingId = behandling.id,
@@ -30,10 +27,6 @@ class RelatertBehandlingUtleder(
                 return null
             }
             return RelatertBehandling.fraEksternBehandlingRelasjon(eksternKlagebehandlingRelasjon)
-        }
-
-        if (behandling.erRevurderingKlage()) {
-            return null
         }
 
         if (behandling.erRevurderingEllerTekniskEndring()) {

@@ -245,20 +245,21 @@ class FagsakControllerTest(
                 )
             }
         val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
-        assert(fagsaker.status == Ressurs.Status.FEILET)
-        assertEquals("Mangler påkrevd variabel orgnummer for institusjon", exception.message)
+        assertThat(fagsaker.data!!).isEmpty()
+        assertThat(exception.message).isEqualTo("Institusjon mangler for fagsaktype institusjon.")
     }
 
     @Test
     @Tag("integration")
     fun `Skal opprette fagsak av type INSTITUSJON hvor FagsakInstitusjon er satt`() {
         val fnr = randomFnr()
+        val orgNrNav = "889640782"
 
         fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
                 personIdent = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = RestInstitusjon("orgnr", "tss-id"),
+                institusjon = RestInstitusjon(orgNrNav, "tss-id"),
             ),
         )
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
@@ -268,7 +269,7 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsaker[0].søkerFødselsnummer)
         assertEquals(FagsakType.INSTITUSJON, fagsaker[0].fagsakType)
         assertNotNull(fagsaker[0].institusjon)
-        assertEquals("orgnr", fagsaker[0].institusjon?.orgNummer)
+        assertEquals(orgNrNav, fagsaker[0].institusjon?.orgNummer)
         assertEquals("tss-id", fagsaker[0].institusjon?.tssEksternId)
     }
 }
