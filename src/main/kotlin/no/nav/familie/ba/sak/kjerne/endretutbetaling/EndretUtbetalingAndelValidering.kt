@@ -214,14 +214,13 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
         val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.personer.any { it.type == PersonType.BARN }
 
-        val deltBostedEndringerISammePeriode by lazy {
+        val deltBostedEndringerISammePeriode =
             endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
                 it.årsak == Årsak.DELT_BOSTED &&
                     it.fom!!.isSameOrBefore(endretPåUtvidetUtbetalinger.fom!!) &&
                     it.tom!!.isSameOrAfter(endretPåUtvidetUtbetalinger.tom!!) &&
                     it.id != endretPåUtvidetUtbetalinger.id
             }
-        }
 
         if (!endretUtbetalingAndelInneholderBarn && deltBostedEndringerISammePeriode.isEmpty()) {
             val feilmelding =
