@@ -51,8 +51,11 @@ class PersongrunnlagService(
     private val arbeidsforholdService: ArbeidsforholdService,
     private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
-    fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
-        val restPerson = person.tilRestPerson()
+    fun mapTilRestPersonMedStatsborgerskapLand(
+        person: Person,
+        erManueltLagtTilISøknad: Boolean? = null,
+    ): RestPerson {
+        val restPerson = person.tilRestPerson(erManueltLagtTilISøknad)
         restPerson.registerhistorikk
             ?.statsborgerskap
             ?.forEach { lagret ->
