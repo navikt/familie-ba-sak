@@ -782,7 +782,7 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `skal ikke feile dersom de er en utvidet endring og delt bosted endring med samme periode og prosent`() {
+    fun `skal ikke feile dersom det er en utvidet endring og delt bosted endring med samme periode og prosent`() {
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling),
         )
@@ -790,6 +790,34 @@ class EndretUtbetalingAndelValideringTest {
             validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                 listOf(endretUtbetalingAndelUtvidetNullutbetaling, endretUtbetalingAndelDeltBostedNullutbetaling),
             )
+        }
+    }
+
+    @Test
+    fun `skal ikke feile dersom det er en delt bosted endring som inneholder barn og søker`() {
+        val andeler =
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                fom = inneværendeMåned().minusMonths(1),
+                tom = inneværendeMåned().minusMonths(1),
+                personer = setOf(barn, søker),
+                årsak = Årsak.DELT_BOSTED,
+                andelTilkjentYtelser =
+                    mutableListOf(
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusMonths(1),
+                            tom = inneværendeMåned().minusMonths(1),
+                            ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        ),
+                        lagAndelTilkjentYtelse(
+                            fom = inneværendeMåned().minusMonths(1),
+                            tom = inneværendeMåned().minusMonths(1),
+                            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        ),
+                    ),
+            )
+
+        assertDoesNotThrow {
+            validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(listOf(andeler))
         }
     }
 
