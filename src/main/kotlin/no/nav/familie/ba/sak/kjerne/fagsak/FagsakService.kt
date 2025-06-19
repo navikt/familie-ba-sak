@@ -252,6 +252,7 @@ class FagsakService(
         return RestBaseFagsak(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
             id = fagsak.id,
+            fagsakeier = fagsak.aktør.aktivFødselsnummer(),
             søkerFødselsnummer = hentSøkersFødselsnummer(fagsak),
             status = fagsak.status,
             underBehandling =

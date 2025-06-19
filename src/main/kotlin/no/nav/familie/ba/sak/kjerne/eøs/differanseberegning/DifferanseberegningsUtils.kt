@@ -55,8 +55,8 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
     val nyttDifferanseberegnetPeriodebeløp by lazy {
         (
             beløpUtenEndretUtbetaling ?: throw FunksjonellFeil(
-                "En feil har oppstått. Gå tilbake til vilkårsvurderingen og trykk 'Neste'." +
-                    "Dersom behandlingen er sendt til totrinnskontroll må behandlingen underkjennes av beslutter slik at saksbehandler kan utføre dette.",
+                "En feil har oppstått. Beslutter må underkjenne behandlingen," +
+                    " slik at saksbehandler 1 kan gå tilbake til vilkårsvurderingen og trykke ‘Neste', og sende sak til godkjenning på nytt.",
             )
         ) - avrundetUtenlandskPeriodebeløp
     }

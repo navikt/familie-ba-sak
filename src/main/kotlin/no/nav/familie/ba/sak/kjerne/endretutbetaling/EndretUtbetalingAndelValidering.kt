@@ -212,6 +212,8 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             }
 
     endredeUtvidetUtbetalingerAndeler.forEach { endretPåUtvidetUtbetalinger ->
+        val endretUtbetalingAndelInneholderBarn = endretPåUtvidetUtbetalinger.personer.any { it.type == PersonType.BARN }
+
         val deltBostedEndringerISammePeriode =
             endretUtbetalingAndelerMedÅrsakDeltBosted.filter {
                 it.årsak == Årsak.DELT_BOSTED &&
@@ -220,7 +222,7 @@ fun validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
                     it.id != endretPåUtvidetUtbetalinger.id
             }
 
-        if (deltBostedEndringerISammePeriode.isEmpty()) {
+        if (!endretUtbetalingAndelInneholderBarn && deltBostedEndringerISammePeriode.isEmpty()) {
             val feilmelding =
                 "Det kan ikke være en endring på en utvidet ytelse uten en endring på en delt bosted ytelse. " +
                     "Legg til en delt bosted endring i perioden ${endretPåUtvidetUtbetalinger.fom} til " +
