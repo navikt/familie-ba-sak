@@ -125,6 +125,7 @@ class BeregningServiceTest {
                 RestBaseFagsak(
                     opprettetTidspunkt = fagsak.opprettetTidspunkt,
                     id = fagsak.id,
+                    fagsakeier = fagsak.aktør.aktivFødselsnummer(),
                     søkerFødselsnummer = fagsak.aktør.aktivFødselsnummer(),
                     status = fagsak.status,
                     underBehandling = false,

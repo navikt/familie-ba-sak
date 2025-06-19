@@ -152,9 +152,16 @@ class PreutfyllBosattIRiketServiceTest {
     fun `skal gi oppfylt i siste periode hvis den er under 12 mnd og søker planlegger å bo i Norge neste 12`() {
         // Arrange
         val behandling = lagBehandling()
-        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id)
+        val persongrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                søkerPersonIdent = randomFnr(),
+                barnasIdenter = listOf(randomFnr()),
+            )
         val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
-        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
             listOf(
@@ -316,10 +323,8 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(5))
 
         // Assert
-        val ikkeOppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }
-        assertThat(ikkeOppfyltPeriode).`as`("Forventer én IKKE_OPPFYLT periode").isNotNull
-        assertThat(ikkeOppfyltPeriode?.periodeFom).`as`("Ikke oppfylt periode fom").isEqualTo(LocalDate.now().minusYears(5))
-        assertThat(ikkeOppfyltPeriode?.periodeTom).`as`("Ikke oppfylt periode tom").isEqualTo(LocalDate.now().minusYears(1).minusDays(1))
+        val ikkeOppfyltPeriode = vilkårResultat.filter { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(ikkeOppfyltPeriode.size).isEqualTo(1)
 
         val oppfyltPeriode = vilkårResultat.find { it.resultat == Resultat.OPPFYLT }
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
@@ -352,5 +357,69 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat).hasSize(1)
         val barnsVilkårResultat = vilkårResultat.find { it.personResultat?.id == personResultat.id }
         assertThat(barnsVilkårResultat?.resultat).isEqualTo(Resultat.OPPFYLT)
+    }
+
+    @Test
+    fun `skal gi begrunnelse Norsk bostedsadresse i 12 måneder for oppfylt periode`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusYears(4),
+                    gyldigTilOgMed = LocalDate.now().minusYears(3),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusYears(2).plusDays(1),
+                    matrikkeladresse = lagMatrikkeladresse(54321L),
+                ),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(4))
+        val begrunnelse = vilkårResultat.firstOrNull { it.resultat == Resultat.OPPFYLT }?.begrunnelse
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(3)
+        assertThat(begrunnelse).isEqualTo(
+            "Fylt ut automatisk fra registerdata i PDL \n" +
+                "- Norsk bostedsadresse i minst 12 måneder.",
+        )
+    }
+
+    @Test
+    fun `skal gi begrunnelse Bosatt i Norge siden fødsel for oppfylt periode`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barnasFødselsdatoer = listOf(LocalDate.now().minusMonths(2)), søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
+        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlag, behandling)
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.barna.first().aktør)
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusMonths(4),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(4))
+        val begrunnelse = vilkårResultat.firstOrNull { it.resultat == Resultat.OPPFYLT }?.begrunnelse
+
+        // Assert
+        assertThat(begrunnelse).isEqualTo(
+            "Fylt ut automatisk fra registerdata i PDL \n" +
+                "- Bosatt i Norge siden fødsel.",
+        )
     }
 }

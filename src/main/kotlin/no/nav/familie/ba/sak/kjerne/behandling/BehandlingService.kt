@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
-import no.nav.familie.ba.sak.kjerne.behandling.søknadreferanse.SøknadReferanseService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -65,7 +64,6 @@ class BehandlingService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val unleashService: UnleashNextMedContextService,
     private val eksternBehandlingRelasjonService: EksternBehandlingRelasjonService,
-    private val søknadReferanseService: SøknadReferanseService,
 ) {
     @Transactional
     fun opprettBehandling(nyBehandling: NyBehandling): Behandling {
@@ -119,16 +117,10 @@ class BehandlingService(
                         )
                     }
                     if (nyBehandling.søknadMottattDato != null) {
-                        behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+                        behandlingSøknadsinfoService.lagreSøknadsinfo(
                             mottattDato = nyBehandling.søknadMottattDato,
                             søknadsinfo = nyBehandling.søknadsinfo,
                             behandling = behandling,
-                        )
-                    }
-                    if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR) && nyBehandling.søknadsinfo != null) {
-                        søknadReferanseService.lagreSøknadReferanse(
-                            behandlingId = it.id,
-                            journalpostId = nyBehandling.søknadsinfo.journalpostId,
                         )
                     }
                     saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.id)
