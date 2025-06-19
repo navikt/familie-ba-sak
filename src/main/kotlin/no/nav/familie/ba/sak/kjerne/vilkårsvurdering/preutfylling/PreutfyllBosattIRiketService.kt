@@ -159,22 +159,19 @@ class PreutfyllBosattIRiketService(
     fun finnFødselsdatoForBeskjæring(
         personResultat: PersonResultat,
         vilkårsvurdering: Vilkårsvurdering,
-    ): LocalDate {
+    ): LocalDate =
         if (personResultat.erSøkersResultater()) {
-            val eldstebarn =
-                persongrunnlagService
-                    .hentAktivThrows(vilkårsvurdering.behandling.id)
-                    .barna
-                    .minOfOrNull { it.fødselsdato } ?: LocalDate.MIN
-            return eldstebarn
+            persongrunnlagService
+                .hentAktivThrows(vilkårsvurdering.behandling.id)
+                .barna
+                .minOfOrNull { it.fødselsdato } ?: LocalDate.MIN
         } else {
-            return persongrunnlagService
+            persongrunnlagService
                 .hentAktivThrows(vilkårsvurdering.behandling.id)
                 .barna
                 .find { it.aktør.aktørId == personResultat.aktør.aktørId }
                 ?.fødselsdato ?: LocalDate.MIN
         }
-    }
 
     private fun harBostedsAdresseINorge(bostedsadresse: Bostedsadresse): Boolean = bostedsadresse.vegadresse != null || bostedsadresse.matrikkeladresse != null || bostedsadresse.ukjentBosted != null
 
