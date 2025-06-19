@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Søknadsinfo
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -25,7 +25,7 @@ class BehandlingSøknadsinfoServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { behandlingSøknadsinfoRepository.save(any()) } returns mockk()
+        every { behandlingSøknadsinfoRepository.save(any()) } returnsArgument 0
         every { behandlingSøknadsinfoRepository.findByBehandlingId(any()) } returns
             setOf(
                 BehandlingSøknadsinfo(
@@ -65,13 +65,13 @@ class BehandlingSøknadsinfoServiceTest {
     fun hentSøkønadMottattDato() {
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId = behandling.id)
         verify(exactly = 1) { behandlingSøknadsinfoRepository.findByBehandlingId(behandling.id) }
-        Assertions.assertThat(søknadMottattDato == this.søknadMottattDato)
+        assertThat(søknadMottattDato).isEqualTo(this.søknadMottattDato.atStartOfDay())
     }
 
     @Test
     fun hentJournalpostId() {
         val journalpostId = behandlingSøknadsinfoService.hentJournalpostId(behandlingId = behandling.id)
         verify(exactly = 1) { behandlingSøknadsinfoRepository.findByBehandlingId(behandling.id) }
-        Assertions.assertThat(journalpostId == this.journalpostId)
+        assertThat(journalpostId).isEqualTo(this.journalpostId)
     }
 }
