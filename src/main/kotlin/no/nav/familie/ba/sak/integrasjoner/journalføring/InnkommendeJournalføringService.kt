@@ -306,7 +306,7 @@ class InnkommendeJournalføringService(
         brevkode: String,
         behandling: Behandling,
     ) {
-        behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+        behandlingSøknadsinfoService.lagreSøknadsinfo(
             mottattDato = journalpost.datoMottatt?.toLocalDate() ?: LocalDate.now(),
             søknadsinfo =
                 Søknadsinfo(
