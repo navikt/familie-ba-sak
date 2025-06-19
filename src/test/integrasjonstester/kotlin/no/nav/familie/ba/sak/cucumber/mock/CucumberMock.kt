@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
@@ -146,6 +147,7 @@ class CucumberMock(
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
     val patchetAndelTilkjentYtelseRepository = mockk<PatchetAndelTilkjentYtelseRepository>()
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -427,12 +429,18 @@ class CucumberMock(
     val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockUnleashNextMedContextService())
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
+    val behandlingSøknadsinfoService =
+        BehandlingSøknadsinfoService(
+            behandlingSøknadsinfoRepository = behandlingSøknadsinfoRepository,
+        )
+
     val tilkjentYtelseValideringService =
         TilkjentYtelseValideringService(
             beregningService = beregningService,
             totrinnskontrollService = totrinnskontrollService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
         )
 
     val utbetalingsoppdragGenerator =
