@@ -139,6 +139,7 @@ class FagsakServiceTest {
             // Assert
             assertThat(restMinimalFagsak.opprettetTidspunkt).isNotNull()
             assertThat(restMinimalFagsak.id).isEqualTo(fagsak.id)
+            assertThat(restMinimalFagsak.fagsakeier).isEqualTo(fagsak.aktør.aktivFødselsnummer())
             assertThat(restMinimalFagsak.søkerFødselsnummer).isEqualTo(fagsak.aktør.aktivFødselsnummer())
             assertThat(restMinimalFagsak.status).isEqualTo(fagsak.status)
             assertThat(restMinimalFagsak.løpendeKategori).isEqualTo(sisteBehandlingSomErVedtatt.kategori)
