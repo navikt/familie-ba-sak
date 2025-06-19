@@ -65,33 +65,40 @@ internal class EndretUtbetalingAndelTest {
     @Test
     fun `Skal sette tom til siste måned med andel tilkjent ytelse hvis tom er null og det ikke finnes noen andre endringsperioder`() {
         val behandling = lagBehandling()
-        val barn = lagPerson(type = PersonType.BARN)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn),
+                personer = setOf(barn1, barn2),
                 fom = YearMonth.now(),
                 tom = null,
                 årsak = Årsak.DELT_BOSTED,
             )
 
-        val sisteTomPåAndeler = YearMonth.now().plusMonths(10)
+        val sisteTomPåAndelerBarn1 = YearMonth.now().plusMonths(10)
+        val sisteTomPåAndelerBarn2 = YearMonth.now().plusMonths(9)
         val andelTilkjentYtelser =
             listOf(
                 lagAndelTilkjentYtelse(
-                    person = barn,
-                    fom = YearMonth.now().minusYears(2),
-                    tom = YearMonth.now().minusMonths(5),
-                ),
-                lagAndelTilkjentYtelse(
-                    person = barn,
+                    person = barn1,
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(4),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn,
+                    person = barn1,
                     fom = YearMonth.now().plusMonths(5),
-                    tom = sisteTomPåAndeler,
+                    tom = sisteTomPåAndelerBarn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now().plusMonths(4),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.now().plusMonths(5),
+                    tom = sisteTomPåAndelerBarn2,
                 ),
             )
 
@@ -102,47 +109,65 @@ internal class EndretUtbetalingAndelTest {
                 andreEndredeAndelerPåBehandling = emptyList(),
             )
 
-        assertEquals(sisteTomPåAndeler, nyTom)
+        val forventetTom = minOf(sisteTomPåAndelerBarn1, sisteTomPåAndelerBarn2)
+        assertEquals(forventetTom, nyTom)
     }
 
     @Test
     fun `Skal sette tom til måneden før neste endringsperiode`() {
         val behandling = lagBehandling()
-        val barn = lagPerson(type = PersonType.BARN)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel =
             lagEndretUtbetalingAndel(
                 behandlingId = behandling.id,
-                personer = setOf(barn),
+                personer = setOf(barn1, barn2),
                 fom = YearMonth.now(),
                 tom = null,
                 årsak = Årsak.DELT_BOSTED,
             )
 
-        val annenEndretAndel =
-            lagEndretUtbetalingAndel(
-                behandlingId = behandling.id,
-                personer = setOf(barn),
-                fom = YearMonth.now().plusMonths(5),
-                tom = YearMonth.now().plusMonths(8),
-                årsak = Årsak.DELT_BOSTED,
+        val fomPåEndretAndelBarn1 = YearMonth.now().plusMonths(5)
+        val fomPåEndretAndelBarn2 = YearMonth.now().plusMonths(6)
+        val andreEndretAndeler =
+            listOf(
+                lagEndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    personer = setOf(barn1),
+                    fom = fomPåEndretAndelBarn1,
+                    tom = YearMonth.now().plusMonths(8),
+                    årsak = Årsak.DELT_BOSTED,
+                ),
+                lagEndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    personer = setOf(barn2),
+                    fom = fomPåEndretAndelBarn2,
+                    tom = YearMonth.now().plusMonths(8),
+                    årsak = Årsak.DELT_BOSTED,
+                ),
             )
 
         val andelTilkjentYtelser =
             listOf(
                 lagAndelTilkjentYtelse(
-                    person = barn,
-                    fom = YearMonth.now().minusYears(2),
-                    tom = YearMonth.now().minusMonths(5),
-                ),
-                lagAndelTilkjentYtelse(
-                    person = barn,
+                    person = barn1,
                     fom = YearMonth.now().minusMonths(4),
                     tom = YearMonth.now().plusMonths(4),
                 ),
                 lagAndelTilkjentYtelse(
-                    person = barn,
+                    person = barn1,
                     fom = YearMonth.now().plusMonths(5),
                     tom = YearMonth.now().plusMonths(10),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.now().minusMonths(4),
+                    tom = YearMonth.now().plusMonths(4),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.now().plusMonths(5),
+                    tom = YearMonth.now().plusMonths(9),
                 ),
             )
 
@@ -150,9 +175,10 @@ internal class EndretUtbetalingAndelTest {
             beregnGyldigTomIFremtiden(
                 andelTilkjentYtelser = andelTilkjentYtelser,
                 endretUtbetalingAndel = endretUtbetalingAndel,
-                andreEndredeAndelerPåBehandling = listOf(annenEndretAndel),
+                andreEndredeAndelerPåBehandling = andreEndretAndeler,
             )
 
-        assertEquals(annenEndretAndel.fom!!.minusMonths(1), nyTom)
+        val forventetTom = andreEndretAndeler.minOf { it.fom!! }.minusMonths(1)
+        assertEquals(forventetTom, nyTom)
     }
 }
