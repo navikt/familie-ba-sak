@@ -137,7 +137,7 @@ class UtvidetBehandlingService(
             arbeidsfordelingPåBehandling = arbeidsfordeling.tilRestArbeidsfordelingPåBehandling(),
             søknadsgrunnlag = søknadsgrunnlag,
             personer =
-                personer?.map { persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(it) }
+                personer?.map { person -> persongrunnlagService.mapTilRestPersonMedStatsborgerskapLand(person, erManueltLagtTilISøknad = søknadsgrunnlag?.barnaMedOpplysninger?.find { it.ident == person.aktør.aktivFødselsnummer() }?.manueltRegistrert) }
                     ?: emptyList(),
             personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
             fødselshendelsefiltreringResultater =
