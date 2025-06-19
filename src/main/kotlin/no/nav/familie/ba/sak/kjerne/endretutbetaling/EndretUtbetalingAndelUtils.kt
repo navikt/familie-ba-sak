@@ -13,7 +13,7 @@ fun beregnGyldigTomIFremtiden(
         andreEndredeAndelerPåBehandling
             .filter {
                 it.fom?.isAfter(endretUtbetalingAndel.fom) == true &&
-                    it.personer == endretUtbetalingAndel.personer
+                    it.personer.intersect(endretUtbetalingAndel.personer).isNotEmpty()
             }.sortedBy { it.fom }
             .firstOrNull()
 
@@ -24,7 +24,8 @@ fun beregnGyldigTomIFremtiden(
             andelTilkjentYtelser
                 .filter {
                     endretUtbetalingAndel.personer.any { person -> person.aktør == it.aktør }
-                }.maxOf { it.stønadTom }
+                }.groupBy { it.aktør }
+                .minOf { (_, andelerForAktør) -> andelerForAktør.maxOf { it.stønadTom } }
 
         return sisteTomAndeler
     }
