@@ -127,6 +127,10 @@ class OpprettTaskService(
         }
     }
 
+    fun opprettAktiverMinsideTask(aktør: Aktør) {
+        taskRepository.save(AktiverMinsideTask.opprettTask(aktør))
+    }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettSatsendringTask(
         fagsakId: Long,
