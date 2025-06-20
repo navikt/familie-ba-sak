@@ -18,6 +18,7 @@ import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
@@ -34,15 +35,11 @@ class PreutfyllBosattIRiketService(
     fun prefutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
         if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
 
-        val eldsteBarnsFødselsdato =
-            persongrunnlagService
-                .hentAktivThrows(vilkårsvurdering.behandling.id)
-                .barna
-                .minOfOrNull { it.fødselsdato } ?: LocalDate.MIN
-
         vilkårsvurdering.personResultater.forEach { personResultat ->
 
-            val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat, eldsteBarnsFødselsdato)
+            val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat, vilkårsvurdering)
+
+            val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat, fødselsdatoForBeskjæring)
 
             if (bosattIRiketVilkårResultat.isNotEmpty()) {
                 personResultat.vilkårResultater.removeIf { it.vilkårType == Vilkår.BOSATT_I_RIKET }
@@ -53,7 +50,7 @@ class PreutfyllBosattIRiketService(
 
     fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
-        eldsteBarnsFødselsdato: LocalDate = LocalDate.MIN,
+        fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
 
@@ -71,6 +68,8 @@ class PreutfyllBosattIRiketService(
 
         val erØvrigeKravForBosattIRiketOppfyltTidslinje = lagErØvrigeKravForBosattIRiketOppfyltTidslinje(erBosattINorgeTidslinje, personResultat)
 
+        val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
+
         val erBosattIRiketTidslinje =
             erØvrigeKravForBosattIRiketOppfyltTidslinje
                 .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
@@ -83,7 +82,7 @@ class PreutfyllBosattIRiketService(
                     } else {
                         IkkeOppfyltDelvilkår
                     }
-                }.beskjærFraOgMed(eldsteBarnsFødselsdato)
+                }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
         return erBosattIRiketTidslinje
             .tilPerioder()
@@ -156,6 +155,23 @@ class PreutfyllBosattIRiketService(
             }
         return planleggerÅBoNeste12Mnd == true
     }
+
+    fun finnFødselsdatoForBeskjæring(
+        personResultat: PersonResultat,
+        vilkårsvurdering: Vilkårsvurdering,
+    ): LocalDate =
+        if (personResultat.erSøkersResultater()) {
+            persongrunnlagService
+                .hentAktivThrows(vilkårsvurdering.behandling.id)
+                .barna
+                .minOfOrNull { it.fødselsdato } ?: LocalDate.MIN
+        } else {
+            persongrunnlagService
+                .hentAktivThrows(vilkårsvurdering.behandling.id)
+                .barna
+                .find { it.aktør.aktørId == personResultat.aktør.aktørId }
+                ?.fødselsdato ?: LocalDate.MIN
+        }
 
     private fun harBostedsAdresseINorge(bostedsadresse: Bostedsadresse): Boolean = bostedsadresse.vegadresse != null || bostedsadresse.matrikkeladresse != null || bostedsadresse.ukjentBosted != null
 
