@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class MinsideAktiveringKafkaProducer(
-    private val kafkaAivenTemplate: KafkaTemplate<String, String>,
+    private val kafkaTemplate: KafkaTemplate<String, String>,
 ) {
     fun aktiver(personIdent: String) {
         val aktiveringsmelding =
@@ -39,7 +39,7 @@ class MinsideAktiveringKafkaProducer(
     private fun sendMinsideMelding(message: String) {
         try {
             // Venter på at meldingen er sendt før vi fortsetter
-            kafkaAivenTemplate.send(TOPIC, message).get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            kafkaTemplate.send(TOPIC, message).get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         } catch (e: Exception) {
             logger.error("Feil ved sending av minside-melding til Kafka", e)
             throw e
