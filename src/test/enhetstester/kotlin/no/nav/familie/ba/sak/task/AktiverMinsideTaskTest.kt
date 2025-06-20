@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringAktørValidator
-import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.AktiverMinsideTask.Companion.TASK_STEP_TYPE
@@ -21,13 +18,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class AktiverMinsideTaskTest {
-    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer = mockk()
     private val minsideAktiveringService: MinsideAktiveringService = mockk()
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val minsideAktiveringAktørValidator: MinsideAktiveringAktørValidator = mockk()
     private val aktiverMinsideTask =
         AktiverMinsideTask(
-            minsideAktiveringKafkaProducer = minsideAktiveringKafkaProducer,
             minsideAktiveringService = minsideAktiveringService,
             aktørIdRepository = aktørIdRepository,
             minsideAktiveringAktørValidator = minsideAktiveringAktørValidator,
@@ -70,7 +65,6 @@ class AktiverMinsideTaskTest {
             every { minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør) } returns true
             every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns false
             every { minsideAktiveringService.aktiverMinsideAktivering(aktør) } returns mockk()
-            every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
 
             // Act
             aktiverMinsideTask.doTask(task)
@@ -80,7 +74,6 @@ class AktiverMinsideTaskTest {
                 aktørIdRepository.findByAktørIdOrNull(aktør.aktørId)
                 minsideAktiveringService.harAktivertMinsideAktivering(aktør)
                 minsideAktiveringService.aktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
             }
         }
 
@@ -108,7 +101,6 @@ class AktiverMinsideTaskTest {
             }
             verify(exactly = 0) {
                 minsideAktiveringService.aktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
             }
         }
 
@@ -126,7 +118,6 @@ class AktiverMinsideTaskTest {
             every { minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør) } returns false
             every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns true
             every { minsideAktiveringService.deaktiverMinsideAktivering(aktør) } returns mockk()
-            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
 
             // Act
             aktiverMinsideTask.doTask(task)
@@ -137,11 +128,9 @@ class AktiverMinsideTaskTest {
                 minsideAktiveringAktørValidator.kanAktivereMinsideForAktør(aktør)
                 minsideAktiveringService.harAktivertMinsideAktivering(aktør)
                 minsideAktiveringService.deaktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
             }
             verify(exactly = 0) {
                 minsideAktiveringService.aktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
             }
         }
 
@@ -170,7 +159,6 @@ class AktiverMinsideTaskTest {
             }
             verify(exactly = 0) {
                 minsideAktiveringService.aktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
             }
         }
     }

@@ -1,17 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
-import no.nav.familie.log.IdUtils
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.tms.microfrontend.MicrofrontendMessageBuilder
 import no.nav.tms.microfrontend.Sensitivitet
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
+import java.util.concurrent.TimeUnit
 
 @Service
 class MinsideAktiveringKafkaProducer(
-    private val kafkaTemplate: KafkaTemplate<String, String>,
+    private val kafkaAivenTemplate: KafkaTemplate<String, String>,
 ) {
     fun aktiver(personIdent: String) {
         val aktiveringsmelding =
@@ -22,9 +20,8 @@ class MinsideAktiveringKafkaProducer(
                     microfrontendId = MICROFRONTEND_ID
                     sensitivitet = Sensitivitet.HIGH
                 }.text()
-        val callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-        logger.info("Aktiverer minside mikrofrontend for personIdent: $personIdent, callId: $callId")
-        kafkaTemplate.send(TOPIC, callId, aktiveringsmelding)
+        logger.info("Aktiverer minside mikrofrontend for personIdent: $personIdent")
+        sendMinsideMelding(aktiveringsmelding)
     }
 
     fun deaktiver(personIdent: String) {
@@ -35,9 +32,18 @@ class MinsideAktiveringKafkaProducer(
                     initiatedBy = INITIATED_BY
                     microfrontendId = MICROFRONTEND_ID
                 }.text()
-        val callId = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
-        logger.info("Deaktiverer minside mikrofrontend for personIdent: $personIdent, callId: $callId")
-        kafkaTemplate.send(TOPIC, deaktiveringsmelding)
+        logger.info("Deaktiverer minside mikrofrontend for personIdent: $personIdent")
+        sendMinsideMelding(deaktiveringsmelding)
+    }
+
+    private fun sendMinsideMelding(message: String) {
+        try {
+            // Venter på at meldingen er sendt før vi fortsetter
+            kafkaAivenTemplate.send(TOPIC, message).get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            logger.error("Feil ved sending av minside-melding til Kafka", e)
+            throw e
+        }
     }
 
     companion object {
@@ -45,5 +51,6 @@ class MinsideAktiveringKafkaProducer(
         private const val MICROFRONTEND_ID = "familie-ba-mikrofrontend-minside"
         private const val INITIATED_BY = "teamfamilie"
         private const val TOPIC = "min-side.aapen-microfrontend-v1"
+        private const val SEND_TIMEOUT_SECONDS = 5L
     }
 }

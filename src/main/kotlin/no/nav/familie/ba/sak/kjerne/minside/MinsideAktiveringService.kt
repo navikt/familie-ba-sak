@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 @Service
 class MinsideAktiveringService(
     private val minsideAktiveringRepository: MinsideAktiveringRepository,
+    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer,
 ) {
     fun harAktivertMinsideAktivering(aktør: Aktør): Boolean = minsideAktiveringRepository.existsByAktørAndAktivertIsTrue(aktør)
 
@@ -13,6 +14,7 @@ class MinsideAktiveringService(
         val minsideAktivering = minsideAktiveringRepository.findByAktør(aktør)
         val aktivertMinsideAktivering =
             minsideAktivering?.copy(aktivert = true) ?: MinsideAktivering(aktør = aktør, aktivert = true)
+        minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
         return minsideAktiveringRepository.save(aktivertMinsideAktivering)
     }
 
@@ -20,6 +22,7 @@ class MinsideAktiveringService(
         val minsideAktivering = minsideAktiveringRepository.findByAktør(aktør)
         val deaktivertMinsideAktivering =
             minsideAktivering?.copy(aktivert = false) ?: MinsideAktivering(aktør = aktør, aktivert = false)
+        minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
         return minsideAktiveringRepository.save(deaktivertMinsideAktivering)
     }
 

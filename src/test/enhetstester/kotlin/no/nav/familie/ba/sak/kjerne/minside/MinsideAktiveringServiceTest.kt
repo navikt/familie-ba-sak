@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import org.assertj.core.api.Assertions.assertThat
@@ -11,7 +13,12 @@ import org.junit.jupiter.params.provider.ValueSource
 
 class MinsideAktiveringServiceTest {
     private val minsideAktiveringRepository: MinsideAktiveringRepository = mockk()
-    private val minsideAktiveringService = MinsideAktiveringService(minsideAktiveringRepository)
+    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer = mockk()
+    private val minsideAktiveringService =
+        MinsideAktiveringService(
+            minsideAktiveringRepository = minsideAktiveringRepository,
+            minsideAktiveringKafkaProducer = minsideAktiveringKafkaProducer,
+        )
 
     @Nested
     inner class HarAktivertMinsideAktivering {
@@ -40,6 +47,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(aktør = aktør, aktivert = true)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns null
+            every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act
@@ -57,6 +65,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(id = 1, aktør = aktør, aktivert = true)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns eksisterendeMinsideAktivering
+            every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act
@@ -76,6 +85,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(aktør = aktør, aktivert = false)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns null
+            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act
@@ -93,6 +103,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(id = 1, aktør = aktør, aktivert = false)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns eksisterendeMinsideAktivering
+            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act

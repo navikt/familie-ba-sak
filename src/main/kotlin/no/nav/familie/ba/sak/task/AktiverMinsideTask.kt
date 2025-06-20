@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringAktørValidator
-import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
@@ -21,7 +20,6 @@ import org.springframework.stereotype.Service
     maxAntallFeil = 3,
 )
 class AktiverMinsideTask(
-    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer,
     private val minsideAktiveringService: MinsideAktiveringService,
     private val aktørIdRepository: AktørIdRepository,
     private val minsideAktiveringAktørValidator: MinsideAktiveringAktørValidator,
@@ -40,7 +38,6 @@ class AktiverMinsideTask(
             if (!kanAktivereMinsideForAktør) {
                 logger.info("Minside er aktivert for aktør: ${aktør.aktørId}, men skulle ikke vært det. Deaktiverer derfor minside.")
                 minsideAktiveringService.deaktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
                 return
             }
             logger.info("Minside er allerede aktivert for aktør: ${aktør.aktørId}")
@@ -54,7 +51,6 @@ class AktiverMinsideTask(
 
         logger.info("Aktiverer minside for aktør: ${aktør.aktørId}")
         minsideAktiveringService.aktiverMinsideAktivering(aktør)
-        minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer())
     }
 
     companion object {

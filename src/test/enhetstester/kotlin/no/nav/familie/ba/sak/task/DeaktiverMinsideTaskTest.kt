@@ -1,13 +1,10 @@
 package no.nav.familie.ba.sak.task
 
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringKafkaProducer
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask.Companion.TASK_STEP_TYPE
@@ -20,12 +17,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class DeaktiverMinsideTaskTest {
-    private val minsideAktiveringKafkaProducer: MinsideAktiveringKafkaProducer = mockk()
     private val minsideAktiveringService: MinsideAktiveringService = mockk()
     private val aktørIdRepository: AktørIdRepository = mockk()
     private val aktiverMinsideTask =
         DeaktiverMinsideTask(
-            minsideAktiveringKafkaProducer = minsideAktiveringKafkaProducer,
             minsideAktiveringService = minsideAktiveringService,
             aktørIdRepository = aktørIdRepository,
         )
@@ -65,7 +60,6 @@ class DeaktiverMinsideTaskTest {
             every { aktørIdRepository.findByAktørIdOrNull(aktør.aktørId) } returns aktør
             every { minsideAktiveringService.harAktivertMinsideAktivering(aktør) } returns true
             every { minsideAktiveringService.deaktiverMinsideAktivering(aktør) } returns mockk()
-            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
 
             // Act
             aktiverMinsideTask.doTask(task)
@@ -75,7 +69,6 @@ class DeaktiverMinsideTaskTest {
                 aktørIdRepository.findByAktørIdOrNull(aktør.aktørId)
                 minsideAktiveringService.harAktivertMinsideAktivering(aktør)
                 minsideAktiveringService.deaktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
             }
         }
 
@@ -103,7 +96,6 @@ class DeaktiverMinsideTaskTest {
 
             verify(exactly = 0) {
                 minsideAktiveringService.deaktiverMinsideAktivering(aktør)
-                minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer())
             }
         }
     }
@@ -120,7 +112,7 @@ class DeaktiverMinsideTaskTest {
 
             // Assert
             assertThat(task.type).isEqualTo(TASK_STEP_TYPE)
-            assertThat(task.payload).isEqualTo(objectMapper.writeValueAsString(DeaktiverMinsideDTO(aktør.aktørId)))
+            assertThat(task.payload).isEqualTo(objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)))
         }
     }
 }
