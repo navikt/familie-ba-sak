@@ -61,6 +61,7 @@ class AutomatiskRegistrerSøknadService(
                         navn = barn.navn ?: "Mangler navn",
                         fødselsdato = barn.fødselsdato,
                         inkludertISøknaden = true,
+                        manueltRegistrert = true,
                     )
                 }
 
