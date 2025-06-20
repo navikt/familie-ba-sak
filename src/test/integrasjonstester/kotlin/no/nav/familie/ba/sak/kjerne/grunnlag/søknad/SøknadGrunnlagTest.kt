@@ -4,6 +4,7 @@ import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
+import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -35,10 +36,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjørbehandling.kjørStegprosessForFGB
 import no.nav.familie.kontrakter.ba.søknad.VersjonertBarnetrygdSøknadV9
 import no.nav.familie.kontrakter.ba.søknad.v4.Søknadstype
-import no.nav.familie.kontrakter.ba.søknad.v8.Barn
-import no.nav.familie.kontrakter.ba.søknad.v8.Søker
-import no.nav.familie.kontrakter.ba.søknad.v9.BarnetrygdSøknad
-import no.nav.familie.kontrakter.felles.søknad.Søknadsfelt
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -361,11 +358,14 @@ class SøknadGrunnlagTest(
         val journalpostIdSøknad = "123456789"
 
         every { integrasjonClient.hentVersjonertBarnetrygdSøknad(journalpostIdSøknad) } returns
-            lagVersjonertBarnetrygdSøknadV9(
-                søkerIdent = søker.aktivFødselsnummer(),
-                barnasIdenter = listOf(barnUtenRelasjon, barnMedRelasjonUtenAdressebeskyttelse),
-                søknadstype = Søknadstype.UTVIDET,
-                originalspråk = "nn",
+            VersjonertBarnetrygdSøknadV9(
+                barnetrygdSøknad =
+                    lagBarnetrygdSøknadV9(
+                        søkerFnr = søker.aktivFødselsnummer(),
+                        barnFnr = listOf(barnUtenRelasjon, barnMedRelasjonUtenAdressebeskyttelse),
+                        søknadstype = Søknadstype.UTVIDET,
+                        originalspråk = "nn",
+                    ),
             )
 
         // Act
@@ -446,60 +446,5 @@ class SøknadGrunnlagTest(
         assertThat(persongrunnlag).isNotNull()
         assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søkerIdent)
         assertThat(persongrunnlag.barna).isEmpty()
-    }
-
-    private fun lagVersjonertBarnetrygdSøknadV9(
-        søkerIdent: String,
-        barnasIdenter: List<String>,
-        søknadstype: Søknadstype = Søknadstype.ORDINÆR,
-        originalspråk: String = "nb",
-    ): VersjonertBarnetrygdSøknadV9 {
-        fun <T> tomtSøknadsfelt() =
-            Søknadsfelt<T>(
-                label = emptyMap(),
-                verdi = emptyMap(),
-            )
-        return VersjonertBarnetrygdSøknadV9(
-            barnetrygdSøknad =
-                BarnetrygdSøknad(
-                    kontraktVersjon = 9,
-                    søker =
-                        Søker(
-                            ident =
-                                Søknadsfelt(
-                                    label = emptyMap(),
-                                    verdi = mapOf("nb" to søkerIdent),
-                                ),
-                            harEøsSteg = false,
-                            navn = tomtSøknadsfelt(),
-                            statsborgerskap = tomtSøknadsfelt(),
-                            adresse = tomtSøknadsfelt(),
-                            adressebeskyttelse = false,
-                            sivilstand = tomtSøknadsfelt(),
-                            spørsmål = emptyMap(),
-                        ),
-                    barn =
-                        barnasIdenter.map {
-                            Barn(
-                                ident =
-                                    Søknadsfelt(
-                                        label = emptyMap(),
-                                        verdi = mapOf("nb" to it),
-                                    ),
-                                harEøsSteg = false,
-                                navn = tomtSøknadsfelt(),
-                                registrertBostedType = tomtSøknadsfelt(),
-                                spørsmål = emptyMap(),
-                            )
-                        },
-                    antallEøsSteg = 0,
-                    søknadstype = søknadstype,
-                    finnesPersonMedAdressebeskyttelse = false,
-                    spørsmål = emptyMap(),
-                    dokumentasjon = emptyList(),
-                    teksterUtenomSpørsmål = emptyMap(),
-                    originalSpråk = originalspråk,
-                ),
-        )
     }
 }

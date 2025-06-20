@@ -20,7 +20,7 @@ class RestPersonResultatTest {
                 resultat = Resultat.OPPFYLT,
                 periodeFom = LocalDate.now(),
                 periodeTom = LocalDate.now().plusDays(1),
-                begrunnelse = "Fylt inn automatisk fra registerdata i PDL",
+                begrunnelse = "Fylt ut automatisk fra registerdata i PDL",
                 endretAv = "Test",
                 endretTidspunkt = LocalDateTime.now(),
                 behandlingId = 1L,
@@ -33,7 +33,9 @@ class RestPersonResultatTest {
         val nyttRestPersonResultat = restPersonResultat.fjernAutomatiskBegrunnelse()
 
         // Assert
-        assertThat(nyttRestPersonResultat.vilkårResultater.any { it.begrunnelse == "Fylt inn automatisk fra registerdata i PDL" }).isFalse
-        assertThat(nyttRestPersonResultat.vilkårResultater.any { it.erAutomatiskVurdert }).isFalse
+        nyttRestPersonResultat.vilkårResultater.forEach {
+            assertThat(it.begrunnelse).doesNotContain("Fylt ut automatisk fra registerdata i PDL")
+            assertThat(it.erAutomatiskVurdert).isFalse()
+        }
     }
 }

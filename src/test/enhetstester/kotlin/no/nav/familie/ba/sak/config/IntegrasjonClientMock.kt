@@ -202,6 +202,8 @@ class IntegrasjonClientMock {
                     aktivEnhet = "0000",
                 )
             }
+
+            every { mockIntegrasjonClient.hentAInntektUrl(any()) } returns "/test/1234"
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {
