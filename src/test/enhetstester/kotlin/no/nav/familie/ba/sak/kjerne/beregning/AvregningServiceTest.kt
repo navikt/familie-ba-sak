@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
@@ -526,6 +527,54 @@ class AvregningServiceTest {
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(inneværendeBehandling.id) } returns andelerInneværendeBehandling
             every { unleashService.isEnabled(FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING) } returns false
+
+            // Act
+            val perioderMedEtterbetalingOgFeilutbetaling =
+                avregningService.hentPerioderMedAvregning(behandlingId = inneværendeBehandling.id)
+
+            // Assert
+            assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere tom liste hvis behandlingskategori er EØS`() {
+            // Arrange
+            val andelerForrigeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                )
+            val andelerInneværendeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                )
+
+            val eøsBehandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+
+            every { behandlingHentOgPersisterService.hent(any()) } returns eøsBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(eøsBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
             val perioderMedEtterbetalingOgFeilutbetaling =
