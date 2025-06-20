@@ -69,10 +69,17 @@ class TilkjentYtelseGenerator(
 
         val skalBeholdeSplittI0krAndeler = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
 
+        val endretUtbetalingAndelÅrsakerSomSkalInkluderes =
+            if (unleashService.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER)) {
+                listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND, Årsak.ENDRE_MOTTAKER)
+            } else {
+                listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND)
+            }
+
         val barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer =
             lagAndelerMedEndretUtbetalingAndeler(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-                endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND) },
+                endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in endretUtbetalingAndelÅrsakerSomSkalInkluderes },
                 tilkjentYtelse = tilkjentYtelse,
                 skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )

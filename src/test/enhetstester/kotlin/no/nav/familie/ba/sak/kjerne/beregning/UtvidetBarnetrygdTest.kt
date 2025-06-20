@@ -62,6 +62,7 @@ internal class UtvidetBarnetrygdTest {
         every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
         every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
         every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING) } returns true
+        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
     }
 
     @Test

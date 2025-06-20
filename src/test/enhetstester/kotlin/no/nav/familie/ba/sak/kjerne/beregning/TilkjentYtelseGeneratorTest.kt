@@ -66,6 +66,7 @@ class TilkjentYtelseGeneratorTest {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
         every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING) } returns true
+        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
     }
 
     @AfterEach
@@ -1081,6 +1082,116 @@ class TilkjentYtelseGeneratorTest {
         assertThat(barnasAndeler[0].stønadFom, `is`(mars2022))
         assertThat(barnasAndeler[0].stønadTom, `is`(månedFørBarnBlir6))
         assertThat(barnasAndeler[0].prosent, `is`(BigDecimal(100)))
+    }
+
+    @Test
+    fun `genrering av utvidet skal avhenge av endret utbetaling med årsak ENDRE_MOTTAKER`() {
+        val barnMedFullUtbetaling = lagPerson(type = PersonType.BARN, fødselsdato = januar2019.atDay(1))
+        val barnMedHalvUtbetaling = lagPerson(type = PersonType.BARN, fødselsdato = januar2019.atDay(1))
+
+        val tilkjentYtelse =
+            settOppScenarioOgBeregnTilkjentYtelse(
+                endretAndeler =
+                    listOf(
+                        EndretAndel(
+                            personer = setOf(barnMedFullUtbetaling),
+                            skalUtbetales = false,
+                            årsak = Årsak.ENDRE_MOTTAKER,
+                            fom = februar2022,
+                            tom = mars2022,
+                        ),
+                        EndretAndel(
+                            personer = setOf(barnMedHalvUtbetaling),
+                            skalUtbetales = false,
+                            årsak = Årsak.ENDRE_MOTTAKER,
+                            fom = april2022,
+                            tom = mai2022,
+                        ),
+                        EndretAndel(
+                            personer = setOf(barnMedFullUtbetaling, barnMedHalvUtbetaling),
+                            skalUtbetales = false,
+                            årsak = Årsak.ENDRE_MOTTAKER,
+                            fom = juni2022,
+                            tom = juli2022,
+                        ),
+                    ),
+                atypiskeVilkårBarna =
+                    listOf(
+                        AtypiskVilkår(
+                            fom = januar2022.førsteDagIInneværendeMåned(),
+                            tom = juli2022.sisteDagIInneværendeMåned(),
+                            vilkårType = Vilkår.BOR_MED_SØKER,
+                            aktør = barnMedFullUtbetaling.aktør,
+                        ),
+                        AtypiskVilkår(
+                            fom = januar2022.førsteDagIInneværendeMåned(),
+                            tom = juli2022.sisteDagIInneværendeMåned(),
+                            vilkårType = Vilkår.BOR_MED_SØKER,
+                            aktør = barnMedHalvUtbetaling.aktør,
+                            utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                        ),
+                    ),
+                atypiskeVilkårSøker =
+                    listOf(
+                        AtypiskVilkår(
+                            fom = barnMedFullUtbetaling.fødselsdato,
+                            tom = null,
+                            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                            aktør = søker.aktør,
+                        ),
+                    ),
+                barna = listOf(barnMedFullUtbetaling, barnMedHalvUtbetaling),
+                overgangsstønadPerioder = emptyList(),
+            )
+
+        assertEquals(9, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val (søkersAndeler, barnasAndeler) = tilkjentYtelse.andelerTilkjentYtelse.partition { it.erSøkersAndel() }
+
+        // SØKER
+        assertEquals(3, søkersAndeler.size)
+        assertThat(søkersAndeler[0].stønadFom, `is`(februar2022))
+        assertThat(søkersAndeler[0].stønadTom, `is`(mars2022))
+        assertThat(søkersAndeler[0].prosent, `is`(BigDecimal(50)))
+
+        assertThat(søkersAndeler[1].stønadFom, `is`(april2022))
+        assertThat(søkersAndeler[1].stønadTom, `is`(mai2022))
+        assertThat(søkersAndeler[1].prosent, `is`(BigDecimal(100)))
+
+        assertThat(søkersAndeler[2].stønadFom, `is`(juni2022))
+        assertThat(søkersAndeler[2].stønadTom, `is`(juli2022))
+        assertThat(søkersAndeler[2].prosent, `is`(BigDecimal(0)))
+
+        // BARN
+        val (barnMedFullUtbetalingAndeler, barnMedHalvUtbetalingAndeler) = barnasAndeler.partition { it.aktør == barnMedFullUtbetaling.aktør }
+
+        // BARN MED FULL UTBETALING
+        assertEquals(3, barnMedFullUtbetalingAndeler.size)
+        assertThat(barnMedFullUtbetalingAndeler[0].stønadFom, `is`(februar2022))
+        assertThat(barnMedFullUtbetalingAndeler[0].stønadTom, `is`(mars2022))
+        assertThat(barnMedFullUtbetalingAndeler[0].prosent, `is`(BigDecimal(0)))
+
+        assertThat(barnMedFullUtbetalingAndeler[1].stønadFom, `is`(april2022))
+        assertThat(barnMedFullUtbetalingAndeler[1].stønadTom, `is`(mai2022))
+        assertThat(barnMedFullUtbetalingAndeler[1].prosent, `is`(BigDecimal(100)))
+
+        assertThat(barnMedFullUtbetalingAndeler[2].stønadFom, `is`(juni2022))
+        assertThat(barnMedFullUtbetalingAndeler[2].stønadTom, `is`(juli2022))
+        assertThat(barnMedFullUtbetalingAndeler[2].prosent, `is`(BigDecimal(0)))
+
+        // BARN MED HALV UTBETALING
+        assertEquals(3, barnMedHalvUtbetalingAndeler.size)
+        assertThat(barnMedHalvUtbetalingAndeler[0].stønadFom, `is`(februar2022))
+        assertThat(barnMedHalvUtbetalingAndeler[0].stønadTom, `is`(mars2022))
+        assertThat(barnMedHalvUtbetalingAndeler[0].prosent, `is`(BigDecimal(50)))
+
+        assertThat(barnMedHalvUtbetalingAndeler[1].stønadFom, `is`(april2022))
+        assertThat(barnMedHalvUtbetalingAndeler[1].stønadTom, `is`(mai2022))
+        assertThat(barnMedHalvUtbetalingAndeler[1].prosent, `is`(BigDecimal(0)))
+
+        assertThat(barnMedHalvUtbetalingAndeler[2].stønadFom, `is`(juni2022))
+        assertThat(barnMedHalvUtbetalingAndeler[2].stønadTom, `is`(juli2022))
+        assertThat(barnMedHalvUtbetalingAndeler[2].prosent, `is`(BigDecimal(0)))
     }
 
     private fun oppdaterBosattIRiketMedBack2BackPerioder(

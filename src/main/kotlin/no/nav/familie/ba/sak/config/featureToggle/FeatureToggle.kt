@@ -48,4 +48,6 @@ enum class FeatureToggle(
 
     // NAV-25329
     BRUK_NY_OPPRETT_FAGSAK_MODAL("familie-ba-sak.bruk.ny.opprett.fagsak.modal"),
+
+    SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER("familie-ba-sak.skal-inkludere-aarsak-endre-mottaker-i-initiell-generering-av-andeler"),
 }
