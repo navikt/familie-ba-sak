@@ -12,6 +12,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 @TaskStepBeskrivelse(
@@ -61,6 +62,11 @@ class AktiverMinsideTask(
             Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
+                properties =
+                    Properties().apply {
+                        this["aktørId"] = aktør.aktørId
+                        this["fnr"] = aktør.aktivFødselsnummer()
+                    },
             )
     }
 }
