@@ -102,7 +102,6 @@ class TilkjentYtelseDifferanseberegningTest {
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         assertEquals(16, andelerMedDifferanse.size)
@@ -170,7 +169,6 @@ class TilkjentYtelseDifferanseberegningTest {
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         assertEquals(6, andelerMedDiff.size)
@@ -189,7 +187,6 @@ class TilkjentYtelseDifferanseberegningTest {
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = blanktUtenlandskPeridebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         assertEquals(3, andelerUtenDiff.size)
@@ -203,7 +200,6 @@ class TilkjentYtelseDifferanseberegningTest {
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         assertEquals(6, andelerMedDiffIgjen.size)

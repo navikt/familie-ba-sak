@@ -132,7 +132,6 @@ class UtvidetBarnetrygdUtilTest {
                         ),
                     endretUtbetalingAndelerSøker = emptyList(),
                     personResultater = setOf(personResultatBarn, personResultatSøker),
-                    skalBeholdeSplittI0krAndeler = true,
                 )
             }
     }

@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -28,7 +26,6 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
-    private val unleashService: UnleashNextMedContextService,
 ) : TilkjentYtelseEndretAbonnent {
     @Transactional
     override fun endretTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
@@ -36,14 +33,11 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val skalBrukeNyDifferanseberegning = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
-
         val oppdaterteAndeler =
             beregnDifferanse(
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = skalBrukeNyDifferanseberegning,
             )
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
@@ -57,7 +51,6 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
-    private val unleashService: UnleashNextMedContextService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -70,14 +63,11 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
 
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
-        val skalBrukeNyDifferanseberegning = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
-
         val oppdaterteAndeler =
             beregnDifferanse(
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = skalBrukeNyDifferanseberegning,
             )
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
@@ -90,7 +80,6 @@ class TilpassDifferanseberegningEtterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val barnasDifferanseberegningEndretAbonnenter: List<BarnasDifferanseberegningEndretAbonnent>,
-    private val unleashService: UnleashNextMedContextService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
     @Transactional
     override fun skjemaerEndret(
@@ -100,14 +89,11 @@ class TilpassDifferanseberegningEtterValutakursService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
-        val skalBrukeNyDifferanseberegning = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
-
         val oppdaterteAndeler =
             beregnDifferanse(
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse,
                 utenlandskePeriodebeløp = utenlandskePeriodebeløp,
                 valutakurser = valutakurser,
-                skalBrukeNyDifferanseberegning = skalBrukeNyDifferanseberegning,
             )
 
         val oppdatertTilkjentYtelse = tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
@@ -121,17 +107,13 @@ class TilpassDifferanseberegningSøkersYtelserService(
     private val kompetanseRepository: KompetanseRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val unleashService: UnleashNextMedContextService,
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
-        val skalBrukeNyDifferanseberegning = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
-
         val oppdaterteAndeler =
             tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
                 kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id),
                 personResultater = vilkårsvurderingRepository.findByBehandlingAndAktiv(tilkjentYtelse.behandling.id)!!.personResultater,
-                skalBrukeNyDifferanseberegning = skalBrukeNyDifferanseberegning,
             )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }

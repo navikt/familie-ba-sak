@@ -75,7 +75,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -159,7 +158,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
@@ -201,7 +199,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         assertEquals(tilkjentYtelse.andelerTilkjentYtelse.sortert(), nyeAndeler.sortert())
@@ -217,7 +214,6 @@ class DifferanseberegningSøkersYtelserTest {
                     barna = emptyList(),
                     kompetanser = emptyList(),
                     personResultater = emptySet(),
-                    skalBrukeNyDifferanseberegning = true,
                 )
 
         assertEquals(emptyList<AndelTilkjentYtelse>(), nyeAndeler)
@@ -278,7 +274,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         // Dette er litt trist. Men selv om andelene er identiske, kan de ikke slås sammen fordi
@@ -344,7 +339,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -392,7 +386,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -447,7 +440,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -503,7 +495,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -563,7 +554,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -624,7 +614,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -685,7 +674,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -753,7 +741,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -826,7 +813,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =
@@ -899,7 +885,6 @@ class DifferanseberegningSøkersYtelserTest {
                 barna = barna,
                 kompetanser = kompetanser,
                 personResultater = personResultater,
-                skalBrukeNyDifferanseberegning = true,
             )
 
         val forventet =

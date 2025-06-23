@@ -31,13 +31,12 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
  */
 fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal?,
-    skalBrukeNyDifferanseberegning: Boolean,
 ): AndelTilkjentYtelse? {
     val nyAndelTilkjentYtelse =
         when {
             this == null -> null
             utenlandskPeriodebeløpINorskeKroner == null -> this.utenDifferanseberegning()
-            else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner, skalBrukeNyDifferanseberegning)
+            else -> this.medDifferanseberegning(utenlandskPeriodebeløpINorskeKroner)
         }
 
     return nyAndelTilkjentYtelse
@@ -45,7 +44,6 @@ fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
 
 fun AndelTilkjentYtelse.medDifferanseberegning(
     utenlandskPeriodebeløpINorskeKroner: BigDecimal,
-    skalBrukeNyDifferanseberegning: Boolean,
 ): AndelTilkjentYtelse {
     val avrundetUtenlandskPeriodebeløp =
         utenlandskPeriodebeløpINorskeKroner
@@ -70,12 +68,7 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
     return copy(
         id = 0,
         kalkulertUtbetalingsbeløp = maxOf(nyttKalkulertUtbetalingsbeløp, 0),
-        differanseberegnetPeriodebeløp =
-            if (skalBrukeNyDifferanseberegning) {
-                nyttDifferanseberegnetPeriodebeløp
-            } else {
-                nyttKalkulertUtbetalingsbeløp
-            },
+        differanseberegnetPeriodebeløp = nyttDifferanseberegnetPeriodebeløp,
     )
 }
 
@@ -106,10 +99,9 @@ fun Tidslinje<AndelTilkjentYtelse>.utenDifferanseberegning() =
 
 fun Tidslinje<AndelTilkjentYtelse>.oppdaterDifferanseberegning(
     utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal>,
-    skalBrukeNyDifferanseberegning: Boolean,
 ): Tidslinje<AndelTilkjentYtelse> =
     this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
-        andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner, skalBrukeNyDifferanseberegning)
+        andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
     }
 
 /**
