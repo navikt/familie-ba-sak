@@ -113,6 +113,8 @@ class DeaktiverMinsideTaskTest {
             // Assert
             assertThat(task.type).isEqualTo(TASK_STEP_TYPE)
             assertThat(task.payload).isEqualTo(objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)))
+            assertThat(task.metadata["aktørId"]).isEqualTo(aktør.aktørId)
+            assertThat(task.metadata["fnr"]).isEqualTo(aktør.aktivFødselsnummer())
         }
     }
 }
