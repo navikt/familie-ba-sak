@@ -48,7 +48,7 @@ class MinsideAktiveringKafkaProducer(
 
     companion object {
         private val logger = LoggerFactory.getLogger(MinsideAktiveringKafkaProducer::class.java)
-        private const val MICROFRONTEND_ID = "familie-ba-mikrofrontend-minside"
+        private const val MICROFRONTEND_ID = "familie-ba-minside-mikrofrontend"
         private const val INITIATED_BY = "teamfamilie"
         private const val TOPIC = "min-side.aapen-microfrontend-v1"
         private const val SEND_TIMEOUT_SECONDS = 5L

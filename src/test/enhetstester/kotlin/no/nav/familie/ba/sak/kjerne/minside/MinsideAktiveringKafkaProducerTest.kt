@@ -38,7 +38,7 @@ class MinsideAktiveringKafkaProducerTest {
                     withArg {
                         assertTrue(it.contains("\"@action\":\"enable\""))
                         assertTrue(it.contains("\"ident\":\"12345678901\""))
-                        assertTrue(it.contains("\"microfrontend_id\":\"familie-ba-mikrofrontend-minside\""))
+                        assertTrue(it.contains("\"microfrontend_id\":\"familie-ba-minside-mikrofrontend\""))
                         assertTrue(it.contains("\"@initiated_by\":\"teamfamilie\""))
                         assertTrue(it.contains("\"sensitivitet\":\"high\""))
                     },
@@ -70,7 +70,7 @@ class MinsideAktiveringKafkaProducerTest {
                     withArg {
                         assertTrue(it.contains("\"@action\":\"disable\""))
                         assertTrue(it.contains("\"ident\":\"12345678901\""))
-                        assertTrue(it.contains("\"microfrontend_id\":\"familie-ba-mikrofrontend-minside\""))
+                        assertTrue(it.contains("\"microfrontend_id\":\"familie-ba-minside-mikrofrontend\""))
                         assertTrue(it.contains("\"@initiated_by\":\"teamfamilie\""))
                     },
                 )
