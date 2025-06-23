@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -38,6 +39,11 @@ class AvregningService(
         }
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        if (behandling.kategori == BehandlingKategori.EØS) {
+            return emptyList()
+        }
+
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id)
                 ?: return emptyList()
