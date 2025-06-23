@@ -16,7 +16,7 @@ import java.util.Properties
 @Service
 @TaskStepBeskrivelse(
     taskStepType = DeaktiverMinsideTask.TASK_STEP_TYPE,
-    beskrivelse = "Aktiverer minside for ident",
+    beskrivelse = "Deaktiverer minside for ident",
     maxAntallFeil = 3,
 )
 class DeaktiverMinsideTask(
