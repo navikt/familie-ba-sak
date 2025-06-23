@@ -406,7 +406,7 @@ class SøknadGrunnlagTest(
                 assertThat(it.ident).isEqualTo(barnUtenRelasjon)
                 assertThat(it.inkludertISøknaden).isTrue()
                 assertThat(it.erFolkeregistrert).isTrue()
-                assertThat(it.manueltRegistrert).isFalse()
+                assertThat(it.manueltRegistrert).isTrue()
             }
 
         val persongrunnlag = persongrunnlagService.hentAktiv(behandling.id)
