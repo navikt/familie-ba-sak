@@ -25,7 +25,7 @@ class SøknadMapperV9 : SøknadMapper {
                     fnr = versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.fnr,
                     planleggerÅBoINorge12Mnd =
                         versjonertBarnetrygdSøknad.barnetrygdSøknad.søker.spørsmål
-                            .hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND)
+                            .hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND_SØKER)
                             .tilBoolskSvar(),
                 ),
             barn =
@@ -33,7 +33,7 @@ class SøknadMapperV9 : SøknadMapper {
                     .map {
                         Barn(
                             fnr = it.fnr,
-                            planleggerÅBoINorge12Mnd = it.spørsmål.hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND).tilBoolskSvar(),
+                            planleggerÅBoINorge12Mnd = it.spørsmål.hentVerdiForSøknadsfelt(SøknadsFeltId.PLANLEGGER_Å_BO_I_NORGE_12_MND_BARN).tilBoolskSvar(),
                         )
                     },
             behandlingUnderkategori = versjonertBarnetrygdSøknad.barnetrygdSøknad.søknadstype.tilBehandlingUnderkategori(),
