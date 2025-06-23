@@ -47,10 +47,6 @@ class EndretUtbetalingAndelService(
             persongrunnlagService
                 .hentPersonerPåBehandling(personerPåEndretUtbetalingAndel, behandling)
 
-        val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, personer.toSet())
@@ -96,18 +92,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
 
-        beregningService.oppdaterBehandlingMedBeregning(
-            behandling,
-            personopplysningGrunnlag,
-            endretUtbetalingAndel,
-        )
-
-        endretUtbetalingAndelOppdatertAbonnementer.forEach {
-            it.endretUtbetalingAndelerOppdatert(
-                behandlingId = BehandlingId(behandling.id),
-                endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel,
-            )
-        }
+        oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
 
     @Transactional
@@ -117,18 +102,7 @@ class EndretUtbetalingAndelService(
     ) {
         endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
-        val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
-
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-
-        endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
-            abonnent.endretUtbetalingAndelerOppdatert(
-                behandlingId = BehandlingId(behandling.id),
-                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
-            )
-        }
+        oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
 
     @Transactional
@@ -152,6 +126,21 @@ class EndretUtbetalingAndelService(
                     behandlingId = behandling.id,
                     personer = it.personer.toMutableSet(),
                 ),
+            )
+        }
+    }
+
+    private fun oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling: Behandling) {
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+
+        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+
+        endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
+            abonnent.endretUtbetalingAndelerOppdatert(
+                behandlingId = BehandlingId(behandling.id),
+                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
             )
         }
     }
