@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -17,10 +19,12 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class EndretUtbetalingAndelService(
@@ -33,6 +37,7 @@ class EndretUtbetalingAndelService(
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
+    private val unleashService: UnleashNextMedContextService,
 ) {
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
@@ -65,12 +70,30 @@ class EndretUtbetalingAndelService(
                 .filter { it.id != endretUtbetalingAndelId }
                 .filterNot { it.manglerObligatoriskFelt() }
 
-        validerOgLagreEndretUtbetalingAndel(
-            endretUtbetalingAndel = endretUtbetalingAndel,
-            andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
-            andelerTilkjentYtelse = andelTilkjentYtelser,
-            vilkårsvurdering = vilkårsvurdering,
-        )
+        val gyldigTomDatoPerAktør =
+            beregnGyldigTomPerAktør(
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andelTilkjentYtelser = andelTilkjentYtelser,
+            )
+
+        val toggleErPå = unleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER)
+        if (skalSplitteEndretUtbetalingAndel(toggleErPå, endretUtbetalingAndel, gyldigTomDatoPerAktør)) {
+            splittValiderOgLagreEndretUtbetalingAndeler(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                gyldigTomDatoPerAktør = gyldigTomDatoPerAktør,
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                andelerTilkjentYtelse = andelTilkjentYtelser,
+                vilkårsvurdering = vilkårsvurdering,
+            )
+        } else {
+            validerOgLagreEndretUtbetalingAndel(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                andelerTilkjentYtelse = andelTilkjentYtelser,
+                vilkårsvurdering = vilkårsvurdering,
+            )
+        }
 
         oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
@@ -179,6 +202,30 @@ class EndretUtbetalingAndelService(
             vilkårsvurdering = vilkårsvurdering,
         )
         endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
+    }
+
+    private fun splittValiderOgLagreEndretUtbetalingAndeler(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        gyldigTomDatoPerAktør: Map<Aktør, YearMonth?>,
+        andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val splittedeAndeler =
+            splittEndretUbetalingAndel(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                gyldigTomEtterDagensDatoPerAktør = gyldigTomDatoPerAktør,
+            ).onEach { endretUtbetalingAndel ->
+                validerOgSettTomDatoHvisNull(
+                    endretUtbetalingAndel = endretUtbetalingAndel,
+                    andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                    andelerTilkjentYtelse = andelerTilkjentYtelse,
+                    vilkårsvurdering = vilkårsvurdering,
+                )
+            }
+
+        endretUtbetalingAndelRepository.delete(endretUtbetalingAndel) // Slett andelen som ble splittet
+        endretUtbetalingAndelRepository.saveAll(splittedeAndeler)
     }
 }
 
