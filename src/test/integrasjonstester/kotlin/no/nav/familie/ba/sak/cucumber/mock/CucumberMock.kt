@@ -575,6 +575,8 @@ class CucumberMock(
             månedligValutajusteringService = månedligValutajusteringService,
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            unleashService = unleashNextMedContextService,
         )
 
     val ferdigstillBehandlingSteg =
