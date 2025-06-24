@@ -41,8 +41,6 @@ enum class FeatureToggle(
     // Tillatter behandling av klage
     BEHANDLE_KLAGE("familie-ba-sak.klage"),
 
-    SKAL_BRUKE_NY_DIFFERANSEBEREGNING("familie-ba-sak.skal-bruke-ny-differanseberegning"),
-
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 

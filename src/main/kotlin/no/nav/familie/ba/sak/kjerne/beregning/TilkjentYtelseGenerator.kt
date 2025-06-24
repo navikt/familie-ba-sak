@@ -67,8 +67,6 @@ class TilkjentYtelseGenerator(
                     )
                 }
 
-        val skalBeholdeSplittI0krAndeler = unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_NY_DIFFERANSEBEREGNING)
-
         val endretUtbetalingAndelÅrsakerSomSkalInkluderes =
             if (unleashService.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER)) {
                 listOf(Årsak.ETTERBETALING_3ÅR, Årsak.ETTERBETALING_3MND, Årsak.ENDRE_MOTTAKER)
@@ -81,7 +79,6 @@ class TilkjentYtelseGenerator(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                 endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak in endretUtbetalingAndelÅrsakerSomSkalInkluderes },
                 tilkjentYtelse = tilkjentYtelse,
-                skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer =
@@ -90,7 +87,6 @@ class TilkjentYtelseGenerator(
                 andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEller3MndEndringer = barnasAndelerInkludertEtterbetaling3ÅrEller3MndEndringer,
                 endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
                 personResultater = vilkårsvurdering.personResultater,
-                skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )
 
         val småbarnstilleggErMulig =
@@ -128,7 +124,6 @@ class TilkjentYtelseGenerator(
                 andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
                 endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
                 tilkjentYtelse = tilkjentYtelse,
-                skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
             )
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })

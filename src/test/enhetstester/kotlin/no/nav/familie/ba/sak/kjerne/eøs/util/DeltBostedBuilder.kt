@@ -62,7 +62,6 @@ fun DeltBostedBuilder.oppdaterTilkjentYtelse(): TilkjentYtelse {
             andelTilkjentYtelserUtenEndringer = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             endretUtbetalingAndeler = bygg().tilEndreteUtebetalingAndeler(),
             tilkjentYtelse = tilkjentYtelse,
-            skalBeholdeSplittI0krAndeler = true,
         )
 
     tilkjentYtelse.andelerTilkjentYtelse.clear()

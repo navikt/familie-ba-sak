@@ -26,7 +26,6 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
-        skalBeholdeSplittI0krAndeler: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (endretUtbetalingAndeler.isEmpty()) {
             return andelTilkjentYtelserUtenEndringer
@@ -58,7 +57,6 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                             andelerAvTypeForPerson = andelerForAktørOgType,
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
-                            skalBeholdeSplittI0krAndeler = skalBeholdeSplittI0krAndeler,
                         )
                     YtelseType.SMÅBARNSTILLEGG ->
                         throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
@@ -72,7 +70,6 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
         andelerAvTypeForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
-        skalBeholdeSplittI0krAndeler: Boolean,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (endretUtbetalingAndelerForPerson.isEmpty()) {
             return andelerAvTypeForPerson
@@ -110,14 +107,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                 }
             }
 
-        return if (skalBeholdeSplittI0krAndeler) {
-            andelerMedEndringerTidslinje
-                .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
-        } else {
-            andelerMedEndringerTidslinje
-                .slåSammenEtterfølgende0krAndelerPgaSammeEndretAndel()
-                .tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
-        }
+        return andelerMedEndringerTidslinje.tilAndelerTilkjentYtelseMedEndreteUtbetalinger(tilkjentYtelse)
     }
 
     internal data class AndelMedEndretUtbetalingForTidslinje(
