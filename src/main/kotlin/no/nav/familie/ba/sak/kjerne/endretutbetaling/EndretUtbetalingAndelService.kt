@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3MND
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3ÅR
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
@@ -99,10 +101,27 @@ class EndretUtbetalingAndelService(
     fun fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
         endretUtbetalingAndelId: Long,
+    ) = fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, listOf(endretUtbetalingAndelId))
+
+    @Transactional
+    fun fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(
+        behandling: Behandling,
+        endretUtbetalingAndelIder: List<Long>,
     ) {
-        endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
+        endretUtbetalingAndelRepository.deleteAllById(endretUtbetalingAndelIder)
 
         oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
+    }
+
+    @Transactional
+    fun fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling: Behandling) {
+        val endretUtbetalingAndelerSomSkalSlettes =
+            endretUtbetalingAndelRepository
+                .findByBehandlingId(behandling.id)
+                .filter { it.årsak in setOf(ETTERBETALING_3ÅR, ETTERBETALING_3MND) && it.behandlingId == behandling.id }
+                .map { it.id }
+
+        fjernEndretUtbetalingAndelerOgOppdaterTilkjentYtelse(behandling, endretUtbetalingAndelerSomSkalSlettes)
     }
 
     @Transactional
