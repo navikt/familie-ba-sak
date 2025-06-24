@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
@@ -32,6 +33,7 @@ class EndretUtbetalingAndelService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
@@ -147,6 +149,31 @@ class EndretUtbetalingAndelService(
                 ),
             )
         }
+    }
+
+    @Transactional
+    fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling: Behandling) {
+        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)?.toLocalDate() ?: return
+
+        fjernEndretUtbetalingAndelerMedÅrsak3MndEller3ÅrGenerertIDenneBehandlingen(behandling)
+
+        val nåværendeAndeler = beregningService.hentAndelerTilkjentYtelseForBehandling(behandling.id)
+        val forrigeAndeler = beregningService.hentAndelerFraForrigeIverksattebehandling(behandling)
+        val personIdenter = (nåværendeAndeler + forrigeAndeler).map { it.aktør.aktivFødselsnummer() }.distinct()
+        val personerPåBehandling = persongrunnlagService.hentPersonerPåBehandling(personIdenter, behandling)
+
+        val endretUtbetalingAndeler =
+            genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
+                behandling = behandling,
+                søknadMottattDato = søknadMottattDato,
+                nåværendeAndeler = nåværendeAndeler,
+                forrigeAndeler = forrigeAndeler,
+                personerPåBehandling = personerPåBehandling,
+            )
+
+        endretUtbetalingAndelRepository.saveAllAndFlush(endretUtbetalingAndeler)
+
+        oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
 
     private fun oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling: Behandling) {

@@ -1,10 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
@@ -13,6 +17,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -29,11 +34,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 class EndretUtbetalingAndelServiceTest {
@@ -44,6 +51,7 @@ class EndretUtbetalingAndelServiceTest {
     private val mockVilkårsvurderingService = mockk<VilkårsvurderingService>()
     private val mockEndretUtbetalingAndelHentOgPersisterService = mockk<EndretUtbetalingAndelHentOgPersisterService>()
     private val mockBeregningService = mockk<BeregningService>()
+    private val mockBehandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
@@ -58,6 +66,7 @@ class EndretUtbetalingAndelServiceTest {
                 andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
                 vilkårsvurderingService = mockVilkårsvurderingService,
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
+                behandlingSøknadsinfoService = mockBehandlingSøknadsinfoService,
             )
     }
 
@@ -266,5 +275,83 @@ class EndretUtbetalingAndelServiceTest {
                 personer = mutableSetOf(barn1, barn2),
             ),
         )
+    }
+
+    @Nested
+    inner class GenererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd {
+        private val behandling = lagBehandling()
+
+        @Test
+        fun `Skal generere endret utbetaling andeler med årsak etterbetaling 3 måneder`() {
+            // Arrange
+            val søker = lagPerson(type = PersonType.SØKER)
+            val barn = lagPerson(type = PersonType.BARN)
+
+            val fomAndelTilkjentYtelse = YearMonth.of(2020, 1)
+            val tomAndelTilkjentYtelse = YearMonth.of(2025, 12)
+            val søknadMottattDato = LocalDateTime.of(2025, 4, 15, 0, 0)
+            val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+
+            every { mockEndretUtbetalingAndelRepository.findByBehandlingId(any()) } returns emptyList()
+            every { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) } returnsArgument 0
+            every { mockEndretUtbetalingAndelRepository.deleteAllById(any()) } just Runs
+            every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(any()) } returns personopplysningGrunnlag
+            every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns mockk()
+            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns søknadMottattDato
+            every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), any()) } returns listOf(søker, barn)
+            every { mockBeregningService.hentAndelerTilkjentYtelseForBehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        behandling = behandling,
+                        person = barn,
+                        fom = fomAndelTilkjentYtelse,
+                        tom = tomAndelTilkjentYtelse,
+                        beløp = 2000,
+                    ),
+                )
+            every { mockBeregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        behandling = behandling,
+                        person = barn,
+                        fom = fomAndelTilkjentYtelse,
+                        tom = tomAndelTilkjentYtelse,
+                        beløp = 1000,
+                    ),
+                )
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert
+            val forventetEndretUtbetalingAndel =
+                EndretUtbetalingAndel(
+                    behandlingId = behandling.id,
+                    personer = mutableSetOf(barn),
+                    prosent = BigDecimal.ZERO,
+                    fom = fomAndelTilkjentYtelse,
+                    tom = søknadMottattDato.minusMonths(4).toLocalDate().toYearMonth(),
+                    årsak = Årsak.ETTERBETALING_3MND,
+                    søknadstidspunkt = søknadMottattDato.toLocalDate(),
+                    begrunnelse = "Fylt ut automatisk fra søknadstidspunkt.",
+                )
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.deleteAllById(emptyList()) }
+            verify(exactly = 1) { mockEndretUtbetalingAndelRepository.saveAllAndFlush(listOf(forventetEndretUtbetalingAndel)) }
+            verify(exactly = 2) { mockBeregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag) }
+        }
+
+        @Test
+        fun `Skal ikke generere endret utbetaling andeler hvis søknadMottattDato er null`() {
+            // Arrange
+            every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.deleteAllById(any()) }
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
+            verify(exactly = 0) { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) }
+        }
     }
 }

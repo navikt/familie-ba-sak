@@ -536,6 +536,7 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
