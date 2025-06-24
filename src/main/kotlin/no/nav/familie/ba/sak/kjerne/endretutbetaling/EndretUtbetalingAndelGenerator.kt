@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
+import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3MndFom
+import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetaling3ÅrFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3MND
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak.ETTERBETALING_3ÅR
@@ -27,12 +30,12 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
 ): List<EndretUtbetalingAndel> {
     val (datoForGyldigEtterbetaling, årsak) =
         if (søknadMottattDato.isBefore(DATO_FOR_OVERGANG_TIL_ETTERBETALING_3MND)) {
-            søknadMottattDato.minusYears(3) to ETTERBETALING_3ÅR
+            hentGyldigEtterbetaling3ÅrFom(søknadMottattDato) to ETTERBETALING_3ÅR
         } else {
-            søknadMottattDato.minusMonths(3) to ETTERBETALING_3MND
+            hentGyldigEtterbetaling3MndFom(søknadMottattDato) to ETTERBETALING_3MND
         }
 
-    val sisteDatoForEndretUtbetalingAndel = datoForGyldigEtterbetaling.sisteDagIForrigeMåned()
+    val sisteDatoForEndretUtbetalingAndel = datoForGyldigEtterbetaling.toLocalDate().sisteDagIForrigeMåned()
 
     val nåværendeAndelerTidslinjer = nåværendeAndeler.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteDatoForEndretUtbetalingAndel)
     val forrigeAndelerTidslinjer = forrigeAndeler.tilTidslinjerPerAktørOgType().beskjærTilOgMed(sisteDatoForEndretUtbetalingAndel)
