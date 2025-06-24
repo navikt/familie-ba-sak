@@ -43,14 +43,14 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate) =
+fun hentGyldigEtterbetaling3ÅrFom(kravDato: LocalDate): YearMonth =
     kravDato
         .minusYears(3)
         .toYearMonth()
 
-fun hentGyldigEtterbetaling3MndFom(kravDato: LocalDate) =
+fun hentGyldigEtterbetaling3MndFom(kravDato: LocalDate): YearMonth =
     kravDato
-        .minusMonths(4)
+        .minusMonths(3)
         .toYearMonth()
 
 fun hentSøkersAndeler(

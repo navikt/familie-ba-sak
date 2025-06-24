@@ -978,8 +978,8 @@ class EndretUtbetalingAndelValideringTest {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                fom = YearMonth.now().minusYears(2),
-                tom = YearMonth.now().minusYears(1),
+                fom = YearMonth.now().minusYears(5),
+                tom = YearMonth.now().minusYears(3),
                 årsak = Årsak.ETTERBETALING_3ÅR,
                 prosent = BigDecimal(0),
                 søknadstidspunkt = LocalDate.now(),
@@ -994,6 +994,26 @@ class EndretUtbetalingAndelValideringTest {
             }
 
         assertThat(feil.frontendFeilmelding).isEqualTo("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn tre år tilbake i tid.")
+    }
+
+    @Test
+    fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 år' og perioden er mer enn 3 år siden`() {
+        val endretUtbetalingAndel =
+            EndretUtbetalingAndel(
+                behandlingId = 1,
+                fom = YearMonth.now().minusYears(5),
+                tom = YearMonth.now().minusYears(3).minusMonths(1),
+                årsak = Årsak.ETTERBETALING_3ÅR,
+                prosent = BigDecimal(0),
+                søknadstidspunkt = LocalDate.now(),
+            )
+
+        assertDoesNotThrow {
+            validerÅrsak(
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                vilkårsvurdering = null,
+            )
+        }
     }
 
     @Test
@@ -1020,11 +1040,11 @@ class EndretUtbetalingAndelValideringTest {
     }
 
     @Test
-    fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mellom 3 måneder og 3 år siden`() {
+    fun `Skal ikke kaste feil dersom endringsårsak er 'Etterbetaling 3 måneder' og perioden er mer enn 3 måneder`() {
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
                 behandlingId = 1,
-                fom = YearMonth.now().minusMonths(10),
+                fom = YearMonth.now().minusMonths(5),
                 tom = YearMonth.now().minusMonths(4),
                 årsak = Årsak.ETTERBETALING_3MND,
                 prosent = BigDecimal(0),

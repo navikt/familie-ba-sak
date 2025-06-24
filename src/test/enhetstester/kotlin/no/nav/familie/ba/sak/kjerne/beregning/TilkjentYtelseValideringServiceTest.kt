@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -22,6 +23,7 @@ class TilkjentYtelseValideringServiceTest {
     private val beregningServiceMock = mockk<BeregningService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
 
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
@@ -33,6 +35,7 @@ class TilkjentYtelseValideringServiceTest {
                 totrinnskontrollService = totrinnskontrollServiceMock,
                 persongrunnlagService = persongrunnlagServiceMock,
                 behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+                behandlingSøknadsinfoService = behandlingSøknadsinfoService,
             )
 
         every {
@@ -139,6 +142,7 @@ class TilkjentYtelseValideringServiceTest {
         every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
         every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
+        every { behandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns behandling.opprettetTidspunkt
 
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
         Assertions.assertEquals(

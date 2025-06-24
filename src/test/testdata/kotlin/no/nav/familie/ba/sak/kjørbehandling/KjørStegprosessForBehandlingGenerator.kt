@@ -67,7 +67,7 @@ fun kjørStegprosessForBehandling(
             behandlingType = behandlingstype,
             behandlingÅrsak = behandlingÅrsak,
             barnasIdenter = barnasIdenter,
-            søknadMottattDato = LocalDate.now(),
+            søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now().minusYears(18) else null,
             fagsakId = fagsak.id,
         )
 
@@ -371,7 +371,7 @@ fun kjørStegprosessForFGB(
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
-                søknadMottattDato = LocalDate.now(),
+                søknadMottattDato = LocalDate.now().minusYears(18),
                 fagsakId = fagsak.id,
             ),
         )

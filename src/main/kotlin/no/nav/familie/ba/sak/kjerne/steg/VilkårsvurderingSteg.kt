@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
@@ -34,6 +37,8 @@ class VilkårsvurderingSteg(
     private val månedligValutajusteringService: MånedligValutajusteringService,
     private val localDateProvider: LocalDateProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val unleashService: UnleashNextMedContextService,
 ) : BehandlingSteg<String> {
     override fun preValiderSteg(
         behandling: Behandling,
@@ -85,6 +90,10 @@ class VilkårsvurderingSteg(
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
 
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
+
+        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND)) {
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling)
+        }
 
         if (!behandling.erSatsendring()) {
             tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
