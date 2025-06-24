@@ -6,10 +6,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerOgSettTomDatoHvisNull
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.fraRestEndretUtbetalingAndel
@@ -19,9 +18,9 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 
 @Service
 class EndretUtbetalingAndelService(
@@ -50,6 +49,11 @@ class EndretUtbetalingAndelService(
         val personer =
             persongrunnlagService
                 .hentPersonerPåBehandling(personerPåEndretUtbetalingAndel, behandling)
+                .filter { personerPåEndretUtbetalingAndel.contains(it.aktør.aktivFødselsnummer()) }
+
+        val vilkårsvurdering =
+            vilkårsvurderingService.hentAktivForBehandling(behandling.id)
+                ?: throw Feil("Fant ikke vilkårsvurdering på behandling ${behandling.id}")
 
         val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
@@ -61,40 +65,12 @@ class EndretUtbetalingAndelService(
                 .filter { it.id != endretUtbetalingAndelId }
                 .filterNot { it.manglerObligatoriskFelt() }
 
-        val gyldigTomEtterDagensDato =
-            beregnGyldigTomIFremtiden(
-                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
-                endretUtbetalingAndel = endretUtbetalingAndel,
-                andelTilkjentYtelser = andelTilkjentYtelser,
-            )
-
-        validerTomDato(
-            tomDato = endretUtbetalingAndel.tom,
-            gyldigTomEtterDagensDato = gyldigTomEtterDagensDato,
-            årsak = endretUtbetalingAndel.årsak,
-        )
-
-        if (endretUtbetalingAndel.tom == null) {
-            endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
-        }
-        validerÅrsak(
+        validerOgLagreEndretUtbetalingAndel(
             endretUtbetalingAndel = endretUtbetalingAndel,
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id),
+            andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+            andelerTilkjentYtelse = andelTilkjentYtelser,
+            vilkårsvurdering = vilkårsvurdering,
         )
-
-        validerUtbetalingMotÅrsak(
-            årsak = endretUtbetalingAndel.årsak,
-            skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0),
-        )
-
-        validerIngenOverlappendeEndring(
-            endretUtbetalingAndel = endretUtbetalingAndel,
-            eksisterendeEndringerPåBehandling = andreEndredeAndelerPåBehandling,
-        )
-
-        validerPeriodeInnenforTilkjentytelse(endretUtbetalingAndel, andelTilkjentYtelser)
-
-        endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
 
         oppdaterBehandlingMedBeregningOgVarsleAbonnenter(behandling)
     }
@@ -188,6 +164,21 @@ class EndretUtbetalingAndelService(
                 endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
             )
         }
+    }
+
+    private fun validerOgLagreEndretUtbetalingAndel(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        validerOgSettTomDatoHvisNull(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            vilkårsvurdering = vilkårsvurdering,
+        )
+        endretUtbetalingAndelRepository.saveAndFlush(endretUtbetalingAndel)
     }
 }
 

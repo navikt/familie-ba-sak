@@ -38,6 +38,50 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
+    fun validerOgSettTomDatoHvisNull(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val gyldigTomEtterDagensDato =
+            beregnGyldigTomIFremtiden(
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andelTilkjentYtelser = andelerTilkjentYtelse,
+            )
+
+        validerTomDato(
+            tomDato = endretUtbetalingAndel.tom,
+            gyldigTomEtterDagensDato = gyldigTomEtterDagensDato,
+            årsak = endretUtbetalingAndel.årsak,
+        )
+
+        if (endretUtbetalingAndel.tom == null) {
+            endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
+        }
+
+        validerÅrsak(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            vilkårsvurdering = vilkårsvurdering,
+        )
+
+        validerUtbetalingMotÅrsak(
+            årsak = endretUtbetalingAndel.årsak,
+            skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0),
+        )
+
+        validerIngenOverlappendeEndring(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            eksisterendeEndringerPåBehandling = andreEndredeAndelerPåBehandling,
+        )
+
+        validerPeriodeInnenforTilkjentytelse(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            andelTilkjentYtelser = andelerTilkjentYtelse,
+        )
+    }
+
     fun validerIngenOverlappendeEndring(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>,
