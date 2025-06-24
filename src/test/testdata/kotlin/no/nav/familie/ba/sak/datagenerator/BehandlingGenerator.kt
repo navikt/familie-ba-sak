@@ -111,7 +111,7 @@ fun nyOrdinærBehandling(
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
         behandlingÅrsak = årsak,
-        søknadMottattDato = if (årsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null,
+        søknadMottattDato = if (årsak == BehandlingÅrsak.SØKNAD) LocalDate.now().minusYears(18) else null,
         fagsakId = fagsakId,
     )
 
@@ -122,9 +122,10 @@ fun nyRevurdering(
     NyBehandling(
         søkersIdent = søkersIdent,
         behandlingType = BehandlingType.REVURDERING,
+        behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
         kategori = BehandlingKategori.NASJONAL,
         underkategori = BehandlingUnderkategori.ORDINÆR,
-        søknadMottattDato = LocalDate.now(),
+        søknadMottattDato = null,
         fagsakId = fagsakId,
     )
 

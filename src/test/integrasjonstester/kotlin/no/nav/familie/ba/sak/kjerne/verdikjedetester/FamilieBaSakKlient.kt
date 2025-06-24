@@ -117,7 +117,7 @@ class FamilieBaSakKlient(
                 søkersIdent = søkersIdent,
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
-                søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now() else null,
+                søknadMottattDato = if (behandlingÅrsak == BehandlingÅrsak.SØKNAD) LocalDate.now().minusYears(18) else null,
                 fagsakId = fagsakId,
             ),
             headers,
