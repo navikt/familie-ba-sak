@@ -74,6 +74,7 @@ class AutomatiskRegistrerSøknadService(
                     søkerMedOpplysninger = søkerMedOpplysninger,
                     barnaMedOpplysninger = barnaMedOpplysninger,
                     endringAvOpplysningerBegrunnelse = "",
+                    erAutomatiskRegistrert = true,
                 ),
             bekreftEndringerViaFrontend = false,
         )
