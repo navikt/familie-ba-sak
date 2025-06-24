@@ -45,7 +45,7 @@ object EndretUtbetalingAndelValidering {
         vilkårsvurdering: Vilkårsvurdering,
     ) {
         val gyldigTomEtterDagensDato =
-            beregnGyldigTomIFremtiden(
+            beregnGyldigTom(
                 andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 andelTilkjentYtelser = andelerTilkjentYtelse,

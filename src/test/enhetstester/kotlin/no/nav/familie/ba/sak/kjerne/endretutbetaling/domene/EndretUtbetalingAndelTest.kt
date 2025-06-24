@@ -5,7 +5,8 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomIFremtiden
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTom
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.beregnGyldigTomPerAktør
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -103,7 +104,7 @@ internal class EndretUtbetalingAndelTest {
             )
 
         val nyTom =
-            beregnGyldigTomIFremtiden(
+            beregnGyldigTom(
                 andelTilkjentYtelser = andelTilkjentYtelser,
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 andreEndredeAndelerPåBehandling = emptyList(),
@@ -172,7 +173,7 @@ internal class EndretUtbetalingAndelTest {
             )
 
         val nyTom =
-            beregnGyldigTomIFremtiden(
+            beregnGyldigTom(
                 andelTilkjentYtelser = andelTilkjentYtelser,
                 endretUtbetalingAndel = endretUtbetalingAndel,
                 andreEndredeAndelerPåBehandling = andreEndretAndeler,
@@ -180,5 +181,60 @@ internal class EndretUtbetalingAndelTest {
 
         val forventetTom = andreEndretAndeler.minOf { it.fom!! }.minusMonths(1)
         assertEquals(forventetTom, nyTom)
+    }
+
+    @Test
+    fun `Skal sette tom til siste måned med andel tilkjent ytelse per aktør hvis tom er null og det ikke finnes noen andre endringsperioder`() {
+        val behandling = lagBehandling()
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val nyEndretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                personer = setOf(barn1, barn2),
+                fom = YearMonth.of(2025, 6),
+                tom = null,
+                årsak = Årsak.ALLEREDE_UTBETALT,
+            )
+
+        val eksisterendeEndretUtbetalingAndel =
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                personer = setOf(barn1),
+                fom = YearMonth.of(2025, 8),
+                tom = YearMonth.of(2025, 10),
+                årsak = Årsak.ENDRE_MOTTAKER,
+            )
+
+        val sisteTomPåAndelerBarn1 = YearMonth.of(2025, 11)
+        val sisteTomPåAndelerBarn2 = YearMonth.of(2025, 12)
+        val andelTilkjentYtelser =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    person = barn1,
+                    fom = YearMonth.of(2025, 1),
+                    tom = sisteTomPåAndelerBarn1,
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.of(2025, 1),
+                    tom = sisteTomPåAndelerBarn2,
+                ),
+            )
+
+        val faktiskTomPerAktør =
+            beregnGyldigTomPerAktør(
+                endretUtbetalingAndel = nyEndretUtbetalingAndel,
+                andelTilkjentYtelser = andelTilkjentYtelser,
+                andreEndredeAndelerPåBehandling = listOf(eksisterendeEndretUtbetalingAndel),
+            )
+
+        val forventetTomPerAktør =
+            mapOf(
+                barn1.aktør to eksisterendeEndretUtbetalingAndel.fom?.minusMonths(1),
+                barn2.aktør to sisteTomPåAndelerBarn2,
+            )
+        assertEquals(forventetTomPerAktør, faktiskTomPerAktør)
     }
 }
