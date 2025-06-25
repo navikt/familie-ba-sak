@@ -1,0 +1,3 @@
+DROP INDEX IF EXISTS uidx_fagsak_type_aktoer_ikke_arkivert;
+
+ALTER INDEX IF EXISTS ny_uidx_fagsak_type_aktoer_ikke_arkivert RENAME TO uidx_fagsak_type_aktoer_ikke_arkivert;
