@@ -89,7 +89,7 @@ fun parseStandardBegrunnelse(rad: Tabellrad): BegrunnelseData {
 }
 
 fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
-    val gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad)
+    val gjelderSoker = parseValgfriBoolean(BrevPeriodeParser.DomenebegrepBrevBegrunnelse.GJELDER_SØKER, rad) ?: false
 
     val annenForeldersAktivitet =
         parseValgfriEnum<KompetanseAktivitet>(
@@ -116,6 +116,12 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
             rad,
         )
+
+    val erAnnenForelderOmfattetAvNorskLovgivning =
+        parseValgfriBoolean(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ER_ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING,
+            rad,
+        ) ?: false
 
     val begrunnelse =
         parseEnum<EØSStandardbegrunnelse>(
@@ -154,6 +160,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             sokersAktivitet = søkersAktivitet,
             sokersAktivitetsland = søkersAktivitetsland,
             gjelderSoker = gjelderSoker,
+            erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
         )
     } else {
         EØSBegrunnelseDataUtenKompetanse(
