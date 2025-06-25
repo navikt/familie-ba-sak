@@ -243,7 +243,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         )
 
         val endretUtbetalingAndel =
-            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(førstegangsbehandling)
+            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndel(førstegangsbehandling)
 
         val restEndretUtbetalingAndel =
             RestEndretUtbetalingAndel(
