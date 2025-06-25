@@ -3,9 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
@@ -23,9 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -38,13 +34,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRe
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 
 @Service
 class AutovedtakFødselshendelseService(
@@ -60,10 +53,7 @@ class AutovedtakFødselshendelseService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val autovedtakService: AutovedtakService,
     private val personopplysningerService: PersonopplysningerService,
-    private val statsborgerskapService: StatsborgerskapService,
-    private val opprettTaskService: OpprettTaskService,
     private val oppgaveService: OppgaveService,
-    private val unleashService: UnleashNextMedContextService,
 ) : AutovedtakBehandlingService<FødselshendelseData> {
     val stansetIAutomatiskFiltreringCounter =
         Metrics.counter("familie.ba.sak.henvendelse.stanset", "steg", "filtrering")
@@ -170,10 +160,6 @@ class AutovedtakFødselshendelseService(
                 )
             taskRepository.save(task)
 
-            if (unleashService.isEnabled(FeatureToggle.SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM, false)) {
-                opprettFremleggsoppgaveDersomEØSMedlem(behandling)
-            }
-
             passertFiltreringOgVilkårsvurderingCounter.increment()
 
             AutovedtakStegService.BEHANDLING_FERDIG
@@ -181,21 +167,6 @@ class AutovedtakFødselshendelseService(
             stansetIAutomatiskVilkårsvurderingCounter
 
             henleggBehandlingOgOpprettManuellOppgave(behandling = behandlingEtterVilkårsvurdering)
-        }
-    }
-
-    internal fun opprettFremleggsoppgaveDersomEØSMedlem(behandling: Behandling) {
-        val gjeldendeStatsborgerskap =
-            personopplysningerService.hentGjeldendeStatsborgerskap(behandling.fagsak.aktør)
-        val medlemskap = statsborgerskapService.hentSterkesteMedlemskap(statsborgerskap = gjeldendeStatsborgerskap)
-        if (medlemskap == Medlemskap.EØS) {
-            logger.info("Oppretter task for opprettelse av fremleggsoppgave på $behandling")
-            opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.Fremlegg,
-                beskrivelse = "Kontroller gyldig opphold",
-                fristForFerdigstillelse = LocalDate.now().plusYears(1),
-            )
         }
     }
 
