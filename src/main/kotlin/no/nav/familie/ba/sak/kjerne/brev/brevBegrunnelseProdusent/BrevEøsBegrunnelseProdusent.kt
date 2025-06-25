@@ -111,6 +111,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                     sokersAktivitet = kompetanse.søkersAktivitet,
                     sokersAktivitetsland = kompetanse.søkersAktivitetsland.tilLandNavn(landkoder).navn,
                     gjelderSoker = gjelderSøker,
+                    erAnnenForelderOmfattetAvNorskLovgivning = kompetanse.erAnnenForelderOmfattetAvNorskLovgivning,
                 )
             } else {
                 null
