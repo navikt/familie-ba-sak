@@ -56,4 +56,7 @@ enum class FeatureToggle(
 
     // NAV-25543
     SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE("familie-ba-sak.skal-bruke-nytt-felt-i-eos-begrunnelse-data-med-kompetanse"),
+
+    // NAV-24639
+    MIN_SIDE_BARNETRYGD_ENDEPUNKT("familie-ba-sak.min-side-barnetrygd-endepunkt"),
 }

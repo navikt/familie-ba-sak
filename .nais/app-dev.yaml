@@ -66,6 +66,8 @@ spec:
         - "https://familie-ba-sak.intern.dev.nav.no/swagger-ui/oauth2-redirect.html"
         - "http://localhost:8089/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true
+  tokenx:
+    enabled: true
   accessPolicy:
     inbound:
       rules:
@@ -113,6 +115,9 @@ spec:
           cluster: dev-gcp
         - application: logging
           namespace: nais-system
+        - application: familie-ba-minside-frontend
+          namespace: teamfamilie
+          cluster: dev-gcp
       external:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
