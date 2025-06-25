@@ -47,9 +47,8 @@ class EndretUtbetalingAndelService(
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getReferenceById(endretUtbetalingAndelId)
         val personerPåEndretUtbetalingAndel =
-            restEndretUtbetalingAndel.personIdenter
-                ?: restEndretUtbetalingAndel.personIdent?.let { listOf(it) }
-                ?: throw FunksjonellFeil("Endret utbetaling andel må ha minst én person ident")
+            restEndretUtbetalingAndel.personIdenter.takeUnless { it.isNullOrEmpty() }
+                ?: throw FunksjonellFeil("Endret utbetalingsperiode må gjelde minst én person")
 
         val personer =
             persongrunnlagService

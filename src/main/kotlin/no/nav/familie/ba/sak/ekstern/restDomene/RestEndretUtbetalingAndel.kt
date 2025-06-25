@@ -7,7 +7,6 @@ import java.time.YearMonth
 
 data class RestEndretUtbetalingAndel(
     val id: Long?,
-    val personIdent: String?,
     val personIdenter: List<String>?,
     val prosent: BigDecimal?,
     val fom: YearMonth?,

@@ -143,7 +143,6 @@ fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != Big
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(
         id = this.id,
-        personIdent = this.personIdenter.firstOrNull(),
         personIdenter = this.personIdenter,
         prosent = this.prosent,
         fom = this.fom,
