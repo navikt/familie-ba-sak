@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.minside
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.datagenerator.randomAktør
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -19,22 +20,22 @@ class MinsideAktiveringKafkaProducerTest {
         @Test
         fun `skal sende aktiveringsmelding for minside via Kafka`() {
             // Arrange
-
-            val personIdent = "12345678901"
+            val aktør = randomAktør("12345678901")
 
             val completableFuture: CompletableFuture<SendResult<String, String>> = mockk()
             val sendResult: SendResult<String, String> = mockk()
 
-            every { kafkaTemplate.send(any(), any()) } returns completableFuture
+            every { kafkaTemplate.send(any(), any(), any()) } returns completableFuture
             every { completableFuture.get(any(), any()) } returns sendResult
 
             // Act
-            minsideAktiveringKafkaProducer.aktiver(personIdent)
+            minsideAktiveringKafkaProducer.aktiver(aktør)
 
             // Assert
             verify {
                 kafkaTemplate.send(
                     "min-side.aapen-microfrontend-v1",
+                    aktør.aktørId,
                     withArg {
                         assertTrue(it.contains("\"@action\":\"enable\""))
                         assertTrue(it.contains("\"ident\":\"12345678901\""))
@@ -52,21 +53,22 @@ class MinsideAktiveringKafkaProducerTest {
         @Test
         fun `skal sende deaktiveringsmelding for minside via Kafka`() {
             // Arrange
-            val personIdent = "12345678901"
+            val aktør = randomAktør("12345678901")
 
             val completableFuture: CompletableFuture<SendResult<String, String>> = mockk()
             val sendResult: SendResult<String, String> = mockk()
 
-            every { kafkaTemplate.send(any(), any()) } returns completableFuture
+            every { kafkaTemplate.send(any(), any(), any()) } returns completableFuture
             every { completableFuture.get(any(), any()) } returns sendResult
 
             // Act
-            minsideAktiveringKafkaProducer.deaktiver(personIdent)
+            minsideAktiveringKafkaProducer.deaktiver(aktør)
 
             // Assert
             verify {
                 kafkaTemplate.send(
                     "min-side.aapen-microfrontend-v1",
+                    aktør.aktørId,
                     withArg {
                         assertTrue(it.contains("\"@action\":\"disable\""))
                         assertTrue(it.contains("\"ident\":\"12345678901\""))

@@ -47,7 +47,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(aktør = aktør, aktivert = true)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns null
-            every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
+            every { minsideAktiveringKafkaProducer.aktiver(aktør) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act
@@ -65,7 +65,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(id = 1, aktør = aktør, aktivert = true)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns eksisterendeMinsideAktivering
-            every { minsideAktiveringKafkaProducer.aktiver(aktør.aktivFødselsnummer()) } just Runs
+            every { minsideAktiveringKafkaProducer.aktiver(aktør) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act
@@ -85,7 +85,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(aktør = aktør, aktivert = false)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns null
-            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
+            every { minsideAktiveringKafkaProducer.deaktiver(aktør) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act
@@ -103,7 +103,7 @@ class MinsideAktiveringServiceTest {
             val forventetMinsideAktivering = MinsideAktivering(id = 1, aktør = aktør, aktivert = false)
 
             every { minsideAktiveringRepository.findByAktør(aktør) } returns eksisterendeMinsideAktivering
-            every { minsideAktiveringKafkaProducer.deaktiver(aktør.aktivFødselsnummer()) } just Runs
+            every { minsideAktiveringKafkaProducer.deaktiver(aktør) } just Runs
             every { minsideAktiveringRepository.save(forventetMinsideAktivering) } returns forventetMinsideAktivering
 
             // Act

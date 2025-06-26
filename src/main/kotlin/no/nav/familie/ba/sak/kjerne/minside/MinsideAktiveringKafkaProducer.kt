@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.tms.microfrontend.MicrofrontendMessageBuilder
 import no.nav.tms.microfrontend.Sensitivitet
 import org.slf4j.LoggerFactory
@@ -12,7 +13,8 @@ import java.util.concurrent.TimeUnit
 class MinsideAktiveringKafkaProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
 ) {
-    fun aktiver(personIdent: String) {
+    fun aktiver(aktør: Aktør) {
+        val personIdent = aktør.aktivFødselsnummer()
         val aktiveringsmelding =
             MicrofrontendMessageBuilder
                 .enable {
@@ -22,10 +24,11 @@ class MinsideAktiveringKafkaProducer(
                     sensitivitet = Sensitivitet.HIGH
                 }.text()
         secureLogger.info("Aktiverer minside mikrofrontend for personIdent: $personIdent")
-        sendMinsideMelding(aktiveringsmelding)
+        sendMinsideMelding(message = aktiveringsmelding, key = aktør.aktørId)
     }
 
-    fun deaktiver(personIdent: String) {
+    fun deaktiver(aktør: Aktør) {
+        val personIdent = aktør.aktivFødselsnummer()
         val deaktiveringsmelding =
             MicrofrontendMessageBuilder
                 .disable {
@@ -34,13 +37,16 @@ class MinsideAktiveringKafkaProducer(
                     microfrontendId = MICROFRONTEND_ID
                 }.text()
         secureLogger.info("Deaktiverer minside mikrofrontend for personIdent: $personIdent")
-        sendMinsideMelding(deaktiveringsmelding)
+        sendMinsideMelding(message = deaktiveringsmelding, key = aktør.aktørId)
     }
 
-    private fun sendMinsideMelding(message: String) {
+    private fun sendMinsideMelding(
+        message: String,
+        key: String,
+    ) {
         try {
             // Venter på at meldingen er sendt før vi fortsetter
-            kafkaTemplate.send(TOPIC, message).get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            kafkaTemplate.send(TOPIC, key, message).get(SEND_TIMEOUT_SECONDS, TimeUnit.SECONDS)
         } catch (e: Exception) {
             logger.error("Feil ved sending av minside-melding til Kafka", e)
             throw e
