@@ -9,6 +9,8 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
@@ -52,6 +54,7 @@ class EndretUtbetalingAndelServiceTest {
     private val mockEndretUtbetalingAndelHentOgPersisterService = mockk<EndretUtbetalingAndelHentOgPersisterService>()
     private val mockBeregningService = mockk<BeregningService>()
     private val mockBehandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
+    private val mockUnleashService = mockk<UnleashNextMedContextService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
@@ -67,6 +70,7 @@ class EndretUtbetalingAndelServiceTest {
                 vilkårsvurderingService = mockVilkårsvurderingService,
                 endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
                 behandlingSøknadsinfoService = mockBehandlingSøknadsinfoService,
+                unleashService = mockUnleashService,
             )
     }
 
@@ -127,6 +131,7 @@ class EndretUtbetalingAndelServiceTest {
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
+        every { mockUnleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
 
         val feil =
             assertThrows<FunksjonellFeil> {
@@ -140,6 +145,77 @@ class EndretUtbetalingAndelServiceTest {
             "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt.",
             feil.frontendFeilmelding,
         )
+    }
+
+    @Test
+    fun `Skal splitte EndretUtbetalingAndel med tom til og med-dato og flere personer`() {
+        // Arrange
+        val behandling = lagBehandling()
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val endretUtbetalingAndel =
+            lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
+                behandlingId = behandling.id,
+                personer = setOf(barn1, barn2),
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ENDRE_MOTTAKER,
+                fom = YearMonth.now(),
+                tom = null,
+            )
+
+        val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
+
+        val andelerTilkjentYtelse =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    person = barn1,
+                    fom = YearMonth.now().minusYears(1),
+                    tom = YearMonth.now().plusYears(1),
+                ),
+                lagAndelTilkjentYtelse(
+                    person = barn2,
+                    fom = YearMonth.now().minusYears(1),
+                    tom = YearMonth.now().plusYears(2),
+                ),
+            )
+
+        val lagretEndretUtbetalingAndelerSlot = slot<List<EndretUtbetalingAndel>>()
+        val slettetEndretUtbetalingAndelSlot = slot<EndretUtbetalingAndel>()
+
+        every { mockEndretUtbetalingAndelRepository.getReferenceById(any()) } returns EndretUtbetalingAndel(behandlingId = behandling.id)
+        every { mockEndretUtbetalingAndelRepository.delete(capture(slettetEndretUtbetalingAndelSlot)) } returns mockk()
+        every { mockEndretUtbetalingAndelRepository.saveAll(capture(lagretEndretUtbetalingAndelerSlot)) } returnsArgument 0
+        every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn1, barn2)
+        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(behandling.id, barn1, barn2)
+        every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
+        every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
+        every { mockUnleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
+        every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any(), any()) } returns mockk()
+        every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns mockk()
+
+        // Act
+        endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+            behandling = behandling,
+            endretUtbetalingAndelId = endretUtbetalingAndel.id,
+            restEndretUtbetalingAndel = restEndretUtbetalingAndel,
+        )
+
+        // Assert
+        val lagredeEndretUtbetalingAndeler = lagretEndretUtbetalingAndelerSlot.captured
+
+        assertThat(lagredeEndretUtbetalingAndeler).hasSize(2)
+
+        assertThat(lagredeEndretUtbetalingAndeler[0].fom).isEqualTo(YearMonth.now())
+        assertThat(lagredeEndretUtbetalingAndeler[0].tom).isEqualTo(YearMonth.now().plusYears(1))
+        assertThat(lagredeEndretUtbetalingAndeler[0].personer).containsExactlyInAnyOrder(barn1, barn2)
+
+        assertThat(lagredeEndretUtbetalingAndeler[1].fom).isEqualTo(YearMonth.now().plusYears(1).plusMonths(1))
+        assertThat(lagredeEndretUtbetalingAndeler[1].tom).isEqualTo(YearMonth.now().plusYears(2))
+        assertThat(lagredeEndretUtbetalingAndeler[1].personer).containsExactly(barn2)
+
+        val slettetEndretUtbetalingAndel = slettetEndretUtbetalingAndelSlot.captured
+        assertThat(slettetEndretUtbetalingAndel).isEqualTo(endretUtbetalingAndel.endretUtbetalingAndel)
     }
 
     @Test
@@ -205,6 +281,7 @@ class EndretUtbetalingAndelServiceTest {
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurdering
         every { mockEndretUtbetalingAndelRepository.saveAndFlush(capture(lagretEndretUtbetalingAndel)) } returns mockk()
         every { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any(), any()) } returns mockk()
+        every { mockUnleashService.isEnabled(FeatureToggle.SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER) } returns true
 
         var restEndretUtbetalingAndel =
             RestEndretUtbetalingAndel(

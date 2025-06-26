@@ -17,9 +17,6 @@ enum class FeatureToggle(
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
     PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND("familie-ba-sak.preutfylling-endret-utbetaling-3aar-eller-3mnd"),
 
-    // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
-    SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM("familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"),
-
     // NAV-24387
     BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING("familie-ba-sak.bruk-utbetalingstidslinjer-ved-generering-av-perioder-til-avstemming"),
     SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK("familie-ba-sak.skal-finne-og-patche-andeler-i-fagsaker-med-avvik"),
@@ -52,4 +49,6 @@ enum class FeatureToggle(
     MINSIDE_AKTIVERING("familie-ba-sak.minside-aktivering"),
 
     SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER("familie-ba-sak.skal-inkludere-aarsak-endre-mottaker-i-initiell-generering-av-andeler"),
+
+    SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER("familie-ba-sak.skal-splitte-endret-utbetaling-andeler"),
 }
