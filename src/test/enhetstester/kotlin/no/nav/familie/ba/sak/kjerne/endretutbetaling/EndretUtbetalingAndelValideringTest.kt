@@ -865,6 +865,22 @@ class EndretUtbetalingAndelValideringTest {
         }
     }
 
+    @ParameterizedTest
+    @EnumSource(value = Årsak::class, names = ["ENDRE_MOTTAKER"], mode = EnumSource.Mode.EXCLUDE)
+    fun `Skal kaste feil hvis årsak ikke er ENDRE_MOTTAKER og tom-dato er null`(
+        årsak: Årsak,
+    ) {
+        assertThrows<FunksjonellFeil> {
+            validerTomDato(
+                tomDato = null,
+                årsak = årsak,
+                gyldigTomEtterDagensDato = YearMonth.now(),
+            )
+        }.also {
+            assertThat(it.frontendFeilmelding).startsWith("Til og med-dato kan ikke være tom")
+        }
+    }
+
     @Test
     fun `Skal ikke kaste feil hvis tom-dato er i fremtiden, men lik gyldig dato i fremtiden`() {
         val tom = YearMonth.now().plusMonths(4)
