@@ -51,4 +51,7 @@ enum class FeatureToggle(
     SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER("familie-ba-sak.skal-inkludere-aarsak-endre-mottaker-i-initiell-generering-av-andeler"),
 
     SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER("familie-ba-sak.skal-splitte-endret-utbetaling-andeler"),
+
+    // NAV-25543
+    SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE("familie-ba-sak.skal-bruke-nytt-felt-i-eos-begrunnelse-data-med-kompetanse"),
 }

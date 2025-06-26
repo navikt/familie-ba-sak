@@ -242,6 +242,7 @@ data class KompetanseForVedtaksperiode(
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat,
     val barnAktører: Set<Aktør>,
+    val erAnnenForelderOmfattetAvNorskLovgivning: Boolean,
 ) {
     constructor(kompetanse: UtfyltKompetanse) : this(
         søkersAktivitet = kompetanse.søkersAktivitet,
@@ -251,6 +252,7 @@ data class KompetanseForVedtaksperiode(
         barnetsBostedsland = kompetanse.barnetsBostedsland,
         resultat = kompetanse.resultat,
         barnAktører = kompetanse.barnAktører,
+        erAnnenForelderOmfattetAvNorskLovgivning = kompetanse.erAnnenForelderOmfattetAvNorskLovgivning,
     )
 }
 

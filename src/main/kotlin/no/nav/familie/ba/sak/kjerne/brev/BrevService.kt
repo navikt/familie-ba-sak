@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.internal.TestVerktøyService
@@ -98,6 +100,7 @@ class BrevService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val hjemmeltekstUtleder: HjemmeltekstUtleder,
     private val avregningService: AvregningService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
@@ -448,6 +451,7 @@ class BrevService(
                     vedtaksperiode.lagBrevPeriode(
                         grunnlagForBegrunnelse = grunnlagForBegrunnelser,
                         landkoder = integrasjonClient.hentLandkoderISO2(),
+                        skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse = unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE),
                     )
                 } catch (e: BrevBegrunnelseFeil) {
                     secureLogger.warn(
