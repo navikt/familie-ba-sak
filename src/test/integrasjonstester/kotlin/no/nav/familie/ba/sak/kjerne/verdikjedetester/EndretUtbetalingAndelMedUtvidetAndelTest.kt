@@ -106,7 +106,6 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val restEndretUtbetalingAndelUtvidetBarnetrygd =
             RestEndretUtbetalingAndel(
                 id = null,
-                personIdent = scenario.søker.ident,
                 personIdenter = listOf(scenario.søker.ident),
                 prosent = BigDecimal(0),
                 fom = endretFom,
@@ -126,7 +125,6 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val restEndretUtbetalingAndelOrdinærBarnetrygd =
             RestEndretUtbetalingAndel(
                 id = null,
-                personIdent = scenario.barna.first().ident,
                 personIdenter = listOf(scenario.barna.first().ident),
                 prosent = BigDecimal(0),
                 fom = endretFom,
