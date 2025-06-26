@@ -292,7 +292,7 @@ fun validerTomDato(
     årsak: Årsak?,
 ) {
     if (årsak != Årsak.ENDRE_MOTTAKER && tomDato == null) {
-        throw FunksjonellFeil(melding = "Til og med-dato kan ikke være tom for årsak ${årsak?.visningsnavn}")
+        throw FunksjonellFeil(melding = "Til og med-dato kan ikke være tom for årsak '${årsak?.visningsnavn}'")
     }
     val dagensDato = YearMonth.now()
     if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
