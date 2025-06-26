@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.tms.microfrontend.MicrofrontendMessageBuilder
 import no.nav.tms.microfrontend.Sensitivitet
 import org.slf4j.LoggerFactory
@@ -20,7 +21,7 @@ class MinsideAktiveringKafkaProducer(
                     microfrontendId = MICROFRONTEND_ID
                     sensitivitet = Sensitivitet.HIGH
                 }.text()
-        logger.info("Aktiverer minside mikrofrontend for personIdent: $personIdent")
+        secureLogger.info("Aktiverer minside mikrofrontend for personIdent: $personIdent")
         sendMinsideMelding(aktiveringsmelding)
     }
 
@@ -32,7 +33,7 @@ class MinsideAktiveringKafkaProducer(
                     initiatedBy = INITIATED_BY
                     microfrontendId = MICROFRONTEND_ID
                 }.text()
-        logger.info("Deaktiverer minside mikrofrontend for personIdent: $personIdent")
+        secureLogger.info("Deaktiverer minside mikrofrontend for personIdent: $personIdent")
         sendMinsideMelding(deaktiveringsmelding)
     }
 
