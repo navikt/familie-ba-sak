@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -283,6 +284,20 @@ class EndretUtbetalingAndelServiceTest {
         fun `Skal ikke generere endret utbetaling andeler hvis søknadMottattDato er null`() {
             // Arrange
             every { mockBehandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns null
+
+            // Act
+            endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
+
+            // Assert
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.deleteAllById(any()) }
+            verify(exactly = 0) { mockEndretUtbetalingAndelRepository.saveAllAndFlush<EndretUtbetalingAndel>(any()) }
+            verify(exactly = 0) { mockBeregningService.oppdaterBehandlingMedBeregning(any(), any()) }
+        }
+
+        @Test
+        fun `Skal ikke generere endret utbetaling andeler hvis behandlingkategori er EØS`() {
+            // Arrange
+            val behandling = behandling.copy(kategori = BehandlingKategori.EØS)
 
             // Act
             endretUtbetalingAndelService.genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(behandling = behandling)
