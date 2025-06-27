@@ -222,15 +222,3 @@ class PreutfyllBosattIRiketService(
             }.tilTidslinje()
     }
 }
-
-private interface Delvilkår {
-    val begrunnelse: String
-}
-
-private data class OppfyltDelvilkår(
-    override val begrunnelse: String,
-) : Delvilkår
-
-private data object IkkeOppfyltDelvilkår : Delvilkår {
-    override val begrunnelse: String = ""
-}

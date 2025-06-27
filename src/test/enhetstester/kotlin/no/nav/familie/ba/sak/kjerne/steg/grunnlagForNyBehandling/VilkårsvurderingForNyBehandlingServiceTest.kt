@@ -56,6 +56,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
                 andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
                 preutfyllBosattIRiketService = mockk(),
                 unleashService = mockk(),
+                preutfyllLovligOppholdService = mockk(),
             )
     }
 

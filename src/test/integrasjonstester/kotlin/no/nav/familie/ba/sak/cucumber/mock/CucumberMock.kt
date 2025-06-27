@@ -550,6 +550,7 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllBosattIRiketService = mockk(),
+            preutfyllLovligOppholdService = mockk(),
             unleashService = unleashNextMedContextService,
         )
 
