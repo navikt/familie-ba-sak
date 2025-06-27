@@ -428,9 +428,9 @@ private fun hentBarnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling(begru
             val endretUtbetalingAndel = begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.endretUtbetalingAndel
             val endretUtbetalingAndelErSattTil0 = endretUtbetalingAndel?.prosent == BigDecimal.ZERO
 
-            andelerTilkjentYtelse?.isNotEmpty() == true
-                    && andelerTilkjentYtelse.none { it.kalkulertUtbetalingsbeløp > 0 }
-                    && endretUtbetalingAndelErSattTil0
+            andelerTilkjentYtelse?.isNotEmpty() == true &&
+                andelerTilkjentYtelse.none { it.kalkulertUtbetalingsbeløp > 0 } &&
+                endretUtbetalingAndelErSattTil0
         }.keys
 
 private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
