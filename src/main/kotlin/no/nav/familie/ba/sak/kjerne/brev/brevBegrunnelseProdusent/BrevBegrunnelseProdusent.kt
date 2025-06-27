@@ -332,8 +332,8 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
     val barnSomHaddeDeltBostedIForrigePeriodeMenIkkeDenne = hentPersonerMedDeltBostedIForrigePeriodeMenIkkeDenne(begrunnelsesGrunnlagPerPerson).filter { it.type == PersonType.BARN }
     val barnSomNåFårUtbetalingIPeriode = barnMedUtbetaling - barnMedUtbetalingHøyereEnn0IForrigeperiode
 
-    val barnMedNullutbetalingForrigePeriode =
-        hentBarnMedNullutbetalingForrigePeriode(begrunnelsesGrunnlagPerPerson)
+    val barnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling =
+        hentBarnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling(begrunnelsesGrunnlagPerPerson)
 
     return when {
         this.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
@@ -349,7 +349,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                         barnMedUtbetalingIForrigeperiode = barnMedUtbetalingIForrigeperiode,
                         barnMedOppfylteVilkår = barnMedOppfylteVilkår,
                         barnMistetUtbetalingFraForrigeBehandling = barnMistetUtbetalingFraForrigeBehandling,
-                        barnMedNullutbetalingForrigePeriode = barnMedNullutbetalingForrigePeriode,
+                        barnMedNullutbetalingForrigePeriode = barnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling,
                     )
                 }
 
@@ -420,13 +420,17 @@ private fun ISanityBegrunnelse.hentRelevanteBarnVedIkkeInnvilget(
     return relevanteBarn
 }
 
-private fun hentBarnMedNullutbetalingForrigePeriode(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
+private fun hentBarnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
     begrunnelsesGrunnlagPerPerson
         .filterKeys { it.type == PersonType.BARN }
         .filter { (_, begrunnelseGrunnlagForPersonIPeriode) ->
             val andelerTilkjentYtelse = begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.andeler?.toList()
+            val endretUtbetalingAndel = begrunnelseGrunnlagForPersonIPeriode.forrigePeriode?.endretUtbetalingAndel
+            val endretUtbetalingAndelErSattTil0 = endretUtbetalingAndel?.prosent == BigDecimal.ZERO
 
-            andelerTilkjentYtelse?.isNotEmpty() == true && andelerTilkjentYtelse.none { it.kalkulertUtbetalingsbeløp > 0 }
+            andelerTilkjentYtelse?.isNotEmpty() == true &&
+                andelerTilkjentYtelse.none { it.kalkulertUtbetalingsbeløp > 0 } &&
+                endretUtbetalingAndelErSattTil0
         }.keys
 
 private fun hentBarnSomSkalUtbetalesVedDeltBosted(begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>) =
