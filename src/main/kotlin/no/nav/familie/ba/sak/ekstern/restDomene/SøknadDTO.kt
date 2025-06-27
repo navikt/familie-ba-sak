@@ -15,6 +15,7 @@ data class SøknadDTO(
     val søkerMedOpplysninger: SøkerMedOpplysninger,
     val barnaMedOpplysninger: List<BarnMedOpplysninger>,
     val endringAvOpplysningerBegrunnelse: String,
+    val erAutomatiskRegistrert: Boolean = false,
 )
 
 fun SøknadDTO.writeValueAsString(): String = objectMapper.writeValueAsString(this)
