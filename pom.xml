@@ -31,7 +31,7 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20250604093431_85c9dc1</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
-        <mockk.version>1.14.2</mockk.version>
+        <mockk.version>1.14.4</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.30</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
@@ -47,7 +47,7 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.21.1</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.21.2</testcontainers.postgresql.version>
         <unleash.version>10.2.2</unleash.version>
         <testcontainers.postgresql.version>1.21.1</testcontainers.postgresql.version>
         <maven.model.version>3.9.10</maven.model.version>
