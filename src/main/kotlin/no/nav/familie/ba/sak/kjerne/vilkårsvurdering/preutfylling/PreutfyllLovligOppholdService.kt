@@ -83,6 +83,6 @@ class PreutfyllLovligOppholdService(
                 statsborgerskapSammeLand
                     .map { Periode(it, it.gyldigFraOgMed, it.gyldigTilOgMed) }
                     .tilTidslinje()
-            }.kombiner { iterable -> iterable.any { it.iNordiskLand() } }
+            }.kombiner { statsborgerskap -> statsborgerskap.any { it.iNordiskLand() } }
     }
 }
