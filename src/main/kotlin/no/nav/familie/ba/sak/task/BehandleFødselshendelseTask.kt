@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -43,6 +44,7 @@ class BehandleFødselshendelseTask(
 ) : AsyncTaskStep {
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
 
+    @WithSpan
     override fun doTask(task: Task) {
         val behandleFødselshendelseTaskDTO =
             objectMapper.readValue(task.payload, BehandleFødselshendelseTaskDTO::class.java)

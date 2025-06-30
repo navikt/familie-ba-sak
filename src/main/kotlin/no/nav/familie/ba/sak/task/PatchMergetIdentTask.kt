@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.hentAktivAktørId
@@ -33,6 +34,7 @@ class PatchMergetIdentTask(
     private val aktørIdRepository: AktørIdRepository,
     private val personidentRepository: PersonidentRepository,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, PatchMergetIdentDto::class.java)
         secureLogger.info("Patcher ident på fagsak $dto")

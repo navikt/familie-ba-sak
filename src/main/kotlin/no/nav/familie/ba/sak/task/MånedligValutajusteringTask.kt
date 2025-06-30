@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -22,6 +23,7 @@ import java.time.YearMonth
 class MånedligValutajusteringTask(
     val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val taskdto = objectMapper.readValue(task.payload, MånedligValutajusteringTaskDto::class.java)
         autovedtakMånedligValutajusteringService.utførMånedligValutajustering(

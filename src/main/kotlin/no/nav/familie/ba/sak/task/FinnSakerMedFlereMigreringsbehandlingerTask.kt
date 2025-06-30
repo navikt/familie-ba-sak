@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -17,6 +18,7 @@ import java.time.YearMonth
 class FinnSakerMedFlereMigreringsbehandlingerTask(
     val fagsakRepository: FagsakRepository,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val fraOgMedÅrMåned = YearMonth.parse(task.payload)
 

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -19,6 +20,7 @@ import java.time.LocalDate
 class OpprettOppgaveTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] =

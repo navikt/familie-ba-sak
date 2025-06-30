@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task.dto
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -18,6 +19,7 @@ class HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask(
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
         val behandlingId = objectMapper.readValue(task.payload, Long::class.java)

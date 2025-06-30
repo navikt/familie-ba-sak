@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task.internkonsistensavstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming.InternKonsistensavstemmingService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.log.IdUtils
@@ -23,6 +24,7 @@ import java.util.Properties
 class OpprettInternKonsistensavstemmingTaskerTask(
     val internKonsistensavstemmingService: InternKonsistensavstemmingService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val maksAntallTasker: Int = objectMapper.readValue(task.payload)
         internKonsistensavstemmingService

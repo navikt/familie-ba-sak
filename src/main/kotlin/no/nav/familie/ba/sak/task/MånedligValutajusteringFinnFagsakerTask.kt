@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -35,6 +36,7 @@ class MånedligValutajusteringFinnFagsakerTask(
         val måned: YearMonth,
     )
 
+    @WithSpan
     override fun doTask(task: Task) {
         val data = objectMapper.readValue(task.payload, MånedligValutajusteringFinnFagsakerTaskDto::class.java)
 

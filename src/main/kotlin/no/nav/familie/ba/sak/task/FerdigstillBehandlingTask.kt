@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
@@ -20,6 +21,7 @@ class FerdigstillBehandlingTask(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
         stegService.håndterFerdigstillBehandling(

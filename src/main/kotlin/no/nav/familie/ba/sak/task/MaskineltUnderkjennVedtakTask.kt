@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -20,6 +21,7 @@ class MaskineltUnderkjennVedtakTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stegService: StegService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val behandlingId = task.payload.toLong()
 

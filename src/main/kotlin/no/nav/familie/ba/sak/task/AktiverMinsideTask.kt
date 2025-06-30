@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringAktørValidator
 import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringService
@@ -25,6 +26,7 @@ class AktiverMinsideTask(
     private val aktørIdRepository: AktørIdRepository,
     private val minsideAktiveringAktørValidator: MinsideAktiveringAktørValidator,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val minsideDTO =
             objectMapper.readValue(task.payload, MinsideDTO::class.java)

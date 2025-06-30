@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.IverksettMotFamilieTilbakeDTO
@@ -20,6 +21,7 @@ class IverksettMotFamilieTilbakeTask(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
