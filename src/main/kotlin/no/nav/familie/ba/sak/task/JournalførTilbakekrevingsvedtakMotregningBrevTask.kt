@@ -20,9 +20,11 @@ import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrev.Companion.logger
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregning
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.task.JournalførTilbakekrevingsvedtakMotregningBrevTask.Companion.TASK_STEP_TYPE
+import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
+import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -146,9 +148,11 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTask(
         fun opprettTask(
             behandlingId: Long,
         ): Task =
-            Task(
-                TASK_STEP_TYPE,
-                "$behandlingId",
-            )
+            overstyrTaskMedNyCallId(IdUtils.generateId()) {
+                Task(
+                    TASK_STEP_TYPE,
+                    "$behandlingId",
+                )
+            }
     }
 }

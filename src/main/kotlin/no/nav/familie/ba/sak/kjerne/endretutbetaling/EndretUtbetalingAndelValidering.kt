@@ -38,6 +38,50 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object EndretUtbetalingAndelValidering {
+    fun validerOgSettTomDatoHvisNull(
+        endretUtbetalingAndel: EndretUtbetalingAndel,
+        andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        vilkårsvurdering: Vilkårsvurdering,
+    ) {
+        val gyldigTomEtterDagensDato =
+            beregnGyldigTom(
+                andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
+                endretUtbetalingAndel = endretUtbetalingAndel,
+                andelTilkjentYtelser = andelerTilkjentYtelse,
+            )
+
+        validerTomDato(
+            tomDato = endretUtbetalingAndel.tom,
+            gyldigTomEtterDagensDato = gyldigTomEtterDagensDato,
+            årsak = endretUtbetalingAndel.årsak,
+        )
+
+        if (endretUtbetalingAndel.tom == null) {
+            endretUtbetalingAndel.tom = gyldigTomEtterDagensDato
+        }
+
+        validerÅrsak(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            vilkårsvurdering = vilkårsvurdering,
+        )
+
+        validerUtbetalingMotÅrsak(
+            årsak = endretUtbetalingAndel.årsak,
+            skalUtbetales = endretUtbetalingAndel.prosent != BigDecimal(0),
+        )
+
+        validerIngenOverlappendeEndring(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            eksisterendeEndringerPåBehandling = andreEndredeAndelerPåBehandling,
+        )
+
+        validerPeriodeInnenforTilkjentytelse(
+            endretUtbetalingAndel = endretUtbetalingAndel,
+            andelTilkjentYtelser = andelerTilkjentYtelse,
+        )
+    }
+
     fun validerIngenOverlappendeEndring(
         endretUtbetalingAndel: EndretUtbetalingAndel,
         eksisterendeEndringerPåBehandling: List<EndretUtbetalingAndel>,
@@ -153,7 +197,7 @@ object EndretUtbetalingAndelValidering {
 
         if (endretUtbetalingAndel.prosent == BigDecimal.valueOf(100)) {
             throw FunksjonellFeil("Du kan ikke endre til full utbetaling når det er mer enn $feilmeldingPeriode siden søknadstidspunktet.")
-        } else if (endretUtbetalingAndel.tom?.isAfter(gyldigEtterbetalingFom) == true) {
+        } else if (endretUtbetalingAndel.tom?.isSameOrAfter(gyldigEtterbetalingFom) == true) {
             throw FunksjonellFeil("Du kan kun stoppe etterbetaling for en periode som strekker seg mer enn $feilmeldingPeriode tilbake i tid.")
         }
     }
@@ -247,6 +291,9 @@ fun validerTomDato(
     gyldigTomEtterDagensDato: YearMonth?,
     årsak: Årsak?,
 ) {
+    if (årsak != Årsak.ENDRE_MOTTAKER && tomDato == null) {
+        throw FunksjonellFeil(melding = "Til og med-dato kan ikke være tom for årsak '${årsak?.visningsnavn}'")
+    }
     val dagensDato = YearMonth.now()
     if (årsak == Årsak.ALLEREDE_UTBETALT && tomDato?.isAfter(dagensDato) == true) {
         val feilmelding =

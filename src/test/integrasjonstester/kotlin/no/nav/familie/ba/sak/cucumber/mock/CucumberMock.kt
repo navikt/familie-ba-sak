@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
@@ -82,6 +83,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import org.slf4j.Logger
@@ -145,6 +147,7 @@ class CucumberMock(
     val behandlingMigreringsinfoRepository = mockBehandlingMigreringsinfoRepository()
     val patchetAndelTilkjentYtelseRepository = mockk<PatchetAndelTilkjentYtelseRepository>()
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
+    val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -426,12 +429,18 @@ class CucumberMock(
     val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockUnleashNextMedContextService())
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
+    val behandlingSøknadsinfoService =
+        BehandlingSøknadsinfoService(
+            behandlingSøknadsinfoRepository = behandlingSøknadsinfoRepository,
+        )
+
     val tilkjentYtelseValideringService =
         TilkjentYtelseValideringService(
             beregningService = beregningService,
             totrinnskontrollService = totrinnskontrollService,
             persongrunnlagService = persongrunnlagService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
         )
 
     val utbetalingsoppdragGenerator =
@@ -527,6 +536,8 @@ class CucumberMock(
             vilkårsvurderingService = vilkårsvurderingService,
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
+            behandlingSøknadsinfoService = behandlingSøknadsinfoService,
+            unleashService = unleashNextMedContextService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
@@ -564,6 +575,8 @@ class CucumberMock(
             månedligValutajusteringService = månedligValutajusteringService,
             localDateProvider = mockedDateProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            unleashService = unleashNextMedContextService,
         )
 
     val ferdigstillBehandlingSteg =
@@ -599,6 +612,12 @@ class CucumberMock(
             tilbakekrevingsvedtakMotregningBrevService = tilbakekrevingsvedtakMotregningBrevService,
         )
 
+    val opprettTaskService =
+        OpprettTaskService(
+            taskRepository = taskRepository,
+            satskjøringRepository = mockk(),
+        )
+
     val stegService =
         spyk(
             StegService(
@@ -622,7 +641,7 @@ class CucumberMock(
                 satsendringService = mockk(),
                 personopplysningerService = personopplysningerService,
                 automatiskBeslutningService = mockk(),
-                opprettTaskService = mockk(),
+                opprettTaskService = opprettTaskService,
                 satskjøringRepository = mockk(),
                 unleashService = unleashNextMedContextService,
                 automatiskRegistrerSøknadService = mockk(),

@@ -9,6 +9,8 @@ import junit.framework.TestCase.assertTrue
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
@@ -22,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.AutomatiskOppdaterValutakursService
@@ -49,6 +52,8 @@ class VilkårsvurderingStegTest {
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService = mockk()
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService = mockk()
+    private val unleashService: UnleashNextMedContextService = mockk()
 
     private val vilkårsvurderingSteg: VilkårsvurderingSteg =
         VilkårsvurderingSteg(
@@ -63,6 +68,8 @@ class VilkårsvurderingStegTest {
             månedligValutajusteringService = mockk(),
             localDateProvider = RealDateProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
+            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            unleashService = unleashService,
         )
 
     val behandling =
@@ -89,6 +96,7 @@ class VilkårsvurderingStegTest {
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
         justRun { automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(any()) }
+        every { unleashService.isEnabled(FeatureToggle.PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND) } returns false
     }
 
     @Test

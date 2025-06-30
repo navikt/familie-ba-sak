@@ -417,6 +417,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetTilleggstekstTredjelandsborgerOppholdstillatelseSoker"
     },
+    INNVILGET_TILLEGGSTEKST_ETTERBETALING_FOR_FEILUTBETALING {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetTilleggstekstEtterbetalingForFeilutbetaling"
+    },
     INNVILGET_MEDLEM_AV_FOLKETRYGDEN_UTEN_DATO {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetMedlemAvFolketrygdenUtenDato"

@@ -37,7 +37,6 @@ class EndretUtbetalingAndelTest(
         val restEndretUtbetalingAndel =
             RestEndretUtbetalingAndel(
                 id = null,
-                personIdent = scenario.barna.first().ident,
                 personIdenter = listOf(scenario.barna.first().ident),
                 prosent = BigDecimal(0),
                 fom = endretFom,
@@ -92,7 +91,6 @@ class EndretUtbetalingAndelTest(
         val restEndretUtbetalingAndel =
             RestEndretUtbetalingAndel(
                 id = null,
-                personIdent = scenario.barna.first().ident,
                 personIdenter = listOf(scenario.barna.first().ident),
                 prosent = BigDecimal(0),
                 fom = endretFom,
