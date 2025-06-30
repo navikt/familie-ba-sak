@@ -126,7 +126,7 @@ class VilkårServiceIntegrasjonTest(
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 when (vilkårResultat.vilkårType) {
-                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET -> assertTrue(vilkårResultat.erAutomatiskVurdert)
+                    Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP, Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD -> assertTrue(vilkårResultat.erAutomatiskVurdert)
                     else -> assertFalse(vilkårResultat.erAutomatiskVurdert)
                 }
             }
