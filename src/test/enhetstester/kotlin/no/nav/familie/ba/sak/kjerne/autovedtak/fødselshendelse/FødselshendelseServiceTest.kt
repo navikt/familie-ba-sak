@@ -1,12 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.config.IntegrasjonClientMock
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.config.tilAktør
@@ -47,9 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
-import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.Month
@@ -92,59 +87,8 @@ class FødselshendelseServiceTest {
             vedtaksperiodeService,
             autovedtakService,
             personopplysningerService,
-            statsborgerskapService,
-            opprettTaskService,
             oppgaveService,
-            unleashService,
         )
-
-    @Test
-    fun `Skal opprette fremleggsoppgave dersom søker er EØS medlem`() {
-        every { personopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns
-            Statsborgerskap(
-                land = "POL",
-                gyldigFraOgMed = LocalDate.now().minusMonths(2),
-                gyldigTilOgMed = null,
-                bekreftelsesdato = null,
-            )
-        every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
-        every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
-
-        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
-
-        verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
-                behandlingId = any(),
-                oppgavetype = Oppgavetype.Fremlegg,
-                beskrivelse = "Kontroller gyldig opphold",
-                fristForFerdigstillelse = LocalDate.now().plusYears(1),
-            )
-        }
-    }
-
-    @Test
-    fun `Skal ikke opprette fremleggsoppgave dersom søker er nordisk medlem`() {
-        every { personopplysningerService.hentGjeldendeStatsborgerskap(any()) } returns
-            Statsborgerskap(
-                land = "DNK",
-                gyldigFraOgMed = LocalDate.now().minusMonths(2),
-                gyldigTilOgMed = null,
-                bekreftelsesdato = null,
-            )
-        every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
-        every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
-
-        autovedtakFødselshendelseService.opprettFremleggsoppgaveDersomEØSMedlem(lagBehandling())
-
-        verify(exactly = 0) {
-            opprettTaskService.opprettOppgaveTask(
-                behandlingId = any(),
-                oppgavetype = Oppgavetype.Fremlegg,
-                beskrivelse = "Kontroller gyldig opphold",
-                fristForFerdigstillelse = LocalDate.now().plusYears(1),
-            )
-        }
-    }
 
     @Test
     fun `Skal opprette manuell oppgave hvis resultat av fødselshendelse blir INNVILGET_OG_ENDRET`() {

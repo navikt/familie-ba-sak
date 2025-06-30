@@ -17,9 +17,7 @@ enum class FeatureToggle(
     PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD("familie-ba-sak.preutfylling-lovlig-opphold"),
 
     AUTOMAITSK_REGISTRER_SØKNAD("familie-ba-sak.automatisk-registrer-soknad"),
-
-    // NAV-21071 lagt bak toggle og kan evt fjernes på sikt hvis man ikke har trengt å skru den på igjen
-    SKAL_OPPRETTE_FREMLEGGSOPPGAVE_EØS_MEDLEM("familie-ba-sak.skalOpprettFremleggsoppgaveDersomEOSMedlem"),
+    PREUTFYLLING_ENDRET_UTBETALING_3ÅR_ELLER_3MND("familie-ba-sak.preutfylling-endret-utbetaling-3aar-eller-3mnd"),
 
     // NAV-24387
     BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING("familie-ba-sak.bruk-utbetalingstidslinjer-ved-generering-av-perioder-til-avstemming"),
@@ -49,5 +47,13 @@ enum class FeatureToggle(
     // NAV-25329
     BRUK_NY_OPPRETT_FAGSAK_MODAL("familie-ba-sak.bruk.ny.opprett.fagsak.modal"),
 
+    // NAV-25472
+    MINSIDE_AKTIVERING("familie-ba-sak.minside-aktivering"),
+
     SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER("familie-ba-sak.skal-inkludere-aarsak-endre-mottaker-i-initiell-generering-av-andeler"),
+
+    SKAL_SPLITTE_ENDRET_UTBETALING_ANDELER("familie-ba-sak.skal-splitte-endret-utbetaling-andeler"),
+
+    // NAV-25543
+    SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE("familie-ba-sak.skal-bruke-nytt-felt-i-eos-begrunnelse-data-med-kompetanse"),
 }

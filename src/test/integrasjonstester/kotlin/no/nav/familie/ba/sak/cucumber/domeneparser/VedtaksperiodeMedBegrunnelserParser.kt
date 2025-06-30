@@ -73,6 +73,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         ANNEN_FORELDERS_AKTIVITETSLAND("Annen forelders aktivitetsland"),
         BARNETS_BOSTEDSLAND("Barnets bostedsland"),
         RESULTAT("Resultat"),
+        ER_ANNEN_FORELDER_OMFATTET_AV_NORSK_LOVGIVNING("Annen forelder omfattet av norsk lovgivning"),
     }
 
     enum class DomenebegrepValutakurs(

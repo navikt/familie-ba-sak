@@ -105,7 +105,7 @@ class EndretUtbetalingAndelController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         validerBehandlingKanRedigeres(behandling)
-        endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
+        endretUtbetalingAndelService.opprettTomEndretUtbetalingAndel(behandling)
 
         tilbakestillBehandlingTilBehandlingsresultatService
             .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)

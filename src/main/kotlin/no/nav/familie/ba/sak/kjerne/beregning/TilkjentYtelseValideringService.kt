@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -20,6 +21,7 @@ class TilkjentYtelseValideringService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
         if (behandling.erMigrering() || behandling.erTekniskEndring() || behandling.erSatsendring() || behandling.erMånedligValutajustering()) return
@@ -99,7 +101,8 @@ class TilkjentYtelseValideringService(
                 ?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
                 ?.andelerTilkjentYtelse
 
-        val gyldigEtterbetalingFom = hentGyldigEtterbetaling3MndFom(behandling.opprettetTidspunkt.toLocalDate())
+        val søknadsdato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id) ?: behandling.opprettetTidspunkt
+        val gyldigEtterbetalingFom = hentGyldigEtterbetaling3MndFom(søknadsdato.toLocalDate())
 
         return finnAktørIderMedUgyldigEtterbetalingsperiode(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),

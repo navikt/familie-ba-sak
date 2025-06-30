@@ -115,11 +115,11 @@ data class EndretUtbetalingAndel(
 enum class Årsak(
     val visningsnavn: String,
 ) {
-    DELT_BOSTED("Delt bosted"),
-    ETTERBETALING_3ÅR("Etterbetaling 3 år"),
-    ETTERBETALING_3MND("Etterbetaling 3 måneder"),
-    ENDRE_MOTTAKER("Endre mottaker, begge foreldre rett"),
-    ALLEREDE_UTBETALT("Allerede utbetalt"),
+    DELT_BOSTED("Delt bosted"),
+    ETTERBETALING_3ÅR("Etterbetaling 3 år"),
+    ETTERBETALING_3MND("Etterbetaling 3 måneder"),
+    ENDRE_MOTTAKER("Endre mottaker, begge foreldre rett"),
+    ALLEREDE_UTBETALT("Allerede utbetalt"),
     ;
 
     fun førerTilOpphørVed0Prosent() =
@@ -143,7 +143,6 @@ fun EndretUtbetalingAndel?.skalUtbetales() = this != null && this.prosent != Big
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
     RestEndretUtbetalingAndel(
         id = this.id,
-        personIdent = this.personIdenter.firstOrNull(),
         personIdenter = this.personIdenter,
         prosent = this.prosent,
         fom = this.fom,

@@ -26,11 +26,12 @@ import java.math.BigDecimal
 fun VedtaksperiodeMedBegrunnelser.lagBrevPeriode(
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
     landkoder: Map<String, String>,
+    skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse: Boolean,
 ): BrevPeriode? {
     val begrunnelsesGrunnlagPerPerson = this.finnBegrunnelseGrunnlagPerPerson(grunnlagForBegrunnelse)
 
     val begrunnelserOgFritekster =
-        hentBegrunnelser(grunnlagForBegrunnelse, begrunnelsesGrunnlagPerPerson, landkoder)
+        hentBegrunnelser(grunnlagForBegrunnelse, begrunnelsesGrunnlagPerPerson, landkoder, skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse)
 
     if (begrunnelserOgFritekster.isEmpty()) return null
 
@@ -45,6 +46,7 @@ fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
     grunnlagForBegrunnelse: GrunnlagForBegrunnelse,
     begrunnelsesGrunnlagPerPerson: Map<Person, IBegrunnelseGrunnlagForPeriode>,
     landkoder: Map<String, String>,
+    skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse: Boolean,
 ): List<BrevBegrunnelse> {
     val standardbegrunnelser =
         this.begrunnelser.map { it.standardbegrunnelse }.toSet().flatMap {
@@ -62,6 +64,7 @@ fun VedtaksperiodeMedBegrunnelser.hentBegrunnelser(
                 grunnlagForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson,
                 landkoder,
+                skalBrukeNyttFeltIEØSBegrunnelseDataMedKompetanse,
             )
         }
 
