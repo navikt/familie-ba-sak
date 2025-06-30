@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iNordiskLand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -20,8 +19,6 @@ class PreutfyllLovligOppholdService(
     private val pdlRestClient: PdlRestClient,
 ) {
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
-        if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
-
         vilkårsvurdering.personResultater.forEach { personResultat ->
 
             val lovligOppholdVilkårResultat = genererLovligOppholdVilkårResultat(personResultat)
