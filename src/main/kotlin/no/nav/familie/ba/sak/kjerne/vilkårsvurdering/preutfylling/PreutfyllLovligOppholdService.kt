@@ -3,15 +3,11 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iNordiskLand
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Periode
-import no.nav.familie.tidslinje.Tidslinje
-import no.nav.familie.tidslinje.tilTidslinje
-import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 
@@ -34,7 +30,7 @@ class PreutfyllLovligOppholdService(
     }
 
     fun genererLovligOppholdVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
-        val erNorskEllerNordiskStatsborgerTidslinje = lagErNorskNordiskStatsborgerTidslinje(personResultat)
+        val erNorskEllerNordiskStatsborgerTidslinje = pdlRestClient.lagErNorskNordiskStatsborgerTidslinje(personResultat)
 
         val delvilkårPerioder =
             erNorskEllerNordiskStatsborgerTidslinje
@@ -70,19 +66,5 @@ class PreutfyllLovligOppholdService(
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
-    }
-
-    fun lagErNorskNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
-        val statsborgerskapGruppertPåNavn =
-            pdlRestClient
-                .hentStatsborgerskap(personResultat.aktør, historikk = true)
-                .groupBy { it.land }
-
-        return statsborgerskapGruppertPåNavn.values
-            .map { statsborgerskapSammeLand ->
-                statsborgerskapSammeLand
-                    .map { Periode(it, it.gyldigFraOgMed, it.gyldigTilOgMed) }
-                    .tilTidslinje()
-            }.kombiner { statsborgerskap -> statsborgerskap.any { it.iNordiskLand() } }
     }
 }

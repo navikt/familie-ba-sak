@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.iNordiskLand
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -19,7 +18,6 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
-import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
@@ -54,7 +52,7 @@ class PreutfyllBosattIRiketService(
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
 
-        val erNordiskStatsborgerTidslinje = lagErNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNorskNordiskStatsborgerTidslinje(personResultat)
 
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordisk, erBosatt ->
@@ -187,20 +185,6 @@ class PreutfyllBosattIRiketService(
                 .find { it.aktør.aktørId == aktørId }
                 ?.fødselsdato ?: throw Feil("Finner ikke barn med aktørId $aktørId i persongrunnlag for behandlingId $behandlingId")
         return erBosattINorgePeriode.omfatter(fødselsdato)
-    }
-
-    private fun lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
-        val statsborgerskapGruppertPåLand =
-            pdlRestClient
-                .hentStatsborgerskap(personResultat.aktør, historikk = true)
-                .groupBy { it.land }
-
-        return statsborgerskapGruppertPåLand.values
-            .map { statsborgerskapFraSammeLand ->
-                statsborgerskapFraSammeLand
-                    .map { Periode(it, it.gyldigFraOgMed, it.gyldigTilOgMed) }
-                    .tilTidslinje()
-            }.kombiner { iterable -> iterable.any { it.iNordiskLand() } }
     }
 
     private fun lagErBosattINorgeTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
