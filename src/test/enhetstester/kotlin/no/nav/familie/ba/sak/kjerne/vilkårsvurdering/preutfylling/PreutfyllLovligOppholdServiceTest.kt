@@ -57,7 +57,9 @@ class PreutfyllLovligOppholdServiceTest {
 
         // Assert
         assertThat(vilkårResultat).hasSize(2)
-        assertThat(vilkårResultat.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }).isNotNull
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.vilkårType).isEqualTo(Vilkår.LOVLIG_OPPHOLD)
+        }
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
         assertThat(vilkårResultat.find { it.resultat == Resultat.OPPFYLT }).isNotNull
     }
@@ -132,7 +134,9 @@ class PreutfyllLovligOppholdServiceTest {
 
         // Assert
         assertThat(vilkårResultat).hasSize(1)
-        assertThat(vilkårResultat.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }).isNotNull
-        assertThat(vilkårResultat.find { it.resultat == Resultat.OPPFYLT }).isNotNull
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.vilkårType).isEqualTo(Vilkår.LOVLIG_OPPHOLD)
+            assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
+        }
     }
 }

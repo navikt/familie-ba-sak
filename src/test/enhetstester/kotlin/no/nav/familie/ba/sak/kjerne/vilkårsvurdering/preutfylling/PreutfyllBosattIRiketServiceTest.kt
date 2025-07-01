@@ -503,7 +503,9 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(vilkårResultat).hasSize(1)
-        assertThat(vilkårResultat.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }).isNotNull
-        assertThat(vilkårResultat.find { it.resultat == Resultat.OPPFYLT }).isNotNull
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
+            assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
+        }
     }
 }
