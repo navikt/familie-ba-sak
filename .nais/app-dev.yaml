@@ -94,6 +94,9 @@ spec:
         - application: omsorgsopptjening-start-innlesning-q1
           namespace: pensjonopptjening
           cluster: dev-gcp
+        - application: familie-ba-minside-frontend
+          namespace: teamfamilie
+          cluster: dev-gcp
     outbound:
       rules:
         - application: familie-brev
@@ -115,9 +118,6 @@ spec:
           cluster: dev-gcp
         - application: logging
           namespace: nais-system
-        - application: familie-ba-minside-frontend
-          namespace: teamfamilie
-          cluster: dev-gcp
       external:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
