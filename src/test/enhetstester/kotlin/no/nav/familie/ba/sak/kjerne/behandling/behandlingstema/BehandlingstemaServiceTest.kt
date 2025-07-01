@@ -896,7 +896,7 @@ class BehandlingstemaServiceTest {
         }
 
         @Test
-        fun `skal utlede kategori NASJONAL når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling finnes ikke`() {
+        fun `skal utlede kategori EØS når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling finnes ikke`() {
             // Arrange
             val stønadFom = dagensDato.minusMonths(3)
             val stønadTom = dagensDato.minusMonths(2)
@@ -972,7 +972,7 @@ class BehandlingstemaServiceTest {
             val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
 
             // Act
-            assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
         }
 
         @Test
@@ -1121,6 +1121,130 @@ class BehandlingstemaServiceTest {
 
             // Act
             assertThat(kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        }
+
+        @Test
+        fun `skal utlede kategori EØS når det ikke finnes oppfylte vilkår resultater for dagens dato og siste oppfylte periode inneholder EØS og ikke NASJONAL`() {
+            // Arrange
+            val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør(), fødselsdato = LocalDate.of(1979, 6, 26))
+            val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = LocalDate.of(2006, 4, 21))
+
+            val fagsak = lagFagsak(aktør = søker.aktør)
+            val aktivBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.NASJONAL)
+            val sisteVedtatteBehandling = lagBehandling(fagsak = fagsak, behandlingKategori = BehandlingKategori.EØS)
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    behandling = aktivBehandling,
+                    lagPersonResultater = { vilkårsvurdering ->
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = søker.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 4, 30),
+                                            periodeTom = LocalDate.of(2021, 6, 30),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.IKKE_OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 7, 1),
+                                            periodeTom = LocalDate.of(2021, 8, 29),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2021, 8, 30),
+                                            periodeTom = LocalDate.of(2021, 9, 30),
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2013, 1, 31),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        ),
+                                    )
+                                },
+                            ),
+                            lagPersonResultat(
+                                vilkårsvurdering = vilkårsvurdering,
+                                aktør = barn.aktør,
+                                lagVilkårResultater = { personResultat ->
+                                    setOf(
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2013, 1, 31),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2013, 1, 31),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2013, 1, 31),
+                                            periodeTom = null,
+                                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                                            vilkårType = Vilkår.BOR_MED_SØKER,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2006, 4, 21),
+                                            periodeTom = LocalDate.of(2024, 4, 20),
+                                            vurderesEtter = null,
+                                            vilkårType = Vilkår.UNDER_18_ÅR,
+                                        ),
+                                        lagVilkårResultat(
+                                            personResultat = personResultat,
+                                            resultat = Resultat.OPPFYLT,
+                                            periodeFom = LocalDate.of(2006, 4, 21),
+                                            periodeTom = null,
+                                            vurderesEtter = null,
+                                            vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                                        ),
+                                    )
+                                },
+                            ),
+                        )
+                    },
+                )
+
+            val vilkårsvurderingTidslinjer =
+                VilkårsvurderingTidslinjer(
+                    vilkårsvurdering = vilkårsvurdering,
+                    søkerOgBarn = listOf(søker, barn),
+                )
+
+            every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsak.id) } returns aktivBehandling
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsak.id) } returns sisteVedtatteBehandling
+            every { tidslinjeService.hentTidslinjer(BehandlingId(aktivBehandling.id)) } returns vilkårsvurderingTidslinjer
+
+            // Act
+            val kategori = behandlingstemaService.finnBehandlingKategori(fagsak.id)
+
+            // Act
+            assertThat(kategori).isEqualTo(BehandlingKategori.EØS)
         }
 
         private fun lagAlleVilkårResultater(

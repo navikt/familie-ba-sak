@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjeService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -78,27 +79,25 @@ class BehandlingstemaService(
         }
 
         val tidslinjer = vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(aktivBehandling.id))
+
         if (tidslinjer == null) {
             return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
         }
 
-        val alleBarnasTidslinjerSomHarLøpendePeriode =
+        val behandlingKategoriBasertPåBarnasVilkår =
             tidslinjer
                 .barnasTidslinjer()
                 .values
-                .map { it.egetRegelverkResultatTidslinje.verdiPåTidspunkt(LocalDate.now(clockProvider.get())) }
+                .mapNotNull {
+                    it.egetRegelverkResultatTidslinje.verdiPåTidspunkt(LocalDate.now(clockProvider.get()))
+                }.filter { it.regelverk != null }
+                .tilBehandlingKategoriEllerNull()
 
-        val etBarnHarMinstEnLøpendeEØSPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it?.regelverk == Regelverk.EØS_FORORDNINGEN }
-        if (etBarnHarMinstEnLøpendeEØSPeriode) {
-            return BehandlingKategori.EØS
+        if (behandlingKategoriBasertPåBarnasVilkår != null) {
+            return behandlingKategoriBasertPåBarnasVilkår
         }
 
-        val etBarnHarMinstEnLøpendeNasjonalPeriode = alleBarnasTidslinjerSomHarLøpendePeriode.any { it?.regelverk == Regelverk.NASJONALE_REGLER }
-        if (etBarnHarMinstEnLøpendeNasjonalPeriode) {
-            return BehandlingKategori.NASJONAL
-        }
-
-        return sisteVedtatteBehandling?.kategori ?: BehandlingKategori.NASJONAL
+        return sisteVedtatteBehandling?.kategori ?: aktivBehandling.kategori
     }
 
     fun finnLøpendeUnderkategoriFraForrigeVedtatteBehandling(fagsakId: Long): BehandlingUnderkategori? {
@@ -138,6 +137,13 @@ class BehandlingstemaService(
             BehandlingUnderkategori.ORDINÆR
         }
     }
+
+    private fun List<RegelverkResultat>.tilBehandlingKategoriEllerNull(): BehandlingKategori? =
+        when {
+            this.any { it.regelverk == Regelverk.EØS_FORORDNINGEN } -> BehandlingKategori.EØS
+            this.any { it.regelverk == Regelverk.NASJONALE_REGLER } -> BehandlingKategori.NASJONAL
+            else -> null
+        }
 
     private fun oppdaterBehandlingstemaPåBehandlingHvisNødvendig(
         behandling: Behandling,
