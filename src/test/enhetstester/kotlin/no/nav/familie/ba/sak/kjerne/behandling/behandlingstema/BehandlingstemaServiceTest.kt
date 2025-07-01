@@ -896,7 +896,7 @@ class BehandlingstemaServiceTest {
         }
 
         @Test
-        fun `skal utlede kategori EØS når det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling finnes ikke`() {
+        fun `skal utlede kategori til aktiv behandling dersom det ikke finnes en løpende NASJONAL eller løpende EØS periode på barnas vilkårsvurderingtidslinje for den aktive behandlingen og siste vedtatte behandling ikke finnes`() {
             // Arrange
             val stønadFom = dagensDato.minusMonths(3)
             val stønadTom = dagensDato.minusMonths(2)
@@ -1124,7 +1124,7 @@ class BehandlingstemaServiceTest {
         }
 
         @Test
-        fun `skal utlede kategori EØS når det ikke finnes oppfylte vilkår resultater for dagens dato og siste oppfylte periode inneholder EØS og ikke NASJONAL`() {
+        fun `skal utlede kategori EØS når det ikke finnes oppfylte vilkår resultater for dagens dato og det ikke finnes en tidligere vedtatt behandling`() {
             // Arrange
             val søker = lagPersonEnkel(personType = PersonType.SØKER, aktør = randomAktør(), fødselsdato = LocalDate.of(1979, 6, 26))
             val barn = lagPersonEnkel(personType = PersonType.BARN, aktør = randomAktør(), fødselsdato = LocalDate.of(2006, 4, 21))
