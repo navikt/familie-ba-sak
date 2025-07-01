@@ -447,4 +447,29 @@ class SøknadGrunnlagTest(
         assertThat(persongrunnlag!!.søker.aktør.aktivFødselsnummer()).isEqualTo(søkerIdent)
         assertThat(persongrunnlag.barna).isEmpty()
     }
+
+    @Test
+    fun `Skal defaulte erAutomatiskRegistrert til false hvis feltet ikke finnes`() {
+        val søknadDTOTekst =
+            """
+            {
+                "underkategori": "ORDINÆR",
+                "søkerMedOpplysninger": {
+                    "ident": "${randomFnr()}",
+                    "målform": "NB"
+                },
+                "barnaMedOpplysninger": [],
+                "endringAvOpplysningerBegrunnelse": ""
+            }
+            """.trimIndent()
+        val søknadGrunnlag =
+            SøknadGrunnlag(
+                behandlingId = 0,
+                søknad = søknadDTOTekst,
+            )
+
+        val søknadDTO = søknadGrunnlag.hentSøknadDto()
+
+        assertThat(søknadDTO.erAutomatiskRegistrert).isFalse()
+    }
 }
