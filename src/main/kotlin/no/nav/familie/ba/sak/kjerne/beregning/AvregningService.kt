@@ -119,7 +119,16 @@ class AvregningService(
                 barnsAndelerFraAndreBehandlinger = beregningService.hentRelevanteTilkjentYtelserForBarn(behandling.fagsak.aktør, behandling.fagsak.id).flatMap { it.andelerTilkjentYtelse },
             ).tilPerioderIkkeNull().filter { it.verdi.erOver100Prosent }
 
-        return tidslinjeMedOverlapp.map { DuplisertePerioderOverFagsak(it.fom!!, it.tom!!) }
+        return tidslinjeMedOverlapp.map {
+            DuplisertePerioderOverFagsak(
+                fom = it.fom!!,
+                tom = it.tom!!,
+                fagsaker =
+                    it.verdi.behandlingIds
+                        .filter { behandlingId != it }
+                        .map { behandlingHentOgPersisterService.hent(it).fagsak.id },
+            )
+        }
     }
 }
 

@@ -300,7 +300,6 @@ object TilkjentYtelseValidering {
             return tomTidslinje()
         }
 
-        // Group andeler by behandlingId
         val andelerPerBehandling = (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }
 
         // Create a map of behandlingId to timeline of percentages

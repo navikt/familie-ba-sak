@@ -69,5 +69,5 @@ data class AvregningPeriode(
 data class DuplisertePerioderOverFagsak(
     val fom: LocalDate,
     val tom: LocalDate,
-    val fagsak: Long? = null,
+    val fagsaker: List<Long>,
 )
