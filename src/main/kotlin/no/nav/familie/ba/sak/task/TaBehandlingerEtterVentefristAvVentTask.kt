@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -18,6 +19,7 @@ import java.time.LocalDate
 class TaBehandlingerEtterVentefristAvVentTask(
     val settPåVentService: SettPåVentService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val sakerPåVent = settPåVentService.finnAktiveSettPåVent()
 

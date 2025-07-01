@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingAvsluttTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
@@ -24,6 +25,7 @@ import java.time.LocalDateTime
 class KonsistensavstemMotOppdragStartTask(
     val avstemmingService: AvstemmingService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val konsistensavstemmingTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingStartTaskDTO::class.java)

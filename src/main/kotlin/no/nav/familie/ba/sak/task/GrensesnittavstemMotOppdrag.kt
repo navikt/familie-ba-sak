@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.GrensesnittavstemmingTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -24,6 +25,7 @@ class GrensesnittavstemMotOppdrag(
     val avstemmingService: AvstemmingService,
     val opprettTaskService: OpprettTaskService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val avstemmingTask = objectMapper.readValue(task.payload, GrensesnittavstemmingTaskDTO::class.java)
         logger.info("Gjør avstemming mot oppdrag fra og med ${avstemmingTask.fomDato} til og med ${avstemmingTask.tomDato}")

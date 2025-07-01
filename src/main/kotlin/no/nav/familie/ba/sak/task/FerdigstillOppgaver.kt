@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.task.dto.FerdigstillOppgaveDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service
 class FerdigstillOppgaver(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgaver(

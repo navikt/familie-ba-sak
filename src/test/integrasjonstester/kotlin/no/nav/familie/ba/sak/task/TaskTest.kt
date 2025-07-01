@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.aop.framework.AopProxyUtils
@@ -41,6 +43,24 @@ class TaskTest : AbstractSpringIntegrationTest() {
                 )
             },
         )
+    }
+
+    @Test
+    fun `doTask skal ha annotasjon WithSpan for bedre tracing`() {
+        val taskerUtenWithSpan =
+            tasker.mapNotNull { task ->
+                val doTaskMethod =
+                    task.javaClass.declaredMethods.find { method ->
+                        method.name == "doTask"
+                    }
+                if (doTaskMethod == null || !doTaskMethod.isAnnotationPresent(WithSpan::class.java)) {
+                    "${task::class.java.name}.doTask() mangler @WithSpan"
+                } else {
+                    null
+                }
+            }
+
+        assertTrue(taskerUtenWithSpan.isEmpty(), taskerUtenWithSpan.joinToString("\n"))
     }
 
     private fun harIkkePåkrevdAnnotasjon(it: AsyncTaskStep): Boolean =

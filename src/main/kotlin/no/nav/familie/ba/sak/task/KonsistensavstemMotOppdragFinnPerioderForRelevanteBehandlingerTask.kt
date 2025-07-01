@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
@@ -26,6 +27,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val taskService: TaskService,
     val unleashNextMedContextService: UnleashNextMedContextService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val taskDto =
             objectMapper.readValue(

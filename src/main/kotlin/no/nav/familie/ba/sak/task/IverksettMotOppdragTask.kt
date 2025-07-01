@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -24,6 +25,7 @@ class IverksettMotOppdragTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         stegService.håndterIverksettMotØkonomi(

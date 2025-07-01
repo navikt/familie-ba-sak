@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevOmregningPgaAlderService
@@ -22,6 +23,7 @@ import java.time.LocalDate
 class SendAutobrevPgaAlderTask(
     private val autobrevOmregningPgaAlderService: AutobrevOmregningPgaAlderService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, AutobrevPgaAlderDTO::class.java)
 

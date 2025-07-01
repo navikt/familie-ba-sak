@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -22,6 +23,7 @@ class DistribuerDokumentTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 

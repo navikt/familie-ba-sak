@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -25,6 +26,7 @@ class AutobrevTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         opprettTaskerForReduksjonPgaAlder()
         opprettTaskerForReduksjonSmåbarnstillegg()

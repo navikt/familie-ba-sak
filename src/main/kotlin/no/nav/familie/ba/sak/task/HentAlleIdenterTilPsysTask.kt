@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -35,6 +36,7 @@ class HentAlleIdenterTilPsysTask(
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
 
+    @WithSpan
     override fun doTask(task: Task) {
         objectMapper.readValue(task.payload, HentAlleIdenterTilPsysRequestDTO::class.java).run {
             logger.info("Starter med å hente alle identer fra DB for request $requestId")

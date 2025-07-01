@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.BatchService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.DataChunkRepository
@@ -27,6 +28,7 @@ class KonsistensavstemMotOppdragAvsluttTask(
     val dataChunkRepository: DataChunkRepository,
     val batchService: BatchService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val konsistensavstemmingAvsluttTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingAvsluttTaskDTO::class.java)

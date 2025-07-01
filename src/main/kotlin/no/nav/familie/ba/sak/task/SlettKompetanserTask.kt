@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -22,6 +23,7 @@ class SlettKompetanserTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val behandlingId = task.payload.toLong()
 
