@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.task.dto.AktørId
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.Periode
@@ -72,9 +73,9 @@ class PreutfyllBosattIRiketService(
                     val oppfylt = erØvrigeKravOppfylt is OppfyltDelvilkår || erNordiskOgBosatt is OppfyltDelvilkår
 
                     val kommentar = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).filterIsInstance<OppfyltDelvilkår>().joinToString("\n") { it.begrunnelse }
-
+                    val begrunnelseForManuellKontroll = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).filterIsInstance<OppfyltDelvilkår>().firstNotNullOfOrNull { it.begrunnelseForManuellKontroll }
                     if (oppfylt) {
-                        OppfyltDelvilkår(kommentar)
+                        OppfyltDelvilkår(kommentar, begrunnelseForManuellKontroll)
                     } else {
                         IkkeOppfyltDelvilkår
                     }
@@ -97,6 +98,7 @@ class PreutfyllBosattIRiketService(
                     periodeTom = erBosattINorgePeriode.tom,
                     begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + erBosattINorgePeriode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                 )
             }.toSet()
     }
@@ -132,7 +134,7 @@ class PreutfyllBosattIRiketService(
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
 
             erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) ->
-                OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
+                OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
 
             else -> IkkeOppfyltDelvilkår
         }

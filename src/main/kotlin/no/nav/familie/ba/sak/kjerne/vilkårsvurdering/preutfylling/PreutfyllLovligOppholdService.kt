@@ -61,6 +61,7 @@ class PreutfyllLovligOppholdService(
                     periodeTom = periode.tom,
                     begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + (periode.verdi.begrunnelse),
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    begrunnelseForManuellKontroll = periode.verdi.begrunnelseForManuellKontroll,
                 )
             }.toSet()
     }
