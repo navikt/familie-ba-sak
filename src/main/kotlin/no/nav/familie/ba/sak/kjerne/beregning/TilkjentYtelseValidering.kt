@@ -302,13 +302,11 @@ object TilkjentYtelseValidering {
 
         val andelerPerBehandling = (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }
 
-        // Create a map of behandlingId to timeline of percentages
         val prosenttidslinjerPerBehandling =
             andelerPerBehandling.mapValues { (_, andelerForBehandling) ->
                 andelerForBehandling.tilProsentAvYtelseUtbetaltTidslinje()
             }
 
-        // Calculate the total percentage timeline
         val totalProsentTidslinje =
             prosenttidslinjerPerBehandling.values
                 .fold(tomTidslinje<BigDecimal>()) { summertProsentTidslinje, prosentTidslinje ->
@@ -317,8 +315,6 @@ object TilkjentYtelseValidering {
                     }
                 }
 
-        // Create a timeline that indicates for each period whether the total percentage exceeds 100%
-        // and which behandlingIds contributed to the overlap
         val erOver100ProsentTidslinje =
             totalProsentTidslinje.mapVerdi { sumProsentForPeriode ->
                 val erOver100Prosent = (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100)
