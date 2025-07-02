@@ -67,16 +67,12 @@ class PreutfyllBosattIRiketService(
         val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
 
         val erBosattIRiketTidslinje =
-            erØvrigeKravForBosattIRiketOppfyltTidslinje
-                .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
-                    val oppfylt = erØvrigeKravOppfylt is OppfyltDelvilkår || erNordiskOgBosatt is OppfyltDelvilkår
-
-                    val kommentar = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).filterIsInstance<OppfyltDelvilkår>().joinToString("\n") { it.begrunnelse }
-                    val begrunnelseForManuellKontroll = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).filterIsInstance<OppfyltDelvilkår>().firstNotNullOfOrNull { it.begrunnelseForManuellKontroll }
-                    if (oppfylt) {
-                        OppfyltDelvilkår(kommentar, begrunnelseForManuellKontroll)
-                    } else {
-                        IkkeOppfyltDelvilkår
+            erBosattOgHarNordiskStatsborgerskapTidslinje
+                .kombinerMed(erØvrigeKravForBosattIRiketOppfyltTidslinje) { erNordiskOgBosatt, erØvrigeKravOppfylt ->
+                    when {
+                        erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
+                        erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
+                        else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
