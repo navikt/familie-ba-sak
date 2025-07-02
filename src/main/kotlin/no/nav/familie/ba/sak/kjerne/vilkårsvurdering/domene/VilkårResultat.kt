@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 
@@ -80,6 +81,9 @@ data class VilkårResultat(
     @Column(name = "utdypende_vilkarsvurderinger")
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
     var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
+    @Enumerated(EnumType.STRING)
+    @Column(name = "begrunnelse_for_manuell_kontroll")
+    var begrunnelseForManuellKontroll: BegrunnelseForManuellKontrollAvVilkår? = null,
 ) : BaseEntitet() {
     override fun toString(): String =
         "VilkårResultat(" +
