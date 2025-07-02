@@ -471,7 +471,7 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         assertThat(vilkårResultat).hasSize(3)
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL \n" +
+            "Fylt ut automatisk fra registerdata i PDL\n" +
                 "- Norsk bostedsadresse i minst 12 måneder.",
         )
         assertThat(vilkårResultat).allSatisfy {
@@ -503,7 +503,7 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL \n" +
+            "Fylt ut automatisk fra registerdata i PDL\n" +
                 "- Bosatt i Norge siden fødsel.",
         )
         assertThat(vilkårResultat).allSatisfy {

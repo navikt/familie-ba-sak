@@ -106,7 +106,7 @@ class PreutfyllLovligOppholdServiceTest {
         // Assert
         assertThat(vilkårResultat).hasSize(1)
         assertThat(vilkårResultat.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }?.begrunnelse)
-            .isEqualTo("Fylt ut automatisk fra registerdata i PDL \n- Norsk/nordisk statsborgerskap")
+            .isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- Norsk/nordisk statsborgerskap")
     }
 
     @Test
