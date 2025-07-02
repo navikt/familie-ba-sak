@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -50,12 +49,7 @@ class PreutfyllLovligOppholdService(
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
-                    resultat =
-                        if (periode.verdi is OppfyltDelvilkår) {
-                            Resultat.OPPFYLT
-                        } else {
-                            Resultat.IKKE_OPPFYLT
-                        },
+                    resultat = periode.verdi.tilResultat(),
                     vilkårType = Vilkår.LOVLIG_OPPHOLD,
                     periodeFom = periode.fom,
                     periodeTom = periode.tom,
