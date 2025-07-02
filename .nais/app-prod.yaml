@@ -72,6 +72,8 @@ spec:
       replyURLs:
         - "https://familie-ba-sak.intern.nav.no/swagger-ui/oauth2-redirect.html"
       singlePageApplication: true
+  tokenx:
+    enabled: true
   accessPolicy:
     inbound:
       rules:
@@ -91,6 +93,9 @@ spec:
           cluster: prod-gcp
         - application: omsorgsopptjening-start-innlesning
           namespace: pensjonopptjening
+          cluster: prod-gcp
+        - application: familie-ba-minside-frontend
+          namespace: teamfamilie
           cluster: prod-gcp
     outbound:
       rules:

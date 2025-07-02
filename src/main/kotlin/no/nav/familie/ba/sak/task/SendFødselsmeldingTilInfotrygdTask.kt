@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdFødselhendelsesFeedDto
@@ -22,6 +23,7 @@ import java.util.Properties
 class SendFødselsmeldingTilInfotrygdTask(
     private val infotrygdFeedClient: InfotrygdFeedClient,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val infotrygdFeedTaskDto = objectMapper.readValue(task.payload, InfotrygdFødselhendelsesFeedTaskDto::class.java)
 

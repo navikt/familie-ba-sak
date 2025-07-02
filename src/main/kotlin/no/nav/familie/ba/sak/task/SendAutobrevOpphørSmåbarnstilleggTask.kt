@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevOpphørSmåbarnstilleggService
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service
 class SendAutobrevOpphørSmåbarnstilleggTask(
     private val autobrevOpphørSmåbarnstilleggService: AutobrevOpphørSmåbarnstilleggService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val autobrevDTO = objectMapper.readValue(task.payload, AutobrevOpphørSmåbarnstilleggDTO::class.java)
 

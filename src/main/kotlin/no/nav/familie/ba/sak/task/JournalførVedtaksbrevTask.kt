@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -16,6 +17,7 @@ class JournalførVedtaksbrevTask(
     private val vedtakService: VedtakService,
     private val stegService: StegService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val vedtakId = task.payload.toLong()
         val behandling = vedtakService.hent(vedtakId).behandling

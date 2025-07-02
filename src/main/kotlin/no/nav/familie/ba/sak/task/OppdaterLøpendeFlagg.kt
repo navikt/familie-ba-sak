@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service
 class OppdaterLøpendeFlagg(
     val fagsakService: FagsakService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val antallOppdaterte = fagsakService.oppdaterLøpendeStatusPåFagsaker()
         logger.info("Oppdatert status på $antallOppdaterte fagsaker til ${FagsakStatus.AVSLUTTET.name}")

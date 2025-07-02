@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
@@ -18,6 +19,7 @@ class PubliserVedtakV2Task(
     val stønadsstatistikkService: StønadsstatistikkService,
     val env: EnvService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(task.payload.toLong())
         LOG.info("Send VedtakV2 til DVH, behandling id ${vedtakV2DVH.behandlingsId}")

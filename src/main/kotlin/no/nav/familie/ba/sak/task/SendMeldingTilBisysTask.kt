@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.micrometer.core.instrument.Metrics
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -34,6 +35,7 @@ class SendMeldingTilBisysTask(
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
     private val meldingsTeller = Metrics.counter("familie.ba.sak.bisys.meldinger.sendt")
 
+    @WithSpan
     override fun doTask(task: Task) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = task.payload.toLong())
 

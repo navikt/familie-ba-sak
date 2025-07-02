@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -17,6 +18,7 @@ class DistribuerVedtaksbrevTask(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val brevmalService: BrevmalService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
 

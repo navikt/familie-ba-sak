@@ -1,5 +1,6 @@
 ﻿package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -21,6 +22,7 @@ data class FerdigstillLagVedtakOppgaverDTO(
 class FerdigstillLagVedtakOppgaver(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val ferdigstillLagVedtakOppgaverDTO = objectMapper.readValue(task.payload, FerdigstillLagVedtakOppgaverDTO::class.java)
         oppgaveService.ferdigstillLagVedtakOppgaver(behandlingId = ferdigstillLagVedtakOppgaverDTO.behandlingId)

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.internal.ForvalterService
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 class PatchFomPåVilkårTilFødselsdatoTask(
     private val forvalterService: ForvalterService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, PatchFomPåVilkårTilFødselsdato::class.java)
 

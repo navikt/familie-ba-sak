@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
@@ -41,6 +42,7 @@ class JournalførTilbakekrevingsvedtakMotregningBrevTask(
     private val brevmottakerService: BrevmottakerService,
     private val behandlingService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val behandling = behandlingService.hent(task.payload.toLong())
         val fagsak = behandling.fagsak

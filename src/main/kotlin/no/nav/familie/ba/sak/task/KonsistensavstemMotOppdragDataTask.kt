@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service
 class KonsistensavstemMotOppdragDataTask(
     val avstemmingService: AvstemmingService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val konsistensavstemmingDataTask =
             objectMapper.readValue(task.payload, KonsistensavstemmingDataTaskDTO::class.java)

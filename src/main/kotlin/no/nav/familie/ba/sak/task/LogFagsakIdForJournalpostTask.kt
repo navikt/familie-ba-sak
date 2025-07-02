@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service
 class LogFagsakIdForJournalpostTask(
     val integrasjonClient: IntegrasjonClient,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val secureLogger = LoggerFactory.getLogger("secureLogger")
 

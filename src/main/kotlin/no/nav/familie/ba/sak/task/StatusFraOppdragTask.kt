@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -37,6 +38,7 @@ class StatusFraOppdragTask(
      * Metoden prøver å hente kvittering i ét døgn.
      * Får tasken kvittering som ikke er OK feiler vi tasken.
      */
+    @WithSpan
     override fun doTask(task: Task) {
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 

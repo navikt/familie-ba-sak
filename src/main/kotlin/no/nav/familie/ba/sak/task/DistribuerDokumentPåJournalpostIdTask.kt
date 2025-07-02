@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import io.sentry.Sentry
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
@@ -46,6 +47,7 @@ class DistribuerDokumentPåJournalpostIdTask(
             )
         }
 
+    @WithSpan
     override fun doTask(task: Task) {
         val taskData = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
