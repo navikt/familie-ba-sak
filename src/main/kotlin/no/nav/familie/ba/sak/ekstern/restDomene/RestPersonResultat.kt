@@ -43,6 +43,7 @@ data class RestVilkårResultat(
     val vurderesEtter: Regelverk? = null,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     val resultatBegrunnelse: ResultatBegrunnelse? = null,
+    val begrunnelseForManuellKontroll: String? = null,
 ) {
     fun erAvslagUtenPeriode() = this.erEksplisittAvslagPåSøknad == true && this.periodeFom == null && this.periodeTom == null
 
@@ -71,6 +72,7 @@ fun PersonResultat.tilRestPersonResultat() =
                     avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
                     vurderesEtter = vilkårResultat.vurderesEtter,
                     utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
+                    begrunnelseForManuellKontroll = vilkårResultat.begrunnelseForManuellKontroll?.begrunnelse(vilkårResultat.vilkårType),
                 )
             },
         andreVurderinger =
@@ -84,7 +86,7 @@ fun RestPersonResultat.fjernAutomatiskBegrunnelse() =
         vilkårResultater =
             vilkårResultater.map { vilkårResultat ->
                 if (vilkårResultat.begrunnelse.startsWith("Fylt ut automatisk fra registerdata i PDL")) {
-                    vilkårResultat.copy(begrunnelse = "", erAutomatiskVurdert = false)
+                    vilkårResultat.copy(begrunnelse = "", erAutomatiskVurdert = false, begrunnelseForManuellKontroll = null)
                 } else {
                     vilkårResultat
                 }
