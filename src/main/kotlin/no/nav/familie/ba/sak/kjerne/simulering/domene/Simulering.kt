@@ -16,7 +16,7 @@ data class Simulering(
 ) {
     fun tilRestSimulering(
         avregningsperioder: List<AvregningPeriode>,
-        overlappendePerioderPåAnnenFagsak: List<OverlappendePerioderMedAnnenFagsak>,
+        overlappendePerioderMedAnnenFagsak: List<OverlappendePerioderMedAnnenFagsak>,
     ): RestSimulering =
         RestSimulering(
             perioder = perioder,
@@ -29,7 +29,7 @@ data class Simulering(
             tidSimuleringHentet = tidSimuleringHentet,
             tomSisteUtbetaling = tomSisteUtbetaling,
             avregningsperioder = avregningsperioder,
-            overlappendePerioderMedAnnenFagsak = overlappendePerioderPåAnnenFagsak,
+            overlappendePerioderMedAnnenFagsak = overlappendePerioderMedAnnenFagsak,
         )
 }
 

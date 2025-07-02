@@ -125,6 +125,7 @@ class AvregningService(
                 tom = it.tom!!,
                 fagsaker =
                     it.verdi.behandlingIds
+                        .distinct()
                         .filter { behandlingId != it }
                         .map { behandlingHentOgPersisterService.hent(it).fagsak.id },
             )
