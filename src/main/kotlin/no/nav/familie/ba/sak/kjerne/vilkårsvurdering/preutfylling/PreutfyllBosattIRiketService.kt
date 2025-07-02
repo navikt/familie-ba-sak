@@ -19,6 +19,7 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -80,7 +81,7 @@ class PreutfyllBosattIRiketService(
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
         return erBosattIRiketTidslinje
-            .tilPerioder()
+            .tilPerioderIkkeNull()
             .map { erBosattINorgePeriode ->
                 VilkårResultat(
                     personResultat = personResultat,
@@ -94,7 +95,7 @@ class PreutfyllBosattIRiketService(
                     vilkårType = Vilkår.BOSATT_I_RIKET,
                     periodeFom = erBosattINorgePeriode.fom,
                     periodeTom = erBosattINorgePeriode.tom,
-                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + (erBosattINorgePeriode.verdi?.begrunnelse ?: ""),
+                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + erBosattINorgePeriode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
