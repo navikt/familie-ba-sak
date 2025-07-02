@@ -656,7 +656,7 @@ class AvregningServiceTest {
     }
 
     @Nested
-    inner class `hentOverlappendePerioderMedAnnenFagsak` {
+    inner class HentOverlappendePerioderMedAnnenFagsak {
         @Test
         fun `Returner tom liste hvis fagsaktype ikke er SKJERMET_BARN, INSTITUSJON, or BARN_ENSLIG_MINDREÅRIG`() {
             every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandling()
