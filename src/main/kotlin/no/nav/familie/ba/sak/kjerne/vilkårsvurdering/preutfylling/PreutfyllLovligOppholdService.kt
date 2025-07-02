@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 
 @Service
 class PreutfyllLovligOppholdService(
@@ -27,21 +28,21 @@ class PreutfyllLovligOppholdService(
     }
 
     fun genererLovligOppholdVilkårResultat(personResultat: PersonResultat): Set<VilkårResultat> {
-        val erNorskEllerNordiskStatsborgerTidslinje = pdlRestClient.lagErNorskNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
         val delvilkårPerioder =
-            erNorskEllerNordiskStatsborgerTidslinje
+            erNordiskStatsborgerTidslinje
                 .tilPerioder()
-                .map { erNorskEllerNordiskStataborger ->
+                .map { erNordiskStatsborger ->
                     Periode(
                         verdi =
-                            if (erNorskEllerNordiskStataborger.verdi == true) {
+                            if (erNordiskStatsborger.verdi == true) {
                                 OppfyltDelvilkår("- Norsk/nordisk statsborgerskap")
                             } else {
                                 IkkeOppfyltDelvilkår
                             },
-                        fom = erNorskEllerNordiskStataborger.fom,
-                        tom = erNorskEllerNordiskStataborger.tom,
+                        fom = erNordiskStatsborger.fom ?: finnDatoFørsteBostedsadresseINorge(personResultat),
+                        tom = erNordiskStatsborger.tom,
                     )
                 }
 
@@ -63,5 +64,15 @@ class PreutfyllLovligOppholdService(
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                 )
             }.toSet()
+    }
+
+    fun finnDatoFørsteBostedsadresseINorge(personResultat: PersonResultat): LocalDate? {
+        val alleBostedsadresserForPerson =
+            pdlRestClient
+                .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
+                .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
+                .sortedBy { it.gyldigFraOgMed }
+
+        return alleBostedsadresserForPerson.firstOrNull()?.gyldigFraOgMed
     }
 }

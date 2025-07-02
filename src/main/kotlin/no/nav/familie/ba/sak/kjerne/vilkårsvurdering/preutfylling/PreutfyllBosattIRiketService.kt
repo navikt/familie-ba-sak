@@ -49,7 +49,7 @@ class PreutfyllBosattIRiketService(
     ): Set<VilkårResultat> {
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
 
-        val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNorskNordiskStatsborgerTidslinje(personResultat)
+        val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
             erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordisk, erBosatt ->

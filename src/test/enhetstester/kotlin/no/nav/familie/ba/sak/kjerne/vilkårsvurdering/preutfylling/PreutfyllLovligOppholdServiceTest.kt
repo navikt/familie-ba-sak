@@ -90,6 +90,33 @@ class PreutfyllLovligOppholdServiceTest {
     }
 
     @Test
+    fun `skal sette fom på lovlig opphold vilkår lik første bostedsadresse i Norge, om fom ikke finnes på statsborgerskap`() {
+        // Arrange
+        val vilkårsvurdering = lagVilkårsvurdering()
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentStatsborgerskap(personResultat.aktør, historikk = true) } returns
+            listOf(
+                Statsborgerskap("SWE", null, null, null),
+            )
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllLovligOppholdService.genererLovligOppholdVilkårResultat(personResultat = personResultat)
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(1)
+        assertThat(vilkårResultat.first().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
+    }
+
+    @Test
     fun `skal gi riktig begrunnelse for oppfylt lovlig opphold vilkår`() {
         // Arrange
         val vilkårsvurdering = lagVilkårsvurdering()
