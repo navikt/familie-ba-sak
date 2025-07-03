@@ -14,10 +14,7 @@ data class Simulering(
     val tidSimuleringHentet: LocalDate?,
     val tomSisteUtbetaling: LocalDate?,
 ) {
-    fun tilRestSimulering(
-        avregningsperioder: List<AvregningPeriode>,
-        overlappendePerioderMedAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker>,
-    ): RestSimulering =
+    fun tilRestSimulering(avregningsperioder: List<AvregningPeriode>): RestSimulering =
         RestSimulering(
             perioder = perioder,
             fomDatoNestePeriode = fomDatoNestePeriode,
@@ -29,7 +26,6 @@ data class Simulering(
             tidSimuleringHentet = tidSimuleringHentet,
             tomSisteUtbetaling = tomSisteUtbetaling,
             avregningsperioder = avregningsperioder,
-            overlappendePerioderMedAndreFagsaker = overlappendePerioderMedAndreFagsaker,
         )
 }
 
@@ -56,7 +52,6 @@ data class RestSimulering(
     val tidSimuleringHentet: LocalDate?,
     val tomSisteUtbetaling: LocalDate?,
     val avregningsperioder: List<AvregningPeriode>,
-    val overlappendePerioderMedAndreFagsaker: List<OverlappendePerioderMedAndreFagsaker> = emptyList(),
 )
 
 data class AvregningPeriode(
@@ -64,10 +59,4 @@ data class AvregningPeriode(
     val tom: LocalDate,
     val totalEtterbetaling: BigDecimal,
     val totalFeilutbetaling: BigDecimal,
-)
-
-data class OverlappendePerioderMedAndreFagsaker(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val fagsaker: List<Long>,
 )
