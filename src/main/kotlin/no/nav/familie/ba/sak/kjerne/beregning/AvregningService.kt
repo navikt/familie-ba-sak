@@ -113,10 +113,16 @@ class AvregningService(
 
         if (fagsaker.isEmpty()) return emptyList()
 
+        val barnsAndelerFraAndreBehandlinger =
+            beregningService
+                .hentRelevanteTilkjentYtelserForBarn(behandling.fagsak.aktør, behandling.fagsak.id)
+                .flatMap { it.andelerTilkjentYtelse }
+                .filter { it.aktør == behandling.fagsak.aktør }
+
         val tidslinjeMedOverlapp =
             lagErOver100ProsentUtbetalingPåYtelseTidslinje(
                 andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
-                barnsAndelerFraAndreBehandlinger = beregningService.hentRelevanteTilkjentYtelserForBarn(behandling.fagsak.aktør, behandling.fagsak.id).flatMap { it.andelerTilkjentYtelse },
+                barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
             ).tilPerioderIkkeNull().filter { it.verdi.erOver100Prosent }
 
         return tidslinjeMedOverlapp.map {

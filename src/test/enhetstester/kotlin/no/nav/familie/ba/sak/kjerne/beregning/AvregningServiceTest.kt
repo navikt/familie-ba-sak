@@ -16,9 +16,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
@@ -680,42 +683,53 @@ class AvregningServiceTest {
 
         @Test
         fun `returner overlappende periode med fagsakId på andre fagsaker`() {
-            val fagsakForInstitusjon1 = lagFagsak(id = 1, type = INSTITUSJON)
-            val behandlingForInstitusjon1 = lagBehandling(id = 1, fagsak = fagsakForInstitusjon1)
-            val fagsakForInstitusjon2 = lagFagsak(id = 2, type = INSTITUSJON)
-            val behandlingForInstitusjon2 = lagBehandling(id = 2, fagsak = fagsakForInstitusjon2)
+            val fagsakForInstitusjon = lagFagsak(id = 1, type = INSTITUSJON, aktør = barn1.aktør)
+            val behandlingForInstitusjon = lagBehandling(id = 1, fagsak = fagsakForInstitusjon)
+            val normalFagsak = lagFagsak(id = 2, type = NORMAL, aktør = søker.aktør)
+            val normalBehandling = lagBehandling(id = 2, fagsak = normalFagsak)
 
-            every { behandlingHentOgPersisterService.hent(behandlingForInstitusjon1.id) } returns behandlingForInstitusjon1
-            every { behandlingHentOgPersisterService.hent(behandlingForInstitusjon2.id) } returns behandlingForInstitusjon2
+            every { behandlingHentOgPersisterService.hent(behandlingForInstitusjon.id) } returns behandlingForInstitusjon
+            every { behandlingHentOgPersisterService.hent(normalBehandling.id) } returns normalBehandling
 
-            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns listOf(fagsakForInstitusjon1, fagsakForInstitusjon2)
-            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingForInstitusjon1.id) } returns
+            every { fagsakService.hentAlleFagsakerForAktør(any()) } returns listOf(fagsakForInstitusjon, normalFagsak)
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingForInstitusjon.id) } returns
                 listOf(
                     lagAndelTilkjentYtelse(
                         fom = jan(2025),
                         tom = apr(2025),
                         prosent = BigDecimal(100),
-                        behandling = behandlingForInstitusjon1,
+                        behandling = behandlingForInstitusjon,
+                        aktør = barn1.aktør,
                     ),
                 )
             every { beregningService.hentRelevanteTilkjentYtelserForBarn(any(), any()) } returns
                 listOf(
                     lagTilkjentYtelse(
-                        behandling = behandlingForInstitusjon2,
+                        behandling = normalBehandling,
                         lagAndelerTilkjentYtelse = {
                             setOf(
                                 lagAndelTilkjentYtelse(
                                     fom = mar(2025),
                                     tom = jun(2025),
                                     prosent = BigDecimal(100),
-                                    behandling = behandlingForInstitusjon2,
+                                    behandling = normalBehandling,
+                                    ytelseType = ORDINÆR_BARNETRYGD,
+                                    aktør = barn1.aktør,
+                                ),
+                                lagAndelTilkjentYtelse(
+                                    fom = mar(2025),
+                                    tom = jun(2025),
+                                    prosent = BigDecimal(100),
+                                    behandling = normalBehandling,
+                                    ytelseType = UTVIDET_BARNETRYGD,
+                                    aktør = søker.aktør,
                                 ),
                             )
                         },
                     ),
                 )
 
-            val result = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId = behandlingForInstitusjon1.id)
+            val result = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId = behandlingForInstitusjon.id)
 
             assertThat(result).hasSize(1)
             assertThat(result.first().fagsaker).containsOnly(2)
