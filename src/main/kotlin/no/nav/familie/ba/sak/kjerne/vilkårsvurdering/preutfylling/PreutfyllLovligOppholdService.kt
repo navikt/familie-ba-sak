@@ -66,13 +66,10 @@ class PreutfyllLovligOppholdService(
             }.toSet()
     }
 
-    fun finnDatoFørsteBostedsadresseINorge(personResultat: PersonResultat): LocalDate? {
-        val alleBostedsadresserForPerson =
-            pdlRestClient
-                .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
-                .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
-                .sortedBy { it.gyldigFraOgMed }
-
-        return alleBostedsadresserForPerson.firstOrNull()?.gyldigFraOgMed
-    }
+    fun finnDatoFørsteBostedsadresseINorge(personResultat: PersonResultat): LocalDate? =
+        pdlRestClient
+            .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
+            .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
+            .mapNotNull { it.gyldigFraOgMed }
+            .minByOrNull { it }
 }
