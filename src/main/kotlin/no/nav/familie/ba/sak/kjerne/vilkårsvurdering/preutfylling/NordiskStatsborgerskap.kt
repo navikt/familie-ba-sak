@@ -8,7 +8,7 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombiner
 
-fun PdlRestClient.lagErNorskNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
+fun PdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
     val statsborgerskapGruppertPåNavn =
         this
             .hentStatsborgerskap(personResultat.aktør, historikk = true)
