@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
+import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -83,6 +85,33 @@ class PreutfyllLovligOppholdServiceTest {
         assertThat(vilkårResultat.first().periodeTom).isEqualTo(LocalDate.now().minusYears(5).minusDays(1))
         assertThat(vilkårResultat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(5))
         assertThat(vilkårResultat.last().periodeTom).isNull()
+    }
+
+    @Test
+    fun `skal sette fom på lovlig opphold vilkår lik første bostedsadresse i Norge, om fom ikke finnes på statsborgerskap`() {
+        // Arrange
+        val vilkårsvurdering = lagVilkårsvurdering()
+        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
+
+        every { pdlRestClient.hentStatsborgerskap(personResultat.aktør, historikk = true) } returns
+            listOf(
+                Statsborgerskap("SWE", null, null, null),
+            )
+
+        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+            listOf(
+                Bostedsadresse(
+                    gyldigFraOgMed = LocalDate.now().minusYears(1),
+                    vegadresse = lagVegadresse(12345L),
+                ),
+            )
+
+        // Act
+        val vilkårResultat = preutfyllLovligOppholdService.genererLovligOppholdVilkårResultat(personResultat = personResultat)
+
+        // Assert
+        assertThat(vilkårResultat).hasSize(1)
+        assertThat(vilkårResultat.first().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
     }
 
     @Test
