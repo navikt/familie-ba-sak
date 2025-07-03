@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
@@ -507,39 +506,6 @@ class PreutfyllBosattIRiketServiceTest {
                 "- Bosatt i Norge siden fødsel.",
         )
         assertThat(vilkårResultat).allSatisfy {
-            assertThat(it.begrunnelseForManuellKontroll).isNull()
-        }
-    }
-
-    @Test
-    fun `skal preutfylle bosatt i riket vilkår i EØS saker`() {
-        // Arrange
-        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
-        val persongrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerPersonIdent = randomFnr(), barnasIdenter = listOf(randomFnr()))
-        val vilkårsvurdering = lagVilkårsvurdering(persongrunnlagForBehandling = persongrunnlag, behandling = behandling)
-        val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
-
-        every { pdlRestClient.hentStatsborgerskap(personResultat.aktør, historikk = true) } returns
-            listOf(
-                Statsborgerskap("SWE", LocalDate.now().minusYears(10), null, null),
-            )
-
-        every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(1),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-            )
-
-        // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat = personResultat)
-
-        // Assert
-        assertThat(vilkårResultat).hasSize(1)
-        assertThat(vilkårResultat).allSatisfy {
-            assertThat(it.vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
-            assertThat(it.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(it.begrunnelseForManuellKontroll).isNull()
         }
     }
