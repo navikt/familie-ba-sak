@@ -27,13 +27,12 @@ class SimuleringController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val avregningsperioder = avregningService.hentPerioderMedAvregning(behandlingId)
-        val overlappendePerioderMedAndreFagsaker = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId)
         val simulering =
             vedtakSimuleringMottakereTilRestSimulering(
                 økonomiSimuleringMottakere = vedtakSimuleringMottaker,
             )
 
-        val restSimulering = simulering.tilRestSimulering(avregningsperioder, overlappendePerioderMedAndreFagsaker)
+        val restSimulering = simulering.tilRestSimulering(avregningsperioder)
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }
 }
