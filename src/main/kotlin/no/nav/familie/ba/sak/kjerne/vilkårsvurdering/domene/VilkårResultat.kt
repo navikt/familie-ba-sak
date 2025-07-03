@@ -23,13 +23,14 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "VilkårResultat")
 @Table(name = "VILKAR_RESULTAT")
-class VilkårResultat(
+data class VilkårResultat(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vilkar_resultat_seq_generator")
     @SequenceGenerator(
@@ -80,6 +81,9 @@ class VilkårResultat(
     @Column(name = "utdypende_vilkarsvurderinger")
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
     var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
+    @Enumerated(EnumType.STRING)
+    @Column(name = "begrunnelse_for_manuell_kontroll")
+    var begrunnelseForManuellKontroll: BegrunnelseForManuellKontrollAvVilkår? = null,
 ) : BaseEntitet() {
     override fun toString(): String =
         "VilkårResultat(" +
@@ -112,22 +116,9 @@ class VilkårResultat(
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat =
-        VilkårResultat(
+        copy(
+            id = 0,
             personResultat = nyPersonResultat ?: personResultat,
-            erAutomatiskVurdert = erAutomatiskVurdert,
-            vilkårType = vilkårType,
-            resultat = resultat,
-            resultatBegrunnelse = resultatBegrunnelse,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom,
-            begrunnelse = begrunnelse,
-            sistEndretIBehandlingId = sistEndretIBehandlingId,
-            regelInput = regelInput,
-            regelOutput = regelOutput,
-            erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-            vurderesEtter = vurderesEtter,
-            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
-            standardbegrunnelser = standardbegrunnelser,
         )
 
     fun kopierMedNyPeriode(
@@ -135,40 +126,18 @@ class VilkårResultat(
         tom: LocalDate,
         behandlingId: Long,
     ): VilkårResultat =
-        VilkårResultat(
-            personResultat = personResultat,
-            erAutomatiskVurdert = erAutomatiskVurdert,
-            vilkårType = vilkårType,
-            resultat = resultat,
-            resultatBegrunnelse = resultatBegrunnelse,
+        copy(
+            id = 0,
             periodeFom = if (fom == TIDENES_MORGEN) null else fom,
             periodeTom = if (tom == TIDENES_ENDE) null else tom,
-            begrunnelse = begrunnelse,
-            regelInput = regelInput,
-            regelOutput = regelOutput,
             sistEndretIBehandlingId = behandlingId,
-            erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-            vurderesEtter = vurderesEtter,
-            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
         )
 
     fun tilKopiForNyttPersonResultat(nyttPersonResultat: PersonResultat): VilkårResultat =
-        VilkårResultat(
+        copy(
+            id = 0,
             personResultat = nyttPersonResultat,
-            erAutomatiskVurdert = erAutomatiskVurdert,
-            vilkårType = vilkårType,
-            resultat = resultat,
-            resultatBegrunnelse = resultatBegrunnelse,
-            periodeFom = periodeFom,
-            periodeTom = periodeTom,
-            begrunnelse = begrunnelse,
             sistEndretIBehandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
-            regelInput = regelInput,
-            regelOutput = regelOutput,
-            erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
-            vurderesEtter = vurderesEtter,
-            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
-            standardbegrunnelser = standardbegrunnelser,
         )
 
     fun oppdaterPekerTilBehandling() {

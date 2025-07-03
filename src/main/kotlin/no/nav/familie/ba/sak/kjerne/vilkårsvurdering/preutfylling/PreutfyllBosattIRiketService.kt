@@ -2,14 +2,14 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.task.dto.AktørId
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.Periode
@@ -19,6 +19,7 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.filtrer
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
+import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -37,7 +38,7 @@ class PreutfyllBosattIRiketService(
             val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat, fødselsdatoForBeskjæring)
 
             if (bosattIRiketVilkårResultat.isNotEmpty()) {
-                personResultat.vilkårResultater.removeIf { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+                personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
                 personResultat.vilkårResultater.addAll(bosattIRiketVilkårResultat)
             }
         }
@@ -66,36 +67,28 @@ class PreutfyllBosattIRiketService(
         val førsteBosattINorgeDato = erBosattINorgeTidslinje.filtrer { it == true }.startsTidspunkt
 
         val erBosattIRiketTidslinje =
-            erØvrigeKravForBosattIRiketOppfyltTidslinje
-                .kombinerMed(erBosattOgHarNordiskStatsborgerskapTidslinje) { erØvrigeKravOppfylt, erNordiskOgBosatt ->
-                    val oppfylt = erØvrigeKravOppfylt is OppfyltDelvilkår || erNordiskOgBosatt is OppfyltDelvilkår
-
-                    val kommentar = listOf(erNordiskOgBosatt, erØvrigeKravOppfylt).filterIsInstance<OppfyltDelvilkår>().joinToString("\n") { it.begrunnelse }
-
-                    if (oppfylt) {
-                        OppfyltDelvilkår(kommentar)
-                    } else {
-                        IkkeOppfyltDelvilkår
+            erBosattOgHarNordiskStatsborgerskapTidslinje
+                .kombinerMed(erØvrigeKravForBosattIRiketOppfyltTidslinje) { erNordiskOgBosatt, erØvrigeKravOppfylt ->
+                    when {
+                        erNordiskOgBosatt is OppfyltDelvilkår -> erNordiskOgBosatt
+                        erØvrigeKravOppfylt is OppfyltDelvilkår -> erØvrigeKravOppfylt
+                        else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(maxOf(fødselsdatoForBeskjæring, førsteBosattINorgeDato))
 
         return erBosattIRiketTidslinje
-            .tilPerioder()
+            .tilPerioderIkkeNull()
             .map { erBosattINorgePeriode ->
                 VilkårResultat(
                     personResultat = personResultat,
                     erAutomatiskVurdert = true,
-                    resultat =
-                        if (erBosattINorgePeriode.verdi is OppfyltDelvilkår) {
-                            Resultat.OPPFYLT
-                        } else {
-                            Resultat.IKKE_OPPFYLT
-                        },
-                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = erBosattINorgePeriode.verdi.tilResultat(),
+                    vilkårType = BOSATT_I_RIKET,
                     periodeFom = erBosattINorgePeriode.fom,
                     periodeTom = erBosattINorgePeriode.tom,
-                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL \n" + (erBosattINorgePeriode.verdi?.begrunnelse ?: ""),
+                    begrunnelse = "Fylt ut automatisk fra registerdata i PDL\n" + erBosattINorgePeriode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
+                    begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
                 )
             }.toSet()
     }
@@ -109,10 +102,9 @@ class PreutfyllBosattIRiketService(
             .map { erBosattINorgePeriode ->
                 Periode(
                     verdi =
-                        if (erBosattINorgePeriode.verdi == true) {
-                            sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
-                        } else {
-                            IkkeOppfyltDelvilkår
+                        when (erBosattINorgePeriode.verdi) {
+                            true -> sjekkØvrigeKravForPeriode(erBosattINorgePeriode, personResultat)
+                            else -> IkkeOppfyltDelvilkår
                         },
                     fom = erBosattINorgePeriode.fom,
                     tom = erBosattINorgePeriode.tom,
@@ -131,7 +123,7 @@ class PreutfyllBosattIRiketService(
                 OppfyltDelvilkår("- Bosatt i Norge siden fødsel.")
 
             erBosattINorgePeriode.omfatter(LocalDate.now()) && erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat) ->
-                OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.")
+                OppfyltDelvilkår("- Oppgitt i søknad at planlegger å bo i Norge i minst 12 måneder.", INFORMASJON_FRA_SØKNAD)
 
             else -> IkkeOppfyltDelvilkår
         }
@@ -139,34 +131,27 @@ class PreutfyllBosattIRiketService(
     private fun Periode<*>.erMinst12Måneder(): Boolean = ChronoUnit.MONTHS.between(fom, tom ?: LocalDate.now()) >= 12
 
     private fun erOppgittAtPlanleggerÅBoINorge12Måneder(personResultat: PersonResultat): Boolean {
-        val søknad =
-            søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id)
-                ?: return false
-        val planleggerÅBoNeste12Mnd =
-            if (personResultat.erSøkersResultater()) {
-                søknad.søker.planleggerÅBoINorge12Mnd
-            } else {
-                søknad.barn.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd
-            }
-        return planleggerÅBoNeste12Mnd == true
+        val søknad = søknadService.finnSøknad(behandlingId = personResultat.vilkårsvurdering.behandling.id) ?: return false
+        return if (personResultat.erSøkersResultater()) {
+            søknad.søker.planleggerÅBoINorge12Mnd
+        } else {
+            søknad.barn.find { it.fnr == personResultat.aktør.aktivFødselsnummer() }?.planleggerÅBoINorge12Mnd ?: false
+        }
     }
 
     fun finnFødselsdatoForBeskjæring(
         personResultat: PersonResultat,
         vilkårsvurdering: Vilkårsvurdering,
-    ): LocalDate =
-        if (personResultat.erSøkersResultater()) {
-            persongrunnlagService
-                .hentAktivThrows(vilkårsvurdering.behandling.id)
-                .barna
-                .minOfOrNull { it.fødselsdato } ?: LocalDate.MIN
-        } else {
-            persongrunnlagService
-                .hentAktivThrows(vilkårsvurdering.behandling.id)
-                .barna
-                .find { it.aktør.aktørId == personResultat.aktør.aktørId }
-                ?.fødselsdato ?: LocalDate.MIN
-        }
+    ): LocalDate {
+        val barna = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).barna
+        val fødselsdatoForBeskjæring =
+            if (personResultat.erSøkersResultater()) {
+                barna.minOfOrNull { it.fødselsdato }
+            } else {
+                barna.find { it.aktør.aktørId == personResultat.aktør.aktørId }?.fødselsdato
+            }
+        return fødselsdatoForBeskjæring ?: LocalDate.MIN
+    }
 
     private fun harBostedsAdresseINorge(bostedsadresse: Bostedsadresse): Boolean = bostedsadresse.vegadresse != null || bostedsadresse.matrikkeladresse != null || bostedsadresse.ukjentBosted != null
 

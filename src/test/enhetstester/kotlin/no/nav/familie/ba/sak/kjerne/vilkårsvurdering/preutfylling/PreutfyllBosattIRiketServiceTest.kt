@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
@@ -72,6 +73,9 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
         assertThat(vilkårResultat.first().vilkårType).isEqualTo(Vilkår.BOSATT_I_RIKET)
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -121,6 +125,9 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         assertThat(vilkårResultat.first().resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -148,7 +155,10 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat)
 
         // Assert
-        assertThat(vilkårResultat).allMatch { it.resultat == Resultat.IKKE_OPPFYLT }
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -179,10 +189,12 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
 
         // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(2))
+        val vilkårResultater = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(2))
 
         // Assert
-        assertThat(vilkårResultat.singleOrNull()?.resultat).isEqualTo(Resultat.OPPFYLT)
+        val vilkårResultat = vilkårResultater.single()
+        assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(INFORMASJON_FRA_SØKNAD)
     }
 
     @Test
@@ -227,10 +239,12 @@ class PreutfyllBosattIRiketServiceTest {
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnFnr to true))
 
         // Act
-        val vilkårResultat = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(2))
+        val vilkårResultater = preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(personResultat, LocalDate.now().minusYears(2))
 
         // Assert
-        assertThat(vilkårResultat.singleOrNull()?.resultat).isEqualTo(Resultat.OPPFYLT)
+        val vilkårResultat = vilkårResultater.single()
+        assertThat(vilkårResultat.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(vilkårResultat.begrunnelseForManuellKontroll).isEqualTo(INFORMASJON_FRA_SØKNAD)
     }
 
     @Test
@@ -279,6 +293,10 @@ class PreutfyllBosattIRiketServiceTest {
 
         assertThat(vilkårResultat.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
         assertThat(vilkårResultat.find { it.resultat == Resultat.IKKE_OPPFYLT }).isNotNull
+
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -333,6 +351,10 @@ class PreutfyllBosattIRiketServiceTest {
         val oppfyltPeriode2 = vilkårResultat.find { it.periodeFom == LocalDate.now().minusMonths(1) }
         assertThat(oppfyltPeriode2?.resultat).`as`("Forventer OPPFYLT periode for 1 måned siden").isEqualTo(Resultat.OPPFYLT)
         assertThat(oppfyltPeriode2?.periodeTom).`as`("Oppfylt periode for 1 måned siden tom").isNull()
+
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -383,6 +405,9 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(oppfyltPeriode).`as`("Forventer én OPPFYLT periode").isNotNull
         assertThat(oppfyltPeriode?.periodeFom).`as`("Oppfylt periode fom").isEqualTo(LocalDate.now().minusYears(1))
         assertThat(oppfyltPeriode?.periodeTom).`as`("Oppfylt periode tom").isNull()
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -410,6 +435,9 @@ class PreutfyllBosattIRiketServiceTest {
         assertThat(vilkårResultat).hasSize(1)
         val barnsVilkårResultat = vilkårResultat.find { it.personResultat?.id == personResultat.id }
         assertThat(barnsVilkårResultat?.resultat).isEqualTo(Resultat.OPPFYLT)
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -442,9 +470,12 @@ class PreutfyllBosattIRiketServiceTest {
         // Assert
         assertThat(vilkårResultat).hasSize(3)
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL \n" +
+            "Fylt ut automatisk fra registerdata i PDL\n" +
                 "- Norsk bostedsadresse i minst 12 måneder.",
         )
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 
     @Test
@@ -471,8 +502,11 @@ class PreutfyllBosattIRiketServiceTest {
 
         // Assert
         assertThat(begrunnelse).isEqualTo(
-            "Fylt ut automatisk fra registerdata i PDL \n" +
+            "Fylt ut automatisk fra registerdata i PDL\n" +
                 "- Bosatt i Norge siden fødsel.",
         )
+        assertThat(vilkårResultat).allSatisfy {
+            assertThat(it.begrunnelseForManuellKontroll).isNull()
+        }
     }
 }
