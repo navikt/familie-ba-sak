@@ -29,6 +29,7 @@ class SamhandlerTestConfig {
         fun clearSamhandlerKlient(samhandlerKlient: SamhandlerKlient) {
             clearMocks(samhandlerKlient)
             every { samhandlerKlient.hentSamhandler(any()) } returns samhandlereInfoMock.first()
+            every { samhandlerKlient.hentSamhandler("312962594") } returns samhandlereInfoMock.last()
             every { samhandlerKlient.søkSamhandlere(any(), any(), any(), any()) } returns
                 SøkSamhandlerInfo(
                     false,
@@ -47,12 +48,12 @@ val samhandlereInfoMock =
                 SamhandlerAdresse(listOf("Instutisjonsnsveien 1"), "0110", "Oslo", "Arbeidsadresse"),
                 SamhandlerAdresse(listOf("Postboks 123"), "0110", "Oslo", "Postadresse"),
             ),
-            orgNummer = "974652269",
+            orgNummer = "312539756",
         ),
         SamhandlerInfo(
             "80000888888",
             "INSTUTISJON 2",
             listOf(SamhandlerAdresse(listOf("Instutisjonsnsveien 2"), "1892", "Degernes", "Arbeidsadresse")),
-            orgNummer = "974652269",
+            orgNummer = "312962594",
         ),
     )

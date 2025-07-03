@@ -7,12 +7,18 @@ import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFE
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.lagErOver100ProsentUtbetalingPåYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerAktørOgType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
+import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -30,6 +36,8 @@ class AvregningService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val clockProvider: ClockProvider,
     private val unleashService: UnleashNextMedContextService,
+    private val fagsakService: FagsakService,
+    private val beregningService: BeregningService,
 ) {
     fun behandlingHarPerioderSomAvregnes(behandlingId: Long): Boolean = hentPerioderMedAvregning(behandlingId).isNotEmpty()
 
@@ -93,6 +101,36 @@ class AvregningService(
                     null
                 }
             }
+
+    fun hentOverlappendePerioderMedAndreFagsaker(behandlingId: Long): List<OverlappendePerioderMedAndreFagsaker> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        val fagsaker =
+            when (behandling.fagsak.type) {
+                SKJERMET_BARN, INSTITUSJON, BARN_ENSLIG_MINDREÅRIG -> fagsakService.hentAlleFagsakerForAktør(behandling.fagsak.aktør).filter { it.id != behandling.fagsak.id }
+                else -> return emptyList()
+            }
+
+        if (fagsaker.isEmpty()) return emptyList()
+
+        val tidslinjeMedOverlapp =
+            lagErOver100ProsentUtbetalingPåYtelseTidslinje(
+                andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
+                barnsAndelerFraAndreBehandlinger = beregningService.hentRelevanteTilkjentYtelserForBarn(behandling.fagsak.aktør, behandling.fagsak.id).flatMap { it.andelerTilkjentYtelse },
+            ).tilPerioderIkkeNull().filter { it.verdi.erOver100Prosent }
+
+        return tidslinjeMedOverlapp.map {
+            OverlappendePerioderMedAndreFagsaker(
+                fom = it.fom!!,
+                tom = it.tom!!,
+                fagsaker =
+                    it.verdi.behandlingIds
+                        .distinct()
+                        .filter { behandlingId != it }
+                        .map { behandlingHentOgPersisterService.hent(it).fagsak.id },
+            )
+        }
+    }
 }
 
 data class EtterbetalingOgFeilutbetaling(

@@ -235,7 +235,7 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() = this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" }.slåSammen()
+    fun Map<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() = this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" }.slåSammen()
 
     fun maksBeløp(
         personType: PersonType,
@@ -275,7 +275,7 @@ object TilkjentYtelseValidering {
                         andeler = andeler.filter { it.type == ytelseType },
                         barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger.filter { it.type == ytelseType },
                     )
-                }.kombiner { it.minstEnYtelseHarOverlapp() }
+                }.kombiner { it.minstEnYtelseMedBehandlingIdHarOverlapp() }
 
         return kombinertOverlappTidslinje
             .tilPerioder()
@@ -285,26 +285,42 @@ object TilkjentYtelseValidering {
 
     internal fun Iterable<Boolean>.minstEnYtelseHarOverlapp(): Boolean = any { it }
 
+    internal fun Iterable<ErOver100ProsentMedBehandlingId>.minstEnYtelseMedBehandlingIdHarOverlapp(): Boolean = any { it.erOver100Prosent }
+
+    data class ErOver100ProsentMedBehandlingId(
+        val erOver100Prosent: Boolean,
+        val behandlingIds: List<Long> = emptyList(),
+    )
+
     fun lagErOver100ProsentUtbetalingPåYtelseTidslinje(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
-    ): Tidslinje<Boolean> {
+    ): Tidslinje<ErOver100ProsentMedBehandlingId> {
         if (barnsAndelerFraAndreBehandlinger.isEmpty()) {
             return tomTidslinje()
         }
-        val prosenttidslinjerPerBehandling =
-            (andeler + barnsAndelerFraAndreBehandlinger)
-                .groupBy { it.behandlingId }
-                .values
-                .map { it.tilProsentAvYtelseUtbetaltTidslinje() }
 
-        val erOver100ProsentTidslinje =
-            prosenttidslinjerPerBehandling
+        val andelerPerBehandling = (andeler + barnsAndelerFraAndreBehandlinger).groupBy { it.behandlingId }
+
+        val prosenttidslinjerPerBehandling =
+            andelerPerBehandling.mapValues { (_, andelerForBehandling) ->
+                andelerForBehandling.tilProsentAvYtelseUtbetaltTidslinje()
+            }
+
+        val totalProsentTidslinje =
+            prosenttidslinjerPerBehandling.values
                 .fold(tomTidslinje<BigDecimal>()) { summertProsentTidslinje, prosentTidslinje ->
                     summertProsentTidslinje.kombinerMed(prosentTidslinje) { sumProsentForPeriode, prosentForAndel ->
                         (sumProsentForPeriode ?: BigDecimal.ZERO) + (prosentForAndel ?: BigDecimal.ZERO)
                     }
-                }.mapVerdi { sumProsentForPeriode -> (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100) }
+                }
+
+        val erOver100ProsentTidslinje =
+            totalProsentTidslinje.mapVerdi { sumProsentForPeriode ->
+                val erOver100Prosent = (sumProsentForPeriode ?: BigDecimal.ZERO) > BigDecimal.valueOf(100)
+
+                ErOver100ProsentMedBehandlingId(erOver100Prosent = erOver100Prosent, behandlingIds = andelerPerBehandling.keys.filterNotNull())
+            }
 
         return erOver100ProsentTidslinje
     }
