@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.simulering.domene.AvregningPeriode
-import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAnnenFagsak
+import no.nav.familie.ba.sak.kjerne.simulering.domene.OverlappendePerioderMedAndreFagsaker
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærTilOgMed
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -102,7 +102,7 @@ class AvregningService(
                 }
             }
 
-    fun hentOverlappendePerioderMedAnnenFagsak(behandlingId: Long): List<OverlappendePerioderMedAnnenFagsak> {
+    fun hentOverlappendePerioderMedAndreFagsaker(behandlingId: Long): List<OverlappendePerioderMedAndreFagsaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val fagsaker =
@@ -120,7 +120,7 @@ class AvregningService(
             ).tilPerioderIkkeNull().filter { it.verdi.erOver100Prosent }
 
         return tidslinjeMedOverlapp.map {
-            OverlappendePerioderMedAnnenFagsak(
+            OverlappendePerioderMedAndreFagsaker(
                 fom = it.fom!!,
                 tom = it.tom!!,
                 fagsaker =

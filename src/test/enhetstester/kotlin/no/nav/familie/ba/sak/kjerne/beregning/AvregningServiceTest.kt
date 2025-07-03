@@ -656,12 +656,12 @@ class AvregningServiceTest {
     }
 
     @Nested
-    inner class HentOverlappendePerioderMedAnnenFagsak {
+    inner class HentOverlappendePerioderMedAndreFagsaker {
         @Test
         fun `Returner tom liste hvis fagsaktype ikke er SKJERMET_BARN, INSTITUSJON, or BARN_ENSLIG_MINDREÅRIG`() {
             every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandling()
 
-            val result = avregningService.hentOverlappendePerioderMedAnnenFagsak(behandlingId = inneværendeBehandling.id)
+            val result = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId = inneværendeBehandling.id)
 
             assertThat(result).isEmpty()
         }
@@ -673,7 +673,7 @@ class AvregningServiceTest {
             every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandling(fagsak = fagsakSkjermetBarn)
             every { fagsakService.hentAlleFagsakerForAktør(any()) } returns listOf(fagsakSkjermetBarn)
 
-            val result = avregningService.hentOverlappendePerioderMedAnnenFagsak(behandlingId = inneværendeBehandling.id)
+            val result = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId = inneværendeBehandling.id)
 
             assertThat(result).isEmpty()
         }
@@ -715,7 +715,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            val result = avregningService.hentOverlappendePerioderMedAnnenFagsak(behandlingId = behandlingForInstitusjon1.id)
+            val result = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId = behandlingForInstitusjon1.id)
 
             assertThat(result).hasSize(1)
             assertThat(result.first().fagsaker).containsOnly(2)
@@ -760,7 +760,7 @@ class AvregningServiceTest {
                     ),
                 )
 
-            val result = avregningService.hentOverlappendePerioderMedAnnenFagsak(behandlingId = behandlingForInstitusjon1.id)
+            val result = avregningService.hentOverlappendePerioderMedAndreFagsaker(behandlingId = behandlingForInstitusjon1.id)
 
             assertThat(result).hasSize(0)
         }
