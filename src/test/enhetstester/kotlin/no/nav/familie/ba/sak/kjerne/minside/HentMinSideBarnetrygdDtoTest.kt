@@ -21,7 +21,7 @@ class HentMinSideBarnetrygdDtoTest {
             val dto = HentMinSideBarnetrygdDto.Suksess.opprettFraDomene(minSideBarnetrygd)
 
             // Assert
-            assertThat(dto?.barnetrygd).isEqualTo(minSideBarnetrygd)
+            assertThat(dto.barnetrygd).isEqualTo(minSideBarnetrygd)
         }
 
         @Test
@@ -37,8 +37,8 @@ class HentMinSideBarnetrygdDtoTest {
             val dto = HentMinSideBarnetrygdDto.Suksess.opprettFraDomene(minSideBarnetrygd)
 
             // Assert
-            assertThat(dto?.barnetrygd?.ordinær).isNull()
-            assertThat(dto?.barnetrygd?.utvidet).isNull()
+            assertThat(dto.barnetrygd?.ordinær).isNull()
+            assertThat(dto.barnetrygd?.utvidet).isNull()
         }
 
         @Test
@@ -47,7 +47,7 @@ class HentMinSideBarnetrygdDtoTest {
             val dto = HentMinSideBarnetrygdDto.Suksess.opprettFraDomene(null)
 
             // Assert
-            assertThat(dto).isNull()
+            assertThat(dto.barnetrygd).isNull()
         }
     }
 }

@@ -5,7 +5,7 @@ sealed class HentMinSideBarnetrygdDto {
         var barnetrygd: MinSideBarnetrygd? = null,
     ) : HentMinSideBarnetrygdDto() {
         companion object {
-            fun opprettFraDomene(minSideBarnetrygd: MinSideBarnetrygd?) = minSideBarnetrygd?.let { Suksess(it) }
+            fun opprettFraDomene(minSideBarnetrygd: MinSideBarnetrygd?) = Suksess(minSideBarnetrygd)
         }
     }
 
