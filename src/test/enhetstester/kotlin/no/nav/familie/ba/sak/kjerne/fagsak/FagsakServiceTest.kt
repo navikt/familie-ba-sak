@@ -279,10 +279,8 @@ class FagsakServiceTest {
         }
     }
 
-    // assertThat(frontendFeilmelding).isEqualTo("Det finnes allerede en skjermet barn fagsak på dette barnet som er koblet til samme søker.")
-    // assertThat(frontendFeilmelding).isEqualTo("Det finnes allerede en skjermet barn fagsak på dette barnet som er koblet til samme søker.")
     @Test
-    fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
+    fun `Skal returnere eksisterende fagsak dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
         // Arrange
         val barnIdent = randomBarnFnr(alder = 5)
         val søkerIdent = randomFnr()
