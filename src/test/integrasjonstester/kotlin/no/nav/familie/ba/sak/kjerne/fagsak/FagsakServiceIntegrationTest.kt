@@ -703,27 +703,26 @@ class FagsakServiceIntegrationTest(
     }
 
     @Test
-    fun `Skal kaste feil ved forsøk på å opprette institusjon fagsak med org nummer som allerede finnes for person`() {
+    fun `Skal returnere eksisterende fagsak ved forsøk på å opprette institusjon fagsak med org nummer som allerede finnes for person`() {
         // Arrange
         val barn = lagPerson(type = PersonType.BARN)
         val institusjon = RestInstitusjon(orgNummer = "123456789", tssEksternId = "testid")
 
-        opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.INSTITUSJON)
+        val fagsak = opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.AVSLUTTET, fagsakType = FagsakType.INSTITUSJON)
 
         // Act && Assert
-        val feilmelding =
-            assertThrows<FunksjonellFeil> {
-                fagsakService.hentEllerOpprettFagsak(
-                    fagsakRequest =
-                        FagsakRequest(
-                            personIdent = barn.aktør.aktivFødselsnummer(),
-                            fagsakType = FagsakType.INSTITUSJON,
-                            institusjon = institusjon,
-                        ),
-                )
-            }.melding
 
-        assertThat(feilmelding).isEqualTo("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
+        val returnertFagsak =
+            fagsakService.hentEllerOpprettFagsak(
+                fagsakRequest =
+                    FagsakRequest(
+                        personIdent = barn.aktør.aktivFødselsnummer(),
+                        fagsakType = FagsakType.INSTITUSJON,
+                        institusjon = institusjon,
+                    ),
+            )
+
+        assertThat(returnertFagsak.data?.id).isEqualTo(fagsak.id)
     }
 
     @Test
