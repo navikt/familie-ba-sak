@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
-import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -58,7 +57,7 @@ class AutomatiskOppdaterValutakursServiceTest {
         AutomatiskOppdaterValutakursService(
             valutakursService = valutakursService,
             vedtaksperiodeService = vedtaksperiodeService,
-            localDateProvider = MockedDateProvider(dagensDato),
+            clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(dagensDato),
             ecbService = ecbService,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,

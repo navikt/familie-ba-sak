@@ -1,7 +1,7 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -40,7 +40,7 @@ class AutovedtakMånedligValutajusteringService(
     private val snikeIKøenService: SnikeIKøenService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingService: BehandlingService,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
     private val valutakursService: ValutakursService,
     private val simuleringService: SimuleringService,
     private val startSatsendring: StartSatsendring,
@@ -61,7 +61,7 @@ class AutovedtakMånedligValutajusteringService(
             return
         }
 
-        if (måned != localDateProvider.now().toYearMonth()) {
+        if (måned != LocalDate.now(clockProvider.get()).toYearMonth()) {
             throw Feil("Prøver å utføre månedlig valutajustering for en annen måned enn nåværende måned.")
         }
 

@@ -1,7 +1,7 @@
 ﻿package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.rangeTo
@@ -32,6 +32,7 @@ import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2024, 6)
@@ -40,7 +41,7 @@ val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2024, 6)
 class AutomatiskOppdaterValutakursService(
     private val valutakursService: ValutakursService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
     private val ecbService: ECBService,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -202,7 +203,7 @@ class AutomatiskOppdaterValutakursService(
         valutakode: String,
     ): List<Valutakurs> {
         val start = maxOf(månedForTidligsteTillatteAutomatiskeValutakurs, fom)
-        val denneMåneden = localDateProvider.now().toYearMonth()
+        val denneMåneden = LocalDate.now(clockProvider.get()).toYearMonth()
         val slutt = tom ?: denneMåneden
 
         if (månedForTidligsteTillatteAutomatiskeValutakurs.isAfter(slutt)) return emptyList()

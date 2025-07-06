@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
@@ -23,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelver
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class VilkårsvurderingSteg(
@@ -35,7 +35,7 @@ class VilkårsvurderingSteg(
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val månedligValutajusteringService: MånedligValutajusteringService,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
     private val automatiskOppdaterValutakursService: AutomatiskOppdaterValutakursService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val unleashService: UnleashNextMedContextService,
@@ -107,7 +107,7 @@ class VilkårsvurderingSteg(
         }
 
         if (behandling.erMånedligValutajustering()) {
-            månedligValutajusteringService.oppdaterValutakurserForMåned(BehandlingId(behandling.id), localDateProvider.now().toYearMonth())
+            månedligValutajusteringService.oppdaterValutakurserForMåned(BehandlingId(behandling.id), YearMonth.now(clockProvider.get()))
         }
 
         automatiskOppdaterValutakursService.oppdaterAndelerMedValutakurser(BehandlingId(behandling.id))
