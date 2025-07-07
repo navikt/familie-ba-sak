@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -107,7 +106,7 @@ internal class VilkårsvurderingTidslinjerTest {
             )
         }
 
-        assertThrows<Feil> {
+        assertThrows<IllegalStateException> {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn =

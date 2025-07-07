@@ -58,7 +58,7 @@ class UtbetalingssikkerhetTest {
         )
 
         val feil =
-            assertThrows<Feil> {
+            assertThrows<IllegalStateException> {
                 TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                     tilkjentYtelse,
                     listOf(person.tilPersonEnkel()),
