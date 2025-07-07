@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -34,6 +34,7 @@ import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class AutovedtakSmåbarnstilleggService(
@@ -47,7 +48,7 @@ class AutovedtakSmåbarnstilleggService(
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
     private val påVentService: SettPåVentService,
     private val stegService: StegService,
     private val småbarnstilleggService: SmåbarnstilleggService,
@@ -110,7 +111,7 @@ class AutovedtakSmåbarnstilleggService(
             erEndringIOvergangsstønadFramITid(
                 perioderMedFullOvergangsstønadForrigeBehandling = perioderMedFullOvergangsstønadForrigeBehandling,
                 perioderMedFullOvergangsstønad = perioderMedFullOvergangsstønad,
-                dagensDato = localDateProvider.now(),
+                dagensDato = LocalDate.now(clockProvider.get()),
             )
 
         val behandlingEtterBehandlingsresultat =
