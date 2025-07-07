@@ -19,7 +19,7 @@ class FagsakRequestTest {
         fun `skal kaste exception om det er et ugydlig fødselsnummer`() {
             // Act & assert
             val exception =
-                assertThrows<Feil> {
+                assertThrows<IllegalStateException> {
                     FagsakRequest(
                         "",
                         fagsakType = FagsakType.NORMAL,
