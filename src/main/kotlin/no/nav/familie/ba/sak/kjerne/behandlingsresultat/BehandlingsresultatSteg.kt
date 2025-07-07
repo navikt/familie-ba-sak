@@ -46,7 +46,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BehandlingsresultatSteg(
@@ -106,7 +106,7 @@ class BehandlingsresultatSteg(
             BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
                 andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,
                 andelerForrigeBehandling = andelerForrigeBehandling,
-                nåMåned = LocalDate.now(clockProvider.get()).toYearMonth(),
+                nåMåned = YearMonth.now(clockProvider.get()),
             )
             BehandlingsresultatValideringUtils.validerSatsErUendret(
                 andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,

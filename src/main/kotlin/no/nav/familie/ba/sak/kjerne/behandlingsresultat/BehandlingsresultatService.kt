@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.ClockProvider
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.skalUtledeSøknadsresultatForBehandling
@@ -14,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
-import java.time.LocalDate
+import java.time.YearMonth
 
 @Service
 class BehandlingsresultatService(
@@ -93,7 +92,7 @@ class BehandlingsresultatService(
                     personerFremstiltKravFor = personerFremstiltKravFor,
                     personerIBehandling = personerIBehandling,
                     personerIForrigeBehandling = personerIForrigeBehandling,
-                    nåMåned = LocalDate.now(clockProvider.get()).toYearMonth(),
+                    nåMåned = YearMonth.now(clockProvider.get()),
                 )
             } else {
                 Endringsresultat.INGEN_ENDRING

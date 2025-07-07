@@ -2,7 +2,6 @@
 
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
@@ -61,7 +60,7 @@ class AutovedtakMånedligValutajusteringService(
             return
         }
 
-        if (måned != LocalDate.now(clockProvider.get()).toYearMonth()) {
+        if (måned != YearMonth.now(clockProvider.get())) {
             throw Feil("Prøver å utføre månedlig valutajustering for en annen måned enn nåværende måned.")
         }
 

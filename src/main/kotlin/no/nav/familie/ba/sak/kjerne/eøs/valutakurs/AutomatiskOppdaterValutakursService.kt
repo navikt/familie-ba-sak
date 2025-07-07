@@ -32,7 +32,6 @@ import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.YearMonth
 
 val DATO_FOR_PRAKSISENDRING_AUTOMATISK_VALUTAJUSTERING = YearMonth.of(2024, 6)
@@ -203,7 +202,7 @@ class AutomatiskOppdaterValutakursService(
         valutakode: String,
     ): List<Valutakurs> {
         val start = maxOf(månedForTidligsteTillatteAutomatiskeValutakurs, fom)
-        val denneMåneden = LocalDate.now(clockProvider.get()).toYearMonth()
+        val denneMåneden = YearMonth.now(clockProvider.get())
         val slutt = tom ?: denneMåneden
 
         if (månedForTidligsteTillatteAutomatiskeValutakurs.isAfter(slutt)) return emptyList()
