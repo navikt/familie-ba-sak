@@ -214,7 +214,7 @@ class IntegrasjonClient(
                 postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
             }
 
-        if (resultat.isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
+        if (resultat.isBlank()) throw Feil("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
         return resultat
     }
 

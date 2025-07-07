@@ -76,11 +76,11 @@ class AutovedtakMånedligValutajusteringServiceTest {
     }
 
     @Test
-    fun `utførMånedligValutajustering kaster IllegalStateException hvis fagsak ikke har en vedtatt behandling`() {
+    fun `utførMånedligValutajustering kaster Feil hvis fagsak ikke har en vedtatt behandling`() {
         every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
-        assertThrows<IllegalStateException> {
+        assertThrows<Feil> {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
                 fagsakId = 0,
                 måned = YearMonth.now(),

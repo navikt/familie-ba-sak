@@ -117,7 +117,7 @@ class OppdragSteg {
         genererBehandlinger(dataTable)
         tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger)
         if (tilkjenteYtelser.flatMap { (_, tilkjentYtelse) -> tilkjentYtelse.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
-            error("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
+            throw Feil("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
         }
     }
 
@@ -321,7 +321,7 @@ class OppdragSteg {
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
             val utbetalingsoppdrag =
                 beregnetUtbetalingsoppdrag[behandlingId]
-                    ?: error("Mangler utbetalingsoppdrag for $behandlingId")
+                    ?: throw Feil("Mangler utbetalingsoppdrag for $behandlingId")
             try {
                 assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag)
             } catch (exception: Throwable) {

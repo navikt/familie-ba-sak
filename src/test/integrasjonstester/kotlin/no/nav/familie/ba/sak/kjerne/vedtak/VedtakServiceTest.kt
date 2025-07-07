@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -245,7 +246,7 @@ class VedtakServiceTest(
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsak))
 
-        assertThrows<IllegalStateException> {
+        assertThrows<Feil> {
             vedtakService.oppdater(
                 Vedtak(
                     behandling = behandling,

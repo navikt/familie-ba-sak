@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -29,7 +30,7 @@ class FinnSakerMedFlereMigreringsbehandlingerTask(
                 ).map { Pair(it.fagsakId, it.fødselsnummer) }
 
         if (sakerMedFlereMigreringsbehandlinger.isNotEmpty()) {
-            error("$FEILMELDING fraOgMedÅrMåned=$fraOgMedÅrMåned \n${sakerMedFlereMigreringsbehandlinger.joinToString("\n")}")
+            throw Feil("$FEILMELDING fraOgMedÅrMåned=$fraOgMedÅrMåned \n${sakerMedFlereMigreringsbehandlinger.joinToString("\n")}")
         }
     }
 

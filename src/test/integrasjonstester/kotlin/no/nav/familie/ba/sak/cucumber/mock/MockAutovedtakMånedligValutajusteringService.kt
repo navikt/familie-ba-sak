@@ -2,6 +2,7 @@
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
@@ -27,7 +28,8 @@ fun mockAutovedtakMånedligValutajusteringService(
         val valutakode = firstArg<String>()
         val dato = secondArg<LocalDate>()
 
-        svarFraEcbMock[Pair(valutakode, dato)] ?: error("Fant ikke valutakurs for valutakode=$valutakode og dato=$dato i ECB mocken")
+        svarFraEcbMock[Pair(valutakode, dato)]
+            ?: throw Feil("Fant ikke valutakurs for valutakode=$valutakode og dato=$dato i ECB mocken")
     }
 
     val cucumberMock =

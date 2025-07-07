@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -28,7 +29,9 @@ class SatsendringService(
         return if (sisteVedtatteBehandling == null) {
             true
         } else {
-            val personOpplysningGrunnlagSisteVedtatteBehandling = personOpplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) ?: error("Fant ikke persongrunnlag på behandling ${sisteVedtatteBehandling.id}")
+            val personOpplysningGrunnlagSisteVedtatteBehandling =
+                personOpplysningGrunnlagRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id)
+                    ?: throw Feil("Fant ikke persongrunnlag på behandling ${sisteVedtatteBehandling.id}")
 
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtatteBehandling.id)

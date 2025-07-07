@@ -47,7 +47,7 @@ class StatusFraOppdrag(
                 taskRepository.save(task.copy(status = Status.MANUELL_OPPFØLGING))
             }
 
-            error("Mottok status '$oppdragStatus' fra oppdrag")
+            throw Feil("Mottok status '$oppdragStatus' fra oppdrag")
         } else {
             val nesteSteg = hentNesteStegForNormalFlyt(behandling)
             if (nesteSteg == StegType.JOURNALFØR_VEDTAKSBREV && !behandling.erBehandlingMedVedtaksbrevutsending()) {
@@ -68,7 +68,7 @@ class StatusFraOppdrag(
                     )
 
                 StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
-                else -> error("Neste task er ikke implementert.")
+                else -> throw Feil("Neste task er ikke implementert.")
             }
         }
 

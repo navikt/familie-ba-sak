@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
@@ -56,7 +57,7 @@ class VilkårsvurderingMetrics(
                 årsaker
                     .forEach { årsak ->
                         if (vilkårUtfallMap[årsak.toString()] != null) {
-                            error("Årsak $årsak deler navn med minst en annen årsak")
+                            throw Feil("Årsak $årsak deler navn med minst en annen årsak")
                         }
 
                         vilkårUtfallMap[årsak.toString()] =
@@ -81,12 +82,12 @@ class VilkårsvurderingMetrics(
     fun tellMetrikker(vilkårsvurdering: Vilkårsvurdering) {
         val personer =
             persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
-                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+                ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
             val person =
                 personer.firstOrNull { it.aktør == personResultat.aktør }
-                    ?: error("Finner ikke person")
+                    ?: throw Feil("Finner ikke person")
 
             val negativeVilkår =
                 personResultat.vilkårResultater.filter { vilkårResultat ->
@@ -142,7 +143,7 @@ class VilkårsvurderingMetrics(
     ): List<Pair<PersonEnkel, VilkårResultat?>> {
         val personer =
             persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
-                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+                ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         return personer.map { person ->
             val personResultat =
@@ -165,11 +166,11 @@ class VilkårsvurderingMetrics(
                 ?.id!!
         val personer =
             persongrunnlagService.hentSøkerOgBarnPåBehandling(behandlingId)
-                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+                ?: throw Feil("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         val person =
             personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }
-                ?: error("Finner ikke person")
+                ?: throw Feil("Finner ikke person")
 
         logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
         secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivFødselsnummer()}, på behandling $behandlingId")

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
@@ -18,7 +19,7 @@ class FagsakRequestTest {
         fun `skal kaste exception om det er et ugydlig fødselsnummer`() {
             // Act & assert
             val exception =
-                assertThrows<IllegalStateException> {
+                assertThrows<Feil> {
                     FagsakRequest(
                         "",
                         fagsakType = FagsakType.NORMAL,

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
@@ -25,7 +26,7 @@ class AnnenVurderingService(
     fun hent(annenVurderingId: Long): AnnenVurdering =
         annenVurderingRepository
             .findById(annenVurderingId)
-            .orElseThrow { error("Annen vurdering med id $annenVurderingId finnes ikke i db") }
+            .orElseThrow { throw Feil("Annen vurdering med id $annenVurderingId finnes ikke i db") }
 
     @Transactional
     fun endreAnnenVurdering(

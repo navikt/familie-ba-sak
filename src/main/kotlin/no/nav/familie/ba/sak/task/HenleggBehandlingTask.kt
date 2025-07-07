@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -46,8 +47,9 @@ class HenleggBehandlingTask(
             val frist =
                 oppgaveService.hentOppgaverSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling).let {
                     it.singleOrNull()?.run {
-                        oppgaveService.hentOppgave(gsakId.toLong()).fristFerdigstillelse ?: error("Oppgave $gsakId mangler frist")
-                    } ?: error("Behandling ${behandling.id} har ingen, eller mer enn en behandleSak-oppgave: $it")
+                        oppgaveService.hentOppgave(gsakId.toLong()).fristFerdigstillelse
+                            ?: throw Feil("Oppgave $gsakId mangler frist")
+                    } ?: throw Feil("Behandling ${behandling.id} har ingen, eller mer enn en behandleSak-oppgave: $it")
                 }
             if (!LocalDate.parse(frist).isAfter(henleggBehandlingTaskDTO.validerOppgavefristErEtterDato)) {
                 task.metadata["Resultat"] = "Stoppet. Behandlingen har frist $frist. Må være etter $valideringsdato"

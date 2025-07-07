@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.http.client.RessursException
@@ -80,7 +81,7 @@ class UtgåendeJournalføringService(
                     )
 
                 if (!journalpost.ferdigstilt) {
-                    error("Klarte ikke ferdigstille journalpost med id ${journalpost.journalpostId}")
+                    throw Feil("Klarte ikke ferdigstille journalpost med id ${journalpost.journalpostId}")
                 }
 
                 journalpost.journalpostId

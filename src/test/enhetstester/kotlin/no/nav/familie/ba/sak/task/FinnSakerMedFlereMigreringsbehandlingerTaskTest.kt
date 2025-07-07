@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.internal.FagsakMedFlereMigreringer
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.prosessering.domene.Task
@@ -25,7 +26,7 @@ class FinnSakerMedFlereMigreringsbehandlingerTaskTest {
             listOf(fagsakMedMigrering1, fagsakMedMigrering2)
 
         val exception =
-            assertThrows<IllegalStateException> {
+            assertThrows<Feil> {
                 task.doTask(Task(type = FinnSakerMedFlereMigreringsbehandlingerTask.TASK_STEP_TYPE, payload = "2023-10"))
             }
 

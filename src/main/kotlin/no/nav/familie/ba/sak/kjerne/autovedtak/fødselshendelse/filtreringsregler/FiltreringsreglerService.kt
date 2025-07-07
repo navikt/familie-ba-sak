@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregl
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.secureLogger
@@ -99,7 +100,7 @@ class FiltreringsreglerService(
 
         val personopplysningGrunnlag =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-                ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+                ?: throw Feil("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
 
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasAktørId.contains(it.aktør) }
 

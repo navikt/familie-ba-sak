@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.ainntekt
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.util.BrukerContextUtil
@@ -36,7 +37,7 @@ class AInntektControllerTest(
     @Test
     fun `prøver å hente ut A-Inntekt url på et ugyldig fnr`() {
         val feil =
-            assertThrows<IllegalStateException> {
+            assertThrows<Feil> {
                 ainntektController.hentAInntektUrl(PersonIdent(ident = "10000111111"))
             }
 

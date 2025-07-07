@@ -159,7 +159,7 @@ class PensjonService(
     ): List<BarnetrygdPeriode> {
         val tilkjentYtelse =
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)
-                ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
+                ?: throw Feil("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
         return tilkjentYtelse.andelerTilkjentYtelse
             .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
             .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD } // Pensjon trenger kun forholde seg til periodene med Ordinær BA

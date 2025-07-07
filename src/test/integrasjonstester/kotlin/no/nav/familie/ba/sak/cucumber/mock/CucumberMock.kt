@@ -5,6 +5,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MockedDateProvider
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
@@ -152,7 +153,7 @@ class CucumberMock(
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
             togglesForBehandling.forEach { (toggleId, isEnabled) ->
-                val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw IllegalStateException("$toggleId does not exist")
+                val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw Feil("$toggleId does not exist")
                 every { unleashNextMedContextService.isEnabled(featureToggle, behandlingId) } returns isEnabled
             }
         }

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.modiacontext
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyAktivBrukerIModiaContext
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -45,7 +46,7 @@ class ModiaContextControllerTest(
     @Test
     fun `skal kaste feil ved ugyldig personIdent`() {
         val exception =
-            assertThrows<IllegalStateException> {
+            assertThrows<Feil> {
                 modiaContextController.settNyAktivBruker(
                     RestNyAktivBrukerIModiaContext(personIdent = "12345678910"),
                 )

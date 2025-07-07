@@ -112,9 +112,7 @@ inline fun <reified T : Enum<T>> String?.finnEnumverdi(apiNavn: String): T? {
     val enumverdi = enumValues<T>().find { this != null && it.name == this }
     if (enumverdi == null) {
         val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
-        logger.error(
-            "$this på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumValues<T>().javaClass.simpleName}",
-        )
+        logger.error("$this på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumValues<T>().javaClass.simpleName}")
     }
     return enumverdi
 }

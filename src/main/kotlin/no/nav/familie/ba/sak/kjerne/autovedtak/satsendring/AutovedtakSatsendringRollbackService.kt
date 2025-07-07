@@ -38,7 +38,9 @@ class AutovedtakSatsendringRollbackService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun kjørSatsendring(fagsakId: Long) {
-        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+                ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
 
         val aktivOgÅpenBehandling =
             behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteVedtatteBehandling.fagsak.id)

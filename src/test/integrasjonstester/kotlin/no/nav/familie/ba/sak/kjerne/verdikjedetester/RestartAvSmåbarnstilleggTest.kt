@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -383,7 +384,7 @@ class RestartAvSmåbarnstilleggTest(
                 brevmalService = brevmalService,
             )
 
-        if (!iverksattBehandling.erVedtatt() && iverksattBehandling.aktiv) error("Satsendringen er ikke utført $iverksattBehandling")
+        if (!iverksattBehandling.erVedtatt() && iverksattBehandling.aktiv) throw Feil("Satsendringen er ikke utført $iverksattBehandling")
     }
 
     fun settAlleVilkårTilOppfylt(

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEØSBegrunnelse
@@ -47,7 +48,7 @@ class HjemmeltekstUtlederTest {
 
         // Act & assert
         val exception =
-            assertThrows<IllegalStateException> {
+            assertThrows<Feil> {
                 hjemmeltekstUtleder.utledHjemmeltekst(
                     behandlingId = 1L,
                     vedtakKorrigertHjemmelSkalMedIBrev = false,

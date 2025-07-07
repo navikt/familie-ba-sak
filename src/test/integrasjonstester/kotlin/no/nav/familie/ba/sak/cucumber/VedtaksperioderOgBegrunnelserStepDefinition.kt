@@ -201,7 +201,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             dataTable.asMaps().groupBy { parseAktørId(it) }
         val personResultatForBehandling =
             vilkårsvurderinger[behandlingId]?.personResultater
-                ?: error("Finner ikke personresultater for behandling med id $behandlingId")
+                ?: throw Feil("Finner ikke personresultater for behandling med id $behandlingId")
 
         vilkårsvurderinger[behandlingId]?.personResultater =
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
@@ -225,11 +225,11 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     ) {
         val personResultatForFraBehandling =
             vilkårsvurderinger[fraBehandlingId]?.personResultater
-                ?: error("Finner ikke personresultater for behandling med id $fraBehandlingId")
+                ?: throw Feil("Finner ikke personresultater for behandling med id $fraBehandlingId")
 
         val vilkårsvurderingTilBehandling =
             vilkårsvurderinger[tilBehandlingId]
-                ?: error("Finner ikke vilkårsvurdering for behandling med id $tilBehandlingId")
+                ?: throw Feil("Finner ikke vilkårsvurdering for behandling med id $tilBehandlingId")
 
         vilkårsvurderinger[tilBehandlingId]?.personResultater =
             personResultatForFraBehandling
@@ -336,7 +336,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     }
 
     private fun genererVedtaksperioderForBehandling(behandlingId: Long): List<UtvidetVedtaksperiodeMedBegrunnelser> {
-        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val vedtak =
+            vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: throw Feil("Finner ikke vedtak")
 
         vedtak.behandling.overstyrtEndringstidspunkt = overstyrteEndringstidspunkt[behandlingId]
 
@@ -385,7 +386,9 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val grunnlagForVedtaksperiode =
             BehandlingsGrunnlagForVedtaksperioder(
                 persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-                personResultater = vilkårsvurderinger[behandlingId]?.personResultater ?: error("Finner ikke personresultater"),
+                personResultater =
+                    vilkårsvurderinger[behandlingId]?.personResultater
+                        ?: throw Feil("Finner ikke personresultater"),
                 behandling = vedtak.behandling,
                 kompetanser = kompetanser[behandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
@@ -400,10 +403,13 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         val grunnlagForVedtaksperiodeForrigeBehandling =
             forrigeBehandlingId?.let {
                 val forrigeVedtak =
-                    vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+                    vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv }
+                        ?: throw Feil("Finner ikke vedtak")
                 BehandlingsGrunnlagForVedtaksperioder(
                     persongrunnlag = persongrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
-                    personResultater = vilkårsvurderinger[forrigeBehandlingId]?.personResultater ?: error("Finner ikke personresultater"),
+                    personResultater =
+                        vilkårsvurderinger[forrigeBehandlingId]?.personResultater
+                            ?: throw Feil("Finner ikke personresultater"),
                     behandling = forrigeVedtak.behandling,
                     kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                     endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
@@ -470,7 +476,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         dataTable: DataTable,
     ) {
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
-        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val vedtak =
+            vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: throw Feil("Finner ikke vedtak")
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
         val vedtaksperiodeMedBegrunnelser =
@@ -508,7 +515,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         dataTable: DataTable,
     ) {
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
-        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val vedtak =
+            vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: throw Feil("Finner ikke vedtak")
         val grunnlagForBegrunnelse = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
         val faktiskeBrevperioder: List<BrevPeriode> =
@@ -616,7 +624,11 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 .asMaps()
                 .map { rad ->
                     val aktørId = parseAktørId(rad)
-                    val dødsfallDato = parseValgfriDato(VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO, rad) ?: error("Dødsfallsdato må være satt")
+                    val dødsfallDato =
+                        parseValgfriDato(
+                            VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag.DØDSFALLDATO,
+                            rad,
+                        ) ?: throw Feil("Dødsfallsdato må være satt")
 
                     aktørId to dødsfallDato
                 }.toMap()
@@ -694,7 +706,8 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         forventetEndringstidspunktString: String,
         behandlingId: Long,
     ) {
-        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+        val vedtak =
+            vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: throw Feil("Finner ikke vedtak")
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
         val grunnlagForBegrunnelser = hentGrunnlagForBegrunnelser(behandlingId, vedtak, forrigeBehandlingId)
 
@@ -704,7 +717,9 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                 behandlingsGrunnlagForVedtaksperioderForrigeBehandling = grunnlagForBegrunnelser.behandlingsGrunnlagForVedtaksperioderForrigeBehandling,
             )
 
-        val forventetEndringstidspunkt = parseNullableDato(forventetEndringstidspunktString) ?: error("Så forvent følgende endringstidspunkt {} forventer en dato")
+        val forventetEndringstidspunkt =
+            parseNullableDato(forventetEndringstidspunktString)
+                ?: throw Feil("Så forvent følgende endringstidspunkt {} forventer en dato")
 
         assertThat(faktiskEndringstidspunkt).isEqualTo(forventetEndringstidspunkt)
     }
@@ -790,7 +805,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         tilBehandlingId: Long,
     ) {
         kompetanser[tilBehandlingId] = kompetanser[fraBehandlingId]
-            ?: error("Finner ikke kompetanser for behandling med id $fraBehandlingId")
+            ?: throw Feil("Finner ikke kompetanser for behandling med id $fraBehandlingId")
     }
 
     @Og("kopier utenlandsk periodebeløp fra behandling {} til behandling {}")
@@ -799,7 +814,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
         tilBehandlingId: Long,
     ) {
         utenlandskPeriodebeløp[tilBehandlingId] = utenlandskPeriodebeløp[fraBehandlingId]
-            ?: error("Finner ikke utenlandsk periodebeløp for behandling med id $fraBehandlingId")
+            ?: throw Feil("Finner ikke utenlandsk periodebeløp for behandling med id $fraBehandlingId")
     }
 
     @Når("vi utfører vilkårsvurderingssteget for behandling {}")

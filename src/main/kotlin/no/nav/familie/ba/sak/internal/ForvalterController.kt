@@ -285,7 +285,7 @@ class ForvalterController(
         )
 
         val task = taskService.findById(taskId)
-        if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) error("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
+        if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) throw Feil("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
         opprettTaskService.opprettGrensesnittavstemMotOppdragTask(GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
         return ResponseEntity.ok("Ok")
     }

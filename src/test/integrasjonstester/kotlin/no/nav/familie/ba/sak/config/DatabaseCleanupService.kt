@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager
 import jakarta.persistence.Table
 import jakarta.persistence.metamodel.Metamodel
 import jakarta.transaction.Transactional
+import no.nav.familie.ba.sak.common.Feil
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
@@ -43,7 +44,7 @@ class DatabaseCleanupService(
                         val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
                         val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
                         tableAnnotation?.name ?: jdbcTableAnnotation?.value
-                            ?: throw IllegalStateException("should never get here")
+                            ?: throw Feil("should never get here")
                     } + getJdbcTableNames()
             }
             return field
