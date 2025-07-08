@@ -156,6 +156,7 @@ enum class VilkårTrigger {
     MEDLEMSKAP,
     DELT_BOSTED,
     BOSATT_PÅ_SVALBARD,
+    BOSATT_I_FINNMARK_NORD_TROMS,
     DELT_BOSTED_SKAL_IKKE_DELES,
     FAST_BOSTED,
 }
@@ -167,6 +168,7 @@ fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResulta
         VilkårTrigger.DELT_BOSTED -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
         VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
         VilkårTrigger.BOSATT_PÅ_SVALBARD -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+        VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
         VilkårTrigger.FAST_BOSTED -> !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
     }
 
