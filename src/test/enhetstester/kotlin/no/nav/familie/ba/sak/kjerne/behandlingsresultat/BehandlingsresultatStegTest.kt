@@ -5,9 +5,9 @@ import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.runs
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.SatsendringFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -103,7 +103,7 @@ class BehandlingsresultatStegTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
-            localDateProvider = RealDateProvider(),
+            clockProvider = TestClockProvider(),
             kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
