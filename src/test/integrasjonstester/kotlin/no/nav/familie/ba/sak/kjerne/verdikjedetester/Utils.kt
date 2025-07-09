@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
@@ -41,7 +42,7 @@ fun generellAssertRestUtvidetBehandling(
     behandlingsresultat: Behandlingsresultat? = null,
 ) {
     if (restUtvidetBehandling.status != Ressurs.Status.SUKSESS) {
-        throw IllegalStateException("generellAssertRestUtvidetBehandling feilet. status: ${restUtvidetBehandling.status.name},  melding: ${restUtvidetBehandling.melding}")
+        throw Feil("generellAssertRestUtvidetBehandling feilet. status: ${restUtvidetBehandling.status.name},  melding: ${restUtvidetBehandling.melding}")
     }
 
     assertEquals(behandlingStatus, restUtvidetBehandling.data?.status)
@@ -62,7 +63,7 @@ fun generellAssertFagsak(
     behandlingsresultat: Behandlingsresultat? = null,
     aktivBehandlingId: Long? = null,
 ) {
-    if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
+    if (restFagsak.status != Ressurs.Status.SUKSESS) throw Feil("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     assertEquals(fagsakStatus, restFagsak.data?.status)
 
     val aktivBehandling =

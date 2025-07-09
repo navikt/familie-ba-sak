@@ -82,7 +82,7 @@ class AvstemmingService(
         logger.info("Utfører konsistensavstemOppdragData: Sender perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr")
         val dataChunk =
             dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, chunkNr)
-                ?: error("Finner ingen datachunk for $transaksjonsId og $chunkNr")
+                ?: throw Feil("Finner ingen datachunk for $transaksjonsId og $chunkNr")
 
         if (dataChunk.erSendt) {
             logger.info("Utfører konsistensavstemOppdragData: Perioder for transaksjonsId $transaksjonsId og chunk nr $chunkNr er allerede sendt.")
@@ -232,12 +232,12 @@ class AvstemmingService(
                             behandlingId = kildeBehandlingId.toString(),
                             aktivFødselsnummer =
                                 aktiveFødselsnummere[kildeBehandlingId]
-                                    ?: error("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
+                                    ?: throw Feil("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
                             perioder =
                                 andeler
                                     .map {
                                         it.periodeOffset
-                                            ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
+                                            ?: throw Feil("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
                                     }.toSet(),
                             utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId],
                         )

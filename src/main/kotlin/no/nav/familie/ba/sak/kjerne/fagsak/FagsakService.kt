@@ -379,7 +379,7 @@ class FagsakService(
                                 }.fold(
                                     onSuccess = { it },
                                     onFailure = {
-                                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
                                     },
                                 )
 
@@ -462,7 +462,7 @@ class FagsakService(
                                 }.fold(
                                     onSuccess = { it },
                                     onFailure = {
-                                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
                                     },
                                 )
 

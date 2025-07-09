@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -20,13 +21,13 @@ class VedtakService(
 
     fun hentVedtaksdatoForBehandlingThrows(behandlingId: Long): LocalDateTime =
         vedtakRepository.finnVedtaksdatoForBehandling(behandlingId)
-            ?: error("Finner ikke vedtaksato for behandling=$behandlingId")
+            ?: throw Feil("Finner ikke vedtaksato for behandling=$behandlingId")
 
     fun oppdater(vedtak: Vedtak): Vedtak =
         if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
             vedtakRepository.saveAndFlush(vedtak)
         } else {
-            error("Forsøker å oppdatere et vedtak som ikke er lagret")
+            throw Feil("Forsøker å oppdatere et vedtak som ikke er lagret")
         }
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak =

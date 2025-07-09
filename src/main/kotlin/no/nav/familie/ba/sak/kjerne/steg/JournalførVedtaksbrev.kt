@@ -154,7 +154,7 @@ class JournalførVedtaksbrev(
         eksternReferanseId: String,
     ): String {
         val vedleggPdf =
-            hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
+            hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: throw Feil("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
 
         val brev =
             listOf(

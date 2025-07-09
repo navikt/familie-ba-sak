@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -23,7 +24,7 @@ object ValideringUtil {
                 utbetalingsoppdrag,
             )
         ) {
-            error("Har ikke kontrollert behandlingene:$ukontrollerteBehandlingId")
+            throw Feil("Har ikke kontrollert behandlingene:$ukontrollerteBehandlingId")
         }
     }
 

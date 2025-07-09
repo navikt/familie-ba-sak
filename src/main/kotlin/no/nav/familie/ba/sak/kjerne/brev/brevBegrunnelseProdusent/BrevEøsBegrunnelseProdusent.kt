@@ -62,7 +62,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                         periodegrunnlagForPersonerIBegrunnelse = periodegrunnlagForPersonerIBegrunnelse,
                     )
 
-            else -> error("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
+            else -> throw Feil("Feltet 'periodeResultat' er ikke satt for begrunnelse fra sanity '${sanityBegrunnelse.apiNavn}'.")
         }
 
     return if (kompetanser.isEmpty() && sanityBegrunnelse.periodeResultat == SanityPeriodeResultat.IKKE_INNVILGET) {

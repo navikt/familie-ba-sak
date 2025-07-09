@@ -72,7 +72,7 @@ class PersongrunnlagService(
 
     fun hentSøkerOgBarnPåBehandlingThrows(behandlingId: Long): List<PersonEnkel> =
         hentSøkerOgBarnPåBehandling(behandlingId)
-            ?: error("Finner ikke søker/barn på behandling=$behandlingId")
+            ?: throw Feil("Finner ikke søker/barn på behandling=$behandlingId")
 
     fun hentSøkerOgBarnPåBehandling(behandlingId: Long): List<PersonEnkel>? =
         personopplysningGrunnlagRepository

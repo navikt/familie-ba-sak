@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedÅr
@@ -123,7 +124,7 @@ private fun VedtaksperiodeMedBegrunnelser.hentTomTekstForBrev(
         BrevPeriodeType.INGEN_UTBETALING -> if (this.type == Vedtaksperiodetype.AVSLAG) "til og med $tomDato " else ""
         BrevPeriodeType.INGEN_UTBETALING_UTEN_PERIODE -> ""
         BrevPeriodeType.FORTSATT_INNVILGET -> ""
-        else -> error("$brevPeriodeType skal ikke brukes")
+        else -> throw Feil("$brevPeriodeType skal ikke brukes")
     }
 }
 

@@ -236,7 +236,7 @@ class VedtaksperiodeService(
         val vurderteBarnSomPersoner =
             barnaAktørSomVurderes.map { barnAktørSomVurderes ->
                 persongrunnlag.barna.find { it.aktør == barnAktørSomVurderes }
-                    ?: error("Finner ikke barn som har blitt vurdert i persongrunnlaget")
+                    ?: throw Feil("Finner ikke barn som har blitt vurdert i persongrunnlaget")
             }
 
         vurderteBarnSomPersoner.map { it.fødselsdato.toYearMonth() }.toSet().forEach { fødselsmåned ->

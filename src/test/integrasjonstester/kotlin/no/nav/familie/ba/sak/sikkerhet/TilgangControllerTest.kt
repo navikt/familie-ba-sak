@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -31,7 +32,7 @@ class TilgangControllerTest(
         } answers { firstArg<List<String>>().map { Tilgang(it, true) } }
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
-        val tilgangDTO = response.body?.data ?: error("Fikk ikke forventet respons")
+        val tilgangDTO = response.body?.data ?: throw Feil("Fikk ikke forventet respons")
         assertThat(tilgangDTO.adressebeskyttelsegradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
         assertThat(tilgangDTO.saksbehandlerHarTilgang).isEqualTo(true)
     }

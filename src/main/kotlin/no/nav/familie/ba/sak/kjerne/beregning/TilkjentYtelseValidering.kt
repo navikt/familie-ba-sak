@@ -246,7 +246,7 @@ object TilkjentYtelseValidering {
         val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
         val ordinær = satser.filter { it.type == SatsType.ORBA }
         val utvidet = satser.filter { it.type == SatsType.UTVIDET_BARNETRYGD }
-        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty()) error("Fant ikke satser ved validering")
+        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty()) throw Feil("Fant ikke satser ved validering")
         val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp

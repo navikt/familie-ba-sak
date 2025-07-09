@@ -60,7 +60,7 @@ class SendVedtakTilInfotrygdTask(
         return if (førsteUtbetalingsperiode != null) {
             førsteUtbetalingsperiode.fom?.førsteDagIInneværendeMåned() ?: throw Feil("Fra og med-dato kan ikke være null")
         } else {
-            error("Finner ikke første utbetalingsperiode")
+            throw Feil("Finner ikke første utbetalingsperiode")
         }
     }
 

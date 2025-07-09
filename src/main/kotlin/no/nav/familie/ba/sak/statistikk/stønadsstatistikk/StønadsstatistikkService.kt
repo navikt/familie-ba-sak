@@ -63,7 +63,7 @@ class StønadsstatistikkService(
 
         if (datoVedtak == null) {
             datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId).singleOrNull()?.vedtaksdato
-                ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
+                ?: throw Feil("Fant ikke vedtaksdato for behandling $behandlingId")
         }
 
         val tidspunktVedtak = datoVedtak
@@ -177,7 +177,7 @@ class StønadsstatistikkService(
                 andelerForSegment.filter { it.erAndelSomSkalSendesTilOppdrag() }.map { andel ->
                     val personForAndel =
                         søkerOgBarn.find { person -> andel.aktør == person.aktør }
-                            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                            ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
                     UtbetalingsDetaljDVHV2(
                         person =
                             lagPersonDVHV2(

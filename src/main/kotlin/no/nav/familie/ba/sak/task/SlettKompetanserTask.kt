@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -29,7 +30,7 @@ class SlettKompetanserTask(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.aktiv || behandling.status != BehandlingStatus.UTREDES) {
-            error("Behandling $behandlingId er ikke i ferd med å utredes.")
+            throw Feil("Behandling $behandlingId er ikke i ferd med å utredes.")
         }
         kompetanseService.skjemaService.slettSkjemaer(BehandlingId(behandlingId))
         tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandling)

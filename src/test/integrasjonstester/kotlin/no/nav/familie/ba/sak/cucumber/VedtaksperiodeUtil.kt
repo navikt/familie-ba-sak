@@ -85,9 +85,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.random.Random
 
-fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) = this[behandlingId] ?: error("Finner ikke behandling med id $behandlingId")
+fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) = this[behandlingId] ?: throw Feil("Finner ikke behandling med id $behandlingId")
 
-fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag = this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
+fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag = this[behandlingId] ?: throw Feil("Finner ikke persongrunnlag for behandling med id $behandlingId")
 
 fun lagFagsaker(dataTable: DataTable) =
     dataTable
@@ -122,7 +122,7 @@ fun lagVedtak(
         dataTable
             .groupByBehandlingId()
             .map {
-                lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling"))
+                lagVedtak(behandlinger[it.key] ?: throw Feil("Finner ikke behandling"))
             },
     )
 }
@@ -383,7 +383,7 @@ fun lagUtenlandskperiodeBeløp(
 
 private fun validerErLandkode(it: String) {
     if (it.length != 2) {
-        error("$it er ikke en landkode")
+        throw Feil("$it er ikke en landkode")
     }
 }
 

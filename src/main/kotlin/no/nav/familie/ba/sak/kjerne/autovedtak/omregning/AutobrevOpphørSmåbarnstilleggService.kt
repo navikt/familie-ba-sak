@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.OmregningBrevData
@@ -34,7 +35,7 @@ class AutobrevOpphørSmåbarnstilleggService(
     ) {
         val behandling =
             behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)
-                ?: error("Fant ikke aktiv behandling")
+                ?: throw Feil("Fant ikke aktiv behandling")
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             persongrunnlagService.hentAktivThrows(behandling.id)

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
@@ -36,7 +37,7 @@ class AuditLogger(
     private val audit = LoggerFactory.getLogger("auditLogger")
 
     fun log(data: Sporingsdata) {
-        val request = getRequest() ?: throw IllegalArgumentException("Ikke brukt i context av en HTTP request")
+        val request = getRequest() ?: throw Feil("Ikke brukt i context av en HTTP request")
 
         if (!SikkerhetContext.erMaskinTilMaskinToken()) {
             audit.info(createAuditLogString(data, request))
@@ -74,5 +75,5 @@ class AuditLogger(
             data.custom3?.let { "cs6Label=${it.key} cs6=${it.value}" },
         ).joinToString(" ")
 
-    private fun getCallId(): String = MDC.get(MDCConstants.MDC_CALL_ID) ?: throw IllegalStateException("Mangler callId")
+    private fun getCallId(): String = MDC.get(MDCConstants.MDC_CALL_ID) ?: throw Feil("Mangler callId")
 }

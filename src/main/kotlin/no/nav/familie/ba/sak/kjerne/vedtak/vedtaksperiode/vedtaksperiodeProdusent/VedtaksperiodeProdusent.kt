@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
@@ -500,7 +501,7 @@ fun lagPeriodeForOmregningsbehandling(
             fom = nåDato.førsteDagIInneværendeMåned(),
             tom =
                 nesteEndringITilkjentYtelse
-                    ?: error("Fant ingen andeler for ${nåDato.tilMånedÅr()}. Autobrev skal ikke brukes for opphør."),
+                    ?: throw Feil("Fant ingen andeler for ${nåDato.tilMånedÅr()}. Autobrev skal ikke brukes for opphør."),
             vedtak = vedtak,
             type = Vedtaksperiodetype.UTBETALING,
         ),

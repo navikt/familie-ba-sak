@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -41,7 +42,7 @@ data class UtbetalingsperiodeDetalj(
     ) : this(
         person =
             personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilRestPerson()
-                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel"),
+                ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel"),
         ytelseType = andel.type,
         utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
         erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
@@ -61,8 +62,8 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
             .filter { !it.verdi.isEmpty() }
             .map { periode ->
                 Utbetalingsperiode(
-                    periodeFom = periode.fom ?: throw IllegalStateException("Fra og med-dato kan ikke være null"),
-                    periodeTom = periode.tom ?: throw IllegalStateException("Til og med-dato kan ikke være null"),
+                    periodeFom = periode.fom ?: throw Feil("Fra og med-dato kan ikke være null"),
+                    periodeTom = periode.tom ?: throw Feil("Til og med-dato kan ikke være null"),
                     ytelseTyper = periode.verdi.map { andelTilkjentYtelse -> andelTilkjentYtelse.type },
                     utbetaltPerMnd = periode.verdi.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
                     antallBarn =
@@ -92,7 +93,7 @@ fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeD
     this.map { andel ->
         val personForAndel =
             personopplysningGrunnlag.personer.find { person -> andel.aktør == person.aktør }
-                ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
+                ?: throw Feil("Fant ikke personopplysningsgrunnlag for andel")
 
         UtbetalingsperiodeDetalj(
             person = personForAndel.tilRestPerson(),

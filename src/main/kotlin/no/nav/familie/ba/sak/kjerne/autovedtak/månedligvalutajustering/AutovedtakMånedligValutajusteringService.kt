@@ -53,7 +53,7 @@ class AutovedtakMånedligValutajusteringService(
     ) {
         logger.info("Utfører månedlig valutajustering for fagsak=$fagsakId og måned=$måned")
 
-        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
         val sisteValutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
         if (!sisteValutakurser.måValutakurserOppdateresForMåned(måned)) {
             logger.info("Valutakursene er allerede oppdatert for fagsak $fagsakId. Hopper ut")

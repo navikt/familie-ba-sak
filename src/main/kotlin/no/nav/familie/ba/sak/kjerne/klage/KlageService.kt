@@ -181,7 +181,7 @@ class KlageService(
             eksternBehandlingId = this.id.toString(),
             behandlingstype = this.type.visningsnavn,
             resultat = this.resultat.displayName,
-            vedtakstidspunkt = vedtak.vedtaksdato ?: error("Mangler vedtakstidspunkt for behandling=$id"),
+            vedtakstidspunkt = vedtak.vedtaksdato ?: throw Feil("Mangler vedtakstidspunkt for behandling=$id"),
             fagsystemType = FagsystemType.ORDNIÆR,
             regelverk = this.kategori.tilRegelverk(),
         )
