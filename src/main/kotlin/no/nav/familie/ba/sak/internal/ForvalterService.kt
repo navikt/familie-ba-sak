@@ -284,11 +284,11 @@ class ForvalterService(
 
     @Transactional
     fun finnFagsakSomSkalHaMinsideAktivertOgLagTask(
-        antallFagsak: Int,
+        antallFagsaker: Int,
         dryRun: Boolean = true,
     ) {
         val fagsakerSomSkalHaMinsideAktivert =
-            fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, antallFagsak)).content
+            fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, antallFagsaker)).content
         logger.info("Fant ${fagsakerSomSkalHaMinsideAktivert.size} fagsaker som ikke har fått minside aktivert")
 
         if (!dryRun) {

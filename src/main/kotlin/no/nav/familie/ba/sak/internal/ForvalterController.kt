@@ -552,7 +552,7 @@ class ForvalterController(
 
         forvalterService.finnFagsakSomSkalHaMinsideAktivertOgLagTask(
             dryRun = opprettMinsideAktiveringTaskDto.dryRun,
-            antallFagsak = opprettMinsideAktiveringTaskDto.antallFagsaker,
+            antallFagsaker = opprettMinsideAktiveringTaskDto.antallFagsaker,
         )
 
         return ResponseEntity.ok("Kjørt OK")
