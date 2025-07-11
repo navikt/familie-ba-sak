@@ -36,7 +36,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.task.AktiverMinsideTask
 import no.nav.familie.log.mdc.MDCConstants
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -67,6 +69,7 @@ class ForvalterService(
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val oppdaterTilkjentYtelseService: OppdaterTilkjentYtelseService,
+    private val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -276,6 +279,25 @@ class ForvalterService(
                 return@map Pair(fagsakId, andelTilkjentYtelseKorreksjoner.tilAndelerTilkjentYtelseKorreksjonerDto())
             }
             return@map Pair(fagsakId, null)
+        }
+    }
+
+    @Transactional
+    fun finnFagsakSomSkalHaMinsideAktivertOgLagTask(
+        antallFagsak: Int,
+        dryRun: Boolean = true,
+    ) {
+        val fagsakerSomSkalHaMinsideAktivert =
+            fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, antallFagsak)).content
+        logger.info("Fant ${fagsakerSomSkalHaMinsideAktivert.size} fagsaker som ikke har fått minside aktivert")
+
+        if (!dryRun) {
+            logger.info("Oppretter AktiverMinsideTask for ${fagsakerSomSkalHaMinsideAktivert.size} fagsaker")
+            fagsakerSomSkalHaMinsideAktivert.forEach { fagsak ->
+                taskService.save(
+                    AktiverMinsideTask.opprettTask(fagsak.aktør),
+                )
+            }
         }
     }
 
