@@ -14,8 +14,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktivering
+import no.nav.familie.ba.sak.kjerne.minside.MinsideAktiveringRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
-import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøker
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -36,6 +38,7 @@ class FagsakRepositoryTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired private val minsideAktiveringRepository: MinsideAktiveringRepository,
 ) : AbstractSpringIntegrationTest() {
     @BeforeEach
     fun beforeEach() {
@@ -240,23 +243,54 @@ class FagsakRepositoryTest(
     }
 
     @Nested
-    inner class FinnFagsakForSkjermetBarnSøker {
-        @Test
-        fun `Skal finne fagsak dersom det finnes en fagsak som har søker som skjermet barn søker`() {
+    inner class FinnLøpendeFagsakSomIkkeHarFåttMinsideAktivertTest {
+        @ParameterizedTest
+        @EnumSource(FagsakType::class, names = ["BARN_ENSLIG_MINDREÅRIG", "NORMAL"], mode = EnumSource.Mode.INCLUDE)
+        fun `Skal returnere løpende fagsaker av type enslig mindreårig og normal som ikke har fått minside aktivert`(fagsakType: FagsakType) {
             // Arrange
-            val barn = aktørIdRepository.save(randomAktør())
-            val søker = aktørIdRepository.save(randomAktør())
-            val skjermetBarnSøker = skjermetBarnSøkerRepository.save(SkjermetBarnSøker(aktør = søker))
-
-            fagsakRepository.save(lagFagsakUtenId(aktør = barn, status = FagsakStatus.LØPENDE, skjermetBarnSøker = skjermetBarnSøker, type = FagsakType.SKJERMET_BARN))
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør, status = FagsakStatus.LØPENDE, type = fagsakType))
 
             // Act
-            val fagsak = fagsakRepository.finnFagsakForSkjermetBarnSøker(barn, søker)
+            val fagsaker = fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, 100)).content
 
             // Assert
-            assertThat(fagsak?.type).isEqualTo(FagsakType.SKJERMET_BARN)
-            assertThat(fagsak?.aktør).isEqualTo(barn)
-            assertThat(fagsak?.skjermetBarnSøker).isEqualTo(skjermetBarnSøker)
+            assertThat(fagsaker.size).isEqualTo(1)
+            assertThat(fagsaker.single()).isEqualTo(fagsak)
+        }
+
+        @ParameterizedTest
+        @EnumSource(FagsakType::class, names = ["INSTITUSJON", "SKJERMET_BARN"], mode = EnumSource.Mode.INCLUDE)
+        fun `Skal ikke returnere løpende fagsaker som ikke har fått minside aktivert men som er av INSTITUSJON eller SKJERMET_BARN`(fagsakType: FagsakType) {
+            // Arrange
+            val aktør = aktørIdRepository.save(randomAktør())
+            fagsakRepository.save(lagFagsakUtenId(aktør = aktør, status = FagsakStatus.LØPENDE, type = fagsakType))
+
+            // Act
+            val fagsaker = fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, 100)).content
+
+            // Assert
+            assertThat(fagsaker).isEmpty()
+        }
+
+        @ParameterizedTest
+        @EnumSource(FagsakType::class, names = ["BARN_ENSLIG_MINDREÅRIG", "NORMAL"], mode = EnumSource.Mode.INCLUDE)
+        fun `Skal ikke returnere løpende fagsaker av type enslig mindreårig og normal der aktør har fått minside aktivert`(fagsakType: FagsakType) {
+            // Arrange
+            val aktør = aktørIdRepository.save(randomAktør())
+            fagsakRepository.save(lagFagsakUtenId(aktør = aktør, status = FagsakStatus.LØPENDE, type = fagsakType))
+
+            minsideAktiveringRepository.saveAndFlush(
+                MinsideAktivering(
+                    aktør = aktør,
+                ),
+            )
+
+            // Act
+            val fagsaker = fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(PageRequest.of(0, 100)).content
+
+            // Assert
+            assertThat(fagsaker).isEmpty()
         }
     }
 }
