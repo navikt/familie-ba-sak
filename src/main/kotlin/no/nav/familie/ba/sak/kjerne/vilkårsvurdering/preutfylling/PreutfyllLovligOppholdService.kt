@@ -48,8 +48,8 @@ class PreutfyllLovligOppholdService(
             erBosattINorgeTidslinje
                 .kombinerMed(erNordiskStatsborgerTidslinje, erEØSBorgerOgHarArbeidsforholdTidslinje) { erBosatt, erNordisk, erEøsOgArbeidsforhold ->
                     when {
-                        erBosatt == true && erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap")
-                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger med arbeidsforhold")
+                        erBosatt == true && erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
+                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.")
                         else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(datoFørsteBostedadresse)
