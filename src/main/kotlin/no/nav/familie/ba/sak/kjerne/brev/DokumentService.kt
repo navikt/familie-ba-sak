@@ -116,7 +116,7 @@ class DokumentService(
                 null
             }
 
-        val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: error("Finnes ikke fagsak for fagsakId=$fagsakId")
+        val fagsak = fagsakRepository.finnFagsak(fagsakId) ?: throw Feil("Finnes ikke fagsak for fagsakId=$fagsakId")
 
         val brevmottakereFraBehandling = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
         val brevmottakere =

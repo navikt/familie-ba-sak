@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -132,7 +133,7 @@ class BehandlingMetrikker(
         if (!behandlingHentOgPersisterService.hent(behandlingId = behandling.id).erHenlagt()) {
             val vedtak =
                 vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
-                    ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
+                    ?: throw Feil("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
             val vedtaksperiodeMedBegrunnelser =
                 vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)

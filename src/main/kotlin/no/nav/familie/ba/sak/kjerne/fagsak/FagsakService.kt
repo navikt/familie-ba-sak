@@ -126,9 +126,7 @@ class FagsakService(
                 FagsakType.INSTITUSJON -> {
                     val orgnummer = institusjon?.orgNummer ?: throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
 
-                    fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, orgnummer)?.also {
-                        throw FunksjonellFeil("Det finnes allerede en institusjon fagsak på denne personen som er koblet til samme organisasjon.")
-                    }
+                    fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, orgnummer)
                 }
 
                 FagsakType.SKJERMET_BARN -> {
@@ -140,9 +138,7 @@ class FagsakService(
 
                     val søkersAktør = personidentService.hentOgLagreAktør(søkersIdent, true)
 
-                    fagsakRepository.finnFagsakForSkjermetBarnSøker(aktør, søkersAktør)?.also {
-                        throw FunksjonellFeil("Det finnes allerede en skjermet barn fagsak på dette barnet som er koblet til samme søker.")
-                    }
+                    fagsakRepository.finnFagsakForSkjermetBarnSøker(aktør, søkersAktør)
                 }
 
                 else -> fagsakRepository.finnFagsakForAktør(aktør, type)
@@ -383,7 +379,7 @@ class FagsakService(
                                 }.fold(
                                     onSuccess = { it },
                                     onFailure = {
-                                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
                                     },
                                 )
 
@@ -466,7 +462,7 @@ class FagsakService(
                                 }.fold(
                                     onSuccess = { it },
                                     onFailure = {
-                                        throw IllegalStateException("Feil ved henting av person fra PDL", it)
+                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
                                     },
                                 )
 

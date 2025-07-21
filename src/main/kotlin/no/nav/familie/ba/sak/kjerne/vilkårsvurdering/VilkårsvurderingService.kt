@@ -50,7 +50,7 @@ class VilkårsvurderingService(
 
         val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.id)
         if (aktivVilkårsvurdering != null) {
-            error("Det finnes allerede et aktivt vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
+            throw Feil("Det finnes allerede et aktivt vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)

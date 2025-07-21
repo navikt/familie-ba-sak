@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -128,7 +129,7 @@ class TestVerktøyController(
             } else if (envService.erProd()) {
                 "https://barnetrygd.intern.nav.no"
             } else {
-                error("Klarer ikke å utlede miljø for redirect til fagsak")
+                throw Feil("Klarer ikke å utlede miljø for redirect til fagsak")
             }
         val behandling = behandlingRepository.finnBehandlingNullable(behandlingId)
         return if (behandling == null) {

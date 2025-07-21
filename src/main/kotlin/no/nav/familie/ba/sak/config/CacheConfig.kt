@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
@@ -65,7 +66,7 @@ class CacheConfig {
         }
 }
 
-fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error("Finner ikke cache=$cache")
+fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: throw Feil("Finner ikke cache=$cache")
 
 /**
  * Henter tidligere cachet verdier, og henter ucachet verdier med [valueLoader]

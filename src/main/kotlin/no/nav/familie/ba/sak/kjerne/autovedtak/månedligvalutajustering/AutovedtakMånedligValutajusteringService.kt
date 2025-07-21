@@ -1,8 +1,7 @@
 ﻿package no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateProvider
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
@@ -40,7 +39,7 @@ class AutovedtakMånedligValutajusteringService(
     private val snikeIKøenService: SnikeIKøenService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingService: BehandlingService,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
     private val valutakursService: ValutakursService,
     private val simuleringService: SimuleringService,
     private val startSatsendring: StartSatsendring,
@@ -54,14 +53,14 @@ class AutovedtakMånedligValutajusteringService(
     ) {
         logger.info("Utfører månedlig valutajustering for fagsak=$fagsakId og måned=$måned")
 
-        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
+        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId) ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
         val sisteValutakurser = valutakursService.hentValutakurser(BehandlingId(sisteVedtatteBehandling.id))
         if (!sisteValutakurser.måValutakurserOppdateresForMåned(måned)) {
             logger.info("Valutakursene er allerede oppdatert for fagsak $fagsakId. Hopper ut")
             return
         }
 
-        if (måned != localDateProvider.now().toYearMonth()) {
+        if (måned != YearMonth.now(clockProvider.get())) {
             throw Feil("Prøver å utføre månedlig valutajustering for en annen måned enn nåværende måned.")
         }
 

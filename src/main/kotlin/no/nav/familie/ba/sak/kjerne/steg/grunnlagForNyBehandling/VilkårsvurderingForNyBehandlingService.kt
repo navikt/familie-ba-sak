@@ -270,7 +270,7 @@ class VilkårsvurderingForNyBehandlingService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
         if (behandling.skalBehandlesAutomatisk && personopplysningGrunnlag.barna.isEmpty()) {
-            throw IllegalStateException("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
+            throw Feil("PersonopplysningGrunnlag for fødselshendelse skal inneholde minst ett barn")
         }
     }
 

@@ -6,8 +6,8 @@ import io.mockk.just
 import io.mockk.justRun
 import io.mockk.mockk
 import junit.framework.TestCase.assertTrue
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.RealDateProvider
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
@@ -66,7 +66,7 @@ class VilkårsvurderingStegTest {
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = mockk(),
-            localDateProvider = RealDateProvider(),
+            clockProvider = TestClockProvider(),
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             unleashService = unleashService,

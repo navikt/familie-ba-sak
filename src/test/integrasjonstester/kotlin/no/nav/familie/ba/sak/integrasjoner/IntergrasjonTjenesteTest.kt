@@ -15,6 +15,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.status
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBarnetrygdSøknadV9
@@ -264,7 +265,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success("")))),
         )
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
+        assertThrows<Feil> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
     }
 
     @Test

@@ -113,6 +113,7 @@ data class VilkårResultat(
         oppdaterPekerTilBehandling()
         vurderesEtter = restVilkårResultat.vurderesEtter
         utdypendeVilkårsvurderinger = restVilkårResultat.utdypendeVilkårsvurderinger
+        begrunnelseForManuellKontroll = null
     }
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): VilkårResultat =

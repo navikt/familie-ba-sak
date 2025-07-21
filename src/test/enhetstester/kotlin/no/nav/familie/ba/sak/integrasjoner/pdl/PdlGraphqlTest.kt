@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonRelasjonerResponse
@@ -274,5 +275,5 @@ class PdlGraphqlTest {
         ).isEqualTo(Kjønn.KVINNE)
     }
 
-    private fun getFile(name: String): String = javaClass.classLoader?.getResource(name)?.file ?: error("Testkonfigurasjon feil")
+    private fun getFile(name: String): String = javaClass.classLoader?.getResource(name)?.file ?: throw Feil("Testkonfigurasjon feil")
 }

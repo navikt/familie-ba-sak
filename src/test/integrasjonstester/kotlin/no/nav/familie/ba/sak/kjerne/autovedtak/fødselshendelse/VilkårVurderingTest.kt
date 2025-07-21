@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -249,7 +250,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlag.personer.add(barn)
         personopplysningGrunnlag.personer.add(feilregistrertSøker)
 
-        assertThrows(IllegalStateException::class.java) {
+        assertThrows(Feil::class.java) {
             Vilkår.BOR_MED_SØKER.vurderVilkår(barn, LocalDate.now()).resultat
         }
     }

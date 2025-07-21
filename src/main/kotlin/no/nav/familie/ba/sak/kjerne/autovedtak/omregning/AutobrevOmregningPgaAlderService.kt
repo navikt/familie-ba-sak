@@ -40,7 +40,7 @@ class AutobrevOmregningPgaAlderService(
 
         val behandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(autobrevPgaAlderDTO.fagsakId)
-                ?: error("Fant ikke aktiv behandling")
+                ?: throw Feil("Fant ikke aktiv behandling")
 
         val behandlingsårsak =
             finnBehandlingÅrsakForAlder(

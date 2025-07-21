@@ -255,7 +255,7 @@ class YearMonthIterator(
         } else if (hoppMåneder < 0) {
             gjeldendeMåned.plusMonths(hoppMåneder) >= tilOgMedMåned.plusMonths(-1)
         } else {
-            throw IllegalStateException("Steglengde kan ikke være null")
+            throw Feil("Steglengde kan ikke være null")
         }
 
     override fun next(): YearMonth {

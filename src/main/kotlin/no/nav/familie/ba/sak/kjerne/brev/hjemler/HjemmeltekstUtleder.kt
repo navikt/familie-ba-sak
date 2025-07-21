@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.hjemler
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.slåSammen
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
@@ -24,7 +25,7 @@ class HjemmeltekstUtleder(
     ): String {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
         if (vilkårsvurdering == null) {
-            throw IllegalStateException("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+            throw Feil("Finner ikke vilkårsvurdering ved begrunning av vedtak")
         }
 
         val begrunnelseTilSanityBegrunnelse = sanityService.hentSanityBegrunnelser()

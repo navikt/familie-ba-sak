@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
@@ -48,7 +49,7 @@ data class DeltBosted(
         barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) },
     ).also {
         if (barnAktører.size != barnPersoner.size) {
-            throw Error("Ikke samsvar mellom antall aktører og barn lenger")
+            throw Feil("Ikke samsvar mellom antall aktører og barn lenger")
         }
     }
 

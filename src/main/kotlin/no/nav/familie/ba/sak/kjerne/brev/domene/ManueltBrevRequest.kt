@@ -107,7 +107,7 @@ data class ManueltBrevRequest(
 ) {
     override fun toString(): String = "${ManueltBrevRequest::class}, $brevmal"
 
-    fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
+    fun enhetNavn(): String = this.enhet?.enhetNavn ?: throw Feil("Finner ikke enhetsnavn på manuell brevrequest")
 
     fun mottakerlandSED(): List<String> {
         if (this.mottakerlandSed.contains("NO")) {
@@ -117,7 +117,7 @@ data class ManueltBrevRequest(
             )
         }
         return this.mottakerlandSed.takeIf { it.isNotEmpty() }
-            ?: error("Finner ikke noen mottakerland for SED på manuell brevrequest")
+            ?: throw Feil("Finner ikke noen mottakerland for SED på manuell brevrequest")
     }
 }
 
@@ -130,7 +130,7 @@ fun ManueltBrevRequest.byggMottakerdataFraBehandling(
 
     val hentPerson = { ident: String ->
         persongrunnlagService.hentPersonerPåBehandling(listOf(ident), behandling).singleOrNull()
-            ?: error("Fant flere eller ingen personer med angitt personident på behandlingId=${behandling.id}")
+            ?: throw Feil("Fant flere eller ingen personer med angitt personident på behandlingId=${behandling.id}")
     }
     val enhet =
         arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).run {

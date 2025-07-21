@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -53,7 +54,7 @@ data class PersonopplysningGrunnlag(
             personer.singleOrNull { it.type == PersonType.SØKER }
                 // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
                 ?: personer.singleOrNull()?.takeIf { it.type == PersonType.BARN }
-                ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
+                ?: throw Feil("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 
     val annenForelder: Person?
         get() = personer.singleOrNull { it.type == PersonType.ANNENPART }

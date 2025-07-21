@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -171,7 +172,7 @@ class BehandlingService(
         kopierVedtakBegrunnelser: Boolean = false,
     ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
-            ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
+            ?: throw Feil("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak =
             vedtakRepository

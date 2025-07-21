@@ -42,7 +42,9 @@ class AutovedtakSatsendringService(
             satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, behandlingsdata.satstidspunkt)
                 ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = behandlingsdata.satstidspunkt))
 
-        val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId) ?: error("Fant ikke siste vedtatte behandling for $fagsakId")
+        val sisteVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+                ?: throw Feil("Fant ikke siste vedtatte behandling for $fagsakId")
         if (sisteVedtatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteVedtatteBehandling.fagsak.id}")
 
         if (satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {

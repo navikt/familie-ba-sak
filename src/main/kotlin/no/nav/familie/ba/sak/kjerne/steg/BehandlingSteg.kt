@@ -206,7 +206,7 @@ fun hentNesteSteg(
             DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
             FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
             BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-            else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+            else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
         }
     }
 
@@ -225,7 +225,7 @@ fun hentNesteSteg(
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException(
+                else -> throw Feil(
                     "StegType ${utførendeStegType.displayName()} " +
                         "er ugyldig ved manuell migreringsbehandling",
                 )
@@ -242,7 +242,7 @@ fun hentNesteSteg(
                 BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException(
+                else -> throw Feil(
                     "StegType ${utførendeStegType.displayName()} " +
                         "er ugyldig ved migreringsbehandling med endre migreringsdato",
                 )
@@ -263,7 +263,7 @@ fun hentNesteSteg(
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk endring")
+                else -> throw Feil("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk endring")
             }
         }
 
@@ -279,7 +279,7 @@ fun hentNesteSteg(
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
             }
         }
 
@@ -307,7 +307,7 @@ fun hentNesteSteg(
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
             }
         }
 
@@ -332,7 +332,7 @@ fun hentNesteSteg(
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
             }
         }
 
@@ -360,7 +360,7 @@ fun hentNesteSteg(
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
             }
         }
 
@@ -383,7 +383,7 @@ fun hentNesteSteg(
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
             }
         }
 
@@ -402,7 +402,7 @@ fun hentNesteSteg(
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
             }
         }
     }

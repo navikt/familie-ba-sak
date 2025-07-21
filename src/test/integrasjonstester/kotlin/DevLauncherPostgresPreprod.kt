@@ -1,3 +1,4 @@
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.ApplicationConfig
 import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -37,7 +38,7 @@ private fun settClientIdOgSecret() {
         val inputStream = BufferedReader(InputStreamReader(process.inputStream))
         inputStream.lines().forEach { println(it) }
         inputStream.close()
-        error("Klarte ikke hente variabler fra Nais. Er du logget på Naisdevice og gcloud?")
+        throw Feil("Klarte ikke hente variabler fra Nais. Er du logget på Naisdevice og gcloud?")
     }
 
     val inputStream = BufferedReader(InputStreamReader(process.inputStream))

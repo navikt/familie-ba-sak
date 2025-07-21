@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
@@ -35,7 +36,7 @@ class FerdigstillBehandling(
         val erHenlagt = behandlingHentOgPersisterService.hent(behandling.id).erHenlagt()
 
         if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && !erHenlagt) {
-            error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
+            throw Feil("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
         }
 
         if (!erHenlagt) {

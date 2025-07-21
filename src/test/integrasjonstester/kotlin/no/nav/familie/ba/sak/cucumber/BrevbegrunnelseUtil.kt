@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevPeriodeParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.norskDatoFormatter
@@ -145,7 +146,7 @@ fun parseEøsBegrunnelse(rad: Tabellrad): EØSBegrunnelseData {
             søkersAktivitet == null ||
             søkersAktivitetsland == null
         ) {
-            error("Alle felter for kompetanse må fylles ut dersom ett av dem fylles ut.")
+            throw Feil("Alle felter for kompetanse må fylles ut dersom ett av dem fylles ut.")
         }
 
         EØSBegrunnelseDataMedKompetanse(

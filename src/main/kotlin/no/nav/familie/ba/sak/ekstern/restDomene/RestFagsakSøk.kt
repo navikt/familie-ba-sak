@@ -15,7 +15,7 @@ data class RestSøkParam(
         try {
             Fødselsnummer(personIdent)
             barnasIdenter.forEach { Fødselsnummer(it) }
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
             throw FunksjonellFeil("Ugyldig fødsels- eller d-nummer")
         }
     }

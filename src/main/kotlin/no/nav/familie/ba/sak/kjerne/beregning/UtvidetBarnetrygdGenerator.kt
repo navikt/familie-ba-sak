@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.filtrertForPerioderBarnaBorMedSøker
@@ -26,7 +27,7 @@ data class UtvidetBarnetrygdGenerator(
     ): List<AndelTilkjentYtelse> {
         if (utvidetVilkår.isEmpty() || andelerBarna.isEmpty()) return emptyList()
 
-        val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
+        val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: throw Feil("Vilkår mangler PersonResultat")
 
         val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkårForVoksenPerson(Vilkår.UTVIDET_BARNETRYGD)
 

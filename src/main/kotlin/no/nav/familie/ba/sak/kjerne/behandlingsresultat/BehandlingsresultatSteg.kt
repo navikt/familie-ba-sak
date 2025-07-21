@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.YearMonth
 
 @Service
 class BehandlingsresultatSteg(
@@ -62,7 +63,7 @@ class BehandlingsresultatSteg(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val valutakursRepository: ValutakursRepository,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
     private val kompetanseRepository: KompetanseRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
@@ -105,7 +106,7 @@ class BehandlingsresultatSteg(
             BehandlingsresultatValideringUtils.validerIngenEndringTilbakeITid(
                 andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,
                 andelerForrigeBehandling = andelerForrigeBehandling,
-                nåMåned = localDateProvider.now().toYearMonth(),
+                nåMåned = YearMonth.now(clockProvider.get()),
             )
             BehandlingsresultatValideringUtils.validerSatsErUendret(
                 andelerDenneBehandlingen = tilkjentYtelse.andelerTilkjentYtelse,

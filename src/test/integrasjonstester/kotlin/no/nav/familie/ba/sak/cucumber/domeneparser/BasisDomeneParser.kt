@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.cucumber.domeneparser
 
+import no.nav.familie.ba.sak.common.Feil
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -218,7 +219,9 @@ inline fun <reified T : Enum<T>> parseValgfriEnum(
 inline fun <reified T : Enum<T>> parseEnum(
     domenebegrep: Domenenøkkel,
     rad: Map<String, String>,
-): T = parseValgfriEnum<T>(domenebegrep, rad) ?: error("Fant ikke enum verdi for ${domenebegrep.nøkkel}. Gjelder rad $rad")
+): T =
+    parseValgfriEnum<T>(domenebegrep, rad)
+        ?: throw Feil("Fant ikke enum verdi for ${domenebegrep.nøkkel}. Gjelder rad $rad")
 
 inline fun <reified T : Enum<T>> parseEnumListe(
     domenebegrep: Domenenøkkel,

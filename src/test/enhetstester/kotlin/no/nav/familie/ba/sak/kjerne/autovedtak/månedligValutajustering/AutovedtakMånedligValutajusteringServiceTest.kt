@@ -4,8 +4,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.LocalDateProvider
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
@@ -31,20 +31,20 @@ import java.time.YearMonth
 class AutovedtakMånedligValutajusteringServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val valutaKursService = mockk<ValutakursService>()
-    private val localDateProvider = mockk<LocalDateProvider>()
+    private val clockProvider = TestClockProvider()
     private val startSatsendring = mockk<StartSatsendring>()
 
     private val autovedtakMånedligValutajusteringService =
         AutovedtakMånedligValutajusteringService(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             valutakursService = valutaKursService,
-            localDateProvider = localDateProvider,
             autovedtakService = mockk(),
             snikeIKøenService = mockk(),
             behandlingService = mockk(),
             simuleringService = mockk(),
             taskRepository = mockk(),
             startSatsendring = startSatsendring,
+            clockProvider = clockProvider,
         )
 
     @BeforeEach
@@ -54,7 +54,6 @@ class AutovedtakMånedligValutajusteringServiceTest {
 
     @Test
     fun `utførMånedligValutajustering kaster Feil hvis en annen enn nåværende måned blir sendt inn`() {
-        every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling()
         every { valutaKursService.hentValutakurser(any()) } returns
             listOf(
@@ -76,11 +75,10 @@ class AutovedtakMånedligValutajusteringServiceTest {
     }
 
     @Test
-    fun `utførMånedligValutajustering kaster IllegalStateException hvis fagsak ikke har en vedtatt behandling`() {
-        every { localDateProvider.now() } returns LocalDate.now()
+    fun `utførMånedligValutajustering kaster Feil hvis fagsak ikke har en vedtatt behandling`() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
 
-        assertThrows<IllegalStateException> {
+        assertThrows<Feil> {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
                 fagsakId = 0,
                 måned = YearMonth.now(),
@@ -95,7 +93,6 @@ class AutovedtakMånedligValutajusteringServiceTest {
         val fagsak = defaultFagsak()
         val behandling = lagBehandling(fagsak = fagsak)
 
-        every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { valutaKursService.hentValutakurser(any()) } returns
             listOf(
@@ -121,7 +118,6 @@ class AutovedtakMånedligValutajusteringServiceTest {
         val fagsak = defaultFagsak().apply { status = FagsakStatus.LØPENDE }
         val behandling = lagBehandling(fagsak = fagsak)
 
-        every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { valutaKursService.hentValutakurser(any()) } returns
             listOf(
@@ -150,7 +146,6 @@ class AutovedtakMånedligValutajusteringServiceTest {
         val åpenBehandling = lagBehandling(fagsak = fagsak, status = BehandlingStatus.FATTER_VEDTAK)
         val klokkenSeksNesteVirkedag = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0)
 
-        every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns åpenBehandling
         every { valutaKursService.hentValutakurser(any()) } returns
@@ -186,7 +181,6 @@ class AutovedtakMånedligValutajusteringServiceTest {
 
         mockkStatic(LocalDateTime::class)
         every { LocalDateTime.now() } returns nå
-        every { localDateProvider.now() } returns LocalDate.now()
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns behandling
         every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(any()) } returns åpenBehandling
         every { valutaKursService.hentValutakurser(any()) } returns

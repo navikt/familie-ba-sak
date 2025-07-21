@@ -65,7 +65,7 @@ class BehandlingsinformasjonUtleder(
 
             FagsakType.INSTITUSJON,
             -> {
-                fagsak.institusjon?.tssEksternId ?: throw IllegalStateException(
+                fagsak.institusjon?.tssEksternId ?: throw Feil(
                     "Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen",
                 )
             }

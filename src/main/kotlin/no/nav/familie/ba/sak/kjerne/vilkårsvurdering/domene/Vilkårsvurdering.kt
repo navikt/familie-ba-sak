@@ -14,6 +14,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -86,5 +87,5 @@ data class Vilkårsvurdering(
 
     fun hentPersonResultaterTil(aktørId: String): List<VilkårResultat> =
         personResultater.find { it.aktør.aktørId == aktørId }?.vilkårResultater?.toList()
-            ?: throw IllegalStateException("Fant ikke personresultat for $aktørId")
+            ?: throw Feil("Fant ikke personresultat for $aktørId")
 }

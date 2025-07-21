@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.MockPersonopplysningerService.Companion.leggTilPersonInfo
@@ -121,10 +121,10 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     lateinit var vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService
 
     @Autowired
-    lateinit var localDateProvider: LocalDateProvider
+    lateinit var settPåVentService: SettPåVentService
 
     @Autowired
-    lateinit var settPåVentService: SettPåVentService
+    lateinit var clockProvider: ClockProvider
 
     private val fnr = randomFnr()
 
@@ -240,7 +240,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
                 autovedtakService = autovedtakService,
                 oppgaveService = oppgaveService,
                 vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-                localDateProvider = localDateProvider,
+                clockProvider = clockProvider,
                 påVentService = settPåVentService,
                 stegService = stegService,
                 småbarnstilleggService = småbarnstilleggService,

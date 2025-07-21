@@ -430,7 +430,7 @@ class OppdaterTilkjentYtelseServiceTest {
             every { tilkjentYtelseRepository.save(any()) } returns tilkjentYtelse
 
             // Act & Assert
-            val exception = assertThrows<IllegalStateException> { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse, beregnetUtbetalingsoppdragLongId) }
+            val exception = assertThrows<Feil> { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse, beregnetUtbetalingsoppdragLongId) }
 
             assertThat(exception.message).isEqualTo("Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir 1 andeler men det er 2 andeler med kalkulertUtbetalingsbeløp != 0")
         }
@@ -512,7 +512,7 @@ class OppdaterTilkjentYtelseServiceTest {
             every { tilkjentYtelseRepository.save(any()) } returns tilkjentYtelse
 
             // Act & Assert
-            val exception = assertThrows<IllegalStateException> { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse, beregnetUtbetalingsoppdragLongId) }
+            val exception = assertThrows<Feil> { oppdaterTilkjentYtelseService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(tilkjentYtelse, beregnetUtbetalingsoppdragLongId) }
 
             assertThat(exception.message).isEqualTo("Feil ved oppdaterig av offset på andeler. Finner ikke andel med id 2 blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider [1, 3]")
         }
