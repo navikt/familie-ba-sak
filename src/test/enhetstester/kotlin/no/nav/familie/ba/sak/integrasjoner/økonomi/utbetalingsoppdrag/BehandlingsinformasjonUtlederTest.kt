@@ -551,7 +551,7 @@ class BehandlingsinformasjonUtlederTest {
 
         // Act & assert
         val exception =
-            assertThrows<IllegalStateException> {
+            assertThrows<Feil> {
                 behandlingsinformasjonUtleder.utled(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,
@@ -598,7 +598,7 @@ class BehandlingsinformasjonUtlederTest {
 
         // Act & assert
         val exception =
-            assertThrows<IllegalStateException> {
+            assertThrows<Feil> {
                 behandlingsinformasjonUtleder.utled(
                     saksbehandlerId = saksbehandlerId,
                     vedtak = vedtak,

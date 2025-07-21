@@ -115,7 +115,9 @@ class BeslutteVedtak(
                 validerErTilbakekrevingHvisFeilutbetaling(feilutbetaling, tilbakekrevingsvalg)
             }
 
-            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+            val vedtak =
+                vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+                    ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
             tilbakekrevingsvedtakMotregningService.finnTilbakekrevingsvedtakMotregning(behandling.id)?.let {
                 opprettJournalførTilbakekrevingsvedtakMotregningBrevTask(behandling)

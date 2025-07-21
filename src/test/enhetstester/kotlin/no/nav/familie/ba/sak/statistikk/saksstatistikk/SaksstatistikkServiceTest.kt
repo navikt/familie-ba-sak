@@ -7,6 +7,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.unmockkAll
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
@@ -530,9 +531,9 @@ internal class SaksstatistikkServiceTest {
                     "/schema/behandling-schema.json",
                 )
             } catch (e: Exception) {
-                throw IllegalStateException(
+                throw Feil(
                     "Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.",
-                    e,
+                    throwable = e,
                 )
             }
         }
@@ -564,9 +565,9 @@ internal class SaksstatistikkServiceTest {
                     "/schema/sak-schema.json",
                 )
             } catch (e: Exception) {
-                throw IllegalStateException(
+                throw Feil(
                     "Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.",
-                    e,
+                    throwable = e,
                 )
             }
         }

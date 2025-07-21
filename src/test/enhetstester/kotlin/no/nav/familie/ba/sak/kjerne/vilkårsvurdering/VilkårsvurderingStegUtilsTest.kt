@@ -12,9 +12,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -280,6 +283,42 @@ class VilkårsvurderingStegUtilsTest {
     }
 
     @Test
+    fun `skal sette erAutomatiskVurdert til false og begrunnelseForManuellKontroll til null`() {
+        val restVilkårResultat =
+            RestVilkårResultat(
+                id = 1,
+                behandlingId = behandling.id,
+                vilkårType = BOSATT_I_RIKET,
+                resultat = resultat,
+                periodeFom = LocalDate.of(2025, 7, 7),
+                periodeTom = LocalDate.of(2025, 7, 7),
+                begrunnelse = "",
+                endretAv = "",
+                endretTidspunkt = LocalDateTime.now(),
+            )
+
+        personResultat.vilkårResultater.forEach {
+            it.erAutomatiskVurdert = true
+            it.begrunnelseForManuellKontroll = INFORMASJON_FRA_SØKNAD
+        }
+
+        VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
+            personResultat,
+            restVilkårResultat,
+        )
+
+        with(personResultat.vilkårResultater.first { it.id == 1L }) {
+            assertThat(erAutomatiskVurdert).isFalse()
+            assertThat(begrunnelseForManuellKontroll).isNull()
+        }
+
+        assertThat(personResultat.vilkårResultater.filter { it.id != 1L }).allSatisfy {
+            assertThat(it.erAutomatiskVurdert).isTrue()
+            assertThat(it.begrunnelseForManuellKontroll).isEqualTo(INFORMASJON_FRA_SØKNAD)
+        }
+    }
+
+    @Test
     fun `Skal fjerne og ikke fylle inn tom periode i midten`() {
         VilkårsvurderingUtils.muterPersonResultatDelete(personResultat, 2)
 
@@ -445,7 +484,7 @@ class VilkårsvurderingStegUtilsTest {
             )
 
         val opprettetBosattIRiket =
-            initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == BOSATT_I_RIKET }
 
         assertEquals(2, opprettetBosattIRiket.size)
         assertEquals(
@@ -476,7 +515,7 @@ class VilkårsvurderingStegUtilsTest {
             )
 
         val opprettetBosattIRiket =
-            initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == BOSATT_I_RIKET }
 
         assertEquals(1, opprettetBosattIRiket.size)
         assertEquals(Resultat.OPPFYLT, opprettetBosattIRiket.first().resultat)
@@ -503,7 +542,7 @@ class VilkårsvurderingStegUtilsTest {
             )
 
         val opprettetBosattIRiket =
-            initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }
+            initiell.personResultater.flatMap { it.vilkårResultater }.filter { it.vilkårType == BOSATT_I_RIKET }
 
         assertEquals(2, opprettetBosattIRiket.size)
         assertTrue(opprettetBosattIRiket.none { it.resultat == Resultat.OPPFYLT })
@@ -529,7 +568,7 @@ class VilkårsvurderingStegUtilsTest {
                 .map {
                     VilkårResultat(
                         personResultat = personResultat,
-                        vilkårType = Vilkår.BOSATT_I_RIKET,
+                        vilkårType = BOSATT_I_RIKET,
                         resultat = it,
                         periodeFom = LocalDate.now().plusMonths(månedsteller++),
                         periodeTom = LocalDate.now().plusMonths(månedsteller++),

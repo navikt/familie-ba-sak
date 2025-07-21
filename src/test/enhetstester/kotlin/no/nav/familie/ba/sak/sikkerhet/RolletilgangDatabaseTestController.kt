@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -30,7 +31,7 @@ class RolletilgangDatabaseTestController(
         @RequestBody nyBehandling: NyBehandling,
     ): ResponseEntity<Ressurs<Behandling>> {
         if (environment.erAktiv(Profil.Prod) || environment.erAktiv(Profil.Preprod)) {
-            error("Controller feilaktig aktivert i miljø")
+            throw Feil("Controller feilaktig aktivert i miljø")
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Ressurs.success(behandlingService.opprettBehandling(nyBehandling)))

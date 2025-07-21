@@ -37,7 +37,7 @@ internal class TidKtTest {
 
         @Test
         fun `Test YearMonth range med tidligere sluttmåned og null som steg`() {
-            assertThrows<IllegalStateException> { (YearMonth.of(2021, 1)..YearMonth.of(2020, 11) step 0).toList() }
+            assertThrows<Feil> { (YearMonth.of(2021, 1)..YearMonth.of(2020, 11) step 0).toList() }
         }
     }
 

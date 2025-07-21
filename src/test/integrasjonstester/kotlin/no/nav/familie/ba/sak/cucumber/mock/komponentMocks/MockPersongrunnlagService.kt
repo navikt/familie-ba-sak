@@ -2,6 +2,7 @@
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -16,7 +17,9 @@ fun mockPersongrunnlagService(dataFraCucumber: VedtaksperioderOgBegrunnelserStep
 
     every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(any()) } answers {
         val behandlingId = firstArg<Long>()
-        val personopplysningGrunnlag = dataFraCucumber.persongrunnlag[behandlingId] ?: error("Fant ikke persongrunnlag for behandling $behandlingId")
+        val personopplysningGrunnlag =
+            dataFraCucumber.persongrunnlag[behandlingId]
+                ?: throw Feil("Fant ikke persongrunnlag for behandling $behandlingId")
         personopplysningGrunnlag.personer.map { it.tilPersonEnkel() }
     }
     every { persongrunnlagService.hentAktivThrows(any()) } answers {

@@ -112,9 +112,7 @@ inline fun <reified T : Enum<T>> String?.finnEnumverdi(apiNavn: String): T? {
     val enumverdi = enumValues<T>().find { this != null && it.name == this }
     if (enumverdi == null) {
         val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
-        logger.error(
-            "$this på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumValues<T>().javaClass.simpleName}",
-        )
+        logger.error("$this på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumValues<T>().javaClass.simpleName}")
     }
     return enumverdi
 }
@@ -155,6 +153,8 @@ enum class VilkårTrigger {
     VURDERING_ANNET_GRUNNLAG,
     MEDLEMSKAP,
     DELT_BOSTED,
+    BOSATT_PÅ_SVALBARD,
+    BOSATT_I_FINNMARK_NORD_TROMS,
     DELT_BOSTED_SKAL_IKKE_DELES,
     FAST_BOSTED,
 }
@@ -165,7 +165,8 @@ fun VilkårTrigger.stemmerMedVilkårsvurdering(utdypendeVilkårPåVilkårResulta
         VilkårTrigger.MEDLEMSKAP -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP)
         VilkårTrigger.DELT_BOSTED -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
         VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
-
+        VilkårTrigger.BOSATT_PÅ_SVALBARD -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD)
+        VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS -> utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS)
         VilkårTrigger.FAST_BOSTED -> !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) && !utdypendeVilkårPåVilkårResultat.contains(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
     }
 

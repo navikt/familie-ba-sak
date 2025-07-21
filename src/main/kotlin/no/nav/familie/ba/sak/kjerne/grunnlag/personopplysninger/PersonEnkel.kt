@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.LocalDate
 
@@ -18,6 +19,6 @@ data class PersonEnkel(
 fun Collection<PersonEnkel>.søker() =
     this.singleOrNull { it.type == PersonType.SØKER }
         ?: this.singleOrNull()?.takeIf { it.type == PersonType.BARN }
-        ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
+        ?: throw Feil("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 
 fun Collection<PersonEnkel>.barn(): List<PersonEnkel> = this.filter { it.type == PersonType.BARN }

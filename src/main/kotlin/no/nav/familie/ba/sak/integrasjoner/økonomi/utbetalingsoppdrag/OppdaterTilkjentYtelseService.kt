@@ -107,13 +107,13 @@ class OppdaterTilkjentYtelseService(
         val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
         if (tilkjentYtelse.behandling.erOppdaterUtvidetKlassekode()) {
             if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size && andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size + 1) {
-                throw IllegalStateException(
+                throw Feil(
                     "Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt eller ha en andel mer enn andelene med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0",
                 )
             }
         } else {
             if (andelerMedPeriodeId.size != andelerSomSkalSendesTilOppdrag.size) {
-                throw IllegalStateException(
+                throw Feil(
                     "Antallet andeler med oppdatert periodeOffset, forrigePeriodeOffset og kildeBehandlingId fra ny generator skal være likt antallet andeler med kalkulertUtbetalingsbeløp != 0. Generator gir ${andelerMedPeriodeId.size} andeler men det er ${andelerSomSkalSendesTilOppdrag.size} andeler med kalkulertUtbetalingsbeløp != 0",
                 )
             }
@@ -122,7 +122,7 @@ class OppdaterTilkjentYtelseService(
         andelerSomSkalSendesTilOppdrag.forEach { andel ->
             val andelMedOffset = andelerPåId[andel.id]
             if (andelMedOffset == null) {
-                throw IllegalStateException(
+                throw Feil(
                     "Feil ved oppdaterig av offset på andeler. Finner ikke andel med id ${andel.id} blandt andelene med oppdatert offset fra ny generator. Ny generator returnerer andeler med ider ${andelerPåId.values.map { it.id }}",
                 )
             }

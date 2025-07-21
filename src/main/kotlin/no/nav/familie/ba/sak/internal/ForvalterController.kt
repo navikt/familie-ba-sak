@@ -285,7 +285,7 @@ class ForvalterController(
         )
 
         val task = taskService.findById(taskId)
-        if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) error("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
+        if (task.type != GrensesnittavstemMotOppdrag.TASK_STEP_TYPE) throw Feil("sisteTaskId må være av typen ${GrensesnittavstemMotOppdrag.TASK_STEP_TYPE}")
         opprettTaskService.opprettGrensesnittavstemMotOppdragTask(GrensesnittavstemMotOppdrag.nesteAvstemmingDTO(task.triggerTid.toLocalDate()))
         return ResponseEntity.ok("Ok")
     }
@@ -537,10 +537,35 @@ class ForvalterController(
             ),
         )
     }
+
+    @PostMapping("/opprett-minside-task-for-fagsaker-uten-aktivering")
+    @Operation(
+        summary = "Oppretter task som aktiverer minside for fagsaker som ikke har fått det aktivert enda",
+    )
+    fun opprettMinsideAktiveringTaskForFagsakerUtenAktivering(
+        @RequestBody opprettMinsideAktiveringTaskDto: OpprettMinsideAktiveringTaskDto,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Aktiver",
+        )
+
+        forvalterService.finnFagsakSomSkalHaMinsideAktivertOgLagTask(
+            dryRun = opprettMinsideAktiveringTaskDto.dryRun,
+            antallFagsaker = opprettMinsideAktiveringTaskDto.antallFagsaker,
+        )
+
+        return ResponseEntity.ok("Kjørt OK")
+    }
 }
 
 data class FinnOgPatchAndelerRequestDto(
     val fagsaker: Set<Long>,
     val korrigerAndelerFraOgMedDato: LocalDate = LocalDate.of(2025, 2, 1),
+    val dryRun: Boolean = true,
+)
+
+data class OpprettMinsideAktiveringTaskDto(
+    val antallFagsaker: Int,
     val dryRun: Boolean = true,
 )

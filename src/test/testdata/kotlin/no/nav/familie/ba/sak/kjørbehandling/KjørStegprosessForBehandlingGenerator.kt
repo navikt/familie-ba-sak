@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjørbehandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.datagenerator.lagSøknadDTO
 import no.nav.familie.ba.sak.datagenerator.leggTilBegrunnelsePåVedtaksperiodeIBehandling
 import no.nav.familie.ba.sak.datagenerator.randomFnr
@@ -295,7 +296,7 @@ fun Vilkårsvurdering.oppdaterMedDataFra(vilkårsvurdering: Vilkårsvurdering) {
             val nyttVilkårResultat =
                 nyttPersonresultat.vilkårResultater
                     .find { it.vilkårType == vilkårResultatSomSkalOppdateres.vilkårType }
-                    ?: error(
+                    ?: throw Feil(
                         "Fant ikke ${vilkårResultatSomSkalOppdateres.vilkårType} i vilkårene som ble sendt med for " +
                             "${personResultatSomSkalOppdateres.aktør.aktivFødselsnummer()}.",
                     )

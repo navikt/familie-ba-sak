@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.overgangsstønad
 
-import no.nav.familie.ba.sak.common.LocalDateProvider
+import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 
 @Service
 class OvergangsstønadService(
@@ -26,7 +27,7 @@ class OvergangsstønadService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val localDateProvider: LocalDateProvider,
+    private val clockProvider: ClockProvider,
 ) {
     @Transactional
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
@@ -87,7 +88,7 @@ class OvergangsstønadService(
     fun hentPerioderMedFullOvergangsstønad(
         behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        val dagensDato = localDateProvider.now()
+        val dagensDato = LocalDate.now(clockProvider.get())
 
         val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id).map { it.tilInternPeriodeOvergangsstønad() }
         val overgangsstønadPerioderFraForrigeBehandling =
@@ -120,7 +121,7 @@ class OvergangsstønadService(
         val persongrunnlagFraSistIverksatteBehandling =
             persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.id)
 
-        val dagensDato = localDateProvider.now()
+        val dagensDato = LocalDate.now(clockProvider.get())
 
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør)

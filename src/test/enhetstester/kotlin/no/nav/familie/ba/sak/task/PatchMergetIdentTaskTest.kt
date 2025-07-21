@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -104,7 +105,7 @@ class PatchMergetIdentTaskTest {
 
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns emptySet()
 
-        assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
+        assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant ikke ident som skal patches på fagsak=${fagsak.id} aktører=[]")
         }
     }
@@ -121,7 +122,7 @@ class PatchMergetIdentTaskTest {
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(dto.fagsakId) } returns personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn().toSet()
         every { pdlIdentRestClient.hentIdenter(nyAktør.aktivFødselsnummer(), true) } returns emptyList()
 
-        assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
+        assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Ident som skal patches finnes ikke som historisk ident av ny ident")
         }
     }
@@ -145,7 +146,7 @@ class PatchMergetIdentTaskTest {
 
         every { personidentRepository.findByFødselsnummerOrNull(dto.nyIdent.ident) } returns Personident(nyAktør.aktivFødselsnummer(), nyAktør)
 
-        assertThrows<IllegalStateException> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
+        assertThrows<Feil> { task.doTask(Task(payload = objectMapper.writeValueAsString(dto), type = PatchMergetIdentTask.TASK_STEP_TYPE)) }.also {
             assertThat(it.message).isEqualTo("Fant allerede en personident for nytt fødselsnummer")
         }
     }

@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -43,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.tilTidslinje
 import org.assertj.core.api.Assertions.assertThat
@@ -50,6 +52,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.data.domain.Slice
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -70,6 +73,7 @@ class ForvalterServiceTest {
     private val utbetalingsTidslinjeService = mockk<UtbetalingsTidslinjeService>()
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
     private val oppdaterTilkjentYtelseService = mockk<OppdaterTilkjentYtelseService>()
+    private val taskService = mockk<TaskService>()
 
     private val forvalterService =
         ForvalterService(
@@ -86,6 +90,7 @@ class ForvalterServiceTest {
             utbetalingsTidslinjeService = utbetalingsTidslinjeService,
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             oppdaterTilkjentYtelseService = oppdaterTilkjentYtelseService,
+            taskService = taskService,
         )
 
     @Test
@@ -619,6 +624,70 @@ class ForvalterServiceTest {
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.forrigePeriodeId }).containsExactlyInAnyOrder(2, 3)
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.korrigertAndel.kildeBehandlingId }?.toSet()).containsExactlyInAnyOrder(sisteIverksatteBehandling.id)
             assertThat(andelTilkjentYtelseKorreksjonerForFagsak.second?.map { it.andelMedFeil.id }).containsExactlyInAnyOrder(andelTilkjentYtelse2.id, andelTilkjentYtelse3.id)
+        }
+    }
+
+    @Nested
+    inner class FinnFagsakSomSkalHaMinsideAktivertOgLagTaskTest {
+        @Test
+        fun `Skal ikke opprette noe task hvis dryRun er satt til true`() {
+            // Arrange
+            val mockFagsakSlice =
+                mockk<Slice<Fagsak>> {
+                    every { content } returns listOf(mockk())
+                    every { hasNext() } returns false
+                    every { iterator() } returns content.iterator()
+                }
+
+            every { fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(any()) } returns mockFagsakSlice
+
+            // Act
+            forvalterService.finnFagsakSomSkalHaMinsideAktivertOgLagTask(100, true)
+
+            // Assert
+            verify(exactly = 0) { taskService.save(any()) }
+        }
+
+        @Test
+        fun `Skal ikke opprette noe task hvis dryRun er satt til false men det ikke finnes fagsak som skal ha minside aktivert`() {
+            // Arrange
+            val mockFagsakSlice =
+                mockk<Slice<Fagsak>> {
+                    every { content } returns emptyList()
+                    every { hasNext() } returns false
+                    every { iterator() } returns content.iterator()
+                }
+
+            every { fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(any()) } returns mockFagsakSlice
+
+            // Act
+            forvalterService.finnFagsakSomSkalHaMinsideAktivertOgLagTask(100, false)
+
+            // Assert
+            verify(exactly = 0) { taskService.save(any()) }
+        }
+
+        @Test
+        fun `Skal opprette task hvis dryRun er satt til false og det finnes fagsak som skal ha minside aktivert`() {
+            val fagsak1 = mockk<Fagsak>(relaxed = true)
+            val fagsak2 = mockk<Fagsak>(relaxed = true)
+
+            // Arrange
+            val mockFagsakSlice =
+                mockk<Slice<Fagsak>> {
+                    every { content } returns listOf(fagsak1, fagsak2)
+                    every { hasNext() } returns false
+                    every { iterator() } returns content.iterator()
+                }
+
+            every { fagsakRepository.finnLøpendeFagsakSomIkkeHarFåttMinsideAktivert(any()) } returns mockFagsakSlice
+            every { taskService.save(any()) } returns mockk()
+
+            // Act
+            forvalterService.finnFagsakSomSkalHaMinsideAktivertOgLagTask(100, false)
+
+            // Assert
+            verify(exactly = 2) { taskService.save(any()) }
         }
     }
 

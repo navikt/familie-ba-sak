@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
-import no.nav.familie.ba.sak.common.MockedDateProvider
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
@@ -100,7 +100,6 @@ class CucumberMock(
     scope: CoroutineScope? = null,
 ) {
     val clockProvider = lagClockProviderMedFastTidspunkt(dataFraCucumber.dagensDato)
-    val mockedDateProvider = MockedDateProvider(dataFraCucumber.dagensDato)
     val persongrunnlagService = mockPersongrunnlagService(dataFraCucumber)
     val fagsakService = mockFagsakService(dataFraCucumber)
     val fagsakRepository = mockFagsakRepository(dataFraCucumber)
@@ -152,7 +151,7 @@ class CucumberMock(
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
             togglesForBehandling.forEach { (toggleId, isEnabled) ->
-                val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw IllegalStateException("$toggleId does not exist")
+                val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw Feil("$toggleId does not exist")
                 every { unleashNextMedContextService.isEnabled(featureToggle, behandlingId) } returns isEnabled
             }
         }
@@ -177,7 +176,7 @@ class CucumberMock(
             tilkjentYtelseRepository = tilkjentYtelseRepository,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            localDateProvider = mockedDateProvider,
+            clockProvider = clockProvider,
         )
 
     val tilpassDifferanseberegningSøkersYtelserService =
@@ -318,7 +317,7 @@ class CucumberMock(
         AutomatiskOppdaterValutakursService(
             valutakursService = valutakursService,
             vedtaksperiodeService = vedtaksperiodeService,
-            localDateProvider = mockedDateProvider,
+            clockProvider = clockProvider,
             ecbService = ecbService,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -399,7 +398,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             kompetanseService = kompetanseService,
-            localDateProvider = mockedDateProvider,
+            clockProvider = clockProvider,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
         )
 
@@ -420,7 +419,7 @@ class CucumberMock(
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
-            localDateProvider = mockedDateProvider,
+            clockProvider = clockProvider,
             kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
@@ -573,7 +572,7 @@ class CucumberMock(
             tilpassKompetanserTilRegelverkService = tilpassKompetanserTilRegelverkService,
             vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
             månedligValutajusteringService = månedligValutajusteringService,
-            localDateProvider = mockedDateProvider,
+            clockProvider = clockProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             unleashService = unleashNextMedContextService,
@@ -670,7 +669,7 @@ class CucumberMock(
             autovedtakService = autovedtakService,
             oppgaveService = oppgaveService,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-            localDateProvider = mockedDateProvider,
+            clockProvider = clockProvider,
             påVentService = mockPåVentService,
             stegService = stegService,
             småbarnstilleggService = småbarnstilleggService,

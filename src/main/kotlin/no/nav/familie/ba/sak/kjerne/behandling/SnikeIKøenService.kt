@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -27,11 +28,11 @@ class SnikeIKøenService(
     ) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         if (!behandling.aktiv) {
-            error("Behandling=$behandlingId er ikke aktiv")
+            throw Feil("Behandling=$behandlingId er ikke aktiv")
         }
         val behandlingStatus = behandling.status
         if (behandlingStatus !== BehandlingStatus.UTREDES && behandlingStatus !== BehandlingStatus.SATT_PÅ_VENT) {
-            error("Behandling=$behandlingId kan ikke settes på maskinell vent då status=$behandlingStatus")
+            throw Feil("Behandling=$behandlingId kan ikke settes på maskinell vent då status=$behandlingStatus")
         }
         behandling.status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT
         behandling.aktiv = false
@@ -95,7 +96,7 @@ class SnikeIKøenService(
         behandlingHentOgPersisterService
             .hentBehandlinger(fagsakId, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
             .takeIf { it.isNotEmpty() }
-            ?.let { it.singleOrNull() ?: error("Forventer kun en behandling på vent for fagsak=$fagsakId") }
+            ?.let { it.singleOrNull() ?: throw Feil("Forventer kun en behandling på vent for fagsak=$fagsakId") }
 
     private fun aktiverBehandlingPåVent(
         aktivBehandling: Behandling?,
@@ -125,7 +126,7 @@ class SnikeIKøenService(
         behandlingPåVent: Behandling,
     ) {
         if (behandlingPåVent.aktiv) {
-            error("Åpen behandling har feil tilstand $behandlingPåVent")
+            throw Feil("Åpen behandling har feil tilstand $behandlingPåVent")
         }
         if (aktivBehandling != null && aktivBehandling.status != BehandlingStatus.AVSLUTTET) {
             throw BehandlingErIkkeAvsluttetException(aktivBehandling)

@@ -69,7 +69,7 @@ class VilkårService(
 
         val vilkårResultat =
             personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
-                ?: error("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
+                ?: throw Feil("Finner ikke vilkår med vilkårId $vilkårId på personResultat ${personResultat.id}")
 
         vilkårResultat.also {
             it.standardbegrunnelser = restVilkårResultat.avslagBegrunnelser ?: emptyList()
