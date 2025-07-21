@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
+import no.nav.familie.tidslinje.tomTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import org.springframework.stereotype.Service
@@ -59,9 +60,21 @@ class PreutfyllLovligOppholdService(
 
         val datoFørsteBostedadresse = finnDatoFørsteBostedsadresseINorge(personResultat) ?: LocalDate.MIN
 
+        val erNordiskHelePerioden =
+            erNordiskStatsborgerTidslinje
+                .tilPerioderIkkeNull()
+                .all { it.verdi == true }
+
         val erEØSBorgerOgHarArbeidsforholdTidslinje =
-            erEøsBorgerOgHarArbeidsforholdTidslinjeOverride
-                ?: lagErEØSBorgerOgHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)
+            when {
+                erNordiskHelePerioden -> tomTidslinje() // Trenger ikke hente
+                erEøsBorgerOgHarArbeidsforholdTidslinjeOverride != null -> erEøsBorgerOgHarArbeidsforholdTidslinjeOverride
+                else -> lagErEØSBorgerOgHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)
+            }
+//
+//        val erEØSBorgerOgHarArbeidsforholdTidslinje2 =
+//            erEøsBorgerOgHarArbeidsforholdTidslinjeOverride
+//                ?: lagErEØSBorgerOgHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)
 
         val harLovligOppholdTidslinje =
             erBosattINorgeTidslinje
