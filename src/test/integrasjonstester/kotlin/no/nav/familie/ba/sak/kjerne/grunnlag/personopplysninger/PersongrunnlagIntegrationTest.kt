@@ -119,7 +119,8 @@ class PersongrunnlagIntegrationTest(
 
     @Test
     fun `Skal hente arbeidsforhold for mor når hun er EØS-borger og det er en automatisk behandling`() {
-        val morAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
+        val fødselsnrMor = randomFnr()
+        val morAktør = personidentService.hentOgLagreAktør(fødselsnrMor, true)
         val barn1Aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
 
         leggTilPersonInfo(
@@ -182,7 +183,7 @@ class PersongrunnlagIntegrationTest(
             målform = Målform.NB,
         )
 
-        verify(exactly = 1) { mockIntegrasjonClient.hentArbeidsforhold(any(), any()) }
+        verify(exactly = 1) { mockIntegrasjonClient.hentArbeidsforhold(fødselsnrMor, any()) }
     }
 
     @Test
