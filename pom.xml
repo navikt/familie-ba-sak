@@ -643,7 +643,7 @@
         </profile>
 
         <profile>
-            <id>kover</id>
+            <id>coverage</id>
             <build>
                 <plugins>
                     <plugin>
