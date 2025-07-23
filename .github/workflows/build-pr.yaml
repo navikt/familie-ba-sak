@@ -26,7 +26,7 @@ jobs:
     with:
       profile: 'enhetstest'
       with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
-      maven-custom-args: '-Dmaven.artifact.threads=10" -Dkover.reportXml.path=target/kover/UT.xml'
+      maven-custom-args: '-Dmaven.artifact.threads=10 -Dkover.reportXml.path=target/kover/UT.xml'
       coverage-artifact-name: 'koverUT'
       coverage-artifact-path: 'target/kover/UT.xml'
     secrets: inherit
@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
 
   verdikjedetest-feature-toggle-off:
-    name: Verdikjedetester with feature toggles off
+    name: Verdikjedetester w/o toggles
     permissions:
       contents: read
       id-token: write
@@ -57,7 +57,7 @@ jobs:
     secrets: inherit
 
   verdikjedetest-feature-toggle-on:
-    name: Verdikjedetester with feature toggles on
+    name: Verdikjedetester w/ toggles
     permissions:
       contents: read
       id-token: write
