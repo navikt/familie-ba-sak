@@ -28,7 +28,7 @@ jobs:
       with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
 #      maven-custom-args: '-Dmaven.artifact.threads=10 -Dkover.reportXml.path=target/coverage/enhetstest.xml'
       coverage-artifact-name: 'coverage-enhetstest'
-      coverage-artifact-path: 'target/coverage/enhetstest.xml'
+      coverage-artifact-path: 'coverage/enhetstest.xml'
     secrets: inherit
 
   integration-test:
@@ -53,7 +53,7 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
       profile: 'verdikjedetest'
-      maven-custom-args: '-Dmaven.artifact.threads=10 -DargLine="-DmockFeatureToggleAnswer=false"'
+      maven-custom-args: '-DargLine="-DmockFeatureToggleAnswer=false"'
     secrets: inherit
 
   verdikjedetest-feature-toggle-on:
@@ -64,7 +64,7 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
       profile: 'verdikjedetest'
-      maven-custom-args: '-Dmaven.artifact.threads=10 -DargLine="-DmockFeatureToggleAnswer=true"'
+      maven-custom-args: '-DargLine="-DmockFeatureToggleAnswer=true"'
     secrets: inherit
 
   # TODO
@@ -85,13 +85,13 @@ jobs:
       - name: Last ned Kover UT rapport
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # ratchet:actions/download-artifact@v4
         with:
-          name: koverUT
-          path: kover/UT
+          name: 'coverage-enhetstest'
+          path: 'coverage/enhetstest'
       - name: Last ned Kover IT rapport
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # ratchet:actions/download-artifact@v4
         with:
-          name: koverIT
-          path: kover/IT
+          name: 'coverage-integrasjonstest'
+          path: 'coverage/integrasjonstest'
       - name: Cache Sonar packages
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # ratchet:actions/cache@v4
         with:
@@ -105,5 +105,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths="kover/UT/UT.xml,kover/IT/IT.xml"
+          mvn sonar:sonar -Dsonar.coverage.jacoco.xmlReportPaths="coverage/enhetstest/enhetstest.xml,coverage/integrasjonstest/integrasjonstest.xml"
 
