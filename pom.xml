@@ -626,6 +626,7 @@
             <id>enhetstest</id>
             <properties>
                 <excludedGroups>integration,verdikjedetest</excludedGroups>
+                <kover.reportXml.path>target/coverage/enhetstest.xml</kover.reportXml.path>
             </properties>
         </profile>
         <profile>
@@ -633,6 +634,7 @@
             <properties>
                 <groups>integration</groups>
                 <excludedGroups>verdikjedetest</excludedGroups>
+                <kover.reportXml.path>target/coverage/integrasjonstest.xml</kover.reportXml.path>
             </properties>
         </profile>
         <profile>
