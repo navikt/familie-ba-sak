@@ -39,7 +39,7 @@ class FerdigstillLagVedtakOppgaver(
                 payload = objectMapper.writeValueAsString(FerdigstillLagVedtakOppgaverDTO(behandlingId = behandlingId)),
                 properties =
                     Properties().apply {
-                        this["behandlingsId"] = behandlingId.toString()
+                        this["behandlingId"] = behandlingId.toString()
                     },
             )
     }
