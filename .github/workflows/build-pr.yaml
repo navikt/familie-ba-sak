@@ -42,7 +42,7 @@ jobs:
       with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
 #      maven-custom-args: '-Dmaven.artifact.threads=10 -Dkover.reportXml.path=target/kover/IT.xml'
       coverage-artifact-name: 'coverage-integrasjonstest'
-      coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
+      coverage-artifact-path: 'coverage/integrasjonstest.xml'
     secrets: inherit
 
   verdikjedetest-feature-toggle-off:
