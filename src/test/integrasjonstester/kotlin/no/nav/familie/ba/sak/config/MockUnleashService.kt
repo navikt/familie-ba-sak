@@ -10,11 +10,6 @@ import org.springframework.stereotype.Service
 @Profile("mock-unleash")
 class MockUnleashService : UnleashService {
     override fun isEnabled(toggleId: String): Boolean {
-        val mockFeatureToggleAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean()
-        if (mockFeatureToggleAnswer == null) throw Exception("mockFeatureToggleAnswer system property is not set")
-        if (mockFeatureToggleAnswer == false) throw Exception("mockFeatureToggleAnswer system property is false")
-        if (mockFeatureToggleAnswer == true) throw Exception("mockFeatureToggleAnswer system property is true")
-
         val mockUnleashServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
         return System.getProperty(toggleId)?.toBoolean() ?: mockUnleashServiceAnswer
     }
