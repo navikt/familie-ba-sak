@@ -51,7 +51,7 @@ class FerdigstillBehandlingTask(
                 properties =
                     Properties().apply {
                         this["personIdent"] = søkerIdent
-                        this["behandlingsId"] = behandlingsId.toString()
+                        this["behandlingId"] = behandlingsId.toString()
                     },
             )
     }

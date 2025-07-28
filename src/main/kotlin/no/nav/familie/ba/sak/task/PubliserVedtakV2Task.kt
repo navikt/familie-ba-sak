@@ -40,7 +40,7 @@ class PubliserVedtakV2Task(
                 properties =
                     Properties().apply {
                         this["personIdent"] = personIdent
-                        this["behandlingsId"] = behandlingsId.toString()
+                        this["behandlingId"] = behandlingsId.toString()
                     },
             )
     }

@@ -39,7 +39,7 @@ class JournalførVedtaksbrevTask(
                 "$vedtakId",
                 gammelTask?.metadata ?: Properties().apply {
                     this["personIdent"] = personIdent
-                    this["behandlingsId"] = behandlingId.toString()
+                    this["behandlingId"] = behandlingId.toString()
                     this["vedtakId"] = vedtakId.toString()
                 },
             )
