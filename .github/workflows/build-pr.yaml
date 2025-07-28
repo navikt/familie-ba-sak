@@ -26,8 +26,7 @@ jobs:
     with:
       profile: 'enhetstest'
       with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
-#      maven-custom-args: '-Dmaven.artifact.threads=10 -Dkover.reportXml.path=target/coverage/enhetstest.xml'
-      coverage-artifact-name: 'coverage-enhetstest'
+      coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
     secrets: inherit
 
@@ -40,13 +39,12 @@ jobs:
     with:
       profile: 'integrasjonstest'
       with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
-#      maven-custom-args: '-Dmaven.artifact.threads=10 -Dkover.reportXml.path=target/kover/IT.xml'
-      coverage-artifact-name: 'coverage-integrasjonstest'
+      coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
     secrets: inherit
 
   verdikjedetest-feature-toggle-off:
-    name: Verdikjedetester w/o toggles
+    name: Verdikjedetester toggle off
     permissions:
       contents: read
       id-token: write
@@ -57,7 +55,7 @@ jobs:
     secrets: inherit
 
   verdikjedetest-feature-toggle-on:
-    name: Verdikjedetester w/ toggles
+    name: Verdikjedetester toggle on
     permissions:
       contents: read
       id-token: write
@@ -67,8 +65,20 @@ jobs:
       maven-custom-args: '-DargLine="-DmockFeatureToggleAnswer=true"'
     secrets: inherit
 
-  # TODO
   sonar:
+    if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
+    name: Sonar
+    needs: [ unit-test, integration-test ]
+    uses: navikt/familie-baks-gha-workflows/.github/workflows/sonar.yaml@pull-request # ratchet:exclude
+    with:
+      unit-test-artifact-name: 'enhetstest'
+      unit-test-artifact-path: 'coverage/enhetstest'
+      integration-test-artifact-name: 'integrasjonstest'
+      integration-test-artifact-path: 'coverage/integrasjonstest'
+    secrets: inherit
+
+  # TODO
+  sonar-old:
     if: github.actor != 'dependabot[bot]' && github.event_name != 'merge_group'
     name: Sonar
     runs-on: ubuntu-latest
@@ -85,12 +95,12 @@ jobs:
       - name: Last ned Kover UT rapport
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # ratchet:actions/download-artifact@v4
         with:
-          name: 'coverage-enhetstest'
+          name: 'enhetstest'
           path: 'coverage/enhetstest'
       - name: Last ned Kover IT rapport
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # ratchet:actions/download-artifact@v4
         with:
-          name: 'coverage-integrasjonstest'
+          name: 'integrasjonstest'
           path: 'coverage/integrasjonstest'
       - name: Cache Sonar packages
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # ratchet:actions/cache@v4
