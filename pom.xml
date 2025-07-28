@@ -638,9 +638,17 @@
             </properties>
         </profile>
         <profile>
-            <id>verdikjedetest</id>
+            <id>verdikjedetest-toggle-on</id>
             <properties>
                 <groups>verdikjedetest</groups>
+                <argLine>-DmockFeatureToggleAnswer=true</argLine>
+            </properties>
+        </profile>
+        <profile>
+            <id>verdikjedetest-toggle-off</id>
+            <properties>
+                <groups>verdikjedetest</groups>
+                <argLine>-DmockFeatureToggleAnswer=false</argLine>
             </properties>
         </profile>
 

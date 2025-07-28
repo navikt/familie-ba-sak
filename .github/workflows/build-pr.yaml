@@ -50,8 +50,7 @@ jobs:
       id-token: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
-      profile: 'verdikjedetest'
-      maven-custom-args: '-DargLine="-DmockFeatureToggleAnswer=false"'
+      profile: 'verdikjedetest-toggle-off'
     secrets: inherit
 
   verdikjedetest-feature-toggle-on:
@@ -61,8 +60,7 @@ jobs:
       id-token: write
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
-      profile: 'verdikjedetest'
-      maven-custom-args: '-DargLine="-DmockFeatureToggleAnswer=true"'
+      profile: 'verdikjedetest-toggle-on'
     secrets: inherit
 
   sonar:
