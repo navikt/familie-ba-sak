@@ -183,17 +183,20 @@ class PdlRestClient(
         }
     }
 
-    fun hentOppholdUtenHistorikk(aktør: Aktør): List<Opphold> {
+    fun hentOppholdstillatelse(
+        aktør: Aktør,
+        historikk: Boolean = false,
+    ): List<Opphold> {
         val pdlPersonRequest =
             PdlPersonRequest(
-                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-                query = hentGraphqlQuery("opphold-uten-historikk"),
+                variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer(), historikk = historikk),
+                query = hentGraphqlQuery("oppholdstillatelse"),
             )
         val pdlResponse: PdlBaseResponse<PdlOppholdResponse> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
-                formål = "Hent opphold uten historikk",
+                formål = "Hent oppholdstillatelse",
             ) {
                 postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
             }
