@@ -104,7 +104,7 @@ class IverksettMotOppdragTask(
                 properties =
                     Properties().apply {
                         this["personIdent"] = aktør.aktivFødselsnummer()
-                        this["behandlingsId"] = behandlingsId.toString()
+                        this["behandlingId"] = behandlingsId.toString()
                         this["vedtakId"] = vedtaksId.toString()
                         this["fagsakId"] = fagsakId.toString()
                     },
