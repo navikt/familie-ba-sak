@@ -126,7 +126,20 @@ class TilkjentYtelseGenerator(
                 tilkjentYtelse = tilkjentYtelse,
             )
 
-        tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })
+        val finnmarkstilleggAndeler =
+            FinnmarkstilleggGenerator.lagFinnmarkstilleggAndeler(
+                behandling = behandling,
+                vilkårsvurdering = vilkårsvurdering,
+                barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
+                tilkjentYtelse = tilkjentYtelse,
+            )
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } +
+                andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } +
+                andelerTilkjentYtelseSmåbarnstillegg.map { it.andel } +
+                finnmarkstilleggAndeler,
+        )
 
         return tilkjentYtelse
     }
