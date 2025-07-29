@@ -227,6 +227,7 @@ class PensjonService(
             YtelseType.ORDINÆR_BARNETRYGD -> YtelseTypeEkstern.ORDINÆR_BARNETRYGD
             YtelseType.SMÅBARNSTILLEGG -> YtelseTypeEkstern.SMÅBARNSTILLEGG
             YtelseType.UTVIDET_BARNETRYGD -> YtelseTypeEkstern.UTVIDET_BARNETRYGD
+            YtelseType.FINNMARKSTILLEGG -> YtelseTypeEkstern.FINNMARKSTILLEGG
         }
 
     fun BehandlingKategori.tilPensjonSakstype(): SakstypeEkstern =

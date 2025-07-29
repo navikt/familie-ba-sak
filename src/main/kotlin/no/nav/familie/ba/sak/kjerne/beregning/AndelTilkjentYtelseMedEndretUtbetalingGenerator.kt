@@ -58,8 +58,10 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                             endretUtbetalingAndelerForPerson = endringerPerAktør.getOrDefault(aktør, emptyList()),
                             tilkjentYtelse = tilkjentYtelse,
                         )
-                    YtelseType.SMÅBARNSTILLEGG ->
-                        throw Feil("Småbarnstillegg kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
+                    YtelseType.SMÅBARNSTILLEGG,
+                    YtelseType.FINNMARKSTILLEGG,
+                    ->
+                        throw Feil("${ytelseType.name} kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
                 }
             }
 

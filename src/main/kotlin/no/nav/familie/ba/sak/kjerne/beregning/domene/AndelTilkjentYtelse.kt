@@ -184,6 +184,7 @@ enum class YtelseType(
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BAUTV-OP"),
     SMÅBARNSTILLEGG("BATRSMA"),
+    FINNMARKSTILLEGG("BATRFIN"),
     ;
 
     fun tilYtelseType(): YtelsetypeBA =
@@ -191,6 +192,7 @@ enum class YtelseType(
             ORDINÆR_BARNETRYGD -> YtelsetypeBA.ORDINÆR_BARNETRYGD
             UTVIDET_BARNETRYGD -> YtelsetypeBA.UTVIDET_BARNETRYGD
             SMÅBARNSTILLEGG -> YtelsetypeBA.SMÅBARNSTILLEGG
+            FINNMARKSTILLEGG -> YtelsetypeBA.FINNMARKSTILLEGG
         }
 
     fun tilSatsType(
@@ -209,6 +211,7 @@ enum class YtelseType(
             }
             UTVIDET_BARNETRYGD -> setOf(SatsType.UTVIDET_BARNETRYGD)
             SMÅBARNSTILLEGG -> setOf(SatsType.SMA)
+            FINNMARKSTILLEGG -> setOf(SatsType.FINNMARKSTILLEGG)
         }
 }
 
