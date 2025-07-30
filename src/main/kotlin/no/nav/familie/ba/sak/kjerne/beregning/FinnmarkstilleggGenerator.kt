@@ -31,7 +31,7 @@ object FinnmarkstilleggGenerator {
     ): List<AndelTilkjentYtelse> {
         val søkersPersonResultat =
             vilkårsvurdering.personResultater.find { it.erSøkersResultater() }
-                ?: throw Feil("Fant ikke personresultat for søker")
+                ?: return emptyList()
 
         val søkerBosattIFinnmarkTidslinje =
             søkersPersonResultat.vilkårResultater
