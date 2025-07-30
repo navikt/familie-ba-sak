@@ -23,10 +23,14 @@ class PreutfyllLovligOppholdService(
     private val statsborgerskapService: StatsborgerskapService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
+    // Fallback dato siden aareg ikke støtter LocalDate.MIN fordi det er for langt tilbake i tid.
+    // Satt til et vilkårlig tidspunkt i fortiden som ikke brekker validering. Burde utbedres til noe mer fornuftig.
+    private val år0 = LocalDate.of(0, 1, 1)
+
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
 
-        val datoFørsteBostedadresseNorgeSøker = finnDatoFørsteBostedsadresseINorge(søkersResultater) ?: LocalDate.MIN
+        val datoFørsteBostedadresseNorgeSøker = finnDatoFørsteBostedsadresseINorge(søkersResultater) ?: år0
         val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkersResultater, datoFørsteBostedadresseNorgeSøker)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
@@ -34,7 +38,7 @@ class PreutfyllLovligOppholdService(
                 if (personResultat.erSøkersResultater()) {
                     genererLovligOppholdVilkårResultat(personResultat)
                 } else {
-                    val datoFørsteBostedadresseNorgeBarn = finnDatoFørsteBostedsadresseINorge(personResultat) ?: LocalDate.MIN
+                    val datoFørsteBostedadresseNorgeBarn = finnDatoFørsteBostedsadresseINorge(personResultat) ?: år0
                     val erEøsBorgerOgHarArbeidsforholdTidslinjeBarn = erEØSBorgerOgHarArbeidsforholdTidslinjeSøker.beskjærFraOgMed(datoFørsteBostedadresseNorgeBarn)
                     genererLovligOppholdVilkårResultat(personResultat, erEøsBorgerOgHarArbeidsforholdTidslinjeBarn)
                 }
@@ -54,7 +58,7 @@ class PreutfyllLovligOppholdService(
 
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
 
-        val datoFørsteBostedadresse = finnDatoFørsteBostedsadresseINorge(personResultat) ?: LocalDate.MIN
+        val datoFørsteBostedadresse = finnDatoFørsteBostedsadresseINorge(personResultat) ?: år0
 
         val erEØSBorgerOgHarArbeidsforholdTidslinje =
             erEøsBorgerOgHarArbeidsforholdTidslinjeOverride ?: lagErEØSBorgerOgHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)
