@@ -52,7 +52,7 @@ fun beregnDifferanse(
         andelerTilkjentYtelse
             .filter { !it.erSøkersAndel() }
             .partition { it.type == YtelseType.ORDINÆR_BARNETRYGD }
-    val ordinæreAndelerTidslinjer = barnasOrdinæreAndeler.tilSeparateTidslinjerForBarna()
+    val barnasOrdinæreAndelerTidslinjer = barnasOrdinæreAndeler.tilSeparateTidslinjerForBarna()
 
     val barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer =
         utenlandskePeriodebeløpTidslinjer.outerJoin(valutakursTidslinjer) { upb, valutakurs ->
@@ -60,7 +60,7 @@ fun beregnDifferanse(
         }
 
     val barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer =
-        ordinæreAndelerTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
+        barnasOrdinæreAndelerTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
             aty.oppdaterDifferanseberegning(beløp)
         }
 

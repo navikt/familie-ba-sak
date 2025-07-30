@@ -38,6 +38,12 @@ object FinnmarkstilleggGenerator {
                 .filter { it.vilkårType == BOSATT_I_RIKET && BOSATT_I_FINNMARK_NORD_TROMS in it.utdypendeVilkårsvurderinger }
                 .lagForskjøvetTidslinjeForOppfylteVilkår(BOSATT_I_RIKET)
 
+        if (søkerBosattIFinnmarkTidslinje.erTom()) {
+            return emptyList()
+        }
+
+        val finnmarkstilleggSatsTidslinje = satstypeTidslinje(SatsType.FINNMARKSTILLEGG)
+
         return when (behandling.fagsak.type) {
             SKJERMET_BARN -> throw Feil("Finnmarkstillegg er ikke implementert for skjermet barn")
 
@@ -45,6 +51,7 @@ object FinnmarkstilleggGenerator {
                 lagAndeler(
                     barnetsAndelerTidslinje = barnasAndeler.tilTidslinje(),
                     barnHarRettTilFinnmarkstilleggTidslinje = søkerBosattIFinnmarkTidslinje.mapVerdi { it != null },
+                    finnmarkstilleggSatsTidslinje = finnmarkstilleggSatsTidslinje,
                     personResultat = søkersPersonResultat,
                     tilkjentYtelse = tilkjentYtelse,
                 )
@@ -67,7 +74,13 @@ object FinnmarkstilleggGenerator {
 
                         val barnetsAndelerTidslinje = barnasAndeler.filter { it.aktør == personResultat.aktør }.tilTidslinje()
 
-                        lagAndeler(barnetsAndelerTidslinje, barnHarRettTilFinnmarkstilleggTidslinje, personResultat, tilkjentYtelse)
+                        lagAndeler(
+                            barnetsAndelerTidslinje = barnetsAndelerTidslinje,
+                            barnHarRettTilFinnmarkstilleggTidslinje = barnHarRettTilFinnmarkstilleggTidslinje,
+                            finnmarkstilleggSatsTidslinje = finnmarkstilleggSatsTidslinje,
+                            personResultat = personResultat,
+                            tilkjentYtelse = tilkjentYtelse,
+                        )
                     }
         }
     }
@@ -75,13 +88,14 @@ object FinnmarkstilleggGenerator {
     private fun lagAndeler(
         barnetsAndelerTidslinje: Tidslinje<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnHarRettTilFinnmarkstilleggTidslinje: Tidslinje<Boolean>,
+        finnmarkstilleggSatsTidslinje: Tidslinje<Int>,
         personResultat: PersonResultat,
         tilkjentYtelse: TilkjentYtelse,
     ): List<AndelTilkjentYtelse> =
         barnetsAndelerTidslinje
             .kombinerMed(
                 barnHarRettTilFinnmarkstilleggTidslinje,
-                satstypeTidslinje(SatsType.FINNMARKSTILLEGG),
+                finnmarkstilleggSatsTidslinje,
             ) { andel, barnHarRettTilFinnmarkstillegg, sats ->
                 if (barnHarRettTilFinnmarkstillegg == true && andel != null && andel.prosent > BigDecimal.ZERO && sats != null) {
                     AndelTilkjentYtelseForTidslinje(
