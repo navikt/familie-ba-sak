@@ -59,4 +59,7 @@ enum class FeatureToggle(
 
     // NAV-24639
     MIN_SIDE_BARNETRYGD_ENDEPUNKT("familie-ba-sak.min-side-barnetrygd-endepunkt"),
+
+    // NAV-
+    SKAL_GENERERE_FINNMARKSTILLEGG("familie-ba-sak.andel-generering-finnmark-nord-troms"),
 }

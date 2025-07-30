@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndretUtbetalingGenerator.lagAndelerMedEndretUtbetalingAndeler
@@ -127,12 +128,16 @@ class TilkjentYtelseGenerator(
             )
 
         val finnmarkstilleggAndeler =
-            FinnmarkstilleggGenerator.lagFinnmarkstilleggAndeler(
-                behandling = behandling,
-                vilkårsvurdering = vilkårsvurdering,
-                barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
-                tilkjentYtelse = tilkjentYtelse,
-            )
+            if (unleashService.isEnabled(SKAL_GENERERE_FINNMARKSTILLEGG)) {
+                FinnmarkstilleggGenerator.lagFinnmarkstilleggAndeler(
+                    behandling = behandling,
+                    vilkårsvurdering = vilkårsvurdering,
+                    barnasAndeler = andelerTilkjentYtelseBarnaMedAlleEndringer,
+                    tilkjentYtelse = tilkjentYtelse,
+                )
+            } else {
+                emptyList()
+            }
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(
             andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } +
