@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
+import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
@@ -23,14 +25,10 @@ class PreutfyllLovligOppholdService(
     private val statsborgerskapService: StatsborgerskapService,
     private val integrasjonClient: IntegrasjonClient,
 ) {
-    // Fallback dato siden aareg ikke støtter LocalDate.MIN fordi det er for langt tilbake i tid.
-    // Satt til et vilkårlig tidspunkt i fortiden som ikke brekker validering. Burde utbedres til noe mer fornuftig.
-    private val år0 = LocalDate.of(0, 1, 1)
-
     fun preutfyllLovligOpphold(vilkårsvurdering: Vilkårsvurdering) {
         val søkersResultater = vilkårsvurdering.personResultater.first { it.erSøkersResultater() }
 
-        val datoFørsteBostedadresseNorgeSøker = finnDatoFørsteBostedsadresseINorge(søkersResultater) ?: år0
+        val datoFørsteBostedadresseNorgeSøker = finnDatoFørsteBostedsadresseINorge(søkersResultater) ?: PRAKTISK_TIDLIGSTE_DAG
         val erEØSBorgerOgHarArbeidsforholdTidslinjeSøker = lagErEØSBorgerOgHarArbeidsforholdTidslinje(søkersResultater, datoFørsteBostedadresseNorgeSøker)
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
@@ -38,7 +36,7 @@ class PreutfyllLovligOppholdService(
                 if (personResultat.erSøkersResultater()) {
                     genererLovligOppholdVilkårResultat(personResultat)
                 } else {
-                    val datoFørsteBostedadresseNorgeBarn = finnDatoFørsteBostedsadresseINorge(personResultat) ?: år0
+                    val datoFørsteBostedadresseNorgeBarn = finnDatoFørsteBostedsadresseINorge(personResultat) ?: PRAKTISK_TIDLIGSTE_DAG
                     val erEøsBorgerOgHarArbeidsforholdTidslinjeBarn = erEØSBorgerOgHarArbeidsforholdTidslinjeSøker.beskjærFraOgMed(datoFørsteBostedadresseNorgeBarn)
                     genererLovligOppholdVilkårResultat(personResultat, erEøsBorgerOgHarArbeidsforholdTidslinjeBarn)
                 }
@@ -58,7 +56,7 @@ class PreutfyllLovligOppholdService(
 
         val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
 
-        val datoFørsteBostedadresse = finnDatoFørsteBostedsadresseINorge(personResultat) ?: år0
+        val datoFørsteBostedadresse = finnDatoFørsteBostedsadresseINorge(personResultat) ?: PRAKTISK_TIDLIGSTE_DAG
 
         val erEØSBorgerOgHarArbeidsforholdTidslinje =
             erEøsBorgerOgHarArbeidsforholdTidslinjeOverride ?: lagErEØSBorgerOgHarArbeidsforholdTidslinje(personResultat, datoFørsteBostedadresse)
@@ -68,7 +66,7 @@ class PreutfyllLovligOppholdService(
                 .kombinerMed(erNordiskStatsborgerTidslinje, erEØSBorgerOgHarArbeidsforholdTidslinje) { erBosatt, erNordisk, erEøsOgArbeidsforhold ->
                     when {
                         erBosatt == true && erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
-                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.")
+                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_ARBEIDSFORHOLD)
                         else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(datoFørsteBostedadresse)
