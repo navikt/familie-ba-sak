@@ -25,7 +25,7 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
       profile: 'enhetstest'
-      with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
       coverage-artifact-name: 'enhetstest'
       coverage-artifact-path: 'target/coverage/enhetstest.xml'
     secrets: inherit
@@ -38,7 +38,7 @@ jobs:
     uses: navikt/familie-baks-gha-workflows/.github/workflows/pull-request-maven.yaml@pull-request # ratchet:exclude
     with:
       profile: 'integrasjonstest'
-      with-coverage: ${{ github.event_name != 'merge_group' && true || false }}
+      with-coverage: ${{ github.actor != 'dependabot[bot]' && github.event_name != 'merge_group' && true || false }}
       coverage-artifact-name: 'integrasjonstest'
       coverage-artifact-path: 'target/coverage/integrasjonstest.xml'
     secrets: inherit
