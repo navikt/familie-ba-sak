@@ -412,6 +412,7 @@ class UtbetalingssikkerhetTest {
                 SatsType.FINN_SVAL,
                 SatsType.ORBA,
                 SatsType.UTVIDET_BARNETRYGD,
+                SatsType.FINNMARKSTILLEGG,
             )
         assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
         assertEquals(støttedeSatstyper.size, SatsType.values().size)
