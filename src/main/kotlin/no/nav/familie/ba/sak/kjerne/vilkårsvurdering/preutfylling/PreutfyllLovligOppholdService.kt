@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -65,7 +66,7 @@ class PreutfyllLovligOppholdService(
                 .kombinerMed(erNordiskStatsborgerTidslinje, erEØSBorgerOgHarArbeidsforholdTidslinje) { erBosatt, erNordisk, erEøsOgArbeidsforhold ->
                     when {
                         erBosatt == true && erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
-                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.")
+                        erBosatt == true && erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_ARBEIDSFORHOLD)
                         else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(datoFørsteBostedadresse)
