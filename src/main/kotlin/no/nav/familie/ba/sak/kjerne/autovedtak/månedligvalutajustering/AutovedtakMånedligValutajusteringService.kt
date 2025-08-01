@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.prosessering.error.RekjørSenereException
-import no.nav.familie.util.VirkedagerProvider
+import no.nav.familie.util.VirkedagerProvider.nesteVirkedag
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -146,7 +146,7 @@ class AutovedtakMånedligValutajusteringService(
                 } else {
                     throw RekjørSenereException(
                         årsak = "Åpen behandling med status ${åpenBehandling.status} ble endret for under fire timer siden. Prøver igjen klokken 06.00 neste virkedag",
-                        triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0),
+                        triggerTid = nesteVirkedag(LocalDate.now()).atTime(6, 0),
                     )
                 }
 
@@ -158,10 +158,13 @@ class AutovedtakMånedligValutajusteringService(
             )
 
             BehandlingStatus.FATTER_VEDTAK,
-            -> throw RekjørSenereException(
-                årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen klokken 06.00 neste virkedag",
-                triggerTid = VirkedagerProvider.nesteVirkedag(LocalDate.now()).atTime(6, 0),
-            )
+            -> {
+                val klokken6OmTreVirkedager = nesteVirkedag(nesteVirkedag(nesteVirkedag(LocalDate.now()))).atTime(6, 0)
+                throw RekjørSenereException(
+                    årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen klokken 06.00 om tre virkedager",
+                    triggerTid = klokken6OmTreVirkedager,
+                )
+            }
 
             else -> throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
         }
