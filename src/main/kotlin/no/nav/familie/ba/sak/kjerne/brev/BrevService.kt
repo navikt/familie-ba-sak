@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.BrevBegrunnelseFeil
 import no.nav.familie.ba.sak.kjerne.brev.brevPeriodeProdusent.lagBrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakFinnmarkstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtFørsteBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Avslag
@@ -246,6 +247,11 @@ class BrevService(
                 AutovedtakNyfødtBarnFraFør(
                     vedtakFellesfelter = vedtakFellesfelter,
                     etterbetaling = hentEtterbetaling(vedtak),
+                )
+
+            Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG ->
+                AutovedtakFinnmarkstillegg(
+                    vedtakFellesfelter = vedtakFellesfelter,
                 )
 
             else -> throw Feil("Forsøker å hente vedtaksbrevdata for brevmal ${brevmal.visningsTekst}")
