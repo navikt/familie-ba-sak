@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.ekstern
+package no.nav.familie.ba.sak.ekstern.klage
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.klage.KlageService
@@ -89,4 +90,24 @@ class EksternKlageController(
 
         return Ressurs.success(klageService.hentFagsystemVedtak(fagsakId))
     }
+
+    @GetMapping("fagsak/{fagsakId}/tilgang")
+    fun hentTilgangTilFagsak(
+        @PathVariable fagsakId: Long,
+    ): Ressurs<FagsakTilgangDto> {
+        val fagsakTilgangDto: FagsakTilgangDto =
+            try {
+                tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+                FagsakTilgangDto(harTilgang = true)
+            } catch (e: RolleTilgangskontrollFeil) {
+                FagsakTilgangDto(harTilgang = false, begrunnelse = e.frontendFeilmelding)
+            }
+
+        return Ressurs.success(fagsakTilgangDto)
+    }
 }
+
+data class FagsakTilgangDto(
+    val harTilgang: Boolean,
+    val begrunnelse: String? = null
+)

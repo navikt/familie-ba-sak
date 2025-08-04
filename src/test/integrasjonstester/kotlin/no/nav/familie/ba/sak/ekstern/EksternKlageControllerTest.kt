@@ -6,10 +6,13 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.unmockkObject
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
+import no.nav.familie.ba.sak.ekstern.klage.EksternKlageController
+import no.nav.familie.ba.sak.ekstern.klage.FagsakTilgangDto
 import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -20,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Ressurs
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -95,6 +99,39 @@ class EksternKlageControllerTest(
             assertThat(eksternBehandlingRelasjon[0].eksternBehandlingId).isEqualTo(klagebehandlingId.toString())
             assertThat(eksternBehandlingRelasjon[0].eksternBehandlingFagsystem).isEqualTo(EksternBehandlingRelasjon.Fagsystem.KLAGE)
             assertThat(eksternBehandlingRelasjon[0].opprettetTid).isNotNull()
+        }
+    }
+
+    @Nested
+    inner class HarTilgangTilFagsak {
+        @Test
+        fun `skal returnere true dersom tilgang til fagsak`() {
+            // Arrange
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
+
+            every { tilgangService.validerTilgangTilFagsak(fagsak.id, any()) } just runs
+
+            // Act
+            val response: Ressurs<FagsakTilgangDto> = eksternKlageController.hentTilgangTilFagsak(fagsak.id)
+
+            // Assert
+            assertThat(response.data?.harTilgang).isTrue()
+        }
+
+        @Test
+        fun `skal returnere false dersom ikke tilgang til fagsak`() {
+            // Arrange
+            val aktør = aktørIdRepository.save(randomAktør())
+            val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
+            
+            every { tilgangService.validerTilgangTilFagsak(fagsak.id, any()) } throws RolleTilgangskontrollFeil("Ingen tilgang")
+
+            // Act
+            val response = eksternKlageController.hentTilgangTilFagsak(fagsak.id)
+
+            // Assert
+            assertThat(response.data?.harTilgang).isFalse()
         }
     }
 }
