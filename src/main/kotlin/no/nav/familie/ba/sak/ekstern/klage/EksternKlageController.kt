@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
+import no.nav.familie.kontrakter.felles.tilgangskontroll.FagsakTilgang
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -94,20 +95,15 @@ class EksternKlageController(
     @GetMapping("fagsak/{fagsakId}/tilgang")
     fun hentTilgangTilFagsak(
         @PathVariable fagsakId: Long,
-    ): Ressurs<FagsakTilgangDto> {
-        val fagsakTilgangDto: FagsakTilgangDto =
+    ): Ressurs<FagsakTilgang> {
+        val fagsakTilgang: FagsakTilgang =
             try {
                 tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
-                FagsakTilgangDto(harTilgang = true)
+                FagsakTilgang(harTilgang = true)
             } catch (e: RolleTilgangskontrollFeil) {
-                FagsakTilgangDto(harTilgang = false, begrunnelse = e.frontendFeilmelding)
+                FagsakTilgang(harTilgang = false, begrunnelse = e.frontendFeilmelding)
             }
 
-        return Ressurs.success(fagsakTilgangDto)
+        return Ressurs.success(fagsakTilgang)
     }
 }
-
-data class FagsakTilgangDto(
-    val harTilgang: Boolean,
-    val begrunnelse: String? = null
-)

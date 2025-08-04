@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.datagenerator.lagBehandlingUtenId
 import no.nav.familie.ba.sak.datagenerator.lagFagsakUtenId
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.ekstern.klage.EksternKlageController
-import no.nav.familie.ba.sak.ekstern.klage.FagsakTilgangDto
 import no.nav.familie.ba.sak.kjerne.behandling.EksternBehandlingRelasjonRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -24,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.tilgangskontroll.FagsakTilgang
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -113,7 +113,7 @@ class EksternKlageControllerTest(
             every { tilgangService.validerTilgangTilFagsak(fagsak.id, any()) } just runs
 
             // Act
-            val response: Ressurs<FagsakTilgangDto> = eksternKlageController.hentTilgangTilFagsak(fagsak.id)
+            val response: Ressurs<FagsakTilgang> = eksternKlageController.hentTilgangTilFagsak(fagsak.id)
 
             // Assert
             assertThat(response.data?.harTilgang).isTrue()
@@ -124,11 +124,11 @@ class EksternKlageControllerTest(
             // Arrange
             val aktør = aktørIdRepository.save(randomAktør())
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
-            
+
             every { tilgangService.validerTilgangTilFagsak(fagsak.id, any()) } throws RolleTilgangskontrollFeil("Ingen tilgang")
 
             // Act
-            val response = eksternKlageController.hentTilgangTilFagsak(fagsak.id)
+            val response: Ressurs<FagsakTilgang> = eksternKlageController.hentTilgangTilFagsak(fagsak.id)
 
             // Assert
             assertThat(response.data?.harTilgang).isFalse()
