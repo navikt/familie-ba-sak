@@ -159,7 +159,7 @@ class AutovedtakMånedligValutajusteringService(
 
             BehandlingStatus.FATTER_VEDTAK,
             -> {
-                val klokken6OmTreVirkedager = nesteVirkedag(nesteVirkedag(nesteVirkedag(LocalDate.now()))).atTime(6, 0)
+                val klokken6OmTreVirkedager = (1..3).fold(LocalDate.now()) { acc, _ -> nesteVirkedag(acc) }.atTime(6, 0)
                 throw RekjørSenereException(
                     årsak = "Åpen behandling har status ${åpenBehandling.status}. Prøver igjen klokken 06.00 om tre virkedager",
                     triggerTid = klokken6OmTreVirkedager,
