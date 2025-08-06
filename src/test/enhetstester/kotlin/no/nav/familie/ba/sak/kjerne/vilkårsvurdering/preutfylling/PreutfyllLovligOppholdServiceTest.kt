@@ -365,50 +365,5 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdResultater.begrunnelse)
                 .isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- EØS-borger og har arbeidsforhold i Norge.")
         }
-
-//        @Test
-//        fun `skal preutfylle oppfylt lovlig vilkår hvis EØS borger og arbeidsforhold, med ikke oppfylt periode uten norsk bostedadresse`() {
-//            // Arrange
-//            val vilkårsvurdering = lagVilkårsvurdering()
-//            val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
-//
-//            every { pdlRestClient.hentStatsborgerskap(personResultat.aktør, historikk = true) } returns
-//                listOf(
-//                    Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
-//                )
-//
-//            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-//                listOf(
-//                    Bostedsadresse(
-//                        gyldigFraOgMed = LocalDate.now().minusYears(5),
-//                        gyldigTilOgMed = LocalDate.now().minusYears(3),
-//                        vegadresse = lagVegadresse(12345L),
-//                    ),
-//                    Bostedsadresse(
-//                        gyldigFraOgMed = LocalDate.now().minusYears(1),
-//                        vegadresse = lagVegadresse(54321L),
-//                    ),
-//                )
-//            every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
-//
-//            every { integrasjonClient.hentArbeidsforhold(any(), LocalDate.now().minusYears(5)) } returns
-//                listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(5), null))))
-//
-//            // Act
-//            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
-//
-//            // Assert
-//            assertThat(personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }).hasSize(3)
-//            assertThat(personResultat.vilkårResultater.first().periodeFom).isEqualTo(LocalDate.now().minusYears(5))
-//            assertThat(personResultat.vilkårResultater.first().periodeTom).isEqualTo(LocalDate.now().minusYears(3))
-//            assertThat(personResultat.vilkårResultater.first().resultat).isEqualTo(Resultat.OPPFYLT)
-//
-//            assertThat(personResultat.vilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.periodeFom).isEqualTo(LocalDate.now().minusYears(3).plusDays(1))
-//            assertThat(personResultat.vilkårResultater.find { it.resultat == Resultat.IKKE_OPPFYLT }!!.periodeTom).isEqualTo(LocalDate.now().minusYears(1).minusDays(1))
-//
-//            assertThat(personResultat.vilkårResultater.last().periodeFom).isEqualTo(LocalDate.now().minusYears(1))
-//            assertThat(personResultat.vilkårResultater.last().periodeTom).isNull()
-//            assertThat(personResultat.vilkårResultater.last().resultat).isEqualTo(Resultat.OPPFYLT)
-//        }
     }
 }

@@ -45,20 +45,18 @@ class PreutfyllLovligOppholdService(
 
     private fun genererLovligOppholdVilkårResultat(
         personResultat: PersonResultat,
-        erEøsBorgerOgHarArbeidsforholdTidslinjeOverride: Tidslinje<Boolean>,
+        erEØSBorgerOgHarArbeidsforholdTidslinje: Tidslinje<Boolean>,
     ): Set<VilkårResultat> {
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
         val fomDatoForBeskjæring = finnFomDatoForBeskjæring(personResultat, personResultat.vilkårsvurdering) ?: PRAKTISK_TIDLIGSTE_DAG
 
-        val erEØSBorgerOgHarArbeidsforholdTidslinje = erEøsBorgerOgHarArbeidsforholdTidslinjeOverride
-
         val harLovligOppholdTidslinje =
             erNordiskStatsborgerTidslinje
-                .kombinerMed(erEØSBorgerOgHarArbeidsforholdTidslinje) { erNordisk, erEøsOgArbeidsforhold ->
+                .kombinerMed(erEØSBorgerOgHarArbeidsforholdTidslinje) { erNordisk, erEØSBorgerOgArbeidsforhold ->
                     when {
                         erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
-                        erEøsOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.")
+                        erEØSBorgerOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.")
                         else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(fomDatoForBeskjæring)
@@ -89,7 +87,7 @@ class PreutfyllLovligOppholdService(
                 .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
                 .filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
                 .mapNotNull { it.gyldigFraOgMed }
-                .minByOrNull { it }
+                .minOrNull()
 
         val barna = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).barna
 
@@ -105,8 +103,8 @@ class PreutfyllLovligOppholdService(
         fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> =
         lagErEØSBorgerTidslinje(personResultat)
-            .kombinerMed(lagHarArbeidsforholdTidslinje(personResultat, fomDatoForBeskjæring)) { erEøs, harArbeidsforhold ->
-                erEøs == true && harArbeidsforhold == true
+            .kombinerMed(lagHarArbeidsforholdTidslinje(personResultat, fomDatoForBeskjæring)) { erEØSBorger, harArbeidsforhold ->
+                erEØSBorger == true && harArbeidsforhold == true
             }
 
     private fun lagErEØSBorgerTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
@@ -117,10 +115,10 @@ class PreutfyllLovligOppholdService(
                 val gjeldende = it.first()
                 val neste = it.getOrNull(1)
 
-                val erEøs = statsborgerskapService.hentSterkesteMedlemskap(gjeldende) == Medlemskap.EØS
+                val erEØSBorger = statsborgerskapService.hentSterkesteMedlemskap(gjeldende) == Medlemskap.EØS
 
                 Periode(
-                    verdi = erEøs,
+                    verdi = erEØSBorger,
                     fom = gjeldende.gyldigFraOgMed,
                     tom = gjeldende.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
