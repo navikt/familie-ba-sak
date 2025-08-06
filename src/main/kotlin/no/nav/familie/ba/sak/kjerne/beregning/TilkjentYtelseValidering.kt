@@ -84,7 +84,7 @@ object TilkjentYtelseValidering {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke legge til en andel som ikke var der i forrige behandling. " +
-                                    "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
+                                        "Satsendringen prøver å legge til en andel i perioden ${nåværendeAndel.stønadFom} - ${nåværendeAndel.stønadTom}",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("forrigeAndel er null, nåværendeAndel=$nåværendeAndel") }
 
@@ -92,7 +92,7 @@ object TilkjentYtelseValidering {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke fjerne en andel som fantes i forrige behandling. " +
-                                    "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
+                                        "Satsendringen prøver å fjerne andel i perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("nåværendeAndel er null, forrigeAndel=$forrigeAndel") }
 
@@ -100,8 +100,8 @@ object TilkjentYtelseValidering {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke endre på prosenten til en andel. " +
-                                    "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
-                                    "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
+                                        "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                                        "Prøver å endre fra ${forrigeAndel.prosent} til ${nåværendeAndel?.prosent} prosent.",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
 
@@ -109,8 +109,8 @@ object TilkjentYtelseValidering {
                         throw SatsendringFeil(
                             melding =
                                 "Satsendring kan ikke endre YtelseType til en andel. " +
-                                    "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
-                                    "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
+                                        "Gjelder perioden ${forrigeAndel.stønadFom} - ${forrigeAndel.stønadTom}. " +
+                                        "Prøver å endre fra ytelsetype ${forrigeAndel.type} til ${nåværendeAndel?.type}.",
                             satsendringSvar = SatsendringSvar.BEHANDLING_HAR_FEIL_PÅ_ANDELER,
                         ).also { secureLogger.info("nåværendeAndel=$nåværendeAndel, forrigeAndel=$forrigeAndel") }
 
@@ -341,21 +341,29 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType,
 ) {
+    val antallOrdinær = andeler.count { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+    val antallFinnmarkstillegg = andeler.count { it.type == YtelseType.FINNMARKSTILLEGG }
+    val antallUtvidet = andeler.count { it.type == YtelseType.UTVIDET_BARNETRYGD }
+
     val maksAntallAndeler =
         when {
-            fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> 3
+            fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
+                if (antallOrdinær > 1 || antallFinnmarkstillegg > 1 || antallUtvidet > 1) {
+                    throw UtbetalingsikkerhetFeil(
+                        melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barnet kan ha maks én ordinær, en utvidet og en finnmarkstillegg andel for en gitt periode.",
+                        frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
+                    )
+                }
+                3
+            }
 
             person.type == PersonType.BARN -> {
-                val antallOrdinær = andeler.count { it.type == YtelseType.ORDINÆR_BARNETRYGD }
-                val antallFinnmarkstillegg = andeler.count { it.type == YtelseType.FINNMARKSTILLEGG }
-
                 if (antallOrdinær > 1 || antallFinnmarkstillegg > 1) {
                     throw UtbetalingsikkerhetFeil(
                         melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barn kan ha maks én ordinær og én finnmarkstillegg andel for en gitt periode.",
                         frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
                     )
                 }
-
                 2
             }
 
