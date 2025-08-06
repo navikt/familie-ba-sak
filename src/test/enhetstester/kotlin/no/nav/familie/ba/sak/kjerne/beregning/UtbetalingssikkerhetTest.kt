@@ -69,6 +69,41 @@ class UtbetalingssikkerhetTest {
     }
 
     @Test
+    fun `Skal ikke kaste feil når et barn har både finnmarkstillegg andel og ordinær for en periode`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN)
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.FINNMARKSTILLEGG,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    660,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                tilkjentYtelse,
+                listOf(person.tilPersonEnkel()),
+            )
+        }
+    }
+
+    @Test
     fun `Skal ikke kaste feil når en periode har like mange andeler som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
 
