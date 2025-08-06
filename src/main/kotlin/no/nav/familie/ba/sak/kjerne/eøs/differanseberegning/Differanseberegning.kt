@@ -52,9 +52,7 @@ fun beregnDifferanse(
         andelerTilkjentYtelse
             .filter { !it.erSøkersAndel() && it.type == YtelseType.ORDINÆR_BARNETRYGD }
 
-    val barnasFinnmarkstilleggAndeler =
-        andelerTilkjentYtelse
-            .filter { !it.erSøkersAndel() && it.type == YtelseType.FINNMARKSTILLEGG }
+    val barnasFinnmarkstilleggAndeler = andelerTilkjentYtelse.filter { it.type == YtelseType.FINNMARKSTILLEGG }
 
     val barnasOrdinæreAndelerTidslinjer = barnasOrdinæreAndeler.tilSeparateTidslinjerForBarna()
 
