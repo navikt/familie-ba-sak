@@ -39,13 +39,13 @@ class KlagebehandlingHenter(
         fun harKlagebehandlingKorrektStatus(behandlingStatus: BehandlingStatus) =
             when (behandlingStatus) {
                 BehandlingStatus.FERDIGSTILT,
-                    -> true
+                -> true
 
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.UTREDES,
                 BehandlingStatus.VENTER,
                 BehandlingStatus.SATT_PÅ_VENT,
-                    -> false
+                -> false
             }
 
         fun harKlagebehandlingKorrektHenlagtÅrsak(henlagtÅrsak: HenlagtÅrsak?): Boolean {
@@ -55,7 +55,7 @@ class KlagebehandlingHenter(
             return when (henlagtÅrsak) {
                 HenlagtÅrsak.TRUKKET_TILBAKE,
                 HenlagtÅrsak.FEILREGISTRERT,
-                    -> false
+                -> false
             }
         }
 
@@ -67,11 +67,11 @@ class KlagebehandlingHenter(
                 BehandlingResultat.MEDHOLD,
                 BehandlingResultat.IKKE_MEDHOLD,
                 BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
-                    -> true
+                -> true
 
                 BehandlingResultat.IKKE_SATT,
                 BehandlingResultat.HENLAGT,
-                    -> false
+                -> false
             }
         }
     }
