@@ -221,6 +221,7 @@ class TilkjentYtelseDifferanseberegningTest {
 
     @Test
     fun `Skal trekke fra finnmarkstillegg andel og ikke ordinær andel ved differanseberegning hvis det er nok med finnmarkstillegget`() {
+        // Arrange
         val barnsFødselsdato = 13.jan(2020)
         val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
@@ -268,6 +269,7 @@ class TilkjentYtelseDifferanseberegningTest {
                 ),
             )
 
+        // Act
         val andelerEtterDifferanseBeregning =
             beregnDifferanse(
                 andelerForBarn,
@@ -275,6 +277,7 @@ class TilkjentYtelseDifferanseberegningTest {
                 valutakurser = valutakursIPeriode,
             )
 
+        // Assert
         val ordinærAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.ORDINÆR_BARNETRYGD }
         val finnmarkstilleggAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.FINNMARKSTILLEGG }
 
@@ -284,6 +287,7 @@ class TilkjentYtelseDifferanseberegningTest {
 
     @Test
     fun `Skal trekke videre fra ordinær andel ved differanseberegning hvis det ikke er nok med finnmarkstillegget`() {
+        // Arrange
         val barnsFødselsdato = 13.jan(2020)
         val barn = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = barnsFødselsdato)
 
@@ -331,6 +335,7 @@ class TilkjentYtelseDifferanseberegningTest {
                 ),
             )
 
+        // Act
         val andelerEtterDifferanseBeregning =
             beregnDifferanse(
                 andelerForBarn,
@@ -338,6 +343,7 @@ class TilkjentYtelseDifferanseberegningTest {
                 valutakurser = valutakursIPeriode,
             )
 
+        // Assert
         val ordinærAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.ORDINÆR_BARNETRYGD }
         val finnmarkstilleggAndel = andelerEtterDifferanseBeregning.single { it.type == YtelseType.FINNMARKSTILLEGG }
 
