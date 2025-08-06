@@ -341,25 +341,26 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType,
 ) {
-    val maksAntallAndeler = when {
-        fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> 2
+    val maksAntallAndeler =
+        when {
+            fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> 2
 
-        person.type == PersonType.BARN -> {
-            val antallOrdinær = andeler.count { it.type == YtelseType.ORDINÆR_BARNETRYGD }
-            val antallFinnmarkstillegg = andeler.count { it.type == YtelseType.FINNMARKSTILLEGG }
+            person.type == PersonType.BARN -> {
+                val antallOrdinær = andeler.count { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+                val antallFinnmarkstillegg = andeler.count { it.type == YtelseType.FINNMARKSTILLEGG }
 
-            if (antallOrdinær > 1 || antallFinnmarkstillegg > 1) {
-                throw UtbetalingsikkerhetFeil(
-                    melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barn kan ha maks én ordinær og én finnmarkstillegg andel for en gitt periode.",
-                    frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. $KONTAKT_TEAMET_SUFFIX",
-                )
+                if (antallOrdinær > 1 || antallFinnmarkstillegg > 1) {
+                    throw UtbetalingsikkerhetFeil(
+                        melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barn kan ha maks én ordinær og én finnmarkstillegg andel for en gitt periode.",
+                        frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
+                    )
+                }
+
+                2
             }
 
-            2
+            else -> 2
         }
-
-        else -> 2
-    }
 
     val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)
 
