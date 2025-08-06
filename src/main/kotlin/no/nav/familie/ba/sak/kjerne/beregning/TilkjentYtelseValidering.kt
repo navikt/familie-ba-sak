@@ -343,7 +343,7 @@ private fun validerAtBeløpForPartStemmerMedSatser(
 ) {
     val maksAntallAndeler =
         when {
-            fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> 2
+            fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> 3
 
             person.type == PersonType.BARN -> {
                 val antallOrdinær = andeler.count { it.type == YtelseType.ORDINÆR_BARNETRYGD }
