@@ -1,6 +1,7 @@
-package no.nav.familie.ba.sak.ekstern
+package no.nav.familie.ba.sak.ekstern.klage
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.klage.KlageService
@@ -10,6 +11,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
+import no.nav.familie.kontrakter.felles.tilgangskontroll.FagsakTilgang
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -88,5 +90,20 @@ class EksternKlageController(
         }
 
         return Ressurs.success(klageService.hentFagsystemVedtak(fagsakId))
+    }
+
+    @GetMapping("fagsak/{fagsakId}/tilgang")
+    fun hentTilgangTilFagsak(
+        @PathVariable fagsakId: Long,
+    ): Ressurs<FagsakTilgang> {
+        val fagsakTilgang: FagsakTilgang =
+            try {
+                tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.ACCESS)
+                FagsakTilgang(harTilgang = true)
+            } catch (e: RolleTilgangskontrollFeil) {
+                FagsakTilgang(harTilgang = false, begrunnelse = e.frontendFeilmelding)
+            }
+
+        return Ressurs.success(fagsakTilgang)
     }
 }
