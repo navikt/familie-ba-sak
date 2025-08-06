@@ -84,10 +84,11 @@ fun beregnDifferanse(
             aty.oppdaterDifferanseberegning(beløpSomSkalTrekkesFraOrdinærAndel)
         }
 
-    val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
+    val barnasDifferanseberegnetOrdinæreAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
+    val barnasDifferanseberegnetFinnmarksAndeler = barnasDifferanseberegneteFinnmarkstilleggAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
-    return søkersAndeler + barnasAndeler + barnasDifferanseberegneteFinnmarkstilleggAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
+    return søkersAndeler + barnasDifferanseberegnetOrdinæreAndeler + barnasDifferanseberegnetFinnmarksAndeler
 }
 
 /**
