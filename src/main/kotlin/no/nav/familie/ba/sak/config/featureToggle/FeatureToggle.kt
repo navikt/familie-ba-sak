@@ -62,4 +62,7 @@ enum class FeatureToggle(
 
     // NAV-
     SKAL_GENERERE_FINNMARKSTILLEGG("familie-ba-sak.andel-generering-finnmark-nord-troms"),
+
+    // NAv-
+    BRUK_NYTT_ENDEPUNKT_FOR_HENTING_AV_KLAGEBEHANDLINGER("familie-ba-sak.bruk-nytt-endepunkt-for-henting-av-klagebehandlinger"),
 }
