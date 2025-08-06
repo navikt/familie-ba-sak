@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -24,16 +25,22 @@ class MockPdlRestClient(
         restTemplate = restOperations,
         personidentService = personidentService,
     ) {
-    override fun hentBostedsadresserForPerson(fødselsnummer: String): List<Bostedsadresse> =
-        listOf(
-            Bostedsadresse(
-                gyldigFraOgMed = LocalDate.now().minusYears(1),
-                gyldigTilOgMed = null,
-                vegadresse = null,
-                matrikkeladresse = lagMatrikkeladresse(1234L),
-                ukjentBosted = null,
-            ),
-        )
+    override fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseOgDeltBostedPerson> =
+        identer.associateWith {
+            PdlBostedsadresseOgDeltBostedPerson(
+                bostedsadresse =
+                    listOf(
+                        Bostedsadresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(1),
+                            gyldigTilOgMed = null,
+                            vegadresse = null,
+                            matrikkeladresse = lagMatrikkeladresse(1234L),
+                            ukjentBosted = null,
+                        ),
+                    ),
+                deltBosted = emptyList(),
+            )
+        }
 
     override fun hentStatsborgerskap(
         aktør: Aktør,

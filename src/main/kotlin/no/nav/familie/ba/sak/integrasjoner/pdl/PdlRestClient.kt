@@ -4,10 +4,12 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlStatsborgerskapResponse
@@ -23,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
@@ -206,28 +207,23 @@ class PdlRestClient(
         }
     }
 
-    fun hentBostedsadresserForPerson(fødselsnummer: String): List<Bostedsadresse> {
+    fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseOgDeltBostedPerson> {
         val pdlPersonRequest =
-            PdlPersonRequest(
-                variables = PdlPersonRequestVariables(fødselsnummer),
-                query = hentGraphqlQuery("bostedsadresse"),
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(identer),
+                query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
             )
 
-        val pdlResponse: PdlBaseResponse<PdlBostedsadresseResponse> =
+        val pdlResponse: PdlBolkResponse<PdlBostedsadresseOgDeltBostedPerson> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,
-                formål = "Hent bostedsadresse for person",
+                formål = "Hent bostedsadresse og delt bosted for personer",
             ) {
                 postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
             }
 
-        return feilsjekkOgReturnerData(
-            ident = fødselsnummer,
-            pdlResponse = pdlResponse,
-        ) {
-            it.person?.bostedsadresse ?: emptyList()
-        }
+        return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
     }
 
     fun hentUtenlandskBostedsadresse(aktør: Aktør): PdlUtenlandskAdresssePersonUtenlandskAdresse? {

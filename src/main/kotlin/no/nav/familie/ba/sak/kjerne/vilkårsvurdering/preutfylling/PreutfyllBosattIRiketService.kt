@@ -31,11 +31,19 @@ class PreutfyllBosattIRiketService(
     private val persongrunnlagService: PersongrunnlagService,
 ) {
     fun prefutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
+        val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
+        val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
+
         vilkårsvurdering.personResultater.forEach { personResultat ->
+            val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
+            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
 
-            val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat, vilkårsvurdering)
-
-            val bosattIRiketVilkårResultat = genererBosattIRiketVilkårResultat(personResultat, fødselsdatoForBeskjæring)
+            val bosattIRiketVilkårResultat =
+                genererBosattIRiketVilkårResultat(
+                    personResultat = personResultat,
+                    fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
+                    bostedsadresserForPerson = bostedsadresserForPerson,
+                )
 
             if (bosattIRiketVilkårResultat.isNotEmpty()) {
                 personResultat.vilkårResultater.removeIf { it.vilkårType == BOSATT_I_RIKET }
@@ -47,8 +55,9 @@ class PreutfyllBosattIRiketService(
     fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
+        bostedsadresserForPerson: List<Bostedsadresse>,
     ): Set<VilkårResultat> {
-        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(personResultat)
+        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(bostedsadresserForPerson)
 
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
@@ -141,9 +150,8 @@ class PreutfyllBosattIRiketService(
 
     fun finnFødselsdatoForBeskjæring(
         personResultat: PersonResultat,
-        vilkårsvurdering: Vilkårsvurdering,
     ): LocalDate {
-        val barna = persongrunnlagService.hentAktivThrows(vilkårsvurdering.behandling.id).barna
+        val barna = persongrunnlagService.hentAktivThrows(personResultat.vilkårsvurdering.behandling.id).barna
         val fødselsdatoForBeskjæring =
             if (personResultat.erSøkersResultater()) {
                 barna.minOfOrNull { it.fødselsdato }
@@ -169,13 +177,9 @@ class PreutfyllBosattIRiketService(
         return erBosattINorgePeriode.omfatter(fødselsdato)
     }
 
-    private fun lagErBosattINorgeTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
-        val alleBostedsadresserForPerson =
-            pdlRestClient
-                .hentBostedsadresserForPerson(fødselsnummer = personResultat.aktør.aktivFødselsnummer())
-                .sortedBy { it.gyldigFraOgMed }
-
-        return alleBostedsadresserForPerson
+    private fun lagErBosattINorgeTidslinje(bostedsadresserForPerson: List<Bostedsadresse>): Tidslinje<Boolean> =
+        bostedsadresserForPerson
+            .sortedBy { it.gyldigFraOgMed }
             .windowed(size = 2, step = 1, partialWindows = true) {
                 val denne = it.first()
                 val neste = it.getOrNull(1)
@@ -186,5 +190,4 @@ class PreutfyllBosattIRiketService(
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )
             }.tilTidslinje()
-    }
 }
