@@ -24,6 +24,7 @@ class FagsystemBATest {
             YtelsetypeBA.UTVIDET_BARNETRYGD,
             YtelsetypeBA.UTVIDET_BARNETRYGD_GAMMEL,
             YtelsetypeBA.SMÅBARNSTILLEGG,
+            YtelsetypeBA.FINNMARKSTILLEGG,
         )
     }
 }
