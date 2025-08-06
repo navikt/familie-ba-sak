@@ -48,10 +48,14 @@ fun beregnDifferanse(
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
 
-    val (barnasOrdinæreAndeler, barnasTilleggsandeler) =
+    val barnasOrdinæreAndeler =
         andelerTilkjentYtelse
-            .filter { !it.erSøkersAndel() }
-            .partition { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+            .filter { !it.erSøkersAndel() && it.type == YtelseType.ORDINÆR_BARNETRYGD }
+
+    val barnasFinnmarkstilleggAndeler =
+        andelerTilkjentYtelse
+            .filter { !it.erSøkersAndel() && it.type == YtelseType.FINNMARKSTILLEGG }
+
     val barnasOrdinæreAndelerTidslinjer = barnasOrdinæreAndeler.tilSeparateTidslinjerForBarna()
 
     val barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer =
@@ -59,15 +63,33 @@ fun beregnDifferanse(
             upb.tilMånedligValutabeløp() * valutakurs.tilKronerPerValutaenhet()
         }
 
+    val barnasFinnmarkstilleggAndelerTidslinjer = barnasFinnmarkstilleggAndeler.tilSeparateTidslinjerForBarna()
+
+    val barnasDifferanseberegneteFinnmarkstilleggAndelTilkjentYtelseTidslinjer =
+        barnasFinnmarkstilleggAndelerTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { finnmarkstillegg, beløp ->
+            finnmarkstillegg.oppdaterDifferanseberegning(beløp)
+        }
+
     val barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer =
-        barnasOrdinæreAndelerTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer) { aty, beløp ->
-            aty.oppdaterDifferanseberegning(beløp)
+        barnasOrdinæreAndelerTidslinjer.outerJoin(barnasUtenlandskePeriodebeløpINorskeKronerTidslinjer, barnasDifferanseberegneteFinnmarkstilleggAndelTilkjentYtelseTidslinjer) { aty, beløp, finnmarkstilleggAty ->
+
+            val beløpSomSkalTrekkesFraOrdinærAndel =
+                if (finnmarkstilleggAty != null) {
+                    finnmarkstilleggAty.differanseberegnetPeriodebeløp
+                        ?.let { maxOf(-it, 0) }
+                        ?.takeIf { it > 0 }
+                        ?.toBigDecimal() ?: BigDecimal.ZERO
+                } else {
+                    beløp
+                }
+
+            aty.oppdaterDifferanseberegning(beløpSomSkalTrekkesFraOrdinærAndel)
         }
 
     val barnasAndeler = barnasDifferanseberegneteAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
     val søkersAndeler = andelerTilkjentYtelse.filter { it.erSøkersAndel() }
 
-    return søkersAndeler + barnasAndeler + barnasTilleggsandeler
+    return søkersAndeler + barnasAndeler + barnasDifferanseberegneteFinnmarkstilleggAndelTilkjentYtelseTidslinjer.tilAndelerTilkjentYtelse()
 }
 
 /**
