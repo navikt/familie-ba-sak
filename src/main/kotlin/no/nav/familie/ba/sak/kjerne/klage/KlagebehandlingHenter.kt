@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
@@ -11,10 +13,14 @@ import org.springframework.stereotype.Component
 @Component
 class KlagebehandlingHenter(
     private val klageClient: KlageClient,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> {
-        val klagebehandligerPerFagsak = klageClient.hentKlagebehandlinger(setOf(fagsakId))
-        val klagerPåFagsak = klagebehandligerPerFagsak[fagsakId]
+        val klagerPåFagsak = if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_NYTT_ENDEPUNKT_FOR_HENTING_AV_KLAGEBEHANDLINGER)) {
+            klageClient.hentKlagebehandlinger(fagsakId)
+        } else {
+            klageClient.hentKlagebehandlinger(setOf(fagsakId))[fagsakId]
+        }
         if (klagerPåFagsak == null) {
             throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
         }
@@ -35,13 +41,13 @@ class KlagebehandlingHenter(
         fun harKlagebehandlingKorrektStatus(behandlingStatus: BehandlingStatus) =
             when (behandlingStatus) {
                 BehandlingStatus.FERDIGSTILT,
-                -> true
+                    -> true
 
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.UTREDES,
                 BehandlingStatus.VENTER,
                 BehandlingStatus.SATT_PÅ_VENT,
-                -> false
+                    -> false
             }
 
         fun harKlagebehandlingKorrektHenlagtÅrsak(henlagtÅrsak: HenlagtÅrsak?): Boolean {
@@ -51,7 +57,7 @@ class KlagebehandlingHenter(
             return when (henlagtÅrsak) {
                 HenlagtÅrsak.TRUKKET_TILBAKE,
                 HenlagtÅrsak.FEILREGISTRERT,
-                -> false
+                    -> false
             }
         }
 
@@ -63,11 +69,11 @@ class KlagebehandlingHenter(
                 BehandlingResultat.MEDHOLD,
                 BehandlingResultat.IKKE_MEDHOLD,
                 BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
-                -> true
+                    -> true
 
                 BehandlingResultat.IKKE_SATT,
                 BehandlingResultat.HENLAGT,
-                -> false
+                    -> false
             }
         }
     }
