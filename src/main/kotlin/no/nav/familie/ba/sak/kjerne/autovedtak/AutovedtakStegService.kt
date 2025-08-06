@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutovedtakBrevService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.AutovedtakSmåbarnstilleggService
@@ -39,6 +40,7 @@ enum class Autovedtaktype(
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     OMREGNING_BREV("Omregning"),
+    FINNMARKSTILLEGG("Finnmarkstillegg"),
 }
 
 sealed interface AutomatiskBehandlingData {
@@ -66,6 +68,12 @@ data class OmregningBrevData(
     override val type = Autovedtaktype.OMREGNING_BREV
 }
 
+data class FinnmarkstilleggData(
+    val fagsakId: Long,
+) : AutomatiskBehandlingData {
+    override val type = Autovedtaktype.FINNMARKSTILLEGG
+}
+
 @Service
 class AutovedtakStegService(
     private val fagsakService: FagsakService,
@@ -74,6 +82,7 @@ class AutovedtakStegService(
     private val autovedtakFødselshendelseService: AutovedtakFødselshendelseService,
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
+    private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
     private val snikeIKøenService: SnikeIKøenService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
@@ -119,6 +128,17 @@ class AutovedtakStegService(
             førstegangKjørt = førstegangKjørt,
         )
 
+    fun kjørBehandlingFinnmarkstillegg(
+        mottakersAktør: Aktør,
+        fagsakId: Long,
+        førstegangKjørt: LocalDateTime = LocalDateTime.now(),
+    ): String =
+        kjørBehandling(
+            mottakersAktør = mottakersAktør,
+            automatiskBehandlingData = FinnmarkstilleggData(fagsakId),
+            førstegangKjørt = førstegangKjørt,
+        )
+
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
         mottakersAktør: Aktør,
@@ -132,6 +152,7 @@ class AutovedtakStegService(
                 is FødselshendelseData -> autovedtakFødselshendelseService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is OmregningBrevData -> autovedtakBrevService.skalAutovedtakBehandles(automatiskBehandlingData)
                 is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
+                is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(automatiskBehandlingData)
             }
 
         if (!skalAutovedtakBehandles) {
@@ -163,6 +184,7 @@ class AutovedtakStegService(
                 is FødselshendelseData -> autovedtakFødselshendelseService.kjørBehandling(automatiskBehandlingData)
                 is OmregningBrevData -> autovedtakBrevService.kjørBehandling(automatiskBehandlingData)
                 is SmåbarnstilleggData -> autovedtakSmåbarnstilleggService.kjørBehandling(automatiskBehandlingData)
+                is FinnmarkstilleggData -> autovedtakFinnmarkstilleggService.kjørBehandling(automatiskBehandlingData)
             }
 
         secureLoggAutovedtakBehandling(
@@ -179,6 +201,7 @@ class AutovedtakStegService(
     ): Long? =
         when (behandlingsdata) {
             is OmregningBrevData -> behandlingsdata.fagsakId
+            is FinnmarkstilleggData -> behandlingsdata.fagsakId
             is FødselshendelseData,
             is SmåbarnstilleggData,
             -> null
@@ -265,4 +288,5 @@ private fun Autovedtaktype.tilMaskinellVentÅrsak() =
         Autovedtaktype.FØDSELSHENDELSE -> SettPåMaskinellVentÅrsak.FØDSELSHENDELSE
         Autovedtaktype.OMREGNING_BREV -> SettPåMaskinellVentÅrsak.OMREGNING_6_ELLER_18_ÅR
         Autovedtaktype.SMÅBARNSTILLEGG -> SettPåMaskinellVentÅrsak.SMÅBARNSTILLEGG
+        Autovedtaktype.FINNMARKSTILLEGG -> SettPåMaskinellVentÅrsak.FINNMARKSTILLEGG
     }
