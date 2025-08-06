@@ -17,6 +17,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -364,6 +366,50 @@ class PreutfyllLovligOppholdServiceTest {
             assertThat(lovligOppholdResultater.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(lovligOppholdResultater.begrunnelse)
                 .isEqualTo("Fylt ut automatisk fra registerdata i PDL\n- EØS-borger og har arbeidsforhold i Norge.")
+        }
+
+        @Test
+        fun `skal preutfylle lovlig opphold vilkår hvis oppholdstillatelse`() {
+            // Arrange
+            val aktør = randomAktør()
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                        )
+                    },
+                )
+
+            every { pdlRestClient.hentOppholdstillatelse(aktør, true) } returns
+                listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
+
+            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
+                listOf(
+                    Bostedsadresse(
+                        gyldigFraOgMed = LocalDate.now().minusYears(10),
+                        gyldigTilOgMed = null,
+                        vegadresse = lagVegadresse(12345L),
+                    ),
+                )
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == aktør }
+                    .vilkårResultater
+                    .find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
+            // assertThat(lovligOppholdResultater.periodeFom).isEqualTo(LocalDate.now().minusYears(10))
         }
     }
 }
