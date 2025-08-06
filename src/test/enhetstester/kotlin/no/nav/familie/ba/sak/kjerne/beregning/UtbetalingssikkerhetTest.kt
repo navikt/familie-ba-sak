@@ -7,6 +7,8 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkel
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
@@ -66,6 +68,84 @@ class UtbetalingssikkerhetTest {
             }
 
         assertEquals("Feil med tidslinje. Overlapp på periode", feil.message)
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når et barn har både finnmarkstillegg andel og ordinær for en periode`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN)
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.FINNMARKSTILLEGG,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    660,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                tilkjentYtelse,
+                listOf(person.tilPersonEnkel()),
+            )
+        }
+    }
+
+    @Test
+    fun `Skal ikke kaste feil når barn har både finnmarkstillegg, utvidet og ordinær andel for en periode i fagsak type barn enslig mindreårig`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN)
+        val behandling = lagBehandling(fagsak = lagFagsak(type = FagsakType.BARN_ENSLIG_MINDREÅRIG))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.FINNMARKSTILLEGG,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    1054,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    inneværendeMåned().minusYears(1),
+                    inneværendeMåned().minusMonths(6),
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    660,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                tilkjentYtelse,
+                listOf(person.tilPersonEnkel()),
+            )
+        }
     }
 
     @Test
@@ -412,6 +492,7 @@ class UtbetalingssikkerhetTest {
                 SatsType.FINN_SVAL,
                 SatsType.ORBA,
                 SatsType.UTVIDET_BARNETRYGD,
+                SatsType.FINNMARKSTILLEGG,
             )
         assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
         assertEquals(støttedeSatstyper.size, SatsType.values().size)

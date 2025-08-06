@@ -47,6 +47,7 @@ class VilkårTilTilkjentYtelseTest {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
         every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
+        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
     }
 
     @AfterEach

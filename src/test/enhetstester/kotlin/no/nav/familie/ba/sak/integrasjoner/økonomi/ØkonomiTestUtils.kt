@@ -11,6 +11,7 @@ fun sats(ytelseType: YtelseType) =
         YtelseType.ORDINÆR_BARNETRYGD -> 1054
         YtelseType.UTVIDET_BARNETRYGD -> 1054
         YtelseType.SMÅBARNSTILLEGG -> 660
+        YtelseType.FINNMARKSTILLEGG -> 500
     }
 
 fun lagUtbetalingsoppdrag(

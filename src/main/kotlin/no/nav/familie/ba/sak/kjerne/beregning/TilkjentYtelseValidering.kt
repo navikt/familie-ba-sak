@@ -341,14 +341,35 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType,
 ) {
+    val antallOrdinær = andeler.count { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+    val antallFinnmarkstillegg = andeler.count { it.type == YtelseType.FINNMARKSTILLEGG }
+    val antallUtvidet = andeler.count { it.type == YtelseType.UTVIDET_BARNETRYGD }
+
     val maksAntallAndeler =
-        if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
-            2
-        } else if (person.type == PersonType.BARN) {
-            1
-        } else {
-            2
+        when {
+            fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
+                if (antallOrdinær > 1 || antallFinnmarkstillegg > 1 || antallUtvidet > 1) {
+                    throw UtbetalingsikkerhetFeil(
+                        melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barnet kan ha maks én ordinær, en utvidet og en finnmarkstillegg andel for en gitt periode.",
+                        frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
+                    )
+                }
+                3
+            }
+
+            person.type == PersonType.BARN -> {
+                if (antallOrdinær > 1 || antallFinnmarkstillegg > 1) {
+                    throw UtbetalingsikkerhetFeil(
+                        melding = "Validering feilet for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}): Barn kan ha maks én ordinær og én finnmarkstillegg andel for en gitt periode.",
+                        frontendFeilmelding = "Det har skjedd en systemfeil, og andelene stemmer ikke overens med det som er lov. $KONTAKT_TEAMET_SUFFIX",
+                    )
+                }
+                2
+            }
+
+            else -> 2
         }
+
     val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)
 
     if (andeler.size > maksAntallAndeler) {

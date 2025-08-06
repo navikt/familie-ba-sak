@@ -364,6 +364,34 @@ fun hentNesteSteg(
             }
         }
 
+        BehandlingÅrsak.FINNMARKSTILLEGG -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> {
+                    if (!behandling.skalBehandlesAutomatisk) {
+                        VURDER_TILBAKEKREVING
+                    } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+                        IVERKSETT_MOT_OPPDRAG
+                    } else {
+                        VURDER_TILBAKEKREVING
+                    }
+                }
+
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
+                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
+                IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
+                JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
+                DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw Feil("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
+            }
+        }
+
         BehandlingÅrsak.SATSENDRING,
         BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
         -> {
