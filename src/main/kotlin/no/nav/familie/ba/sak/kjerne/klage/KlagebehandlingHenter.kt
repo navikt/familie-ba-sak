@@ -20,11 +20,8 @@ class KlagebehandlingHenter(
             if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_NYTT_ENDEPUNKT_FOR_HENTING_AV_KLAGEBEHANDLINGER)) {
                 klageClient.hentKlagebehandlinger(fagsakId)
             } else {
-                klageClient.hentKlagebehandlinger(setOf(fagsakId))[fagsakId]
+                klageClient.hentKlagebehandlinger(setOf(fagsakId))[fagsakId] ?: throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
             }
-        if (klagerPåFagsak == null) {
-            throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
-        }
         return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
     }
 
@@ -42,13 +39,13 @@ class KlagebehandlingHenter(
         fun harKlagebehandlingKorrektStatus(behandlingStatus: BehandlingStatus) =
             when (behandlingStatus) {
                 BehandlingStatus.FERDIGSTILT,
-                -> true
+                    -> true
 
                 BehandlingStatus.OPPRETTET,
                 BehandlingStatus.UTREDES,
                 BehandlingStatus.VENTER,
                 BehandlingStatus.SATT_PÅ_VENT,
-                -> false
+                    -> false
             }
 
         fun harKlagebehandlingKorrektHenlagtÅrsak(henlagtÅrsak: HenlagtÅrsak?): Boolean {
@@ -58,7 +55,7 @@ class KlagebehandlingHenter(
             return when (henlagtÅrsak) {
                 HenlagtÅrsak.TRUKKET_TILBAKE,
                 HenlagtÅrsak.FEILREGISTRERT,
-                -> false
+                    -> false
             }
         }
 
@@ -70,11 +67,11 @@ class KlagebehandlingHenter(
                 BehandlingResultat.MEDHOLD,
                 BehandlingResultat.IKKE_MEDHOLD,
                 BehandlingResultat.IKKE_MEDHOLD_FORMKRAV_AVVIST,
-                -> true
+                    -> true
 
                 BehandlingResultat.IKKE_SATT,
                 BehandlingResultat.HENLAGT,
-                -> false
+                    -> false
             }
         }
     }
