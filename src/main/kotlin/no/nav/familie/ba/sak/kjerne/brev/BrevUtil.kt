@@ -70,6 +70,9 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
         -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
+        BehandlingÅrsak.FINNMARKSTILLEGG,
+        -> Brevmal.AUTOVEDTAK_FINNMARKSTILLEGG
+
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
 }
