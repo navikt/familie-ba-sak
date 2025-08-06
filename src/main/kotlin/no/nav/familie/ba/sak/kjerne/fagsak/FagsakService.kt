@@ -439,10 +439,11 @@ class FagsakService(
                                 navn = personInfoMedRelasjoner.navn,
                                 ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                                 rolle =
-                                    if (behandling.fagsak.type == FagsakType.NORMAL) {
-                                        FagsakDeltagerRolle.FORELDER
-                                    } else {
-                                        FagsakDeltagerRolle.UKJENT
+                                    when (behandling.fagsak.type) {
+                                        FagsakType.NORMAL -> FagsakDeltagerRolle.FORELDER
+                                        FagsakType.SKJERMET_BARN -> FagsakDeltagerRolle.BARN
+                                        FagsakType.BARN_ENSLIG_MINDREÅRIG -> FagsakDeltagerRolle.BARN
+                                        else -> FagsakDeltagerRolle.UKJENT
                                     },
                                 kjønn = personInfoMedRelasjoner.kjønn,
                                 fagsakId = behandling.fagsak.id,
