@@ -9,9 +9,30 @@ data class PdlBostedsadresseOgDeltBostedPerson(
     val deltBosted: List<DeltBosted>,
 ) {
     fun nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms(): Boolean {
-        val sisteBostedsadresse = bostedsadresse.filter { it.gyldigFraOgMed != null && it.gyldigTilOgMed == null }.maxByOrNull { it.gyldigFraOgMed!! }
-        val sisteDeltBosted = deltBosted.filter { it.startdatoForKontrakt != null && it.sluttdatoForKontrakt == null }.maxByOrNull { it.sluttdatoForKontrakt!! }
+        val sisteBostedsadresse = bostedsadresse.sortedBy { it.gyldigFraOgMed }.lastOrNull()
+        val sisteDeltBosted = deltBosted.sortedBy { it.startdatoForKontrakt }.lastOrNull()
         return sisteBostedsadresse.erIFinnmarkEllerNordTroms() || sisteDeltBosted.erIFinnmarkEllerNordTroms()
+    }
+
+    fun harFlyttetInnEllerUtAvFinnmarkEllerNordTroms(): Boolean {
+        val bostedsadresseSortert = bostedsadresse.sortedByDescending { it.gyldigFraOgMed }
+        val deltBostedSortert = deltBosted.sortedByDescending { it.startdatoForKontrakt }
+
+        val sisteBostedsadresseErIFinnmarkEllerNordTroms = bostedsadresseSortert.getOrNull(0).erIFinnmarkEllerNordTroms()
+        val nestSisteBostedsadresseErIFinnmarkEllerNordTroms = bostedsadresseSortert.getOrNull(1).erIFinnmarkEllerNordTroms()
+
+        val sisteDeltBostedErIFinnmarkEllerNordTroms = deltBostedSortert.getOrNull(0).erIFinnmarkEllerNordTroms()
+        val nestSisteDeltBostedErIFinnmarkEllerNordTroms = deltBostedSortert.getOrNull(1).erIFinnmarkEllerNordTroms()
+
+        val bostedsadresseErEndretInnEllerUtAvFinnmarkEllerNordTroms =
+            (sisteBostedsadresseErIFinnmarkEllerNordTroms || nestSisteBostedsadresseErIFinnmarkEllerNordTroms) &&
+                sisteBostedsadresseErIFinnmarkEllerNordTroms != nestSisteBostedsadresseErIFinnmarkEllerNordTroms
+
+        val deltBostedErEndretInnEllerUtAvFinnmarkEllerNordTroms =
+            (sisteDeltBostedErIFinnmarkEllerNordTroms || nestSisteDeltBostedErIFinnmarkEllerNordTroms) &&
+                sisteDeltBostedErIFinnmarkEllerNordTroms != nestSisteDeltBostedErIFinnmarkEllerNordTroms
+
+        return bostedsadresseErEndretInnEllerUtAvFinnmarkEllerNordTroms || deltBostedErEndretInnEllerUtAvFinnmarkEllerNordTroms
     }
 }
 
