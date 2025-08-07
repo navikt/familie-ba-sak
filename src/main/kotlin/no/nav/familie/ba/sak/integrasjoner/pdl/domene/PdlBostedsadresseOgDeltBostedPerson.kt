@@ -11,20 +11,18 @@ data class PdlBostedsadresseOgDeltBostedPerson(
     fun nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms(): Boolean {
         val sisteBostedsadresse = bostedsadresse.filter { it.gyldigFraOgMed != null && it.gyldigTilOgMed == null }.maxByOrNull { it.gyldigFraOgMed!! }
         val sisteDeltBosted = deltBosted.filter { it.startdatoForKontrakt != null && it.sluttdatoForKontrakt == null }.maxByOrNull { it.sluttdatoForKontrakt!! }
-        val bostedskommuneErIFinnmarkEllerNordTroms =
-            (
-                sisteBostedsadresse?.vegadresse?.kommunenummer
-                    ?: sisteBostedsadresse?.matrikkeladresse?.kommunenummer
-                    ?: sisteBostedsadresse?.ukjentBosted?.bostedskommune
-            )?.let { kommuneErIFinnmarkEllerNordTroms(it) } ?: false
-
-        val gjeldendeDeltBostedskommuneErIFinnmarkEllerNordTroms =
-            (
-                sisteDeltBosted?.vegadresse?.kommunenummer
-                    ?: sisteDeltBosted?.matrikkeladresse?.kommunenummer
-                    ?: sisteDeltBosted?.ukjentBosted?.bostedskommune
-            )?.let { kommuneErIFinnmarkEllerNordTroms(it) } ?: false
-
-        return bostedskommuneErIFinnmarkEllerNordTroms || gjeldendeDeltBostedskommuneErIFinnmarkEllerNordTroms
+        return sisteBostedsadresse.erIFinnmarkEllerNordTroms() || sisteDeltBosted.erIFinnmarkEllerNordTroms()
     }
 }
+
+fun Bostedsadresse?.erIFinnmarkEllerNordTroms(): Boolean =
+    this?.vegadresse?.kommunenummer?.let { kommuneErIFinnmarkEllerNordTroms(it) }
+        ?: this?.matrikkeladresse?.kommunenummer?.let { kommuneErIFinnmarkEllerNordTroms(it) }
+        ?: this?.ukjentBosted?.bostedskommune?.let { kommuneErIFinnmarkEllerNordTroms(it) }
+        ?: false
+
+fun DeltBosted?.erIFinnmarkEllerNordTroms(): Boolean =
+    this?.vegadresse?.kommunenummer?.let { kommuneErIFinnmarkEllerNordTroms(it) }
+        ?: this?.matrikkeladresse?.kommunenummer?.let { kommuneErIFinnmarkEllerNordTroms(it) }
+        ?: this?.ukjentBosted?.bostedskommune?.let { kommuneErIFinnmarkEllerNordTroms(it) }
+        ?: false
