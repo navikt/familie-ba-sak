@@ -352,6 +352,7 @@ class FagsakService(
                         kjønn = personInfoMedRelasjoner.kjønn,
                         fagsakId = fagsak?.id,
                         fagsakType = fagsak?.type,
+                        adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
                     ),
                 )
             }
@@ -393,6 +394,7 @@ class FagsakService(
                                         kjønn = forelderInfo.kjønn,
                                         fagsakId = fagsak?.id,
                                         fagsakType = fagsak?.type,
+                                        adressebeskyttelseGradering = relasjon.adressebeskyttelseGradering,
                                     ),
                                 )
                             }
@@ -437,14 +439,16 @@ class FagsakService(
                                 navn = personInfoMedRelasjoner.navn,
                                 ident = behandling.fagsak.aktør.aktivFødselsnummer(),
                                 rolle =
-                                    if (behandling.fagsak.type == FagsakType.NORMAL) {
-                                        FagsakDeltagerRolle.FORELDER
-                                    } else {
-                                        FagsakDeltagerRolle.UKJENT
+                                    when (behandling.fagsak.type) {
+                                        FagsakType.NORMAL -> FagsakDeltagerRolle.FORELDER
+                                        FagsakType.SKJERMET_BARN -> FagsakDeltagerRolle.BARN
+                                        FagsakType.BARN_ENSLIG_MINDREÅRIG -> FagsakDeltagerRolle.BARN
+                                        FagsakType.INSTITUSJON -> FagsakDeltagerRolle.UKJENT
                                     },
                                 kjønn = personInfoMedRelasjoner.kjønn,
                                 fagsakId = behandling.fagsak.id,
                                 fagsakType = behandling.fagsak.type,
+                                adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
                             )
                     } else {
                         val maskertForelder =
@@ -474,6 +478,7 @@ class FagsakService(
                                     kjønn = personinfo.kjønn,
                                     fagsakId = behandling.fagsak.id,
                                     fagsakType = behandling.fagsak.type,
+                                    adressebeskyttelseGradering = personinfo.adressebeskyttelseGradering,
                                 )
                         }
                     }
