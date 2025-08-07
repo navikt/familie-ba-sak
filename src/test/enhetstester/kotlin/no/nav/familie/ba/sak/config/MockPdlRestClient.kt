@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -20,7 +20,7 @@ import java.time.LocalDate
 class MockPdlRestClient(
     restOperations: RestOperations,
     personidentService: PersonidentService,
-) : PdlRestClient(
+) : SystemOnlyPdlRestClient(
         pdlBaseUrl = URI("dummy_uri"),
         restTemplate = restOperations,
         personidentService = personidentService,

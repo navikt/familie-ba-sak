@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
@@ -26,7 +26,7 @@ import java.time.temporal.ChronoUnit
 
 @Service
 class PreutfyllBosattIRiketService(
-    private val pdlRestClient: PdlRestClient,
+    private val pdlRestClient: SystemOnlyPdlRestClient,
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
