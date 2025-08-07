@@ -450,14 +450,22 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentOppholdstillatelse(aktør, true) } returns
                 listOf(Opphold(OPPHOLDSTILLATELSE.PERMANENT, null, null))
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
