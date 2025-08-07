@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettels
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -52,14 +53,22 @@ class PreutfyllLovligOppholdServiceTest {
                     },
                 )
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
 
             every { pdlRestClient.hentStatsborgerskap(aktør, historikk = true) } returns
                 listOf(
@@ -102,14 +111,22 @@ class PreutfyllLovligOppholdServiceTest {
                     Statsborgerskap("NOR", LocalDate.now().minusYears(2).plusDays(1), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -149,14 +166,22 @@ class PreutfyllLovligOppholdServiceTest {
                     Statsborgerskap("NOR", LocalDate.now().minusYears(5).plusDays(1), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -200,13 +225,22 @@ class PreutfyllLovligOppholdServiceTest {
                     Statsborgerskap("SWE", null, null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -245,14 +279,22 @@ class PreutfyllLovligOppholdServiceTest {
                     Statsborgerskap("NOR", LocalDate.now().minusYears(10), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
 
             // Act
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
@@ -291,14 +333,23 @@ class PreutfyllLovligOppholdServiceTest {
                     Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
                 )
 
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
+
             every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
 
             every { integrasjonClient.hentArbeidsforhold(any(), LocalDate.now().minusYears(10)) } returns
@@ -340,14 +391,24 @@ class PreutfyllLovligOppholdServiceTest {
                 listOf(
                     Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null),
                 )
-            every { pdlRestClient.hentBostedsadresserForPerson(any()) } returns
-                listOf(
-                    Bostedsadresse(
-                        gyldigFraOgMed = LocalDate.now().minusYears(10),
-                        gyldigTilOgMed = null,
-                        vegadresse = lagVegadresse(12345L),
-                    ),
-                )
+
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseOgDeltBostedPerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
+
             every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
 
             every { integrasjonClient.hentArbeidsforhold(any(), LocalDate.now().minusYears(10)) } returns
