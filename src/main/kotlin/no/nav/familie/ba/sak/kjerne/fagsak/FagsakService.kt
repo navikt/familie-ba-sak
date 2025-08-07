@@ -443,7 +443,7 @@ class FagsakService(
                                         FagsakType.NORMAL -> FagsakDeltagerRolle.FORELDER
                                         FagsakType.SKJERMET_BARN -> FagsakDeltagerRolle.BARN
                                         FagsakType.BARN_ENSLIG_MINDREÅRIG -> FagsakDeltagerRolle.BARN
-                                        else -> FagsakDeltagerRolle.UKJENT
+                                        FagsakType.INSTITUSJON -> FagsakDeltagerRolle.UKJENT
                                     },
                                 kjønn = personInfoMedRelasjoner.kjønn,
                                 fagsakId = behandling.fagsak.id,
