@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
@@ -70,6 +71,25 @@ class SystemOnlyPdlRestClient(
         return feilsjekkOgReturnerData(
             pdlResponse = pdlResponse,
         )
+    }
+
+    fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseOgDeltBostedPerson> {
+        val pdlPersonRequest =
+            PdlPersonBolkRequest(
+                variables = PdlPersonBolkRequestVariables(identer),
+                query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
+            )
+
+        val pdlResponse: PdlBolkResponse<PdlBostedsadresseOgDeltBostedPerson> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent bostedsadresse og delt bosted for personer",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
+
+        return feilsjekkOgReturnerData(pdlResponse = pdlResponse)
     }
 }
 
