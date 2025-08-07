@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 import no.nav.familie.ba.sak.config.FeatureToggle.KJØRING_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringScheduler.Companion.CRON_HVERT_10_MIN_UKEDAG
@@ -27,7 +27,7 @@ class AutovedtakFinnmarkstilleggScheduler(
     private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val pdlRestClient: PdlRestClient,
+    private val pdlRestClient: SystemOnlyPdlRestClient,
 ) : ApplicationListener<ContextClosedEvent> {
     @Volatile private var isShuttingDown = false
 
