@@ -65,4 +65,6 @@ enum class FeatureToggle(
 
     // NAv-
     BRUK_NYTT_ENDEPUNKT_FOR_HENTING_AV_KLAGEBEHANDLINGER("familie-ba-sak.bruk-nytt-endepunkt-for-henting-av-klagebehandlinger"),
+
+    KJØRING_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kjoering-autovedtak-finnmarkstillegg"),
 }
