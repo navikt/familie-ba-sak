@@ -47,7 +47,7 @@ class AutovedtakFinnmarkstilleggService(
 
         return pdlRestClient
             .hentBostedsadresseOgDeltBostedForPersoner(identerISisteIverksatteBehandling)
-            .any { it.value.harFlyttetInnEllerUtAvFinnmarkEllerNordTroms() }
+            .any { it.value.sisteFlyttingVarInnEllerUtAvFinnmarkEllerNordTroms() }
     }
 
     @Transactional

@@ -9,12 +9,12 @@ data class PdlBostedsadresseOgDeltBostedPerson(
     val deltBosted: List<DeltBosted>,
 ) {
     fun nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms(): Boolean {
-        val sisteBostedsadresse = bostedsadresse.sortedBy { it.gyldigFraOgMed }.lastOrNull()
-        val sisteDeltBosted = deltBosted.sortedBy { it.startdatoForKontrakt }.lastOrNull()
+        val sisteBostedsadresse = bostedsadresse.filter { it.gyldigTilOgMed == null }.sortedBy { it.gyldigFraOgMed }.lastOrNull()
+        val sisteDeltBosted = deltBosted.filter { it.sluttdatoForKontrakt == null }.sortedBy { it.startdatoForKontrakt }.lastOrNull()
         return sisteBostedsadresse.erIFinnmarkEllerNordTroms() || sisteDeltBosted.erIFinnmarkEllerNordTroms()
     }
 
-    fun harFlyttetInnEllerUtAvFinnmarkEllerNordTroms(): Boolean {
+    fun sisteFlyttingVarInnEllerUtAvFinnmarkEllerNordTroms(): Boolean {
         val bostedsadresseSortert = bostedsadresse.sortedByDescending { it.gyldigFraOgMed }
         val deltBostedSortert = deltBosted.sortedByDescending { it.startdatoForKontrakt }
 
