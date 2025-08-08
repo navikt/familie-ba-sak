@@ -35,24 +35,6 @@ class KlageClient(
         }
     }
 
-    fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
-        val uri =
-            UriComponentsBuilder
-                .fromUri(familieKlageUri)
-                .pathSegment("api/ekstern/behandling/${Fagsystem.BA}")
-                .queryParam("eksternFagsakId", eksternIder.joinToString(","))
-                .build()
-                .toUri()
-
-        return kallEksternTjenesteRessurs(
-            tjeneste = "klage",
-            uri = uri,
-            formål = "Hent klagebehandlinger",
-        ) {
-            getForEntity(uri)
-        }
-    }
-
     fun hentKlagebehandlinger(fagsakId: Long): List<KlagebehandlingDto> {
         val uri =
             UriComponentsBuilder
