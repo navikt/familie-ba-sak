@@ -2,16 +2,20 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.BostedsadresserOgDelteBosteder
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.erIFinnmarkEllerNordTroms
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
 import no.nav.familie.ba.sak.task.dto.AktørId
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.omfatter
@@ -36,13 +40,13 @@ class PreutfyllBosattIRiketService(
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
             val fødselsdatoForBeskjæring = finnFødselsdatoForBeskjæring(personResultat)
-            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()]?.bostedsadresse ?: emptyList()
+            val bostedsadresserForPerson = bostedsadresser[personResultat.aktør.aktivFødselsnummer()].tilAdresser()
 
             val bosattIRiketVilkårResultat =
                 genererBosattIRiketVilkårResultat(
                     personResultat = personResultat,
                     fødselsdatoForBeskjæring = fødselsdatoForBeskjæring,
-                    bostedsadresserForPerson = bostedsadresserForPerson,
+                    adresserForPerson = bostedsadresserForPerson,
                 )
 
             if (bosattIRiketVilkårResultat.isNotEmpty()) {
@@ -55,17 +59,18 @@ class PreutfyllBosattIRiketService(
     fun genererBosattIRiketVilkårResultat(
         personResultat: PersonResultat,
         fødselsdatoForBeskjæring: LocalDate = LocalDate.MIN,
-        bostedsadresserForPerson: List<Bostedsadresse>,
+        adresserForPerson: BostedsadresserOgDelteBosteder,
     ): Set<VilkårResultat> {
-        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(bostedsadresserForPerson)
-
+        val erBosattINorgeTidslinje = lagErBosattINorgeTidslinje(adresserForPerson)
+        val erBosattIFinnmarkEllerNordTromsTidslinje = lagErBosattIFinnmarkEllerNordTromsTidslinje(adresserForPerson)
         val erNordiskStatsborgerTidslinje = pdlRestClient.lagErNordiskStatsborgerTidslinje(personResultat)
 
         val erBosattOgHarNordiskStatsborgerskapTidslinje =
-            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje) { erNordisk, erBosatt ->
-                val nordiskOgBosatt = erNordisk == true && erBosatt == true
+            erNordiskStatsborgerTidslinje.kombinerMed(erBosattINorgeTidslinje, erBosattIFinnmarkEllerNordTromsTidslinje) { erNordisk, erBosattINorge, erBosattIFinnmarkEllerNordTroms ->
+                val nordiskOgBosatt = erNordisk == true && erBosattINorge == true
+                val utdypendeVilkårsvurderinger = if (erBosattIFinnmarkEllerNordTroms == true) listOf(BOSATT_I_FINNMARK_NORD_TROMS) else emptyList()
                 if (nordiskOgBosatt) {
-                    OppfyltDelvilkår("- Norsk/nordisk statsborgerskap")
+                    OppfyltDelvilkår(begrunnelse = "- Norsk/nordisk statsborgerskap", utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger)
                 } else {
                     IkkeOppfyltDelvilkår
                 }
@@ -98,6 +103,7 @@ class PreutfyllBosattIRiketService(
                     begrunnelse = "Fylt ut automatisk fra registerdata i PDL\n" + erBosattINorgePeriode.verdi.begrunnelse,
                     sistEndretIBehandlingId = personResultat.vilkårsvurdering.behandling.id,
                     begrunnelseForManuellKontroll = erBosattINorgePeriode.verdi.begrunnelseForManuellKontroll,
+                    utdypendeVilkårsvurderinger = erBosattINorgePeriode.verdi.utdypendeVilkårsvurderinger,
                 )
             }.toSet()
     }
@@ -161,8 +167,6 @@ class PreutfyllBosattIRiketService(
         return fødselsdatoForBeskjæring ?: LocalDate.MIN
     }
 
-    private fun harBostedsAdresseINorge(bostedsadresse: Bostedsadresse): Boolean = bostedsadresse.vegadresse != null || bostedsadresse.matrikkeladresse != null || bostedsadresse.ukjentBosted != null
-
     private fun erFødselsdatoIPeriode(
         behandlingId: Long,
         aktørId: AktørId,
@@ -177,15 +181,32 @@ class PreutfyllBosattIRiketService(
         return erBosattINorgePeriode.omfatter(fødselsdato)
     }
 
-    private fun lagErBosattINorgeTidslinje(bostedsadresserForPerson: List<Bostedsadresse>): Tidslinje<Boolean> =
-        bostedsadresserForPerson
+    private fun Adresse.erINorge(): Boolean = vegadresse != null || matrikkeladresse != null || ukjentBosted != null
+
+    private fun lagErBosattINorgeTidslinje(adresser: BostedsadresserOgDelteBosteder): Tidslinje<Boolean> = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erINorge() }
+
+    private fun lagErBosattIFinnmarkEllerNordTromsTidslinje(adresser: BostedsadresserOgDelteBosteder): Tidslinje<Boolean> {
+        val bostedsadresserIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.bostedsadresser) { it.erIFinnmarkEllerNordTroms() }
+        val delteBostederIFinnmarkEllerNordTromsTidslinje = lagTidslinjeForAdresser(adresser.delteBosteder) { it.erIFinnmarkEllerNordTroms() }
+
+        return bostedsadresserIFinnmarkEllerNordTromsTidslinje
+            .kombinerMed(delteBostederIFinnmarkEllerNordTromsTidslinje) { bostedsadresseIFinnmarkEllerNordTroms, deltBostedIFinnmarkEllerNordTroms ->
+                bostedsadresseIFinnmarkEllerNordTroms == true || deltBostedIFinnmarkEllerNordTroms == true
+            }
+    }
+
+    private fun lagTidslinjeForAdresser(
+        adresser: List<Adresse>,
+        operator: (Adresse) -> Boolean,
+    ): Tidslinje<Boolean> =
+        adresser
             .sortedBy { it.gyldigFraOgMed }
             .windowed(size = 2, step = 1, partialWindows = true) {
                 val denne = it.first()
                 val neste = it.getOrNull(1)
 
                 Periode(
-                    verdi = harBostedsAdresseINorge(denne),
+                    verdi = operator(denne),
                     fom = denne.gyldigFraOgMed,
                     tom = denne.gyldigTilOgMed ?: neste?.gyldigFraOgMed?.minusDays(1),
                 )

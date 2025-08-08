@@ -15,11 +15,12 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.Adresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.BostedsadresserOgDelteBosteder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.søknad.SøknadService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_FRA_SØKNAD
-import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -40,27 +41,31 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering)
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(4),
-                    gyldigTilOgMed = LocalDate.now().minusYears(3),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(3).plusDays(1),
-                    gyldigTilOgMed = LocalDate.now().minusYears(2),
-                    matrikkeladresse = lagMatrikkeladresse(54321L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(1),
-                    gyldigTilOgMed = null,
-                    vegadresse = lagVegadresse(98765L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
-                    gyldigTilOgMed = null,
-                    vegadresse = lagVegadresse(98764L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(4),
+                            gyldigTilOgMed = LocalDate.now().minusYears(3),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(3).plusDays(1),
+                            gyldigTilOgMed = LocalDate.now().minusYears(2),
+                            matrikkeladresse = lagMatrikkeladresse(54321L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(1),
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(98765L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(98764L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         // Act
@@ -68,7 +73,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -95,7 +100,11 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårResultat =
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
-                bostedsadresserForPerson = emptyList(),
+                adresserForPerson =
+                    BostedsadresserOgDelteBosteder(
+                        emptyList(),
+                        emptyList(),
+                    ),
             )
 
         // Assert
@@ -113,24 +122,28 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
-                    gyldigTilOgMed = LocalDate.now().minusMonths(4),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(4).plusDays(1),
-                    gyldigTilOgMed = LocalDate.now().minusMonths(2),
-                    matrikkeladresse = lagMatrikkeladresse(54321L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                            gyldigTilOgMed = LocalDate.now().minusMonths(4),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(4).plusDays(1),
+                            gyldigTilOgMed = LocalDate.now().minusMonths(2),
+                            matrikkeladresse = lagMatrikkeladresse(54321L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         // Act
         val vilkårResultat =
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -152,12 +165,16 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(6),
-                    gyldigTilOgMed = LocalDate.now().minusMonths(4),
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(6),
+                            gyldigTilOgMed = LocalDate.now().minusMonths(4),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false)
@@ -166,7 +183,7 @@ class PreutfyllBosattIRiketServiceTest {
         val vilkårResultat =
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -193,12 +210,16 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(8),
-                    gyldigTilOgMed = null,
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(8),
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = true)
@@ -208,7 +229,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(2),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -248,12 +269,16 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(2),
-                    gyldigTilOgMed = null,
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad(søkerPlanleggerÅBoINorge12Mnd = false, barneIdenterTilPlanleggerBoINorge12Mnd = mapOf(barnFnr to true))
@@ -263,7 +288,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(2),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -289,22 +314,26 @@ class PreutfyllBosattIRiketServiceTest {
         val personResultat = lagPersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = persongrunnlag.søker.aktør)
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(20),
-                    gyldigTilOgMed = LocalDate.now().minusYears(15),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(12),
-                    gyldigTilOgMed = LocalDate.now().minusYears(5),
-                    matrikkeladresse = lagMatrikkeladresse(54321L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(1),
-                    gyldigTilOgMed = null,
-                    vegadresse = lagVegadresse(98765L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(20),
+                            gyldigTilOgMed = LocalDate.now().minusYears(15),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(12),
+                            gyldigTilOgMed = LocalDate.now().minusYears(5),
+                            matrikkeladresse = lagMatrikkeladresse(54321L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(1),
+                            gyldigTilOgMed = null,
+                            vegadresse = lagVegadresse(98765L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         // Act
@@ -312,7 +341,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(10),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -346,16 +375,20 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(12),
-                    gyldigTilOgMed = LocalDate.now().minusMonths(5),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(1),
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(12),
+                            gyldigTilOgMed = LocalDate.now().minusMonths(5),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(1),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
@@ -370,7 +403,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(10),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -408,16 +441,20 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(5),
-                    gyldigTilOgMed = LocalDate.now().minusYears(4).minusMonths(2),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(1),
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(5),
+                            gyldigTilOgMed = LocalDate.now().minusYears(4).minusMonths(2),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(1),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         every { søknadService.finnSøknad(behandling.id) } returns lagSøknad()
@@ -434,7 +471,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(5),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -461,11 +498,15 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(2),
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(2),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         // Act
@@ -473,7 +514,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusMonths(2),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -496,16 +537,20 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(4),
-                    gyldigTilOgMed = LocalDate.now().minusYears(3),
-                    vegadresse = lagVegadresse(12345L),
-                ),
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusYears(2).plusDays(1),
-                    matrikkeladresse = lagMatrikkeladresse(54321L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(4),
+                            gyldigTilOgMed = LocalDate.now().minusYears(3),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusYears(2).plusDays(1),
+                            matrikkeladresse = lagMatrikkeladresse(54321L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         // Act
@@ -513,7 +558,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
@@ -539,11 +584,15 @@ class PreutfyllBosattIRiketServiceTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
 
         val bostedsadresser =
-            listOf(
-                Bostedsadresse(
-                    gyldigFraOgMed = LocalDate.now().minusMonths(4),
-                    vegadresse = lagVegadresse(12345L),
-                ),
+            BostedsadresserOgDelteBosteder(
+                bostedsadresser =
+                    listOf(
+                        Adresse(
+                            gyldigFraOgMed = LocalDate.now().minusMonths(4),
+                            vegadresse = lagVegadresse(12345L),
+                        ),
+                    ),
+                delteBosteder = emptyList(),
             )
 
         // Act
@@ -551,7 +600,7 @@ class PreutfyllBosattIRiketServiceTest {
             preutfyllBosattIRiketService.genererBosattIRiketVilkårResultat(
                 personResultat = personResultat,
                 fødselsdatoForBeskjæring = LocalDate.now().minusYears(4),
-                bostedsadresserForPerson = bostedsadresser,
+                adresserForPerson = bostedsadresser,
             )
 
         // Assert
