@@ -23,13 +23,13 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250728105838_1f618e2</prosessering.version>
-        <felles.version>3.20250616113100_41d23f2</felles.version>
+        <prosessering.version>2.20250804113739_6d49ef6</prosessering.version>
+        <felles.version>3.20250804101327_a0f5fad</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250804093222_2bf44ca</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250805142725_8942276</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250804093222_2bf44ca</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250804093222_2bf44ca</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.4</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
@@ -83,7 +83,7 @@
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
                 <artifactId>swagger-annotations</artifactId>
-                <version>2.2.34</version>
+                <version>2.2.35</version>
             </dependency>
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
