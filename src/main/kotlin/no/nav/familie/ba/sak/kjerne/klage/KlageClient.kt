@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
