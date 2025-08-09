@@ -90,7 +90,7 @@ class PersonopplysningerService(
     fun hentGjeldendeStatsborgerskap(aktør: Aktør): Statsborgerskap = pdlRestClient.hentStatsborgerskap(aktør).firstOrNull() ?: UKJENT_STATSBORGERSKAP
 
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold =
-        pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
+        pdlRestClient.hentOppholdstillatelse(aktør).firstOrNull()
             ?: throw Feil(
                 message = "Bruker mangler opphold",
                 frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",

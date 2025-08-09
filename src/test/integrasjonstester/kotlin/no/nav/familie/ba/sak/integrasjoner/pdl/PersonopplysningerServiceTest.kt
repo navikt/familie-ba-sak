@@ -247,7 +247,7 @@ internal class PersonopplysningerServiceTest(
         )
 
         lagMockForPdl(
-            "opphold-uten-historikk.graphql",
+            "oppholdstillatelse.graphql",
             "PdlIntegrasjon/gyldigRequestForMorMedXXXStatsborgerskap.json",
             readfile("PdlIntegrasjon/personinfoResponseForMorMedXXXStatsborgerskap.json"),
         )
