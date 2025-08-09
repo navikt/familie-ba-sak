@@ -158,7 +158,7 @@ object TilkjentYtelseValidering {
         andelerForPerson: List<AndelTilkjentYtelse>,
         gyldigEtterbetalingFom: YearMonth,
     ): Boolean =
-        YtelseType.values().any { ytelseType ->
+        YtelseType.entries.any { ytelseType ->
             val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
             val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 

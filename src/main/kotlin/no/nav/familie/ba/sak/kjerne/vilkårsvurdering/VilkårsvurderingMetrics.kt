@@ -47,12 +47,12 @@ class VilkårsvurderingMetrics(
         vilkårTellerType: VilkårTellerType,
         utfallMap: MutableMap<PersonType, Map<String, Counter>>,
     ) {
-        PersonType.values().forEach { personType ->
+        PersonType.entries.forEach { personType ->
             val vilkårUtfallMap = mutableMapOf<String, Counter>()
             listOf(
-                Pair(Resultat.IKKE_OPPFYLT, VilkårIkkeOppfyltÅrsak.values()),
-                Pair(Resultat.IKKE_VURDERT, VilkårKanskjeOppfyltÅrsak.values()),
-                Pair(Resultat.OPPFYLT, VilkårOppfyltÅrsak.values()),
+                Pair(Resultat.IKKE_OPPFYLT, VilkårIkkeOppfyltÅrsak.entries),
+                Pair(Resultat.IKKE_VURDERT, VilkårKanskjeOppfyltÅrsak.entries),
+                Pair(Resultat.OPPFYLT, VilkårOppfyltÅrsak.entries),
             ).forEach { (resultat, årsaker) ->
                 årsaker
                     .forEach { årsak ->

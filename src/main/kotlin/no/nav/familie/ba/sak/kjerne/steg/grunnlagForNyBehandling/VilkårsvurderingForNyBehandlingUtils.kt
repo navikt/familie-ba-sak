@@ -83,7 +83,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
             if (person.erDød()) {
                 val dødsDato = person.dødsfall!!.dødsfallDato
 
-                Vilkår.values().forEach { vilkårType ->
+                Vilkår.entries.forEach { vilkårType ->
                     val vilkårAvTypeMedSenesteTom =
                         personResultat.vilkårResultater
                             .filter { it.vilkårType == vilkårType }

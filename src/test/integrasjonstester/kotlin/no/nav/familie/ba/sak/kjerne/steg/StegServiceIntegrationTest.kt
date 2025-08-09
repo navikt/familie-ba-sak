@@ -117,7 +117,7 @@ class StegServiceIntegrationTest(
                         listOf(
                             Sivilstand(type = SIVILSTANDTYPE.GIFT, gyldigFraOgMed = LocalDate.now().minusMonths(8)),
                         ),
-                    kjønn = Kjønn.values().random(),
+                    kjønn = Kjønn.entries.random(),
                     navn = "navn",
                 ),
         )

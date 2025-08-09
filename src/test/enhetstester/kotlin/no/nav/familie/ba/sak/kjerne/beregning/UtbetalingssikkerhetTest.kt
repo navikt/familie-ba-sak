@@ -494,7 +494,7 @@ class UtbetalingssikkerhetTest {
                 SatsType.UTVIDET_BARNETRYGD,
                 SatsType.FINNMARKSTILLEGG,
             )
-        assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
-        assertEquals(støttedeSatstyper.size, SatsType.values().size)
+        assertTrue(støttedeSatstyper.containsAll(SatsType.entries.toSet()))
+        assertEquals(støttedeSatstyper.size, SatsType.entries.size)
     }
 }

@@ -29,9 +29,9 @@ data class RestFinnOppgaveRequest(
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest =
         FinnOppgaveRequest(
             tema = Tema.BAR,
-            behandlingstema = Behandlingstema.values().find { it.value == this.behandlingstema },
-            behandlingstype = Behandlingstype.values().find { it.value == this.behandlingstype },
-            oppgavetype = Oppgavetype.values().find { it.value == this.oppgavetype },
+            behandlingstema = Behandlingstema.entries.find { it.value == this.behandlingstema },
+            behandlingstype = Behandlingstype.entries.find { it.value == this.behandlingstype },
+            oppgavetype = Oppgavetype.entries.find { it.value == this.oppgavetype },
             enhet = this.enhet,
             saksbehandler = this.saksbehandler,
             journalpostId = this.journalpostId,
