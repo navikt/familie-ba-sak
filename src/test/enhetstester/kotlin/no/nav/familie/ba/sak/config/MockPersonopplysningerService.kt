@@ -104,7 +104,7 @@ class MockPersonopplysningerService(
             personInfo[personIdent] = egendefinertMock ?: PersonInfo(
                 fødselsdato = LocalDate.parse(personIdent.substring(0, 6), ofPattern("ddMMyy")),
                 bostedsadresser = mutableListOf(bostedsadresse),
-                kjønn = Kjønn.values().random(),
+                kjønn = Kjønn.entries.random(),
                 navn = "$personIdent sitt navn",
             )
             return personIdent
