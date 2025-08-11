@@ -174,7 +174,7 @@ internal class DokumentServiceTest {
 
     @Test
     fun `sendManueltBrev skal legge til opplysningspliktvilkåret når gjeldende og forrige vilkårsvurdering mangler`() {
-        val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
+        val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
             val behandling = lagBehandling()
@@ -208,7 +208,7 @@ internal class DokumentServiceTest {
 
     @Test
     fun `sendManueltBrev skal legge til opplysningspliktvilkåret når gjeldende vilkårsvurdering mangler, men forrige finnes`() {
-        val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
+        val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
             val behandling = lagBehandling()
@@ -247,7 +247,7 @@ internal class DokumentServiceTest {
 
     @Test
     fun `sendManueltBrev skal legge til opplysningspliktvilkåret når vilkårsvurderingen finnes`() {
-        val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
+        val brevSomFørerTilOpplysningsplikt = Brevmal.entries.filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
             val behandling = lagBehandling()
