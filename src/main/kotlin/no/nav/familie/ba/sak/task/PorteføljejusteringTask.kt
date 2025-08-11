@@ -13,7 +13,9 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 
+@Service
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Finner oppgaver som skal flyttes til ny enhet og oppretter tasker for å oppdatere enhet")
 class PorteføljejusteringTask(
     private val oppgaveService: OppgaveService,
