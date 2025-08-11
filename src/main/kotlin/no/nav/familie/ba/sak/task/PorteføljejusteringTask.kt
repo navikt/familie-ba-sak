@@ -29,24 +29,71 @@ class PorteføljejusteringTask(
                 limit = task.payload.toLong(),
             )
         val finnOppgaveResponseDto: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest)
-        val grupperteOppgaver = grupperOppgaverEtterBehandlesAvApplikasjonOgOppgavetype(finnOppgaveResponseDto.oppgaver)
+        val oppgaveGruppereringer = finnOppgaveResponseDto.oppgaver.tilOppgaveGrupperinger()
+        val grupperteOppgaver = grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(oppgaveGruppereringer)
         secureLogger.info(objectMapper.writeValueAsString(grupperteOppgaver))
     }
 
-    private fun grupperOppgaverEtterBehandlesAvApplikasjonOgOppgavetype(
-        oppgaver: List<Oppgave>,
-    ): Map<String, Map<String, Map<String, Int>>> =
-        oppgaver
-            .groupBy { oppgave -> oppgave.behandlesAvApplikasjon ?: oppgave.saksreferanse?.let { if (it.matches(Regex("\\d+[A-Z]\\d+"))) "Infotrygd" else "behandlesAvApplikasjonIkkeSatt" } ?: "behandlesAvApplikasjonIkkeSatt" }
-            .mapValues { (_, oppgaver) ->
-                oppgaver
-                    .groupBy { oppgave -> oppgave.oppgavetype ?: "manglerOppgavetype" }
-                    .mapValues { (_, oppgaver) ->
-                        oppgaver
-                            .groupBy { oppgave -> oppgave.saksreferanse?.let { "medSaksreferanse" } ?: "ingenSaksreferanse" }
-                            .mapValues { (_, oppgaver) -> oppgaver.size }
+    private fun List<Oppgave>.tilOppgaveGrupperinger(): List<OppgaveGruppering> =
+        this.map {
+            when (it.saksreferanse) {
+                null ->
+                    // Tror disse kan oppdateres med ny enhet uten at det vil påvirke fagsystemene negativt
+                    OppgaveUtenSaksreferanse(
+                        id = it.id!!,
+                        oppgavetype = it.oppgavetype ?: "manglerOppgavetype",
+                        behandlesAvApplikasjon = it.behandlesAvApplikasjon ?: "behandlesAvApplikasjonIkkeSatt",
+                    )
+
+                else ->
+                    // For disse må vi nok kommunisere med de ulike fagsystemene slik at de ikke kommer ut av synk ved oppdatering av enhet. Ihvertfall for BehandleSak, GodkjenneVedtak og BehandleUnderkjentVedtak.
+                    // For de øvrige oppgavetypene som måtte dukke opp her er jeg usikker på om det er nødvendig. Mulig oppgavene kan oppdateres uten å "si ifra" til noen.
+                    OppgaveMedSaksreferanse(
+                        id = it.id!!,
+                        oppgavetype = it.oppgavetype ?: "manglerOppgavetype",
+                        behandlesAvApplikasjon =
+                            it.behandlesAvApplikasjon ?: if (it.saksreferanse!!.matches(Regex("\\d+[A-Z]\\d+"))) {
+                                "infotrygd"
+                            } else {
+                                "behandlesAvApplikasjonIkkeSatt"
+                            },
+                        saksreferanse = it.saksreferanse!!,
+                    )
+            }
+        }
+
+    private fun grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(
+        oppgaveGrupperinger: List<OppgaveGruppering>,
+    ): Map<String?, Map<String, Map<String, Int>>> =
+        oppgaveGrupperinger
+            .groupBy { it::class.simpleName }
+            .mapValues { (_, oppgaveGrupperinger) ->
+                oppgaveGrupperinger
+                    .groupBy {
+                        it.behandlesAvApplikasjon
+                    }.mapValues { (_, oppgaveGrupperinger) ->
+                        oppgaveGrupperinger.groupingBy { it.oppgavetype }.eachCount()
                     }
             }
+
+    sealed interface OppgaveGruppering {
+        val id: Long
+        val oppgavetype: String
+        val behandlesAvApplikasjon: String
+    }
+
+    data class OppgaveMedSaksreferanse(
+        override val id: Long,
+        override val oppgavetype: String,
+        override val behandlesAvApplikasjon: String,
+        val saksreferanse: String,
+    ) : OppgaveGruppering
+
+    data class OppgaveUtenSaksreferanse(
+        override val id: Long,
+        override val oppgavetype: String,
+        override val behandlesAvApplikasjon: String,
+    ) : OppgaveGruppering
 
     companion object {
         val logger = LoggerFactory.getLogger(PorteføljejusteringTask::class.java)
