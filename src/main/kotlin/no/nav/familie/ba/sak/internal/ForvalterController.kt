@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.task.OppdaterLøpendeFlagg
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.PatchFomPåVilkårTilFødselsdato
 import no.nav.familie.ba.sak.task.PatchMergetIdentDto
+import no.nav.familie.ba.sak.task.PorteføljejusteringTask
 import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
@@ -556,6 +557,20 @@ class ForvalterController(
         )
 
         return ResponseEntity.ok("Kjørt OK")
+    }
+
+    @GetMapping("/start-portefoljejustering-task")
+    fun startPorteføljejusteringTask(
+        @RequestParam("antallOppgaver") antallOppgaver: Long,
+    ): ResponseEntity<Long> {
+//        tilgangService.verifiserHarTilgangTilHandling(
+//            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+//            handling = "Start porteføljejustering",
+//        )
+
+        val opprettetTask = taskRepository.save(PorteføljejusteringTask.opprettTask(antallOppgaver = antallOppgaver))
+
+        return ResponseEntity.ok(opprettetTask.id)
     }
 }
 
