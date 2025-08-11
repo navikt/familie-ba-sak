@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
@@ -29,7 +29,7 @@ import java.time.LocalDate
 class PreutfyllLovligOppholdServiceTest {
     @Nested
     inner class GenererLovligOppholdVilkårResultatTest {
-        private val pdlRestClient: PdlRestClient = mockk(relaxed = true)
+        private val pdlRestClient: SystemOnlyPdlRestClient = mockk(relaxed = true)
         private val statsborgerskapService = mockk<StatsborgerskapService>(relaxed = true)
         private val integrasjonClient: IntegrasjonClient = mockk(relaxed = true)
         private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)

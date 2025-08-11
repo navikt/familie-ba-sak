@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagSøknad
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.randomFnr
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class PreutfyllBosattIRiketServiceTest {
-    private val pdlRestClient: PdlRestClient = mockk(relaxed = true)
+    private val pdlRestClient: SystemOnlyPdlRestClient = mockk(relaxed = true)
     private val søknadService: SøknadService = mockk(relaxed = true)
     private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
     private val preutfyllBosattIRiketService = PreutfyllBosattIRiketService(pdlRestClient, søknadService, persongrunnlagService)
