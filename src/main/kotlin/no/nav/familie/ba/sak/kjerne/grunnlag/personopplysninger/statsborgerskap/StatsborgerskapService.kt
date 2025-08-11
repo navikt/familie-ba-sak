@@ -204,7 +204,7 @@ class StatsborgerskapService(
 
 fun Statsborgerskap.hentFom() = this.bekreftelsesdato ?: this.gyldigFraOgMed
 
-fun Statsborgerskap.iNordiskLand() = Norden.values().map { it.name }.contains(this.land)
+fun Statsborgerskap.iNordiskLand() = Norden.entries.map { it.name }.contains(this.land)
 
 fun Statsborgerskap.iTredjeland() = this.land != StatsborgerskapService.LANDKODE_UKJENT
 

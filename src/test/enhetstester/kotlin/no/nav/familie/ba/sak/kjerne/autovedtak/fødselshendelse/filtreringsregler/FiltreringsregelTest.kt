@@ -721,10 +721,10 @@ internal class FiltreringsregelTest {
                 Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
                 Filtreringsregel.MOR_HAR_IKKE_OPPHØRT_BARNETRYGD,
             )
-        assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
+        assertThat(Filtreringsregel.entries.size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
             Filtreringsregel
-                .values()
+                .entries
                 .zip(fagbestemtFiltreringsregelrekkefølge)
                 .all { (x, y) -> x == y },
         ).isTrue

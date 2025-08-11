@@ -460,17 +460,17 @@ internal class SaksstatistikkServiceTest {
     fun `Enum-verdier brukt i behandlingDVH skal validere mot json schema`() {
         val enumVerdier =
             listOf(
-                BehandlingType.values(),
-                BehandlingStatus.values(),
-                BehandlingUnderkategori.values(),
-                BehandlingÅrsak.values(),
-                BehandlingKategori.values(),
-                Behandlingsresultat.values(),
-                SettPåVentÅrsak.values(),
+                BehandlingType.entries,
+                BehandlingStatus.entries,
+                BehandlingUnderkategori.entries,
+                BehandlingÅrsak.entries,
+                BehandlingKategori.entries,
+                Behandlingsresultat.entries,
+                SettPåVentÅrsak.entries,
             )
 
         val alleMuligeResultatBegrunnelser =
-            Standardbegrunnelse.values().map {
+            Standardbegrunnelse.entries.map {
                 ResultatBegrunnelseDVH(now(), now(), it.vedtakBegrunnelseType.name, it.name)
             }
 
@@ -542,9 +542,9 @@ internal class SaksstatistikkServiceTest {
     @Test
     fun `Enum-verdier brukt i sakDvh skal validere mot json schema`() {
         val deltagere =
-            PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
+            PersonType.entries.map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
 
-        FagsakStatus.values().forEach {
+        FagsakStatus.entries.forEach {
             val sakDvh =
                 SakDVH(
                     funksjonellTid = ZonedDateTime.now(),

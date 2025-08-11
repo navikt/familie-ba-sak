@@ -77,11 +77,11 @@ class AutovedtakStegService(
     private val snikeIKøenService: SnikeIKøenService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
-        Autovedtaktype.values().associateWith {
+        Autovedtaktype.entries.associateWith {
             Metrics.counter("behandling.saksbehandling.autovedtak", "type", it.name)
         }
     private val antallAutovedtakÅpenBehandling: Map<Autovedtaktype, Counter> =
-        Autovedtaktype.values().associateWith {
+        Autovedtaktype.entries.associateWith {
             Metrics.counter("behandling.saksbehandling.autovedtak.aapen_behandling", "type", it.name)
         }
 
