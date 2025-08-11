@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
