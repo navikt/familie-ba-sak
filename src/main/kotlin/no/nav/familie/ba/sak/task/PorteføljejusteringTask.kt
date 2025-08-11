@@ -37,7 +37,7 @@ class PorteføljejusteringTask(
         oppgaver: List<Oppgave>,
     ): Map<String, Map<String, Map<String, Int>>> =
         oppgaver
-            .groupBy { oppgave -> oppgave.behandlesAvApplikasjon ?: "behandlesAvApplikasjonIkkeSatt" }
+            .groupBy { oppgave -> oppgave.behandlesAvApplikasjon ?: oppgave.saksreferanse?.let { if (it.matches(Regex("\\d+[A-Z]\\d+"))) "Infotrygd" else "behandlesAvApplikasjonIkkeSatt" } ?: "behandlesAvApplikasjonIkkeSatt" }
             .mapValues { (_, oppgaver) ->
                 oppgaver
                     .groupBy { oppgave -> oppgave.oppgavetype ?: "manglerOppgavetype" }
