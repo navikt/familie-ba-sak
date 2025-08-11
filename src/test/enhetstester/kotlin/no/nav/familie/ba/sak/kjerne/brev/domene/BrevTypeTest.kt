@@ -33,7 +33,7 @@ class BrevTypeTest {
 
     private val førerIkkeTilAvventingAvDokumentasjon =
         Brevmal
-            .values()
+            .entries
             .filter {
                 it !in førerTilAvventerDokumentasjon && it !in eøsDokumentMedAvventerDokumentasjon
             }
@@ -42,7 +42,7 @@ class BrevTypeTest {
     fun `Skal si om behandling settes på vent`() {
         val setterIkkeBehandlingPåVent =
             Brevmal
-                .values()
+                .entries
                 .filter { !førerTilAvventerDokumentasjon.contains(it) && it !in eøsDokumentMedAvventerDokumentasjon }
 
         setterIkkeBehandlingPåVent.forEach {
