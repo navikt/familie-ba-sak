@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.minside
 
+import no.nav.familie.ba.sak.common.ClockProvider
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -8,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class MinSideBarnetrygdService(
@@ -15,6 +18,7 @@ class MinSideBarnetrygdService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val clockProvider: ClockProvider,
 ) {
     fun hentMinSideBarnetrygd(fødselsnummer: Fødselsnummer): MinSideBarnetrygd? {
         val aktør = personidentService.hentAktør(fødselsnummer.verdi)
@@ -31,19 +35,37 @@ class MinSideBarnetrygdService(
 
         val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        val ordinær =
+        val harLøpendeOrdinærAndel =
             andeler
                 .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }
-                .map { it.stønadFom }
-                .minByOrNull { it }
-                ?.let { MinSideBarnetrygd.Ordinær(it) }
+                .any { it.stønadTom.isSameOrAfter(YearMonth.now(clockProvider.get())) }
 
-        val utvidet =
+        val harLøpendeUtvidetAndel =
             andeler
                 .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-                .map { it.stønadFom }
-                .minByOrNull { it }
-                ?.let { MinSideBarnetrygd.Utvidet(it) }
+                .any { it.stønadTom.isSameOrAfter(YearMonth.now(clockProvider.get())) }
+
+        val ordinær =
+            if (harLøpendeOrdinærAndel) {
+                andeler
+                    .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+                    .map { it.stønadFom }
+                    .minBy { it }
+                    .let { MinSideBarnetrygd.Ordinær(it) }
+            } else {
+                null
+            }
+
+        val utvidet =
+            if (harLøpendeUtvidetAndel) {
+                andeler
+                    .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
+                    .map { it.stønadFom }
+                    .minBy { it }
+                    .let { MinSideBarnetrygd.Utvidet(it) }
+            } else {
+                null
+            }
 
         return MinSideBarnetrygd(ordinær, utvidet)
     }
