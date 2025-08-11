@@ -35,7 +35,7 @@ class PorteføljejusteringTask(
 
     private fun grupperOppgaverEtterBehandlesAvApplikasjonOgOppgavetype(
         oppgaver: List<Oppgave>,
-    ): Map<String, Map<String?, Int>> = oppgaver.groupBy { oppgave -> oppgave.behandlesAvApplikasjon ?: "behandlesAvApplikasjonIkkeSatt" }.mapValues { (_, oppgaver) -> oppgaver.groupBy { oppgave -> oppgave.oppgavetype }.mapValues { (_, oppgaver) -> oppgaver.size } }
+    ): Map<String, Map<String, Map<String, Int>>> = oppgaver.groupBy { oppgave -> oppgave.behandlesAvApplikasjon ?: "behandlesAvApplikasjonIkkeSatt" }.mapValues { (_, oppgaver) -> oppgaver.groupBy { oppgave -> oppgave.oppgavetype ?: "manglerOppgavetype" }.mapValues { (_, oppgaver) -> oppgaver.groupBy { oppgave -> oppgave.saksreferanse ?: "ingenSaksreferanse" }.mapValues { (_, oppgaver) -> oppgaver.size } } }
 
     companion object {
         val logger = LoggerFactory.getLogger(PorteføljejusteringTask::class.java)
