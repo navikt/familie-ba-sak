@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBos
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
@@ -52,6 +54,18 @@ class MockPdlRestClient(
                 gyldigFraOgMed = LocalDate.now().minusYears(1),
                 gyldigTilOgMed = null,
                 bekreftelsesdato = null,
+            ),
+        )
+
+    override fun hentOppholdstillatelse(
+        aktør: Aktør,
+        historikk: Boolean,
+    ): List<Opphold> =
+        listOf(
+            Opphold(
+                oppholdFra = LocalDate.now().minusYears(10),
+                oppholdTil = null,
+                type = OPPHOLDSTILLATELSE.PERMANENT,
             ),
         )
 }
