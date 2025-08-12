@@ -258,7 +258,7 @@ class BehandlingsresultatSteg(
     private fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
-                ?: throw FunksjonellFeil("Kan ikke kjøre finnmarkstillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
+                ?: throw Feil("Kan ikke kjøre finnmarkstillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
 
         val andelerFraForrigeBehandling =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
@@ -275,7 +275,7 @@ class BehandlingsresultatSteg(
                 .any { it.verdi == true }
 
         if (erEndringIUtbetaling) {
-            throw Feil("Det er oppdaget forskjell i utbetaling utenom finnmarkstillegg andeler. Dette kan ikke skje i en behandling der årsak er FINNMARKSTILLEGG, og den automatiske kjøring stoppes derfor.")
+            throw Feil("Det er oppdaget forskjell i utbetaling utenom finnmarkstillegg andeler. Dette kan ikke skje i en behandling der årsak er ${BehandlingÅrsak.FINNMARKSTILLEGG}, og den automatiske kjøring stoppes derfor.")
         }
     }
 
