@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling
 
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 @Service
 class PreutfyllLovligOppholdService(
-    private val pdlRestClient: PdlRestClient,
+    private val pdlRestClient: SystemOnlyPdlRestClient,
     private val statsborgerskapService: StatsborgerskapService,
     private val integrasjonClient: IntegrasjonClient,
     private val persongrunnlagService: PersongrunnlagService,

@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.BehandlingStatus
@@ -13,15 +10,9 @@ import org.springframework.stereotype.Component
 @Component
 class KlagebehandlingHenter(
     private val klageClient: KlageClient,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> {
-        val klagerPåFagsak =
-            if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_NYTT_ENDEPUNKT_FOR_HENTING_AV_KLAGEBEHANDLINGER)) {
-                klageClient.hentKlagebehandlinger(fagsakId)
-            } else {
-                klageClient.hentKlagebehandlinger(setOf(fagsakId))[fagsakId] ?: throw Feil("Fikk ikke fagsakId=$fagsakId tilbake fra kallet til klage.")
-            }
+        val klagerPåFagsak = klageClient.hentKlagebehandlinger(fagsakId)
         return klagerPåFagsak.map { it.brukVedtaksdatoFraKlageinstansHvisOversendt() }
     }
 
