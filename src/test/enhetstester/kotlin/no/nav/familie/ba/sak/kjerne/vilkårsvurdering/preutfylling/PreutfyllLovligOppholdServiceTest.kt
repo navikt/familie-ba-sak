@@ -478,7 +478,7 @@ class PreutfyllLovligOppholdServiceTest {
                     .find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
 
             assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
-            // assertThat(lovligOppholdResultater.periodeFom).isEqualTo(LocalDate.now().minusYears(10))
+            assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(LocalDate.now().minusYears(10))
         }
     }
 }

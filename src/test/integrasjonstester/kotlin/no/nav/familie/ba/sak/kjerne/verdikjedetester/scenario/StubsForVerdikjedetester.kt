@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlIdenter
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKjoenn
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlMetadata
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlNavn
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonData
@@ -50,6 +52,7 @@ fun stubScenario(scenario: RestScenario) {
         stubHentPersonVergemaalEllerFretidfullmakt(it)
         stubHentStatsborgerskap(it)
         stubHentSøknad(it)
+        stubHentOppholdstillatelse(it)
     }
     stubHentBostedsadresserOgDeltBostedForPerson(scenario)
     stubHentPerson(scenario)
@@ -88,6 +91,40 @@ private fun stubHentStatsborgerskap(restScenarioPerson: RestScenarioPerson) {
         PdlPersonRequest(
             variables = PdlPersonRequestVariables(restScenarioPerson.ident, historikk = true),
             query = hentGraphqlQuery("statsborgerskap"),
+        )
+
+    stubFor(
+        post(urlEqualTo("/rest/api/pdl/graphql"))
+            .withRequestBody(WireMock.equalToJson(objectMapper.writeValueAsString(pdlRequestBody)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
+}
+
+private fun stubHentOppholdstillatelse(restScenarioPerson: RestScenarioPerson) {
+    val response =
+        PdlBaseResponse(
+            data =
+                PdlOppholdResponse(
+                    person =
+                        PdlOppholdPerson(
+                            opphold = restScenarioPerson.oppholdstillatelse,
+                        ),
+                ),
+            errors = null,
+            extensions = null,
+        )
+
+    val pdlRequestBody =
+        PdlPersonRequest(
+            variables = PdlPersonRequestVariables(restScenarioPerson.ident, historikk = true),
+            query = hentGraphqlQuery("oppholdstillatelse"),
         )
 
     stubFor(

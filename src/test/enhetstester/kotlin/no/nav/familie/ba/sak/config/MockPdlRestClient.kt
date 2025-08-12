@@ -63,7 +63,7 @@ class MockPdlRestClient(
     ): List<Opphold> =
         listOf(
             Opphold(
-                oppholdFra = LocalDate.now().minusYears(1),
+                oppholdFra = LocalDate.now().minusYears(10),
                 oppholdTil = null,
                 type = OPPHOLDSTILLATELSE.PERMANENT,
             ),
