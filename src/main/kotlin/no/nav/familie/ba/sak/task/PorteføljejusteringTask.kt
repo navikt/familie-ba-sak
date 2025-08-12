@@ -71,15 +71,15 @@ class PorteføljejusteringTask(
 
     private fun grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(
         oppgaveGrupperinger: List<OppgaveGruppering>,
-    ): Map<String?, Map<String?, Map<String?, Int>>> =
+    ): Map<String, Map<String, Map<String, Int>>> =
         oppgaveGrupperinger
-            .groupBy { it::class.simpleName }
+            .groupBy { it::class.simpleName ?: "null" }
             .mapValues { (_, oppgaveGrupperinger) ->
                 oppgaveGrupperinger
                     .groupBy {
-                        it.behandlesAvApplikasjon
+                        it.behandlesAvApplikasjon ?: "null"
                     }.mapValues { (_, oppgaveGrupperinger) ->
-                        oppgaveGrupperinger.groupingBy { it.oppgavetype }.eachCount()
+                        oppgaveGrupperinger.groupingBy { it.oppgavetype ?: "null" }.eachCount()
                     }
             }
 
