@@ -462,6 +462,24 @@ class FagsakService(
             )
         }
 
+        val forelderInfo = personInfoMedRelasjoner.forelderBarnRelasjon.find { it.aktør.aktivFødselsnummer() == behandling.fagsak.aktør.aktivFødselsnummer() }
+        if (forelderInfo != null) {
+            return RestFagsakDeltager(
+                navn = forelderInfo.navn,
+                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
+                rolle = FagsakDeltagerRolle.FORELDER,
+                kjønn = forelderInfo.kjønn,
+                fagsakId = behandling.fagsak.id,
+                fagsakType = behandling.fagsak.type,
+                adressebeskyttelseGradering = forelderInfo.adressebeskyttelseGradering,
+                erEgenAnsatt = forelderInfo.erEgenAnsatt,
+            )
+        }
+
+        // Liten varsling på om det er trygt å slette kallet under.
+        // I mine øyne skal det være overflødig å gjøre nytt kall mot PDL, men har ikke full oversikt over de forksjellige scenarioene.
+        logger.warn("PersonInfoMedRelasjoner inneholdt ikke forventet aktør, henter personinfo fra PDL som fallback.")
+
         return runCatching {
             personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
         }.fold(
