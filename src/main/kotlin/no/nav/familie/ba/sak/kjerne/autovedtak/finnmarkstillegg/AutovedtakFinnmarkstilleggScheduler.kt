@@ -70,7 +70,7 @@ class AutovedtakFinnmarkstilleggScheduler(
                         .flatMap { personer ->
                             pdlRestClient
                                 .hentBostedsadresseOgDeltBostedForPersoner(personer)
-                                .filterValues { it.nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms() }
+                                .filterValues { it.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
                                 .keys
                         }
 

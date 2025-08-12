@@ -138,11 +138,11 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
             mapOf(
                 søker1.aktør.aktivFødselsnummer() to
                     mockk(relaxed = true) {
-                        every { nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms() } returns true
+                        every { harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() } returns true
                     },
                 søker2.aktør.aktivFødselsnummer() to
                     mockk(relaxed = true) {
-                        every { nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms() } returns false
+                        every { harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() } returns false
                     },
             )
 
@@ -165,7 +165,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
             mapOf(
                 søker1.aktør.aktivFødselsnummer() to
                     mockk(relaxed = true) {
-                        every { nåværendeBostedEllerDeltBostedErIFinnmarkEllerNordTroms() } returns true
+                        every { harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() } returns true
                     },
             )
 
