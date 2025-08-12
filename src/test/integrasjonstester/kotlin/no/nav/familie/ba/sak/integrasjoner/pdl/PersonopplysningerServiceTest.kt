@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
@@ -40,6 +41,10 @@ internal class PersonopplysningerServiceTest(
 
     @BeforeEach
     fun setUp() {
+        every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } answers {
+            val personIdenter = firstArg<List<String>>()
+            personIdenter.associateWith { false }
+        }
         personopplysningerService =
             PersonopplysningerService(
                 PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
@@ -57,6 +62,10 @@ internal class PersonopplysningerServiceTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
+        every { integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(ID_BARN_1, ID_BARN_2, ID_MOR)) }) } answers {
+            val personIdenter = firstArg<List<String>>()
+            personIdenter.associateWith { it == ID_MOR }
+        }
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
@@ -66,6 +75,8 @@ internal class PersonopplysningerServiceTest(
         assertThat(personInfo.forelderBarnRelasjonMaskert.size).isEqualTo(1)
         assertThat(personInfo.kontaktinformasjonForDoedsbo).isNull()
         assertThat(personInfo.dødsfall).isNull()
+        assertThat(personInfo.erEgenAnsatt).isEqualTo(true)
+        assertThat(personInfo.forelderBarnRelasjon.first().erEgenAnsatt).isEqualTo(false)
     }
 
     @Test
