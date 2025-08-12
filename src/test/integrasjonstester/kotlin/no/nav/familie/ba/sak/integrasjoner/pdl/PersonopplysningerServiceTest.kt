@@ -41,10 +41,6 @@ internal class PersonopplysningerServiceTest(
 
     @BeforeEach
     fun setUp() {
-        every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } answers {
-            val personIdenter = firstArg<List<String>>()
-            personIdenter.associateWith { false }
-        }
         personopplysningerService =
             PersonopplysningerService(
                 PdlRestClient(URI.create(wireMockServer.baseUrl() + "/api"), restTemplate, mockPersonidentService),
