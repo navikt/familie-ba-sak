@@ -353,6 +353,7 @@ class FagsakService(
                         fagsakId = fagsak?.id,
                         fagsakType = fagsak?.type,
                         adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
+                        erEgenAnsatt = personInfoMedRelasjoner.erEgenAnsatt,
                     ),
                 )
             }
@@ -395,6 +396,7 @@ class FagsakService(
                                         fagsakId = fagsak?.id,
                                         fagsakType = fagsak?.type,
                                         adressebeskyttelseGradering = relasjon.adressebeskyttelseGradering,
+                                        erEgenAnsatt = relasjon.erEgenAnsatt,
                                     ),
                                 )
                             }
@@ -449,6 +451,7 @@ class FagsakService(
                                 fagsakId = behandling.fagsak.id,
                                 fagsakType = behandling.fagsak.type,
                                 adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
+                                erEgenAnsatt = personInfoMedRelasjoner.erEgenAnsatt,
                             )
                     } else {
                         val maskertForelder =

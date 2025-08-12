@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTil
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -32,6 +33,8 @@ internal class PersonopplysningerServiceTest(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -46,6 +49,7 @@ internal class PersonopplysningerServiceTest(
                     mockPersonidentService,
                 ),
                 familieIntegrasjonerTilgangskontrollService,
+                integrasjonClient,
             )
         lagMockForPersoner()
     }

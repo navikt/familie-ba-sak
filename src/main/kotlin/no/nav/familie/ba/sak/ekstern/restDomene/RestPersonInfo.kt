@@ -20,6 +20,7 @@ data class RestPersonInfo(
     val kommunenummer: String = "ukjent",
     val dødsfallDato: String? = null,
     val bostedsadresse: RestBostedsadresse? = null,
+    val erEgenAnsatt: Boolean? = null,
 )
 
 data class RestForelderBarnRelasjon(
@@ -28,6 +29,7 @@ data class RestForelderBarnRelasjon(
     val navn: String,
     val fødselsdato: LocalDate?,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val erEgenAnsatt: Boolean? = null,
 )
 
 data class RestForelderBarnRelasjonnMaskert(
@@ -53,6 +55,7 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         navn = this.navn ?: "",
         fødselsdato = this.fødselsdato,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
+        erEgenAnsatt = this.erEgenAnsatt,
     )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
@@ -79,6 +82,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
+        erEgenAnsatt = this.erEgenAnsatt,
     )
 }
 
