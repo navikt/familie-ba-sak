@@ -11,7 +11,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType.REVURDERING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -31,23 +34,39 @@ class AutovedtakFinnmarkstilleggService(
     private val persongrunnlagService: PersongrunnlagService,
     private val pdlRestClient: SystemOnlyPdlRestClient,
     private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
 ) : AutovedtakBehandlingService<FinnmarkstilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun skalAutovedtakBehandles(behandlingsdata: FinnmarkstilleggData): Boolean {
+        val harIkkeLøpendeBarnetrygd = fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).status != FagsakStatus.LØPENDE
+
+        if (harIkkeLøpendeBarnetrygd) return false
+
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        val identerISisteIverksatteBehandling =
+        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler =
+            beregningService
+                .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
+                .andelerTilkjentYtelse
+                .any { it.type == YtelseType.FINNMARKSTILLEGG }
+
+        if (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler) return true
+
+        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg =
             persongrunnlagService
                 .hentAktivThrows(sisteIverksatteBehandling.id)
                 .personer
                 .map { it.aktør.aktivFødselsnummer() }
+                .let { identer ->
+                    pdlRestClient
+                        .hentBostedsadresseOgDeltBostedForPersoner(identer)
+                        .any { it.value.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
+                }
 
-        return pdlRestClient
-            .hentBostedsadresseOgDeltBostedForPersoner(identerISisteIverksatteBehandling)
-            .any { it.value.sisteFlyttingVarInnEllerUtAvFinnmarkEllerNordTroms() }
+        return minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
     }
 
     @Transactional
