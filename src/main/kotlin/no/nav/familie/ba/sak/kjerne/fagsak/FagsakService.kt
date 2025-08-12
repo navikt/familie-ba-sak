@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -408,7 +409,6 @@ class FagsakService(
         }
     }
 
-    // We find all cases that either have the given person as applicant, or have it as a child
     private fun hentAssosierteFagsakdeltagere(
         aktør: Aktør,
         personInfoMedRelasjoner: PersonInfo,
@@ -416,71 +416,70 @@ class FagsakService(
         val assosierteFagsakDeltagerMap = mutableMapOf<Long, RestFagsakDeltager>()
 
         personRepository.findByAktør(aktør).forEach { person: Person ->
-            if (person.personopplysningGrunnlag.aktiv) {
-                val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
-                if (behandling.aktiv &&
-                    !behandling.fagsak.arkivert &&
-                    !assosierteFagsakDeltagerMap.containsKey(
-                        behandling.fagsak.id,
-                    )
-                ) {
-                    // get applicant info from PDL. we assume that the applicant is always a person whose info is stored in PDL.
-                    if (behandling.fagsak.aktør == aktør) {
-                        assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                            RestFagsakDeltager(
-                                navn = personInfoMedRelasjoner.navn,
-                                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
-                                rolle =
-                                    when (behandling.fagsak.type) {
-                                        FagsakType.NORMAL -> FagsakDeltagerRolle.FORELDER
-                                        FagsakType.SKJERMET_BARN -> FagsakDeltagerRolle.BARN
-                                        FagsakType.BARN_ENSLIG_MINDREÅRIG -> FagsakDeltagerRolle.BARN
-                                        FagsakType.INSTITUSJON -> FagsakDeltagerRolle.UKJENT
-                                    },
-                                kjønn = personInfoMedRelasjoner.kjønn,
-                                fagsakId = behandling.fagsak.id,
-                                fagsakType = behandling.fagsak.type,
-                                adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
-                                erEgenAnsatt = personInfoMedRelasjoner.erEgenAnsatt,
-                            )
-                    } else {
-                        val maskertForelder =
-                            hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
-                        if (maskertForelder != null) {
-                            assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                maskertForelder.copy(
-                                    rolle = FagsakDeltagerRolle.FORELDER,
-                                    fagsakType = behandling.fagsak.type,
-                                )
-                        } else {
-                            val personinfo =
-                                runCatching {
-                                    personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
-                                }.fold(
-                                    onSuccess = { it },
-                                    onFailure = {
-                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
-                                    },
-                                )
-
-                            assosierteFagsakDeltagerMap[behandling.fagsak.id] =
-                                RestFagsakDeltager(
-                                    navn = personinfo.navn,
-                                    ident = behandling.fagsak.aktør.aktivFødselsnummer(),
-                                    rolle = FagsakDeltagerRolle.FORELDER,
-                                    kjønn = personinfo.kjønn,
-                                    fagsakId = behandling.fagsak.id,
-                                    fagsakType = behandling.fagsak.type,
-                                    adressebeskyttelseGradering = personinfo.adressebeskyttelseGradering,
-                                )
-                        }
-                    }
-                }
+            if (!person.personopplysningGrunnlag.aktiv) {
+                return@forEach
             }
+            val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
+            if (!behandling.aktiv || behandling.fagsak.arkivert || assosierteFagsakDeltagerMap.containsKey(behandling.fagsak.id)) {
+                return@forEach
+            }
+
+            assosierteFagsakDeltagerMap[behandling.fagsak.id] = hentAssosiertFagsakdeltager(behandling, aktør, personInfoMedRelasjoner)
         }
 
-        // The given person and its parents may be included in the result, no matter whether they have a case.
         return assosierteFagsakDeltagerMap.values.toMutableList()
+    }
+
+    private fun hentAssosiertFagsakdeltager(
+        behandling: Behandling,
+        aktør: Aktør,
+        personInfoMedRelasjoner: PersonInfo,
+    ): RestFagsakDeltager {
+        if (behandling.fagsak.aktør == aktør) {
+            return RestFagsakDeltager(
+                navn = personInfoMedRelasjoner.navn,
+                ident = behandling.fagsak.aktør.aktivFødselsnummer(),
+                rolle =
+                    when (behandling.fagsak.type) {
+                        FagsakType.NORMAL -> FagsakDeltagerRolle.FORELDER
+                        FagsakType.SKJERMET_BARN -> FagsakDeltagerRolle.BARN
+                        FagsakType.BARN_ENSLIG_MINDREÅRIG -> FagsakDeltagerRolle.BARN
+                        FagsakType.INSTITUSJON -> FagsakDeltagerRolle.UKJENT
+                    },
+                kjønn = personInfoMedRelasjoner.kjønn,
+                fagsakId = behandling.fagsak.id,
+                fagsakType = behandling.fagsak.type,
+                adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
+                erEgenAnsatt = personInfoMedRelasjoner.erEgenAnsatt,
+            )
+        }
+
+        val maskertForelder = hentMaskertFagsakdeltakerVedManglendeTilgang(behandling.fagsak.aktør)
+        if (maskertForelder != null) {
+            return maskertForelder.copy(
+                rolle = FagsakDeltagerRolle.FORELDER,
+                fagsakType = behandling.fagsak.type,
+            )
+        }
+
+        return runCatching {
+            personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
+        }.fold(
+            onSuccess = {
+                RestFagsakDeltager(
+                    navn = it.navn,
+                    ident = behandling.fagsak.aktør.aktivFødselsnummer(),
+                    rolle = FagsakDeltagerRolle.FORELDER,
+                    kjønn = it.kjønn,
+                    fagsakId = behandling.fagsak.id,
+                    fagsakType = behandling.fagsak.type,
+                    adressebeskyttelseGradering = it.adressebeskyttelseGradering,
+                )
+            },
+            onFailure = {
+                throw Feil("Feil ved henting av person fra PDL", throwable = it)
+            },
+        )
     }
 
     private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? =
