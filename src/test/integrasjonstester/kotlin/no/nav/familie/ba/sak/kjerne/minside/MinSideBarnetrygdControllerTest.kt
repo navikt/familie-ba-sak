@@ -106,6 +106,9 @@ class MinSideBarnetrygdControllerTest(
         @Test
         fun `skal hente min side barnetrygd`() {
             // Arrange
+            val andelFom = YearMonth.now().minusMonths(5)
+            val andelTom = YearMonth.now().plusMonths(5)
+
             val aktør = aktørIdRepository.save(randomAktør(fnr = fnr))
 
             val fagsak = fagsakRepository.save(lagFagsakUtenId(aktør = aktør))
@@ -130,8 +133,8 @@ class MinSideBarnetrygdControllerTest(
                     behandling = behandling,
                     tilkjentYtelse = tilkjentYtelse,
                     aktør = aktør,
-                    fom = YearMonth.of(2025, 1),
-                    tom = YearMonth.of(2025, 6),
+                    fom = andelFom,
+                    tom = andelTom,
                     ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 ),
             )
@@ -142,7 +145,7 @@ class MinSideBarnetrygdControllerTest(
             // Assert
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body).isInstanceOfSatisfying(HentMinSideBarnetrygdDto.Suksess::class.java) {
-                assertThat(it.barnetrygd?.ordinær?.startmåned).isEqualTo(YearMonth.of(2025, 1))
+                assertThat(it.barnetrygd?.ordinær?.startmåned).isEqualTo(andelFom)
                 assertThat(it.barnetrygd?.utvidet).isNull()
             }
         }
