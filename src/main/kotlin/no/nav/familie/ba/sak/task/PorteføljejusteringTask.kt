@@ -17,7 +17,10 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Finner oppgaver som skal flyttes til ny enhet og oppretter tasker for å oppdatere enhet")
+@TaskStepBeskrivelse(
+    taskStepType = TASK_STEP_TYPE,
+    beskrivelse = "Finner oppgaver som skal flyttes til ny enhet og oppretter tasker for å oppdatere enhet",
+)
 class PorteføljejusteringTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
@@ -32,7 +35,8 @@ class PorteføljejusteringTask(
             )
         val finnOppgaveResponseDto: FinnOppgaveResponseDto = oppgaveService.hentOppgaver(finnOppgaveRequest)
         val oppgaveGruppereringer = finnOppgaveResponseDto.oppgaver.tilOppgaveGrupperinger()
-        val grupperteOppgaver = grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(oppgaveGruppereringer)
+        val grupperteOppgaver =
+            grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(oppgaveGruppereringer)
         secureLogger.info(objectMapper.writeValueAsString(grupperteOppgaver))
         // TODO: Legg inn logikk for å opprette tasker som oppdaterer enhet på oppgavene. Kommer i en senere PR når håndtering av porteføljejustering er ferdig avklart.
     }
@@ -44,8 +48,8 @@ class PorteføljejusteringTask(
                     // Tror disse kan oppdateres med ny enhet uten at det vil påvirke fagsystemene negativt
                     OppgaveUtenSaksreferanse(
                         id = it.id!!,
-                        oppgavetype = it.oppgavetype ?: "manglerOppgavetype",
-                        behandlesAvApplikasjon = it.behandlesAvApplikasjon ?: "behandlesAvApplikasjonIkkeSatt",
+                        oppgavetype = it.oppgavetype,
+                        behandlesAvApplikasjon = it.behandlesAvApplikasjon,
                     )
 
                 else ->
@@ -53,12 +57,12 @@ class PorteføljejusteringTask(
                     // For de øvrige oppgavetypene som måtte dukke opp her er jeg usikker på om det er nødvendig. Mulig oppgavene kan oppdateres uten å "si ifra" til noen.
                     OppgaveMedSaksreferanse(
                         id = it.id!!,
-                        oppgavetype = it.oppgavetype ?: "manglerOppgavetype",
+                        oppgavetype = it.oppgavetype,
                         behandlesAvApplikasjon =
                             it.behandlesAvApplikasjon ?: if (it.saksreferanse!!.matches(Regex("\\d+[A-Z]\\d+"))) {
                                 "infotrygd"
                             } else {
-                                "behandlesAvApplikasjonIkkeSatt"
+                                null
                             },
                         saksreferanse = it.saksreferanse!!,
                     )
@@ -67,7 +71,7 @@ class PorteføljejusteringTask(
 
     private fun grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(
         oppgaveGrupperinger: List<OppgaveGruppering>,
-    ): Map<String?, Map<String, Map<String, Int>>> =
+    ): Map<String?, Map<String?, Map<String?, Int>>> =
         oppgaveGrupperinger
             .groupBy { it::class.simpleName }
             .mapValues { (_, oppgaveGrupperinger) ->
@@ -81,21 +85,21 @@ class PorteføljejusteringTask(
 
     sealed interface OppgaveGruppering {
         val id: Long
-        val oppgavetype: String
-        val behandlesAvApplikasjon: String
+        val oppgavetype: String?
+        val behandlesAvApplikasjon: String?
     }
 
     data class OppgaveMedSaksreferanse(
         override val id: Long,
-        override val oppgavetype: String,
-        override val behandlesAvApplikasjon: String,
+        override val oppgavetype: String?,
+        override val behandlesAvApplikasjon: String?,
         val saksreferanse: String,
     ) : OppgaveGruppering
 
     data class OppgaveUtenSaksreferanse(
         override val id: Long,
-        override val oppgavetype: String,
-        override val behandlesAvApplikasjon: String,
+        override val oppgavetype: String?,
+        override val behandlesAvApplikasjon: String?,
     ) : OppgaveGruppering
 
     companion object {
