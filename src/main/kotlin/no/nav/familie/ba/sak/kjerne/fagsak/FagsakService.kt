@@ -375,24 +375,14 @@ class FagsakService(
                         if (maskertForelder != null) {
                             assosierteFagsakDeltagere.add(maskertForelder.copy(rolle = FagsakDeltagerRolle.FORELDER))
                         } else {
-                            val forelderInfo =
-                                runCatching {
-                                    personopplysningerService.hentPersoninfoEnkel(relasjon.aktør)
-                                }.fold(
-                                    onSuccess = { it },
-                                    onFailure = {
-                                        throw Feil("Feil ved henting av person fra PDL", throwable = it)
-                                    },
-                                )
-
                             val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
                             fagsakerForRelasjon.forEach { fagsak ->
                                 assosierteFagsakDeltagere.add(
                                     RestFagsakDeltager(
-                                        navn = forelderInfo.navn,
+                                        navn = relasjon.navn,
                                         ident = relasjon.aktør.aktivFødselsnummer(),
                                         rolle = FagsakDeltagerRolle.FORELDER,
-                                        kjønn = forelderInfo.kjønn,
+                                        kjønn = relasjon.kjønn,
                                         fagsakId = fagsak?.id,
                                         fagsakType = fagsak?.type,
                                         adressebeskyttelseGradering = relasjon.adressebeskyttelseGradering,

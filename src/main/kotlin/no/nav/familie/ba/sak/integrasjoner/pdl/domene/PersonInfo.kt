@@ -42,6 +42,7 @@ data class ForelderBarnRelasjon(
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val kjønn: Kjønn? = null,
     val erEgenAnsatt: Boolean? = null,
 ) {
     override fun toString(): String = "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"

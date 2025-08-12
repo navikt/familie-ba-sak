@@ -43,6 +43,7 @@ class PersonopplysningerService(
                                 relasjonsrolle = it.relasjonsrolle,
                                 fødselsdato = relasjonsinfo.fødselsdato,
                                 navn = relasjonsinfo.navn,
+                                kjønn = relasjonsinfo.kjønn,
                                 adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
                                 erEgenAnsatt = egenAnsattPerIdent.getOrDefault(it.aktør.aktivFødselsnummer(), null),
                             )
