@@ -16,7 +16,7 @@ data class RestPersonInfo(
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     var harTilgang: Boolean = true,
     val forelderBarnRelasjon: List<RestForelderBarnRelasjon> = emptyList(),
-    val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
+    val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonMaskert> = emptyList(),
     val kommunenummer: String = "ukjent",
     val dødsfallDato: String? = null,
     val bostedsadresse: RestBostedsadresse? = null,
@@ -32,7 +32,7 @@ data class RestForelderBarnRelasjon(
     val erEgenAnsatt: Boolean? = null,
 )
 
-data class RestForelderBarnRelasjonnMaskert(
+data class RestForelderBarnRelasjonMaskert(
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
 )
@@ -43,7 +43,7 @@ data class RestBostedsadresse(
 )
 
 private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() =
-    RestForelderBarnRelasjonnMaskert(
+    RestForelderBarnRelasjonMaskert(
         relasjonRolle = this.relasjonsrolle,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
     )
