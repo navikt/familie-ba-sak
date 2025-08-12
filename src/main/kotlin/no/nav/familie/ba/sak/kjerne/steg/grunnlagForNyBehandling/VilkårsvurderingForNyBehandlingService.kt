@@ -75,6 +75,14 @@ class VilkårsvurderingForNyBehandlingService(
                 )
             }
 
+            BehandlingÅrsak.FINNMARKSTILLEGG ->
+                genererVilkårsvurderingForFinnmarkstillegg(
+                    forrigeBehandlingSomErVedtatt =
+                        forrigeBehandlingSomErVedtatt
+                            ?: throw Feil("Kan ikke opprette behandling med årsak ${behandling.opprettetÅrsak} hvis det ikke finnes en tidligere behandling"),
+                    inneværendeBehandling = behandling,
+                )
+
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
@@ -156,6 +164,31 @@ class VilkårsvurderingForNyBehandlingService(
         )
 
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+    }
+
+    private fun genererVilkårsvurderingForFinnmarkstillegg(
+        forrigeBehandlingSomErVedtatt: Behandling,
+        inneværendeBehandling: Behandling,
+    ): Vilkårsvurdering {
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(inneværendeBehandling.id)
+
+        val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
+
+        val vilkårsvurderingMedPreutfyltBosattIRiket =
+            forrigeBehandlingVilkårsvurdering
+                .tilKopiForNyBehandling(
+                    nyBehandling = inneværendeBehandling,
+                    personopplysningGrunnlag,
+                ).also {
+                    preutfyllVilkårService.preutfyllBosattIRiket(it)
+                }
+
+        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+            behandling = inneværendeBehandling,
+            forrigeBehandling = forrigeBehandlingSomErVedtatt,
+        )
+
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurderingMedPreutfyltBosattIRiket)
     }
 
     fun initierVilkårsvurderingForBehandling(

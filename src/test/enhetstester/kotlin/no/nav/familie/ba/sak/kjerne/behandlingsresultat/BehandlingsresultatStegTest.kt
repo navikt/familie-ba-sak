@@ -36,6 +36,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -503,7 +504,7 @@ class BehandlingsresultatStegTest {
                     ),
                 ),
             )
-            lagMocksForPreValiderStegSatsendring(
+            lagMocksForPreValiderSteg(
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 forrigeBehandling = forrigeBehandling,
@@ -601,7 +602,7 @@ class BehandlingsresultatStegTest {
                     ),
                 ),
             )
-            lagMocksForPreValiderStegSatsendring(
+            lagMocksForPreValiderSteg(
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 forrigeBehandling = forrigeBehandling,
@@ -613,6 +614,134 @@ class BehandlingsresultatStegTest {
             behandlingsresultatSteg.preValiderSteg(behandling)
 
             assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal ikke kaste feil dersom eneste endringer i andeler har vært i finnmarkstillegg andeler i behandlinger med årsak finnmarkstillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            behandlingsresultatSteg.preValiderSteg(behandling)
+            assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `Skal kaste feil dersom det har vært endringer i andeler annet enn finnmarkstillegg i behandlinger med årsak finnmarkstillegg`() {
+            val søker = lagPerson()
+            val barn = lagPerson(type = PersonType.BARN)
+            val forrigeBehandling =
+                lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
+
+            val forrigeTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = forrigeBehandling)
+            forrigeTilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = forrigeBehandling,
+                        tilkjentYtelse = forrigeTilkjentYtelse,
+                        beløp = 999,
+                        person = barn,
+                    ),
+                ),
+            )
+
+            val behandling =
+                lagBehandling(
+                    fagsak = forrigeBehandling.fagsak,
+                    behandlingType = BehandlingType.REVURDERING,
+                    årsak = BehandlingÅrsak.FINNMARKSTILLEGG,
+                )
+            val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
+
+            tilkjentYtelse.andelerTilkjentYtelse.addAll(
+                mutableSetOf(
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 1000,
+                        person = barn,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = YearMonth.of(2023, 1),
+                        tom = YearMonth.of(2023, 2),
+                        behandling = behandling,
+                        tilkjentYtelse = tilkjentYtelse,
+                        beløp = 500,
+                        person = barn,
+                        ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    ),
+                ),
+            )
+
+            lagMocksForPreValiderSteg(
+                behandling = behandling,
+                tilkjentYtelse = tilkjentYtelse,
+                forrigeBehandling = forrigeBehandling,
+                forrigeTilkjentYtelse = forrigeTilkjentYtelse,
+                søker = søker,
+                barn = listOf(barn),
+            )
+
+            assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
+                .hasMessageContaining("Det er oppdaget forskjell i utbetaling utenom finnmarkstillegg andeler. Dette kan ikke skje i en behandling der årsak er FINNMARKSTILLEGG, og den automatiske kjøring stoppes derfor.")
         }
     }
 
@@ -634,7 +763,7 @@ class BehandlingsresultatStegTest {
         }
     }
 
-    private fun lagMocksForPreValiderStegSatsendring(
+    private fun lagMocksForPreValiderSteg(
         behandling: Behandling,
         tilkjentYtelse: TilkjentYtelse,
         forrigeBehandling: Behandling,
@@ -656,6 +785,7 @@ class BehandlingsresultatStegTest {
         every { personopplysningGrunnlag.søker } returns søker
         every { personopplysningGrunnlag.barna } returns barn
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling) } returns forrigeBehandling
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeTilkjentYtelse.andelerTilkjentYtelse.toList()
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService

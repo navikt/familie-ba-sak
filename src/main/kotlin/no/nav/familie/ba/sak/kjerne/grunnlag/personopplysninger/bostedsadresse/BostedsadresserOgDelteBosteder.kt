@@ -11,13 +11,7 @@ import java.time.LocalDate
 data class BostedsadresserOgDelteBosteder(
     val bostedsadresser: List<Adresse>,
     val delteBosteder: List<Adresse>,
-) {
-    fun nåværendeBostedsadresseEllerDeltBostedErIFinnmarkEllerNordTroms(): Boolean {
-        val sisteBostedsadresse = bostedsadresser.sortedBy { it.gyldigFraOgMed }.lastOrNull()
-        val sisteDeltBosted = delteBosteder.sortedBy { it.gyldigFraOgMed }.lastOrNull()
-        return sisteBostedsadresse.erIFinnmarkEllerNordTroms() || sisteDeltBosted.erIFinnmarkEllerNordTroms()
-    }
-}
+)
 
 data class Adresse(
     val gyldigFraOgMed: LocalDate? = null,

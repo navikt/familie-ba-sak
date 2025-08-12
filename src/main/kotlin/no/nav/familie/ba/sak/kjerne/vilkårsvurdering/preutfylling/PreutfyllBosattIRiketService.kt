@@ -34,7 +34,7 @@ class PreutfyllBosattIRiketService(
     private val søknadService: SøknadService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
-    fun prefutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
+    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
         val identer = vilkårsvurdering.personResultater.map { it.aktør.aktivFødselsnummer() }
         val bostedsadresser = pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(identer)
 
