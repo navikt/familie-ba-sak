@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service
 class PorteføljejusteringTask(
     private val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val finnOppgaveRequest =
             FinnOppgaveRequest(
