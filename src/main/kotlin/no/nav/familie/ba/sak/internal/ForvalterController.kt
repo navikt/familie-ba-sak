@@ -563,10 +563,10 @@ class ForvalterController(
     fun startPorteføljejusteringTask(
         @RequestParam("antallOppgaver") antallOppgaver: Long,
     ): ResponseEntity<Long> {
-//        tilgangService.verifiserHarTilgangTilHandling(
-//            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-//            handling = "Start porteføljejustering",
-//        )
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Start porteføljejustering",
+        )
 
         val opprettetTask = taskRepository.save(PorteføljejusteringTask.opprettTask(antallOppgaver = antallOppgaver))
 

@@ -32,6 +32,7 @@ class PorteføljejusteringTask(
         val oppgaveGruppereringer = finnOppgaveResponseDto.oppgaver.tilOppgaveGrupperinger()
         val grupperteOppgaver = grupperOppgaverEtterSaksreferanseBehandlesAvApplikasjonOgOppgavetype(oppgaveGruppereringer)
         secureLogger.info(objectMapper.writeValueAsString(grupperteOppgaver))
+        // TODO: Legg inn logikk for å opprette tasker som oppdaterer enhet på oppgavene. Kommer i en senere PR når håndtering av porteføljejustering er ferdig avklart.
     }
 
     private fun List<Oppgave>.tilOppgaveGrupperinger(): List<OppgaveGruppering> =
