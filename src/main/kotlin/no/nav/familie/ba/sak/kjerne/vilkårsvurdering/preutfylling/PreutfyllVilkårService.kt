@@ -16,10 +16,16 @@ class PreutfyllVilkårService(
         if (vilkårsvurdering.behandling.kategori == BehandlingKategori.EØS) return
 
         if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
-            preutfyllBosattIRiketService.prefutfyllBosattIRiket(vilkårsvurdering)
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
         }
         if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD)) {
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
+        }
+    }
+
+    fun preutfyllBosattIRiket(vilkårsvurdering: Vilkårsvurdering) {
+        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR)) {
+            preutfyllBosattIRiketService.preutfyllBosattIRiket(vilkårsvurdering)
         }
     }
 }

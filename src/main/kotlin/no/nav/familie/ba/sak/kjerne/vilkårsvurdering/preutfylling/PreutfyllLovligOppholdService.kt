@@ -11,7 +11,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPH
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_ARBEIDSFORHOLD
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.BegrunnelseForManuellKontrollAvVilkår.INFORMASJON_OM_OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.tidslinje.PRAKTISK_TIDLIGSTE_DAG
 import no.nav.familie.tidslinje.Periode
 import no.nav.familie.tidslinje.Tidslinje
@@ -58,12 +60,15 @@ class PreutfyllLovligOppholdService(
 
         val fomDatoForBeskjæring = finnFomDatoForBeskjæring(personResultat, personResultat.vilkårsvurdering, bostedsadresserForPerson) ?: PRAKTISK_TIDLIGSTE_DAG
 
+        val harOppholdstillatelseTidslinje = lagHarOppholdstillatelseTidslinje(personResultat)
+
         val harLovligOppholdTidslinje =
             erNordiskStatsborgerTidslinje
-                .kombinerMed(erEØSBorgerOgHarArbeidsforholdTidslinje) { erNordisk, erEØSBorgerOgArbeidsforhold ->
+                .kombinerMed(erEØSBorgerOgHarArbeidsforholdTidslinje, harOppholdstillatelseTidslinje) { erNordisk, erEØSBorgerOgArbeidsforhold, harOppholdstillatelse ->
                     when {
                         erNordisk == true -> OppfyltDelvilkår("- Norsk/nordisk statsborgerskap.")
                         erEØSBorgerOgArbeidsforhold == true -> OppfyltDelvilkår("- EØS-borger og har arbeidsforhold i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_ARBEIDSFORHOLD)
+                        harOppholdstillatelse == true -> OppfyltDelvilkår("- Har gyldig oppholdstillatelse i Norge.", begrunnelseForManuellKontroll = INFORMASJON_OM_OPPHOLDSTILLATELSE)
                         else -> IkkeOppfyltDelvilkår
                     }
                 }.beskjærFraOgMed(fomDatoForBeskjæring)
@@ -134,12 +139,12 @@ class PreutfyllLovligOppholdService(
 
     private fun lagHarArbeidsforholdTidslinje(
         personResultat: PersonResultat,
-        datoFørsteBostedadresse: LocalDate,
+        fomDatoForBeskjæring: LocalDate,
     ): Tidslinje<Boolean> {
         val arbeidsforhold =
             systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(
                 ident = personResultat.aktør.aktivFødselsnummer(),
-                ansettelsesperiodeFom = datoFørsteBostedadresse,
+                ansettelsesperiodeFom = fomDatoForBeskjæring,
             )
 
         return arbeidsforhold
@@ -149,6 +154,20 @@ class PreutfyllLovligOppholdService(
                     verdi = true,
                     fom = it.fom,
                     tom = it.tom,
+                )
+            }.tilTidslinje()
+    }
+
+    private fun lagHarOppholdstillatelseTidslinje(personResultat: PersonResultat): Tidslinje<Boolean> {
+        val oppholdstillatelse = pdlRestClient.hentOppholdstillatelse(personResultat.aktør, historikk = true)
+
+        return oppholdstillatelse
+            .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }
+            .map {
+                Periode(
+                    verdi = true,
+                    fom = it.oppholdFra,
+                    tom = it.oppholdTil,
                 )
             }.tilTidslinje()
     }

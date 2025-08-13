@@ -66,8 +66,9 @@ class VilkårsvurderingForNyBehandlingService(
 
             BehandlingÅrsak.SATSENDRING,
             BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING,
+            BehandlingÅrsak.FINNMARKSTILLEGG,
             -> {
-                genererVilkårsvurderingForSatsendring(
+                genererVilkårsvurderingForSatsendringMånedligvalutaJusteringOgFinnmarkstillegg(
                     forrigeBehandlingSomErVedtatt =
                         forrigeBehandlingSomErVedtatt
                             ?: throw Feil("Kan ikke opprette behandling med årsak ${behandling.opprettetÅrsak} hvis det ikke finnes en tidligere behandling"),
@@ -136,7 +137,7 @@ class VilkårsvurderingForNyBehandlingService(
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
-    private fun genererVilkårsvurderingForSatsendring(
+    private fun genererVilkårsvurderingForSatsendringMånedligvalutaJusteringOgFinnmarkstillegg(
         forrigeBehandlingSomErVedtatt: Behandling,
         inneværendeBehandling: Behandling,
     ): Vilkårsvurdering {
@@ -145,10 +146,11 @@ class VilkårsvurderingForNyBehandlingService(
         val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
 
         val nyVilkårsvurdering =
-            forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(
-                nyBehandling = inneværendeBehandling,
-                personopplysningGrunnlag,
-            )
+            forrigeBehandlingVilkårsvurdering
+                .tilKopiForNyBehandling(
+                    nyBehandling = inneværendeBehandling,
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                ).also { if (inneværendeBehandling.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG) preutfyllVilkårService.preutfyllBosattIRiket(it) }
 
         endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
             behandling = inneværendeBehandling,

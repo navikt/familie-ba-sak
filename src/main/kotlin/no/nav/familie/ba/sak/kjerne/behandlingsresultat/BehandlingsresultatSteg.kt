@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpRepository
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -43,6 +45,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -86,6 +89,10 @@ class BehandlingsresultatSteg(
 
         if (behandling.erSatsendring()) {
             validerSatsendring(tilkjentYtelse)
+        }
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG) {
+            validerFinnmarkstilleggBehandling(tilkjentYtelse)
         }
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
@@ -246,6 +253,30 @@ class BehandlingsresultatSteg(
             andelerFraForrigeBehandling = andelerFraForrigeBehandling,
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
         )
+    }
+
+    private fun validerFinnmarkstilleggBehandling(tilkjentYtelse: TilkjentYtelse) {
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(tilkjentYtelse.behandling)
+                ?: throw Feil("Kan ikke kjøre finnmarkstillegg behandling dersom det ikke finnes en tidligere iverksatt behandling")
+
+        val andelerFraForrigeBehandling =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+
+        val andelerUtenomFinnmarkstilleggDenneBehandling = tilkjentYtelse.andelerTilkjentYtelse.filter { it.type != YtelseType.FINNMARKSTILLEGG }
+        val andelerUtenomFinnmarkstilleggForrigeBehandling = andelerFraForrigeBehandling.filter { it.type != YtelseType.FINNMARKSTILLEGG }
+
+        val erEndringIUtbetaling =
+            EndringIUtbetalingUtil
+                .lagEndringIUtbetalingTidslinje(
+                    nåværendeAndeler = andelerUtenomFinnmarkstilleggDenneBehandling,
+                    forrigeAndeler = andelerUtenomFinnmarkstilleggForrigeBehandling,
+                ).tilPerioder()
+                .any { it.verdi == true }
+
+        if (erEndringIUtbetaling) {
+            throw Feil("Det er oppdaget forskjell i utbetaling utenom finnmarkstillegg andeler. Dette kan ikke skje i en behandling der årsak er ${BehandlingÅrsak.FINNMARKSTILLEGG}, og den automatiske kjøring stoppes derfor.")
+        }
     }
 
     private fun validerAtUtenlandskPeriodeBeløpOgValutakursErUtfylt(behandling: Behandling) {
