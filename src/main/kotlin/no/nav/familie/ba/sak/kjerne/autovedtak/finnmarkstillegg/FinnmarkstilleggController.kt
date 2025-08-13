@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -18,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class FinnmarkstilleggController(
     private val tilgangService: TilgangService,
+    private val opprettTaskService: OpprettTaskService,
+    private val fagsakService: FagsakService,
+    private val personidentService: PersonidentService,
 ) {
     @PostMapping("/vurder-finnmarkstillegg")
     fun vurderFinnmarkstillegg(
@@ -31,7 +37,14 @@ class FinnmarkstilleggController(
             event = AuditLoggerEvent.UPDATE,
         )
 
-        // TODO: Implementer mot logikken for å trigge vurdering av Finnmarkstillegg
+        val aktør = personidentService.hentAktør(personIdent.ident)
+        fagsakService
+            .finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+            .filter { it.type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS }
+            .forEach { fagsak ->
+                opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(fagsak.id)
+            }
+
         secureLogger.info("Trigget vurdering av Finnmarkstillegg for personIdent: ${personIdent.ident}")
 
         return ResponseEntity.ok(
