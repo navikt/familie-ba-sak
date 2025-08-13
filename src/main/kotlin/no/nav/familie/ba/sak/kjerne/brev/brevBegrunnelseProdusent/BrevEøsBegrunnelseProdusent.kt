@@ -72,6 +72,7 @@ fun EØSStandardbegrunnelse.lagBrevBegrunnelse(
                 gjelderSøker = gjelderSøker,
                 personerIBegrunnelse = personerGjeldendeForBegrunnelse,
                 begrunnelsesGrunnlagPerPerson = begrunnelsesGrunnlagPerPerson,
+                vedtaksperiode = vedtaksperiode,
             )
 
         listOf(

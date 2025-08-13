@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.forrigeMåned
@@ -84,6 +85,7 @@ fun Standardbegrunnelse.lagBrevBegrunnelse(
             sanityBegrunnelse = sanityBegrunnelse,
             grunnlag = grunnlag,
             månedOgÅrBegrunnelsenGjelderFor = månedOgÅrBegrunnelsenGjelderFor,
+            vedtaksperiode = vedtaksperiode,
         )
     }
 }
@@ -95,6 +97,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
     sanityBegrunnelse: ISanityBegrunnelse,
     grunnlag: GrunnlagForBegrunnelse,
     månedOgÅrBegrunnelsenGjelderFor: String?,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): List<BegrunnelseData> {
     val grunnlagForPersonerIBegrunnelsen =
         begrunnelsesGrunnlagPerPerson.filtrerPåErPersonIBegrunnelse(personerGjeldeneForBegrunnelse)
@@ -115,6 +118,7 @@ private fun Standardbegrunnelse.lagEnkeltBegrunnelse(
 
     val barnasFødselsdatoer =
         sanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
+            vedtaksperiode = vedtaksperiode,
             grunnlag = grunnlag,
             gjelderSøker = gjelderSøker,
             personerIBegrunnelse = personerGjeldeneForBegrunnelse,
@@ -302,6 +306,7 @@ private fun hentPersonerMistetUtbetalingFraForrigeBehandling(begrunnelsesGrunnla
 private fun gjelderBegrunnelseSøker(personerGjeldeneForBegrunnelse: List<Person>) = personerGjeldeneForBegrunnelse.any { it.type == PersonType.SØKER }
 
 fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
     grunnlag: GrunnlagForBegrunnelse,
     gjelderSøker: Boolean,
     personerIBegrunnelse: List<Person>,
@@ -350,6 +355,7 @@ fun ISanityBegrunnelse.hentBarnasFødselsdatoerForBegrunnelse(
                         barnMedOppfylteVilkår = barnMedOppfylteVilkår,
                         barnMistetUtbetalingFraForrigeBehandling = barnMistetUtbetalingFraForrigeBehandling,
                         barnMedNullutbetalingForrigePeriode = barnMedNullutbetalingForrigePeriodeGrunnetEndretUtbetaling,
+                        vedtaksperiode = vedtaksperiode,
                     )
                 }
 
@@ -391,15 +397,17 @@ private fun ISanityBegrunnelse.hentRelevanteBarnVedIkkeInnvilget(
     barnMedOppfylteVilkår: List<Person>,
     barnMistetUtbetalingFraForrigeBehandling: List<Person>,
     barnMedNullutbetalingForrigePeriode: Set<Person>,
+    vedtaksperiode: VedtaksperiodeMedBegrunnelser,
 ): List<LocalDate> {
     val erAvslagPåSøker = erEksplisittAvslagPåSøker(begrunnelsesGrunnlagPerPerson, grunnlag)
 
     val relevanteBarn =
         if (erAvslagPåSøker) {
             val personerFramstiltKravFor = grunnlag.behandlingsGrunnlagForVedtaksperioder.personerFremstiltKravFor
-            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor }
+            val barnDetErFramstiltKravFor = barnPåBehandlingen.filter { it.aktør in personerFramstiltKravFor }.ifEmpty { barnPåBehandlingen }
 
             barnDetErFramstiltKravFor
+                .filter { it.fødselsdato < (vedtaksperiode.tom ?: TIDENES_ENDE) }
                 .ifEmpty { barnPåBehandlingen }
                 .map { it.fødselsdato } + uregistrerteBarnPåBehandlingen.mapNotNull { it.fødselsdato }
         } else {
