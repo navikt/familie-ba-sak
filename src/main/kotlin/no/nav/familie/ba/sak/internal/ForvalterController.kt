@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
@@ -93,7 +93,7 @@ class ForvalterController(
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
-    private val personidentService: PersonidentService,
+    private val personidentRepository: PersonidentRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -610,9 +610,9 @@ class ForvalterController(
             handling = "Opprett task for å aktivere minside for ident",
         )
 
-        val aktør = personidentService.hentAktør(ident)
+        val personIdent = personidentRepository.findByFødselsnummerOrNull(ident) ?: return ResponseEntity.status(404).body("Finner ikke person")
 
-        opprettTaskService.opprettAktiverMinsideTask(aktør)
+        opprettTaskService.opprettAktiverMinsideTask(personIdent.aktør)
 
         return ResponseEntity.ok("Task for aktivering av minside for ident opprettet")
     }
@@ -629,9 +629,9 @@ class ForvalterController(
             handling = "Opprett task for å deaktivere minside for ident",
         )
 
-        val aktør = personidentService.hentAktør(ident)
+        val personIdent = personidentRepository.findByFødselsnummerOrNull(ident) ?: return ResponseEntity.status(404).body("Finner ikke person")
 
-        DeaktiverMinsideTask.opprettTask(aktør)
+        DeaktiverMinsideTask.opprettTask(personIdent.aktør)
 
         return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
     }
