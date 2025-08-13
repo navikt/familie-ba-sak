@@ -61,7 +61,6 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
@@ -98,6 +97,7 @@ class BehandlingsresultatStegTest {
     private val kompetanseRepository = mockk<KompetanseRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
     private val tilbakestillBehandlingService = mockk<TilbakestillBehandlingService>()
+    private val clockProvider = TestClockProvider.lagClockProviderMedFastTidspunkt(LocalDate.of(2025, 10, 10))
 
     private val behandlingsresultatSteg: BehandlingsresultatSteg =
         BehandlingsresultatSteg(
@@ -114,7 +114,7 @@ class BehandlingsresultatStegTest {
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             utenlandskPeriodebeløpRepository = utenlandskPeriodebeløpRepository,
             valutakursRepository = valutakursRepository,
-            clockProvider = TestClockProvider(),
+            clockProvider = clockProvider,
             kompetanseRepository = kompetanseRepository,
             småbarnstilleggService = småbarnstilleggService,
             tilbakestillBehandlingService = tilbakestillBehandlingService,
@@ -794,7 +794,7 @@ class BehandlingsresultatStegTest {
                         person = barn,
                     ),
                     lagAndelTilkjentYtelse(
-                        fom = YearMonth.now().plusMonths(2),
+                        fom = YearMonth.now(clockProvider.get()).plusMonths(2),
                         tom = YearMonth.now().plusMonths(122),
                         behandling = behandling,
                         tilkjentYtelse = tilkjentYtelse,
@@ -815,7 +815,7 @@ class BehandlingsresultatStegTest {
             )
 
             assertThatThrownBy { behandlingsresultatSteg.preValiderSteg(behandling) }
-                .hasMessageContaining("Det eksisterer finnmarkstillegg andeler som først blir innvilget mer enn 1 måned fram i tid. Dette er mulig å innvilge disse enda, og behandlingen stoppes derfor.")
+                .hasMessageContaining("Det eksisterer finnmarkstillegg andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
         }
 
         @Test

@@ -57,6 +57,7 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -343,7 +344,8 @@ class BehandlingsresultatSteg(
             .forEach { (_, andel) ->
                 val tidligsteFinnmarkstilleggAndelForAktør = andel.minOfOrNull { it.stønadFom } ?: return@forEach
 
-                if (tidligsteFinnmarkstilleggAndelForAktør > enMånedFramITid) {
+                // TODO: Fiks valideringen når vi går live i oktober
+                if ((tidligsteFinnmarkstilleggAndelForAktør > enMånedFramITid) && dagensDato >= YearMonth.of(2025, 10)) {
                     throw Feil("Det eksisterer finnmarkstillegg andeler som først blir innvilget mer enn 1 måned fram i tid. Det er ikke mulig å innvilge disse enda, og behandlingen stoppes derfor.")
                 }
             }
