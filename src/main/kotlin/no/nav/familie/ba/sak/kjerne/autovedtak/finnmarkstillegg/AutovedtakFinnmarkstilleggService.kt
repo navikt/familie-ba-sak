@@ -15,7 +15,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak.FINNMARKS
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus.LØPENDE
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -27,6 +29,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+
+val FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS = setOf(NORMAL, BARN_ENSLIG_MINDREÅRIG)
 
 @Service
 class AutovedtakFinnmarkstilleggService(
@@ -43,7 +47,10 @@ class AutovedtakFinnmarkstilleggService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun skalAutovedtakBehandles(behandlingsdata: FinnmarkstilleggData): Boolean {
-        val harLøpendeBarnetrygd by lazy { fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).status == FagsakStatus.LØPENDE }
+        val (fagsaktypeKanBehandles, harLøpendeBarnetrygd) =
+            fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).run {
+                (type in FAGSAKTYPER_DER_FINNMARKSTILLEG_KAN_AUTOVEDTAS) to (status == LØPENDE)
+            }
 
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
@@ -69,7 +76,9 @@ class AutovedtakFinnmarkstilleggService(
                 }
         }
 
-        return harLøpendeBarnetrygd && (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg)
+        return fagsaktypeKanBehandles &&
+            harLøpendeBarnetrygd &&
+            (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg)
     }
 
     @Transactional

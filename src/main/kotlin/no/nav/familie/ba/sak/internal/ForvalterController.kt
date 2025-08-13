@@ -25,8 +25,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRe
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
+import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask
@@ -91,6 +93,7 @@ class ForvalterController(
     private val persongrunnlagService: PersongrunnlagService,
     private val hentAlleIdenterTilPsysTask: HentAlleIdenterTilPsysTask,
     private val utbetalingsTidslinjeService: UtbetalingsTidslinjeService,
+    private val personidentService: PersonidentService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -593,6 +596,44 @@ class ForvalterController(
             opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(it)
         }
         return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
+    }
+
+    @PostMapping("/aktiver-minside-for-ident")
+    @Operation(
+        summary = "Sender Kafka-melding om å aktivere MinSide for en ident",
+    )
+    fun aktiverMinsideForIdent(
+        @RequestBody ident: String,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for å aktivere minside for ident",
+        )
+
+        val aktør = personidentService.hentAktør(ident)
+
+        opprettTaskService.opprettAktiverMinsideTask(aktør)
+
+        return ResponseEntity.ok("Task for aktivering av minside for ident opprettet")
+    }
+
+    @PostMapping("/deaktiver-minside-for-ident")
+    @Operation(
+        summary = "Sender Kafka-melding om å deaktivere MinSide for en ident",
+    )
+    fun deaktiverMinsideForIdent(
+        @RequestBody ident: String,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for å deaktivere minside for ident",
+        )
+
+        val aktør = personidentService.hentAktør(ident)
+
+        DeaktiverMinsideTask.opprettTask(aktør)
+
+        return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
     }
 }
 
