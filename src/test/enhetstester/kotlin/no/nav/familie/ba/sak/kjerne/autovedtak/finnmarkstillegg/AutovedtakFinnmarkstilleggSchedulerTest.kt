@@ -11,18 +11,23 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.kontrakter.ba.finnmarkstillegg.KommunerIFinnmarkOgNordTroms
+import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
+import java.time.LocalDate
 
 class AutovedtakFinnmarkstilleggSchedulerTest {
     private val leaderClientService = mockk<LeaderClientService>()
@@ -57,6 +62,50 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
 
     private val persongrunnlag2 =
         lagTestPersonopplysningGrunnlag(behandlingId = behandling2.id, søker2)
+
+    private val bostedsadresseIFinnmark =
+        PdlBostedsadresseOgDeltBostedPerson(
+            bostedsadresse =
+                listOf(
+                    Bostedsadresse(
+                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
+                        vegadresse =
+                            Vegadresse(
+                                matrikkelId = null,
+                                husnummer = null,
+                                husbokstav = null,
+                                bruksenhetsnummer = null,
+                                adressenavn = null,
+                                kommunenummer = KommunerIFinnmarkOgNordTroms.ALTA.kommunenummer,
+                                tilleggsnavn = null,
+                                postnummer = null,
+                            ),
+                    ),
+                ),
+            deltBosted = emptyList(),
+        )
+
+    private val bostedsadresseIOslo =
+        PdlBostedsadresseOgDeltBostedPerson(
+            bostedsadresse =
+                listOf(
+                    Bostedsadresse(
+                        gyldigFraOgMed = LocalDate.of(2025, 1, 1),
+                        vegadresse =
+                            Vegadresse(
+                                matrikkelId = null,
+                                husnummer = null,
+                                husbokstav = null,
+                                bruksenhetsnummer = null,
+                                adressenavn = null,
+                                kommunenummer = "0301",
+                                tilleggsnavn = null,
+                                postnummer = null,
+                            ),
+                    ),
+                ),
+            deltBosted = emptyList(),
+        )
 
     @BeforeEach
     fun setup() {
@@ -136,14 +185,8 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
 
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søker1.aktør.aktivFødselsnummer(), søker2.aktør.aktivFødselsnummer())) } returns
             mapOf(
-                søker1.aktør.aktivFødselsnummer() to
-                    mockk(relaxed = true) {
-                        every { harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() } returns true
-                    },
-                søker2.aktør.aktivFødselsnummer() to
-                    mockk(relaxed = true) {
-                        every { harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() } returns false
-                    },
+                søker1.aktør.aktivFødselsnummer() to bostedsadresseIFinnmark,
+                søker2.aktør.aktivFødselsnummer() to bostedsadresseIOslo,
             )
 
         // Act
@@ -162,12 +205,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
             PageImpl(listOf(behandling1.fagsak.id), Pageable.ofSize(1000), 1)
 
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søker1.aktør.aktivFødselsnummer())) } returns
-            mapOf(
-                søker1.aktør.aktivFødselsnummer() to
-                    mockk(relaxed = true) {
-                        every { harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() } returns true
-                    },
-            )
+            mapOf(søker1.aktør.aktivFødselsnummer() to bostedsadresseIFinnmark)
 
         every { finnmarkstilleggKjøringRepository.findByFagsakId(behandling1.fagsak.id) } returns
             FinnmarkstilleggKjøring(fagsakId = behandling1.fagsak.id)

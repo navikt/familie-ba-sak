@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVED
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringScheduler.Companion.CRON_HVERT_10_MIN_UKEDAG
@@ -70,6 +71,7 @@ class AutovedtakFinnmarkstilleggScheduler(
                         .flatMap { personer ->
                             pdlRestClient
                                 .hentBostedsadresseOgDeltBostedForPersoner(personer)
+                                .mapValues { it.value.tilAdresser() }
                                 .filterValues { it.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
                                 .keys
                         }

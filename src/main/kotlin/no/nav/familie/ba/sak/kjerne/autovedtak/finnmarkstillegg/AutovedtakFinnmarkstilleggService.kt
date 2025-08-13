@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
@@ -60,6 +61,7 @@ class AutovedtakFinnmarkstilleggService(
                 .let { identer ->
                     pdlRestClient
                         .hentBostedsadresseOgDeltBostedForPersoner(identer)
+                        .mapValues { it.value.tilAdresser() }
                         .any { it.value.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
                 }
         }
