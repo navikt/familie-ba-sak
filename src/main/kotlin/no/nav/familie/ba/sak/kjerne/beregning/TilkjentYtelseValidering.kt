@@ -248,13 +248,13 @@ object TilkjentYtelseValidering {
         val utvidet = satser.filter { it.type == SatsType.UTVIDET_BARNETRYGD }
         val finnmarkstillegg = satser.filter { it.type == SatsType.FINNMARKSTILLEGG }
 
-        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty() || finnmarkstillegg.isEmpty()) throw Feil("Fant ikke satser ved validering")
+        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty()) throw Feil("Fant ikke satser ved validering")
 
         val maksSmåbarnstillegg = småbarnsTillegg.maxBy { it.beløp }.beløp
         val maksOrdinærMedTillegg = ordinærMedTillegg.maxBy { it.beløp }.beløp
         val maksOrdinær = ordinær.maxBy { it.beløp }.beløp
         val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
-        val maksFinnmarkstillegg = finnmarkstillegg.maxBy { it.beløp }.beløp
+        val maksFinnmarkstillegg = finnmarkstillegg.maxByOrNull { it.beløp }?.beløp ?: 0
 
         return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
             maxOf(maksOrdinær, maksOrdinærMedTillegg) + maksUtvidet + maksFinnmarkstillegg
