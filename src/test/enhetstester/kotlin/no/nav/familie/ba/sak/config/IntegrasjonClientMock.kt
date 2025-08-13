@@ -204,6 +204,11 @@ class IntegrasjonClientMock {
             }
 
             every { mockIntegrasjonClient.hentAInntektUrl(any()) } returns "/test/1234"
+
+            every { mockIntegrasjonClient.sjekkErEgenAnsattBulk(any()) } answers {
+                val personIdenter = firstArg<List<String>>()
+                personIdenter.associateWith { false }
+            }
         }
 
         fun clearMockFamilieIntegrasjonerTilgangskontrollClient(mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient) {

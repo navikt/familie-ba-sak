@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
@@ -32,6 +34,8 @@ internal class PersonopplysningerServiceTest(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -46,6 +50,7 @@ internal class PersonopplysningerServiceTest(
                     mockPersonidentService,
                 ),
                 familieIntegrasjonerTilgangskontrollService,
+                integrasjonClient,
             )
         lagMockForPersoner()
     }
@@ -53,6 +58,10 @@ internal class PersonopplysningerServiceTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
+        every { integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(ID_BARN_1, ID_BARN_2, ID_MOR)) }) } answers {
+            val personIdenter = firstArg<List<String>>()
+            personIdenter.associateWith { it == ID_MOR }
+        }
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
@@ -62,6 +71,8 @@ internal class PersonopplysningerServiceTest(
         assertThat(personInfo.forelderBarnRelasjonMaskert.size).isEqualTo(1)
         assertThat(personInfo.kontaktinformasjonForDoedsbo).isNull()
         assertThat(personInfo.dødsfall).isNull()
+        assertThat(personInfo.erEgenAnsatt).isEqualTo(true)
+        assertThat(personInfo.forelderBarnRelasjon.first().erEgenAnsatt).isEqualTo(false)
     }
 
     @Test

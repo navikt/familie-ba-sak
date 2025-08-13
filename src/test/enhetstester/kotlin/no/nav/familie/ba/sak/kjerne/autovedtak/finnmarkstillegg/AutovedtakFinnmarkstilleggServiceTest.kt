@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus.LØPENDE
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
@@ -30,6 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
 import org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -39,6 +41,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
     private val beregningService = mockk<BeregningService>()
     private val fagsakService = mockk<FagsakService>()
     private val pdlRestClient = mockk<SystemOnlyPdlRestClient>()
+    private val simuleringService = mockk<SimuleringService>()
 
     private val autovedtakFinnmarkstilleggService =
         AutovedtakFinnmarkstilleggService(
@@ -47,6 +50,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
             beregningService = beregningService,
             fagsakService = fagsakService,
             pdlRestClient = pdlRestClient,
+            simuleringService = simuleringService,
             autovedtakService = mockk(),
             behandlingService = mockk(),
             taskService = mockk(),
@@ -76,6 +80,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns behandling
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
+        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
+        every { simuleringService.oppdaterSimuleringPåBehandling(behandling) } returns emptyList()
     }
 
     @Nested

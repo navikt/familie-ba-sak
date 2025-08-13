@@ -20,7 +20,7 @@ data class PersonInfo(
     val fødselsdato: LocalDate,
     val navn: String? = null,
     @JsonDeserialize(using = KjonnDeserializer::class)
-    val kjønn: Kjønn? = null,
+    val kjønn: Kjønn = Kjønn.UKJENT,
     // Observer at ForelderBarnRelasjon og ForelderBarnRelasjonMaskert ikke er en PDL-objekt.
     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
     val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
@@ -31,6 +31,7 @@ data class PersonInfo(
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
     val dødsfall: DødsfallData? = null,
     val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null,
+    val erEgenAnsatt: Boolean? = null,
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
@@ -41,6 +42,8 @@ data class ForelderBarnRelasjon(
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
+    val kjønn: Kjønn = Kjønn.UKJENT,
+    val erEgenAnsatt: Boolean? = null,
 ) {
     override fun toString(): String = "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
 
