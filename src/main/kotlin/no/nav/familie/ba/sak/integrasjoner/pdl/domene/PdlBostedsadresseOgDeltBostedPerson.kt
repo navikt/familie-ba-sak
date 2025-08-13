@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.BostedsadresserOgDelteBosteder
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.tilAdresse
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
@@ -49,3 +51,9 @@ fun DeltBosted?.erIFinnmarkEllerNordTroms(): Boolean =
         ?: this?.matrikkeladresse?.kommunenummer?.let { kommuneErIFinnmarkEllerNordTroms(it) }
         ?: this?.ukjentBosted?.bostedskommune?.let { kommuneErIFinnmarkEllerNordTroms(it) }
         ?: false
+
+fun PdlBostedsadresseOgDeltBostedPerson?.tilAdresser(): BostedsadresserOgDelteBosteder =
+    BostedsadresserOgDelteBosteder(
+        bostedsadresser = this?.let { bostedsadresse.map { it.tilAdresse() } } ?: emptyList(),
+        delteBosteder = this?.let { deltBosted.map { it.tilAdresse() } } ?: emptyList(),
+    )
