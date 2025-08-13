@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
+import no.nav.familie.ba.sak.task.DeaktiverMinsideTask
 import no.nav.familie.ba.sak.task.GrensesnittavstemMotOppdrag
 import no.nav.familie.ba.sak.task.HentAlleIdenterTilPsysTask
 import no.nav.familie.ba.sak.task.LogFagsakIdForJournalpostTask
@@ -614,6 +615,25 @@ class ForvalterController(
         opprettTaskService.opprettAktiverMinsideTask(aktør)
 
         return ResponseEntity.ok("Task for aktivering av minside for ident opprettet")
+    }
+
+    @PostMapping("/deaktiver-minside-for-ident")
+    @Operation(
+        summary = "Sender Kafka-melding om å deaktivere MinSide for en ident",
+    )
+    fun deaktiverMinsideForIdent(
+        @RequestBody ident: String,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for å deaktivere minside for ident",
+        )
+
+        val aktør = personidentService.hentAktør(ident)
+
+        DeaktiverMinsideTask.opprettTask(aktør)
+
+        return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
     }
 }
 
