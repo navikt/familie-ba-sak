@@ -51,9 +51,11 @@ spec:
             envVarPrefix: DB
         flags:
           - name: cloudsql.enable_pgaudit
-            value: "true"
+            value: "on"
           - name: pgaudit.log
-            value: 'write'
+            value: "write"
+          - name: pgaudit.log_parameters
+            value: "on"
   azure:
     application:
       enabled: true
