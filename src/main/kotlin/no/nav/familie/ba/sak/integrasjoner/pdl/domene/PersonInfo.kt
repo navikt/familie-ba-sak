@@ -20,7 +20,7 @@ data class PersonInfo(
     val fødselsdato: LocalDate,
     val navn: String? = null,
     @JsonDeserialize(using = KjonnDeserializer::class)
-    val kjønn: Kjønn? = null,
+    val kjønn: Kjønn = Kjønn.UKJENT,
     // Observer at ForelderBarnRelasjon og ForelderBarnRelasjonMaskert ikke er en PDL-objekt.
     val forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
     val forelderBarnRelasjonMaskert: Set<ForelderBarnRelasjonMaskert> = emptySet(),
@@ -42,7 +42,7 @@ data class ForelderBarnRelasjon(
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
-    val kjønn: Kjønn? = null,
+    val kjønn: Kjønn = Kjønn.UKJENT,
     val erEgenAnsatt: Boolean? = null,
 ) {
     override fun toString(): String = "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"

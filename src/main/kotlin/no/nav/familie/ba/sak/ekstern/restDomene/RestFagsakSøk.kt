@@ -32,7 +32,7 @@ data class RestFagsakDeltager(
     val ident: String = "",
     val rolle: FagsakDeltagerRolle,
     val fagsakType: FagsakType? = null,
-    val kjønn: Kjønn? = Kjønn.UKJENT,
+    val kjønn: Kjønn = Kjønn.UKJENT,
     val fagsakId: Long? = null,
     val fagsakStatus: FagsakStatus? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
