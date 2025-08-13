@@ -20,6 +20,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -69,87 +70,89 @@ class AutovedtakFinnmarkstilleggServiceTest {
         every { fagsakService.hentPåFagsakId(fagsak.id) } returns mockk { every { status } returns FagsakStatus.LØPENDE }
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns behandling
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
+        every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
     }
 
-    @ParameterizedTest
-    @EnumSource(FagsakStatus::class, names = ["LØPENDE"], mode = EXCLUDE)
-    fun `skal returnere false når fagsak ikke har løpende barnetrygd`(
-        fagsakStatus: FagsakStatus,
-    ) {
-        // Arrange
-        every { fagsakService.hentPåFagsakId(fagsak.id) } returns mockk { every { status } returns fagsakStatus }
+    @Nested
+    inner class SkalAutovedtakBehandles {
+        @ParameterizedTest
+        @EnumSource(FagsakStatus::class, names = ["LØPENDE"], mode = EXCLUDE)
+        fun `skal returnere false når fagsak ikke har løpende barnetrygd`(
+            fagsakStatus: FagsakStatus,
+        ) {
+            // Arrange
+            every { fagsakService.hentPåFagsakId(fagsak.id) } returns mockk { every { status } returns fagsakStatus }
 
-        // Act
-        val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
 
-        // Assert
-        assertThat(skalAutovedtakBehandles).isFalse()
-    }
+            // Assert
+            assertThat(skalAutovedtakBehandles).isFalse()
+        }
 
-    @Test
-    fun `skal returnere false når det ikke finnes noen siste iverksatte behandling`() {
-        // Arrange
-        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns null
+        @Test
+        fun `skal returnere false når det ikke finnes noen siste iverksatte behandling`() {
+            // Arrange
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns null
 
-        // Act
-        val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
 
-        // Assert
-        assertThat(skalAutovedtakBehandles).isFalse()
-    }
+            // Assert
+            assertThat(skalAutovedtakBehandles).isFalse()
+        }
 
-    @Test
-    fun `skal returnere true når forrige behandling hadde andeler med ytelsetype FINNMARKSTILLEGG`() {
-        // Arrange
-        every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns
-            lagTilkjentYtelse {
-                setOf(
-                    lagAndelTilkjentYtelse(
-                        fom = YearMonth.of(2025, 10),
-                        tom = YearMonth.of(2025, 10),
-                        ytelseType = YtelseType.FINNMARKSTILLEGG,
-                    ),
+        @Test
+        fun `skal returnere true når forrige behandling hadde andeler med ytelsetype FINNMARKSTILLEGG`() {
+            // Arrange
+            every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns
+                lagTilkjentYtelse {
+                    setOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2025, 10),
+                            tom = YearMonth.of(2025, 10),
+                            ytelseType = YtelseType.FINNMARKSTILLEGG,
+                        ),
+                    )
+                }
+
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+
+            // Assert
+            assertThat(skalAutovedtakBehandles).isTrue()
+        }
+
+        @Test
+        fun `skal returnere false når ingen av personene bor i tilleggssone`() {
+            // Arrange
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+                mapOf(
+                    søkerIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
-            }
 
-        // Act
-        val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
 
-        // Assert
-        assertThat(skalAutovedtakBehandles).isTrue()
-    }
+            // Assert
+            assertThat(skalAutovedtakBehandles).isFalse()
+        }
 
-    @Test
-    fun `skal returnere false når ingen av personene bor i tilleggssone`() {
-        // Arrange
-        every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
-            mapOf(
-                søkerIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-                barnIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-            )
+        @Test
+        fun `skal returnere true når minst en person bor i tilleggssone`() {
+            // Arrange
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
+                mapOf(
+                    søkerIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                )
 
-        // Act
-        val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
 
-        // Assert
-        assertThat(skalAutovedtakBehandles).isFalse()
-    }
-
-    @Test
-    fun `skal returnere true når minst en person bor i tilleggssone`() {
-        // Arrange
-        every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
-        every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
-            mapOf(
-                søkerIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
-                barnIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-            )
-
-        // Act
-        val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
-
-        // Assert
-        assertThat(skalAutovedtakBehandles).isTrue()
+            // Assert
+            assertThat(skalAutovedtakBehandles).isTrue()
+        }
     }
 }

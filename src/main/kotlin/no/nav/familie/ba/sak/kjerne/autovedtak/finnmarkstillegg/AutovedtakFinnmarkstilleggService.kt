@@ -39,23 +39,20 @@ class AutovedtakFinnmarkstilleggService(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun skalAutovedtakBehandles(behandlingsdata: FinnmarkstilleggData): Boolean {
-        val harIkkeLøpendeBarnetrygd = fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).status != FagsakStatus.LØPENDE
-
-        if (harIkkeLøpendeBarnetrygd) return false
+        val harLøpendeBarnetrygd by lazy { fagsakService.hentPåFagsakId(behandlingsdata.fagsakId).status == FagsakStatus.LØPENDE }
 
         val sisteIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandlingsdata.fagsakId)
                 ?: return false
 
-        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler =
+        val sisteIverksatteBehandlingHarFinnmarkstilleggAndeler by lazy {
             beregningService
                 .hentTilkjentYtelseForBehandling(sisteIverksatteBehandling.id)
                 .andelerTilkjentYtelse
                 .any { it.type == YtelseType.FINNMARKSTILLEGG }
+        }
 
-        if (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler) return true
-
-        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg =
+        val minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg by lazy {
             persongrunnlagService
                 .hentAktivThrows(sisteIverksatteBehandling.id)
                 .personer
@@ -65,8 +62,9 @@ class AutovedtakFinnmarkstilleggService(
                         .hentBostedsadresseOgDeltBostedForPersoner(identer)
                         .any { it.value.harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg() }
                 }
+        }
 
-        return minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg
+        return harLøpendeBarnetrygd && (sisteIverksatteBehandlingHarFinnmarkstilleggAndeler || minstÉnAktørHarAdresseSomErRelevanteForFinnmarkstillegg)
     }
 
     @Transactional
