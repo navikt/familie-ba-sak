@@ -627,6 +627,23 @@ class IntegrasjonClient(
         }
     }
 
+    fun sjekkErEgenAnsattBulk(personIdenter: List<String>): Map<String, Boolean> {
+        val url = URI.create("$integrasjonUri/egenansatt/bulk")
+
+        val egenAnsattResponse =
+            kallEksternTjenesteRessurs(
+                tjeneste = "skjermede-personer-pip",
+                uri = url,
+                formål = "Sjekk om personer er egen ansatt",
+            ) {
+                postForEntity<Ressurs<Map<String, Boolean>>>(
+                    url,
+                    personIdenter,
+                )
+            }
+        return egenAnsattResponse
+    }
+
     companion object {
         const val VEDTAK_VEDLEGG_FILNAVN = "NAV_33-0005bm-10.2016.pdf"
         const val VEDTAK_VEDLEGG_TITTEL = "Stønadsmottakerens rettigheter og plikter (Barnetrygd)"
