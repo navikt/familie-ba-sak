@@ -8,7 +8,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import org.hibernate.Hibernate
-import java.time.LocalDateTime
 
 @Entity(name = "FinnmarkstilleggKjøring")
 @Table(name = "finnmarkstillegg_kjoering")
@@ -23,10 +22,6 @@ data class FinnmarkstilleggKjøring(
     val id: Long = 0,
     @Column(name = "fk_fagsak_id", nullable = false, updatable = false, unique = true)
     val fagsakId: Long,
-    @Column(name = "start_tid", nullable = false, updatable = false)
-    val startTidspunkt: LocalDateTime = LocalDateTime.now(),
-    @Column(name = "ferdig_tid")
-    var ferdigTidspunkt: LocalDateTime? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
