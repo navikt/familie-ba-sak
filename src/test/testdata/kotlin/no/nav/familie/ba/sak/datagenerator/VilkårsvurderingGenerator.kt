@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.datagenerator
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
@@ -20,7 +21,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
@@ -180,6 +184,45 @@ fun lagVilkårsvurdering(
     vilkårsvurdering.personResultater = lagPersonResultater(vilkårsvurdering)
     return vilkårsvurdering
 }
+
+fun lagPersonResultatMedBosattIFinnmark(
+    behandling: Behandling,
+    person: Person,
+    bosattIFinnmarkPerioder: List<Pair<LocalDate, LocalDate?>>,
+    vilkårsvurdering: Vilkårsvurdering,
+): PersonResultat =
+    lagPersonResultat(
+        vilkårsvurdering = vilkårsvurdering,
+        aktør = person.aktør,
+        lagVilkårResultater = { personResultat ->
+            setOfNotNull(
+                *bosattIFinnmarkPerioder
+                    .map {
+                        lagVilkårResultat(
+                            personResultat = personResultat,
+                            vilkårType = BOSATT_I_RIKET,
+                            resultat = OPPFYLT,
+                            periodeFom = it.first,
+                            periodeTom = it.second,
+                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                            behandlingId = behandling.id,
+                        )
+                    }.toTypedArray(),
+                if (person.type == PersonType.BARN) {
+                    lagVilkårResultat(
+                        personResultat = personResultat,
+                        vilkårType = UNDER_18_ÅR,
+                        resultat = OPPFYLT,
+                        periodeFom = person.fødselsdato,
+                        periodeTom = person.fødselsdato.plusYears(18),
+                        behandlingId = behandling.id,
+                    )
+                } else {
+                    null
+                },
+            )
+        },
+    )
 
 fun lagPersonResultat(
     id: Long = 0L,
