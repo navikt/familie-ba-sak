@@ -105,7 +105,7 @@ class BehandlingTest {
 
     @Test
     fun `Skal svare med overstyrt dokumenttittel på alle behandlinger som er definert som omgjøringsårsaker`() {
-        BehandlingÅrsak.values().forEach {
+        BehandlingÅrsak.entries.forEach {
             if (it.erOmregningsårsak()) {
                 assertNotNull(it.hentOverstyrtDokumenttittelForOmregningsbehandling())
             } else {
