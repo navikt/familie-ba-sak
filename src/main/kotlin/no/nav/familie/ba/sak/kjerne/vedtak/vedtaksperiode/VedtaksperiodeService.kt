@@ -253,7 +253,7 @@ class VedtaksperiodeService(
                         "Fødselsnummer: ${it.aktør.aktivFødselsnummer()}.  Resultater: ${it.vilkårResultater}"
                     },
                 )
-                throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse")
+                throw Feil("Finner ikke vedtaksperiode å begrunne for barn fra hendelse. Vedtaksperioder var: $vedtaksperioderMedBegrunnelser")
             }
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(
