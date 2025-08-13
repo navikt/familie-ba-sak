@@ -246,17 +246,21 @@ object TilkjentYtelseValidering {
         val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
         val ordinær = satser.filter { it.type == SatsType.ORBA }
         val utvidet = satser.filter { it.type == SatsType.UTVIDET_BARNETRYGD }
+        val finnmarkstillegg = satser.filter { it.type == SatsType.FINNMARKSTILLEGG }
+
         if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty()) throw Feil("Fant ikke satser ved validering")
-        val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
-        val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
-        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
+
+        val maksSmåbarnstillegg = småbarnsTillegg.maxBy { it.beløp }.beløp
+        val maksOrdinærMedTillegg = ordinærMedTillegg.maxBy { it.beløp }.beløp
+        val maksOrdinær = ordinær.maxBy { it.beløp }.beløp
         val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
+        val maksFinnmarkstillegg = finnmarkstillegg.maxByOrNull { it.beløp }?.beløp ?: 0
 
         return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
-            maxOf(maksOrdinær, maksOrdinærMedTillegg) + maksUtvidet
+            maxOf(maksOrdinær, maksOrdinærMedTillegg) + maksUtvidet + maksFinnmarkstillegg
         } else {
             when (personType) {
-                PersonType.BARN -> maxOf(maksOrdinær, maksOrdinærMedTillegg)
+                PersonType.BARN -> maxOf(maksOrdinær, maksOrdinærMedTillegg) + maksFinnmarkstillegg
                 PersonType.SØKER -> maksUtvidet + maksSmåbarnstillegg
                 else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
             }
