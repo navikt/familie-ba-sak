@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
+import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
@@ -15,6 +16,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus.LØPENDE
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
@@ -25,6 +29,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE
+import org.junit.jupiter.params.provider.EnumSource.Mode.INCLUDE
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -67,7 +72,7 @@ class AutovedtakFinnmarkstilleggServiceTest {
 
     @BeforeEach
     fun setUp() {
-        every { fagsakService.hentPåFagsakId(fagsak.id) } returns mockk { every { status } returns FagsakStatus.LØPENDE }
+        every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = LØPENDE, type = NORMAL)
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns behandling
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns persongrunnlag
         every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns lagTilkjentYtelse { emptySet() }
@@ -81,7 +86,22 @@ class AutovedtakFinnmarkstilleggServiceTest {
             fagsakStatus: FagsakStatus,
         ) {
             // Arrange
-            every { fagsakService.hentPåFagsakId(fagsak.id) } returns mockk { every { status } returns fagsakStatus }
+            every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = fagsakStatus)
+
+            // Act
+            val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
+
+            // Assert
+            assertThat(skalAutovedtakBehandles).isFalse()
+        }
+
+        @ParameterizedTest
+        @EnumSource(FagsakType::class, names = ["SKJERMET_BARN", "INSTITUSJON"], mode = INCLUDE)
+        fun `skal returnere false når fagsaktype ikke kan behandles`(
+            fagsakType: FagsakType,
+        ) {
+            // Arrange
+            every { fagsakService.hentPåFagsakId(fagsak.id) } returns lagFagsak(status = LØPENDE, type = fagsakType)
 
             // Act
             val skalAutovedtakBehandles = autovedtakFinnmarkstilleggService.skalAutovedtakBehandles(FinnmarkstilleggData(fagsakId = fagsak.id))
