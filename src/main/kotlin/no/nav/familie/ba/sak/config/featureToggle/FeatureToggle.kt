@@ -63,5 +63,7 @@ enum class FeatureToggle(
     // NAV-
     SKAL_GENERERE_FINNMARKSTILLEGG("familie-ba-sak.andel-generering-finnmark-nord-troms"),
 
-    KJØRING_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kjoering-autovedtak-finnmarkstillegg"),
+    AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kjoering-autovedtak-finnmarkstillegg"),
+
+    KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG("familie-ba-sak.kan-kjoere-autovedtak-finnmarkstillegg"),
 }

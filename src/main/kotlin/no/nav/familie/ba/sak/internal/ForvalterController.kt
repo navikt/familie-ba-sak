@@ -557,6 +557,28 @@ class ForvalterController(
 
         return ResponseEntity.ok("Kjørt OK")
     }
+
+    @PostMapping("/opprett-tasker-for-autovedtak-finnmarkstillegg")
+    @Operation(
+        summary = "Oppretter tasker for autovedtak av Finnmarkstillegg",
+    )
+    fun opprettTaskerForAutovedtakFinnmarkstillegg(
+        @RequestBody fagsakIder: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett task for autovedtak av Finnmarkstillegg",
+        )
+
+        if (!unleashNextMedContextService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+            throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
+        }
+
+        fagsakIder.forEach {
+            opprettTaskService.opprettAutovedtakFinnmarkstilleggTask(it)
+        }
+        return ResponseEntity.ok("Tasker for autovedtak av Finnmarkstillegg opprettet")
+    }
 }
 
 data class FinnOgPatchAndelerRequestDto(

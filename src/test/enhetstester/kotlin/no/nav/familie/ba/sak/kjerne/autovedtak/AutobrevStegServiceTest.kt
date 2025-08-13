@@ -40,6 +40,7 @@ class AutobrevStegServiceTest {
             autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
             snikeIKøenService = snikeIKøenService,
             autovedtakFinnmarkstilleggService = autovedtakFinnmarkstilleggService,
+            unleashNextMedContextService = mockk(),
         )
 
     @Test

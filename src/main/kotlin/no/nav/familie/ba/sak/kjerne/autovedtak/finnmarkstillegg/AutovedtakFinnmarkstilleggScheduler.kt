@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
-import no.nav.familie.ba.sak.config.FeatureToggle.KJØRING_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.LeaderClientService
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
@@ -33,7 +33,7 @@ class AutovedtakFinnmarkstilleggScheduler(
 
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggAutovedtakFinnmarkstillegg() {
-        if (unleashService.isEnabled(KJØRING_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+        if (unleashService.isEnabled(AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG)) {
             opprettTaskerForAutovedtakFinnmarkstillegg(1000)
         }
     }

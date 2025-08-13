@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.config.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.AutovedtakFødselshendelseService
@@ -84,6 +86,7 @@ class AutovedtakStegService(
     private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
     private val autovedtakFinnmarkstilleggService: AutovedtakFinnmarkstilleggService,
     private val snikeIKøenService: SnikeIKøenService,
+    private val unleashNextMedContextService: UnleashNextMedContextService,
 ) {
     private val antallAutovedtak: Map<Autovedtaktype, Counter> =
         Autovedtaktype.values().associateWith {
@@ -132,12 +135,16 @@ class AutovedtakStegService(
         mottakersAktør: Aktør,
         fagsakId: Long,
         førstegangKjørt: LocalDateTime = LocalDateTime.now(),
-    ): String =
-        kjørBehandling(
+    ): String {
+        if (!unleashNextMedContextService.isEnabled(KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+            return "Autovedtak for Finnmarkstillegg er deaktivert"
+        }
+        return kjørBehandling(
             mottakersAktør = mottakersAktør,
             automatiskBehandlingData = FinnmarkstilleggData(fagsakId),
             førstegangKjørt = førstegangKjørt,
         )
+    }
 
     private fun kjørBehandling(
         automatiskBehandlingData: AutomatiskBehandlingData,
