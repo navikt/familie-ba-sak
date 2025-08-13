@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -144,6 +145,24 @@ class OpprettTaskService(
                 Task(
                     type = SatsendringTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(SatsendringTaskDto(fagsakId, satstidspunkt)),
+                    properties =
+                        Properties().apply {
+                            this["fagsakId"] = fagsakId.toString()
+                        },
+                ),
+            )
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettAutovedtakFinnmarkstilleggTask(
+        fagsakId: Long,
+    ) {
+        overstyrTaskMedNyCallId(IdUtils.generateId()) {
+            taskRepository.save(
+                Task(
+                    type = AutovedtakFinnmarkstilleggTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
                     properties =
                         Properties().apply {
                             this["fagsakId"] = fagsakId.toString()
