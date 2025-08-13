@@ -113,7 +113,9 @@ class FinnmarkstilleggGeneratorTest {
 
         // Assert
         val finnmarkstilleggAndel = finnmarkstilleggAndeler.single()
-        assertThat(finnmarkstilleggAndel.stønadFom).isEqualTo(YearMonth.of(2025, 10))
+
+        // TODO: Endre tilbake til oktober 2025 før vi går live
+        assertThat(finnmarkstilleggAndel.stønadFom).isEqualTo(YearMonth.of(2025, 8))
         assertThat(finnmarkstilleggAndel.stønadTom).isEqualTo(YearMonth.of(2025, 12))
     }
 
