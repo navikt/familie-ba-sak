@@ -455,23 +455,23 @@ class UtbetalingssikkerhetTest {
     fun `Korrekt maksbeløp gis for persontype`() {
         val utvidetBarnetrygd = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp
         val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
-        val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
         val ordinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
+        val finnmarkstillegg = SatsService.finnSisteSatsFor(SatsType.FINNMARKSTILLEGG).beløp
 
         assertEquals(
             utvidetBarnetrygd + småbarnstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL),
         )
         assertEquals(
-            ordinærBarnetrygd,
+            ordinærBarnetrygd + finnmarkstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL),
         )
         assertEquals(
-            ordinærBarnetrygd,
+            ordinærBarnetrygd + finnmarkstillegg,
             TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON),
         )
         assertEquals(
-            ordinærBarnetrygd + utvidetBarnetrygd,
+            ordinærBarnetrygd + utvidetBarnetrygd + finnmarkstillegg,
             TilkjentYtelseValidering.maksBeløp(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,

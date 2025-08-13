@@ -4,20 +4,12 @@ import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelseMedEndreteUtbet
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
-import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
-import no.nav.familie.ba.sak.datagenerator.lagVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultatMedBosattIFinnmark
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat.OPPFYLT
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -59,15 +51,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, dag) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, dag) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -93,15 +87,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 1, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 1, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -127,20 +123,23 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn2,
                         bosattIFinnmarkPerioder = emptyList(),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -181,15 +180,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -225,15 +226,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -268,15 +271,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = emptyList(),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -300,15 +305,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = emptyList(),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -332,15 +339,17 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = søker,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -368,10 +377,11 @@ class FinnmarkstilleggGeneratorTest {
         val vilkårsvurdering =
             lagVilkårsvurdering(behandling = behandling) {
                 setOf(
-                    personResultat(
+                    lagPersonResultatMedBosattIFinnmark(
                         person = barn1,
                         bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
+                        behandling = behandling,
                     ),
                 )
             }
@@ -390,42 +400,4 @@ class FinnmarkstilleggGeneratorTest {
         assertThat(finnmarkstilleggAndel.stønadFom).isEqualTo(YearMonth.of(2025, 11))
         assertThat(finnmarkstilleggAndel.stønadTom).isEqualTo(YearMonth.of(2025, 12))
     }
-
-    private fun personResultat(
-        person: Person,
-        bosattIFinnmarkPerioder: List<Pair<LocalDate, LocalDate?>>,
-        vilkårsvurdering: Vilkårsvurdering,
-    ): PersonResultat =
-        lagPersonResultat(
-            vilkårsvurdering = vilkårsvurdering,
-            aktør = person.aktør,
-            lagVilkårResultater = { personResultat ->
-                setOfNotNull(
-                    *bosattIFinnmarkPerioder
-                        .map {
-                            lagVilkårResultat(
-                                personResultat = personResultat,
-                                vilkårType = BOSATT_I_RIKET,
-                                resultat = OPPFYLT,
-                                periodeFom = it.first,
-                                periodeTom = it.second,
-                                utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
-                                behandlingId = behandling.id,
-                            )
-                        }.toTypedArray(),
-                    if (person.type == PersonType.BARN) {
-                        lagVilkårResultat(
-                            personResultat = personResultat,
-                            vilkårType = UNDER_18_ÅR,
-                            resultat = OPPFYLT,
-                            periodeFom = person.fødselsdato,
-                            periodeTom = person.fødselsdato.plusYears(18),
-                            behandlingId = behandling.id,
-                        )
-                    } else {
-                        null
-                    },
-                )
-            },
-        )
 }
