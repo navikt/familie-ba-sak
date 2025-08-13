@@ -7,16 +7,35 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit.SECONDS
 
 class FinnmarkstilleggKjøringRepositoryTest(
     @Autowired private val finnmarkstilleggKjøringRepository: FinnmarkstilleggKjøringRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val aktørIdRepository: AktørIdRepository,
 ) : AbstractSpringIntegrationTest() {
+    @BeforeEach
+    fun setup() {
+        finnmarkstilleggKjøringRepository.deleteAll()
+    }
+
+    @Test
+    fun `skal kunne lagre FinnmarkstilleggKjøring`() {
+        // Arrange
+        val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
+        val fagsak = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }
+
+        // Act
+        val lagretFinnmarkstilleggKjøring = FinnmarkstilleggKjøring(fagsakId = fagsak.id).also { finnmarkstilleggKjøringRepository.saveAndFlush(it) }
+
+        // Assert
+        assertThat(lagretFinnmarkstilleggKjøring).isNotNull()
+        assertThat(lagretFinnmarkstilleggKjøring.id).isNotEqualTo(0L)
+        assertThat(lagretFinnmarkstilleggKjøring.fagsakId).isEqualTo(fagsak.id)
+    }
+
     @Test
     fun `findByFagsakId skal returnere FinnmarkstilleggKjøring når den finnes`() {
         // Arrange
@@ -31,8 +50,6 @@ class FinnmarkstilleggKjøringRepositoryTest(
         // Assert
         assertThat(hentetFinnmarkstilleggKjøring).isNotNull()
         assertThat(hentetFinnmarkstilleggKjøring!!.fagsakId).isEqualTo(fagsak.id)
-        assertThat(hentetFinnmarkstilleggKjøring.startTidspunkt).isNotNull()
-        assertThat(hentetFinnmarkstilleggKjøring.ferdigTidspunkt).isNull()
     }
 
     @Test
@@ -42,30 +59,5 @@ class FinnmarkstilleggKjøringRepositoryTest(
 
         // Assert
         assertThat(hentetFinnmarkstilleggKjøring).isNull()
-    }
-
-    @Test
-    fun `skal kunne lagre og hente FinnmarkstilleggKjøring med ferdigTidspunkt`() {
-        // Arrange
-        val aktør = tilAktør(randomFnr()).also { aktørIdRepository.saveAndFlush(it) }
-        val fagsak = lagFagsakUtenId(aktør = aktør).also { fagsakRepository.saveAndFlush(it) }
-
-        val startTid = LocalDateTime.now().truncatedTo(SECONDS)
-        val ferdigTid = LocalDateTime.now().truncatedTo(SECONDS)
-
-        FinnmarkstilleggKjøring(
-            fagsakId = fagsak.id,
-            startTidspunkt = startTid,
-            ferdigTidspunkt = ferdigTid,
-        ).also { finnmarkstilleggKjøringRepository.saveAndFlush(it) }
-
-        // Act
-        val hentetFinnmarkstilleggKjøring = finnmarkstilleggKjøringRepository.findByFagsakId(fagsak.id)
-
-        // Assert
-        assertThat(hentetFinnmarkstilleggKjøring).isNotNull()
-        assertThat(hentetFinnmarkstilleggKjøring!!.fagsakId).isEqualTo(fagsak.id)
-        assertThat(hentetFinnmarkstilleggKjøring.startTidspunkt).isEqualTo(startTid)
-        assertThat(hentetFinnmarkstilleggKjøring.ferdigTidspunkt).isEqualTo(ferdigTid)
     }
 }
