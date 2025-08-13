@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Plassholdertekst for egenskap - gBxvRIlK7j
+Egenskap: Avslagperioder med flere barn
 
   Scenario: Dersom det eksisterer en avslagsperiode med tom dato før barn er født, skal ikke barnet flettes inn i avslagsperioden
     Gitt følgende fagsaker
