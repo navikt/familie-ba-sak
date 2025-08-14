@@ -34,7 +34,7 @@ class MockSystemOnlyIntegrasjonClient :
                     Ansettelsesperiode(
                         periode =
                             Periode(
-                                fom = LocalDate.now().minusYears(1),
+                                fom = ansettelsesperiodeFom,
                                 tom = null,
                             ),
                     ),
