@@ -24,5 +24,11 @@ fun mockFagsakService(dataFraCucumber: VedtaksperioderOgBegrunnelserStepDefiniti
         fagsak.status = nyStatus
         fagsak
     }
+    every { fagsakService.hentAktør(any()) } answers {
+        val fagsakId = firstArg<Long>()
+        dataFraCucumber.fagsaker.values
+            .single { it.id == fagsakId }
+            .aktør
+    }
     return fagsakService
 }

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinitio
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
@@ -80,6 +81,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.Tilba
 import no.nav.familie.ba.sak.kjerne.vedtak.tilbakekrevingsvedtakmotregning.TilbakekrevingsvedtakMotregningService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllBosattIRiketService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -147,6 +150,7 @@ class CucumberMock(
     val patchetAndelTilkjentYtelseRepository = mockk<PatchetAndelTilkjentYtelseRepository>()
     val eksternBehandlingRelasjonService = mockk<EksternBehandlingRelasjonService>()
     val behandlingSøknadsinfoRepository = mockBehandlingSøknadsinfoRepository()
+    val systemOnlyPdlRestClient = mockSystemOnlyPdlRestClient(dataFraCucumber)
 
     init {
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
@@ -539,6 +543,20 @@ class CucumberMock(
             unleashService = unleashNextMedContextService,
         )
 
+    val preutfyllBosattIRiketService =
+        PreutfyllBosattIRiketService(
+            pdlRestClient = systemOnlyPdlRestClient,
+            søknadService = mockk(),
+            persongrunnlagService = persongrunnlagService,
+        )
+
+    val preutfyllVilkårService =
+        PreutfyllVilkårService(
+            preutfyllLovligOppholdService = mockk(),
+            preutfyllBosattIRiketService = preutfyllBosattIRiketService,
+            unleashService = unleashNextMedContextService,
+        )
+
     val vilkårsvurderingForNyBehandlingService =
         VilkårsvurderingForNyBehandlingService(
             vilkårsvurderingService = vilkårsvurderingService,
@@ -548,7 +566,7 @@ class CucumberMock(
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
-            preutfyllVilkårService = mockk(),
+            preutfyllVilkårService = preutfyllVilkårService,
         )
 
     val registrerPersongrunnlag =

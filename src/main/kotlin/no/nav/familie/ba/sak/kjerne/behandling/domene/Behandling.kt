@@ -166,6 +166,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
+            skalBehandlesAutomatisk && erFinnmarkstillegg() -> true
             else -> false
         }
 
@@ -223,6 +224,8 @@ data class Behandling(
     fun erSatsendring() = this.opprettetÅrsak == BehandlingÅrsak.SATSENDRING
 
     fun erMånedligValutajustering() = this.opprettetÅrsak == BehandlingÅrsak.MÅNEDLIG_VALUTAJUSTERING
+
+    fun erFinnmarkstillegg() = this.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG
 
     fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
