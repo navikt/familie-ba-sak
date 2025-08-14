@@ -17,15 +17,19 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehan
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseAdresser
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.mock.CucumberMock
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockAutovedtakFinnmarkstilleggService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
 import no.nav.familie.ba.sak.cucumber.mock.mockAutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -94,6 +98,7 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
     var uregistrerteBarn = listOf<BarnMedOpplysninger>()
     var dagensDato: LocalDate = LocalDate.now()
     var toggles = mapOf<Long, Map<String, Boolean>>()
+    var adresser = mutableMapOf<String, PdlBostedsadresseOgDeltBostedPerson>()
 
     var utvidetVedtaksperiodeMedBegrunnelser = listOf<UtvidetVedtaksperiodeMedBegrunnelser>()
 
@@ -578,6 +583,57 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
             mottakersAktør = fagsak.aktør,
             aktør = fagsak.aktør,
         )
+    }
+
+    /**
+     * Mulige verdier: | AktørId | Fra dato | Til dato | Bostedskommune | Adressetype |
+     *
+     * Adressetype kan være "Bostedsadresse" eller "Delt bosted"
+     */
+    @Og("med bostedskommuner")
+    fun `med bostedskommuner`(dataTable: DataTable) {
+        adresser.putAll(parseAdresser(dataTable, persongrunnlag))
+    }
+
+    @Når("vi lager automatisk behandling med id {} på fagsak {} på grunn av finnmarkstillegg")
+    fun `kjør behandling finnmarkstillegg på fagsak med behandlingsid`(
+        finnmarkstilleggBehandlingId: Long,
+        fagsakId: Long,
+    ) {
+        mockAutovedtakFinnmarkstilleggService(
+            dataFraCucumber = this,
+            fagsakId = fagsakId,
+            nyBehanldingId = finnmarkstilleggBehandlingId,
+        ).kjørBehandling(FinnmarkstilleggData(fagsakId))
+    }
+
+    @Så("forvent følgende vilkårresultater for behandling {}")
+    fun `forvent følgende vilkårresultater for behandling`(
+        behandlingId: Long,
+        dataTable: DataTable,
+    ) {
+        val forventedeVilkårResultaterPerAktør =
+            dataTable
+                .asMaps()
+                .groupBy { parseAktørId(it) }
+                .mapValues { (aktørId, vilkårResultatRaderForAktør) ->
+                    parseVilkårResultaterForAktør(
+                        vilkårResultatRaderForAktør = vilkårResultatRaderForAktør,
+                        behandlingId = behandlingId,
+                        personResultat = vilkårsvurderinger[behandlingId]!!.personResultater.first { it.aktør.aktørId == aktørId },
+                    )
+                }
+
+        val faktiskeVilkårResultaterPerAktør =
+            vilkårsvurderinger[behandlingId]!!
+                .personResultater
+                .associate { it.aktør.aktørId to it.vilkårResultater }
+
+        assertThat(faktiskeVilkårResultaterPerAktør)
+            .usingRecursiveComparison()
+            .ignoringFieldsMatchingRegexes("id", ".*opprettetTidspunkt", ".*endretTidspunkt", ".*begrunnelse", ".*erAutomatiskVurdert")
+            .ignoringCollectionOrder()
+            .isEqualTo(forventedeVilkårResultaterPerAktør)
     }
 
     /**

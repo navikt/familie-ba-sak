@@ -106,4 +106,11 @@ object VedtaksperiodeMedBegrunnelserParser {
     ) : Domenenøkkel {
         YTELSE_TYPE("Ytelse type"),
     }
+
+    enum class DomenebegrepAdresse(
+        override val nøkkel: String,
+    ) : Domenenøkkel {
+        ADRESSETYPE("Adressetype"),
+        KOMMUNENUMMER("Kommunenummer"),
+    }
 }
