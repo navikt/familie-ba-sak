@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
 import no.nav.familie.ba.sak.datagenerator.lagVegadresse
 import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.SystemOnlyIntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
@@ -31,9 +31,9 @@ class PreutfyllLovligOppholdServiceTest {
     inner class GenererLovligOppholdVilkårResultatTest {
         private val pdlRestClient: SystemOnlyPdlRestClient = mockk(relaxed = true)
         private val statsborgerskapService = mockk<StatsborgerskapService>(relaxed = true)
-        private val integrasjonClient: IntegrasjonClient = mockk(relaxed = true)
+        private val systemOnlyIntegrasjonClient: SystemOnlyIntegrasjonClient = mockk(relaxed = true)
         private val persongrunnlagService: PersongrunnlagService = mockk(relaxed = true)
-        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService = PreutfyllLovligOppholdService(pdlRestClient, statsborgerskapService, integrasjonClient, persongrunnlagService)
+        private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService = PreutfyllLovligOppholdService(pdlRestClient, statsborgerskapService, systemOnlyIntegrasjonClient, persongrunnlagService)
 
         @Test
         fun `skal preutfylle oppfylt lovlig opphold vilkår basert på norsk eller nordisk statsborgerskap`() {
@@ -352,7 +352,7 @@ class PreutfyllLovligOppholdServiceTest {
 
             every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
 
-            every { integrasjonClient.hentArbeidsforhold(any(), LocalDate.now().minusYears(10)) } returns
+            every { systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
                 listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(10), null))))
 
             // Act
@@ -411,7 +411,7 @@ class PreutfyllLovligOppholdServiceTest {
 
             every { statsborgerskapService.hentSterkesteMedlemskap(Statsborgerskap("BE", LocalDate.now().minusYears(20), null, null)) } returns Medlemskap.EØS
 
-            every { integrasjonClient.hentArbeidsforhold(any(), LocalDate.now().minusYears(10)) } returns
+            every { systemOnlyIntegrasjonClient.hentArbeidsforholdMedSystembruker(any(), LocalDate.now().minusYears(10)) } returns
                 listOf(Arbeidsforhold(arbeidsgiver = null, ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(10), null))))
 
             // Act
