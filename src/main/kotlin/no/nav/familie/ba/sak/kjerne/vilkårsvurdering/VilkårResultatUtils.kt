@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -11,7 +10,7 @@ import java.time.LocalDate
 object VilkårResultatUtils {
     fun genererVilkårResultatForEtVilkårPåEnPerson(
         person: Person,
-        eldsteBarnSinFødselsdato: LocalDate,
+        fom: LocalDate,
         personResultat: PersonResultat,
         vilkår: Vilkår,
         annenForelder: Person? = null,
@@ -20,10 +19,8 @@ object VilkårResultatUtils {
             vilkår.vurderVilkår(
                 person = person,
                 annenForelder = annenForelder,
-                vurderFra = eldsteBarnSinFødselsdato,
+                vurderFra = fom,
             )
-
-        val fom = if (person.type == PersonType.SØKER) eldsteBarnSinFødselsdato else person.fødselsdato
 
         val tom: LocalDate? =
             if (vilkår == Vilkår.UNDER_18_ÅR) {
