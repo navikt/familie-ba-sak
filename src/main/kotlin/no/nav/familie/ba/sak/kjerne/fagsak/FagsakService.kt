@@ -477,8 +477,8 @@ class FagsakService(
         }
 
         // Liten varsling på om det er trygt å slette kallet under.
-        // I mine øyne skal det være overflødig å gjøre nytt kall mot PDL, men har ikke full oversikt over de forksjellige scenarioene.
-        logger.warn("PersonInfoMedRelasjoner inneholdt ikke forventet aktør, henter personinfo fra PDL som fallback.")
+        // I mine øyne skal det være overflødig å gjøre nytt kall mot PDL, men har ikke full oversikt over de forskjellige scenarioene.
+        logger.warn("PersonInfoMedRelasjoner inneholdt ikke forventet aktør, henter personinfo fra PDL som fallback. Behandling: ${behandling.id}")
 
         return runCatching {
             personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
