@@ -6,6 +6,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.nav.familie.ba.sak.datagenerator.lagMatrikkeladresse
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettelsesperiode
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsgiver
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlBolkResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonBolk
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonDataBolk
@@ -36,6 +40,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.hentGraphqlQuery
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
@@ -56,6 +61,7 @@ fun stubScenario(scenario: RestScenario) {
     }
     stubHentBostedsadresserOgDeltBostedForPerson(scenario)
     stubHentPerson(scenario)
+    stubHentArbeidsforhold(scenario.søker.ident)
 }
 
 private fun stubHentSøknad(restScenarioPerson: RestScenarioPerson) {
@@ -136,6 +142,25 @@ private fun stubHentOppholdstillatelse(restScenarioPerson: RestScenarioPerson) {
                     .withHeader("Content-Type", "application/json")
                     .withBody(
                         objectMapper.writeValueAsString(response),
+                    ),
+            ),
+    )
+}
+
+private fun stubHentArbeidsforhold(ident: String) {
+    val response = listOf(Arbeidsforhold(arbeidsgiver = Arbeidsgiver(organisasjonsnummer = "123456789"), ansettelsesperiode = Ansettelsesperiode(Periode(LocalDate.now().minusYears(1), LocalDate.now().plusYears(1)))))
+
+    val ressursResponse = Ressurs.success(response)
+
+    stubFor(
+        post(urlEqualTo("/rest/api/integrasjoner/aareg/arbeidsforhold"))
+            .withRequestBody(WireMock.matchingJsonPath("$.personIdent", WireMock.equalTo(ident)))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        objectMapper.writeValueAsString(ressursResponse),
                     ),
             ),
     )

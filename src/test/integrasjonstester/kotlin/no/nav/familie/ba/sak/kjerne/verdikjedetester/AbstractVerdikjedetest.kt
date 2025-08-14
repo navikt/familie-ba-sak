@@ -18,6 +18,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer : ApplicationContextIni
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
             "PDL_URL: http://localhost:1337/rest/api/pdl",
+            "FAMILIE_INTEGRASJONER_API_URL: http://localhost:1337/rest/api/integrasjoner",
         )
     }
 }
