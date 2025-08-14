@@ -54,7 +54,7 @@ spec:
             value: "true"
           - name: pgaudit.log
             value: "write"
-          - name: pgaudit.log_parameters
+          - name: pgaudit.log_parameter
             value: "on"
           - name: pgaudit.log_rows
             value: "on"
