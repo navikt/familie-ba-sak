@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -44,6 +45,7 @@ class AutovedtakFinnmarkstilleggService(
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
     private val autovedtakFinnmarkstilleggBegrunnelseService: AutovedtakFinnmarkstilleggBegrunnelseService,
+    private val iverksettMotOppdrag: IverksettMotOppdrag,
 ) : AutovedtakBehandlingService<FinnmarkstilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -103,7 +105,11 @@ class AutovedtakFinnmarkstilleggService(
             throw Feil("Det er oppdaget feilutbetaling ved kjøring av finnmarkstillegg for fagsakId=${behandlingsdata.fagsakId}. Automatisk kjøring stoppes.")
         }
 
-        autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandlingEtterBehandlingsresultat)
+        if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
+            autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(
+                behandlingEtterBehandlingsresultat,
+            )
+        }
 
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
