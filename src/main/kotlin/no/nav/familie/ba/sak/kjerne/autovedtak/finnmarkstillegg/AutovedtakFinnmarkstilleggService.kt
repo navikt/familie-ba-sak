@@ -43,6 +43,7 @@ class AutovedtakFinnmarkstilleggService(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
+    private val autovedtakFinnmarkstilleggBegrunnelseService: AutovedtakFinnmarkstilleggBegrunnelseService,
 ) : AutovedtakBehandlingService<FinnmarkstilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -101,6 +102,8 @@ class AutovedtakFinnmarkstilleggService(
         if (feilutbetaling > BigDecimal.ZERO) {
             throw Feil("Det er oppdaget feilutbetaling ved kjøring av finnmarkstillegg for fagsakId=${behandlingsdata.fagsakId}. Automatisk kjøring stoppes.")
         }
+
+        autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(behandlingEtterBehandlingsresultat)
 
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
