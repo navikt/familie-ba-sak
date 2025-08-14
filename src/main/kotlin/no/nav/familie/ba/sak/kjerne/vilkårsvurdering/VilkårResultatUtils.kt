@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -22,7 +23,7 @@ object VilkårResultatUtils {
                 vurderFra = eldsteBarnSinFødselsdato,
             )
 
-        val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
+        val fom = if (person.type == PersonType.SØKER) eldsteBarnSinFødselsdato else person.fødselsdato
 
         val tom: LocalDate? =
             if (vilkår == Vilkår.UNDER_18_ÅR) {

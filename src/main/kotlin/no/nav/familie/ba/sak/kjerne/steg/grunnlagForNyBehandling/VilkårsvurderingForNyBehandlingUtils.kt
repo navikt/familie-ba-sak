@@ -112,7 +112,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         val eldsteBarnSomVurderesSinFødselsdato =
             personopplysningGrunnlag.barna
                 .filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
-                .maxByOrNull { it.fødselsdato }
+                .minByOrNull { it.fødselsdato }
                 ?.fødselsdato
                 ?: throw Feil("Finner ingen barn på persongrunnlag")
 
