@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.NORMAL
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.steg.IverksettMotOppdrag
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -43,6 +44,7 @@ class AutovedtakFinnmarkstilleggService(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
+    private val autovedtakFinnmarkstilleggBegrunnelseService: AutovedtakFinnmarkstilleggBegrunnelseService,
 ) : AutovedtakBehandlingService<FinnmarkstilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -100,6 +102,12 @@ class AutovedtakFinnmarkstilleggService(
 
         if (feilutbetaling > BigDecimal.ZERO) {
             throw Feil("Det er oppdaget feilutbetaling ved kjøring av finnmarkstillegg for fagsakId=${behandlingsdata.fagsakId}. Automatisk kjøring stoppes.")
+        }
+
+        if (behandlingEtterBehandlingsresultat.steg == StegType.IVERKSETT_MOT_OPPDRAG) {
+            autovedtakFinnmarkstilleggBegrunnelseService.begrunnAutovedtakForFinnmarkstillegg(
+                behandlingEtterBehandlingsresultat,
+            )
         }
 
         val opprettetVedtak =
