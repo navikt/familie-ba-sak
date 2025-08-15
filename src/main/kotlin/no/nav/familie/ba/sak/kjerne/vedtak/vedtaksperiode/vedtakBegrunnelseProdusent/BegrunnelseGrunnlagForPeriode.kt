@@ -10,6 +10,8 @@ sealed interface IBegrunnelseGrunnlagForPeriode {
 
     fun erSmåbarnstilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.SMÅBARNSTILLEGG } == true
 
+    fun erFinnmarkstilleggIForrigeBehandlingPeriode() = sammePeriodeForrigeBehandling?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
+
     companion object {
         fun opprett(
             dennePerioden: BegrunnelseGrunnlagForPersonIPeriode,

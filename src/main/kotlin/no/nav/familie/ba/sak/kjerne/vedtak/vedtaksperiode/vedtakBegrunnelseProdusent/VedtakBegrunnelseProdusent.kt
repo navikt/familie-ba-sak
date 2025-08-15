@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.brev.brevBegrunnelseProdusent.GrunnlagForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
@@ -276,10 +278,11 @@ internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
     return begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
-internal fun ISanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
+internal fun ISanityBegrunnelse.matcherErAutomatisk(behandling: Behandling): Boolean =
     when {
-        this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
-        ØvrigTrigger.ALLTID_AUTOMATISK in this.øvrigeTriggere -> erAutomatiskBehandling
+        this.gjelderFinnmarkstillegg -> true
+        this.valgbarhet != Valgbarhet.AUTOMATISK -> !behandling.skalBehandlesAutomatisk
+        ØvrigTrigger.ALLTID_AUTOMATISK in this.øvrigeTriggere -> behandling.skalBehandlesAutomatisk
         else -> true
     }
 

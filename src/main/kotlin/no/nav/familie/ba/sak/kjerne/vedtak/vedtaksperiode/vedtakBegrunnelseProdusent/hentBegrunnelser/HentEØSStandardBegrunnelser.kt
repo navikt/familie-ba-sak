@@ -38,7 +38,7 @@ internal fun hentEØSStandardBegrunnelser(
         sanityEØSBegrunnelser
             .filterValues { it.periodeResultat in relevantePeriodeResultater || it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT }
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
-            .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
+            .filterValues { it.matcherErAutomatisk(behandling) }
             .filterValues { it.erSammeTemaSomPeriode(temaSomPeriodeErVurdertEtter) }
 
     val filtrertPåEndretVilkår =
