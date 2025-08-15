@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
@@ -57,6 +58,7 @@ class FagsakServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val unleashService = mockk<UnleashNextMedContextService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
+    private val integrasjonClient = mockk<IntegrasjonClient>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -75,6 +77,7 @@ class FagsakServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             unleashService = unleashService,
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
+            integrasjonClient = integrasjonClient,
         )
 
     @Nested

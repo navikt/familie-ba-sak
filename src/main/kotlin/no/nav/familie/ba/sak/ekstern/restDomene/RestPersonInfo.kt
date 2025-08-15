@@ -55,7 +55,6 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         navn = this.navn ?: "",
         fødselsdato = this.fødselsdato,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-        erEgenAnsatt = this.erEgenAnsatt,
     )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
@@ -82,7 +81,6 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
-        erEgenAnsatt = this.erEgenAnsatt,
     )
 }
 

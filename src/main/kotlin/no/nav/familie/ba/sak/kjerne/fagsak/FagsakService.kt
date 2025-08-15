@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -66,6 +67,7 @@ class FagsakService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
     private val unleashService: UnleashNextMedContextService,
+    private val integrasjonClient: IntegrasjonClient,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
@@ -354,7 +356,6 @@ class FagsakService(
                         fagsakId = fagsak?.id,
                         fagsakType = fagsak?.type,
                         adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
-                        erEgenAnsatt = personInfoMedRelasjoner.erEgenAnsatt,
                     ),
                 )
             }
@@ -387,7 +388,6 @@ class FagsakService(
                                         fagsakId = fagsak?.id,
                                         fagsakType = fagsak?.type,
                                         adressebeskyttelseGradering = relasjon.adressebeskyttelseGradering,
-                                        erEgenAnsatt = relasjon.erEgenAnsatt,
                                     ),
                                 )
                             }
@@ -395,7 +395,9 @@ class FagsakService(
                     }
                 }
         }
-        return assosierteFagsakDeltagere
+        val fagsakDeltagereMedEgenAnsattStatus = settEgenAnsattStatusPåFagsakDeltagere(assosierteFagsakDeltagere)
+
+        return fagsakDeltagereMedEgenAnsattStatus
     }
 
     private fun sjekkStatuskodeOgHåndterFeil(throwable: Throwable): List<RestFagsakDeltager> {
@@ -450,7 +452,6 @@ class FagsakService(
                 fagsakId = behandling.fagsak.id,
                 fagsakType = behandling.fagsak.type,
                 adressebeskyttelseGradering = personInfoMedRelasjoner.adressebeskyttelseGradering,
-                erEgenAnsatt = personInfoMedRelasjoner.erEgenAnsatt,
             )
         }
 
@@ -472,14 +473,10 @@ class FagsakService(
                 fagsakId = behandling.fagsak.id,
                 fagsakType = behandling.fagsak.type,
                 adressebeskyttelseGradering = forelderInfo.adressebeskyttelseGradering,
-                erEgenAnsatt = forelderInfo.erEgenAnsatt,
             )
         }
 
-        // Liten varsling på om det er trygt å slette kallet under.
-        // I mine øyne skal det være overflødig å gjøre nytt kall mot PDL, men har ikke full oversikt over de forskjellige scenarioene.
-        logger.warn("PersonInfoMedRelasjoner inneholdt ikke forventet aktør, henter personinfo fra PDL som fallback. Behandling: ${behandling.id}")
-
+        // Person med forelderrolle uten direkte relasjon
         return runCatching {
             personopplysningerService.hentPersoninfoEnkel(behandling.fagsak.aktør)
         }.fold(
@@ -510,6 +507,15 @@ class FagsakService(
                     harTilgang = false,
                 )
             }
+
+    internal fun settEgenAnsattStatusPåFagsakDeltagere(fagsakDeltagere: MutableList<RestFagsakDeltager>): List<RestFagsakDeltager> {
+        val egenAnsattPerIdent = integrasjonClient.sjekkErEgenAnsattBulk(fagsakDeltagere.map { it.ident })
+        return fagsakDeltagere.map { fagsakDeltager ->
+            fagsakDeltager.copy(
+                erEgenAnsatt = egenAnsattPerIdent.getOrDefault(fagsakDeltager.ident, null),
+            )
+        }
+    }
 
     fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
         aktør: Aktør,
