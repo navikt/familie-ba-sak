@@ -17,6 +17,8 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -120,6 +122,7 @@ data class Behandling(
             erManuellMigrering() -> false
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
+            erFinnmarkstillegg() && resultat in setOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> false
             else -> true
         }
 
@@ -157,14 +160,11 @@ data class Behandling(
 
     fun skalRettFraBehandlingsresultatTilIverksetting(erEndringFraForrigeBehandlingSendtTilØkonomi: Boolean): Boolean =
         when {
-            skalBehandlesAutomatisk &&
-                erOmregning() &&
-                resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
-
+            skalBehandlesAutomatisk && erOmregning() && resultat in listOf(FORTSATT_INNVILGET, FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
-            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == Behandlingsresultat.FORTSATT_INNVILGET -> true
+            skalBehandlesAutomatisk && this.opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID && this.resultat == FORTSATT_INNVILGET -> true
             skalBehandlesAutomatisk && erMånedligValutajustering() -> true
             skalBehandlesAutomatisk && erFinnmarkstillegg() -> true
             else -> false
