@@ -13,6 +13,7 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.Properties
 
 @Service
@@ -60,7 +61,10 @@ class AktiverMinsideTask(
         const val TASK_STEP_TYPE = "aktiverMinside"
         private val logger = LoggerFactory.getLogger(AktiverMinsideTask::class.java)
 
-        fun opprettTask(aktør: Aktør): Task =
+        fun opprettTask(
+            aktør: Aktør,
+            triggerTid: LocalDateTime = LocalDateTime.now(),
+        ): Task =
             Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(MinsideDTO(aktør.aktørId)),
@@ -69,6 +73,6 @@ class AktiverMinsideTask(
                         this["aktørId"] = aktør.aktørId
                         this["fnr"] = aktør.aktivFødselsnummer()
                     },
-            )
+            ).medTriggerTid(triggerTid)
     }
 }

@@ -52,6 +52,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -295,7 +296,13 @@ class ForvalterService(
             logger.info("Oppretter AktiverMinsideTask for ${fagsakerSomSkalHaMinsideAktivert.size} fagsaker")
             fagsakerSomSkalHaMinsideAktivert.forEach { fagsak ->
                 taskService.save(
-                    AktiverMinsideTask.opprettTask(fagsak.aktør),
+                    AktiverMinsideTask.opprettTask(
+                        aktør = fagsak.aktør,
+                        triggerTid =
+                            LocalDateTime
+                                .now()
+                                .withHour(18),
+                    ),
                 )
             }
         }
