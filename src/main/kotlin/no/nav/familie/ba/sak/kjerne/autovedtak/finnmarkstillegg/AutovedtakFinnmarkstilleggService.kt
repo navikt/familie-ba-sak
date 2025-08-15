@@ -45,7 +45,6 @@ class AutovedtakFinnmarkstilleggService(
     private val beregningService: BeregningService,
     private val simuleringService: SimuleringService,
     private val autovedtakFinnmarkstilleggBegrunnelseService: AutovedtakFinnmarkstilleggBegrunnelseService,
-    private val iverksettMotOppdrag: IverksettMotOppdrag,
 ) : AutovedtakBehandlingService<FinnmarkstilleggData> {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
