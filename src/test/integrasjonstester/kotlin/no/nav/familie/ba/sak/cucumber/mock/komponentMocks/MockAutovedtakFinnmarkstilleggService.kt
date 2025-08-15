@@ -34,5 +34,6 @@ fun mockAutovedtakFinnmarkstilleggService(
         beregningService = cucumberMock.beregningService,
         simuleringService = cucumberMock.simuleringService,
         pdlRestClient = cucumberMock.systemOnlyPdlRestClient,
+        autovedtakFinnmarkstilleggBegrunnelseService = cucumberMock.autovedtakFinnmarkstilleggBegrunnelseService,
     )
 }
