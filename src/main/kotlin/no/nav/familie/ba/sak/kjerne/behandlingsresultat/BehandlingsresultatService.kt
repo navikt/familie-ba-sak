@@ -79,6 +79,7 @@ class BehandlingsresultatService(
                 val forrigeUtenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(BehandlingId(forrigeBehandling.id))
 
                 BehandlingsresultatEndringUtils.utledEndringsresultat(
+                    behandling = behandling,
                     nåværendeAndeler = andelerTilkjentYtelse,
                     forrigeAndeler = forrigeAndelerTilkjentYtelse,
                     nåværendeEndretAndeler = endretUtbetalingAndeler,
