@@ -335,8 +335,7 @@ class FagsakServiceTest {
         @Test
         fun `skal returnere kun maskert deltager når søker ikke har tilgang`() {
             // Arrange
-            val barnIdent = randomBarnFnr()
-            val barnAktør = randomAktør(barnIdent)
+            val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
             every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
             every {
                 familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(barnAktør)
@@ -359,8 +358,7 @@ class FagsakServiceTest {
         @Test
         fun `skal returnere grunnleggende info hvis person ikke har fagsak`() {
             // Arrange
-            val ident = randomFnr()
-            val aktør = randomAktør(ident)
+            val (ident, aktør) = randomBarnFnr().let { it to randomAktør(it) }
             val navn = "Mock Mockesen"
             val personInfo = PersonInfo(fødselsdato = LocalDate.now().minusYears(30), kjønn = Kjønn.KVINNE, navn = navn)
             every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) } returns aktør
@@ -385,27 +383,24 @@ class FagsakServiceTest {
         @Test
         fun `søk på barn med to foreldre skal returnere alle tre`() {
             // Arrange
-            val barnIdent = randomBarnFnr()
-            val morIdent = randomFnr()
-            val farIdent = randomFnr()
-            val barnAktør = randomAktør(barnIdent)
-            val morAktør = randomAktør(morIdent)
-            val farAktør = randomAktør(farIdent)
+            val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
+            val (morIdent, morAktør) = randomFnr().let { it to randomAktør(it) }
+            val (farIdent, farAktør) = randomFnr().let { it to randomAktør(it) }
             val aktører = listOf(barnAktør, morAktør, farAktør)
-            val morRelasjon =
-                ForelderBarnRelasjon(
-                    aktør = morAktør,
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR,
-                )
-            val farRelasjon =
-                ForelderBarnRelasjon(
-                    aktør = farAktør,
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR,
-                )
             val barnInfo =
                 PersonInfo(
                     fødselsdato = LocalDate.now().minusYears(30),
-                    forelderBarnRelasjon = setOf(morRelasjon, farRelasjon),
+                    forelderBarnRelasjon =
+                        setOf(
+                            ForelderBarnRelasjon(
+                                aktør = morAktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR,
+                            ),
+                            ForelderBarnRelasjon(
+                                aktør = farAktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR,
+                            ),
+                        ),
                 )
             every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
             every {
@@ -430,12 +425,9 @@ class FagsakServiceTest {
         @Test
         fun `skal sette korrekt egen ansatt status basert på respons fra integrasjoner`() {
             // Arrange
-            val barnIdent = randomBarnFnr()
-            val morIdent = randomFnr()
-            val farIdent = randomFnr()
-            val barnAktør = randomAktør(barnIdent)
-            val morAktør = randomAktør(morIdent)
-            val farAktør = randomAktør(farIdent)
+            val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
+            val (morIdent, morAktør) = randomFnr().let { it to randomAktør(it) }
+            val (farIdent, farAktør) = randomFnr().let { it to randomAktør(it) }
             val aktører = listOf(barnAktør, morAktør, farAktør)
             val barnInfo =
                 PersonInfo(
