@@ -369,21 +369,15 @@ fun hentNesteSteg(
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> {
-                    if (!behandling.skalBehandlesAutomatisk) {
-                        VURDER_TILBAKEKREVING
-                    } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+                    if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
                         IVERKSETT_MOT_OPPDRAG
                     } else {
-                        VURDER_TILBAKEKREVING
+                        FERDIGSTILLE_BEHANDLING
                     }
                 }
 
-                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
-                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
-                IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
+                VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
                 DISTRIBUER_VEDTAKSBREV -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

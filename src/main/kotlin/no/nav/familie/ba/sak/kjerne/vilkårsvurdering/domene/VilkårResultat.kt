@@ -92,7 +92,8 @@ data class VilkårResultat(
             "periodeFom=$periodeFom, " +
             "periodeTom=$periodeTom, " +
             "resultat=$resultat, " +
-            "evalueringÅrsaker=$evalueringÅrsaker" +
+            "evalueringÅrsaker=$evalueringÅrsaker, " +
+            "utdypendeVilkårsvurderinger=$utdypendeVilkårsvurderinger" +
             ")"
 
     fun nullstill() {

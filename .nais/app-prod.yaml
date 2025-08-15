@@ -54,9 +54,7 @@ spec:
             value: "true"
           - name: pgaudit.log
             value: "write"
-          - name: pgaudit.log_parameter
-            value: "on"
-          - name: pgaudit.log_rows
+          - name: "pgaudit.log_parameter"
             value: "on"
   azure:
     application:

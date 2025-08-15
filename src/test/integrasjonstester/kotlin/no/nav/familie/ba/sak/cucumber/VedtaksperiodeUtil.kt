@@ -198,9 +198,20 @@ fun leggTilVilkårResultatPåPersonResultat(
     behandlingId: Long,
 ) = personResultatForBehandling
     .map { personResultat ->
-        personResultat.vilkårResultater.clear()
+        personResultat.apply {
+            vilkårResultater.clear()
+            val nyeVilkårResultater = parseVilkårResultaterForAktør(vilkårResultaterPerPerson[aktør.aktørId]!!, behandlingId, personResultat)
+            vilkårResultater.addAll(nyeVilkårResultater)
+        }
+    }.toSet()
 
-        vilkårResultaterPerPerson[personResultat.aktør.aktørId]?.forEach { rad ->
+fun parseVilkårResultaterForAktør(
+    vilkårResultatRaderForAktør: List<MutableMap<String, String>>,
+    behandlingId: Long,
+    personResultat: PersonResultat? = null,
+): Set<VilkårResultat> =
+    vilkårResultatRaderForAktør
+        .flatMap { rad ->
             val vilkårForÉnRad =
                 parseEnumListe<Vilkår>(
                     VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
@@ -243,10 +254,8 @@ fun leggTilVilkårResultatPåPersonResultat(
                         standardbegrunnelser = hentStandardBegrunnelser(rad),
                     )
                 }
-            personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
-        }
-        personResultat
-    }.toSet()
+            vilkårResultaterForÉnRad
+        }.toSet()
 
 private fun hentStandardBegrunnelser(rad: MutableMap<String, String>): List<IVedtakBegrunnelse> {
     val standardbegrunnelser: List<IVedtakBegrunnelse> =

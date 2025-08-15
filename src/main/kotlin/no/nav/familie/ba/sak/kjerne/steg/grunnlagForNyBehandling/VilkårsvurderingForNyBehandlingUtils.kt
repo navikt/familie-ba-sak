@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårResultatMedNyPeriode
@@ -112,7 +113,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         val eldsteBarnSomVurderesSinFødselsdato =
             personopplysningGrunnlag.barna
                 .filter { !barnaAktørSomAlleredeErVurdert.contains(it.aktør) }
-                .maxByOrNull { it.fødselsdato }
+                .minByOrNull { it.fødselsdato }
                 ?.fødselsdato
                 ?: throw Feil("Finner ingen barn på persongrunnlag")
 
@@ -132,7 +133,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         genererVilkårResultatForEtVilkårPåEnPerson(
                             person = person,
                             annenForelder = annenForelder,
-                            eldsteBarnSinFødselsdato = eldsteBarnSomVurderesSinFødselsdato,
+                            fom = if (person.type == PersonType.SØKER) eldsteBarnSomVurderesSinFødselsdato else person.fødselsdato,
                             personResultat = personResultat,
                             vilkår = vilkår,
                         )

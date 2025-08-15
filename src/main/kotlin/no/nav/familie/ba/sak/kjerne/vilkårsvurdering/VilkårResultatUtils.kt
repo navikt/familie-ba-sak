@@ -10,7 +10,7 @@ import java.time.LocalDate
 object VilkårResultatUtils {
     fun genererVilkårResultatForEtVilkårPåEnPerson(
         person: Person,
-        eldsteBarnSinFødselsdato: LocalDate,
+        fom: LocalDate,
         personResultat: PersonResultat,
         vilkår: Vilkår,
         annenForelder: Person? = null,
@@ -19,10 +19,8 @@ object VilkårResultatUtils {
             vilkår.vurderVilkår(
                 person = person,
                 annenForelder = annenForelder,
-                vurderFra = eldsteBarnSinFødselsdato,
+                vurderFra = fom,
             )
-
-        val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
 
         val tom: LocalDate? =
             if (vilkår == Vilkår.UNDER_18_ÅR) {
