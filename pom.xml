@@ -17,26 +17,26 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.2.0</kotlin.version>
+        <kotlin.version>2.2.10</kotlin.version>
         <kotlin.compiler.languageVersion>2.1</kotlin.compiler.languageVersion>
         <kotlin.compiler.apiVersion>2.1</kotlin.compiler.apiVersion>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <prosessering.version>2.20250804113739_6d49ef6</prosessering.version>
+        <prosessering.version>2.20250814122631_d951dfb</prosessering.version>
         <felles.version>3.20250804101327_a0f5fad</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20250804093222_2bf44ca</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20250805142725_8942276</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20250804093222_2bf44ca</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250804093222_2bf44ca</familie.kontrakter.stønadsstatistikk>
-        <utbetalingsgenerator.version>1.0_20250415144931_0dc88d8</utbetalingsgenerator.version>
+        <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
         <cucumber.version>7.23.0</cucumber.version>
         <mockk.version>1.14.5</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.34</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.8.9</springdoc.version>
-        <sentry.version>8.18.0</sentry.version>
+        <sentry.version>8.19.1</sentry.version>
         <kotlinx.version>1.10.2</kotlinx.version>
         <kotlinx-kover.version>0.9.1</kotlinx-kover.version>
 
@@ -48,7 +48,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.21.2</testcontainers.postgresql.version>
-        <unleash.version>11.0.2</unleash.version>
+        <unleash.version>11.1.0</unleash.version>
         <testcontainers.postgresql.version>1.21.3</testcontainers.postgresql.version>
         <maven.model.version>3.9.11</maven.model.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
