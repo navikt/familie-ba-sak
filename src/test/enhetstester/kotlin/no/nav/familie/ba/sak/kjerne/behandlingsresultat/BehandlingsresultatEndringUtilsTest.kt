@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløpForPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
@@ -54,6 +55,7 @@ class BehandlingsresultatEndringUtilsTest {
     fun `utledEndringsresultat skal returnere INGEN_ENDRING dersom det ikke finnes noe endringer i behandling`() {
         val endringsresultat =
             utledEndringsresultat(
+                behandling = lagBehandling(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -87,6 +89,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                behandling = lagBehandling(),
                 nåværendeAndeler = listOf(forrigeAndel.copy(kalkulertUtbetalingsbeløp = 40)),
                 forrigeAndeler = listOf(forrigeAndel),
                 personerFremstiltKravFor = emptyList(),
@@ -182,6 +185,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                behandling = lagBehandling(),
                 nåværendeAndeler = nåværendeAndeler,
                 forrigeAndeler = forrigeAndeler,
                 personerFremstiltKravFor = emptyList(),
@@ -224,6 +228,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                behandling = lagBehandling(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -263,6 +268,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                behandling = lagBehandling(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -302,6 +308,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endringsresultat =
             utledEndringsresultat(
+                behandling = lagBehandling(),
                 nåværendeAndeler = emptyList(),
                 forrigeAndeler = emptyList(),
                 personerFremstiltKravFor = emptyList(),
@@ -316,6 +323,87 @@ class BehandlingsresultatEndringUtilsTest {
                 nåMåned = YearMonth.now(),
                 nåværendeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp.copy(valutakode = "SEK").apply { behandlingId = nåværendeBehandling.id }),
                 forrigeUtenlandskPeriodebeløp = listOf(forrigeUtenlandskPeriodebeløp),
+            )
+
+        assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
+    }
+
+    @Test
+    fun `utledEndringsresultat skal returnere INGEN_ENDRING hvis behandlingsårsak er FINNMARKSTILLEGG og eneste endring er i vilkårsvurdering`() {
+        val fødselsdato = LocalDate.of(2015, 1, 1)
+
+        val forrigePersonResultat =
+            PersonResultat(
+                id = 0,
+                vilkårsvurdering = mockk(),
+                aktør = barn1Aktør,
+                vilkårResultater =
+                    mutableSetOf(
+                        VilkårResultat(
+                            personResultat = null,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = fødselsdato,
+                            periodeTom = null,
+                            begrunnelse = "begrunnelse",
+                            sistEndretIBehandlingId = 0,
+                            utdypendeVilkårsvurderinger = listOf(),
+                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                        ),
+                    ),
+            )
+
+        val nåværendePersonResultat =
+            PersonResultat(
+                id = 0,
+                vilkårsvurdering = mockk(),
+                aktør = barn1Aktør,
+                vilkårResultater =
+                    mutableSetOf(
+                        VilkårResultat(
+                            personResultat = null,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = fødselsdato,
+                            periodeTom = LocalDate.of(2024, 12, 31),
+                            begrunnelse = "begrunnelse",
+                            sistEndretIBehandlingId = 0,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                        ),
+                        VilkårResultat(
+                            personResultat = null,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.OPPFYLT,
+                            periodeFom = LocalDate.of(2025, 1, 1),
+                            periodeTom = null,
+                            begrunnelse = "begrunnelse",
+                            sistEndretIBehandlingId = 0,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
+                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                        ),
+                    ),
+            )
+
+        val barn = lagPerson(aktør = barn1Aktør, fødselsdato = fødselsdato, type = PersonType.BARN)
+
+        val endringsresultat =
+            utledEndringsresultat(
+                behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD),
+                nåværendeAndeler = emptyList(),
+                forrigeAndeler = emptyList(),
+                personerFremstiltKravFor = emptyList(),
+                nåværendeKompetanser = emptyList(),
+                forrigeKompetanser = emptyList(),
+                nåværendePersonResultat = setOf(nåværendePersonResultat),
+                forrigePersonResultat = setOf(forrigePersonResultat),
+                nåværendeEndretAndeler = emptyList(),
+                forrigeEndretAndeler = emptyList(),
+                personerIBehandling = setOf(barn),
+                personerIForrigeBehandling = setOf(barn),
+                nåMåned = YearMonth.now(),
+                nåværendeUtenlandskPeriodebeløp = emptyList(),
+                forrigeUtenlandskPeriodebeløp = emptyList(),
             )
 
         assertThat(endringsresultat, Is(Endringsresultat.ENDRING))
