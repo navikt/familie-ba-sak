@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.stemmerMedVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.vedtaksperiodeProdusent.EndretUtbetalingAndelForVedtaksperiode
@@ -258,3 +259,5 @@ fun ISanityBegrunnelse.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePer
         vilkår.contains(it)
     }
 }
+
+fun ISanityBegrunnelse.inneholderFinnmarkstilleggTrigger(): Boolean = this.bosattIRiketTriggere.contains(VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS)

@@ -15,7 +15,7 @@ fun mockVedtaksperiodeHentOgPersisterService(dataFraCucumber: VedtaksperioderOgB
     }
     every { vedtaksperiodeHentOgPersisterService.lagre(any<List<VedtaksperiodeMedBegrunnelser>>()) } answers {
         val vedtaksperioder = firstArg<List<VedtaksperiodeMedBegrunnelser>>()
-        dataFraCucumber.vedtaksperioderMedBegrunnelser = dataFraCucumber.vedtaksperioderMedBegrunnelser + vedtaksperioder
+        dataFraCucumber.vedtaksperioderMedBegrunnelser = (dataFraCucumber.vedtaksperioderMedBegrunnelser + vedtaksperioder).distinct()
         vedtaksperioder
     }
     every { vedtaksperiodeHentOgPersisterService.lagre(any<VedtaksperiodeMedBegrunnelser>()) } answers {

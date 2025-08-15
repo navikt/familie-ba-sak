@@ -847,7 +847,6 @@ class VedtaksperioderOgBegrunnelserStepDefinition {
                     vedtaksliste.find { it.behandling.id == behandlingId }
                         ?: throw Feil("Fant ingen vedtak for behandling $behandlingId"),
             )
-
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
         assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
             .usingRecursiveComparison()

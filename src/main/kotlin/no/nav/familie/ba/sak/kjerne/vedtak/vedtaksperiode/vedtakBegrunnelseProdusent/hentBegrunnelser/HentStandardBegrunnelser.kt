@@ -105,6 +105,11 @@ internal fun hentStandardBegrunnelser(
             begrunnelse.erGjeldendeForSmåbarnstillegg(begrunnelseGrunnlag)
         }
 
+    val filtrertPåFinnmarkstillegg =
+        relevanteBegrunnelser.filterValues { begrunnelse ->
+            begrunnelse.erGjeldendeForFinnmarkstillegg(begrunnelseGrunnlag)
+        }
+
     val filtrertPåUtgjørendeVilkårOgEndretUtbetalingAndelIForrigePeriode =
         relevanteBegrunnelser.filterValues {
             it.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePeriode(begrunnelseGrunnlag, vedtaksperiode)
@@ -141,6 +146,7 @@ internal fun hentStandardBegrunnelser(
         filtrertPåReduksjonFraForrigeBehandling.keys +
         filtrertPåOpphørFraForrigeBehandling.keys +
         filtrertPåSmåbarnstillegg.keys +
+        filtrertPåFinnmarkstillegg.keys +
         filtrertPåEtterEndretUtbetaling.keys +
         filtrertPåHendelser.keys +
         filtrertPåSkalVisesSelvOmIkkeEndring.keys +
@@ -222,17 +228,41 @@ private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
     return begrunnelseGjelderSmåbarnstillegg && begrunnelseMatcherPeriodeResultat && (erEndringISmåbarnstillegg || erEndringISmåbarnstilleggFraForrigeBehandling)
 }
 
+private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+): Boolean {
+    if (!this.gjelderFinnmarkstillegg) return false
+
+    val erFinnmarkstilleggForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.andeler?.any { it.type == YtelseType.FINNMARKSTILLEGG } == true
+    val erFinnmarkstilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG }
+    val erFinnmarkstilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.erFinnmarkstilleggIForrigeBehandlingPeriode()
+
+    val erEndringIFinnmarkstilleggFraForrigeBehandling =
+        erFinnmarkstilleggIForrigeBehandlingPeriode != erFinnmarkstilleggDennePerioden
+
+    val begrunnelseMatcherPeriodeResultat =
+        this.matcherPerioderesultat(
+            erFinnmarkstilleggForrigePeriode,
+            erFinnmarkstilleggDennePerioden,
+            erFinnmarkstilleggIForrigeBehandlingPeriode,
+        )
+
+    val erEndringIFinnmarkstillegg = erFinnmarkstilleggForrigePeriode != erFinnmarkstilleggDennePerioden
+
+    return begrunnelseMatcherPeriodeResultat && (erEndringIFinnmarkstillegg || erEndringIFinnmarkstilleggFraForrigeBehandling)
+}
+
 private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.forrigePeriode?.erOrdinæreVilkårInnvilget() == true }
 
 private fun SanityBegrunnelse.matcherPerioderesultat(
-    erSmåbarnstilleggForrigePeriode: Boolean,
-    erSmåbarnstilleggDennePerioden: Boolean,
-    erSmåbarnstilleggIForrigeBehandlingPeriode: Boolean,
+    erAndelerForrigePeriode: Boolean,
+    erAndelerDennePeriode: Boolean,
+    erAndelerIForrigeBehandlingPeriode: Boolean,
 ): Boolean {
     val erReduksjon =
-        !erSmåbarnstilleggDennePerioden && (erSmåbarnstilleggForrigePeriode || erSmåbarnstilleggIForrigeBehandlingPeriode)
+        !erAndelerDennePeriode && (erAndelerForrigePeriode || erAndelerIForrigeBehandlingPeriode)
     val erØkning =
-        erSmåbarnstilleggDennePerioden && (!erSmåbarnstilleggForrigePeriode || !erSmåbarnstilleggIForrigeBehandlingPeriode)
+        erAndelerDennePeriode && (!erAndelerForrigePeriode || !erAndelerIForrigeBehandlingPeriode)
 
     val erBegrunnelseReduksjon = periodeResultat == SanityPeriodeResultat.REDUKSJON
     val erBegrunnelseØkning = periodeResultat == SanityPeriodeResultat.INNVILGET_ELLER_ØKNING
