@@ -59,7 +59,7 @@ internal fun hentStandardBegrunnelser(
     val relevanteBegrunnelser =
         filtrertPåRolleOgFagsaktype
             .filterValues { it.periodeResultat in relevantePeriodeResultater || it.periodeResultat == SanityPeriodeResultat.IKKE_RELEVANT }
-            .filterValues { it.matcherErAutomatisk(behandling) }
+            .filterValues { it.matcherErAutomatisk(behandling.skalBehandlesAutomatisk) }
             .filterValues { it.erGjeldendeForBrevPeriodeType(vedtaksperiode, erUtbetalingEllerDeltBostedIPeriode) }
             .filterValues { !it.begrunnelseGjelderReduksjonFraForrigeBehandling() && !it.begrunnelseGjelderOpphørFraForrigeBehandling() }
 

@@ -278,11 +278,11 @@ internal fun ISanityBegrunnelse.skalVisesSelvOmIkkeEndring(
     return begrunnelseSkalVisesSelvOmIkkeEndring && begrunnelseMatcherVilkår
 }
 
-internal fun ISanityBegrunnelse.matcherErAutomatisk(behandling: Behandling): Boolean =
+internal fun ISanityBegrunnelse.matcherErAutomatisk(erAutomatiskBehandling: Boolean): Boolean =
     when {
         this.gjelderFinnmarkstillegg -> true
-        this.valgbarhet != Valgbarhet.AUTOMATISK -> !behandling.skalBehandlesAutomatisk
-        ØvrigTrigger.ALLTID_AUTOMATISK in this.øvrigeTriggere -> behandling.skalBehandlesAutomatisk
+        this.valgbarhet != Valgbarhet.AUTOMATISK -> !erAutomatiskBehandling
+        ØvrigTrigger.ALLTID_AUTOMATISK in this.øvrigeTriggere -> erAutomatiskBehandling
         else -> true
     }
 
