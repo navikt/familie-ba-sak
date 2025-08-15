@@ -8,6 +8,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærFraOgMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.tidslinje.Tidslinje
@@ -71,7 +74,7 @@ object EndringIVilkårsvurderingUtil {
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
                 val erEndringerIUtdypendeVilkårsvurdering =
-                    nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()
+                    nåværende.relevanteUtdypendeVilkårsvurderinger() != forrige.relevanteUtdypendeVilkårsvurderinger()
                 val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
                 val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
 
@@ -83,7 +86,9 @@ object EndringIVilkårsvurderingUtil {
         return endringIVilkårResultat
     }
 
-    private fun VilkårResultat.obligatoriskUtdypendeVilkårsvurderingErSatt(): Boolean = this.utdypendeVilkårsvurderinger.isNotEmpty() || !this.utdypendeVilkårsvurderingErObligatorisk()
+    private fun VilkårResultat.obligatoriskUtdypendeVilkårsvurderingErSatt(): Boolean = relevanteUtdypendeVilkårsvurderinger().isNotEmpty() || !this.utdypendeVilkårsvurderingErObligatorisk()
+
+    private fun VilkårResultat.relevanteUtdypendeVilkårsvurderinger(): Set<UtdypendeVilkårsvurdering> = utdypendeVilkårsvurderinger.filterNot { it in setOf(BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD) }.toSet()
 
     private fun VilkårResultat.utdypendeVilkårsvurderingErObligatorisk(): Boolean =
         if (this.vurderesEtter == Regelverk.NASJONALE_REGLER) {
