@@ -7,15 +7,21 @@ import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVisningsbehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
+import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
+import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -26,7 +32,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
@@ -34,6 +42,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
+import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -57,6 +67,7 @@ class FagsakServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val unleashService = mockk<UnleashNextMedContextService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
+    private val integrasjonClient = mockk<IntegrasjonClient>()
     private val fagsakService =
         FagsakService(
             fagsakRepository = fagsakRepository,
@@ -75,6 +86,7 @@ class FagsakServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             unleashService = unleashService,
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
+            integrasjonClient = integrasjonClient,
         )
 
     @Nested
@@ -277,33 +289,182 @@ class FagsakServiceTest {
 
             assertThat(frontendFeilmelding).isEqualTo("Søker og barn søkt for kan ikke være lik for fagsak type skjermet barn")
         }
+
+        @Test
+        fun `Skal returnere eksisterende fagsak dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
+            // Arrange
+            val barnIdent = randomBarnFnr(alder = 5)
+            val søkerIdent = randomFnr()
+            val barnAktør = randomAktør(barnIdent)
+            val søkerAktør = randomAktør(søkerIdent)
+            val fagsak = lagFagsak(1, type = FagsakType.SKJERMET_BARN)
+
+            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
+            every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
+            every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør) } returns fagsak
+
+            // Act && Assert
+            val returnertFagsak =
+                fagsakService.hentEllerOpprettFagsak(
+                    personIdent = barnIdent,
+                    skjermetBarnSøker = restSkjermetBarnSøker,
+                    fraAutomatiskBehandling = false,
+                    type = FagsakType.SKJERMET_BARN,
+                )
+
+            assertThat(returnertFagsak).isEqualTo(fagsak)
+        }
     }
 
-    @Test
-    fun `Skal returnere eksisterende fagsak dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
-        // Arrange
-        val barnIdent = randomBarnFnr(alder = 5)
-        val søkerIdent = randomFnr()
-        val barnAktør = randomAktør(barnIdent)
-        val søkerAktør = randomAktør(søkerIdent)
-        val fagsak = lagFagsak(1, type = FagsakType.SKJERMET_BARN)
+    @Nested
+    inner class HentFagsakDeltager {
+        @Test
+        fun `skal returnere tom liste når person ikke finnes`() {
+            // Arrange
+            val ident = randomFnr()
+            every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) } returns null
 
-        val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+            // Act
+            val resultat = fagsakService.hentFagsakDeltager(ident)
 
-        every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
-        every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
-        every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
-        every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør) } returns fagsak
+            // Assert
+            assertThat(resultat).isEmpty()
+        }
 
-        // Act && Assert
-        val returnertFagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                personIdent = barnIdent,
-                skjermetBarnSøker = restSkjermetBarnSøker,
-                fraAutomatiskBehandling = false,
-                type = FagsakType.SKJERMET_BARN,
-            )
+        @Test
+        fun `skal returnere kun maskert deltager når søker ikke har tilgang`() {
+            // Arrange
+            val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
+            every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
+            every {
+                familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(barnAktør)
+            } returns
+                RestPersonInfo(
+                    personIdent = barnAktør.aktivFødselsnummer(),
+                    adressebeskyttelseGradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
+                )
 
-        assertThat(returnertFagsak).isEqualTo(fagsak)
+            // Act
+            val resultat = fagsakService.hentFagsakDeltager(barnIdent)
+
+            // Assert
+            assertThat(resultat).hasSize(1)
+            assertThat(resultat.single().adressebeskyttelseGradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
+            assertThat(resultat.single().harTilgang).isFalse()
+            assertThat(resultat.single().rolle).isEqualTo(FagsakDeltagerRolle.UKJENT)
+        }
+
+        @Test
+        fun `skal returnere grunnleggende info hvis person ikke har fagsak`() {
+            // Arrange
+            val (ident, aktør) = randomBarnFnr().let { it to randomAktør(it) }
+            val navn = "Mock Mockesen"
+            val personInfo = PersonInfo(fødselsdato = LocalDate.now().minusYears(30), kjønn = Kjønn.KVINNE, navn = navn)
+            every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(ident) } returns aktør
+            every { familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør) } returns null
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør) } returns personInfo
+            every { fagsakRepository.finnFagsakerForAktør(aktør) } returns emptyList()
+            every { personRepository.findByAktør(aktør) } returns emptyList()
+            every { integrasjonClient.sjekkErEgenAnsattBulk(any()) } returns emptyMap()
+
+            // Act
+            val resultat = fagsakService.hentFagsakDeltager(ident)
+
+            // Assert
+            assertThat(resultat).hasSize(1)
+            val deltager = resultat.single()
+            assertThat(deltager.ident).isEqualTo(ident)
+            assertThat(deltager.navn).isEqualTo(navn)
+            assertThat(deltager.rolle).isEqualTo(FagsakDeltagerRolle.UKJENT)
+            assertThat(deltager.fagsakId).isNull()
+        }
+
+        @Test
+        fun `søk på barn med to foreldre skal returnere alle tre`() {
+            // Arrange
+            val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
+            val (morIdent, morAktør) = randomFnr().let { it to randomAktør(it) }
+            val (farIdent, farAktør) = randomFnr().let { it to randomAktør(it) }
+            val aktører = listOf(barnAktør, morAktør, farAktør)
+            val barnPersonInfo =
+                PersonInfo(
+                    fødselsdato = LocalDate.now().minusYears(5),
+                    forelderBarnRelasjon =
+                        setOf(
+                            ForelderBarnRelasjon(
+                                aktør = morAktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR,
+                            ),
+                            ForelderBarnRelasjon(
+                                aktør = farAktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR,
+                            ),
+                        ),
+                )
+            every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
+            every {
+                familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
+            } returns null
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør) } returns barnPersonInfo
+            every { personRepository.findByAktør(barnAktør) } returns listOf()
+            every {
+                integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
+            } returns emptyMap()
+            every { fagsakRepository.finnFagsakerForAktør(match { it in aktører }) } returns emptyList()
+
+            // Act
+            val resultat = fagsakService.hentFagsakDeltager(barnIdent)
+
+            // Assert
+            assertThat(resultat).hasSize(3)
+            assertThat(resultat.single { it.ident == barnIdent }.rolle).isEqualTo(FagsakDeltagerRolle.BARN)
+            assertThat(resultat.single { it.ident == morIdent }.rolle).isEqualTo(FagsakDeltagerRolle.FORELDER)
+            assertThat(resultat.single { it.ident == farIdent }.rolle).isEqualTo(FagsakDeltagerRolle.FORELDER)
+        }
+
+        @Test
+        fun `skal sette korrekt egen ansatt status basert på respons fra integrasjoner`() {
+            // Arrange
+            val (barnIdent, barnAktør) = randomBarnFnr().let { it to randomAktør(it) }
+            val (morIdent, morAktør) = randomFnr().let { it to randomAktør(it) }
+            val (farIdent, farAktør) = randomFnr().let { it to randomAktør(it) }
+            val aktører = listOf(barnAktør, morAktør, farAktør)
+            val barnInfo =
+                PersonInfo(
+                    fødselsdato = LocalDate.now().minusYears(6),
+                    forelderBarnRelasjon =
+                        setOf(
+                            ForelderBarnRelasjon(
+                                aktør = morAktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.MOR,
+                            ),
+                            ForelderBarnRelasjon(
+                                aktør = farAktør,
+                                relasjonsrolle = FORELDERBARNRELASJONROLLE.FAR,
+                            ),
+                        ),
+                )
+            every { personidentService.hentAktørOrNullHvisIkkeAktivFødselsnummer(barnIdent) } returns barnAktør
+            every {
+                familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
+            } returns null
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør) } returns barnInfo
+            every { fagsakRepository.finnFagsakerForAktør(match { it in aktører }) } returns emptyList()
+            every { personRepository.findByAktør(match { it in aktører }) } returns emptyList()
+            every {
+                integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
+            } returns mapOf(barnIdent to false, morIdent to true) // Far utelates
+
+            // Act
+            val resultat = fagsakService.hentFagsakDeltager(barnIdent)
+
+            // Assert
+            assertThat(resultat.single { it.ident == barnIdent }.erEgenAnsatt).isFalse()
+            assertThat(resultat.single { it.ident == morIdent }.erEgenAnsatt).isTrue()
+            assertThat(resultat.single { it.ident == farIdent }.erEgenAnsatt).isNull()
+        }
     }
 }

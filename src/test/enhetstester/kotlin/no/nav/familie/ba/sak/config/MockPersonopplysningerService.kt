@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.config
 
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
@@ -44,12 +43,10 @@ class MockPersonopplysningerService(
     pdlRestClient: PdlRestClient,
     systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    integrasjonClient: IntegrasjonClient,
 ) : PersonopplysningerService(
         pdlRestClient,
         systemOnlyPdlRestClient,
         familieIntegrasjonerTilgangskontrollService,
-        integrasjonClient,
     ) {
     init {
         settPersoninfoMedRelasjonerForPredefinerteTestpersoner()

@@ -24,14 +24,12 @@ class PersonopplysningerService(
     private val pdlRestClient: PdlRestClient,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
-    private val integrasjonClient: IntegrasjonClient,
 ) {
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
         val relasjonsidenter = personinfo.forelderBarnRelasjon.mapNotNull { it.aktør.aktivFødselsnummer() }
         val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
-        val egenAnsattPerIdent = integrasjonClient.sjekkErEgenAnsattBulk(listOf(aktør.aktivFødselsnummer()) + relasjonsidenter)
         val forelderBarnRelasjon =
             personinfo.forelderBarnRelasjon
                 .mapNotNull {
@@ -45,7 +43,6 @@ class PersonopplysningerService(
                                 navn = relasjonsinfo.navn,
                                 kjønn = relasjonsinfo.kjønn,
                                 adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
-                                erEgenAnsatt = egenAnsattPerIdent.getOrDefault(it.aktør.aktivFødselsnummer(), null),
                             )
                         } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
                             logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
@@ -67,7 +64,6 @@ class PersonopplysningerService(
                     )
                 }.toSet()
         return personinfo.copy(
-            erEgenAnsatt = egenAnsattPerIdent.getOrDefault(aktør.aktivFødselsnummer(), null),
             forelderBarnRelasjon = forelderBarnRelasjon,
             forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )

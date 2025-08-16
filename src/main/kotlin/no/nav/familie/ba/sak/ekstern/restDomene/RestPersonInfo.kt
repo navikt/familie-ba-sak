@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -55,7 +56,6 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() =
         navn = this.navn ?: "",
         fødselsdato = this.fødselsdato,
         adressebeskyttelseGradering = this.adressebeskyttelseGradering,
-        erEgenAnsatt = this.erEgenAnsatt,
     )
 
 fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
@@ -82,7 +82,6 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
         dødsfallDato = dødsfallDato,
-        erEgenAnsatt = this.erEgenAnsatt,
     )
 }
 
@@ -106,6 +105,18 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
                                 ?.trim(),
                         postnummer = postnummer,
                     )
+            },
+    )
+}
+
+fun RestPersonInfo.leggTilEgenAnsattStatus(integrasjonClient: IntegrasjonClient): RestPersonInfo {
+    val personIdenter = this.forelderBarnRelasjon.map { it.personIdent } + this.personIdent
+    val erEgenAnsattMap = integrasjonClient.sjekkErEgenAnsattBulk(personIdenter)
+    return this.copy(
+        erEgenAnsatt = erEgenAnsattMap.getOrDefault(this.personIdent, null),
+        forelderBarnRelasjon =
+            this.forelderBarnRelasjon.map {
+                it.copy(erEgenAnsatt = erEgenAnsattMap.getOrDefault(it.personIdent, null))
             },
     )
 }
