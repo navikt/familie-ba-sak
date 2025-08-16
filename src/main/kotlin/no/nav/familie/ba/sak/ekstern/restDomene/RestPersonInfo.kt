@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -104,6 +105,18 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
                                 ?.trim(),
                         postnummer = postnummer,
                     )
+            },
+    )
+}
+
+fun RestPersonInfo.leggTilEgenAnsattStatus(integrasjonClient: IntegrasjonClient): RestPersonInfo {
+    val personIdenter = this.forelderBarnRelasjon.map { it.personIdent } + this.personIdent
+    val erEgenAnsattMap = integrasjonClient.sjekkErEgenAnsattBulk(personIdenter)
+    return this.copy(
+        erEgenAnsatt = erEgenAnsattMap.getOrDefault(this.personIdent, null),
+        forelderBarnRelasjon =
+            this.forelderBarnRelasjon.map {
+                it.copy(erEgenAnsatt = erEgenAnsattMap.getOrDefault(it.personIdent, null))
             },
     )
 }
