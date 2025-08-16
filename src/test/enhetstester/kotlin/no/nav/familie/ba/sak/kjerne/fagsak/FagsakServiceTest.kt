@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
+import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagVisningsbehandling
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
@@ -33,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.skjermetbarnsøker.SkjermetBarnSøkerRepository
@@ -387,9 +389,9 @@ class FagsakServiceTest {
             val (morIdent, morAktør) = randomFnr().let { it to randomAktør(it) }
             val (farIdent, farAktør) = randomFnr().let { it to randomAktør(it) }
             val aktører = listOf(barnAktør, morAktør, farAktør)
-            val barnInfo =
+            val barnPersonInfo =
                 PersonInfo(
-                    fødselsdato = LocalDate.now().minusYears(30),
+                    fødselsdato = LocalDate.now().minusYears(5),
                     forelderBarnRelasjon =
                         setOf(
                             ForelderBarnRelasjon(
@@ -406,7 +408,8 @@ class FagsakServiceTest {
             every {
                 familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(match { it in aktører })
             } returns null
-            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør) } returns barnInfo
+            every { personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(barnAktør) } returns barnPersonInfo
+            every { personRepository.findByAktør(barnAktør) } returns listOf()
             every {
                 integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(barnIdent, morIdent, farIdent)) })
             } returns emptyMap()
