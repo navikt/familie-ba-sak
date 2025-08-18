@@ -199,9 +199,11 @@ fun leggTilVilkårResultatPåPersonResultat(
 ) = personResultatForBehandling
     .map { personResultat ->
         personResultat.apply {
-            vilkårResultater.clear()
-            val nyeVilkårResultater = parseVilkårResultaterForAktør(vilkårResultaterPerPerson[aktør.aktørId]!!, behandlingId, personResultat)
-            vilkårResultater.addAll(nyeVilkårResultater)
+            vilkårResultaterPerPerson[aktør.aktørId]?.let { vilkårResultaterForPerson ->
+                vilkårResultater.clear()
+                val nyeVilkårResultater = parseVilkårResultaterForAktør(vilkårResultaterForPerson, behandlingId, personResultat)
+                vilkårResultater.addAll(nyeVilkårResultater)
+            }
         }
     }.toSet()
 
