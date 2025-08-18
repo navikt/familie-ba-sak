@@ -57,7 +57,6 @@ import no.nav.familie.tidslinje.utvidelser.tilPerioder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -84,7 +83,7 @@ class BehandlingsresultatSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
-        if (!behandling.erSatsendringEllerMånedligValutajustering() && behandling.skalBehandlesAutomatisk) return
+        if (!behandling.erSatsendringMånedligValutajusteringEllerFinnmarkstillegg() && behandling.skalBehandlesAutomatisk) return
 
         val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
@@ -109,7 +108,7 @@ class BehandlingsresultatSteg(
             søkerOgBarn = søkerOgBarn,
         )
 
-        if (!behandling.erSatsendringEllerMånedligValutajustering()) {
+        if (!behandling.erSatsendringMånedligValutajusteringEllerFinnmarkstillegg()) {
             val endreteUtbetalingerMedAndeler =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService
                     .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)

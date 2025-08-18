@@ -73,7 +73,7 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
-            if (behandling.erSatsendringEllerMånedligValutajustering() || behandling.opprettetÅrsak.erOmregningsårsak()) {
+            if (behandling.erSatsendringMånedligValutajusteringEllerFinnmarkstillegg() || behandling.opprettetÅrsak.erOmregningsårsak()) {
                 secureLogger.warn(
                     "Fødselsdato ${person.fødselsdato} ulik fom ${
                         personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
