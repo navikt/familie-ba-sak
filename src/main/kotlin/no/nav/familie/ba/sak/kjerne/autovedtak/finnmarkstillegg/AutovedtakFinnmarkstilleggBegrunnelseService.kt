@@ -49,11 +49,19 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
         }
 
         redusertMånedTidspunkt.forEach {
-            leggTilBegrunnelseIVedtaksperiode(
-                vedtaksperiodeStartDato = it,
-                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
-                vedtaksperioder = vedtaksperioder,
-            )
+            if (redusertMånedTidspunkt.size == 1 && nåværendeAndeler.filter { it.erFinnmarkstillegg() }.isEmpty()) {
+                leggTilBegrunnelseIVedtaksperiode(
+                    vedtaksperiodeStartDato = it,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE,
+                    vedtaksperioder = vedtaksperioder,
+                )
+            } else {
+                leggTilBegrunnelseIVedtaksperiode(
+                    vedtaksperiodeStartDato = it,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
+                    vedtaksperioder = vedtaksperioder,
+                )
+            }
         }
 
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder)

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityPeriodeResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.Tema
 import no.nav.familie.ba.sak.kjerne.brev.domene.UtvidetBarnetrygdTrigger
+import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -191,14 +192,24 @@ fun ISanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGr
 
     val begrunnelseGjelderMistedeVilkår = this.vilkår.all { it in vilkårMistetSidenForrigeBehandling }
 
+    val begrunnelseGjelderTaptSmåbarnstillegg = sjekkOmBegrunnelseGjelderTaptSmåbarnstillegg(begrunnelseGrunnlag)
+    val begrunnelseGjelderTaptFinnmarkstillegg = sjekkOmBegrunnelseGjelderTaptFinnmarkstillegg(begrunnelseGrunnlag)
+
+    return begrunnelseGjelderReduksjonFraForrigeBehandling() && (begrunnelseGjelderMistedeVilkår || begrunnelseGjelderTaptSmåbarnstillegg || begrunnelseGjelderTaptFinnmarkstillegg)
+}
+
+private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSmåbarnstillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
     val haddeSmåbarnstilleggForrigeBehandling = begrunnelseGrunnlag.erSmåbarnstilleggIForrigeBehandlingPeriode()
-    val harSmåbarnstilleggDennePerioden =
-        begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SMÅBARNSTILLEGG }
+    val harSmåbarnstilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SMÅBARNSTILLEGG }
+    val begrunnelseGjelderTaptSmåbarnstillegg = UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG in utvidetBarnetrygdTriggere && haddeSmåbarnstilleggForrigeBehandling && !harSmåbarnstilleggDennePerioden
+    return begrunnelseGjelderTaptSmåbarnstillegg
+}
 
-    val begrunnelseGjelderTaptSmåbarnstillegg =
-        UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG in utvidetBarnetrygdTriggere && haddeSmåbarnstilleggForrigeBehandling && !harSmåbarnstilleggDennePerioden
-
-    return begrunnelseGjelderReduksjonFraForrigeBehandling() && (begrunnelseGjelderMistedeVilkår || begrunnelseGjelderTaptSmåbarnstillegg)
+private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptFinnmarkstillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
+    val haddeFinnmarkstilleggForrigeBehandling = begrunnelseGrunnlag.erFinnmarkstilleggIForrigeBehandlingPeriode()
+    val harFinnmarksDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG }
+    val begrunnelseGjelderTaptFinnmarkstillegg = VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS in bosattIRiketTriggere && haddeFinnmarkstilleggForrigeBehandling && !harFinnmarksDennePerioden
+    return begrunnelseGjelderTaptFinnmarkstillegg
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(

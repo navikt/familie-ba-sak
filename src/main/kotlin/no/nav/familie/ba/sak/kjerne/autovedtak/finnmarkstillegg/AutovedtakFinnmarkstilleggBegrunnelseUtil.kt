@@ -48,7 +48,7 @@ internal fun leggTilBegrunnelseIVedtaksperiode(
 ) {
     val vedtaksperiode =
         vedtaksperioder.find {
-            it.type == Vedtaksperiodetype.UTBETALING &&
+            (it.type == Vedtaksperiodetype.UTBETALING || it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING) &&
                 it.fom?.toYearMonth() == vedtaksperiodeStartDato
         } ?: run {
             secureLogger.info(
