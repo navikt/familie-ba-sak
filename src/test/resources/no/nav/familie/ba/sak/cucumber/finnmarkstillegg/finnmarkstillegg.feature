@@ -97,8 +97,7 @@ Egenskap: Finnmarkstillegg autovedtak
       | 1       | 01.01.2000 |          | 0301          |
       | 2       | 01.01.2025 |          | 0301          |
       | 1, 2    | 01.05.2025 |          | 5601          |
-      | 2       | 15.10.2025 |          | 0301          |
-
+      | 2       | 15.09.2025 |          | 0301          |
 
     Når vi lager automatisk behandling med id 2 på fagsak 1 på grunn av finnmarkstillegg
 
@@ -111,22 +110,22 @@ Egenskap: Finnmarkstillegg autovedtak
       | 2       | UNDER_18_ÅR                   | 01.01.2025 | 31.12.2042 | OPPFYLT  |                              |
       | 2       | GIFT_PARTNERSKAP              | 01.01.2025 |            | OPPFYLT  |                              |
       | 2       | BOSATT_I_RIKET                | 01.01.2025 | 30.04.2025 | OPPFYLT  |                              |
-      | 2       | BOSATT_I_RIKET                | 01.05.2025 | 14.10.2025 | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
-      | 2       | BOSATT_I_RIKET                | 15.10.2025 |            | OPPFYLT  |                              |
+      | 2       | BOSATT_I_RIKET                | 01.05.2025 | 14.09.2025 | OPPFYLT  | BOSATT_I_FINNMARK_NORD_TROMS |
+      | 2       | BOSATT_I_RIKET                | 15.09.2025 |            | OPPFYLT  |                              |
       | 2       | BOR_MED_SØKER, LOVLIG_OPPHOLD | 01.01.2025 |            | OPPFYLT  |                              |
 
     Så forvent følgende andeler tilkjent ytelse for behandling 2
       | AktørId | BehandlingId | Fra dato   | Til dato   | Beløp | Prosent | Ytelse type        |
       | 2       | 2            | 01.02.2025 | 30.04.2025 | 1766  | 100     | ORDINÆR_BARNETRYGD |
       | 2       | 2            | 01.05.2025 | 31.12.2042 | 1968  | 100     | ORDINÆR_BARNETRYGD |
-      | 2       | 2            | 01.08.2025 | 31.10.2025 | 500   | 100     | FINNMARKSTILLEGG   |
+      | 2       | 2            | 01.08.2025 | 31.09.2025 | 500   | 100     | FINNMARKSTILLEGG   |
 
     Så forvent følgende vedtaksperioder for behandling 2
       | Fra dato   | Til dato   | Vedtaksperiodetype | Begrunnelser               |
-      | 01.11.2025 | 31.12.2042 | Utbetaling         | REDUKSJON_FINNMARKSTILLEGG |
+      | 01.10.2025 | 31.12.2042 | Utbetaling         | REDUKSJON_FINNMARKSTILLEGG |
       | 01.01.2043 |            | Opphør             |                            |
 
-    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.11.2025 til 31.12.2042
+    Så forvent følgende brevbegrunnelser for behandling 2 i periode 01.10.2025 til 31.12.2042
       | Begrunnelse                | Type     | Gjelder søker | Barnas fødselsdatoer | Antall barn | Måned og år begrunnelsen gjelder for | Målform | Beløp | Søknadstidspunkt | Søkers rett til utvidet | Avtaletidspunkt delt bosted |
       | REDUKSJON_FINNMARKSTILLEGG | STANDARD |               | 01.01.25             | 1           | oktober 2025                         |         | 1 968 |                  | SØKER_HAR_IKKE_RETT     |                             |
 
