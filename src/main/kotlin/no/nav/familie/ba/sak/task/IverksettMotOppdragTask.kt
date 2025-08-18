@@ -42,18 +42,14 @@ class IverksettMotOppdragTask(
                 .fagsak.aktør
                 .aktivFødselsnummer()
         val statusFraOppdragTask =
-            Task(
-                type = StatusFraOppdragTask.TASK_STEP_TYPE,
-                payload =
-                    objectMapper.writeValueAsString(
-                        StatusFraOppdragDTO(
-                            aktørId = iverksettingTask.personIdent,
-                            personIdent = personIdent,
-                            fagsystem = FAGSYSTEM,
-                            behandlingsId = iverksettingTask.behandlingsId,
-                            vedtaksId = iverksettingTask.vedtaksId,
-                        ),
-                    ),
+            StatusFraOppdragTask.opprettTask(
+                StatusFraOppdragDTO(
+                    personIdent = personIdent,
+                    aktørId = null,
+                    fagsystem = FAGSYSTEM,
+                    behandlingsId = iverksettingTask.behandlingsId,
+                    vedtaksId = iverksettingTask.vedtaksId,
+                ),
                 properties = task.metadata,
             )
 
