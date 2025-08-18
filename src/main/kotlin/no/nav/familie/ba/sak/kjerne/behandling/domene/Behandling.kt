@@ -118,7 +118,7 @@ data class Behandling(
         when {
             type == BehandlingType.TEKNISK_ENDRING -> false
             opprettetÅrsak == BehandlingÅrsak.SMÅBARNSTILLEGG_ENDRING_FRAM_I_TID -> false
-            erSatsendringMånedligValutajusteringEllerFinnmarkstillegg() -> false
+            erSatsendringEllerMånedligValutajustering() -> false
             erManuellMigrering() -> false
             erMigrering() -> false
             erIverksetteKAVedtak() -> false
@@ -227,11 +227,11 @@ data class Behandling(
 
     fun erFinnmarkstillegg() = this.opprettetÅrsak == BehandlingÅrsak.FINNMARKSTILLEGG
 
-    fun erSatsendringMånedligValutajusteringEllerFinnmarkstillegg() = erSatsendring() || erMånedligValutajustering() || erFinnmarkstillegg()
+    fun erSatsendringEllerMånedligValutajustering() = erSatsendring() || erMånedligValutajustering()
 
     fun erOppdaterUtvidetKlassekode() = this.opprettetÅrsak == BehandlingÅrsak.OPPDATER_UTVIDET_KLASSEKODE
 
-    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringMånedligValutajusteringEllerFinnmarkstillegg() || erSmåbarnstillegg() || erOmregning() || erFinnmarkstillegg()
+    fun erAutomatiskOgSkalHaTidligereBehandling() = erSatsendringEllerMånedligValutajustering() || erSmåbarnstillegg() || erOmregning() || erFinnmarkstillegg()
 
     fun erManuellMigreringForEndreMigreringsdato() =
         erMigrering() &&
