@@ -505,7 +505,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
