@@ -128,17 +128,6 @@ class FagsakController(
             )
     }
 
-    @PostMapping(path = ["/sok"])
-    fun søkFagsak(
-        @RequestBody søkParam: RestSøkParam,
-    ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
-        søkParam.valider()
-        logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} søker fagsak")
-
-        val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
-        return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
-    }
-
     @PostMapping(path = ["/sok/fagsaker-hvor-person-er-deltaker"])
     fun søkFagsakerHvorPersonErSøkerEllerMottarOrdinærBarnetrygd(
         @RequestBody request: RestSøkFagsakRequest,
@@ -199,34 +188,6 @@ class FagsakController(
         val aktørId: String,
         val fagsakId: Long,
     )
-
-    @PostMapping(path = ["/sok/fagsakdeltagere"])
-    fun oppgiFagsakdeltagere(
-        @RequestBody restSøkParam: RestSøkParam,
-    ): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
-        restSøkParam.valider()
-        return Result
-            .runCatching {
-                val aktør = personidentService.hentAktør(restSøkParam.personIdent)
-                val barnsAktørId = personidentService.hentAktørIder(restSøkParam.barnasIdenter)
-
-                fagsakService.oppgiFagsakdeltagere(aktør, barnsAktørId)
-            }.fold(
-                onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
-                onFailure = {
-                    logger.info("Henting av fagsakdeltagere feilet.")
-                    secureLogger.info("Henting av fagsakdeltagere feilet: ${it.message}", it)
-                    ResponseEntity
-                        .status(if (it is Feil) it.httpStatus else HttpStatus.OK)
-                        .body(
-                            Ressurs.failure(
-                                error = it,
-                                errorMessage = "Henting av fagsakdeltagere feilet: ${it.message}",
-                            ),
-                        )
-                },
-            )
-    }
 
     @GetMapping(path = ["/{fagsakId}/har-apen-tilbakekreving"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun harÅpenTilbakekreving(
