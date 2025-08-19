@@ -19,6 +19,7 @@ enum class SatsType(
     FINN_SVAL("Finnmark- og Svalbardtillegg"),
     UTVIDET_BARNETRYGD("Utvidet barnetrygd"),
     FINNMARKSTILLEGG("Finnmarkstillegg"),
+    SVALBARDTILLEGG("Svalbardtillegg"),
     ;
 
     fun tilYtelseType(): YtelseType =
@@ -29,5 +30,6 @@ enum class SatsType(
             FINN_SVAL -> throw Feil("FINN_SVAL har ikke noen tilsvarende ytelsestype")
             UTVIDET_BARNETRYGD -> YtelseType.UTVIDET_BARNETRYGD
             FINNMARKSTILLEGG -> YtelseType.FINNMARKSTILLEGG
+            SVALBARDTILLEGG -> YtelseType.SVALBARDTILLEGG
         }
 }
