@@ -73,14 +73,14 @@ class SystemOnlyPdlRestClient(
         )
     }
 
-    fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseOgDeltBostedPerson> {
+    fun hentBostedsadresseOgDeltBostedForPersoner(identer: List<String>): Map<String, PdlBostedsadresseDeltBostedOppholdsadressePerson> {
         val pdlPersonRequest =
             PdlPersonBolkRequest(
                 variables = PdlPersonBolkRequestVariables(identer),
                 query = hentGraphqlQuery("bostedsadresse-og-delt-bosted"),
             )
 
-        val pdlResponse: PdlBolkResponse<PdlBostedsadresseOgDeltBostedPerson> =
+        val pdlResponse: PdlBolkResponse<PdlBostedsadresseDeltBostedOppholdsadressePerson> =
             kallEksternTjeneste(
                 tjeneste = "pdl",
                 uri = pdlUri,

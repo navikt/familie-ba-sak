@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.domene.FinnmarkstilleggKjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -64,7 +64,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
         lagTestPersonopplysningGrunnlag(behandlingId = behandling2.id, søker2)
 
     private val bostedsadresseIFinnmark =
-        PdlBostedsadresseOgDeltBostedPerson(
+        PdlBostedsadresseDeltBostedOppholdsadressePerson(
             bostedsadresse =
                 listOf(
                     Bostedsadresse(
@@ -86,7 +86,7 @@ class AutovedtakFinnmarkstilleggSchedulerTest {
         )
 
     private val bostedsadresseIOslo =
-        PdlBostedsadresseOgDeltBostedPerson(
+        PdlBostedsadresseDeltBostedOppholdsadressePerson(
             bostedsadresse =
                 listOf(
                     Bostedsadresse(
