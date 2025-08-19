@@ -169,6 +169,7 @@ fun VilkårsvurderingBuilder.byggTilkjentYtelse(): TilkjentYtelse {
     every { vilkårsvurderingServiceMock.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
     every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
     every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
+    every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG) } returns true
 
     return tilkjentYtelseGenerator.genererTilkjentYtelse(
         behandling = vilkårsvurdering.behandling,

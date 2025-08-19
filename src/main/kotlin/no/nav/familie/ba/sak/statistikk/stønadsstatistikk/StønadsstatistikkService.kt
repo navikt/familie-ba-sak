@@ -35,6 +35,7 @@ import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
 import no.nav.familie.eksterne.kontrakter.YtelseType.FINNMARKSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.eksterne.kontrakter.YtelseType.SVALBARDTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.familie.tidslinje.utvidelser.kombiner
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
@@ -192,6 +193,7 @@ class StønadsstatistikkService(
                                 YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
                                 YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
                                 YtelseType.FINNMARKSTILLEGG -> FINNMARKSTILLEGG
+                                YtelseType.SVALBARDTILLEGG -> SVALBARDTILLEGG
                             },
                         utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
                         delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,

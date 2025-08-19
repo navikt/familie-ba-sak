@@ -60,6 +60,7 @@ object AndelTilkjentYtelseMedEndretUtbetalingGenerator {
                         )
                     YtelseType.SMÅBARNSTILLEGG,
                     YtelseType.FINNMARKSTILLEGG,
+                    YtelseType.SVALBARDTILLEGG,
                     ->
                         throw Feil("${ytelseType.name} kan ikke oppdateres med endret utbetaling andeler i behandling=${tilkjentYtelse.behandling.id}")
                 }

@@ -148,6 +148,19 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
                 ),
             )
 
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 12),
+                    tom = YearMonth.of(2025, 12),
+                    person = barn,
+                    behandling = behandling,
+                    beløp = 500,
+                    sats = 500,
+                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                ),
+            )
+
         val oppdaterteVedtaksperioderSlot = slot<List<VedtaksperiodeMedBegrunnelser>>()
 
         val vedtaksperiode =
@@ -161,7 +174,7 @@ class AutovedtakFinnmarkstilleggBegrunnelseServiceTest {
 
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id) } returns forrigeBehandling
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id) } returns forrigeAndeler
-        every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandling.id) } returns emptyList()
+        every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandling.id) } returns nåværendeAndeler
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperiode
         every { vedtakService.hentAktivForBehandlingThrows(behandling.id) } returns mockk()
         every { vedtaksperiodeHentOgPersisterService.lagre(capture(oppdaterteVedtaksperioderSlot)) } answers { firstArg() }
