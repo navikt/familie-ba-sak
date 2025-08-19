@@ -48,6 +48,7 @@ enum class YtelseTypeEkstern {
     UTVIDET_BARNETRYGD,
     SMÅBARNSTILLEGG,
     FINNMARKSTILLEGG,
+    SVALBARDTILLEGG,
 }
 
 enum class YtelseProsent {

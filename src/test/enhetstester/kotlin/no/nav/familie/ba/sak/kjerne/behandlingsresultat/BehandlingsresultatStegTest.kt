@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.datagenerator.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagKompetanse
 import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagPersonResultat
-import no.nav.familie.ba.sak.datagenerator.lagPersonResultatMedBosattIFinnmark
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.lagUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.datagenerator.lagValutakurs
 import no.nav.familie.ba.sak.datagenerator.lagVedtak
@@ -61,6 +61,7 @@ import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
@@ -828,11 +829,12 @@ class BehandlingsresultatStegTest {
             val vilkårsvurdering =
                 lagVilkårsvurdering(behandling = behandling) {
                     setOf(
-                        lagPersonResultatMedBosattIFinnmark(
-                            person = søker,
-                            bosattIFinnmarkPerioder = listOf(LocalDate.of(2025, 1, 1) to null),
-                            vilkårsvurdering = it,
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                             behandling = behandling,
+                            person = søker,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
                         ),
                         lagPersonResultat(
                             vilkårsvurdering = it,

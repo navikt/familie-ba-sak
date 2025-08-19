@@ -10,6 +10,7 @@ enum class YtelsetypeBA(
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BAUTV-OP"),
     FINNMARKSTILLEGG("BATRFIN"),
+    SVALBARDTILLEGG("BATRSVAL"),
 
     // UTVIDET_BARNETRYGD_GAMMEL kan ikke slettes før vi er sikre på at alle løpende saker er over på ny klassekode
     UTVIDET_BARNETRYGD_GAMMEL("BATR"),

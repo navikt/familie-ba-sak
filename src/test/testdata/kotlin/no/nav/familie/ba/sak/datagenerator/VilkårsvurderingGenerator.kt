@@ -44,7 +44,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             person = lagPerson(type = PersonType.SØKER, aktør = søkerAktør),
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
             lagFullstendigVilkårResultat = true,
@@ -58,7 +58,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
                     aktør = barn1Aktør,
                     fødselsdato = stønadFom,
                 ),
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
             lagFullstendigVilkårResultat = true,
@@ -68,7 +68,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = stønadFom),
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
             lagFullstendigVilkårResultat = true,
@@ -85,7 +85,7 @@ fun lagPersonResultat(
     periodeTom: LocalDate?,
     lagFullstendigVilkårResultat: Boolean = false,
     personType: PersonType = PersonType.BARN,
-    vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
+    vilkårType: Vilkår = BOSATT_I_RIKET,
     erDeltBosted: Boolean = false,
     erDeltBostedSkalIkkeDeles: Boolean = false,
     erEksplisittAvslagPåSøknad: Boolean? = null,
@@ -150,12 +150,12 @@ fun vurderVilkårsvurderingTilInnvilget(
 ) {
     vilkårsvurdering.personResultater.filter { it.aktør == barn.aktør }.forEach { personResultat ->
         personResultat.vilkårResultater.forEach {
-            if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
-                it.resultat = Resultat.OPPFYLT
+            if (it.vilkårType == UNDER_18_ÅR) {
+                it.resultat = OPPFYLT
                 it.periodeFom = barn.fødselsdato
                 it.periodeTom = barn.fødselsdato.plusYears(18)
             } else {
-                it.resultat = Resultat.OPPFYLT
+                it.resultat = OPPFYLT
                 it.periodeFom = innvilgetFom ?: LocalDate.now()
             }
         }
@@ -185,18 +185,19 @@ fun lagVilkårsvurdering(
     return vilkårsvurdering
 }
 
-fun lagPersonResultatMedBosattIFinnmark(
+fun lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
     behandling: Behandling,
     person: Person,
-    bosattIFinnmarkPerioder: List<Pair<LocalDate, LocalDate?>>,
+    perioderMedUtdypendeVilkårsvurdering: List<Pair<LocalDate, LocalDate?>>,
     vilkårsvurdering: Vilkårsvurdering,
+    utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
 ): PersonResultat =
     lagPersonResultat(
         vilkårsvurdering = vilkårsvurdering,
         aktør = person.aktør,
         lagVilkårResultater = { personResultat ->
             setOfNotNull(
-                *bosattIFinnmarkPerioder
+                *perioderMedUtdypendeVilkårsvurdering
                     .map {
                         lagVilkårResultat(
                             personResultat = personResultat,
@@ -204,7 +205,7 @@ fun lagPersonResultatMedBosattIFinnmark(
                             resultat = OPPFYLT,
                             periodeFom = it.first,
                             periodeTom = it.second,
-                            utdypendeVilkårsvurderinger = listOf(BOSATT_I_FINNMARK_NORD_TROMS),
+                            utdypendeVilkårsvurderinger = listOf(utdypendeVilkårsvurdering),
                             behandlingId = behandling.id,
                         )
                     }.toTypedArray(),
@@ -233,8 +234,8 @@ fun lagPersonResultat(
             lagVilkårResultat(
                 behandlingId = vilkårsvurdering.behandling.id,
                 personResultat = it,
-                vilkårType = Vilkår.BOSATT_I_RIKET,
-                resultat = Resultat.OPPFYLT,
+                vilkårType = BOSATT_I_RIKET,
+                resultat = OPPFYLT,
                 periodeFom = LocalDate.now().minusMonths(1),
                 periodeTom = LocalDate.now().plusYears(2),
                 begrunnelse = "",
@@ -243,7 +244,7 @@ fun lagPersonResultat(
                 behandlingId = vilkårsvurdering.behandling.id,
                 personResultat = it,
                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                resultat = Resultat.OPPFYLT,
+                resultat = OPPFYLT,
                 periodeFom = LocalDate.now().minusMonths(1),
                 periodeTom = LocalDate.now().plusYears(2),
                 begrunnelse = "",
@@ -272,7 +273,7 @@ fun lagPersonResultat(
 fun lagAnnenVurdering(
     id: Long = 0L,
     personResultat: PersonResultat,
-    resultat: Resultat = Resultat.OPPFYLT,
+    resultat: Resultat = OPPFYLT,
     type: AnnenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT,
     begrunnelse: String? = null,
 ): AnnenVurdering =
@@ -305,7 +306,7 @@ fun lagVilkårsvurdering(
         setOf(
             VilkårResultat(
                 personResultat = personResultat,
-                vilkårType = Vilkår.BOSATT_I_RIKET,
+                vilkårType = BOSATT_I_RIKET,
                 resultat = resultat,
                 periodeFom = søkerPeriodeFom,
                 periodeTom = søkerPeriodeTom,
@@ -347,7 +348,7 @@ fun lagVilkårResultat(
 ) = VilkårResultat(
     personResultat = null,
     vilkårType = vilkår,
-    resultat = Resultat.OPPFYLT,
+    resultat = OPPFYLT,
     periodeFom = fom?.toLocalDate(),
     periodeTom = tom?.toLocalDate(),
     begrunnelse = "",
@@ -358,8 +359,8 @@ fun lagVilkårResultat(
 fun lagVilkårResultat(
     id: Long = 0L,
     personResultat: PersonResultat? = null,
-    vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
-    resultat: Resultat = Resultat.OPPFYLT,
+    vilkårType: Vilkår = BOSATT_I_RIKET,
+    resultat: Resultat = OPPFYLT,
     periodeFom: LocalDate? = LocalDate.of(2009, 12, 24),
     periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
@@ -435,7 +436,7 @@ fun lagPersonResultatAvOverstyrteResultater(
                             id = if (id != 0L) index + 1L else 0L,
                             personResultat = personResultat,
                             periodeFom =
-                                if (vilkårType == Vilkår.UNDER_18_ÅR) {
+                                if (vilkårType == UNDER_18_ÅR) {
                                     person.fødselsdato
                                 } else {
                                     maxOf(
@@ -443,9 +444,9 @@ fun lagPersonResultatAvOverstyrteResultater(
                                         LocalDate.now().minusYears(3),
                                     )
                                 },
-                            periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
+                            periodeTom = if (vilkårType == UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
                             vilkårType = vilkårType,
-                            resultat = Resultat.OPPFYLT,
+                            resultat = OPPFYLT,
                             begrunnelse = "",
                             sistEndretIBehandlingId = vilkårsvurdering.behandling.id,
                             utdypendeVilkårsvurderinger = emptyList(),
@@ -503,8 +504,8 @@ fun lagVilkårsvurderingFraRestScenario(
 ): Vilkårsvurdering {
     fun RestScenarioPerson.tilAktør() =
         Aktør(
-            this.aktørId!!,
-            mutableSetOf(Personident(this.ident!!, mockk(relaxed = true))),
+            this.aktørId,
+            mutableSetOf(Personident(this.ident, mockk(relaxed = true))),
         )
 
     val søker =
@@ -537,8 +538,8 @@ fun lagSøkerVilkårResultat(
     setOf(
         lagVilkårResultat(
             personResultat = søkerPersonResultat,
-            vilkårType = Vilkår.BOSATT_I_RIKET,
-            resultat = Resultat.OPPFYLT,
+            vilkårType = BOSATT_I_RIKET,
+            resultat = OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             behandlingId = behandlingId,
@@ -546,7 +547,7 @@ fun lagSøkerVilkårResultat(
         lagVilkårResultat(
             personResultat = søkerPersonResultat,
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             behandlingId = behandlingId,
@@ -563,8 +564,8 @@ fun lagBarnVilkårResultat(
     setOf(
         lagVilkårResultat(
             personResultat = barnPersonResultat,
-            vilkårType = Vilkår.UNDER_18_ÅR,
-            resultat = Resultat.OPPFYLT,
+            vilkårType = UNDER_18_ÅR,
+            resultat = OPPFYLT,
             periodeFom = barnetsFødselsdato,
             periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
             behandlingId = behandlingId,
@@ -572,7 +573,7 @@ fun lagBarnVilkårResultat(
         lagVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.GIFT_PARTNERSKAP,
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = barnetsFødselsdato,
             periodeTom = null,
             behandlingId = behandlingId,
@@ -580,15 +581,15 @@ fun lagBarnVilkårResultat(
         lagVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.BOR_MED_SØKER,
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = null,
             behandlingId = behandlingId,
         ),
         lagVilkårResultat(
             personResultat = barnPersonResultat,
-            vilkårType = Vilkår.BOSATT_I_RIKET,
-            resultat = Resultat.OPPFYLT,
+            vilkårType = BOSATT_I_RIKET,
+            resultat = OPPFYLT,
             periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
             behandlingId = behandlingId,
@@ -596,7 +597,7 @@ fun lagBarnVilkårResultat(
         lagVilkårResultat(
             personResultat = barnPersonResultat,
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
-            resultat = Resultat.OPPFYLT,
+            resultat = OPPFYLT,
             periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
             behandlingId = behandlingId,
