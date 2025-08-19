@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -68,6 +69,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 import kotlin.concurrent.thread
+import kotlin.time.measureTimedValue
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -634,6 +636,49 @@ class ForvalterController(
         DeaktiverMinsideTask.opprettTask(personIdent.aktør)
 
         return ResponseEntity.ok("Task for deaktivering av minside for ident opprettet")
+    }
+
+    @PostMapping("/opprett-tasker-som-finner-personer-som-bor-i-finnmark-nord-troms-eller-paa-svalbard")
+    @Operation(
+        summary = "Oppretter tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
+    )
+    fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
+        @RequestBody dryRun: Boolean = true,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
+        )
+
+        val (antallTasker, tid) =
+            measureTimedValue {
+                val sisteIverksatteBehandlingerFraLøpendeFagsaker =
+                    behandlingHentOgPersisterService
+                        .hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+
+                val chunksMedPersoner =
+                    sisteIverksatteBehandlingerFraLøpendeFagsaker
+                        .flatMap { behandlingId ->
+                            persongrunnlagService
+                                .hentAktiv(behandlingId)
+                                ?.personer
+                                ?.map { it.aktør.aktivFødselsnummer() }
+                                ?: emptyList()
+                        }.distinct()
+                        .chunked(10000)
+
+                chunksMedPersoner
+                    .onEachIndexed { index, identer ->
+                        val task =
+                            FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
+                                .opprettTask(identer)
+                                .medTriggerTid(LocalDateTime.now().plusSeconds(index * 5L))
+
+                        if (!dryRun) taskService.save(task)
+                    }.size
+            }
+
+        return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
     }
 }
 

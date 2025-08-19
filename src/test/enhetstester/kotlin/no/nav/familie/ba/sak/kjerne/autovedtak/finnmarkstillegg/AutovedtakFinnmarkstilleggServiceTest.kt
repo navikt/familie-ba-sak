@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.FinnmarkstilleggData
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -156,8 +156,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
             // Arrange
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
 
             // Act
@@ -172,8 +172,8 @@ class AutovedtakFinnmarkstilleggServiceTest {
             // Arrange
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(listOf(søkerIdent, barnIdent)) } returns
                 mapOf(
-                    søkerIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
-                    barnIdent to PdlBostedsadresseOgDeltBostedPerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
+                    søkerIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseIFinnmark), deltBosted = emptyList()),
+                    barnIdent to PdlBostedsadresseDeltBostedOppholdsadressePerson(bostedsadresse = listOf(bostedsadresseUtenforFinnmark), deltBosted = emptyList()),
                 )
 
             // Act

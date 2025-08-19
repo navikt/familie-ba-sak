@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Folkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.FolkeregisteridentifikatorType
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFolkeregisteridentifikator
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlFødselsDato
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentIdenterResponse
@@ -184,7 +184,7 @@ private fun stubHentBostedsadresserOgDeltBostedForPerson(restScenario: RestScena
                                     ident = person.ident,
                                     code = "ok",
                                     person =
-                                        PdlBostedsadresseOgDeltBostedPerson(
+                                        PdlBostedsadresseDeltBostedOppholdsadressePerson(
                                             bostedsadresse =
                                                 listOf(
                                                     Bostedsadresse(

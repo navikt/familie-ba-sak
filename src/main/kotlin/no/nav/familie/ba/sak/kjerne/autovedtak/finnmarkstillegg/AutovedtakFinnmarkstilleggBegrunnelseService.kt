@@ -48,12 +48,22 @@ class AutovedtakFinnmarkstilleggBegrunnelseService(
             )
         }
 
-        redusertMånedTidspunkt.forEach {
+        val alleFinnmarksandelerHarForsvunnet = redusertMånedTidspunkt.size == 1 && nåværendeAndeler.none { it.erFinnmarkstillegg() }
+
+        if (alleFinnmarksandelerHarForsvunnet) {
             leggTilBegrunnelseIVedtaksperiode(
-                vedtaksperiodeStartDato = it,
-                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
+                vedtaksperiodeStartDato = redusertMånedTidspunkt.single(),
+                standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG_BODDE_IKKE_I_TILLEGGSONE,
                 vedtaksperioder = vedtaksperioder,
             )
+        } else {
+            redusertMånedTidspunkt.forEach {
+                leggTilBegrunnelseIVedtaksperiode(
+                    vedtaksperiodeStartDato = it,
+                    standardbegrunnelse = Standardbegrunnelse.REDUKSJON_FINNMARKSTILLEGG,
+                    vedtaksperioder = vedtaksperioder,
+                )
+            }
         }
 
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder)

@@ -163,11 +163,12 @@ class PreutfyllLovligOppholdService(
 
         return oppholdstillatelse
             .filter { it.type == OPPHOLDSTILLATELSE.PERMANENT || it.type == OPPHOLDSTILLATELSE.MIDLERTIDIG }
-            .map {
+            .mapIndexed { index, it ->
+                val erSiste = index == oppholdstillatelse.lastIndex
                 Periode(
                     verdi = true,
                     fom = it.oppholdFra,
-                    tom = it.oppholdTil,
+                    tom = if (erSiste) null else it.oppholdTil,
                 )
             }.tilTidslinje()
     }

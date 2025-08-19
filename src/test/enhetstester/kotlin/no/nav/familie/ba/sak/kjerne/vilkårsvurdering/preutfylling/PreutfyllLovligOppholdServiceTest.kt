@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Ansettels
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsforhold
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseOgDeltBostedPerson
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBostedsadresseDeltBostedOppholdsadressePerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -56,7 +56,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -114,7 +114,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -169,7 +169,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -228,7 +228,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -282,7 +282,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -336,7 +336,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -395,7 +395,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -453,7 +453,7 @@ class PreutfyllLovligOppholdServiceTest {
             every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
                 val identer = firstArg<List<String>>()
                 identer.associateWith {
-                    PdlBostedsadresseOgDeltBostedPerson(
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
                         bostedsadresse =
                             listOf(
                                 Bostedsadresse(
@@ -479,6 +479,59 @@ class PreutfyllLovligOppholdServiceTest {
 
             assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
             assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(LocalDate.now().minusYears(10))
+        }
+
+        @Test
+        fun `siste periode skal være løpende om tom er satt på oppholdstillatelse`() {
+            // Arrange
+            val aktør = randomAktør()
+            val vilkårsvurdering =
+                lagVilkårsvurdering(
+                    lagPersonResultater = {
+                        setOf(
+                            lagPersonResultat(
+                                vilkårsvurdering = it,
+                                aktør = aktør,
+                                lagVilkårResultater = { emptySet() },
+                                lagAnnenVurderinger = { emptySet() },
+                            ),
+                        )
+                    },
+                )
+
+            every { pdlRestClient.hentOppholdstillatelse(aktør, true) } returns
+                listOf(Opphold(OPPHOLDSTILLATELSE.MIDLERTIDIG, LocalDate.now().minusYears(5), LocalDate.now().plusYears(5)))
+
+            every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
+                val identer = firstArg<List<String>>()
+                identer.associateWith {
+                    PdlBostedsadresseDeltBostedOppholdsadressePerson(
+                        bostedsadresse =
+                            listOf(
+                                Bostedsadresse(
+                                    gyldigFraOgMed = LocalDate.now().minusYears(5),
+                                    gyldigTilOgMed = null,
+                                    vegadresse = lagVegadresse(12345L),
+                                ),
+                            ),
+                        deltBosted = emptyList(),
+                    )
+                }
+            }
+
+            // Act
+            preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering = vilkårsvurdering)
+
+            // Assert
+            val lovligOppholdResultater =
+                vilkårsvurdering.personResultater
+                    .first { it.aktør == aktør }
+                    .vilkårResultater
+                    .find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
+
+            assertThat(lovligOppholdResultater?.resultat).isEqualTo(Resultat.OPPFYLT)
+            assertThat(lovligOppholdResultater?.periodeFom).isEqualTo(LocalDate.now().minusYears(5))
+            assertThat(lovligOppholdResultater?.periodeTom).isNull()
         }
     }
 }
