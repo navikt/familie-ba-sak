@@ -5,12 +5,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.t
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 
-data class PdlBostedsadresseOgDeltBostedPerson(
-    val bostedsadresse: List<Bostedsadresse>,
-    val deltBosted: List<DeltBosted>,
+data class PdlBostedsadresseDeltBostedOppholdsadressePerson(
+    val bostedsadresse: List<Bostedsadresse> = emptyList(),
+    val deltBosted: List<DeltBosted> = emptyList(),
+    val oppholdsadresse: List<Oppholdsadresse> = emptyList(),
 )
 
-fun PdlBostedsadresseOgDeltBostedPerson?.tilAdresser(): BostedsadresserOgDelteBosteder =
+fun PdlBostedsadresseDeltBostedOppholdsadressePerson?.tilAdresser(): BostedsadresserOgDelteBosteder =
     BostedsadresserOgDelteBosteder(
         bostedsadresser = this?.let { bostedsadresse.map { it.tilAdresse() } } ?: emptyList(),
         delteBosteder = this?.let { deltBosted.map { it.tilAdresse() } } ?: emptyList(),
