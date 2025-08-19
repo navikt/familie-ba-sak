@@ -1,0 +1,39 @@
+query($identer: [ID!]!){
+    personBolk: hentPersonBolk(identer: $identer) {
+        code
+        ident
+        person {
+            bostedsadresse(historikk: false) {
+                gyldigFraOgMed
+                gyldigTilOgMed
+                vegadresse {
+                    kommunenummer
+                }
+                matrikkeladresse {
+                    kommunenummer
+                }
+                ukjentBosted {
+                    bostedskommune
+                }
+            }
+            deltBosted(historikk: false) {
+                startdatoForKontrakt
+                sluttdatoForKontrakt
+                vegadresse {
+                    kommunenummer
+                }
+                matrikkeladresse {
+                    kommunenummer
+                }
+                ukjentBosted {
+                    bostedskommune
+                }
+            }
+            oppholdsadresse(historikk: false) {
+                gyldigFraOgMed
+                gyldigTilOgMed
+                oppholdAnnetSted
+            }
+        }
+    }
+}

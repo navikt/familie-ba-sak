@@ -6,8 +6,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.DeltBosted
 
 data class PdlBostedsadresseDeltBostedOppholdsadressePerson(
-    val bostedsadresse: List<Bostedsadresse>,
-    val deltBosted: List<DeltBosted>,
+    val bostedsadresse: List<Bostedsadresse> = emptyList(),
+    val deltBosted: List<DeltBosted> = emptyList(),
+    val oppholdsadresse: List<Oppholdsadresse> = emptyList(),
 )
 
 fun PdlBostedsadresseDeltBostedOppholdsadressePerson?.tilAdresser(): BostedsadresserOgDelteBosteder =
