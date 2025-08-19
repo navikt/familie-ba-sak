@@ -54,7 +54,6 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
                                         fagsakService
                                             .finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
                                             .map { it.id }
-                                            .distinct()
 
                                     ident to
                                         BorIFinnmarkNordTromsEllerPåSvalbard(

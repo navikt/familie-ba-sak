@@ -664,7 +664,8 @@ class ForvalterController(
                                 ?.personer
                                 ?.map { it.aktør.aktivFødselsnummer() }
                                 ?: emptyList()
-                        }.chunked(10000)
+                        }.distinct()
+                        .chunked(10000)
 
                 chunksMedPersoner
                     .onEachIndexed { index, identer ->
