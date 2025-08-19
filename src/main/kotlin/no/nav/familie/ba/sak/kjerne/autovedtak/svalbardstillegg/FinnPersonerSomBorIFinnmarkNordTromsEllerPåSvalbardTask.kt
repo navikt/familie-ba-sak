@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.oppholdsadresseErPåSvalbardPåDato
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
@@ -23,6 +24,7 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
     private val fagsakService: FagsakService,
     private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
+    @WithSpan
     override fun doTask(task: Task) {
         val identer = task.payload.split(",")
 
