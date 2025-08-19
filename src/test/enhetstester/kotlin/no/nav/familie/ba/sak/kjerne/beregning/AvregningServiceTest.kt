@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.datagenerator.lagPerson
 import no.nav.familie.ba.sak.datagenerator.lagTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
@@ -594,6 +595,54 @@ class AvregningServiceTest {
             every { behandlingHentOgPersisterService.hent(any()) } returns eøsBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
             every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(eøsBehandling.id) } returns andelerInneværendeBehandling
+
+            // Act
+            val perioderMedEtterbetalingOgFeilutbetaling =
+                avregningService.hentPerioderMedAvregning(behandlingId = inneværendeBehandling.id)
+
+            // Assert
+            assertThat(perioderMedEtterbetalingOgFeilutbetaling).isEmpty()
+        }
+
+        @Test
+        fun `skal returnere tom liste hvis behandlingstype er TEKNISK_ENDRING`() {
+            // Arrange
+            val andelerForrigeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                )
+            val andelerInneværendeBehandling =
+                listOf(
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn1,
+                        kalkulertUtbetalingsbeløp = 2000,
+                    ),
+                    lagAndelTilkjentYtelse(
+                        fom = jan(2025),
+                        tom = jan(2025),
+                        person = barn2,
+                        kalkulertUtbetalingsbeløp = 1000,
+                    ),
+                )
+
+            val tekniskEndringBehandling = lagBehandling(behandlingType = BehandlingType.TEKNISK_ENDRING)
+
+            every { behandlingHentOgPersisterService.hent(any()) } returns tekniskEndringBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id) } returns andelerForrigeBehandling
+            every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(tekniskEndringBehandling.id) } returns andelerInneværendeBehandling
 
             // Act
             val perioderMedEtterbetalingOgFeilutbetaling =

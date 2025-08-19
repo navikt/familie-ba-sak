@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFE
 import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.lagErOver100ProsentUtbetalingPåYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -48,7 +49,7 @@ class AvregningService(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        if (behandling.kategori == BehandlingKategori.EØS) {
+        if (behandling.kategori == BehandlingKategori.EØS || behandling.type == BehandlingType.TEKNISK_ENDRING) {
             return emptyList()
         }
 
