@@ -111,6 +111,11 @@ internal fun hentStandardBegrunnelser(
             begrunnelse.erGjeldendeForFinnmarkstillegg(begrunnelseGrunnlag)
         }
 
+    val filtrertPåSvalbardtillegg =
+        relevanteBegrunnelser.filterValues { begrunnelse ->
+            begrunnelse.erGjeldendeForSvalbardtillegg(begrunnelseGrunnlag)
+        }
+
     val filtrertPåUtgjørendeVilkårOgEndretUtbetalingAndelIForrigePeriode =
         relevanteBegrunnelser.filterValues {
             it.erEndretUtbetalingOgUtgjørendeVilkårSamtidigIForrigePeriode(begrunnelseGrunnlag, vedtaksperiode)
@@ -148,6 +153,7 @@ internal fun hentStandardBegrunnelser(
         filtrertPåOpphørFraForrigeBehandling.keys +
         filtrertPåSmåbarnstillegg.keys +
         filtrertPåFinnmarkstillegg.keys +
+        filtrertPåSvalbardtillegg.keys +
         filtrertPåEtterEndretUtbetaling.keys +
         filtrertPåHendelser.keys +
         filtrertPåSkalVisesSelvOmIkkeEndring.keys +
@@ -194,8 +200,15 @@ fun ISanityBegrunnelse.erGjeldendeForReduksjonFraForrigeBehandling(begrunnelseGr
 
     val begrunnelseGjelderTaptSmåbarnstillegg = sjekkOmBegrunnelseGjelderTaptSmåbarnstillegg(begrunnelseGrunnlag)
     val begrunnelseGjelderTaptFinnmarkstillegg = sjekkOmBegrunnelseGjelderTaptFinnmarkstillegg(begrunnelseGrunnlag)
+    val begrunnelseGjelderTaptSvalbardtillegg = sjekkOmBegrunnelseGjelderTaptSvalbardtillegg(begrunnelseGrunnlag)
 
-    return begrunnelseGjelderReduksjonFraForrigeBehandling() && (begrunnelseGjelderMistedeVilkår || begrunnelseGjelderTaptSmåbarnstillegg || begrunnelseGjelderTaptFinnmarkstillegg)
+    return begrunnelseGjelderReduksjonFraForrigeBehandling() &&
+        (
+            begrunnelseGjelderMistedeVilkår ||
+                begrunnelseGjelderTaptSmåbarnstillegg ||
+                begrunnelseGjelderTaptFinnmarkstillegg ||
+                begrunnelseGjelderTaptSvalbardtillegg
+        )
 }
 
 private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSmåbarnstillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
@@ -210,6 +223,13 @@ private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptFinnmarkstillegg(beg
     val harFinnmarksDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.FINNMARKSTILLEGG }
     val begrunnelseGjelderTaptFinnmarkstillegg = VilkårTrigger.BOSATT_I_FINNMARK_NORD_TROMS in bosattIRiketTriggere && haddeFinnmarkstilleggForrigeBehandling && !harFinnmarksDennePerioden
     return begrunnelseGjelderTaptFinnmarkstillegg
+}
+
+private fun ISanityBegrunnelse.sjekkOmBegrunnelseGjelderTaptSvalbardtillegg(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode): Boolean {
+    val haddeSvalbardtilleggForrigeBehandling = begrunnelseGrunnlag.erSvalbardtilleggIForrigeBehandlingPeriode()
+    val harSvalbardtilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG }
+    val begrunnelseGjelderTaptSvalbardtillegg = VilkårTrigger.BOSATT_PÅ_SVALBARD in bosattIRiketTriggere && haddeSvalbardtilleggForrigeBehandling && !harSvalbardtilleggDennePerioden
+    return begrunnelseGjelderTaptSvalbardtillegg
 }
 
 private fun SanityBegrunnelse.erGjeldendeForSmåbarnstillegg(
@@ -261,6 +281,30 @@ private fun SanityBegrunnelse.erGjeldendeForFinnmarkstillegg(
     val erEndringIFinnmarkstillegg = erFinnmarkstilleggForrigePeriode != erFinnmarkstilleggDennePerioden
 
     return begrunnelseMatcherPeriodeResultat && (erEndringIFinnmarkstillegg || erEndringIFinnmarkstilleggFraForrigeBehandling)
+}
+
+private fun SanityBegrunnelse.erGjeldendeForSvalbardtillegg(
+    begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode,
+): Boolean {
+    if (!this.gjelderSvalbardtillegg) return false
+
+    val erSvalbardtilleggForrigePeriode = begrunnelseGrunnlag.forrigePeriode?.andeler?.any { it.type == YtelseType.SVALBARDTILLEGG } == true
+    val erSvalbardtilleggDennePerioden = begrunnelseGrunnlag.dennePerioden.andeler.any { it.type == YtelseType.SVALBARDTILLEGG }
+    val erSvalbardtilleggIForrigeBehandlingPeriode = begrunnelseGrunnlag.erSvalbardtilleggIForrigeBehandlingPeriode()
+
+    val erEndringISvalbardtilleggFraForrigeBehandling =
+        erSvalbardtilleggIForrigeBehandlingPeriode != erSvalbardtilleggDennePerioden
+
+    val begrunnelseMatcherPeriodeResultat =
+        this.matcherPerioderesultat(
+            erSvalbardtilleggForrigePeriode,
+            erSvalbardtilleggDennePerioden,
+            erSvalbardtilleggIForrigeBehandlingPeriode,
+        )
+
+    val erEndringISvalbardtillegg = erSvalbardtilleggForrigePeriode != erSvalbardtilleggDennePerioden
+
+    return begrunnelseMatcherPeriodeResultat && (erEndringISvalbardtillegg || erEndringISvalbardtilleggFraForrigeBehandling)
 }
 
 private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: IBegrunnelseGrunnlagForPeriode) = begrunnelseGrunnlag.forrigePeriode?.endretUtbetalingAndel.takeIf { begrunnelseGrunnlag.forrigePeriode?.erOrdinæreVilkårInnvilget() == true }
