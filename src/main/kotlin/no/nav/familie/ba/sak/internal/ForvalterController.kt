@@ -695,7 +695,7 @@ class ForvalterController(
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
     }
 
-    @PostMapping("/rekjor-feilede-tasker-med-type-finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask")
+    @PostMapping("/rekjor-feilede-tasker-med-type-finnPersonerSomBorIFinnmarkNordTromsEllerPaaSvalbardTask")
     fun rekjørFeiledeTaskerForÅFinnePersonerSomBorIFinnmarkNordTromsEllerPåSvalbard(): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
