@@ -663,7 +663,10 @@ class ForvalterController(
 
                 val chunksMedPersoner =
                     sisteIverksatteBehandlingerFraLøpendeFagsaker
-                        .flatMap { behandlingId ->
+                        .flatMapIndexed { index, behandlingId ->
+                            if (index % 30000 == 0) {
+                                logger.info("Henter personer for behandling ${index + 1}/${sisteIverksatteBehandlingerFraLøpendeFagsaker.size}")
+                            }
                             persongrunnlagService
                                 .hentAktiv(behandlingId)
                                 ?.personer
