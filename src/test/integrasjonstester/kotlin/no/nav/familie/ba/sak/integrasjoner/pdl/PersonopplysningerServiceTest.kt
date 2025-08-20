@@ -34,6 +34,8 @@ internal class PersonopplysningerServiceTest(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     @Autowired
     private val mockPersonidentService: PersonidentService,
+    @Autowired
+    private val integrasjonClient: IntegrasjonClient,
 ) : AbstractSpringIntegrationTest() {
     lateinit var personopplysningerService: PersonopplysningerService
 
@@ -48,6 +50,7 @@ internal class PersonopplysningerServiceTest(
                     mockPersonidentService,
                 ),
                 familieIntegrasjonerTilgangskontrollService,
+                integrasjonClient,
             )
         lagMockForPersoner()
     }
@@ -55,7 +58,10 @@ internal class PersonopplysningerServiceTest(
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
-
+        every { integrasjonClient.sjekkErEgenAnsattBulk(match { it.containsAll(listOf(ID_BARN_1, ID_BARN_2, ID_MOR)) }) } answers {
+            val personIdenter = firstArg<List<String>>()
+            personIdenter.associateWith { it == ID_MOR }
+        }
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
         assert(LocalDate.of(1955, 9, 13) == personInfo.fødselsdato)
@@ -64,6 +70,8 @@ internal class PersonopplysningerServiceTest(
         assertThat(personInfo.forelderBarnRelasjonMaskert.size).isEqualTo(1)
         assertThat(personInfo.kontaktinformasjonForDoedsbo).isNull()
         assertThat(personInfo.dødsfall).isNull()
+        assertThat(personInfo.erEgenAnsatt).isTrue()
+        assertThat(personInfo.forelderBarnRelasjon.first().erEgenAnsatt).isFalse()
     }
 
     @Test

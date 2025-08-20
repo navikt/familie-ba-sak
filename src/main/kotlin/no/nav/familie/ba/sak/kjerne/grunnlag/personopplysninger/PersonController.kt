@@ -5,11 +5,9 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestManuellDødsfall
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.ekstern.restDomene.leggTilEgenAnsattStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfoMedNavnOgAdresse
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -39,7 +37,6 @@ class PersonController(
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val tilgangService: TilgangService,
-    private val integrasjonClient: IntegrasjonClient,
 ) {
     @PostMapping
     fun hentPerson(
@@ -56,7 +53,6 @@ class PersonController(
                 ?: personopplysningerService
                     .hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
                     .tilRestPersonInfo(personIdent)
-                    .leggTilEgenAnsattStatus(integrasjonClient)
         return ResponseEntity.ok(Ressurs.success(personinfo))
     }
 

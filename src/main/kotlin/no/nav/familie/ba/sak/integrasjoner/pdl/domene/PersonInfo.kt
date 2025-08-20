@@ -31,6 +31,7 @@ data class PersonInfo(
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
     val dødsfall: DødsfallData? = null,
     val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null,
+    val erEgenAnsatt: Boolean? = null,
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() = this.filter { it.vegadresse != null || it.matrikkeladresse != null || it.ukjentBosted != null }
@@ -42,6 +43,7 @@ data class ForelderBarnRelasjon(
     val fødselsdato: LocalDate? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
     val kjønn: Kjønn = Kjønn.UKJENT,
+    val erEgenAnsatt: Boolean? = null,
 ) {
     override fun toString(): String = "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
 
