@@ -302,6 +302,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             INNER JOIN po_person p ON po.id = p.fk_gr_personopplysninger_id
             INNER JOIN personident ON personident.fk_aktoer_id = p.fk_aktoer_id
         WHERE personident.aktiv = true
+        ORDER BY b.id
         """,
         nativeQuery = true,
     )
