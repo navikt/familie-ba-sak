@@ -574,6 +574,8 @@ class FagsakService(
         return fagsakDeltagere
     }
 
+    fun finnOrgnummerForLøpendeFagsaker(): List<String> = fagsakRepository.finnOrgnummerForLøpendeFagsaker()
+
     companion object {
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }
