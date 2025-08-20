@@ -659,6 +659,8 @@ class ForvalterController(
                         .hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
                         .take(antallFagsaker ?: Int.MAX_VALUE)
 
+                logger.info("Hentet ${sisteIverksatteBehandlingerFraLøpendeFagsaker.size} siste iverksatte behandlinger fra løpende fagsaker")
+
                 val chunksMedPersoner =
                     sisteIverksatteBehandlingerFraLøpendeFagsaker
                         .flatMap { behandlingId ->
@@ -668,7 +670,10 @@ class ForvalterController(
                                 ?.map { it.aktør.aktivFødselsnummer() }
                                 ?: emptyList()
                         }.distinct()
+                        .also { logger.info("Hentet ${it.size} unike identer") }
                         .chunked(10000)
+
+                logger.info("Chunket identer i ${chunksMedPersoner.size} grupper á 10 000 identer")
 
                 chunksMedPersoner
                     .onEachIndexed { index, identer ->
@@ -678,6 +683,10 @@ class ForvalterController(
                                 .medTriggerTid(LocalDateTime.now().plusSeconds(index * 5L))
 
                         if (!dryRun) taskService.save(task)
+
+                        if (index % 10 == 0) {
+                            logger.info("Opprettet og lagret task ${index + 1}/${chunksMedPersoner.size}")
+                        }
                     }.size
             }
 
