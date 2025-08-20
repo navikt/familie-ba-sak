@@ -61,39 +61,38 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
                                         .oppholdsadresse
                                         .oppholdsadresseErPåSvalbardPåDato(dato)
 
-                                val harDNummerOgGeografiskTilknytningTilSvalbard by lazy {
+                                val harDNummerOgGeografiskTilknytningTilSvalbard =
                                     Fødselsnummer(ident).erDNummer &&
                                         systemOnlyPdlRestClient
                                             .hentGeografiskTilknytning(ident)
                                             .erSvalbard()
-                                }
 
-                                if (harBostedsadresseIFinnmarkEllerNordTroms ||
-                                    harDeltBostedIFinnmarkEllerNordTroms ||
-                                    harOppholdsadressePåSvalbard ||
-                                    harDNummerOgGeografiskTilknytningTilSvalbard
+                                if (!harBostedsadresseIFinnmarkEllerNordTroms &&
+                                    !harDeltBostedIFinnmarkEllerNordTroms &&
+                                    !harOppholdsadressePåSvalbard &&
+                                    !harDNummerOgGeografiskTilknytningTilSvalbard
                                 ) {
-                                    val aktør = personidentService.hentAktør(ident)
-                                    val fagsakIder =
-                                        fagsakService
-                                            .finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
-                                            .map { it.id }
-
-                                    if (fagsakIder.isNotEmpty()) {
-                                        ident to
-                                            BorIFinnmarkNordTromsEllerPåSvalbard(
-                                                harBostedsadresseIFinnmarkNordTroms = harBostedsadresseIFinnmarkEllerNordTroms,
-                                                harDeltBostedIFinnmarkNordTroms = harDeltBostedIFinnmarkEllerNordTroms,
-                                                harOppholdsadressePåSvalbard = harOppholdsadressePåSvalbard,
-                                                harDNummerOgGeografiskTilknytningTilSvalbard = harDNummerOgGeografiskTilknytningTilSvalbard,
-                                                fagsakIder = fagsakIder,
-                                            )
-                                    } else {
-                                        null
-                                    }
-                                } else {
-                                    null
+                                    return@mapNotNull null
                                 }
+
+                                val aktør = personidentService.hentAktør(ident)
+                                val fagsakIder =
+                                    fagsakService
+                                        .finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+                                        .map { it.id }
+
+                                if (fagsakIder.isEmpty()) {
+                                    return@mapNotNull null
+                                }
+
+                                ident to
+                                    BorIFinnmarkNordTromsEllerPåSvalbard(
+                                        harBostedsadresseIFinnmarkNordTroms = harBostedsadresseIFinnmarkEllerNordTroms,
+                                        harDeltBostedIFinnmarkNordTroms = harDeltBostedIFinnmarkEllerNordTroms,
+                                        harOppholdsadressePåSvalbard = harOppholdsadressePåSvalbard,
+                                        harDNummerOgGeografiskTilknytningTilSvalbard = harDNummerOgGeografiskTilknytningTilSvalbard,
+                                        fagsakIder = fagsakIder,
+                                    )
                             }
                     }.toMap()
             }
