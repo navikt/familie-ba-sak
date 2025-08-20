@@ -16,10 +16,6 @@ data class BostedsadresserOgDelteBosteder(
     val bostedsadresser: List<Adresse>,
     val delteBosteder: List<Adresse>,
 ) {
-    fun bostedsadresseEllerDeltBostedErIFinnmarkEllerNordTromsPåDato(dato: LocalDate): Boolean =
-        bostedsadresser.hentForDato(dato)?.erIFinnmarkEllerNordTroms() ?: false ||
-            delteBosteder.hentForDato(dato)?.erIFinnmarkEllerNordTroms() ?: false
-
     fun harBostedsadresseEllerDeltBostedSomErRelevantForFinnmarkstillegg(): Boolean =
         bostedsadresser.filtrerUtAdresserSomErRelevanteForFinnmarkstillegg().any { it.erIFinnmarkEllerNordTroms() } ||
             delteBosteder.filtrerUtAdresserSomErRelevanteForFinnmarkstillegg().any { it.erIFinnmarkEllerNordTroms() }

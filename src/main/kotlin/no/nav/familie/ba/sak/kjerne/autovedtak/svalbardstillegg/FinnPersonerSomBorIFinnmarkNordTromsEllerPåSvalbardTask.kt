@@ -2,10 +2,14 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.erSvalbard
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.oppholdsadresseErPåSvalbardPåDato
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.erIFinnmarkEllerNordTroms
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.hentForDato
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.kontrakter.felles.Fødselsnummer
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
@@ -16,7 +20,7 @@ import kotlin.time.measureTimedValue
 @Service
 @TaskStepBeskrivelse(
     taskStepType = FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask.TASK_STEP_TYPE,
-    beskrivelse = "Finn personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
+    beskrivelse = "Finn personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms, oppholdsadresse på Svalbard eller D-nummer med geografisk tilknytning til Svalbard",
     maxAntallFeil = 1,
 )
 class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
@@ -38,46 +42,86 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
                             .mapNotNull { (ident, adresser) ->
                                 val dato = LocalDate.now()
 
-                                val borIFinnmarkEllerNordTroms =
+                                val harBostedsadresseIFinnmarkEllerNordTroms =
                                     adresser
                                         .tilAdresser()
-                                        .bostedsadresseEllerDeltBostedErIFinnmarkEllerNordTromsPåDato(dato)
+                                        .bostedsadresser
+                                        .hentForDato(dato)
+                                        ?.erIFinnmarkEllerNordTroms() ?: false
 
-                                val borPåSvalbard =
+                                val harDeltBostedIFinnmarkEllerNordTroms =
+                                    adresser
+                                        .tilAdresser()
+                                        .delteBosteder
+                                        .hentForDato(dato)
+                                        ?.erIFinnmarkEllerNordTroms() ?: false
+
+                                val harOppholdsadressePåSvalbard =
                                     adresser
                                         .oppholdsadresse
                                         .oppholdsadresseErPåSvalbardPåDato(dato)
 
-                                if (borIFinnmarkEllerNordTroms || borPåSvalbard) {
-                                    val aktør = personidentService.hentAktør(ident)
-                                    val fagsakIder =
-                                        fagsakService
-                                            .finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
-                                            .map { it.id }
+                                val harDNummerOgGeografiskTilknytningTilSvalbard =
+                                    Fødselsnummer(ident).erDNummer &&
+                                        systemOnlyPdlRestClient
+                                            .hentGeografiskTilknytning(ident)
+                                            .erSvalbard()
 
-                                    ident to
-                                        BorIFinnmarkNordTromsEllerPåSvalbard(
-                                            borIFinnmarkNordTroms = borIFinnmarkEllerNordTroms,
-                                            borPåSvalbard = borPåSvalbard,
-                                            fagsakIder = fagsakIder,
-                                        )
-                                } else {
-                                    null
+                                if (!harBostedsadresseIFinnmarkEllerNordTroms &&
+                                    !harDeltBostedIFinnmarkEllerNordTroms &&
+                                    !harOppholdsadressePåSvalbard &&
+                                    !harDNummerOgGeografiskTilknytningTilSvalbard
+                                ) {
+                                    return@mapNotNull null
                                 }
+
+                                val aktør = personidentService.hentAktør(ident)
+                                val fagsakIder =
+                                    fagsakService
+                                        .finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+                                        .map { it.id }
+
+                                if (fagsakIder.isEmpty()) {
+                                    return@mapNotNull null
+                                }
+
+                                ident to
+                                    BorIFinnmarkNordTromsEllerPåSvalbard(
+                                        harBostedsadresseIFinnmarkNordTroms = harBostedsadresseIFinnmarkEllerNordTroms,
+                                        harDeltBostedIFinnmarkNordTroms = harDeltBostedIFinnmarkEllerNordTroms,
+                                        harOppholdsadressePåSvalbard = harOppholdsadressePåSvalbard,
+                                        harDNummerOgGeografiskTilknytningTilSvalbard = harDNummerOgGeografiskTilknytningTilSvalbard,
+                                        fagsakIder = fagsakIder,
+                                    )
                             }
                     }.toMap()
             }
 
-        val personerSomBorIFinnmarkEllerNordTroms = personerSomBorIFinnmarkNordTromsEllerPåSvalbard.filterValues { it.borIFinnmarkNordTroms }
-        val personerSomBorPåSvalbard = personerSomBorIFinnmarkNordTromsEllerPåSvalbard.filterValues { it.borPåSvalbard }
-        val fagsakerMedPersonerSomBorIFinnmarkEllerNordTroms = personerSomBorIFinnmarkEllerNordTroms.values.flatMap { it.fagsakIder }.distinct()
-        val fagsakerMedPersonerSomBorPåSvalbard = personerSomBorPåSvalbard.values.flatMap { it.fagsakIder }.distinct()
+        val personerMedBostedsadresseIFinnmarkNordTroms = personerSomBorIFinnmarkNordTromsEllerPåSvalbard.filterValues { it.harBostedsadresseIFinnmarkNordTroms }
+        val personerMedDeltBostedIFinnmarkNordTroms = personerSomBorIFinnmarkNordTromsEllerPåSvalbard.filterValues { it.harDeltBostedIFinnmarkNordTroms }
+        val overlappFinnmarkNordTroms = personerMedBostedsadresseIFinnmarkNordTroms.keys.intersect(personerMedDeltBostedIFinnmarkNordTroms.keys)
 
-        task.metadata["Antall personer med bostedsadresse eller delt bosted i Finnmark"] = personerSomBorIFinnmarkEllerNordTroms.size
-        task.metadata["Antall personer med oppholdsadresse på Svalbard"] = personerSomBorPåSvalbard.size
-        task.metadata["Antall fagsaker der minst én person har bostedsadresse eller delt bosted i Finnmark"] = fagsakerMedPersonerSomBorIFinnmarkEllerNordTroms.size
-        task.metadata["Antall fagsaker der minst én person har oppholdsadresse på Svalbard"] = fagsakerMedPersonerSomBorPåSvalbard.size
-        task.metadata["Tid brukt på å kjøre task"] = "${tid.inWholeMilliseconds} ms"
+        val personerMedOppholdsadressePåSvalbard = personerSomBorIFinnmarkNordTromsEllerPåSvalbard.filterValues { it.harOppholdsadressePåSvalbard }
+        val personerSomHarDNummerOgGeografiskTilknytningTilSvalbard = personerSomBorIFinnmarkNordTromsEllerPåSvalbard.filterValues { it.harDNummerOgGeografiskTilknytningTilSvalbard }
+        val overlappSvalbard = personerMedOppholdsadressePåSvalbard.keys.intersect(personerSomHarDNummerOgGeografiskTilknytningTilSvalbard.keys)
+
+        val fagsakerMedPersonerSomBorIFinnmarkNordTroms =
+            (personerMedBostedsadresseIFinnmarkNordTroms.values + personerMedDeltBostedIFinnmarkNordTroms.values).flatMap { it.fagsakIder }.distinct()
+        val fagsakerMedPersonerSomBorPåSvalbard =
+            (personerMedOppholdsadressePåSvalbard.values + personerSomHarDNummerOgGeografiskTilknytningTilSvalbard.values).flatMap { it.fagsakIder }.distinct()
+
+        task.metadata["bostedsadresseFinnmarkNordTroms"] = personerMedBostedsadresseIFinnmarkNordTroms.size
+        task.metadata["deltBostedFinnmarkNordTroms"] = personerMedDeltBostedIFinnmarkNordTroms.size
+        task.metadata["overlappFinnmarkNordTroms"] = overlappFinnmarkNordTroms.size
+
+        task.metadata["oppholdsadresseSvalbard"] = personerMedOppholdsadressePåSvalbard.size
+        task.metadata["dNummerGeografiskTilknytningSvalbard"] = personerSomHarDNummerOgGeografiskTilknytningTilSvalbard.size
+        task.metadata["overlappSvalbard"] = overlappSvalbard.size
+
+        task.metadata["fagsakerFinnmark"] = fagsakerMedPersonerSomBorIFinnmarkNordTroms.size
+        task.metadata["fagsakerSvalbard"] = fagsakerMedPersonerSomBorPåSvalbard.size
+
+        task.metadata["kjøretid"] = "${tid.inWholeMilliseconds} ms"
     }
 
     companion object {
@@ -93,8 +137,10 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
     }
 
     private data class BorIFinnmarkNordTromsEllerPåSvalbard(
-        val borIFinnmarkNordTroms: Boolean,
-        val borPåSvalbard: Boolean,
+        val harBostedsadresseIFinnmarkNordTroms: Boolean,
+        val harDeltBostedIFinnmarkNordTroms: Boolean,
+        val harOppholdsadressePåSvalbard: Boolean,
+        val harDNummerOgGeografiskTilknytningTilSvalbard: Boolean,
         val fagsakIder: List<Long>,
     )
 }

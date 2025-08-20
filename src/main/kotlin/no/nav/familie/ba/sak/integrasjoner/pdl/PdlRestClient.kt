@@ -3,8 +3,10 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.DødsfallData
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.GeografiskTilknytning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlDødsfallResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlGeografiskTilknytningResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlHentPersonResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
@@ -231,6 +233,27 @@ class PdlRestClient(
                 it.person!!.bostedsadresse
             }
         return bostedsadresser.firstOrNull { bostedsadresse -> bostedsadresse.utenlandskAdresse != null }?.utenlandskAdresse
+    }
+
+    fun hentGeografiskTilknytning(ident: String): GeografiskTilknytning? {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(ident),
+                query = hentGraphqlQuery("geografisk-tilknytning"),
+            )
+        val pdlResponse: PdlBaseResponse<PdlGeografiskTilknytningResponse> =
+            kallEksternTjeneste(
+                tjeneste = "pdl",
+                uri = pdlUri,
+                formål = "Hent geografisk tilknytning",
+            ) {
+                postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+            }
+
+        return feilsjekkOgReturnerData(
+            ident = ident,
+            pdlResponse = pdlResponse,
+        ) { it.geografiskTilknytning }
     }
 
     fun httpHeaders(): HttpHeaders =

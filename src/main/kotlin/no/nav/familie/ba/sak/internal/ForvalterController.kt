@@ -643,7 +643,8 @@ class ForvalterController(
         summary = "Oppretter tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
     )
     fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
-        @RequestBody dryRun: Boolean = true,
+        @RequestParam dryRun: Boolean = true,
+        @RequestParam antallFagsaker: Int? = null,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -655,6 +656,7 @@ class ForvalterController(
                 val sisteIverksatteBehandlingerFraLøpendeFagsaker =
                     behandlingHentOgPersisterService
                         .hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+                        .take(antallFagsaker ?: Int.MAX_VALUE)
 
                 val chunksMedPersoner =
                     sisteIverksatteBehandlingerFraLøpendeFagsaker
@@ -677,6 +679,8 @@ class ForvalterController(
                         if (!dryRun) taskService.save(task)
                     }.size
             }
+
+        logger.info("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
 
         return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
     }
