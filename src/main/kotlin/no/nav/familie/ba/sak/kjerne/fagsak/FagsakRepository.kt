@@ -283,4 +283,28 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         nativeQuery = true,
     )
     fun finnFagsakerMedFlereMigreringsbehandlinger(month: LocalDateTime): List<FagsakMedFlereMigreringer>
+
+    @Query(
+        """
+        WITH siste_iverksatte_behandling_for_løpende_fagsaker AS (
+            SELECT DISTINCT ON (b.fk_fagsak_id) b.id
+            FROM behandling b
+                INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+            WHERE f.status = 'LØPENDE'
+            AND ty.utbetalingsoppdrag IS NOT NULL
+            AND f.arkivert = false
+            ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC
+        )
+        SELECT DISTINCT personident.foedselsnummer
+        FROM siste_iverksatte_behandling_for_løpende_fagsaker b
+            INNER JOIN gr_personopplysninger po ON b.id = po.fk_behandling_id
+            INNER JOIN po_person p ON po.id = p.fk_gr_personopplysninger_id
+            INNER JOIN personident ON personident.fk_aktoer_id = p.fk_aktoer_id
+        WHERE personident.aktiv = true
+        ORDER BY b.id
+        """,
+        nativeQuery = true,
+    )
+    fun finnIdenterForLøpendeFagsaker(): List<String>
 }
