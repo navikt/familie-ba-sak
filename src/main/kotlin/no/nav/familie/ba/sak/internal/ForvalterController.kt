@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsis
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -692,6 +693,28 @@ class ForvalterController(
 
         forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
+    }
+
+    @PostMapping
+    fun rekjørFeiledeTaskerForÅFinnePersonerSomBorIFinnmarkNordTromsEllerPåSvalbard(): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Rekjør feilede task med type finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask",
+        )
+
+        val tasker =
+            taskRepository
+                .findByStatus(Status.FEILET)
+                .filter { it.type == FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask.TASK_STEP_TYPE }
+                .onEachIndexed { index, task ->
+                    taskService.save(
+                        task
+                            .copy(status = Status.KLAR_TIL_PLUKK)
+                            .medTriggerTid(LocalDateTime.now().plusMinutes(index.toLong())),
+                    )
+                }
+
+        return ResponseEntity.ok("Rekjørte ${tasker.size} feilede tasker med type finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask")
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
