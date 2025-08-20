@@ -44,6 +44,7 @@ import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
+import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -643,7 +644,8 @@ class ForvalterController(
         summary = "Oppretter tasker som finner personer med bostedsadresse eller delt bosted i Finnmark/Nord-Troms eller oppholdsadresse på Svalbard",
     )
     fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
-        @RequestBody dryRun: Boolean = true,
+        @RequestParam dryRun: Boolean = true,
+        @RequestParam antallFagsaker: Int? = null,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -655,6 +657,7 @@ class ForvalterController(
                 val sisteIverksatteBehandlingerFraLøpendeFagsaker =
                     behandlingHentOgPersisterService
                         .hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
+                        .take(antallFagsaker ?: Int.MAX_VALUE)
 
                 val chunksMedPersoner =
                     sisteIverksatteBehandlingerFraLøpendeFagsaker
@@ -678,7 +681,48 @@ class ForvalterController(
                     }.size
             }
 
+        logger.info("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
+
         return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
+    }
+
+    @PostMapping("/sjekk-om-personer-i-fagsak-har-utbetalinger-som-overstiger-100-prosent")
+    fun sjekkOmPersonerIFagsakHarUtbetalingerSomOverstiger100Prosent(
+        @RequestBody fagsakIder: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Sjekk om fagsak har utbetalinger som overstiger 100 prosent",
+        )
+
+        forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
+        return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
+    }
+
+    @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
+    fun identifiserInstitusjonerMedFinnmarkstillegg(): ResponseEntity<List<Triple<String, String?, String?>>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Identifiser institusjoner med Finnmarkstillegg",
+        )
+
+        val institusjonerSomSkalHaFinnmarkstillegg =
+            fagsakService
+                .finnOrgnummerForLøpendeFagsaker()
+                .mapNotNull { orgNummer ->
+                    val organisasjon = integrasjonClient.hentOrganisasjon(orgNummer)
+                    val kommunenummer = organisasjon.adresse?.kommunenummer
+                    if (kommunenummer == null) {
+                        logger.info("Kommunenummer er null for orgnummer ${organisasjon.organisasjonsnummer}")
+                        null
+                    } else if (kommuneErIFinnmarkEllerNordTroms(kommunenummer)) {
+                        Triple(organisasjon.organisasjonsnummer, organisasjon.adresse?.type, kommunenummer)
+                    } else {
+                        null
+                    }
+                }
+
+        return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
     }
 }
 
