@@ -110,16 +110,16 @@ class FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask(
         val fagsakerMedPersonerSomBorPåSvalbard =
             (personerMedOppholdsadressePåSvalbard.values + personerSomHarDNummerOgGeografiskTilknytningTilSvalbard.values).flatMap { it.fagsakIder }.distinct()
 
-        task.metadata["bostedsadresseFinnmarkNordTroms"] = personerMedBostedsadresseIFinnmarkNordTroms.size
-        task.metadata["deltBostedFinnmarkNordTroms"] = personerMedDeltBostedIFinnmarkNordTroms.size
-        task.metadata["overlappFinnmarkNordTroms"] = overlappFinnmarkNordTroms.size
+        task.metadata["bostedsadresseFinnmarkNordTroms"] = personerMedBostedsadresseIFinnmarkNordTroms.size.toString()
+        task.metadata["deltBostedFinnmarkNordTroms"] = personerMedDeltBostedIFinnmarkNordTroms.size.toString()
+        task.metadata["overlappFinnmarkNordTroms"] = overlappFinnmarkNordTroms.size.toString()
 
-        task.metadata["oppholdsadresseSvalbard"] = personerMedOppholdsadressePåSvalbard.size
-        task.metadata["dNummerGeografiskTilknytningSvalbard"] = personerSomHarDNummerOgGeografiskTilknytningTilSvalbard.size
-        task.metadata["overlappSvalbard"] = overlappSvalbard.size
+        task.metadata["oppholdsadresseSvalbard"] = personerMedOppholdsadressePåSvalbard.size.toString()
+        task.metadata["dNummerGeografiskTilknytningSvalbard"] = personerSomHarDNummerOgGeografiskTilknytningTilSvalbard.size.toString()
+        task.metadata["overlappSvalbard"] = overlappSvalbard.size.toString()
 
-        task.metadata["fagsakerFinnmark"] = fagsakerMedPersonerSomBorIFinnmarkNordTroms.size
-        task.metadata["fagsakerSvalbard"] = fagsakerMedPersonerSomBorPåSvalbard.size
+        task.metadata["fagsakerFinnmark"] = fagsakerMedPersonerSomBorIFinnmarkNordTroms.size.toString()
+        task.metadata["fagsakerSvalbard"] = fagsakerMedPersonerSomBorPåSvalbard.size.toString()
 
         task.metadata["kjøretid"] = "${tid.inWholeMilliseconds} ms"
     }
