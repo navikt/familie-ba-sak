@@ -684,6 +684,19 @@ class ForvalterController(
 
         return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
     }
+
+    @PostMapping("/sjekk-om-personer-i-fagsak-har-utbetalinger-som-overstiger-100-prosent")
+    fun sjekkOmPersonerIFagsakHarUtbetalingerSomOverstiger100Prosent(
+        @RequestBody fagsakIder: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Sjekk om fagsak har utbetalinger som overstiger 100 prosent",
+        )
+
+        forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
+        return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
+    }
 }
 
 data class FinnOgPatchAndelerRequestDto(

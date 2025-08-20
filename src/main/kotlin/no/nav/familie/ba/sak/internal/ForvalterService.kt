@@ -149,7 +149,7 @@ class ForvalterService(
         logger.info("Alle async jobber er kjørt. Totalt antall sider=${deffereds.size}")
     }
 
-    private fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker: List<Long>) {
+    fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker: List<Long>) {
         fagsaker.forEach { fagsakId ->
             val sisteIverksatteBehandling =
                 behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
