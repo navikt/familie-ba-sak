@@ -77,6 +77,16 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     ): Page<Long>
 
     @Query(
+        value = """SELECT distinct f.institusjon.orgNummer
+            FROM   Fagsak f
+            WHERE  f.status = 'LØPENDE' 
+            AND f.institusjon is not null
+            AND f.arkivert = false""",
+        nativeQuery = false,
+    )
+    fun finnOrgnummerForLøpendeFagsaker(): List<String>
+
+    @Query(
         value = """
             SELECT f.id
             FROM   Fagsak f

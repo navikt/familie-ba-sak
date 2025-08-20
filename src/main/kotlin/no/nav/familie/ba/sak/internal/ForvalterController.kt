@@ -44,6 +44,7 @@ import no.nav.familie.ba.sak.task.SlettKompetanserTask
 import no.nav.familie.ba.sak.task.dto.HenleggAutovedtakOgSettBehandlingTilbakeTilVentVedSmåbarnstilleggTask
 import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
+import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
@@ -696,6 +697,32 @@ class ForvalterController(
 
         forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
+    }
+
+    @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
+    fun identifiserInstitusjonerMedFinnmarkstillegg(): ResponseEntity<List<Triple<String, String?, String?>>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Identifiser institusjoner med Finnmarkstillegg",
+        )
+
+        val institusjonerSomSkalHaFinnmarkstillegg =
+            fagsakService
+                .finnOrgnummerForLøpendeFagsaker()
+                .mapNotNull { orgNummer ->
+                    val organisasjon = integrasjonClient.hentOrganisasjon(orgNummer)
+                    val kommunenummer = organisasjon.adresse?.kommunenummer
+                    if (kommunenummer == null) {
+                        logger.info("Kommunenummer er null for orgnummer ${organisasjon.organisasjonsnummer}")
+                        null
+                    } else if (kommuneErIFinnmarkEllerNordTroms(kommunenummer)) {
+                        Triple(organisasjon.organisasjonsnummer, organisasjon.adresse?.type, kommunenummer)
+                    } else {
+                        null
+                    }
+                }
+
+        return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
     }
 }
 
