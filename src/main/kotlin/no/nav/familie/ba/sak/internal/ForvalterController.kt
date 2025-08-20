@@ -645,7 +645,6 @@ class ForvalterController(
     )
     fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
         @RequestParam dryRun: Boolean = true,
-        @RequestParam antallFagsaker: Int? = null,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -654,31 +653,15 @@ class ForvalterController(
 
         val (antallTasker, tid) =
             measureTimedValue {
-                val sisteIverksatteBehandlingerFraLøpendeFagsaker =
-                    behandlingHentOgPersisterService
-                        .hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
-                        .take(antallFagsaker ?: Int.MAX_VALUE)
-
-                logger.info("Hentet ${sisteIverksatteBehandlingerFraLøpendeFagsaker.size} siste iverksatte behandlinger fra løpende fagsaker")
-
-                val chunksMedPersoner =
-                    sisteIverksatteBehandlingerFraLøpendeFagsaker
-                        .flatMapIndexed { index, behandlingId ->
-                            if (index % 30000 == 0) {
-                                logger.info("Henter personer for behandling ${index + 1}/${sisteIverksatteBehandlingerFraLøpendeFagsaker.size}")
-                            }
-                            persongrunnlagService
-                                .hentAktiv(behandlingId)
-                                ?.personer
-                                ?.map { it.aktør.aktivFødselsnummer() }
-                                ?: emptyList()
-                        }.distinct()
-                        .also { logger.info("Hentet ${it.size} unike identer") }
+                val chunksMedIdenter =
+                    fagsakService
+                        .finnIdenterForLøpendeFagsaker()
+                        .also { logger.info("Hentet ${it.size} identer for løpende fagsaker") }
                         .chunked(10000)
 
-                logger.info("Chunket identer i ${chunksMedPersoner.size} grupper á 10 000 identer")
+                logger.info("Lagde ${chunksMedIdenter.size} chunks á 10 000 identer")
 
-                chunksMedPersoner
+                chunksMedIdenter
                     .onEachIndexed { index, identer ->
                         val task =
                             FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
@@ -688,7 +671,7 @@ class ForvalterController(
                         if (!dryRun) taskService.save(task)
 
                         if (index % 10 == 0) {
-                            logger.info("Opprettet og lagret task ${index + 1}/${chunksMedPersoner.size}")
+                            logger.info("Opprettet og lagret task $index/${chunksMedIdenter.size}")
                         }
                     }.size
             }
