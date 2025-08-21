@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.valider18ÅrsVilkårEksistererFraFødselsdato
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
 import org.springframework.stereotype.Service
@@ -65,6 +66,11 @@ class VilkårsvurderingSteg(
                 søkerOgBarn = søkerOgBarn,
                 vilkårsvurdering = this,
                 behandling = behandling,
+            )
+
+            validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
+                søkerOgBarn = søkerOgBarn,
+                vilkårsvurdering = this,
             )
         }
     }

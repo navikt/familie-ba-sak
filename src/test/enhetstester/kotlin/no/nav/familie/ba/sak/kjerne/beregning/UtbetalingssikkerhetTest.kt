@@ -25,6 +25,7 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 
 class UtbetalingssikkerhetTest {
     @Test
@@ -68,6 +69,44 @@ class UtbetalingssikkerhetTest {
             }
 
         assertEquals("Feil med tidslinje. Overlapp på periode", feil.message)
+    }
+
+    @Test
+    fun `Skal kaste feil når et barn har både finnmarkstillegg andel og svalbardtillegg for en periode`() {
+        // Arrange
+        val person = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2025, 1, 1))
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.FINNMARKSTILLEGG,
+                    beløp = 500,
+                    person = person,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2025, 10),
+                    tom = YearMonth.of(2025, 12),
+                    ytelseType = YtelseType.SVALBARDTILLEGG,
+                    beløp = 500,
+                    person = person,
+                ),
+            ),
+        )
+
+        // Act && Assert
+        val feilmelding =
+            assertThrows<UtbetalingsikkerhetFeil> {
+                TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                    tilkjentYtelse,
+                    listOf(person.tilPersonEnkel()),
+                )
+            }.melding
+
+        assertEquals("Validering feilet for person med fødselsdato 2025-01-01 - Barnet kan ikke ha både finnmarkstillegg og svalbardtillegg i samme periode.", feilmelding)
     }
 
     @Test

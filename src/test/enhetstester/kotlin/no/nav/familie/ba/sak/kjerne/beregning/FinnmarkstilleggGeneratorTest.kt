@@ -57,14 +57,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, dag) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, dag) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -95,14 +95,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -135,21 +135,21 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn2,
                         perioderMedUtdypendeVilkårsvurdering = emptyList(),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -195,14 +195,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -243,14 +243,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -290,14 +290,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = emptyList(),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -326,14 +326,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = emptyList(),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -362,14 +362,14 @@ class FinnmarkstilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }
@@ -402,7 +402,7 @@ class FinnmarkstilleggGeneratorTest {
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS),
                     ),
                 )
             }

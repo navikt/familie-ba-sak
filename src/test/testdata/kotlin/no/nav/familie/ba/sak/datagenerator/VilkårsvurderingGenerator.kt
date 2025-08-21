@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
@@ -190,7 +189,7 @@ fun lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
     person: Person,
     perioderMedUtdypendeVilkårsvurdering: List<Pair<LocalDate, LocalDate?>>,
     vilkårsvurdering: Vilkårsvurdering,
-    utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering,
+    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
 ): PersonResultat =
     lagPersonResultat(
         vilkårsvurdering = vilkårsvurdering,
@@ -205,7 +204,7 @@ fun lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                             resultat = OPPFYLT,
                             periodeFom = it.first,
                             periodeTom = it.second,
-                            utdypendeVilkårsvurderinger = listOf(utdypendeVilkårsvurdering),
+                            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
                             behandlingId = behandling.id,
                         )
                     }.toTypedArray(),

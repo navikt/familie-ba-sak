@@ -58,14 +58,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, dag) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, dag) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -97,14 +97,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -138,21 +138,21 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn2,
                         perioderMedUtdypendeVilkårsvurdering = emptyList(),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -199,14 +199,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -248,14 +248,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -295,14 +295,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = emptyList(),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -331,14 +331,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = emptyList(),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -367,14 +367,14 @@ class SvalbardtilleggGeneratorTest {
                         person = søker,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                     lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
                         behandling = behandling,
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
@@ -407,7 +407,7 @@ class SvalbardtilleggGeneratorTest {
                         person = barn1,
                         perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
                         vilkårsvurdering = it,
-                        utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD,
+                        utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
                     ),
                 )
             }
