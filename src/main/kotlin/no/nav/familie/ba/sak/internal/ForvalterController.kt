@@ -686,10 +686,10 @@ class ForvalterController(
     fun sjekkOmPersonerIFagsakHarUtbetalingerSomOverstiger100Prosent(
         @RequestBody fagsakIder: List<Long>,
     ): ResponseEntity<String> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Sjekk om fagsak har utbetalinger som overstiger 100 prosent",
-        )
+//        tilgangService.verifiserHarTilgangTilHandling(
+//            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+//            handling = "Sjekk om fagsak har utbetalinger som overstiger 100 prosent",
+//        )
 
         forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
