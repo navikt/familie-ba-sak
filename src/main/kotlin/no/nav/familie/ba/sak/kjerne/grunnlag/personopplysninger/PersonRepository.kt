@@ -19,11 +19,11 @@ interface PersonRepository : JpaRepository<Person, Long> {
                      JOIN gr_personopplysninger pog ON pog.id = p.fk_gr_personopplysninger_id
                      JOIN behandling b ON b.id = pog.fk_behandling_id
                      JOIN Fagsak f ON f.id = b.fk_fagsak_id
-            WHERE p.fk_aktoer_id = :aktør.id
+            WHERE p.fk_aktoer_id = :aktørId
               AND pog.aktiv = true
               AND f.arkivert = false
         """,
         nativeQuery = true,
     )
-    fun findFagsakerByAktør(aktør: Aktør): List<Fagsak>
+    fun findFagsakerByAktør(aktørId: String): List<Fagsak>
 }

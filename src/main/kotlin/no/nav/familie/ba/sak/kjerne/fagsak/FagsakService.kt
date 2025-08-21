@@ -166,7 +166,7 @@ class FagsakService(
         return lagre(nyFagsak).also { skyggesakService.opprettSkyggesak(it) }
     }
 
-    fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> = personRepository.findFagsakerByAktør(aktør)
+    fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> = personRepository.findFagsakerByAktør(aktør.aktørId)
 
     @Transactional
     fun lagre(fagsak: Fagsak): Fagsak {
