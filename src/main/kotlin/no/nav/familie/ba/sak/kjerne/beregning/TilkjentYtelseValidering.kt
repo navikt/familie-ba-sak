@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -206,7 +205,6 @@ object TilkjentYtelseValidering {
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
-        val sammenlignedeBehandlingerSomLiggerTilGodkjenningEllerIverksetting = barnMedAndreRelevanteTilkjentYtelser.flatMap { it.second.map { tilkjentYtelse -> tilkjentYtelse.behandling } }.distinctBy { it.id }.filter { it.status in listOf(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.IVERKSETTER_VEDTAK) }
         val barnMedUtbetalingsikkerhetFeil = mutableMapOf<PersonEnkel, List<MånedPeriode>>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
@@ -226,10 +224,16 @@ object TilkjentYtelseValidering {
             }
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
+            val sammenlignedeBehandlingerMedDeltBosted =
+                barnMedAndreRelevanteTilkjentYtelser
+                    .flatMap { it.second }
+                    .filter { it.andelerTilkjentYtelse.any { andel -> andel.erDeltBosted() } }
+                    .map { it.behandling.id }
+
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
-                }. ${if (sammenlignedeBehandlingerSomLiggerTilGodkjenningEllerIverksetting.isNotEmpty()) "Sammenligning gjort med behandling: ${sammenlignedeBehandlingerSomLiggerTilGodkjenningEllerIverksetting.joinToString(",") { it.id.toString() }} som ligger til godkjenning eller iverksetting. Mulig feil retter seg selv når den behandlingen ferdigstilles." else ""}",
+                }. ${if (sammenlignedeBehandlingerMedDeltBosted.isNotEmpty()) "Sammenligning gjort med behandling: ${sammenlignedeBehandlingerMedDeltBosted.joinToString(",") { it.toString() }} som omhandler delt bosted. Mulig det finnes behandlinger som ligger til godkjenning som vil korrigere feilen." else ""}",
                 frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
                     barnMedUtbetalingsikkerhetFeil.tilFeilmeldingTekst()
                 }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre.",
