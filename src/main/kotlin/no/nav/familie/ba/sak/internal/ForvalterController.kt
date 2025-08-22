@@ -693,7 +693,7 @@ class ForvalterController(
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Opprett tasker som finner fagsker med personer med oppholdsadresse på Svalbard",
+            handling = "Opprett tasker som finner fagsaker med personer med oppholdsadresse på Svalbard",
         )
 
         val (antallTasker, tid) =
