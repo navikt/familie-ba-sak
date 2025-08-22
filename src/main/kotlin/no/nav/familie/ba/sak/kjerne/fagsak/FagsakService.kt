@@ -301,6 +301,8 @@ class FagsakService(
 
     fun hentLøpendeFagsaker(): List<Fagsak> = fagsakRepository.finnLøpendeFagsaker()
 
+    fun hentIdPåLøpendeFagsaker(): List<Long> = fagsakRepository.finnIdPåLøpendeFagsaker()
+
     fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
         aktør: Aktør,
         ytelseTyper: List<YtelseType>,

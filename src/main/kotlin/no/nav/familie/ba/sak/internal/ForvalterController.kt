@@ -700,10 +700,12 @@ class ForvalterController(
             measureTimedValue {
                 val chunksMedFagsakIder =
                     fagsakService
-                        .hentLøpendeFagsaker()
-                        .map { it.id }
+                        .hentIdPåLøpendeFagsaker()
+                        .also { logger.info("Hentet ${it.size} fagsaker for løpende fagsaker") }
                         .take(antallFagsaker)
                         .chunked(chunkSize)
+
+                logger.info("Lagde ${chunksMedFagsakIder.size} chunks á $chunkSize fagsaker")
 
                 chunksMedFagsakIder
                     .onEachIndexed { index, fagsakIder ->
