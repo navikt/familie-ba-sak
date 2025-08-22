@@ -14,9 +14,11 @@ import no.nav.familie.tidslinje.Tidslinje
 import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+@Service
 class PreutfyllBorHosSøkerService(
     private val pdlRestClient: SystemOnlyPdlRestClient,
     private val persongrunnlagService: PersongrunnlagService,
