@@ -229,6 +229,7 @@ object TilkjentYtelseValidering {
                     .flatMap { it.second }
                     .filter { it.andelerTilkjentYtelse.any { andel -> andel.erDeltBosted() } }
                     .map { it.behandling.id }
+                    .distinct()
 
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
