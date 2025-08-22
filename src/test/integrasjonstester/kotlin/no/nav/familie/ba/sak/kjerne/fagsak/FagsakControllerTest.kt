@@ -178,59 +178,6 @@ class FagsakControllerTest(
     }
 
     @Test
-    fun `Skal oppgi person med fagsak som fagsakdeltaker`() {
-        val personAktør = mockPersonidentService.hentAktør(randomFnr())
-
-        fagsakService
-            .hentEllerOpprettFagsak(personAktør.aktivFødselsnummer())
-            .also { fagsakService.oppdaterStatus(it, FagsakStatus.LØPENDE) }
-
-        fagsakController.oppgiFagsakdeltagere(RestSøkParam(personAktør.aktivFødselsnummer(), emptyList())).apply {
-            assertEquals(personAktør.aktivFødselsnummer(), body!!.data!!.first().ident)
-            assertEquals(FagsakDeltagerRolle.FORELDER, body!!.data!!.first().rolle)
-        }
-    }
-
-    @Test
-    fun `Skal oppgi det første barnet i listen som fagsakdeltaker`() {
-        val personAktør = mockPersonidentService.hentOgLagreAktør(randomFnr(), true)
-        val søkerFnr = randomFnr()
-        val barnaFnr = listOf(randomBarnFnr())
-        val søkerAktør = mockPersonidentService.hentOgLagreAktør(søkerFnr, true)
-        val barnaAktør = mockPersonidentService.hentOgLagreAktørIder(barnaFnr, true)
-
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                søkerAktør.aktivFødselsnummer(),
-            )
-
-        val behandling =
-            behandlingService.opprettBehandling(
-                nyOrdinærBehandling(
-                    søkersIdent = søkerFnr,
-                    fagsakId = fagsak.id,
-                ),
-            )
-        persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
-            personAktør,
-            barnaAktør,
-            behandling,
-            Målform.NB,
-        )
-
-        fagsakController
-            .oppgiFagsakdeltagere(
-                RestSøkParam(
-                    personAktør.aktivFødselsnummer(),
-                    barnaFnr + randomFnr(),
-                ),
-            ).apply {
-                assertEquals(barnaFnr, body!!.data!!.map { it.ident })
-                assertEquals(listOf(FagsakDeltagerRolle.BARN), body!!.data!!.map { it.rolle })
-            }
-    }
-
-    @Test
     @Tag("integration")
     fun `Skal få valideringsfeil ved oppretting av fagsak av type INSTITUSJON uten FagsakInstitusjon satt`() {
         val fnr = randomFnr()

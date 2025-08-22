@@ -13,9 +13,7 @@ import no.nav.familie.ba.sak.datagenerator.randomBarnFnr
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSkjermetBarnSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -47,8 +45,6 @@ class FagsakServiceTest {
     private val personidentService = mockk<PersonidentService>()
     private val utvidetBehandlingService = mockk<UtvidetBehandlingService>()
     private val behandlingService = mockk<BehandlingService>()
-    private val personopplysningerService = mockk<PersonopplysningerService>()
-    private val familieIntegrasjonerTilgangskontrollService = mockk<FamilieIntegrasjonerTilgangskontrollService>()
     private val saksstatistikkEventPublisher = mockk<SaksstatistikkEventPublisher>()
     private val skyggesakService = mockk<SkyggesakService>()
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
@@ -65,8 +61,6 @@ class FagsakServiceTest {
             personidentService = personidentService,
             utvidetBehandlingService = utvidetBehandlingService,
             behandlingService = behandlingService,
-            personopplysningerService = personopplysningerService,
-            familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollService,
             saksstatistikkEventPublisher = saksstatistikkEventPublisher,
             skyggesakService = skyggesakService,
             vedtaksperiodeService = vedtaksperiodeService,
@@ -277,33 +271,34 @@ class FagsakServiceTest {
 
             assertThat(frontendFeilmelding).isEqualTo("Søker og barn søkt for kan ikke være lik for fagsak type skjermet barn")
         }
-    }
 
-    @Test
-    fun `Skal returnere eksisterende fagsak dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
-        // Arrange
-        val barnIdent = randomBarnFnr(alder = 5)
-        val søkerIdent = randomFnr()
-        val barnAktør = randomAktør(barnIdent)
-        val søkerAktør = randomAktør(søkerIdent)
-        val fagsak = lagFagsak(1, type = FagsakType.SKJERMET_BARN)
+        @Test
+        fun `Skal returnere eksisterende fagsak dersom man forsøker å lage en fagsak med type skjermet barn men samme kombinasjon av barn og søker finnes allerede`() {
+            // Arrange
+            val barnIdent = randomBarnFnr(alder = 5)
+            val søkerIdent = randomFnr()
+            val barnAktør = randomAktør(barnIdent)
+            val søkerAktør = randomAktør(søkerIdent)
+            val fagsak = lagFagsak(1, type = FagsakType.SKJERMET_BARN)
 
-        val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
+            val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
 
-        every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
-        every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
-        every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
-        every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør) } returns fagsak
+            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
+            every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
+            every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør) } returns fagsak
 
-        // Act && Assert
-        val returnertFagsak =
-            fagsakService.hentEllerOpprettFagsak(
-                personIdent = barnIdent,
-                skjermetBarnSøker = restSkjermetBarnSøker,
-                fraAutomatiskBehandling = false,
-                type = FagsakType.SKJERMET_BARN,
-            )
+            // Act
+            val returnertFagsak =
+                fagsakService.hentEllerOpprettFagsak(
+                    personIdent = barnIdent,
+                    skjermetBarnSøker = restSkjermetBarnSøker,
+                    fraAutomatiskBehandling = false,
+                    type = FagsakType.SKJERMET_BARN,
+                )
 
-        assertThat(returnertFagsak).isEqualTo(fagsak)
+            // Assert
+            assertThat(returnertFagsak).isEqualTo(fagsak)
+        }
     }
 }
