@@ -152,7 +152,7 @@ class ForvalterService(
     fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker: List<Long>) {
         fagsaker.forEach { fagsakId ->
             val sisteIverksatteBehandling =
-                behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
+                behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
             if (sisteIverksatteBehandling != null) {
                 try {
                     tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(

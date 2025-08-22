@@ -333,6 +333,8 @@ class FagsakService(
 
     fun finnOrgnummerForLøpendeFagsaker(): List<String> = fagsakRepository.finnOrgnummerForLøpendeFagsaker()
 
+    fun finnIdenterForLøpendeFagsaker(): List<String> = fagsakRepository.finnIdenterForLøpendeFagsaker()
+
     companion object {
         private val logger = LoggerFactory.getLogger(FagsakService::class.java)
     }

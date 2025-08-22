@@ -112,9 +112,15 @@ class FagsakServiceIntegrationTest(
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(fagsakFar))
         persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar))
 
+        // Oppretter fagsak med tilhørende behandling og personopplsyninggrunnlag, og arkiverer den.
+        val arkivertFagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandlingArkivertFagsak = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandlingUtenId(arkivertFagsak))
+        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingArkivertFagsak))
+        fagsakService.lagre(arkivertFagsak.also { it.arkivert = true })
+
         val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
         assertEquals(2, fagsaker.size)
-        assertThat(persongrunnlagRepository.findAll()).hasSize(4)
+        assertThat(persongrunnlagRepository.findAll()).hasSize(5)
     }
 
     @Test

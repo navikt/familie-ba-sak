@@ -46,6 +46,7 @@ import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsis
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.kontrakter.ba.finnmarkstillegg.kommuneErIFinnmarkEllerNordTroms
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.prosessering.domene.Status
 import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -645,7 +646,6 @@ class ForvalterController(
     )
     fun opprettTaskerSomFinnerPersonerMedOppholdsadressePåSvalbard(
         @RequestParam dryRun: Boolean = true,
-        @RequestParam antallFagsaker: Int? = null,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
@@ -654,23 +654,15 @@ class ForvalterController(
 
         val (antallTasker, tid) =
             measureTimedValue {
-                val sisteIverksatteBehandlingerFraLøpendeFagsaker =
-                    behandlingHentOgPersisterService
-                        .hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
-                        .take(antallFagsaker ?: Int.MAX_VALUE)
-
-                val chunksMedPersoner =
-                    sisteIverksatteBehandlingerFraLøpendeFagsaker
-                        .flatMap { behandlingId ->
-                            persongrunnlagService
-                                .hentAktiv(behandlingId)
-                                ?.personer
-                                ?.map { it.aktør.aktivFødselsnummer() }
-                                ?: emptyList()
-                        }.distinct()
+                val chunksMedIdenter =
+                    fagsakService
+                        .finnIdenterForLøpendeFagsaker()
+                        .also { logger.info("Hentet ${it.size} identer for løpende fagsaker") }
                         .chunked(10000)
 
-                chunksMedPersoner
+                logger.info("Lagde ${chunksMedIdenter.size} chunks á 10 000 identer")
+
+                chunksMedIdenter
                     .onEachIndexed { index, identer ->
                         val task =
                             FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
@@ -678,6 +670,10 @@ class ForvalterController(
                                 .medTriggerTid(LocalDateTime.now().plusSeconds(index * 5L))
 
                         if (!dryRun) taskService.save(task)
+
+                        if (index % 10 == 0) {
+                            logger.info("Opprettet og lagret task $index/${chunksMedIdenter.size}")
+                        }
                     }.size
             }
 
@@ -697,6 +693,28 @@ class ForvalterController(
 
         forvalterService.sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsakIder)
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
+    }
+
+    @PostMapping("/rekjor-feilede-tasker-med-type-finnPersonerSomBorIFinnmarkNordTromsEllerPaaSvalbardTask")
+    fun rekjørFeiledeTaskerForÅFinnePersonerSomBorIFinnmarkNordTromsEllerPåSvalbard(): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Rekjør feilede task med type finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask",
+        )
+
+        val tasker =
+            taskRepository
+                .findByStatus(Status.FEILET)
+                .filter { it.type == FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask.TASK_STEP_TYPE }
+                .onEachIndexed { index, task ->
+                    taskService.save(
+                        task
+                            .copy(status = Status.KLAR_TIL_PLUKK)
+                            .medTriggerTid(LocalDateTime.now().plusMinutes(index.toLong())),
+                    )
+                }
+
+        return ResponseEntity.ok("Rekjørte ${tasker.size} feilede tasker med type finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask")
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")

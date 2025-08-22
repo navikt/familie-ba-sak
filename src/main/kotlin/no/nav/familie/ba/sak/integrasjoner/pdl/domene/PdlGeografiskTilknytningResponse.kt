@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl.domene
 private const val KOMMUNENUMMER_SVALBARD = "2100"
 
 data class PdlGeografiskTilknytningResponse(
-    val geografiskTilknytning: GeografiskTilknytning,
+    val geografiskTilknytning: GeografiskTilknytning?,
 )
 
 data class GeografiskTilknytning(
