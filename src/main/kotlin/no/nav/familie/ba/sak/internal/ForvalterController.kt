@@ -713,8 +713,14 @@ class ForvalterController(
                                 .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask))
 
                         if (!dryRun) taskService.save(task)
+
+                        if (index % 10 == 0) {
+                            logger.info("Opprettet og lagret task $index/${chunksMedFagsakIder.size}")
+                        }
                     }.size
             }
+
+        logger.info("Brukte ${tid.inWholeMilliseconds} ms på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
 
         return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
     }

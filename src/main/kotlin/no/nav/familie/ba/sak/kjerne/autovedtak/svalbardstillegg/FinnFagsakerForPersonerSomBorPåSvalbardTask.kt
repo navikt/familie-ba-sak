@@ -4,6 +4,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.erSvalbard
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.oppholdsadresseErPåSvalbardPåDato
+import no.nav.familie.ba.sak.integrasjoner.pdl.logger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -98,11 +99,14 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
                     }.toMap()
             }
 
-        val fagsakerDerMinstÉnPersonBorPåSvalbard = fagsakerMedPersonerSomBorPåSvalbard.keys
-        val fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard = fagsakerMedPersonerSomBorPåSvalbard.filterValues { it }.keys
+        val fagsakerDerMinstÉnPersonBorPåSvalbard = fagsakerMedPersonerSomBorPåSvalbard.keys.joinToString(",") { it.toString() }
+        val fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard = fagsakerMedPersonerSomBorPåSvalbard.filterValues { it }.keys.joinToString(",") { it.toString() }
 
-        task.metadata["Fagsaker der minst én person bor på Svalbard"] = fagsakerDerMinstÉnPersonBorPåSvalbard.joinToString(",") { it.toString() }
-        task.metadata["Fagsaker der søker og minst ett barn bor på Svalbard"] = fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard.joinToString(",") { it.toString() }
+        logger.info("Fagsaker der minst én person bor på Svalbard: $fagsakerDerMinstÉnPersonBorPåSvalbard")
+        logger.info("Fagsaker der søker og minst ett barn bor på Svalbard: $fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard")
+
+        task.metadata["Fagsaker der minst én person bor på Svalbard"] = fagsakerDerMinstÉnPersonBorPåSvalbard
+        task.metadata["Fagsaker der søker og minst ett barn bor på Svalbard"] = fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard
         task.metadata["Kjøretid"] = "${tid.inWholeSeconds} sekunder"
     }
 
