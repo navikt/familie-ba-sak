@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnFagsakerForPersonerSomBorPåSvalbardTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -682,6 +683,48 @@ class ForvalterController(
         return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
     }
 
+    @PostMapping("/opprett-tasker-som-finner-fagsaker-for-personer-med-oppholdsadresse-paa-svalbard")
+    @Operation(summary = "Oppretter tasker som finner fagsaker for personer med oppholdsadresse på Svalbard")
+    fun opprettTaskerSomFinnerFagsakerMedPersonerMedOppholdsadressePåSvalbard(
+        @RequestParam dryRun: Boolean = true,
+        @RequestParam antallFagsaker: Int = Int.MAX_VALUE,
+        @RequestParam minutterMellomHverTask: Long = 1,
+        @RequestParam chunkSize: Int = 5000,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Opprett tasker som finner fagsaker med personer med oppholdsadresse på Svalbard",
+        )
+
+        val (antallTasker, tid) =
+            measureTimedValue {
+                val chunksMedFagsakIder =
+                    fagsakService
+                        .hentLøpendeFagsaker()
+                        .map { it.id }
+                        .take(antallFagsaker)
+                        .chunked(chunkSize)
+
+                chunksMedFagsakIder
+                    .onEachIndexed { index, fagsakIder ->
+                        val task =
+                            FinnFagsakerForPersonerSomBorPåSvalbardTask
+                                .opprettTask(fagsakIder)
+                                .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask))
+
+                        if (!dryRun) taskService.save(task)
+
+                        if (index % 10 == 0) {
+                            logger.info("Opprettet og lagret task $index/${chunksMedFagsakIder.size}")
+                        }
+                    }.size
+            }
+
+        logger.info("Brukte ${tid.inWholeMilliseconds} ms på å opprette $antallTasker tasker for å finne personer som bor i Finnmark, Nord-Troms eller på Svalbard")
+
+        return ResponseEntity.ok("Brukte ${tid.inWholeSeconds} sekunder på å opprette $antallTasker tasker")
+    }
+
     @PostMapping("/sjekk-om-personer-i-fagsak-har-utbetalinger-som-overstiger-100-prosent")
     fun sjekkOmPersonerIFagsakHarUtbetalingerSomOverstiger100Prosent(
         @RequestBody fagsakIder: List<Long>,
@@ -695,26 +738,28 @@ class ForvalterController(
         return ResponseEntity.ok("Sjekket om fagsaker har utbetalinger som overstiger 100 prosent")
     }
 
-    @PostMapping("/rekjor-feilede-tasker-med-type-finnPersonerSomBorIFinnmarkNordTromsEllerPaaSvalbardTask")
-    fun rekjørFeiledeTaskerForÅFinnePersonerSomBorIFinnmarkNordTromsEllerPåSvalbard(): ResponseEntity<String> {
+    @PostMapping("/rekjor-feilede-tasker-med-type-finnFagsakerForPersonerSomBorPaaSvalbard")
+    fun rekjørFeiledeTaskerMedTypeFinnFagsakerForPersonerSomBorPåSvalbard(
+        @RequestParam minutterMellomHverTask: Long = 1,
+    ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
-            handling = "Rekjør feilede task med type finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask",
+            handling = "Rekjør feilede task med type finnFagsakerForPersonerSomBorPåSvalbard",
         )
 
         val tasker =
             taskRepository
                 .findByStatus(Status.FEILET)
-                .filter { it.type == FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask.TASK_STEP_TYPE }
+                .filter { it.type == FinnFagsakerForPersonerSomBorPåSvalbardTask.TASK_STEP_TYPE }
                 .onEachIndexed { index, task ->
                     taskService.save(
                         task
                             .copy(status = Status.KLAR_TIL_PLUKK)
-                            .medTriggerTid(LocalDateTime.now().plusMinutes(index.toLong())),
+                            .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask)),
                     )
                 }
 
-        return ResponseEntity.ok("Rekjørte ${tasker.size} feilede tasker med type finnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask")
+        return ResponseEntity.ok("Rekjørte ${tasker.size} feilede tasker med type finnFagsakerForPersonerSomBorPåSvalbard")
     }
 
     @GetMapping("/identifiser-institusjoner-med-finnmarkstillegg")
