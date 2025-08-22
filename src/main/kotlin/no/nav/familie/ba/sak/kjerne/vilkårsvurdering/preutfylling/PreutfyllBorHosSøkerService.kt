@@ -15,6 +15,7 @@ import no.nav.familie.tidslinje.tilTidslinje
 import no.nav.familie.tidslinje.utvidelser.kombinerMed
 import no.nav.familie.tidslinje.utvidelser.tilPerioderIkkeNull
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class PreutfyllBorHosSøkerService(
     private val pdlRestClient: SystemOnlyPdlRestClient,
@@ -81,7 +82,7 @@ class PreutfyllBorHosSøkerService(
         val bostedsadresserSøkerTidslinje = lagBostedsadresseTidslinje(bostedsadresserSøker, fødselsdatoForBeskjæring)
 
         return bostedsadresserBarnTidslinje.kombinerMed(bostedsadresserSøkerTidslinje) { barnAdresse, søkerAdresse ->
-            if (barnAdresse != null && barnAdresse.erSammeAdresse(søkerAdresse)) {
+            if (barnAdresse != null && harVærtSammeAdresseMinst3Mnd(barnAdresse, søkerAdresse)) {
                 OppfyltDelvilkår(begrunnelse = "- Har samme bostedsadresse som søker.")
             } else {
                 IkkeOppfyltDelvilkår
@@ -106,6 +107,15 @@ class PreutfyllBorHosSøkerService(
                 )
             }.tilTidslinje()
             .beskjærFraOgMed(fødselsdatoForBeskjæring)
+
+    private fun harVærtSammeAdresseMinst3Mnd(
+        barnAdresse: Bostedsadresse,
+        søkerAdresse: Bostedsadresse?,
+    ): Boolean =
+        søkerAdresse
+            ?.takeIf { barnAdresse.erSammeAdresse(it) }
+            ?.let { ChronoUnit.MONTHS.between(barnAdresse.gyldigFraOgMed, barnAdresse.gyldigTilOgMed ?: LocalDate.now()) >= 3 }
+            ?: false
 
     private fun Bostedsadresse.erSammeAdresse(søkersAdresse: Bostedsadresse?): Boolean =
         søkersAdresse != null && (
