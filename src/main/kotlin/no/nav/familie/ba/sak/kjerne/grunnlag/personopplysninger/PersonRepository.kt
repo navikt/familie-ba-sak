@@ -14,16 +14,15 @@ interface PersonRepository : JpaRepository<Person, Long> {
 
     @Query(
         """
-            SELECT DISTINCT ON(f.id) f.*
-            FROM po_person p
-                     JOIN gr_personopplysninger po ON po.id = p.fk_gr_personopplysninger_id
-                     JOIN behandling b ON b.id = po.fk_behandling_id
-                     JOIN fagsak f ON f.id = b.fk_fagsak_id
-            WHERE p.fk_aktoer_id = :aktørId
+            SELECT DISTINCT f
+            FROM Person p
+                     JOIN PersonopplysningGrunnlag po ON po.id = p.personopplysningGrunnlag.id
+                     JOIN Behandling b ON b.id = po.behandlingId
+                     JOIN Fagsak f ON f.id = b.fagsak.id
+            WHERE p.aktør = :aktør
               AND po.aktiv = true
               AND f.arkivert = false
         """,
-        nativeQuery = true,
     )
-    fun findFagsakerByAktør(aktørId: String): List<Fagsak>
+    fun findFagsakerByAktør(aktør: Aktør): List<Fagsak>
 }
