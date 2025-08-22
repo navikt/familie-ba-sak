@@ -16,11 +16,11 @@ interface PersonRepository : JpaRepository<Person, Long> {
         """
             SELECT DISTINCT ON(f.id) f.*
             FROM po_person p
-                     JOIN gr_personopplysninger pog ON pog.id = p.fk_gr_personopplysninger_id
-                     JOIN behandling b ON b.id = pog.fk_behandling_id
-                     JOIN Fagsak f ON f.id = b.fk_fagsak_id
+                     JOIN gr_personopplysninger po ON po.id = p.fk_gr_personopplysninger_id
+                     JOIN behandling b ON b.id = po.fk_behandling_id
+                     JOIN fagsak f ON f.id = b.fk_fagsak_id
             WHERE p.fk_aktoer_id = :aktørId
-              AND pog.aktiv = true
+              AND po.aktiv = true
               AND f.arkivert = false
         """,
         nativeQuery = true,
