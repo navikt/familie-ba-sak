@@ -122,9 +122,4 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
         val søkerIdent: String,
         val barnIdenter: List<String>,
     )
-
-    private data class SøkerOgDeltakerBorPåSvalbard(
-        val minstÉnPersonBorPåSvalbard: Boolean,
-        val søkerOgMinstEttBarnBorPåSvalbard: Boolean,
-    )
 }
