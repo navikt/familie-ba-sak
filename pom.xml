@@ -30,7 +30,7 @@
         <familie.kontrakter.saksstatistikk>2.0_20250819081736_d4884f9</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20250819081736_d4884f9</familie.kontrakter.stønadsstatistikk>
         <utbetalingsgenerator.version>1.0_20250804104526_5648100</utbetalingsgenerator.version>
-        <cucumber.version>7.23.0</cucumber.version>
+        <cucumber.version>7.27.2</cucumber.version>
         <mockk.version>1.14.5</mockk.version>
         <wiremock.version>3.10.0</wiremock.version>
         <token-validation-spring.version>5.0.34</token-validation-spring.version>
