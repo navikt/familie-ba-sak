@@ -13,6 +13,25 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId")
     fun finnAndelerTilkjentYtelseForBehandling(behandlingId: Long): List<AndelTilkjentYtelse>
 
+    @Query(
+        value =
+            """
+        SELECT DISTINCT p.foedselsnummer 
+        FROM andel_tilkjent_ytelse aty
+            INNER JOIN aktoer a ON aty.fk_aktoer_id = a.aktoer_id
+            INNER JOIN personident p ON a.aktoer_id = p.fk_aktoer_id
+        WHERE aty.fk_behandling_id = :behandlingId
+          AND aty.type = :type
+          AND aty.stonad_tom >= CURRENT_DATE
+          AND p.aktiv = true
+        """,
+        nativeQuery = true,
+    )
+    fun finnIdentForAktørerMedLøpendeAndelerTilkjentYtelseForBehandlingAvType(
+        behandlingId: Long,
+        type: YtelseType,
+    ): List<String>
+
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.aktør = :barnAktør")
     fun finnAndelerTilkjentYtelseForBehandlingOgBarn(
         behandlingId: Long,

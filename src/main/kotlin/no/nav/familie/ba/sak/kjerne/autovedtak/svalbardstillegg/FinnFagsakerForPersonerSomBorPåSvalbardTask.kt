@@ -40,17 +40,16 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
                         .mapNotNull { fagsakId ->
                             val sisteIverksatteBehandlingId =
                                 behandlingHentOgPersisterService
-                                    .hentSisteBehandlingSomErIverksatt(fagsakId)
-                                    ?.id
+                                    .hentIdForSisteBehandlingSomErIverksatt(fagsakId)
                                     ?: return@mapNotNull null
 
                             val søkerIdent = fagsakService.hentAktør(fagsakId).aktivFødselsnummer()
                             val barnMedLøpendeOrdinær =
                                 andelTilkjentYtelseRepository
-                                    .finnAndelerTilkjentYtelseForBehandling(sisteIverksatteBehandlingId)
-                                    .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.erLøpende() }
-                                    .map { it.aktør.aktivFødselsnummer() }
-                                    .distinct()
+                                    .finnIdentForAktørerMedLøpendeAndelerTilkjentYtelseForBehandlingAvType(
+                                        behandlingId = sisteIverksatteBehandlingId,
+                                        type = YtelseType.ORDINÆR_BARNETRYGD,
+                                    )
 
                             fagsakId to
                                 SøkerOgBarnIdenter(
@@ -105,8 +104,8 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
         logger.info("Fagsaker der minst én person bor på Svalbard: $fagsakerDerMinstÉnPersonBorPåSvalbard")
         logger.info("Fagsaker der søker og minst ett barn bor på Svalbard: $fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard")
 
-        task.metadata["Fagsaker der minst én person bor på Svalbard"] = fagsakerDerMinstÉnPersonBorPåSvalbard
-        task.metadata["Fagsaker der søker og minst ett barn bor på Svalbard"] = fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard
+        task.metadata["fagsakerDerMinstÉnPersonBorPåSvalbard"] = fagsakerDerMinstÉnPersonBorPåSvalbard
+        task.metadata["fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard"] = fagsakerDerSøkerOgMinstEttBarnBorPåSvalbard
         task.metadata["Kjøretid"] = "${tid.inWholeSeconds} sekunder"
     }
 
