@@ -14,7 +14,7 @@ class MånedligValutajusteringTaskTest {
     private val task = MånedligValutajusteringTask(autovedtakMånedligValutajusteringService)
 
     @Test
-    fun `doTask utfører valutajustering når nåværende måned samsvarer med oppgavens måned`() {
+    fun `doTask utfører valutajustering når nåværende måned samsvarer med måned i paýload`() {
         val currentMonth = YearMonth.now()
         val taskDto =
             MånedligValutajusteringTask.MånedligValutajusteringTaskDto(
@@ -37,7 +37,7 @@ class MånedligValutajusteringTaskTest {
     }
 
     @Test
-    fun `doTask logger info og utfører ikke valutajustering når nåværende måned ikke samsvarer med oppgavens måned`() {
+    fun `doTask logger info og utfører ikke valutajustering når nåværende måned ikke samsvarer med måned i paýload`() {
         val taskDto =
             MånedligValutajusteringTask.MånedligValutajusteringTaskDto(
                 fagsakId = 123L,
