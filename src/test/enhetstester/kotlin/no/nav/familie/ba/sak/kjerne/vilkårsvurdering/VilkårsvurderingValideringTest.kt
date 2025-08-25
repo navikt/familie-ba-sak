@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagPerson
+import no.nav.familie.ba.sak.datagenerator.lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.datagenerator.lagVilkårsvurdering
 import no.nav.familie.ba.sak.datagenerator.randomAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -14,9 +16,11 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -209,6 +213,41 @@ class VilkårsvurderingValideringTest {
                     behandling = behandling,
                 )
             }
+        }
+    }
+
+    @Nested
+    inner class ValiderAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidigTest {
+        @Test
+        fun `skal kaste feil hvis man har satt bosatt i finnmark og bosatt på svalbard i samme vilkår periode`() {
+            // Arrange
+            val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2025, 1, 1))
+            val personEnkelFraBarn = PersonEnkel(PersonType.BARN, barn.aktør, barn.fødselsdato, null, Målform.NB)
+            val behandling = lagBehandling()
+
+            val vilkårsvurdering =
+                lagVilkårsvurdering(behandling = behandling) {
+                    setOf(
+                        lagPersonResultatBosattIRiketMedUtdypendeVilkårsvurdering(
+                            behandling = behandling,
+                            person = barn,
+                            perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 10, 1) to null),
+                            vilkårsvurdering = it,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD),
+                        ),
+                    )
+                }
+
+            // Act && Assert
+            val feilmelding =
+                assertThrows<FunksjonellFeil> {
+                    validerAtManIkkeBorIBådeFinnmarkOgSvalbardSamtidig(
+                        vilkårsvurdering = vilkårsvurdering,
+                        søkerOgBarn = listOf(personEnkelFraBarn),
+                    )
+                }.melding
+
+            assertThat(feilmelding).isEqualTo("Barn født 2025-01-01 kan ikke bo i Finnmark og Svalbard samtidig.")
         }
     }
 

@@ -62,6 +62,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.BOSATT_PÅ_SVALBARD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering.DELT_BOSTED
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOR_MED_SØKER
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RIKET
@@ -834,7 +835,7 @@ class BehandlingsresultatStegTest {
                             person = søker,
                             perioderMedUtdypendeVilkårsvurdering = listOf(LocalDate.of(2025, 1, 1) to null),
                             vilkårsvurdering = it,
-                            utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS,
+                            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BOSATT_I_FINNMARK_NORD_TROMS, BOSATT_PÅ_SVALBARD),
                         ),
                         lagPersonResultat(
                             vilkårsvurdering = it,
