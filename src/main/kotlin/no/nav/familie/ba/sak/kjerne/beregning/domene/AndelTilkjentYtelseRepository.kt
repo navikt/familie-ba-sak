@@ -29,7 +29,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
     )
     fun finnIdentForAktørerMedLøpendeAndelerTilkjentYtelseForBehandlingAvType(
         behandlingId: Long,
-        type: YtelseType,
+        type: String,
     ): List<String>
 
     @Query(value = "SELECT aty FROM AndelTilkjentYtelse aty WHERE aty.behandlingId = :behandlingId AND aty.aktør = :barnAktør")
