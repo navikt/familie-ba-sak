@@ -48,7 +48,7 @@ class FinnFagsakerForPersonerSomBorPåSvalbardTask(
                                 andelTilkjentYtelseRepository
                                     .finnIdentForAktørerMedLøpendeAndelerTilkjentYtelseForBehandlingAvType(
                                         behandlingId = sisteIverksatteBehandlingId,
-                                        type = YtelseType.ORDINÆR_BARNETRYGD,
+                                        type = YtelseType.ORDINÆR_BARNETRYGD.name,
                                     )
 
                             fagsakId to
