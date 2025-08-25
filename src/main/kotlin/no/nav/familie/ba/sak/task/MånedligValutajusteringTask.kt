@@ -20,7 +20,7 @@ import java.time.YearMonth
 @TaskStepBeskrivelse(
     taskStepType = MånedligValutajusteringTask.TASK_STEP_TYPE,
     beskrivelse = "månedlig valutajustering",
-    maxAntallFeil = 3,
+    maxAntallFeil = 5,
     settTilManuellOppfølgning = true,
 )
 class MånedligValutajusteringTask(
