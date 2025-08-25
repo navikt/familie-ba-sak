@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
+    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
     private val unleashService: UnleashNextMedContextService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {
@@ -20,6 +21,9 @@ class PreutfyllVilkårService(
         }
         if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_VILKÅR_LOVLIG_OPPHOLD)) {
             preutfyllLovligOppholdService.preutfyllLovligOpphold(vilkårsvurdering)
+        }
+        if (unleashService.isEnabled(FeatureToggle.PREUTFYLLING_BOR_HOS_SØKER)) {
+            preutfyllBorHosSøkerService.preutfyllBorFastHosSøkerVilkårResultat(vilkårsvurdering)
         }
     }
 
