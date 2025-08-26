@@ -925,7 +925,7 @@ private object SanityBegrunnelseMock {
     // se https://familie-brev.sanity.studio/ba-brev/vision med query fra SanityQueries.kt.
     fun hentSanityBegrunnelserMock(): Map<Standardbegrunnelse, SanityBegrunnelse> {
         val restSanityBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
+            this::class.java.getResource("/cucumber/gyldigeBegrunnelser/restSanityBegrunnelser")!!
 
         val restSanityBegrunnelser =
             objectMapper
@@ -948,7 +948,7 @@ private object SanityBegrunnelseMock {
 
     fun hentSanityEØSBegrunnelserMock(): Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> {
         val restSanityEØSBegrunnelserJson =
-            this::class.java.getResource("/no/nav/familie/ba/sak/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
+            this::class.java.getResource("/cucumber/gyldigeBegrunnelser/restSanityEØSBegrunnelser")!!
 
         val restSanityEØSBegrunnelser =
             objectMapper
