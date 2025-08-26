@@ -5,7 +5,7 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.nullableTilString
-import no.nav.familie.ba.sak.common.Utils.storForbokstav
+import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
@@ -45,23 +45,29 @@ data class GrVegadresse(
         )
 
     override fun toSecureString(): String =
-        """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
-|           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer
-        """.trimMargin()
+        "VegadresseDao(" +
+            "husnummer=$husnummer, " +
+            "husbokstav=$husbokstav, " +
+            "matrikkelId=$matrikkelId, " +
+            "bruksenhetsnummer=$bruksenhetsnummer, " +
+            "adressenavn=$adressenavn, " +
+            "kommunenummer=$kommunenummer, " +
+            "tilleggsnavn=$tilleggsnavn, " +
+            "postnummer=$postnummer, " +
+            "oppholdAnnetSted=$oppholdAnnetSted" +
+            ")"
 
     override fun toString(): String = "Vegadresse(detaljer skjult)"
 
     override fun tilFrontendString(): String {
-        val adressenavn = adressenavn?.storForbokstav()
+        val adressenavn = adressenavn?.storForbokstavIHvertOrd()
         val husnummer = husnummer.nullableTilString()
         val husbokstav = husbokstav.nullableTilString()
         val postnummer = postnummer?.let { ", $it" } ?: ""
-        val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == OppholdAnnetSted.PAA_SVALBARD }
-        return when {
-            adressenavn == null && oppholdAnnetSted == null -> "Ukjent adresse"
-            adressenavn == null -> "$oppholdAnnetSted"
-            oppholdAnnetSted == null -> "$adressenavn $husnummer$husbokstav$postnummer"
-            else -> "$adressenavn $husnummer$husbokstav$postnummer, $oppholdAnnetSted"
+        val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == OppholdAnnetSted.PAA_SVALBARD }?.let { ", $it" } ?: ""
+        return when (adressenavn) {
+            null -> "Ukjent adresse$oppholdAnnetSted"
+            else -> "$adressenavn $husnummer$husbokstav$postnummer$oppholdAnnetSted"
         }
     }
 

@@ -4,6 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted.PAA_SVALBARD
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.Objects
@@ -33,13 +34,22 @@ data class GrMatrikkeladresse(
         )
 
     override fun toSecureString(): String =
-        """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
-|               postnummer=$postnummer,kommunenummer=$kommunenummer
-        """.trimMargin()
+        "MatrikkeladresseDao(" +
+            "matrikkelId=$matrikkelId, " +
+            "bruksenhetsnummer=$bruksenhetsnummer, " +
+            "tilleggsnavn=$tilleggsnavn, " +
+            "postnummer=$postnummer, " +
+            "kommunenummer=$kommunenummer, " +
+            "oppholdAnnetSted=$oppholdAnnetSted" +
+            ")"
 
     override fun toString(): String = "Matrikkeladresse(detaljer skjult)"
 
-    override fun tilFrontendString() = postnummer?.let { "Postnummer $postnummer" } ?: "Ukjent adresse"
+    override fun tilFrontendString(): String {
+        val postnummer = postnummer?.let { "Postnummer $postnummer" }
+        val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""
+        return postnummer?.let { "$postnummer$oppholdAnnetSted" } ?: "Ukjent adresse$oppholdAnnetSted"
+    }
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {

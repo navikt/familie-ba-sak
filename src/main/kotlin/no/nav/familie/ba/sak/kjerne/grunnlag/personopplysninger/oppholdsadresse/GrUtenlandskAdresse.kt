@@ -4,7 +4,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
-import no.nav.familie.ba.sak.common.Utils.storForbokstav
+import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdresssePersonUtenlandskAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
@@ -36,20 +36,18 @@ data class GrUtenlandskAdresse(
         )
 
     override fun toSecureString(): String =
-        """
-        UtenlandskAdresseDao(
-            adressenavnNummer=$adressenavnNummer,
-            bygningEtasjeLeilighet=$bygningEtasjeLeilighet,
-            postkode=$postkode,
-            bySted=$bySted,
-            regionDistriktOmraade=$regionDistriktOmraade,
-            landkode=$landkode,
-            oppholdAnnetSted=$oppholdAnnetSted
-        )
-        """.trimMargin()
+        "UtenlandskAdresseDao(" +
+            "adressenavnNummer=$adressenavnNummer, " +
+            "bygningEtasjeLeilighet=$bygningEtasjeLeilighet, " +
+            "postkode=$postkode, " +
+            "bySted=$bySted, " +
+            "regionDistriktOmraade=$regionDistriktOmraade, " +
+            "landkode=$landkode, " +
+            "oppholdAnnetSted=$oppholdAnnetSted" +
+            ")"
 
     override fun tilFrontendString(): String {
-        val adressenavnNummer = adressenavnNummer?.storForbokstav()
+        val adressenavnNummer = adressenavnNummer?.storForbokstavIHvertOrd()
         val bygningEtasjeLeilighet = bygningEtasjeLeilighet?.let { ", $it" } ?: ""
         val postkode = postkode?.let { ", $it" } ?: ""
         val bySted = bySted?.let { ", $it" } ?: ""
