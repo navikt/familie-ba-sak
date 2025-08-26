@@ -9,7 +9,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrMatrikkeladresse")
+@Entity(name = "GrMatrikkeladresseBostedsadresse")
 @DiscriminatorValue("Matrikkeladresse")
 data class GrMatrikkeladresse(
     @Column(name = "matrikkel_id")

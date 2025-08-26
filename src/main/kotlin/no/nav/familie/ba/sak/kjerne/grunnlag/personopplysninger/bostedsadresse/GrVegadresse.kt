@@ -11,7 +11,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrVegadresse")
+@Entity(name = "GrVegadresseBostedsadresse")
 @DiscriminatorValue("Vegadresse")
 data class GrVegadresse(
     @Column(name = "matrikkel_id")

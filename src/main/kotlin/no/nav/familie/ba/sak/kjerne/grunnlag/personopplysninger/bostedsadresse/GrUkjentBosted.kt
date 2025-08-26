@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrUkjentBosted")
+@Entity(name = "GrUkjentBostedBostedsadresse")
 @DiscriminatorValue("ukjentBosted")
 data class GrUkjentBosted(
     @Column(name = "bostedskommune")
