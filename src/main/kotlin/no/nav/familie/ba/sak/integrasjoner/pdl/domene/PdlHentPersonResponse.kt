@@ -26,6 +26,7 @@ data class PdlPersonData(
     val adressebeskyttelse: List<Adressebeskyttelse> = emptyList(),
     val sivilstand: List<Sivilstand> = emptyList(),
     val bostedsadresse: List<Bostedsadresse>,
+    val oppholdsadresse: List<Oppholdsadresse> = emptyList(),
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
     val doedsfall: List<PdlDødsfallResponse> = emptyList(),

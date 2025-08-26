@@ -16,5 +16,10 @@ class PdlUtenlandskAdresssePersonBostedsadresse(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class PdlUtenlandskAdresssePersonUtenlandskAdresse(
+    val adressenavnNummer: String?,
+    val bygningEtasjeLeilighet: String?,
+    val postkode: String?,
+    val bySted: String?,
+    val regionDistriktOmraade: String?,
     val landkode: String,
 )

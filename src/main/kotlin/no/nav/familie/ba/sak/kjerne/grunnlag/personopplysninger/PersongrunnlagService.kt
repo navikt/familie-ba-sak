@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.SKJERMET_BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.ArbeidsforholdService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrOppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -305,6 +306,10 @@ class PersongrunnlagService(
                 personinfo.bostedsadresser
                     .filtrerUtKunNorskeBostedsadresser()
                     .map { GrBostedsadresse.fraBostedsadresse(it, person) }
+                    .toMutableList()
+            person.oppholdsadresser =
+                personinfo.oppholdsadresser
+                    .map { GrOppholdsadresse.fraOppholdsadresse(it, person) }
                     .toMutableList()
             person.sivilstander = personinfo.sivilstander.map { GrSivilstand.fraSivilstand(it, person) }.toMutableList()
             person.statsborgerskap =
