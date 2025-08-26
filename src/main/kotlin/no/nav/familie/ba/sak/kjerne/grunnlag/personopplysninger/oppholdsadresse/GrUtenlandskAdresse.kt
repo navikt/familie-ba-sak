@@ -23,7 +23,7 @@ data class GrUtenlandskAdresse(
     @Column(name = "region")
     val regionDistriktOmraade: String?,
     @Column(name = "landkode")
-    val landkode: String,
+    val landkode: String?,
 ) : GrOppholdsadresse() {
     override fun tilKopiForNyPerson(): GrOppholdsadresse =
         GrUtenlandskAdresse(
@@ -54,7 +54,7 @@ data class GrUtenlandskAdresse(
         val postkode = postkode?.let { ", $it" } ?: ""
         val bySted = bySted?.let { ", $it" } ?: ""
         val regionDistriktOmraade = regionDistriktOmraade?.let { ", $it" } ?: ""
-        val landkode = landkode.let { ", $it" }
+        val landkode = landkode?.let { ", $it" } ?: ""
         return adressenavnNummer?.let {
             "$adressenavnNummer$bygningEtasjeLeilighet$postkode$bySted$regionDistriktOmraade$landkode"
         } ?: "Ukjent utenlandsk adresse$landkode"
