@@ -99,6 +99,7 @@ data class Person(
             id = 0,
             personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
             bostedsadresser = mutableListOf(),
+            oppholdsadresser = mutableListOf(),
             statsborgerskap = mutableListOf(),
             opphold = mutableListOf(),
             arbeidsforhold = mutableListOf(),
@@ -106,16 +107,17 @@ data class Person(
         ).also {
             it.bostedsadresser.addAll(
                 bostedsadresser.map { grBostedsadresse ->
-                    grBostedsadresse.tilKopiForNyPerson(
-                        it,
-                    )
+                    grBostedsadresse.tilKopiForNyPerson(it)
+                },
+            )
+            it.oppholdsadresser.addAll(
+                oppholdsadresser.map { grBostedsadresse ->
+                    grBostedsadresse.tilKopiForNyPerson(it)
                 },
             )
             it.statsborgerskap.addAll(
                 statsborgerskap.map { grStatsborgerskap ->
-                    grStatsborgerskap.tilKopiForNyPerson(
-                        it,
-                    )
+                    grStatsborgerskap.tilKopiForNyPerson(it)
                 },
             )
             it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
