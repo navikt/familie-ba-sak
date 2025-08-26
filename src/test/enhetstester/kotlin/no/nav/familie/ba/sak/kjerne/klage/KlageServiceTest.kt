@@ -2,14 +2,11 @@ package no.nav.familie.ba.sak.kjerne.klage
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagKlagebehandlingDto
 import no.nav.familie.ba.sak.datagenerator.randomAktør
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.BarnetrygdEnhet
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -21,11 +18,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.EksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.behandling.domene.NyEksternBehandlingRelasjon
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.klage.BehandlingResultat
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
-import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -38,18 +35,16 @@ class KlageServiceTest {
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val stegService = mockk<StegService>()
     private val klagebehandlingHenter = mockk<KlagebehandlingHenter>()
-    private val integrasjonClient = mockk<IntegrasjonClient>()
-    private val klageClient = mockk<KlageClient>()
+    private val klagebehandlingOppretter = mockk<KlagebehandlingOppretter>()
     private val klageService =
         KlageService(
             fagsakService = fagsakService,
-            klageClient = klageClient,
-            integrasjonClient = integrasjonClient,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             stegService = stegService,
             vedtakService = mockk(),
             tilbakekrevingKlient = mockk(),
             klagebehandlingHenter = klagebehandlingHenter,
+            klagebehandlingOppretter = klagebehandlingOppretter,
         )
 
     @Nested
@@ -235,22 +230,35 @@ class KlageServiceTest {
     @Nested
     inner class OpprettKlage {
         @Test
-        fun `skal sette enheten til saksbehandlers enhet ved opprettelse av klage`() {
+        fun `skal opprette klagebehandling for fagsak`() {
             // Arrange
             val fagsak = lagFagsak()
-            val forventetEnhet = BarnetrygdEnhet.OSLO
-            val enhetSomIkkeBurdeVelges = BarnetrygdEnhet.VIKAFOSSEN
-            every { integrasjonClient.hentBehandlendeEnheterSomNavIdentHarTilgangTil(any()) } returns
-                listOf(forventetEnhet, enhetSomIkkeBurdeVelges)
+            val dagensDato = LocalDate.now()
+            val klagebehandlingId = UUID.randomUUID()
 
-            val opprettKlageRequest = slot<OpprettKlagebehandlingRequest>()
-            every { klageClient.opprettKlage(capture(opprettKlageRequest)) } returns UUID.randomUUID()
+            every { klagebehandlingOppretter.opprettKlage(fagsak, dagensDato) } returns klagebehandlingId
 
             // Act
-            klageService.opprettKlage(fagsak, LocalDate.now())
+            val id = klageService.opprettKlage(fagsak, LocalDate.now())
 
             // Assert
-            assertThat(opprettKlageRequest.captured.behandlendeEnhet).isEqualTo(forventetEnhet.enhetsnummer)
+            assertThat(id).isEqualTo(klagebehandlingId)
+        }
+
+        @Test
+        fun `skal opprette klagebehandling for fagsakId`() {
+            // Arrange
+            val fagsakId = 1L
+            val klagebehandlingId = UUID.randomUUID()
+            val opprettKlageDto = OpprettKlageDto(LocalDate.now())
+
+            every { klagebehandlingOppretter.opprettKlage(fagsakId, opprettKlageDto) } returns klagebehandlingId
+
+            // Act
+            val id = klageService.opprettKlage(fagsakId, opprettKlageDto)
+
+            // Assert
+            assertThat(id).isEqualTo(klagebehandlingId)
         }
     }
 }

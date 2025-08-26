@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -17,8 +15,6 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.kontrakter.felles.NavIdent
-import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.FagsystemType
 import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.klage.IkkeOpprettet
@@ -26,11 +22,8 @@ import no.nav.familie.kontrakter.felles.klage.IkkeOpprettetÅrsak
 import no.nav.familie.kontrakter.felles.klage.KanIkkeOppretteRevurderingÅrsak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
-import no.nav.familie.kontrakter.felles.klage.Klagebehandlingsårsak
-import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.Opprettet
-import no.nav.familie.kontrakter.felles.klage.Stønadstype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,53 +33,24 @@ import java.util.UUID
 @Service
 class KlageService(
     private val fagsakService: FagsakService,
-    private val klageClient: KlageClient,
-    private val integrasjonClient: IntegrasjonClient,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val klagebehandlingHenter: KlagebehandlingHenter,
+    private val klagebehandlingOppretter: KlagebehandlingOppretter,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun opprettKlage(
         fagsakId: Long,
         opprettKlageDto: OpprettKlageDto,
-    ): UUID {
-        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-
-        return opprettKlage(fagsak, opprettKlageDto.klageMottattDato)
-    }
+    ): UUID = klagebehandlingOppretter.opprettKlage(fagsakId, opprettKlageDto)
 
     fun opprettKlage(
         fagsak: Fagsak,
         klageMottattDato: LocalDate,
-    ): UUID {
-        if (klageMottattDato.isAfter(LocalDate.now())) {
-            throw FunksjonellFeil("Kan ikke opprette klage med krav mottatt frem i tid")
-        }
-
-        val aktivtFødselsnummer = fagsak.aktør.aktivFødselsnummer()
-        val saksbehandlerIdent = SikkerhetContext.hentSaksbehandler()
-        val enhetsnummer =
-            integrasjonClient
-                .hentBehandlendeEnheterSomNavIdentHarTilgangTil(NavIdent(saksbehandlerIdent))
-                .first()
-                .enhetsnummer
-
-        return klageClient.opprettKlage(
-            OpprettKlagebehandlingRequest(
-                ident = aktivtFødselsnummer,
-                stønadstype = Stønadstype.BARNETRYGD,
-                eksternFagsakId = fagsak.id.toString(),
-                fagsystem = Fagsystem.BA,
-                klageMottatt = klageMottattDato,
-                behandlendeEnhet = enhetsnummer,
-                behandlingsårsak = Klagebehandlingsårsak.ORDINÆR,
-            ),
-        )
-    }
+    ): UUID = klagebehandlingOppretter.opprettKlage(fagsak, klageMottattDato)
 
     fun hentKlagebehandlingerPåFagsak(fagsakId: Long): List<KlagebehandlingDto> = klagebehandlingHenter.hentKlagebehandlingerPåFagsak(fagsakId)
 
