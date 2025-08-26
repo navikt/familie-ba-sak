@@ -20,7 +20,7 @@ import java.time.YearMonth
 @TaskStepBeskrivelse(
     taskStepType = MånedligValutajusteringTask.TASK_STEP_TYPE,
     beskrivelse = "månedlig valutajustering",
-    maxAntallFeil = 5,
+    maxAntallFeil = 6,
     settTilManuellOppfølgning = true,
 )
 class MånedligValutajusteringTask(
@@ -32,7 +32,7 @@ class MånedligValutajusteringTask(
     override fun doTask(task: Task) {
         val taskdto = objectMapper.readValue(task.payload, MånedligValutajusteringTaskDto::class.java)
 
-        if (!LocalDate.now().toYearMonth().equals(taskdto.måned)) {
+        if (!YearMonth.now().equals(taskdto.måned)) {
             logger.info("Task for månedlig valutajustering må kjøres innenfor måneden det skal sjekkes mot.")
         } else {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(
