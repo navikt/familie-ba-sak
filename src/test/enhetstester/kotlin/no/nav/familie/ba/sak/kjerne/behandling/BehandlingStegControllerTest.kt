@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BehandlingStegControllerTest {
-    private val unleashService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val tilgangServiceMock = mockk<TilgangService>()
     private val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
     private val stegServiceMock = mockk<StegService>()
@@ -25,7 +25,7 @@ class BehandlingStegControllerTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
             stegService = stegServiceMock,
             tilgangService = tilgangServiceMock,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             utvidetBehandlingService = utvidetBehandlingServiceMock,
         )
 
@@ -33,9 +33,9 @@ class BehandlingStegControllerTest {
     fun `Skal kaste feil hvis saksbehandler uten teknisk endring-tilgang prøver å henlegge en behandling med årsak=teknisk endring`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
 
-        every { unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, behandling.id) } returns false
+        every { featureToggleService.isEnabled(FeatureToggle.TEKNISK_ENDRING, behandling.id) } returns false
         every {
-            unleashService.isEnabled(
+            featureToggleService.isEnabled(
                 FeatureToggle.TEKNISK_VEDLIKEHOLD_HENLEGGELSE,
                 behandling.id,
             )

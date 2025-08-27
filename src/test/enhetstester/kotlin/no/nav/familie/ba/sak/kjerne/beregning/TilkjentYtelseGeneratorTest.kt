@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.common.tilyyyyMMdd
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
@@ -58,16 +58,16 @@ import java.time.YearMonth
 class TilkjentYtelseGeneratorTest {
     private val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     private val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    private val unleashServiceMock: UnleashNextMedContextService = mockk()
-    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, unleashServiceMock)
+    private val featureToggleServiceMock: FeatureToggleService = mockk()
+    private val tilkjentYtelseGenerator: TilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, featureToggleServiceMock)
 
     @BeforeEach
     fun førHverTest() {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
-        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
-        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
-        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG) } returns true
+        every { featureToggleServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
+        every { featureToggleServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
+        every { featureToggleServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG) } returns true
     }
 
     @AfterEach

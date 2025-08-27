@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestInstitusjon
@@ -51,7 +51,7 @@ class FagsakService(
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val skjermetBarnSøkerRepository: SkjermetBarnSøkerRepository,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val antallFagsakerOpprettetFraManuell =
         Metrics.counter("familie.ba.sak.fagsak.opprettet", "saksbehandling", "manuell")
@@ -90,7 +90,7 @@ class FagsakService(
     ): Fagsak {
         if (type == FagsakType.SKJERMET_BARN) {
             when {
-                !unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) -> {
+                !featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) -> {
                     throw FunksjonellFeil(
                         melding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",
                         frontendFeilmelding = "Fagsaktype SKJERMET_BARN er ikke støttet i denne versjonen av tjenesten.",

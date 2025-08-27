@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -65,7 +65,7 @@ class FødselshendelseServiceTest {
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val oppgaveService = mockk<OppgaveService>()
-    val unleashService = mockk<UnleashNextMedContextService>()
+    val featureToggleService = mockk<FeatureToggleService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
     val statsborgerskapService =

@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.toLocalDate
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
@@ -27,7 +27,7 @@ internal class UtenlandskPeriodebeløpServiceTest {
     val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp> =
         mockPeriodeBarnSkjemaRepository()
     val kompetanseRepository: KompetanseRepository = mockk()
-    val unleashService: UnleashNextMedContextService = mockk()
+    val featureToggleService: FeatureToggleService = mockk()
 
     val utenlandskPeriodebeløpService =
         UtenlandskPeriodebeløpService(

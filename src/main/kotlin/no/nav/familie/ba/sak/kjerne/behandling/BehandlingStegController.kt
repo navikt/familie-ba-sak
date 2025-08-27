@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjon
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -42,7 +42,7 @@ class BehandlingStegController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val stegService: StegService,
     private val tilgangService: TilgangService,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @PostMapping(
         path = ["registrer-søknad"],
@@ -180,13 +180,13 @@ class BehandlingStegController(
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
-            tekniskVedlikeholdToggel = unleashService.isEnabled(FeatureToggle.TEKNISK_VEDLIKEHOLD_HENLEGGELSE, behandling.id),
+            tekniskVedlikeholdToggel = featureToggleService.isEnabled(FeatureToggle.TEKNISK_VEDLIKEHOLD_HENLEGGELSE, behandling.id),
             behandlingId = behandling.id,
         )
 
         validerTilgangTilHenleggelseAvBehandling(
             behandling = behandling,
-            tekniskEndringToggle = unleashService.isEnabled(FeatureToggle.TEKNISK_ENDRING, behandling.id),
+            tekniskEndringToggle = featureToggleService.isEnabled(FeatureToggle.TEKNISK_ENDRING, behandling.id),
         )
 
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)

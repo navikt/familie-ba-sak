@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -41,7 +41,7 @@ class KonsistensavstemmingTest {
     private val batchRepository = mockk<BatchRepository>()
     private val dataChunkRepository = mockk<DataChunkRepository>(relaxed = true)
     private val utbetalingsTidslinjeService = mockk<UtbetalingsTidslinjeService>()
-    private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val avstemmingService =
         AvstemmingService(
@@ -66,10 +66,10 @@ class KonsistensavstemmingTest {
     @BeforeEach
     fun setUp() {
         every { taskService.save(any()) } returns Task(type = "dummy", payload = "")
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false) } returns false
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false) } returns false
         konistensavstemmingStartTask = KonsistensavstemMotOppdragStartTask(avstemmingService)
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =
-            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(avstemmingService, taskService, unleashNextMedContextService)
+            KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(avstemmingService, taskService, featureToggleService)
         konsistensavstemMotOppdragDataTask = KonsistensavstemMotOppdragDataTask(avstemmingService)
         konsistensavstemMotOppdragAvsluttTask =
             KonsistensavstemMotOppdragAvsluttTask(avstemmingService, dataChunkRepository, BatchService(batchRepository))

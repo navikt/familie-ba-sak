@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.lagVisningsbehandling
@@ -51,7 +51,7 @@ class FagsakServiceTest {
     private val institusjonService = mockk<InstitusjonService>()
     private val organisasjonService = mockk<OrganisasjonService>()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
-    private val unleashService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
     private val skjermetBarnSøkerRepository = mockk<SkjermetBarnSøkerRepository>()
     private val fagsakService =
         FagsakService(
@@ -67,7 +67,7 @@ class FagsakServiceTest {
             institusjonService = institusjonService,
             organisasjonService = organisasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             skjermetBarnSøkerRepository = skjermetBarnSøkerRepository,
         )
 
@@ -179,7 +179,7 @@ class FagsakServiceTest {
         @Test
         fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn i automatiske løyper`() {
             // Arrange
-            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
 
             val barnIdent = randomBarnFnr(alder = 5)
             val søkerIdent = randomFnr()
@@ -202,7 +202,7 @@ class FagsakServiceTest {
         @Test
         fun `Skal kaste funksjonell feil dersom man forsøker å lage en fagsak med type skjermet barn uten at toggle er på`() {
             // Arrange
-            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns false
 
             val barnIdent = randomBarnFnr(alder = 5)
             val søkerIdent = randomFnr()
@@ -228,7 +228,7 @@ class FagsakServiceTest {
             val barnIdent = randomBarnFnr(alder = 5)
             val barnAktør = randomAktør(barnIdent)
 
-            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
             every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
 
             // Act && Assert
@@ -255,7 +255,7 @@ class FagsakServiceTest {
 
             val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
 
-            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
             every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
 
             // Act && Assert
@@ -283,7 +283,7 @@ class FagsakServiceTest {
 
             val restSkjermetBarnSøker = RestSkjermetBarnSøker(søkerIdent)
 
-            every { unleashService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN) } returns true
             every { personidentService.hentOgLagreAktør(barnIdent, true) } returns barnAktør
             every { personidentService.hentOgLagreAktør(søkerIdent, true) } returns søkerAktør
             every { fagsakRepository.finnFagsakForSkjermetBarnSøker(barnAktør, søkerAktør) } returns fagsak

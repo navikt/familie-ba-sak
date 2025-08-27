@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
@@ -25,7 +25,7 @@ import java.util.Properties
 class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val avstemmingService: AvstemmingService,
     val taskService: TaskService,
-    val unleashNextMedContextService: UnleashNextMedContextService,
+    val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     @WithSpan
     override fun doTask(task: Task) {
@@ -45,7 +45,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
         }
 
         val perioderTilAvstemming =
-            if (unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false)) {
+            if (featureToggleService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false)) {
                 avstemmingService.hentDataForKonsistensavstemmingVedHjelpAvUtbetalingstidslinjer(
                     taskDto.avstemmingsdato,
                     taskDto.relevanteBehandlinger,

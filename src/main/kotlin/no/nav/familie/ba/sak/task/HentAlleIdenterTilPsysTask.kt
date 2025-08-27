@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype.DATA
@@ -32,7 +32,7 @@ class HentAlleIdenterTilPsysTask(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val envService: EnvService,
-    private val unleashNext: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) : AsyncTaskStep {
     private val logger = LoggerFactory.getLogger(HentAlleIdenterTilPsysTask::class.java)
 
@@ -66,7 +66,7 @@ class HentAlleIdenterTilPsysTask(
         logger.info("Starter med å hente alle identer fra Infotrygd for request $requestId")
         val identerFraInfotrygd =
             when {
-                envService.erPreprod() && !unleashNext.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
+                envService.erPreprod() && !featureToggleService.isEnabled(FeatureToggle.HENT_IDENTER_TIL_PSYS_FRA_INFOTRYGD) -> emptyList()
                 else -> infotrygdBarnetrygdClient.hentPersonerMedBarnetrygdTilPensjon(år)
             }
         logger.info("Ferdig med å hente alle identer fra Infotrygd for request $requestId")

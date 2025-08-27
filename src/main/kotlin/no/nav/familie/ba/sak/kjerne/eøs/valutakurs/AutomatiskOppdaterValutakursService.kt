@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.tilSisteVirkedag
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -47,7 +47,7 @@ class AutomatiskOppdaterValutakursService(
     private val tilpassValutakurserTilUtenlandskePeriodebeløpService: TilpassValutakurserTilUtenlandskePeriodebeløpService,
     private val simuleringService: SimuleringService,
     private val vurderingsstrategiForValutakurserRepository: VurderingsstrategiForValutakurserRepository,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val tilpassDifferanseberegningEtterValutakursService: TilpassDifferanseberegningEtterValutakursService,
 ) {
     @Transactional
@@ -227,7 +227,7 @@ class AutomatiskOppdaterValutakursService(
         behandlingId: BehandlingId,
         nyStrategi: VurderingsstrategiForValutakurser,
     ): VurderingsstrategiForValutakurserDB {
-        if (!unleashNextMedContextService.isEnabled(FeatureToggle.TEKNISK_ENDRING)) {
+        if (!featureToggleService.isEnabled(FeatureToggle.TEKNISK_ENDRING)) {
             throw Feil("Relevante toggler for å overstyre vurderingsstrategi for valutakurser er ikke satt.")
         }
 

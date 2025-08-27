@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseString
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseÅrMåned
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.mockAndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -68,7 +68,7 @@ class OppdragSteg {
     private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val unleashNextMedContextService = mockUnleashNextMedContextService()
+    private val unleashNextMedContextService = mockFeatureToggleService()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository(tilkjenteYtelser, behandlinger)
     private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
@@ -90,7 +90,7 @@ class OppdragSteg {
             vedtaksperiodeService = mockk(),
             taskRepository = mockk(),
             vilkårsvurderingService = mockk(),
-            unleashService = unleashNextMedContextService,
+            featureToggleService = unleashNextMedContextService,
             eksternBehandlingRelasjonService = mockk(),
         )
 

@@ -6,7 +6,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.datagenerator.lagØkonomiSimuleringPostering
@@ -51,7 +51,7 @@ class AutomatiskOppdaterValutakursServiceTest {
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val simuleringService = mockk<SimuleringService>()
     val vurderingsstrategiForValutakurserRepository = mockk<VurderingsstrategiForValutakurserRepository>()
-    val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
+    val featureToggleService = mockk<FeatureToggleService>()
 
     val automatiskOppdaterValutakursService =
         AutomatiskOppdaterValutakursService(
@@ -64,7 +64,7 @@ class AutomatiskOppdaterValutakursServiceTest {
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
             vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             tilpassDifferanseberegningEtterValutakursService = tilpassDifferanseberegningEtterValutakursService,
         )
 

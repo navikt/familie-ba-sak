@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
@@ -71,7 +71,7 @@ class StegService(
     private val automatiskBeslutningService: AutomatiskBeslutningService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val automatiskRegistrerSøknadService: AutomatiskRegistrerSøknadService,
 ) {
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -102,7 +102,7 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         // Aktiverer minside for fagsak-aktør
-        if (unleashService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING)) {
+        if (featureToggleService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING)) {
             opprettTaskService.opprettAktiverMinsideTask(behandling.fagsak.aktør)
         }
 
@@ -155,7 +155,7 @@ class StegService(
     }
 
     private fun validerIverksettKAVedtak() {
-        if (!unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK)) {
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK)) {
             throw FunksjonellFeil("Det er ikke mulig å opprette behandling med årsak Iverksette KA-vedtak")
         }
     }
@@ -277,7 +277,7 @@ class StegService(
                 behandlingSteg.utførStegOgAngiNeste(behandling, registrerPersongrunnlagDTO)
             }
 
-        return if (unleashService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) && behandlingEtterRegistrerePersongrunnlag.steg == StegType.REGISTRERE_SØKNAD) {
+        return if (featureToggleService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) && behandlingEtterRegistrerePersongrunnlag.steg == StegType.REGISTRERE_SØKNAD) {
             håndterAutomatiskRegistrerSøknad(behandlingEtterRegistrerePersongrunnlag)
         } else {
             behandlingEtterRegistrerePersongrunnlag

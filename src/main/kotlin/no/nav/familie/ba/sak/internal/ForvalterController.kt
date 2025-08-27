@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
 import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
@@ -91,7 +91,7 @@ class ForvalterController(
     private val autovedtakMånedligValutajusteringService: AutovedtakMånedligValutajusteringService,
     private val månedligValutajusteringScheduler: MånedligValutajusteringScheduler,
     private val fagsakService: FagsakService,
-    private val unleashNextMedContextService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stønadsstatistikkService: StønadsstatistikkService,
@@ -359,7 +359,7 @@ class ForvalterController(
     fun justerValuta(
         @PathVariable fagsakId: Long,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
-        val erPersonMedTilgangTilÅStarteValutajustering = unleashNextMedContextService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
+        val erPersonMedTilgangTilÅStarteValutajustering = featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOMATISK_VALUTAJUSTERING_FOR_ENKELT_SAK)
 
         if (erPersonMedTilgangTilÅStarteValutajustering) {
             autovedtakMånedligValutajusteringService.utførMånedligValutajustering(fagsakId = fagsakId, måned = YearMonth.now())
@@ -534,7 +534,7 @@ class ForvalterController(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Finne og patche andeler tilkjent ytelse i fagsaker med avvik i konsistensavstemming",
         )
-        if (!unleashNextMedContextService.isEnabled(FeatureToggle.SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK, false)) {
+        if (!featureToggleService.isEnabled(FeatureToggle.SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK, false)) {
             throw FunksjonellFeil("Kan ikke finne og patche andeler. Toggelen ${FeatureToggle.SKAL_FINNE_OG_PATCHE_ANDELER_I_FAGAKER_MED_AVVIK} er skrudd av")
         }
 
@@ -593,7 +593,7 @@ class ForvalterController(
             handling = "Opprett task for autovedtak av Finnmarkstillegg",
         )
 
-        if (!unleashNextMedContextService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
+        if (!featureToggleService.isEnabled(FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG)) {
             throw Feil("Toggle for å opprette tasker for autovedtak av Finnmarkstillegg er skrudd av")
         }
 

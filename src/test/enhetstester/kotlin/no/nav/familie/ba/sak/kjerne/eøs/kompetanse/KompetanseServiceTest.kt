@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.datagenerator.tilfeldigPerson
@@ -49,8 +49,8 @@ internal class KompetanseServiceTest {
     val andelerTilkjentYtelseOgEndreteUtbetalingerService = mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
     val overgangsstønadServiceMock: OvergangsstønadService = mockk()
     val vilkårsvurderingServiceMock: VilkårsvurderingService = mockk()
-    val unleashServiceMock: UnleashNextMedContextService = mockk()
-    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, unleashServiceMock)
+    val featureToggleServiceMock: FeatureToggleService = mockk()
+    val tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadServiceMock, vilkårsvurderingServiceMock, featureToggleServiceMock)
     val clockProvider = TestClockProvider()
 
     val kompetanseService =
@@ -74,9 +74,9 @@ internal class KompetanseServiceTest {
         mockKompetanseRepository.deleteAll()
         every { overgangsstønadServiceMock.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns mockkObject()
         every { overgangsstønadServiceMock.hentPerioderMedFullOvergangsstønad(any<Behandling>()) } answers { emptyList() }
-        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
-        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
-        every { unleashServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG) } returns true
+        every { featureToggleServiceMock.isEnabled(FeatureToggle.SKAL_INKLUDERE_ÅRSAK_ENDRE_MOTTAKER_I_INITIELL_GENERERING_AV_ANDELER) } returns true
+        every { featureToggleServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG) } returns true
+        every { featureToggleServiceMock.isEnabled(FeatureToggle.SKAL_GENERERE_SVALBARDTILLEGG) } returns true
     }
 
     @Test

@@ -8,7 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak
 import no.nav.familie.ba.sak.datagenerator.randomAktør
@@ -44,7 +44,7 @@ class StegServiceTest {
     private val satsendringService: SatsendringService = mockk()
     private val opprettTaskService: OpprettTaskService = mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
-    private val unleashService: UnleashNextMedContextService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
     private val tilgangService: TilgangService = mockk()
     private val mocketRegistrerPersongrunnlag: RegistrerPersongrunnlag = mockk<RegistrerPersongrunnlag>(relaxed = true)
 
@@ -63,7 +63,7 @@ class StegServiceTest {
             automatiskBeslutningService = mockk(),
             opprettTaskService = opprettTaskService,
             satskjøringRepository = satskjøringRepository,
-            unleashService = unleashService,
+            featureToggleService = featureToggleService,
             automatiskRegistrerSøknadService = mockk(),
         )
 
@@ -71,7 +71,7 @@ class StegServiceTest {
     fun setup() {
         every { tilgangService.validerTilgangTilBehandling(any(), any()) } just runs
         every { tilgangService.verifiserHarTilgangTilHandling(any(), any()) } just runs
-        every { unleashService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.AUTOMAITSK_REGISTRER_SØKNAD) } returns true
     }
 
     @Nested
@@ -113,7 +113,7 @@ class StegServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
             every { behandlingService.erLøpende(forrigeBehandling) } returns false
             every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
-            every { unleashService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING) } returns true
             every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
             every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
             every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
@@ -182,7 +182,7 @@ class StegServiceTest {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId) } returns forrigeBehandling
             every { behandlingService.erLøpende(forrigeBehandling) } returns false
             every { behandlingService.opprettBehandling(nyBehandling) } returns opprettetBehandling
-            every { unleashService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING) } returns true
+            every { featureToggleService.isEnabled(FeatureToggle.MINSIDE_AKTIVERING) } returns true
             every { opprettTaskService.opprettAktiverMinsideTask(opprettetBehandling.fagsak.aktør) } just runs
             every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(opprettetBehandling.id, any()) } returns opprettetBehandling
             every { mocketRegistrerPersongrunnlag.stegType() } returns StegType.REGISTRERE_PERSONGRUNNLAG
@@ -232,7 +232,7 @@ class StegServiceTest {
                     fagsakId = 1L,
                 )
 
-            every { unleashService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK) } returns false
+            every { featureToggleService.isEnabled(FeatureToggle.KAN_OPPRETTE_REVURDERING_MED_ÅRSAK_IVERKSETTE_KA_VEDTAK) } returns false
 
             // Act & assert
             val exception = assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }

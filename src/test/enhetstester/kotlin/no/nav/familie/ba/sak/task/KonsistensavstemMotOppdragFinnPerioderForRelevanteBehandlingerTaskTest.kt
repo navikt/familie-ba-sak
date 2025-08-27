@@ -5,7 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
@@ -21,13 +21,13 @@ import java.util.UUID
 class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTaskTest {
     private val avstemmingService = mockk<AvstemmingService>()
     private val taskService = mockk<TaskService>()
-    private val unleashNextMedContextService = mockk<UnleashNextMedContextService>()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     private val konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask =
         KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
             avstemmingService = avstemmingService,
             taskService = taskService,
-            unleashNextMedContextService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
         )
 
     @Test
@@ -76,7 +76,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTaskTest {
             )
         } returns false
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false) } returns false
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false) } returns false
 
         val perioderTilAvstemming =
             listOf(
@@ -138,7 +138,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTaskTest {
             )
         } returns false
 
-        every { unleashNextMedContextService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false) } returns true
+        every { featureToggleService.isEnabled(FeatureToggle.BRUK_UTBETALINGSTIDSLINJER_VED_GENERERING_AV_PERIODER_TIL_AVSTEMMING, false) } returns true
 
         val perioderTilAvstemming =
             listOf(

@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggle
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -24,7 +24,7 @@ class StartSatsendring(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val unleashService: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
     private val satsendringService: SatsendringService,
@@ -35,7 +35,7 @@ class StartSatsendring(
     fun startSatsendring(
         antallFagsaker: Int,
     ) {
-        if (!unleashService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false)) {
+        if (!featureToggleService.isEnabled(FeatureToggle.SATSENDRING_ENABLET, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }
