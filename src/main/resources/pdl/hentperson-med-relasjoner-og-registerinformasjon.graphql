@@ -78,6 +78,7 @@ query($ident: ID!) {person: hentPerson(ident: $ident) {
         utenlandskAdresse {
             adressenavnNummer
             bygningEtasjeLeilighet
+            postboksNummerNavn
             postkode
             bySted
             regionDistriktOmraade

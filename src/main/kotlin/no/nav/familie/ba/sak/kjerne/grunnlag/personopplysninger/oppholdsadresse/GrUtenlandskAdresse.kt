@@ -16,6 +16,8 @@ data class GrUtenlandskAdresse(
     val adressenavnNummer: String?,
     @Column(name = "husnummer")
     val bygningEtasjeLeilighet: String?,
+    @Column(name = "postboks")
+    val postboksNummerNavn: String?,
     @Column(name = "postnummer")
     val postkode: String?,
     @Column(name = "by_sted")
@@ -29,6 +31,7 @@ data class GrUtenlandskAdresse(
         GrUtenlandskAdresse(
             adressenavnNummer,
             bygningEtasjeLeilighet,
+            postboksNummerNavn,
             postkode,
             bySted,
             regionDistriktOmraade,
@@ -39,6 +42,7 @@ data class GrUtenlandskAdresse(
         "UtenlandskAdresseDao(" +
             "adressenavnNummer=$adressenavnNummer, " +
             "bygningEtasjeLeilighet=$bygningEtasjeLeilighet, " +
+            "postboksNummerNavn=$postboksNummerNavn, " +
             "postkode=$postkode, " +
             "bySted=$bySted, " +
             "regionDistriktOmraade=$regionDistriktOmraade, " +
@@ -49,12 +53,13 @@ data class GrUtenlandskAdresse(
     override fun tilFrontendString(): String {
         val adressenavnNummer = adressenavnNummer?.storForbokstavIHvertOrd()
         val bygningEtasjeLeilighet = bygningEtasjeLeilighet?.let { ", $it" } ?: ""
+        val postboks = postboksNummerNavn?.let { ", $it" } ?: ""
         val postkode = postkode?.let { ", $it" } ?: ""
         val bySted = bySted?.let { ", $it" } ?: ""
         val regionDistriktOmraade = regionDistriktOmraade?.let { ", $it" } ?: ""
         val landkode = landkode?.let { ", $it" } ?: ""
         return adressenavnNummer?.let {
-            "$adressenavnNummer$bygningEtasjeLeilighet$postkode$bySted$regionDistriktOmraade$landkode"
+            "$adressenavnNummer$bygningEtasjeLeilighet$postboks$postkode$bySted$regionDistriktOmraade$landkode"
         } ?: "Ukjent utenlandsk adresse$landkode"
     }
 
@@ -65,6 +70,7 @@ data class GrUtenlandskAdresse(
             GrUtenlandskAdresse(
                 utenlandskAdresse.adressenavnNummer.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.bygningEtasjeLeilighet.takeUnless { it.isNullOrBlank() },
+                utenlandskAdresse.postboksNummerNavn.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.postkode.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.bySted.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.regionDistriktOmraade.takeUnless { it.isNullOrBlank() },

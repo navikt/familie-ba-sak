@@ -320,8 +320,8 @@ class OppholdsadresseTest {
             // Assert
             assertThat(result).isEqualTo(
                 "UtenlandskAdresseDao(adressenavnNummer=123 Foreign St, " +
-                    "bygningEtasjeLeilighet=Apt 4B, postkode=10001, " +
-                    "bySted=New York, regionDistriktOmraade=NY, " +
+                    "bygningEtasjeLeilighet=Apt 4B, postboksNummerNavn=PO Box 567, " +
+                    "postkode=10001, bySted=New York, regionDistriktOmraade=NY, " +
                     "landkode=USA, oppholdAnnetSted=Svalbard)",
             )
         }
@@ -491,7 +491,7 @@ class OppholdsadresseTest {
             val result = utenlandskAdresse.tilFrontendString()
 
             // Assert
-            assertThat(result).isEqualTo("123 Foreign St, Apt 4B, 10001, New York, NY, USA")
+            assertThat(result).isEqualTo("123 Foreign St, Apt 4B, PO Box 567, 10001, New York, NY, USA")
         }
 
         @Test
