@@ -45,7 +45,7 @@ data class GrVegadresseOppholdsadresse(
         )
 
     override fun toSecureString(): String =
-        "VegadresseDao(" +
+        "GrVegadresseOppholdsadresse(" +
             "husnummer=$husnummer, " +
             "husbokstav=$husbokstav, " +
             "matrikkelId=$matrikkelId, " +
@@ -57,7 +57,7 @@ data class GrVegadresseOppholdsadresse(
             "oppholdAnnetSted=$oppholdAnnetSted" +
             ")"
 
-    override fun toString(): String = "Vegadresse(detaljer skjult)"
+    override fun toString(): String = "GrVegadresseOppholdsadresse(detaljer skjult)"
 
     override fun tilFrontendString(): String {
         val adressenavn = adressenavn?.storForbokstavIHvertOrd()

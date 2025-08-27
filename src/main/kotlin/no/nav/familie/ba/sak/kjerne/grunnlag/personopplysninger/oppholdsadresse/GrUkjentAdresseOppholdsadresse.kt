@@ -10,9 +10,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SV
 @Entity(name = "GrUkjentAdresseOppholdsadresse")
 @DiscriminatorValue("UkjentAdresse")
 class GrUkjentAdresseOppholdsadresse : GrOppholdsadresse() {
-    override fun toString(): String = "UkjentAdresse(detaljer skjult)"
+    override fun toString(): String = "GrUkjentAdresseOppholdsadresse(detaljer skjult)"
 
-    override fun toSecureString(): String = "UkjentAdresseDao(${oppholdAnnetSted ?: ""})"
+    override fun toSecureString(): String = "GrUkjentAdresseOppholdsadresse(${oppholdAnnetSted ?: ""})"
 
     override fun tilFrontendString(): String = "Ukjent adresse${oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""}"
 

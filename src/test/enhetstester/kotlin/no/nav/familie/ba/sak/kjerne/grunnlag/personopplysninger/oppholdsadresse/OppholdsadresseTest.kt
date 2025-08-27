@@ -212,7 +212,7 @@ class OppholdsadresseTest {
             val result = ukjentAdresse.toString()
 
             // Assert
-            assertThat(result).isEqualTo("UkjentAdresse(detaljer skjult)")
+            assertThat(result).isEqualTo("GrUkjentAdresseOppholdsadresse(detaljer skjult)")
         }
 
         @Test
@@ -224,7 +224,7 @@ class OppholdsadresseTest {
             val result = vegadresse.toString()
 
             // Assert
-            assertThat(result).isEqualTo("Vegadresse(detaljer skjult)")
+            assertThat(result).isEqualTo("GrVegadresseOppholdsadresse(detaljer skjult)")
         }
 
         @Test
@@ -236,7 +236,7 @@ class OppholdsadresseTest {
             val result = matrikkeladresse.toString()
 
             // Assert
-            assertThat(result).isEqualTo("Matrikkeladresse(detaljer skjult)")
+            assertThat(result).isEqualTo("GrMatrikkeladresseOppholdsadresse(detaljer skjult)")
         }
 
         @Test
@@ -247,7 +247,7 @@ class OppholdsadresseTest {
             // Act
             val result = utenlandskAdresse.toString()
             // Assert
-            assertThat(result).isEqualTo("UtenlandskAdresse(detaljer skjult)")
+            assertThat(result).isEqualTo("GrUtenlandskAdresseOppholdsadresse(detaljer skjult)")
         }
     }
 
@@ -262,7 +262,7 @@ class OppholdsadresseTest {
             val result = ukjentAdresse.toSecureString()
 
             // Assert
-            assertThat(result).isEqualTo("UkjentAdresseDao(Svalbard)")
+            assertThat(result).isEqualTo("GrUkjentAdresseOppholdsadresse(Svalbard)")
         }
 
         @Test
@@ -274,7 +274,7 @@ class OppholdsadresseTest {
             val result = ukjentAdresse.toSecureString()
 
             // Assert
-            assertThat(result).isEqualTo("UkjentAdresseDao()")
+            assertThat(result).isEqualTo("GrUkjentAdresseOppholdsadresse()")
         }
 
         @Test
@@ -287,7 +287,7 @@ class OppholdsadresseTest {
 
             // Assert
             assertThat(result).isEqualTo(
-                "VegadresseDao(husnummer=10, husbokstav=A, matrikkelId=12345, " +
+                "GrVegadresseOppholdsadresse(husnummer=10, husbokstav=A, matrikkelId=12345, " +
                     "bruksenhetsnummer=H101, adressenavn=Testgata, kommunenummer=0301, " +
                     "tilleggsnavn=Bak butikken, postnummer=0123, oppholdAnnetSted=Svalbard)",
             )
@@ -303,7 +303,7 @@ class OppholdsadresseTest {
 
             // Assert
             assertThat(result).isEqualTo(
-                "MatrikkeladresseDao(matrikkelId=67890, bruksenhetsnummer=H202, " +
+                "GrMatrikkeladresseOppholdsadresse(matrikkelId=67890, bruksenhetsnummer=H202, " +
                     "tilleggsnavn=Ved skogen, postnummer=1234, " +
                     "kommunenummer=0219, oppholdAnnetSted=Svalbard)",
             )
@@ -319,7 +319,7 @@ class OppholdsadresseTest {
 
             // Assert
             assertThat(result).isEqualTo(
-                "UtenlandskAdresseDao(adressenavnNummer=123 Foreign St, " +
+                "GrUtenlandskAdresseOppholdsadresse(adressenavnNummer=123 Foreign St, " +
                     "bygningEtasjeLeilighet=Apt 4B, postboksNummerNavn=PO Box 567, " +
                     "postkode=10001, bySted=New York, regionDistriktOmraade=NY, " +
                     "landkode=USA, oppholdAnnetSted=Svalbard)",

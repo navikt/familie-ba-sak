@@ -39,7 +39,7 @@ data class GrUtenlandskAdresseOppholdsadresse(
         )
 
     override fun toSecureString(): String =
-        "UtenlandskAdresseDao(" +
+        "GrUtenlandskAdresseOppholdsadresse(" +
             "adressenavnNummer=$adressenavnNummer, " +
             "bygningEtasjeLeilighet=$bygningEtasjeLeilighet, " +
             "postboksNummerNavn=$postboksNummerNavn, " +
@@ -63,7 +63,7 @@ data class GrUtenlandskAdresseOppholdsadresse(
         } ?: "Ukjent utenlandsk adresse$landkode"
     }
 
-    override fun toString(): String = "UtenlandskAdresse(detaljer skjult)"
+    override fun toString(): String = "GrUtenlandskAdresseOppholdsadresse(detaljer skjult)"
 
     companion object {
         fun fraUtenlandskAdresse(utenlandskAdresse: UtenlandskAdresse): GrUtenlandskAdresseOppholdsadresse =

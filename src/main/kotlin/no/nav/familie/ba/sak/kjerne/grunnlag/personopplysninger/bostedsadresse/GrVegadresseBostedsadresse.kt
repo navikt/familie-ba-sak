@@ -44,11 +44,11 @@ data class GrVegadresseBostedsadresse(
         )
 
     override fun toSecureString(): String =
-        """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
+        """GrVegadresseBostedsadresse(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer
         """.trimMargin()
 
-    override fun toString(): String = "Vegadresse(detaljer skjult)"
+    override fun toString(): String = "GrVegadresseBostedsadresse(detaljer skjult)"
 
     override fun tilFrontendString() =
         """${

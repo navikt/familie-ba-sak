@@ -34,7 +34,7 @@ data class GrMatrikkeladresseOppholdsadresse(
         )
 
     override fun toSecureString(): String =
-        "MatrikkeladresseDao(" +
+        "GrMatrikkeladresseOppholdsadresse(" +
             "matrikkelId=$matrikkelId, " +
             "bruksenhetsnummer=$bruksenhetsnummer, " +
             "tilleggsnavn=$tilleggsnavn, " +
@@ -43,7 +43,7 @@ data class GrMatrikkeladresseOppholdsadresse(
             "oppholdAnnetSted=$oppholdAnnetSted" +
             ")"
 
-    override fun toString(): String = "Matrikkeladresse(detaljer skjult)"
+    override fun toString(): String = "GrMatrikkeladresseOppholdsadresse(detaljer skjult)"
 
     override fun tilFrontendString(): String {
         val postnummer = postnummer?.let { "Postnummer $postnummer" }

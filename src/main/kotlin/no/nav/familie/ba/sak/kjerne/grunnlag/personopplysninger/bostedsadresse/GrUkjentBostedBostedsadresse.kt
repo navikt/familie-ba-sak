@@ -16,11 +16,11 @@ data class GrUkjentBostedBostedsadresse(
 ) : GrBostedsadresse() {
     override fun tilKopiForNyPerson(): GrBostedsadresse = GrUkjentBostedBostedsadresse(bostedskommune)
 
-    override fun toSecureString(): String = """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
+    override fun toSecureString(): String = """GrUkjentBostedBostedsadresse(bostedskommune=$bostedskommune""".trimMargin()
 
     override fun tilFrontendString() = """Ukjent adresse, kommune $bostedskommune""".trimMargin()
 
-    override fun toString(): String = "UkjentBostedAdresse(detaljer skjult)"
+    override fun toString(): String = "GrUkjentBostedBostedsadresse(detaljer skjult)"
 
     companion object {
         fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBostedBostedsadresse = GrUkjentBostedBostedsadresse(bostedskommune = ukjentBosted.bostedskommune)
