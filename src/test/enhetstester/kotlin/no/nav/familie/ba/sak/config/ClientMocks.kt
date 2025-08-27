@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.randomFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonException
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlIdentRestClient
@@ -23,7 +24,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
 import no.nav.familie.kontrakter.felles.personopplysning.Sivilstand
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
-import no.nav.familie.unleash.UnleashService
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -153,25 +153,33 @@ class ClientMocks {
     }
 
     companion object {
-        fun clearUnleashServiceMocks(mockUnleashService: UnleashService) {
-            val mockUnleashServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
+        fun clearFeatureToggleMocks(mockFeatureToggleService: FeatureToggleService) {
+            val mockFeatureToggleServiceAnswer = System.getProperty("mockFeatureToggleAnswer")?.toBoolean() ?: true
 
-            val featureSlot = slot<String>()
+            val featureSlotString = slot<String>()
+            val featureSlot = slot<FeatureToggle>()
             every {
-                mockUnleashService.isEnabled(toggleId = capture(featureSlot))
+                mockFeatureToggleService.isEnabled(toggleId = capture(featureSlotString))
             } answers {
-                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
-            }
-            every {
-                mockUnleashService.isEnabled(toggleId = capture(featureSlot), defaultValue = any())
-            } answers {
-                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
+                System.getProperty(featureSlotString.captured)?.toBoolean() ?: mockFeatureToggleServiceAnswer
             }
 
             every {
-                mockUnleashService.isEnabled(toggleId = capture(featureSlot), properties = any())
+                mockFeatureToggleService.isEnabled(toggle = capture(featureSlot))
             } answers {
-                System.getProperty(featureSlot.captured)?.toBoolean() ?: mockUnleashServiceAnswer
+                System.getProperty(featureSlot.captured.navn)?.toBoolean() ?: mockFeatureToggleServiceAnswer
+            }
+
+            every {
+                mockFeatureToggleService.isEnabled(toggle = capture(featureSlot), behandlingId = any<Long>())
+            } answers {
+                System.getProperty(featureSlot.captured.navn)?.toBoolean() ?: mockFeatureToggleServiceAnswer
+            }
+
+            every {
+                mockFeatureToggleService.isEnabled(toggle = capture(featureSlot), defaultValue = any<Boolean>())
+            } answers {
+                System.getProperty(featureSlot.captured.navn)?.toBoolean() ?: mockFeatureToggleServiceAnswer
             }
         }
 
