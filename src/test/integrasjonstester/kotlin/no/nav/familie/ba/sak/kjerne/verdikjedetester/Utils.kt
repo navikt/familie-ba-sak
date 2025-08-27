@@ -187,7 +187,6 @@ fun håndterIverksettingAvBehandling(
                     StatusFraOppdragDTO(
                         fagsystem = FAGSYSTEM,
                         personIdent = søkerFnr,
-                        aktørId = behandlingEtterVurdering.fagsak.aktør.aktørId,
                         behandlingsId = behandlingEtterIverksetteVedtak.id,
                         vedtaksId = vedtak.id,
                     ),

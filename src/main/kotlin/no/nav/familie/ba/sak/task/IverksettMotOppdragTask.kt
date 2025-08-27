@@ -45,7 +45,6 @@ class IverksettMotOppdragTask(
             StatusFraOppdragTask.opprettTask(
                 StatusFraOppdragDTO(
                     personIdent = personIdent,
-                    aktørId = null,
                     fagsystem = FAGSYSTEM,
                     behandlingsId = iverksettingTask.behandlingsId,
                     vedtaksId = iverksettingTask.vedtaksId,
