@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted.PAA_SVALBARD
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrUkjentAdresseOppholdsadresse")

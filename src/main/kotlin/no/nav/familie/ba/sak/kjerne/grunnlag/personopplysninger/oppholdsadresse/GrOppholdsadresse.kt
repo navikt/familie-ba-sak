@@ -20,10 +20,10 @@ import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Oppholdsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -81,9 +81,9 @@ abstract class GrOppholdsadresse(
             person: Person,
         ): GrOppholdsadresse =
             when {
-                oppholdsadresse.vegadresse != null -> GrVegadresse.fraVegadresse(oppholdsadresse.vegadresse)
-                oppholdsadresse.matrikkeladresse != null -> GrMatrikkeladresse.fraMatrikkeladresse(oppholdsadresse.matrikkeladresse)
-                oppholdsadresse.utenlandskAdresse != null -> GrUtenlandskAdresse.fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse)
+                oppholdsadresse.vegadresse != null -> GrVegadresse.fraVegadresse(oppholdsadresse.vegadresse!!)
+                oppholdsadresse.matrikkeladresse != null -> GrMatrikkeladresse.fraMatrikkeladresse(oppholdsadresse.matrikkeladresse!!)
+                oppholdsadresse.utenlandskAdresse != null -> GrUtenlandskAdresse.fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse!!)
                 else -> GrUkjentAdresse()
             }.also {
                 it.person = person

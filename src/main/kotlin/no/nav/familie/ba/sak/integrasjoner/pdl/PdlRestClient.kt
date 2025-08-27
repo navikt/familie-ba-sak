@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlOppholdResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlStatsborgerskapResponse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdresssePersonUtenlandskAdresse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdressseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlVergeResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -27,6 +26,7 @@ import no.nav.familie.http.util.UriUtil
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
+import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -211,7 +211,7 @@ class PdlRestClient(
         }
     }
 
-    fun hentUtenlandskBostedsadresse(aktør: Aktør): PdlUtenlandskAdresssePersonUtenlandskAdresse? {
+    fun hentUtenlandskBostedsadresse(aktør: Aktør): UtenlandskAdresse? {
         val pdlPersonRequest =
             PdlPersonRequest(
                 variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),

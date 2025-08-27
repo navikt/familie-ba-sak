@@ -2,12 +2,12 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted.PAA_SVALBARD
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.Oppholdsadresse
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdresssePersonUtenlandskAdresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
+import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
+import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -44,9 +44,10 @@ class OppholdsadresseTest {
         )
 
     private val utenlandskAdresse =
-        PdlUtenlandskAdresssePersonUtenlandskAdresse(
+        UtenlandskAdresse(
             adressenavnNummer = "123 Foreign St",
             bygningEtasjeLeilighet = "Apt 4B",
+            postboksNummerNavn = "PO Box 567",
             postkode = "10001",
             bySted = "New York",
             regionDistriktOmraade = "NY",

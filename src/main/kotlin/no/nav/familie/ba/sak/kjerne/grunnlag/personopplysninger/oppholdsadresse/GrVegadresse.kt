@@ -6,8 +6,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.nullableTilString
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.OppholdAnnetSted
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SVALBARD
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.Objects
 
@@ -64,7 +64,7 @@ data class GrVegadresse(
         val husnummer = husnummer.nullableTilString()
         val husbokstav = husbokstav.nullableTilString()
         val postnummer = postnummer?.let { ", $it" } ?: ""
-        val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == OppholdAnnetSted.PAA_SVALBARD }?.let { ", $it" } ?: ""
+        val oppholdAnnetSted = oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""
         return when (adressenavn) {
             null -> "Ukjent adresse$oppholdAnnetSted"
             else -> "$adressenavn $husnummer$husbokstav$postnummer$oppholdAnnetSted"

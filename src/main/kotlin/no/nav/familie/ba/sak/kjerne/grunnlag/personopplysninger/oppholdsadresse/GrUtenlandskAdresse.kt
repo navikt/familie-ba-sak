@@ -5,8 +5,8 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlUtenlandskAdresssePersonUtenlandskAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrUtenlandskAdresseOppholdsadresse")
@@ -61,7 +61,7 @@ data class GrUtenlandskAdresse(
     override fun toString(): String = "UtenlandskAdresse(detaljer skjult)"
 
     companion object {
-        fun fraUtenlandskAdresse(utenlandskAdresse: PdlUtenlandskAdresssePersonUtenlandskAdresse): GrUtenlandskAdresse =
+        fun fraUtenlandskAdresse(utenlandskAdresse: UtenlandskAdresse): GrUtenlandskAdresse =
             GrUtenlandskAdresse(
                 utenlandskAdresse.adressenavnNummer.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.bygningEtasjeLeilighet.takeUnless { it.isNullOrBlank() },
