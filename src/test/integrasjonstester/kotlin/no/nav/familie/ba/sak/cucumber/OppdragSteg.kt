@@ -68,7 +68,7 @@ class OppdragSteg {
     private var toggles = mutableMapOf<Long, Map<String, Boolean>>()
 
     private val tilkjentYtelseRepository = mockk<TilkjentYtelseRepository>()
-    private val unleashNextMedContextService = mockFeatureToggleService()
+    private val featureToggleService = mockFeatureToggleService()
     private val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     private val andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository(tilkjenteYtelser, behandlinger)
     private val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
@@ -90,7 +90,7 @@ class OppdragSteg {
             vedtaksperiodeService = mockk(),
             taskRepository = mockk(),
             vilkårsvurderingService = mockk(),
-            featureToggleService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = mockk(),
         )
 
@@ -195,7 +195,7 @@ class OppdragSteg {
             tilkjentYtelseRepository.findByFagsak(any())
         } returns tidligereTilkjenteYtelser.filter { it.behandling.fagsak.id == tilkjentYtelse.behandling.fagsak.id }.map { it.copy(utbetalingsoppdrag = objectMapper.writeValueAsString(beregnetUtbetalingsoppdrag[it.behandling.id]?.utbetalingsoppdrag)) }
         every {
-            unleashNextMedContextService.isEnabled(
+            featureToggleService.isEnabled(
                 any<FeatureToggle>(),
                 any<Long>(),
             )
