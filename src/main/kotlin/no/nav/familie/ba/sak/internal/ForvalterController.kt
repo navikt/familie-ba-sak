@@ -803,7 +803,7 @@ class ForvalterController(
             handling = "Finn personer som bor på Svalbard i fagsaker",
         )
 
-        FinnPersonerSomBorPåSvalbardIFagsakerTask.opprettTask(fagsakIder)
+        taskService.save(FinnPersonerSomBorPåSvalbardIFagsakerTask.opprettTask(fagsakIder))
 
         return ResponseEntity.ok("Opprettet task for å finne personer som bor på Svalbard i ${fagsakIder.size} fagsaker")
     }
