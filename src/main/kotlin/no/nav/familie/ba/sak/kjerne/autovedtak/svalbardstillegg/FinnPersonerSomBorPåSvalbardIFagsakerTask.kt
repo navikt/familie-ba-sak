@@ -109,7 +109,7 @@ class FinnPersonerSomBorPåSvalbardIFagsakerTask(
             task.metadata[fagsakId] = personer
         }
 
-        task.metadata["Kjøretid"] = "${tid.inWholeSeconds} sekunder"
+        task.metadata["Kjøretid"] = "${tid.inWholeMilliseconds} ms"
     }
 
     companion object {
