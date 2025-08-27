@@ -15,11 +15,14 @@ object EndringIEndretUtbetalingAndelUtil {
 
         val endringerTidslinje =
             nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-                (
-                    nåværende?.avtaletidspunktDeltBosted != forrige?.avtaletidspunktDeltBosted ||
-                        nåværende?.årsak != forrige?.årsak ||
-                        nåværende?.søknadstidspunkt != forrige?.søknadstidspunkt
-                )
+                val endringIAvtaletidspunktDeltBosted = nåværende?.avtaletidspunktDeltBosted != forrige?.avtaletidspunktDeltBosted
+                val endringIÅrsak = nåværende?.årsak != forrige?.årsak
+                val endringISøknadstidspunkt = nåværende?.søknadstidspunkt != forrige?.søknadstidspunkt
+                val haddeTidligereIkkeSøknadstidspunkt = forrige?.søknadstidspunkt == null
+
+                endringIAvtaletidspunktDeltBosted ||
+                    endringIÅrsak ||
+                    (endringISøknadstidspunkt && haddeTidligereIkkeSøknadstidspunkt)
             }
 
         return endringerTidslinje

@@ -988,7 +988,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere true hvis søknadstidspunkt er endret`() {
+    fun `Endring i endret utbetaling andel - skal returnere true hvis søknadstidspunkt er endret og det ikke var satt før`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel =
             lagEndretUtbetalingAndel(
@@ -997,7 +997,7 @@ class BehandlingsresultatEndringUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 årsak = Årsak.DELT_BOSTED,
-                søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+                søknadstidspunkt = null,
                 avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
             )
 
