@@ -794,7 +794,7 @@ class ForvalterController(
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
     }
 
-    @GetMapping("/opprett-finn-personer-som-bor-paa-svalbard-i-fagsaker-task")
+    @PostMapping("/opprett-finn-personer-som-bor-paa-svalbard-i-fagsaker-task")
     fun opprettPersonerSomBorPåSvalbardIFagsakerTask(
         @RequestBody fagsakIder: List<Long>,
     ): ResponseEntity<String> {
