@@ -14,7 +14,7 @@ import java.util.Objects
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrVegadresseOppholdsadresse")
 @DiscriminatorValue("Vegadresse")
-data class GrVegadresse(
+data class GrVegadresseOppholdsadresse(
     @Column(name = "matrikkel_id")
     val matrikkelId: Long?,
     @Column(name = "husnummer")
@@ -33,7 +33,7 @@ data class GrVegadresse(
     val postnummer: String?,
 ) : GrOppholdsadresse() {
     override fun tilKopiForNyPerson(): GrOppholdsadresse =
-        GrVegadresse(
+        GrVegadresseOppholdsadresse(
             matrikkelId,
             husnummer,
             husbokstav,
@@ -75,7 +75,7 @@ data class GrVegadresse(
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val otherVegadresse = other as GrVegadresse
+        val otherVegadresse = other as GrVegadresseOppholdsadresse
 
         return this === other ||
             (
@@ -95,8 +95,8 @@ data class GrVegadresse(
     override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
-        fun fraVegadresse(vegadresse: Vegadresse): GrVegadresse =
-            GrVegadresse(
+        fun fraVegadresse(vegadresse: Vegadresse): GrVegadresseOppholdsadresse =
+            GrVegadresseOppholdsadresse(
                 matrikkelId = vegadresse.matrikkelId,
                 husnummer = vegadresse.husnummer.takeUnless { it.isNullOrBlank() },
                 husbokstav = vegadresse.husbokstav.takeUnless { it.isNullOrBlank() },

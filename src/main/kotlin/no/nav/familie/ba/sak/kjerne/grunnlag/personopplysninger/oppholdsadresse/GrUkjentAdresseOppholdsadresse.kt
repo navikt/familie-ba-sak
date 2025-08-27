@@ -9,12 +9,12 @@ import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted.PAA_SV
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrUkjentAdresseOppholdsadresse")
 @DiscriminatorValue("UkjentAdresse")
-class GrUkjentAdresse : GrOppholdsadresse() {
+class GrUkjentAdresseOppholdsadresse : GrOppholdsadresse() {
     override fun toString(): String = "UkjentAdresse(detaljer skjult)"
 
     override fun toSecureString(): String = "UkjentAdresseDao(${oppholdAnnetSted ?: ""})"
 
     override fun tilFrontendString(): String = "Ukjent adresse${oppholdAnnetSted.takeIf { it == PAA_SVALBARD }?.let { ", $it" } ?: ""}"
 
-    override fun tilKopiForNyPerson(): GrOppholdsadresse = GrUkjentAdresse()
+    override fun tilKopiForNyPerson(): GrOppholdsadresse = GrUkjentAdresseOppholdsadresse()
 }

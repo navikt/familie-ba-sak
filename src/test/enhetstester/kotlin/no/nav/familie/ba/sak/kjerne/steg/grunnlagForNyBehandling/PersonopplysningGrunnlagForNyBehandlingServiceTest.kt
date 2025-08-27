@@ -24,9 +24,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagForNyBehandlingServiceTest.Companion.validerAtPersonerIGrunnlagErLike
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBostedBostedsadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
@@ -119,9 +119,9 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
 
         val grVegadresse =
-            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
-        val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
-        val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
+            GrVegadresseBostedsadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
+        val grUkjentBosted = GrUkjentBostedBostedsadresse("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grMatrikkeladresse = GrMatrikkeladresseBostedsadresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
 
         val statsborgerskap =
             GrStatsborgerskap(
@@ -210,9 +210,9 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
 
         val grVegadresse =
-            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
-        val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
-        val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
+            GrVegadresseBostedsadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
+        val grUkjentBosted = GrUkjentBostedBostedsadresse("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grMatrikkeladresse = GrMatrikkeladresseBostedsadresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
 
         val statsborgerskap =
             GrStatsborgerskap(

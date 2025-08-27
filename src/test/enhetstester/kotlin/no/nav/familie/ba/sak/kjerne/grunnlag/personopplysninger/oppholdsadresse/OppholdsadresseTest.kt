@@ -83,9 +83,9 @@ class OppholdsadresseTest {
             val grOppholdsadresse = GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person1)
 
             // Assert
-            assertThat(grOppholdsadresse).isInstanceOf(GrVegadresse::class.java)
+            assertThat(grOppholdsadresse).isInstanceOf(GrVegadresseOppholdsadresse::class.java)
 
-            val grVegadresse = grOppholdsadresse as GrVegadresse
+            val grVegadresse = grOppholdsadresse as GrVegadresseOppholdsadresse
             assertOppholdsadresse(grVegadresse)
             assertVegadresse(grVegadresse)
         }
@@ -99,9 +99,9 @@ class OppholdsadresseTest {
             val grOppholdsadresse = GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person1)
 
             // Assert
-            assertThat(grOppholdsadresse).isInstanceOf(GrMatrikkeladresse::class.java)
+            assertThat(grOppholdsadresse).isInstanceOf(GrMatrikkeladresseOppholdsadresse::class.java)
 
-            val grMatrikkeladresse = grOppholdsadresse as GrMatrikkeladresse
+            val grMatrikkeladresse = grOppholdsadresse as GrMatrikkeladresseOppholdsadresse
             assertOppholdsadresse(grMatrikkeladresse)
             assertMatrikkeladresse(grMatrikkeladresse)
         }
@@ -115,9 +115,9 @@ class OppholdsadresseTest {
             val grOppholdsadresse = GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person1)
 
             // Assert
-            assertThat(grOppholdsadresse).isInstanceOf(GrUtenlandskAdresse::class.java)
+            assertThat(grOppholdsadresse).isInstanceOf(GrUtenlandskAdresseOppholdsadresse::class.java)
 
-            val grUtenlandskAdresse = grOppholdsadresse as GrUtenlandskAdresse
+            val grUtenlandskAdresse = grOppholdsadresse as GrUtenlandskAdresseOppholdsadresse
             assertOppholdsadresse(grUtenlandskAdresse)
             assertUtenlandskAdresse(grUtenlandskAdresse)
         }
@@ -131,7 +131,7 @@ class OppholdsadresseTest {
             val grOppholdsadresse = GrOppholdsadresse.fraOppholdsadresse(oppholdsadresse, person1)
 
             // Assert
-            assertThat(grOppholdsadresse).isInstanceOf(GrUkjentAdresse::class.java)
+            assertThat(grOppholdsadresse).isInstanceOf(GrUkjentAdresseOppholdsadresse::class.java)
             assertOppholdsadresse(grOppholdsadresse)
         }
 
@@ -177,9 +177,9 @@ class OppholdsadresseTest {
             val grVegadresse = GrOppholdsadresse.fraOppholdsadresse(oppholdsadresseMedVegMatrikkelOgUtenlandskAdresse, person1)
 
             // Assert
-            assertThat(grUtenlandskAdresse).isInstanceOf(GrUtenlandskAdresse::class.java)
-            assertThat(grMatrikkeladresse).isInstanceOf(GrMatrikkeladresse::class.java)
-            assertThat(grVegadresse).isInstanceOf(GrVegadresse::class.java)
+            assertThat(grUtenlandskAdresse).isInstanceOf(GrUtenlandskAdresseOppholdsadresse::class.java)
+            assertThat(grMatrikkeladresse).isInstanceOf(GrMatrikkeladresseOppholdsadresse::class.java)
+            assertThat(grVegadresse).isInstanceOf(GrVegadresseOppholdsadresse::class.java)
         }
     }
 
@@ -187,26 +187,26 @@ class OppholdsadresseTest {
         GrOppholdsadresse.fraOppholdsadresse(
             oppholdsadresse = oppholdsadresse.copy(vegadresse = vegadresse),
             person = person1,
-        ) as GrVegadresse
+        ) as GrVegadresseOppholdsadresse
 
     private val grMatrikkeladresse =
         GrOppholdsadresse.fraOppholdsadresse(
             oppholdsadresse = oppholdsadresse.copy(matrikkeladresse = matrikkeladresse),
             person = person1,
-        ) as GrMatrikkeladresse
+        ) as GrMatrikkeladresseOppholdsadresse
 
     private val grUtenlandskAdresse =
         GrOppholdsadresse.fraOppholdsadresse(
             oppholdsadresse = oppholdsadresse.copy(utenlandskAdresse = utenlandskAdresse),
             person = person1,
-        ) as GrUtenlandskAdresse
+        ) as GrUtenlandskAdresseOppholdsadresse
 
     @Nested
     inner class ToString {
         @Test
         fun `GrUkjentAdresse toString skal returnere riktig format`() {
             // Arrange
-            val ukjentAdresse = GrUkjentAdresse()
+            val ukjentAdresse = GrUkjentAdresseOppholdsadresse()
 
             // Act
             val result = ukjentAdresse.toString()
@@ -256,7 +256,7 @@ class OppholdsadresseTest {
         @Test
         fun `GrUkjentAdresse toSecureString skal returnere riktig format`() {
             // Arrange
-            val ukjentAdresse = GrUkjentAdresse().apply { oppholdAnnetSted = PAA_SVALBARD }
+            val ukjentAdresse = GrUkjentAdresseOppholdsadresse().apply { oppholdAnnetSted = PAA_SVALBARD }
 
             // Act
             val result = ukjentAdresse.toSecureString()
@@ -268,7 +268,7 @@ class OppholdsadresseTest {
         @Test
         fun `GrUkjentAdresse toSecureString uten oppholdAnnetSted skal returnere riktig format`() {
             // Arrange
-            val ukjentAdresse = GrUkjentAdresse()
+            val ukjentAdresse = GrUkjentAdresseOppholdsadresse()
 
             // Act
             val result = ukjentAdresse.toSecureString()
@@ -332,7 +332,7 @@ class OppholdsadresseTest {
         @Test
         fun `GrUkjentAdresse tilFrontendString uten oppholdAnnetSted skal returnere 'Ukjent adresse'`() {
             // Arrange
-            val ukjentAdresse = GrUkjentAdresse()
+            val ukjentAdresse = GrUkjentAdresseOppholdsadresse()
 
             // Act
             val result = ukjentAdresse.tilFrontendString()
@@ -347,7 +347,7 @@ class OppholdsadresseTest {
             opphold: OppholdAnnetSted,
         ) {
             // Arrange
-            val ukjentAdresse = GrUkjentAdresse().apply { oppholdAnnetSted = opphold }
+            val ukjentAdresse = GrUkjentAdresseOppholdsadresse().apply { oppholdAnnetSted = opphold }
 
             // Act
             val result = ukjentAdresse.tilFrontendString()
@@ -359,7 +359,7 @@ class OppholdsadresseTest {
         @Test
         fun `GrUkjentAdresse tilFrontendString med oppholdAnnetSted Svalbard skal inkludere det`() {
             // Arrange
-            val ukjentAdresse = GrUkjentAdresse().apply { oppholdAnnetSted = PAA_SVALBARD }
+            val ukjentAdresse = GrUkjentAdresseOppholdsadresse().apply { oppholdAnnetSted = PAA_SVALBARD }
 
             // Act
             val result = ukjentAdresse.tilFrontendString()
@@ -513,7 +513,7 @@ class OppholdsadresseTest {
         fun `GrUkjentAdresse tilKopiForNyPerson skal returnere ny instans med samme data`() {
             // Arrange
             val originalAdresse =
-                GrUkjentAdresse().apply {
+                GrUkjentAdresseOppholdsadresse().apply {
                     periode = DatoIntervallEntitet(fom, tom)
                     person = person1
                     oppholdAnnetSted = PAA_SVALBARD
@@ -523,7 +523,7 @@ class OppholdsadresseTest {
             val kopiForNyPerson = originalAdresse.tilKopiForNyPerson(person2)
 
             // Assert
-            assertThat(kopiForNyPerson).isInstanceOf(GrUkjentAdresse::class.java)
+            assertThat(kopiForNyPerson).isInstanceOf(GrUkjentAdresseOppholdsadresse::class.java)
             assertThat(kopiForNyPerson).isNotSameAs(originalAdresse)
             assertOppholdsadresse(kopiForNyPerson, forventetPerson = person2, forventetOppholdAnnetSted = PAA_SVALBARD)
         }
@@ -542,10 +542,10 @@ class OppholdsadresseTest {
             val kopiForNyPerson = originalAdresse.tilKopiForNyPerson(person2)
 
             // Assert
-            assertThat(kopiForNyPerson).isInstanceOf(GrVegadresse::class.java)
+            assertThat(kopiForNyPerson).isInstanceOf(GrVegadresseOppholdsadresse::class.java)
             assertThat(kopiForNyPerson).isNotSameAs(originalAdresse)
 
-            val kopierteVegadresse = kopiForNyPerson as GrVegadresse
+            val kopierteVegadresse = kopiForNyPerson as GrVegadresseOppholdsadresse
             assertVegadresse(kopierteVegadresse)
             assertOppholdsadresse(kopierteVegadresse, forventetPerson = person2, forventetOppholdAnnetSted = PAA_SVALBARD)
         }
@@ -564,10 +564,10 @@ class OppholdsadresseTest {
             val kopiForNyPerson = originalAdresse.tilKopiForNyPerson(person2)
 
             // Assert
-            assertThat(kopiForNyPerson).isInstanceOf(GrMatrikkeladresse::class.java)
+            assertThat(kopiForNyPerson).isInstanceOf(GrMatrikkeladresseOppholdsadresse::class.java)
             assertThat(kopiForNyPerson).isNotSameAs(originalAdresse)
 
-            val kopierteMatrikkeladresse = kopiForNyPerson as GrMatrikkeladresse
+            val kopierteMatrikkeladresse = kopiForNyPerson as GrMatrikkeladresseOppholdsadresse
             assertMatrikkeladresse(kopierteMatrikkeladresse)
             assertOppholdsadresse(kopierteMatrikkeladresse, forventetPerson = person2, forventetOppholdAnnetSted = PAA_SVALBARD)
         }
@@ -586,10 +586,10 @@ class OppholdsadresseTest {
             val kopiForNyPerson = originalAdresse.tilKopiForNyPerson(person2)
 
             // Assert
-            assertThat(kopiForNyPerson).isInstanceOf(GrUtenlandskAdresse::class.java)
+            assertThat(kopiForNyPerson).isInstanceOf(GrUtenlandskAdresseOppholdsadresse::class.java)
             assertThat(kopiForNyPerson).isNotSameAs(originalAdresse)
 
-            val kopierteUtenlandskAdresse = kopiForNyPerson as GrUtenlandskAdresse
+            val kopierteUtenlandskAdresse = kopiForNyPerson as GrUtenlandskAdresseOppholdsadresse
             assertUtenlandskAdresse(kopierteUtenlandskAdresse)
             assertOppholdsadresse(kopierteUtenlandskAdresse, forventetPerson = person2, forventetOppholdAnnetSted = PAA_SVALBARD)
         }
@@ -598,7 +598,7 @@ class OppholdsadresseTest {
         fun `tilKopiForNyPerson skal håndtere null verdier korrekt`() {
             // Arrange
             val originalAdresse =
-                GrVegadresse(
+                GrVegadresseOppholdsadresse(
                     matrikkelId = null,
                     husnummer = null,
                     husbokstav = null,
@@ -635,7 +635,7 @@ class OppholdsadresseTest {
     }
 
     fun assertVegadresse(
-        grVegadresse: GrVegadresse,
+        grVegadresse: GrVegadresseOppholdsadresse,
         forventetMatrikkelId: Long? = vegadresse.matrikkelId,
         forventetHusnummer: String? = vegadresse.husnummer,
         forventetHusbokstav: String? = vegadresse.husbokstav,
@@ -656,7 +656,7 @@ class OppholdsadresseTest {
     }
 
     fun assertMatrikkeladresse(
-        grMatrikkeladresse: GrMatrikkeladresse,
+        grMatrikkeladresse: GrMatrikkeladresseOppholdsadresse,
         forventetMatrikkelId: Long? = matrikkeladresse.matrikkelId,
         forventetBruksenhetsnummer: String? = matrikkeladresse.bruksenhetsnummer,
         forventetTilleggsnavn: String? = matrikkeladresse.tilleggsnavn,
@@ -671,7 +671,7 @@ class OppholdsadresseTest {
     }
 
     fun assertUtenlandskAdresse(
-        grUtenlandskAdresse: GrUtenlandskAdresse,
+        grUtenlandskAdresse: GrUtenlandskAdresseOppholdsadresse,
         forventetAdressenavnNummer: String? = grUtenlandskAdresse.adressenavnNummer,
         forventetBygningEtasjeLeilighet: String? = grUtenlandskAdresse.bygningEtasjeLeilighet,
         forventetPostkode: String? = grUtenlandskAdresse.postkode,

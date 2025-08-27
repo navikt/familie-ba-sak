@@ -21,6 +21,9 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrMatrikkeladresseOppholdsadresse.Companion.fraMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrUtenlandskAdresseOppholdsadresse.Companion.fraUtenlandskAdresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.oppholdsadresse.GrVegadresseOppholdsadresse.Companion.fraVegadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.OppholdAnnetSted
 import no.nav.familie.kontrakter.felles.personopplysning.Oppholdsadresse
@@ -81,10 +84,10 @@ abstract class GrOppholdsadresse(
             person: Person,
         ): GrOppholdsadresse =
             when {
-                oppholdsadresse.vegadresse != null -> GrVegadresse.fraVegadresse(oppholdsadresse.vegadresse!!)
-                oppholdsadresse.matrikkeladresse != null -> GrMatrikkeladresse.fraMatrikkeladresse(oppholdsadresse.matrikkeladresse!!)
-                oppholdsadresse.utenlandskAdresse != null -> GrUtenlandskAdresse.fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse!!)
-                else -> GrUkjentAdresse()
+                oppholdsadresse.vegadresse != null -> fraVegadresse(oppholdsadresse.vegadresse!!)
+                oppholdsadresse.matrikkeladresse != null -> fraMatrikkeladresse(oppholdsadresse.matrikkeladresse!!)
+                oppholdsadresse.utenlandskAdresse != null -> fraUtenlandskAdresse(oppholdsadresse.utenlandskAdresse!!)
+                else -> GrUkjentAdresseOppholdsadresse()
             }.also {
                 it.person = person
                 it.periode = DatoIntervallEntitet(oppholdsadresse.gyldigFraOgMed, oppholdsadresse.gyldigTilOgMed)

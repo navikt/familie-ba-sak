@@ -11,7 +11,7 @@ import no.nav.familie.kontrakter.felles.personopplysning.UtenlandskAdresse
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrUtenlandskAdresseOppholdsadresse")
 @DiscriminatorValue("UtenlandskAdresse")
-data class GrUtenlandskAdresse(
+data class GrUtenlandskAdresseOppholdsadresse(
     @Column(name = "adressenavn")
     val adressenavnNummer: String?,
     @Column(name = "husnummer")
@@ -28,7 +28,7 @@ data class GrUtenlandskAdresse(
     val landkode: String?,
 ) : GrOppholdsadresse() {
     override fun tilKopiForNyPerson(): GrOppholdsadresse =
-        GrUtenlandskAdresse(
+        GrUtenlandskAdresseOppholdsadresse(
             adressenavnNummer,
             bygningEtasjeLeilighet,
             postboksNummerNavn,
@@ -66,8 +66,8 @@ data class GrUtenlandskAdresse(
     override fun toString(): String = "UtenlandskAdresse(detaljer skjult)"
 
     companion object {
-        fun fraUtenlandskAdresse(utenlandskAdresse: UtenlandskAdresse): GrUtenlandskAdresse =
-            GrUtenlandskAdresse(
+        fun fraUtenlandskAdresse(utenlandskAdresse: UtenlandskAdresse): GrUtenlandskAdresseOppholdsadresse =
+            GrUtenlandskAdresseOppholdsadresse(
                 utenlandskAdresse.adressenavnNummer.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.bygningEtasjeLeilighet.takeUnless { it.isNullOrBlank() },
                 utenlandskAdresse.postboksNummerNavn.takeUnless { it.isNullOrBlank() },
