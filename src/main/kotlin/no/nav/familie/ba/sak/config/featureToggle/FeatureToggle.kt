@@ -44,9 +44,6 @@ enum class FeatureToggle(
     // NAV-25256
     SKAL_BRUKE_FAGSAKTYPE_SKJERMET_BARN("familie-ba-sak.skjermet-barn"),
 
-    // NAV-25329
-    BRUK_NY_OPPRETT_FAGSAK_MODAL("familie-ba-sak.bruk.ny.opprett.fagsak.modal"),
-
     // NAV-25472
     MINSIDE_AKTIVERING("familie-ba-sak.minside-aktivering"),
 
@@ -56,9 +53,6 @@ enum class FeatureToggle(
 
     // NAV-25543
     SKAL_BRUKE_NYTT_FELT_I_EØS_BEGRUNNELSE_DATA_MED_KOMPETANSE("familie-ba-sak.skal-bruke-nytt-felt-i-eos-begrunnelse-data-med-kompetanse"),
-
-    // NAV-24639
-    MIN_SIDE_BARNETRYGD_ENDEPUNKT("familie-ba-sak.min-side-barnetrygd-endepunkt"),
 
     // NAV-
     SKAL_GENERERE_FINNMARKSTILLEGG("familie-ba-sak.andel-generering-finnmark-nord-troms"),
