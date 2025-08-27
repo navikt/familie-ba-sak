@@ -1,11 +1,10 @@
 package no.nav.familie.ba.sak.datagenerator
 
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.time.LocalDate
-import kotlin.Long
 
 fun lagGrVegadresse(
     matrikkelId: Long? = null,
@@ -14,7 +13,7 @@ fun lagGrVegadresse(
     husnummer: String? = null,
     husbokstav: String? = null,
     postnummer: String? = null,
-) = GrVegadresse(
+) = GrVegadresseBostedsadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
     husbokstav = husbokstav,

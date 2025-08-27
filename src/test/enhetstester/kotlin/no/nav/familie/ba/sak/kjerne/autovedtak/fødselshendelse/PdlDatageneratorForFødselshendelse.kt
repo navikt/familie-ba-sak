@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresseBostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTANDTYPE
@@ -156,7 +156,7 @@ fun genererAutomatiskTestperson(
     )
 
 val mockNåværendeBosted =
-    GrMatrikkeladresse(
+    GrMatrikkeladresseBostedsadresse(
         matrikkelId = 123L,
         bruksenhetsnummer = "H301",
         tilleggsnavn = "navn",
@@ -167,7 +167,7 @@ val mockNåværendeBosted =
     }
 
 val mockAnnetNåværendeBosted =
-    GrMatrikkeladresse(
+    GrMatrikkeladresseBostedsadresse(
         matrikkelId = 123L,
         bruksenhetsnummer = "H501",
         tilleggsnavn = "navn",
@@ -178,7 +178,7 @@ val mockAnnetNåværendeBosted =
     }
 
 val mockTidligereBosted =
-    GrMatrikkeladresse(
+    GrMatrikkeladresseBostedsadresse(
         matrikkelId = 123L,
         bruksenhetsnummer = "H301",
         tilleggsnavn = "navn",

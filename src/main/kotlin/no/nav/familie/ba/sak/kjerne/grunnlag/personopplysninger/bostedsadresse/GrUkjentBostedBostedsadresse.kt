@@ -8,21 +8,21 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrUkjentBosted")
+@Entity(name = "GrUkjentBostedBostedsadresse")
 @DiscriminatorValue("ukjentBosted")
-data class GrUkjentBosted(
+data class GrUkjentBostedBostedsadresse(
     @Column(name = "bostedskommune")
     val bostedskommune: String,
 ) : GrBostedsadresse() {
-    override fun tilKopiForNyPerson(): GrBostedsadresse = GrUkjentBosted(bostedskommune)
+    override fun tilKopiForNyPerson(): GrBostedsadresse = GrUkjentBostedBostedsadresse(bostedskommune)
 
-    override fun toSecureString(): String = """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
+    override fun toSecureString(): String = """GrUkjentBostedBostedsadresse(bostedskommune=$bostedskommune""".trimMargin()
 
     override fun tilFrontendString() = """Ukjent adresse, kommune $bostedskommune""".trimMargin()
 
-    override fun toString(): String = "UkjentBostedAdresse(detaljer skjult)"
+    override fun toString(): String = "GrUkjentBostedBostedsadresse(detaljer skjult)"
 
     companion object {
-        fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBosted = GrUkjentBosted(bostedskommune = ukjentBosted.bostedskommune)
+        fun fraUkjentBosted(ukjentBosted: UkjentBosted): GrUkjentBostedBostedsadresse = GrUkjentBostedBostedsadresse(bostedskommune = ukjentBosted.bostedskommune)
     }
 }

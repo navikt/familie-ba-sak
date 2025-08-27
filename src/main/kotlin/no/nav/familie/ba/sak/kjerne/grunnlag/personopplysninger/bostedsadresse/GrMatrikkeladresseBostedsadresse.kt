@@ -9,9 +9,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "GrMatrikkeladresse")
+@Entity(name = "GrMatrikkeladresseBostedsadresse")
 @DiscriminatorValue("Matrikkeladresse")
-data class GrMatrikkeladresse(
+data class GrMatrikkeladresseBostedsadresse(
     @Column(name = "matrikkel_id")
     val matrikkelId: Long?,
     @Column(name = "bruksenhetsnummer")
@@ -24,7 +24,7 @@ data class GrMatrikkeladresse(
     val kommunenummer: String?,
 ) : GrBostedsadresse() {
     override fun tilKopiForNyPerson(): GrBostedsadresse =
-        GrMatrikkeladresse(
+        GrMatrikkeladresseBostedsadresse(
             matrikkelId,
             bruksenhetsnummer,
             tilleggsnavn,
@@ -33,11 +33,11 @@ data class GrMatrikkeladresse(
         )
 
     override fun toSecureString(): String =
-        """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
+        """GrMatrikkeladresseBostedsadresse(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
 |               postnummer=$postnummer,kommunenummer=$kommunenummer
         """.trimMargin()
 
-    override fun toString(): String = "Matrikkeladresse(detaljer skjult)"
+    override fun toString(): String = "GrMatrikkeladresseBostedsadresse(detaljer skjult)"
 
     override fun tilFrontendString() = """Matrikkel $matrikkelId, bruksenhet $bruksenhetsnummer, postnummer $postnummer""".trimMargin()
 
@@ -45,7 +45,7 @@ data class GrMatrikkeladresse(
         if (other == null || javaClass != other.javaClass) {
             return false
         }
-        val otherMatrikkeladresse = other as GrMatrikkeladresse
+        val otherMatrikkeladresse = other as GrMatrikkeladresseBostedsadresse
         return this === other ||
             matrikkelId != null &&
             matrikkelId == otherMatrikkeladresse.matrikkelId &&
@@ -55,8 +55,8 @@ data class GrMatrikkeladresse(
     override fun hashCode(): Int = Objects.hash(matrikkelId)
 
     companion object {
-        fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresse =
-            GrMatrikkeladresse(
+        fun fraMatrikkeladresse(matrikkeladresse: Matrikkeladresse): GrMatrikkeladresseBostedsadresse =
+            GrMatrikkeladresseBostedsadresse(
                 matrikkelId = matrikkeladresse.matrikkelId,
                 bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
                 tilleggsnavn = matrikkeladresse.tilleggsnavn,

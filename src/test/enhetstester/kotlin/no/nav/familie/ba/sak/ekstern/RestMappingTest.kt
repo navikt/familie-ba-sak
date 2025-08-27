@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.ekstern.restDomene.fyllInnTomDatoer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse.Companion.fregManglendeFlytteDato
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresseBostedsadresse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -13,7 +13,7 @@ class RestMappingTest {
     @Test
     fun `Manglende angitt flyttedato fra freg mappes som manglende dato`() {
         val adresseUtenFlyttedato =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 matrikkelId = 1234,
                 husnummer = "11",
                 husbokstav = "B",
@@ -26,7 +26,7 @@ class RestMappingTest {
 
         val flyttedato = LocalDate.of(2000, 1, 1)
         val adresseMedFlyttedato =
-            GrVegadresse(
+            GrVegadresseBostedsadresse(
                 matrikkelId = 1234,
                 husnummer = "11",
                 husbokstav = "B",

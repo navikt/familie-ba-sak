@@ -384,6 +384,7 @@ private fun enkelPdlHentPersonResponse(scenarioPerson: RestScenarioPerson): PdlP
         adressebeskyttelse = emptyList(),
         sivilstand = listOf(Sivilstand(type = SIVILSTANDTYPE.UGIFT)),
         bostedsadresse = scenarioPerson.bostedsadresser,
+        oppholdsadresse = emptyList(),
         doedsfall = emptyList(),
         kontaktinformasjonForDoedsbo = emptyList(),
     )
