@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class AutovedtakFødselshendelseBegrunnelseService(
@@ -87,6 +88,31 @@ class AutovedtakFødselshendelseBegrunnelseService(
 
             vedtaksperiodeMedBegrunnelser.settBegrunnelser(begrunnelser)
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
+
+            /**
+             * Hvis barn(a) er født før desember påvirkes vedtaket av satsendring januar 2022
+             * og vi må derfor også automatisk begrunne satsendringen
+             */
+            if (fødselsmåned <
+                YearMonth.of(
+                    2021,
+                    12,
+                )
+            ) {
+                vedtaksperioder
+                    .firstOrNull { it.fom?.toYearMonth() == YearMonth.of(2022, 1) }
+                    ?.also { satsendringsvedtaksperiode ->
+                        satsendringsvedtaksperiode.settBegrunnelser(
+                            listOf(
+                                Vedtaksbegrunnelse(
+                                    standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                                    vedtaksperiodeMedBegrunnelser = satsendringsvedtaksperiode,
+                                ),
+                            ),
+                        )
+                        vedtaksperiodeHentOgPersisterService.lagre(satsendringsvedtaksperiode)
+                    }
+            }
         }
     }
 }
