@@ -5,7 +5,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.assertj.core.api.Assertions.assertThat
@@ -18,9 +17,8 @@ import java.util.UUID
 class SaksbehandlerContextTest {
     private val mockIntegrasjonClient = mockk<IntegrasjonClient>()
     private val kode6GruppeId = "kode6GruppeId"
-    private val mockFeatureToggleService = mockk<FeatureToggleService>()
 
-    private val saksbehandlerContext = SaksbehandlerContext(kode6GruppeId, mockIntegrasjonClient, mockFeatureToggleService)
+    private val saksbehandlerContext = SaksbehandlerContext(kode6GruppeId, mockIntegrasjonClient)
 
     @BeforeEach
     fun beforeEach() {

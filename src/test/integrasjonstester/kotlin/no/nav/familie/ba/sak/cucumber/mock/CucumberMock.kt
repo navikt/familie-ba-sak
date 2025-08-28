@@ -428,7 +428,7 @@ class CucumberMock(
             tilbakestillBehandlingService = tilbakestillBehandlingService,
         )
 
-    val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockFeatureToggleService())
+    val saksbehandlerContext = SaksbehandlerContext("", mockk())
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
     val behandlingSøknadsinfoService =
