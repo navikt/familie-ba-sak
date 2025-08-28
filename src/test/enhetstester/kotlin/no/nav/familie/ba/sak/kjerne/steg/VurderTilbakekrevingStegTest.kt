@@ -24,7 +24,7 @@ class VurderTilbakekrevingStegTest {
     private val featureToggleService: FeatureToggleService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
-        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService, featureToggleService = featureToggleService)
+        VurderTilbakekrevingSteg(tilbakekrevingService = tilbakekrevingService, simuleringService = simuleringService)
 
     private val behandling: Behandling =
         lagBehandling(
