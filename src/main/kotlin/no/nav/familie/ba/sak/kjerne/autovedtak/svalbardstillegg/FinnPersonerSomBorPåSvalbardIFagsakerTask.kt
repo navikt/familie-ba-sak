@@ -90,7 +90,9 @@ class FinnPersonerSomBorPåSvalbardIFagsakerTask(
                 fagsakMedSøkerOgBarna
                     .mapNotNull { (fagsakId, søkerOgBarna) ->
                         val søkerBorPåSvalbard = søkerOgBarna.søkerIdent in personerSomBorPåSvalbard
+                        val søkerHarDNummer = Fødselsnummer(søkerOgBarna.søkerIdent).erDNummer
                         val antallBarnSomBorPåSvalbard = søkerOgBarna.barnIdenter.count { it in personerSomBorPåSvalbard }
+                        val antallBarnSomHarDNummer = søkerOgBarna.barnIdenter.count { Fødselsnummer(it).erDNummer }
 
                         val personerSomBorPåSvalbard =
                             when {
@@ -100,7 +102,15 @@ class FinnPersonerSomBorPåSvalbardIFagsakerTask(
                                 else -> "Ingen"
                             }
 
-                        fagsakId to personerSomBorPåSvalbard
+                        val personerSomHarDNummer =
+                            when {
+                                søkerHarDNummer && antallBarnSomHarDNummer > 0 -> "Søker og $antallBarnSomHarDNummer barn"
+                                søkerHarDNummer -> "Søker"
+                                antallBarnSomHarDNummer > 0 -> "$antallBarnSomHarDNummer barn"
+                                else -> "Ingen"
+                            }
+
+                        fagsakId to "$personerSomBorPåSvalbard,$personerSomHarDNummer"
                     }.toMap()
             }
 
