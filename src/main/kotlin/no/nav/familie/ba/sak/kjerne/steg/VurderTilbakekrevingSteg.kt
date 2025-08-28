@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional
 class VurderTilbakekrevingSteg(
     val tilbakekrevingService: TilbakekrevingService,
     val simuleringService: SimuleringService,
-    val featureToggleService: FeatureToggleService,
 ) : BehandlingSteg<RestTilbakekreving?> {
     @Transactional
     override fun utførStegOgAngiNeste(
