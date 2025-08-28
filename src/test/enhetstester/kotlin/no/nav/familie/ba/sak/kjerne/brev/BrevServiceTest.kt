@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.datagenerator.lagArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
@@ -46,7 +46,7 @@ class BrevServiceTest {
     val mockTotrinnskontrollService = mockk<TotrinnskontrollService>()
     val mockArbeidsfordelingService = mockk<ArbeidsfordelingService>()
     val mockAvregningService = mockk<AvregningService>()
-    val mockUnleashNextMedContextService = mockk<UnleashNextMedContextService>()
+    val mockFeatureToggleService = mockk<FeatureToggleService>()
 
     val brevService =
         BrevService(
@@ -69,7 +69,7 @@ class BrevServiceTest {
             endretUtbetalingAndelRepository = endretUtbetalingAndelRepository,
             hjemmeltekstUtleder = hjemmeltekstUtleder,
             avregningService = mockAvregningService,
-            unleashNextMedContextService = mockUnleashNextMedContextService,
+            featureToggleService = mockFeatureToggleService,
         )
 
     @BeforeEach

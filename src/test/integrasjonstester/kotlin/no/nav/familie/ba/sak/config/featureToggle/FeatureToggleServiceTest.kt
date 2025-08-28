@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @Tag("integration")
-class UnleashNextTest(
+class FeatureToggleServiceTest(
     @Autowired
-    private val unleashNext: UnleashNextMedContextService,
+    private val featureToggleService: FeatureToggleService,
 ) : AbstractSpringIntegrationTest() {
     @Test
     fun `skal svare true ved dummy impl i tester`() {
-        Assertions.assertEquals(true, unleashNext.isEnabled("sull-bala-tull"))
+        Assertions.assertEquals(true, featureToggleService.isEnabled("sull-bala-tull"))
     }
 }
