@@ -59,13 +59,12 @@ class FødselshendelseServiceTest {
     val persongrunnlagService = mockk<PersongrunnlagService>()
     val personidentService = mockk<PersonidentService>()
     val stegService = mockk<StegService>()
-    val vedtakService = mockk<VedtakService>()
-    val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     val autovedtakService = mockk<AutovedtakService>()
     val personopplysningerService = mockk<PersonopplysningerService>()
     val opprettTaskService = mockk<OpprettTaskService>()
     val oppgaveService = mockk<OppgaveService>()
     val unleashService = mockk<UnleashNextMedContextService>()
+    val autovedtakFødselshendelseBegrunnelseService = mockk<AutovedtakFødselshendelseBegrunnelseService>()
 
     val integrasjonClient = mockk<IntegrasjonClient>()
     val statsborgerskapService =
@@ -83,11 +82,10 @@ class FødselshendelseServiceTest {
             persongrunnlagService,
             personidentService,
             stegService,
-            vedtakService,
-            vedtaksperiodeService,
             autovedtakService,
             personopplysningerService,
             oppgaveService,
+            autovedtakFødselshendelseBegrunnelseService,
         )
 
     @Test

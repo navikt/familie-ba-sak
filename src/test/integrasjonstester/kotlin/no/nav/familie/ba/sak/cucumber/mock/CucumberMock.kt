@@ -142,7 +142,7 @@ class CucumberMock(
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this, scope)
-    val unleashNextMedContextService = mockUnleashNextMedContextService()
+    val featureToggleService = mockUnleashNextMedContextService()
     val unleashService = mockUnleashService()
     val mockPåVentService = mockk<SettPåVentService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
@@ -157,7 +157,7 @@ class CucumberMock(
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
             togglesForBehandling.forEach { (toggleId, isEnabled) ->
                 val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw Feil("$toggleId does not exist")
-                every { unleashNextMedContextService.isEnabled(featureToggle, behandlingId) } returns isEnabled
+                every { featureToggleService.isEnabled(featureToggle, behandlingId) } returns isEnabled
             }
         }
     }
@@ -210,7 +210,7 @@ class CucumberMock(
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService, unleashNextMedContextService),
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService, featureToggleService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
@@ -245,7 +245,6 @@ class CucumberMock(
 
     val vedtaksperiodeService =
         VedtaksperiodeService(
-            personidentService = personidentService,
             persongrunnlagService = persongrunnlagService,
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
@@ -282,7 +281,7 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashNextMedContextService,
+            unleashService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
         )
 
@@ -329,7 +328,7 @@ class CucumberMock(
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
             vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
+            unleashNextMedContextService = featureToggleService,
             tilpassDifferanseberegningEtterValutakursService = tilpassDifferanseberegningEtterValutakursService,
         )
 
@@ -509,7 +508,7 @@ class CucumberMock(
             settPåVentRepository = mockSettPåVentRepository(),
             loggService = loggService,
             oppgaveService = oppgaveService,
-            unleashService = unleashNextMedContextService,
+            unleashService = featureToggleService,
             tilbakekrevingsvedtakMotregningService = mockk(relaxed = true),
         )
 
@@ -541,7 +540,7 @@ class CucumberMock(
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             behandlingSøknadsinfoService = behandlingSøknadsinfoService,
-            unleashService = unleashNextMedContextService,
+            unleashService = featureToggleService,
         )
 
     val preutfyllBosattIRiketService =
@@ -555,7 +554,7 @@ class CucumberMock(
         PreutfyllVilkårService(
             preutfyllLovligOppholdService = mockk(),
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
-            unleashService = unleashNextMedContextService,
+            unleashService = featureToggleService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
@@ -568,6 +567,7 @@ class CucumberMock(
             vilkårsvurderingMetrics = mockk(),
             andelerTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             preutfyllVilkårService = preutfyllVilkårService,
+            featureToggleService = featureToggleService,
         )
 
     val registrerPersongrunnlag =
@@ -603,7 +603,7 @@ class CucumberMock(
             clockProvider = clockProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
-            unleashService = unleashNextMedContextService,
+            unleashService = featureToggleService,
         )
 
     val ferdigstillBehandlingSteg =
@@ -628,7 +628,7 @@ class CucumberMock(
             taskRepository = taskRepository,
             loggService = loggService,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashNextMedContextService,
+            unleashService = featureToggleService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
@@ -670,7 +670,7 @@ class CucumberMock(
                 automatiskBeslutningService = mockk(),
                 opprettTaskService = opprettTaskService,
                 satskjøringRepository = mockk(),
-                unleashService = unleashNextMedContextService,
+                unleashService = featureToggleService,
                 automatiskRegistrerSøknadService = mockk(),
             ),
         )
