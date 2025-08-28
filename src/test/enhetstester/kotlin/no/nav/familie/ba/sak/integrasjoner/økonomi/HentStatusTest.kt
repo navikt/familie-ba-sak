@@ -156,7 +156,6 @@ class HentStatusTest {
             StatusFraOppdragDTO(
                 fagsystem = "BA",
                 personIdent = tilfeldigPerson.aktør.aktivFødselsnummer(),
-                aktørId = "Søker1",
                 behandlingsId = nyBehandling.id,
                 vedtaksId = 0L,
             ),

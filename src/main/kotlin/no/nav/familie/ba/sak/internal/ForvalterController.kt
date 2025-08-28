@@ -22,8 +22,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.AutovedtakMånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnFagsakerForPersonerSomBorPåSvalbardTask
 import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnPersonerSomBorIFinnmarkNordTromsEllerPåSvalbardTask
+import no.nav.familie.ba.sak.kjerne.autovedtak.svalbardstillegg.FinnPersonerSomBorPåSvalbardIFagsakerTask
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -689,12 +689,16 @@ class ForvalterController(
         @RequestParam dryRun: Boolean = true,
         @RequestParam antallFagsaker: Int = Int.MAX_VALUE,
         @RequestParam minutterMellomHverTask: Long = 1,
-        @RequestParam chunkSize: Int = 5000,
+        @RequestParam chunkSize: Int = 250,
     ): ResponseEntity<String> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.FORVALTER,
             handling = "Opprett tasker som finner fagsaker med personer med oppholdsadresse på Svalbard",
         )
+
+        if (chunkSize > 250) {
+            throw Feil("chunkSize kan ikke være større enn 250")
+        }
 
         val (antallTasker, tid) =
             measureTimedValue {
@@ -710,7 +714,7 @@ class ForvalterController(
                 chunksMedFagsakIder
                     .onEachIndexed { index, fagsakIder ->
                         val task =
-                            FinnFagsakerForPersonerSomBorPåSvalbardTask
+                            FinnPersonerSomBorPåSvalbardIFagsakerTask
                                 .opprettTask(fagsakIder)
                                 .medTriggerTid(LocalDateTime.now().plusMinutes(index * minutterMellomHverTask))
 
@@ -752,7 +756,7 @@ class ForvalterController(
         val tasker =
             taskRepository
                 .findByStatus(Status.FEILET)
-                .filter { it.type == FinnFagsakerForPersonerSomBorPåSvalbardTask.TASK_STEP_TYPE }
+                .filter { it.type == FinnPersonerSomBorPåSvalbardIFagsakerTask.TASK_STEP_TYPE }
                 .onEachIndexed { index, task ->
                     taskService.save(
                         task
@@ -788,6 +792,20 @@ class ForvalterController(
                 }
 
         return ResponseEntity.ok(institusjonerSomSkalHaFinnmarkstillegg)
+    }
+
+    @PostMapping("/opprett-finn-personer-som-bor-paa-svalbard-i-fagsaker-task")
+    fun opprettPersonerSomBorPåSvalbardIFagsakerTask(
+        @RequestBody fagsakIder: List<Long>,
+    ): ResponseEntity<String> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.FORVALTER,
+            handling = "Finn personer som bor på Svalbard i fagsaker",
+        )
+
+        taskService.save(FinnPersonerSomBorPåSvalbardIFagsakerTask.opprettTask(fagsakIder))
+
+        return ResponseEntity.ok("Opprettet task for å finne personer som bor på Svalbard i ${fagsakIder.size} fagsaker")
     }
 }
 
