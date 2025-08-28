@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilyyyyMMdd
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.datagenerator.lagBehandling

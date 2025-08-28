@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBaseFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFagsak

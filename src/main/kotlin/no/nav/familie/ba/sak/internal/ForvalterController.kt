@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService

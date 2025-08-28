@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 
-import no.nav.familie.ba.sak.config.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.LeaderClientService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.tilAdresser

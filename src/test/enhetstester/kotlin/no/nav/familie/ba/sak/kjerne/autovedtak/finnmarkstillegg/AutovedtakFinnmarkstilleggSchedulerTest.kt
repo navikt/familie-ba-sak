@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.LeaderClientService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.AUTOMATISK_KJØRING_AV_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.datagenerator.lagFagsak

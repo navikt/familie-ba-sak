@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.cucumber.mock.komponentMocks
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 
 fun mockFeatureToggleService(): FeatureToggleService {

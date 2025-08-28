@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

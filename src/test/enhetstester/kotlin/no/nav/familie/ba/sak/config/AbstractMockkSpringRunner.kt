@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.isMockKMock
 import io.mockk.unmockkAll
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient

@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.ClockProvider
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.månedligvalutajustering.MånedligValutajusteringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

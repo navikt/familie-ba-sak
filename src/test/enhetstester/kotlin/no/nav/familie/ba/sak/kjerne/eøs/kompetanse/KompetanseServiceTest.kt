@@ -6,7 +6,7 @@ import io.mockk.mockkObject
 import no.nav.familie.ba.sak.TestClockProvider
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toLocalDate
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.datagenerator.tilPersonEnkelSøkerOgBarn

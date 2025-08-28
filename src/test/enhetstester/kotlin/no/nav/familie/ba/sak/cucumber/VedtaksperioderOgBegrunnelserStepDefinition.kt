@@ -10,7 +10,7 @@ import mockAutovedtakSmåbarnstilleggService
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId

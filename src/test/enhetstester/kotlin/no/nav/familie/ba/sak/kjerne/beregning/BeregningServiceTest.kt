@@ -11,7 +11,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.defaultFagsak
 import no.nav.familie.ba.sak.datagenerator.lagAndelTilkjentYtelse

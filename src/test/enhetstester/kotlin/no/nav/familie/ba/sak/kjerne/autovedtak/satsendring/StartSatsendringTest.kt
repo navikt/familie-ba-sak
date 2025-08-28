@@ -5,8 +5,8 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.lagBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.hentAktivSatsendringstidspunkt

@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.sammensattKontrollsak
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.BehandlerRolle
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestOpprettSammensattKontrollsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSammensattKontrollsak

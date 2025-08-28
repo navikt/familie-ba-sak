@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile

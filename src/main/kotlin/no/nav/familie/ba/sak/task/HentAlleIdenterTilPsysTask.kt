@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.familie.ba.sak.common.EnvService
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.pensjon.HentAlleIdenterTilPsysResponseDTO
 import no.nav.familie.ba.sak.ekstern.pensjon.Meldingstype

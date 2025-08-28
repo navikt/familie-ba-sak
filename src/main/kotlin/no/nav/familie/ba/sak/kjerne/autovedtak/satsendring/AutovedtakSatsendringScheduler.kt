@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.config.LeaderClientService
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener

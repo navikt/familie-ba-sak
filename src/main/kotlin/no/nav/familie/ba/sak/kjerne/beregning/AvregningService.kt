@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.ClockProvider
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
-import no.nav.familie.ba.sak.config.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.BRUK_FUNKSJONALITET_FOR_ULOVFESTET_MOTREGNING
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori

@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.config.featureToggle
 
-import no.nav.familie.ba.sak.config.FeatureToggle
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.hentArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService

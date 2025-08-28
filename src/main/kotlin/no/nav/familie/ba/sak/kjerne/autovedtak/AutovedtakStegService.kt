@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle.KAN_KJØRE_AUTOVEDTAK_FINNMARKSTILLEGG
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.finnmarkstillegg.AutovedtakFinnmarkstilleggService

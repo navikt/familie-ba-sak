@@ -6,7 +6,7 @@ import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
