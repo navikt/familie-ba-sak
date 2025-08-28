@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.UnleashNextMedContextService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingUtils
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.preutfylling.PreutfyllVilkårService
+import no.nav.familie.unleash.UnleashService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -32,6 +35,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val preutfyllVilkårService: PreutfyllVilkårService,
+    private val featureToggleService: UnleashNextMedContextService,
 ) {
     fun opprettVilkårsvurderingUtenomHovedflyt(
         behandling: Behandling,
@@ -187,6 +191,10 @@ class VilkårsvurderingForNyBehandlingService(
             preutfyllVilkårService.preutfyllVilkår(
                 vilkårsvurdering = initiellVilkårsvurdering,
             )
+        } else if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE &&
+            featureToggleService.isEnabled(FeatureToggle.SKAL_GENERERE_FINNMARKSTILLEGG)
+        ) {
+            preutfyllVilkårService.preutfyllBosattIRiket(vilkårsvurdering = initiellVilkårsvurdering)
         }
 
         tellMetrikkerForFødselshendelse(
