@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.config.featureToggle
 
 enum class FeatureToggle(
     val navn: String,

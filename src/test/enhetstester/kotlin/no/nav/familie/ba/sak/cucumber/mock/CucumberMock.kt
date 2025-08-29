@@ -6,15 +6,14 @@ import io.mockk.spyk
 import kotlinx.coroutines.CoroutineScope
 import no.nav.familie.ba.sak.TestClockProvider.Companion.lagClockProviderMedFastTidspunkt
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.config.FeatureToggle
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggle
 import no.nav.familie.ba.sak.cucumber.VedtaksperioderOgBegrunnelserStepDefinition
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockBehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockEcbService
+import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockFeatureToggleService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockSystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockTilbakekrevingsvedtakMotregningRepository
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashNextMedContextService
-import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockUnleashService
 import no.nav.familie.ba.sak.cucumber.mock.komponentMocks.mockVurderingsstrategiForValutakurserRepository
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
@@ -142,8 +141,7 @@ class CucumberMock(
     val behandlingMetrikker = mockBehandlingMetrikker()
     val tilbakekrevingService = mockTilbakekrevingService()
     val taskRepository = MockTasker().mockTaskRepositoryWrapper(this, scope)
-    val unleashNextMedContextService = mockUnleashNextMedContextService()
-    val unleashService = mockUnleashService()
+    val featureToggleService = mockFeatureToggleService()
     val mockPåVentService = mockk<SettPåVentService>()
     val vurderingsstrategiForValutakurserRepository = mockVurderingsstrategiForValutakurserRepository()
     val brevmottakerService = mockk<BrevmottakerService>()
@@ -157,7 +155,7 @@ class CucumberMock(
         dataFraCucumber.toggles.forEach { (behandlingId, togglesForBehandling) ->
             togglesForBehandling.forEach { (toggleId, isEnabled) ->
                 val featureToggle = FeatureToggle.entries.find { it.navn == toggleId } ?: throw Feil("$toggleId does not exist")
-                every { unleashNextMedContextService.isEnabled(featureToggle, behandlingId) } returns isEnabled
+                every { featureToggleService.isEnabled(featureToggle, behandlingId) } returns isEnabled
             }
         }
     }
@@ -210,7 +208,7 @@ class CucumberMock(
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             tilkjentYtelseEndretAbonnenter = listOf(tilpassDifferanseberegningEtterTilkjentYtelseService),
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService, unleashNextMedContextService),
+            tilkjentYtelseGenerator = TilkjentYtelseGenerator(overgangsstønadService, vilkårsvurderingService, featureToggleService),
         )
 
     val utbetalingTidslinjeService = UtbetalingTidslinjeService(beregningService)
@@ -282,7 +280,7 @@ class CucumberMock(
             vedtaksperiodeService = vedtaksperiodeService,
             taskRepository = taskRepository,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             eksternBehandlingRelasjonService = eksternBehandlingRelasjonService,
         )
 
@@ -329,7 +327,7 @@ class CucumberMock(
             tilpassValutakurserTilUtenlandskePeriodebeløpService = tilpassValutakurserTilUtenlandskePeriodebeløpService,
             simuleringService = simuleringService,
             vurderingsstrategiForValutakurserRepository = vurderingsstrategiForValutakurserRepository,
-            unleashNextMedContextService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             tilpassDifferanseberegningEtterValutakursService = tilpassDifferanseberegningEtterValutakursService,
         )
 
@@ -430,7 +428,7 @@ class CucumberMock(
             tilbakestillBehandlingService = tilbakestillBehandlingService,
         )
 
-    val saksbehandlerContext = SaksbehandlerContext("", mockk(), mockUnleashNextMedContextService())
+    val saksbehandlerContext = SaksbehandlerContext("", mockk())
     val totrinnskontrollService = TotrinnskontrollService(behandlingService = behandlingService, totrinnskontrollRepository = totrinnskontrollRepository, saksbehandlerContext = saksbehandlerContext)
 
     val behandlingSøknadsinfoService =
@@ -509,7 +507,7 @@ class CucumberMock(
             settPåVentRepository = mockSettPåVentRepository(),
             loggService = loggService,
             oppgaveService = oppgaveService,
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             tilbakekrevingsvedtakMotregningService = mockk(relaxed = true),
         )
 
@@ -541,7 +539,7 @@ class CucumberMock(
             endretUtbetalingAndelOppdatertAbonnementer = emptyList(),
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             behandlingSøknadsinfoService = behandlingSøknadsinfoService,
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
         )
 
     val preutfyllBosattIRiketService =
@@ -555,7 +553,7 @@ class CucumberMock(
         PreutfyllVilkårService(
             preutfyllLovligOppholdService = mockk(),
             preutfyllBosattIRiketService = preutfyllBosattIRiketService,
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
         )
 
     val vilkårsvurderingForNyBehandlingService =
@@ -603,7 +601,7 @@ class CucumberMock(
             clockProvider = clockProvider,
             automatiskOppdaterValutakursService = automatiskOppdaterValutakursService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
         )
 
     val ferdigstillBehandlingSteg =
@@ -616,7 +614,7 @@ class CucumberMock(
             loggService = loggService,
             snikeIKøenService = snikeIKøenService,
             taskService = taskService,
-            unleashNextMedContextService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
         )
 
     val automatiskBeslutningService = AutomatiskBeslutningService(simuleringService)
@@ -630,7 +628,7 @@ class CucumberMock(
             taskRepository = taskRepository,
             loggService = loggService,
             vilkårsvurderingService = vilkårsvurderingService,
-            unleashService = unleashNextMedContextService,
+            featureToggleService = featureToggleService,
             tilkjentYtelseValideringService = tilkjentYtelseValideringService,
             saksbehandlerContext = saksbehandlerContext,
             automatiskBeslutningService = automatiskBeslutningService,
@@ -672,7 +670,7 @@ class CucumberMock(
                 automatiskBeslutningService = mockk(),
                 opprettTaskService = opprettTaskService,
                 satskjøringRepository = mockk(),
-                unleashService = unleashNextMedContextService,
+                featureToggleService = featureToggleService,
                 automatiskRegistrerSøknadService = mockk(),
             ),
         )
@@ -706,7 +704,7 @@ class CucumberMock(
         )
     val iverksettMotOppdragTask = IverksettMotOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository)
     val ferdigstillBehandlingTask = FerdigstillBehandlingTask(stegService = stegService, behandlingHentOgPersisterService = behandlingHentOgPersisterService)
-    val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository, unleashNextMedContextService)
+    val statusFraOppdragTask = StatusFraOppdragTask(stegService, behandlingHentOgPersisterService, taskRepository, featureToggleService)
 
     val taskservices = listOf(iverksettMotOppdragTask, ferdigstillBehandlingTask, statusFraOppdragTask)
 }

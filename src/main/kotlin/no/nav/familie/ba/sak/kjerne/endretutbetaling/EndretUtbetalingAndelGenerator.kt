@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -26,6 +27,7 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
     søknadMottattDato: LocalDate,
     nåværendeAndeler: List<AndelTilkjentYtelse>,
     forrigeAndeler: List<AndelTilkjentYtelse>,
+    nåværendeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     personerPåBehandling: List<Person>,
 ): List<EndretUtbetalingAndel> {
     val (datoForGyldigEtterbetaling, årsak) =
@@ -43,10 +45,19 @@ fun genererEndretUtbetalingAndelerMedÅrsakEtterbetaling3ÅrEller3Mnd(
     val perioderMedUgyldigEtterbetalingForAktører =
         nåværendeAndelerTidslinjer
             .outerJoin(forrigeAndelerTidslinjer) { nåværendeAndel, forrigeAndel ->
-                val aktør = nåværendeAndel?.aktør ?: forrigeAndel?.aktør
-                val nåværendeBeløp = nåværendeAndel?.kalkulertUtbetalingsbeløp ?: 0
+                if (nåværendeAndel == null) return@outerJoin null
+
+                val aktør = nåværendeAndel.aktør
+                val nåværendeBeløp = nåværendeAndel.kalkulertUtbetalingsbeløp
                 val forrigeBeløp = forrigeAndel?.kalkulertUtbetalingsbeløp ?: 0
-                aktør.takeIf { nåværendeBeløp > forrigeBeløp }
+
+                val nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel =
+                    nåværendeEndretUtbetalingAndeler.any {
+                        it.overlapperMed(MånedPeriode(nåværendeAndel.stønadFom, nåværendeAndel.stønadTom)) &&
+                            it.personer.any { person -> person.aktør == aktør }
+                    }
+
+                aktør.takeIf { nåværendeBeløp > forrigeBeløp && !nåværendeAndelOverlapperMedEksisterendeEndretUtbetalingAndel }
             }.values
             .kombiner()
             .tilPerioderIkkeNull()
