@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 class PreutfyllVilkårService(
     private val preutfyllLovligOppholdService: PreutfyllLovligOppholdService,
     private val preutfyllBosattIRiketService: PreutfyllBosattIRiketService,
+    private val preutfyllBorHosSøkerService: PreutfyllBorHosSøkerService,
     private val featureToggleService: FeatureToggleService,
 ) {
     fun preutfyllVilkår(vilkårsvurdering: Vilkårsvurdering) {

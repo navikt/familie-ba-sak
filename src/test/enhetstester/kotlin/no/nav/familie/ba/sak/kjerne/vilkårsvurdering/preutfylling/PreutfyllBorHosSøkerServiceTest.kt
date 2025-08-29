@@ -39,6 +39,8 @@ class PreutfyllBorHosSøkerServiceTest {
                 overstyrendeVilkårResultater = emptyMap(),
             )
 
+        val nåDato = LocalDate.now()
+
         every { pdlRestClient.hentBostedsadresseOgDeltBostedForPersoner(any()) } answers {
             val identer = firstArg<List<String>>()
             identer.associateWith {
@@ -46,7 +48,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     bostedsadresse =
                         listOf(
                             Bostedsadresse(
-                                gyldigFraOgMed = LocalDate.now().minusYears(10),
+                                gyldigFraOgMed = nåDato.minusYears(10),
                                 gyldigTilOgMed = null,
                                 vegadresse = lagVegadresse(12345L),
                             ),
@@ -68,7 +70,7 @@ class PreutfyllBorHosSøkerServiceTest {
                     it.vilkårType == Vilkår.BOR_MED_SØKER
                 }
         assertThat(borFastHosSøkerVilkår.resultat).isEqualTo(Resultat.OPPFYLT)
-        assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(LocalDate.now().minusYears(10))
+        assertThat(borFastHosSøkerVilkår.periodeFom).isEqualTo(nåDato.minusYears(10))
         assertThat(borFastHosSøkerVilkår.periodeTom).isNull()
     }
 
