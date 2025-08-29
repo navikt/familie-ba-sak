@@ -121,8 +121,7 @@ class SvalbardtilleggGeneratorTest {
         // Assert
         val svalbardtilleggAndel = svalbardtilleggAndeler.single()
 
-        // TODO: Endre tilbake til oktober 2025 før vi går live
-        assertThat(svalbardtilleggAndel.stønadFom).isEqualTo(YearMonth.of(2025, 8))
+        assertThat(svalbardtilleggAndel.stønadFom).isEqualTo(YearMonth.of(2025, 10))
         assertThat(svalbardtilleggAndel.stønadTom).isEqualTo(YearMonth.of(2025, 12))
         assertThat(svalbardtilleggAndel.type).isEqualTo(YtelseType.SVALBARDTILLEGG)
     }
